@@ -36,6 +36,18 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 
 Если результат был `LOCAL_CHANGES_REQUIRE_REVIEW`, остановиться; не делать `reset`, `stash` или массовый `restore` ради тестов. Если GitHub не доступен и push лога не удался, сообщить конкретную проблему, результат пока не считать подтверждённым.
 
+## НОВЫЙ БЛИЖАЙШИЙ ШАГ: независимая диагностика после повторных ошибок
+В GitHub не поступили ни ошибки, ни логи. НЕ повторять run.ps1. Скрипт scripts/diagnose.ps1 через git show загружается в %TEMP% напрямую из свежего origin/development без изменения локального рабочего дерева, затем публикует безопасный отчёт из чистого временного клона.
+Команды из корня локального minimarket:
+git fetch origin development
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_FETCH_FAILED' }
+$code = git show FETCH_HEAD:scripts/diagnose.ps1
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_SCRIPT_READ_FAILED' }
+$path = Join-Path $env:TEMP 'minimarket-diagnose.ps1'
+$code | Set-Content -LiteralPath $path -Encoding UTF8
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File $path -RepoPath (Get-Location).Path
+Критерий: новая запись MINIMARKET_DIAGNOSTIC_V1 в GitHub logs/LAST_RUN.log. Если сообщение MINIMARKET_DIAGNOSTIC_NOT_UPLOADED — Git авторизация/связь требует отдельной диагностики; автоматическое получение лога невозможно, пока push не работает. Никакие reset/force/mass restore не использовать.
+
 ## Критерии завершения
 - Команда проходит на Windows, `logs/LAST_RUN.log` появляется в GitHub и обновляется после каждого запуска.
 - Нет утечек параметров `.env`; в логе читаются Source_SHA, действие, статус, код выхода.
