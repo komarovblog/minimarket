@@ -70,8 +70,11 @@ try {
     # Сохраняем его единственную резервную копию внутри .git, затем возвращаем
     # ТОЛЬКО служебный файл лога к HEAD, чтобы безопасно выполнить pull --ff-only.
     # Любые изменения кода, настроек или другие неотслеживаемые файлы — стоп.
-    $dirtyLines = @(Invoke-RepoGit -GitArgs @('status', '--porcelain', '--untracked-files=normal') -split "`n" | Where-Object { $_.Trim().Length -gt 0 })
-    $otherDirty = @($dirtyLines | Where-Object { $_ -ne ' M logs/LAST_RUN.log' })
+    $dirtyText = Invoke-RepoGit -GitArgs @('status', '--porcelain', '--untracked-files=normal')
+    # Invoke-RepoGit убирает начальные пробелы результата git, поэтому первая строка
+    # porcelain status может начинаться с "M", а последующие — с " M".
+    $dirtyLines = @(($dirtyText -split "`n") | ForEach-Object { $_.TrimEnd("`r") } | Where-Object { $_.Length -gt 0 })
+    $otherDirty = @($dirtyLines | Where-Object { $_ -notin @('M logs/LAST_RUN.log', ' M logs/LAST_RUN.log') })
     if ($otherDirty.Count -gt 0) {
         throw ('WORKTREE_NOT_CLEAN: есть изменения вне служебного лога; количество=' + $otherDirty.Count)
     }
