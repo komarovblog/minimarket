@@ -24,8 +24,17 @@ $Synced = $false
 function Invoke-RepoGit {
     param([string[]]$GitArgs)
     # При ошибке Git запрещено продолжать на старых данных.
-    $result = & git -C $Root @GitArgs 2>&1
-    $code = $LASTEXITCODE
+    # В Windows PowerShell 5.1 штатный stderr git (progress при fetch/pull)
+    # может превращаться в NativeCommandError при ErrorActionPreference=Stop.
+    # Пока выполняется git, временно используем Continue и проверяем КОД возврата.
+    $previousPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $result = & git -C $Root @GitArgs 2>&1
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
     if ($code -ne 0) {
         throw ('GIT_ERROR: git ' + ($GitArgs -join ' ') + '; exit=' + $code + '; ' + (($result | Out-String).Trim()))
     }
