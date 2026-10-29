@@ -1,26 +1,21 @@
 # CURRENT_TASK — MiniMarket
-Дата: 2026-10-29. Только `komarovblog/minimarket`, ветка `development`. Shop/Symfony не затрагивать.
+Дата: 2026-10-29. ТОЛЬКО репозиторий `komarovblog/minimarket`, ветка `development`. Shop/Symfony не затрагивать.
 
-## Что уже подтверждено
-- Open Server Panel 6.5.1. Домены в `osp status`; `minimarket.local` включён.
-- Apache 2.4.66, PHP 8.5.4, MySQL 8.0.45 включены.
-- **29.10.2026**, пользователь из CMD (`C:\OSPanel>`) выполнил `curl.exe -4 --noproxy "*" -I --max-time 10 http://minimarket.local/`. Ответ **HTTP/1.1 200 OK**, `Server: Apache`. Следовательно, сетевой HTTP-доступ к домену работает.
-- Код 200 на HEAD ещё не гарантирует, что DocumentRoot — `C:\Users\User\Desktop\WebProjects\MiniMarket\public`, и не подтверждает работу PHP. Joomla ещё не установлена.
-- В официальных загрузках Joomla последняя стабильная на эту дату — **6.2.0** (Full Package ZIP); https://downloads.joomla.org/latest .
+## Что подтверждено
+- Windows 11, Open Server Panel 6.5.1; Apache 2.4.66, PHP 8.5.4, MySQL 8.0.45 включены.
+- Домен `http://minimarket.local` отвечает на `curl.exe -4 --noproxy "*" -I --max-time 10 http://minimarket.local/` статусом **HTTP/1.1 200 OK**.
+- Joomla в `MiniMarket/public` ещё **не установлена**. Привязка DocumentRoot к `public` не подтверждена статическим тестом.
+- Принят единый процесс разработки: собственный код компонента/модулей — в `MiniMarket/src`, GitHub `development`; установленная Joomla и локальная OSP-конфигурация — в игнорируемых `MiniMarket/public` и `MiniMarket/.osp`; обновление своих расширений — стандартным ZIP-пакетом Joomla. Гарантировать автоматический push логов пока нельзя. Детали — `docs/CONTEXT.md` §28.
 
-## Текущий шаг — завершить проверку 2.1b, подтвердить DocumentRoot
-**Пользователь предпочитает короткие CMD-совместимые команды**, Open Server открывает CMD; не давать PowerShell синтаксис с `$var` без запуска PowerShell.
+## Текущая задача: 2.1-db — создать отдельную БД сайта
+В phpMyAdmin Open Server Panel 6.5.1 подключиться к **MySQL-8.0**, открыть вкладку «Базы данных» и проверить отсутствие базы `minimarket`. Если имя свободно — создать базу `minimarket` с `utf8mb4_unicode_ci`. Если имя уже существует — остановиться и проверить принадлежность, ничего не удалять/перезаписывать. Не запускать SQL от Shop/Bidder и не использовать их существующие БД.
+После подтверждения создать отдельного MySQL-пользователя, имеющего доступ только к `minimarket`, и сохранить его реквизиты локально, не сообщая в чат, не коммитя в GitHub.
 
-В CMD из любого каталога (путь MiniMarket абсолютный), только три простых команды:
-```cmd
-if not exist "C:\Users\User\Desktop\WebProjects\MiniMarket\public\__mm_probe_20261029_1440.txt" echo MINIMARKET_STATIC_OK>"C:\Users\User\Desktop\WebProjects\MiniMarket\public\__mm_probe_20261029_1440.txt"
-curl.exe -4 --noproxy "*" --max-time 10 http://minimarket.local/__mm_probe_20261029_1440.txt
-del "C:\Users\User\Desktop\WebProjects\MiniMarket\public\__mm_probe_20261029_1440.txt"
-```
-Если получено `MINIMARKET_STATIC_OK`, отметить DocumentRoot PASS и переходить к отдельной MySQL БД и чистой Joomla 6.2.0 в `public`. Если вместо строки 404/403/500 — диагностировать по результатам, не менять Joomla (её ещё нет). Команды безопасны для остальных проектов, но не использовать старое имя временного файла для иных целей.
+## После выполнения
+1. Проверить статический тест `MiniMarket/public` через `http://minimarket.local/<имя-временного-файла>` (этап 2.1b ещё частично открыт).
+2. Скачать оригинальный Joomla 6 Full Package с официального Joomla и распаковать в `public` после подтверждения DocumentRoot. Настроить Joomla на новую БД, проверить установку на PHP 8.5.
+3. Начать исходники `src/com_minimarket` и штатное ZIP-обновление, без изменений файлов ядра.
+4. Позднее восстановить и проверить автоматические логи/runner: предыдущие попытки Windows → GitHub остаются непроверенными, не выполнять скрипты вслепую.
 
-## Далее
-После проверки статики — создать отдельную БД MySQL (не использовать базу Shop или Bidder), скачать оригинальный Full Package 6.2.0 с официального Joomla и установить через штатный мастер. Не копировать ядро Joomla в Git; `/.osp/` и `/public/` исключены в `.gitignore`. PHP 8.5 — проверить совместимость установщиком и smoke-test.
-
-## Прочие открытые вопросы
-Автоматическая отправка консольных логов Windows → GitHub (этапы 0.3/0.4) по-прежнему не имеет подтверждённого PASS. Не тратить время на переписывание runner наугад. Все изменения — только MiniMarket, без правок CMS ядра.
+## Безусловные правила
+Не менять ядро Joomla. Не добавлять `public` или `.osp` в Git. Не трогать Shop. Все изменения `development`, `main` не трогать. Не использовать Git reset --hard / force-push без согласования.
