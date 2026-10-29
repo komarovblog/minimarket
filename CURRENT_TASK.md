@@ -1,35 +1,35 @@
 # CURRENT_TASK — MiniMarket
-Дата: 2026-10-29. Только `komarovblog/minimarket`, ветка `development`. Shop/Symfony не трогать.
+Дата: 2026-10-29. Только `komarovblog/minimarket`, ветка `development`. Другой проект Shop/Symfony не трогать.
 
-## Завершено
-Этап 2.1a — по подтверждению пользователя проект `minimarket.local` появился в Open Server Panel 6. Windows 11, Apache 2.4, PHP 8.5, MySQL 8.0, исходная папка `C:\Users\User\Desktop\WebProjects\MiniMarket`.
+## Что подтверждено по локальным логам пользователя
+- Open Server Panel **6.5.1**, проект `minimarket.local` **включён**.
+- Apache **2.4.66**, PHP **8.5.4**, MySQL **8.0.45** — включены.
+- Причина десятков ошибок прошлой диагностики: пользователь запускал **PowerShell-команды в CMD** из Open Server (видно по `C:\OSPanel>`). Команды `$root`, `Test-Path`, `try`, `Remove-Item` не выполнялись; `curl` ошибался из-за одинарных кавычек в CMD.
+- Код `200 OK` получен для другого домена в том же Open Server, **не для MiniMarket**. Реальная доставка статического файла из `MiniMarket\public` ещё не проверена. Joomla ещё не установлена.
 
-## Текущий шаг: 2.1b — диагностика HTTP без Joomla
-При открытии `minimarket.local` Яндекс Браузер показывает «Страница недоступна. Сайт пока не может обработать этот запрос». На скриншоте HTTP-код не виден. Joomla в `public` ещё не установлена. **Не утверждать 500 без измерения.**
-
-**Одно действие:** безопасная временная статическая проба `__mm_static_probe_20261029.txt` внутри `public`, HTTP-запрос `curl.exe` к файлу и к корню, затем удалить только тестовый файл, вывести код; попросить пользователя прислать точный результат (автоматические GitHub-логи пока не доказаны). Никаких изменений конфигурации OSP или ядра Joomla до данных.
-
-PowerShell (выполнять целиком):
+## Текущий шаг 2.1b — проверить HTTP/DocumentRoot MiniMarket в ПРАВИЛЬНОЙ оболочке
+1. В консоли Open Server сначала выполнить `powershell`. Должно появиться приглашение вида `PS C:\OSPanel>`.
+2. Затем в PowerShell выполнить **один** безопасный тест:
 ```powershell
-$root = 'C:\Users\User\Desktop\WebProjects\MiniMarket'
-$public = Join-Path $root 'public'
+$public = 'C:\Users\User\Desktop\WebProjects\MiniMarket\public'
 if (-not (Test-Path -LiteralPath $public -PathType Container)) { throw 'PUBLIC_DIRECTORY_MISSING' }
-$probe = Join-Path $public '__mm_static_probe_20261029.txt'
-if (Test-Path -LiteralPath $probe) { throw 'PROBE_ALREADY_EXISTS' }
-[System.IO.File]::WriteAllText($probe, 'MINIMARKET_STATIC_OK', (New-Object System.Text.UTF8Encoding($false)))
+$file = Join-Path $public ('__mm_probe_' + [guid]::NewGuid().ToString('N') + '.txt')
+[System.IO.File]::WriteAllText($file, 'MINIMARKET_STATIC_OK')
 try {
-    curl.exe --noproxy '*' -sS --max-time 15 -i 'http://minimarket.local/__mm_static_probe_20261029.txt'
-    'FILE_CURL_EXIT=' + $LASTEXITCODE
-    curl.exe --noproxy '*' -sS --max-time 15 -o NUL -w 'ROOT_HTTP=%{http_code}' 'http://minimarket.local/'
+    curl.exe -4 --noproxy "*" -i --max-time 10 ('http://minimarket.local/' + (Split-Path -Leaf $file))
+    'PROBE_CURL_EXIT=' + $LASTEXITCODE
+    curl.exe -4 --noproxy "*" -sS --max-time 10 -o NUL -w 'ROOT_HTTP=%{http_code}' 'http://minimarket.local/'
     'ROOT_CURL_EXIT=' + $LASTEXITCODE
 } finally {
-    Remove-Item -LiteralPath $probe -Force
+    Remove-Item -LiteralPath $file -Force
 }
 ```
-Ожидаемый файл при правильной настройке: `HTTP/1.1 200 OK` и `MINIMARKET_STATIC_OK`. Если он возвращает 404/403/500, посмотреть на фактическую версию Open Server и её параметр `public_dir` или `web_root` и журналы. Устанавливать Joomla только после подтверждения работы HTTP.
+Результат прислать текстом или скрином. Если файл доступен по HTTP 200 с ожидаемым текстом — можно готовить установку оригинальной Joomla 6. Ошибка 404/403/5xx означает необходимость проверки текущего DocumentRoot/журналов проекта по фактам, а не смены PHP наугад.
 
-## Другой открытый блокер
-Этап 0.3/0.4: публикация локальных тестовых логов в GitHub ещё не доказана. Не путать с текущей ошибкой локального веб-сайта.
+## Другой открытый этап
+0.3/0.4: автоматическая публикация консольных логов Windows → GitHub ранее не подтверждена; проблема запуска PowerShell в CMD частично объясняет ошибки, но **сама по себе не доказывает**, что git push работает.
 
-## Обязательные принципы
-Ядро Joomla не править, только штатные API. `public` и `.osp` не коммитить, содержимое Joomla держать отдельно. Репозиторий Shop на Symfony полностью изолирован. Без reset/force-push и без merge в main.
+## Постоянные принципы
+- Ни при каких условиях не изменять файлы или таблицы ядра Joomla; только официальные расширения.
+- `public` и `.osp` остаются локальными и исключены из Git.
+- Только MiniMarket, не обращаться к репозиторию Shop. Никаких reset/force-push или слияния в main.
