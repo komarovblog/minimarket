@@ -1,15 +1,18 @@
-# Секреты и локальные настройки
+# Local secrets, Joomla-generated configuration
 .env
 .env.*
 !.env.example
 configuration.php
 
-# Окружение Open Server Panel 6 и установленное ядро Joomla 6.
-# Код наших расширений разрабатываем и храним вне /public в исходниках репозитория.
-/.osp/
-/public/
+# Version the OSP project profile, but never its runtime files.
+/.osp/*
+!/.osp/project.ini
 
-# Зависимости и локальные артефакты
+# Joomla 6 is installed only locally. Keep the directory in Git, not CMS files.
+/public/*
+!/public/.gitkeep
+
+# Local build outputs / runtime / backups
 /vendor/
 /node_modules/
 /.cache/
@@ -22,5 +25,3 @@ configuration.php
 *.sql.gz
 *.bak
 *.log
-# Единственный Git-лог проверок: предыдущие версии доступны в истории коммитов.
-!/logs/LAST_RUN.log
