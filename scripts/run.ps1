@@ -66,8 +66,22 @@ try {
     if ($remoteUrl -notmatch '(?i)github\.com[:/]komarovblog/minimarket(?:\.git)?$') {
         throw 'WRONG_ORIGIN: ожидался komarovblog/minimarket'
     }
-    if ((Invoke-RepoGit -GitArgs @('status', '--porcelain', '--untracked-files=normal')) -ne '') {
-        throw 'WORKTREE_NOT_CLEAN: сначала разберите локальные изменения; никаких автоматических сбросов'
+    # Ранее не опубликованный LAST_RUN.log не должен навсегда блокировать следующую попытку.
+    # Сохраняем его единственную резервную копию внутри .git, затем возвращаем
+    # ТОЛЬКО служебный файл лога к HEAD, чтобы безопасно выполнить pull --ff-only.
+    # Любые изменения кода, настроек или другие неотслеживаемые файлы — стоп.
+    $dirtyLines = @(Invoke-RepoGit -GitArgs @('status', '--porcelain', '--untracked-files=normal') -split "`n" | Where-Object { $_.Trim().Length -gt 0 })
+    $otherDirty = @($dirtyLines | Where-Object { $_ -ne ' M logs/LAST_RUN.log' })
+    if ($otherDirty.Count -gt 0) {
+        throw ('WORKTREE_NOT_CLEAN: есть изменения вне служебного лога; количество=' + $otherDirty.Count)
+    }
+    if ($dirtyLines.Count -eq 1) {
+        $backupDir = Invoke-RepoGit -GitArgs @('rev-parse', '--absolute-git-dir')
+        $backupFile = Join-Path $backupDir 'MINIMARKET_LAST_UNPUBLISHED.log'
+        Copy-Item -LiteralPath $LogPath -Destination $backupFile -Force -ErrorAction Stop
+        # После гарантированного копирования разрешаем restore только для LAST_RUN.log.
+        [void](Invoke-RepoGit -GitArgs @('restore', '--worktree', '--', 'logs/LAST_RUN.log'))
+        $Details.Add('OLD_LOCAL_LOG_BACKUP: .git/MINIMARKET_LAST_UNPUBLISHED.log')
     }
     [void](Invoke-RepoGit -GitArgs @('fetch', '--prune', 'origin'))
     [void](Invoke-RepoGit -GitArgs @('show-ref', '--verify', 'refs/remotes/origin/development'))
@@ -124,7 +138,10 @@ try {
     $Status = 'PASS'
     $ExitCode = 0
 } catch {
-    $Details.Add('ERROR: ' + $_.Exception.Message)
+    $safeError = Protect-Log ([string]$_.Exception.Message)
+    $Details.Add('ERROR: ' + $safeError)
+    # Отображаем краткую причину на экране, даже если GitHub недоступен.
+    Write-Host ('RUN_ERROR: ' + $safeError)
     $ExitCode = 1
 } finally {
     # Лог должен быть записан в любом случае, включая ошибку проверки.
