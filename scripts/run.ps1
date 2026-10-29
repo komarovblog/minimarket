@@ -62,27 +62,27 @@ function Protect-Log {
 
 try {
     # Проверяем источник: нельзя незаметно подключиться к другому репозиторию.
-    $remoteUrl = Invoke-RepoGit @('remote', 'get-url', 'origin')
+    $remoteUrl = Invoke-RepoGit -GitArgs @('remote', 'get-url', 'origin')
     if ($remoteUrl -notmatch '(?i)github\.com[:/]komarovblog/minimarket(?:\.git)?$') {
         throw 'WRONG_ORIGIN: ожидался komarovblog/minimarket'
     }
-    if ((Invoke-RepoGit @('status', '--porcelain', '--untracked-files=normal')) -ne '') {
+    if ((Invoke-RepoGit -GitArgs @('status', '--porcelain', '--untracked-files=normal')) -ne '') {
         throw 'WORKTREE_NOT_CLEAN: сначала разберите локальные изменения; никаких автоматических сбросов'
     }
-    [void](Invoke-RepoGit @('fetch', '--prune', 'origin'))
-    [void](Invoke-RepoGit @('show-ref', '--verify', 'refs/remotes/origin/development'))
-    $branch = Invoke-RepoGit @('branch', '--show-current')
+    [void](Invoke-RepoGit -GitArgs @('fetch', '--prune', 'origin'))
+    [void](Invoke-RepoGit -GitArgs @('show-ref', '--verify', 'refs/remotes/origin/development'))
+    $branch = Invoke-RepoGit -GitArgs @('branch', '--show-current')
     if ($branch -ne 'development') {
         $exists = & git -C $Root show-ref --verify --quiet refs/heads/development
         if ($LASTEXITCODE -eq 0) {
-            [void](Invoke-RepoGit @('switch', 'development'))
+            [void](Invoke-RepoGit -GitArgs @('switch', 'development'))
         } else {
-            [void](Invoke-RepoGit @('switch', '-c', 'development', '--track', 'origin/development'))
+            [void](Invoke-RepoGit -GitArgs @('switch', '-c', 'development', '--track', 'origin/development'))
         }
     }
-    [void](Invoke-RepoGit @('pull', '--ff-only', 'origin', 'development'))
-    $SourceSha = Invoke-RepoGit @('rev-parse', 'HEAD')
-    $remoteSha = Invoke-RepoGit @('rev-parse', 'refs/remotes/origin/development')
+    [void](Invoke-RepoGit -GitArgs @('pull', '--ff-only', 'origin', 'development'))
+    $SourceSha = Invoke-RepoGit -GitArgs @('rev-parse', 'HEAD')
+    $remoteSha = Invoke-RepoGit -GitArgs @('rev-parse', 'refs/remotes/origin/development')
     if ($SourceSha -ne $remoteSha) { throw 'SHA_MISMATCH: локальная и удалённая ветки расходятся' }
     $Synced = $true
     $Details.Add('SYNC_PASS: origin/development=' + $SourceSha)
@@ -111,7 +111,7 @@ try {
             throw 'INVALID_TEST_PATH: ожидается scripts/test-*.ps1'
         }
         $safeRelPath = $TestFile.Replace('/', '\')
-        [void](Invoke-RepoGit @('ls-files', '--error-unmatch', '--', $safeRelPath.Replace('\', '/')))
+        [void](Invoke-RepoGit -GitArgs @('ls-files', '--error-unmatch', '--', $safeRelPath.Replace('\', '/')))
         $fullTestFile = Join-Path $Root $safeRelPath
         if (-not (Test-Path -LiteralPath $fullTestFile)) { throw 'TEST_FILE_MISSING' }
         $Details.Add('TEST_FILE: ' + $safeRelPath)
@@ -146,20 +146,20 @@ try {
     if ($Synced) {
         # Единственный автоматически добавляемый в индекс файл — санитизированный лог.
         try {
-            [void](Invoke-RepoGit @('add', '--', 'logs/LAST_RUN.log'))
-            [void](Invoke-RepoGit @('commit', '-m', ('test: record ' + $Action + ' ' + $Status)))
-            [void](Invoke-RepoGit @('push', 'origin', 'development'))
-            [void](Invoke-RepoGit @('fetch', 'origin', 'development'))
-            $localAfter = Invoke-RepoGit @('rev-parse', 'HEAD')
-            $remoteAfter = Invoke-RepoGit @('rev-parse', 'refs/remotes/origin/development')
+            [void](Invoke-RepoGit -GitArgs @('add', '--', 'logs/LAST_RUN.log'))
+            [void](Invoke-RepoGit -GitArgs @('commit', '-m', ('test: record ' + $Action + ' ' + $Status)))
+            [void](Invoke-RepoGit -GitArgs @('push', 'origin', 'development'))
+            [void](Invoke-RepoGit -GitArgs @('fetch', 'origin', 'development'))
+            $localAfter = Invoke-RepoGit -GitArgs @('rev-parse', 'HEAD')
+            $remoteAfter = Invoke-RepoGit -GitArgs @('rev-parse', 'refs/remotes/origin/development')
             if ($localAfter -ne $remoteAfter) { throw 'LOG_PUSH_SHA_MISMATCH' }
             Write-Host ('LOG_PUSH_PASS ' + $localAfter)
         } catch {
-            Write-Error ('LOG_NOT_PUBLISHED: ' + $_.Exception.Message)
+            Write-Host ('LOG_NOT_PUBLISHED: ' + $_.Exception.Message)
             $ExitCode = 1
         }
     } else {
-        Write-Error 'LOG_LOCAL_ONLY: синхронизация не прошла; отправка в GitHub запрещена'
+        Write-Host 'LOG_LOCAL_ONLY: синхронизация не прошла; отправка в GitHub запрещена'
     }
 }
 exit $ExitCode
