@@ -1,0 +1,21 @@
+# Секреты и локальные настройки
+.env
+.env.*
+!.env.example
+configuration.php
+
+# Зависимости и локальные артефакты
+/vendor/
+/node_modules/
+/.cache/
+/runtime/
+/tmp/
+/dist/
+/backups/
+*.zip
+*.sql
+*.sql.gz
+*.bak
+*.log
+# Единственный Git-лог проверок: предыдущие версии доступны в истории коммитов.
+!/logs/LAST_RUN.log
