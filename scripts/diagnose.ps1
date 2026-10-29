@@ -79,8 +79,9 @@ try {
             $tokens = $null
             $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile($runner, [ref]$tokens, [ref]$errors) | Out-Null
-            Add-Result 'RUNNER_PARSE_ERROR_COUNT' @($errors).Count
-            if (@($errors).Count -gt 0) { Add-Result 'FIRST_PARSE_ERROR_LINE' $errors[0].Extent.StartLineNumber }
+            $parseCount = @($errors | Where-Object { $null -ne $_ }).Count
+            Add-Result 'RUNNER_PARSE_ERROR_COUNT' $parseCount
+            if ($parseCount -gt 0) { Add-Result 'FIRST_PARSE_ERROR_LINE' $errors[0].Extent.StartLineNumber }
         }
     }
 } catch {
@@ -102,16 +103,16 @@ try {
     $Report.Add('END=1')
     $target = Join-Path $TempRepo 'logs\LAST_RUN.log'
     [System.IO.File]::WriteAllLines($target, [string[]]$Report.ToArray(), (New-Object System.Text.UTF8Encoding($false)))
-    foreach ($args in @(
-        @('config','user.name','MiniMarket Diagnostics'),
-        @('config','user.email','minimarket-diagnostics@users.noreply.github.com'),
-        @('add','--','logs/LAST_RUN.log'),
-        @('commit','-m','test: isolated diagnostics'),
-        @('push','origin','HEAD:development')
-    )) {
-        $result = Read-Git -Directory $TempRepo -GitArgs ([string[]]$args)
-        if (-not $result.OK) { throw ('UPLOAD_GIT_STEP_FAILED_' + $args[0] + '_' + $result.Code) }
-    }
+    $configName = Read-Git -Directory $TempRepo -GitArgs @('config','user.name','MiniMarket Diagnostics')
+    if (-not $configName.OK) { throw 'GIT_CONFIG_NAME_FAILED' }
+    $configEmail = Read-Git -Directory $TempRepo -GitArgs @('config','user.email','minimarket-diagnostics@users.noreply.github.com')
+    if (-not $configEmail.OK) { throw 'GIT_CONFIG_EMAIL_FAILED' }
+    $add = Read-Git -Directory $TempRepo -GitArgs @('add','--','logs/LAST_RUN.log')
+    if (-not $add.OK) { throw 'GIT_ADD_FAILED' }
+    $commit = Read-Git -Directory $TempRepo -GitArgs @('commit','-m','test: isolated diagnostics')
+    if (-not $commit.OK) { throw 'GIT_COMMIT_FAILED' }
+    $push = Read-Git -Directory $TempRepo -GitArgs @('push','origin','HEAD:development')
+    if (-not $push.OK) { throw ('GIT_PUSH_FAILED_' + $push.Code) }
     $uploaded = Read-Git -Directory $TempRepo -GitArgs @('rev-parse','HEAD')
     Write-Host ('MINIMARKET_DIAGNOSTIC_UPLOADED ' + $uploaded.Data)
 } catch {
