@@ -10,21 +10,31 @@
 ## Последняя правка runner — ожидает проверку
 После статического анализа найден тупик: если локальный `logs/LAST_RUN.log` изменён неудачным запуском, старая версия runner считает дерево грязным и не может получить новые коммиты. В новой версии предусмотрено резервирование этого **одного** файла внутри `.git` и безопасный `git restore --worktree` только для него; для других локальных изменений запуск останавливается. Ошибка `RUN_ERROR` печатается в консоли. Учтён формат `git status --porcelain` и пробелы, обрезаемые обёрткой команд Git. Код ещё не проверен на Windows, поэтому никакого PASS не объявлять.
 
-## Следующее действие (одно)
-В существующей локальной папке `minimarket` выполнить:
+## Следующее действие (одно) — первый повторный запуск на Windows
+На компьютере, **находясь внутри локальной папки minimarket**, выполнить следующий блок целиком.
+При первом запуске после прежних ошибок разрешено сохранить и восстановить только `logs/LAST_RUN.log`; любые другие изменения не трогать и остановиться.
+
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action preflight
-```
-**ВНИМАНИЕ:** если старый скрипт был скачан ранее, команда запустит старую версию. Перед её запуском необходимо отдельно безопасно синхронизировать Git:
-```powershell
-git status --short
-git branch --show-current
+if ((git branch --show-current) -ne 'development') { throw 'BRANCH_NOT_DEVELOPMENT' }
+$changes = @(git status --porcelain)
+if ($LASTEXITCODE -ne 0) { throw 'GIT_STATUS_FAILED' }
+$others = @($changes | Where-Object { $_ -ne ' M logs/LAST_RUN.log' })
+if ($others.Count -gt 0) { throw 'LOCAL_CHANGES_REQUIRE_REVIEW' }
+if ($changes.Count -gt 0) {
+    $gitDir = (git rev-parse --absolute-git-dir).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'GIT_DIR_FAILED' }
+    Copy-Item -LiteralPath .\logs\LAST_RUN.log -Destination (Join-Path $gitDir 'MINIMARKET_LAST_UNPUBLISHED.log') -Force
+    git restore --worktree -- logs/LAST_RUN.log
+    if ($LASTEXITCODE -ne 0) { throw 'LOG_RESTORE_FAILED' }
+}
 git fetch origin
-git switch development
+if ($LASTEXITCODE -ne 0) { throw 'GIT_FETCH_FAILED' }
 git pull --ff-only origin development
+if ($LASTEXITCODE -ne 0) { throw 'GIT_PULL_FAILED' }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action preflight
 ```
-При наличии локальных изменений, неожиданных веток или конфликтов остановиться, не выполнять reset/force; документация содержит порядок диагностики. Если SSH/HTTPS Git не авторизуется, пуш лога невозможен до решения проблемы доступа.
+
+Если результат был `LOCAL_CHANGES_REQUIRE_REVIEW`, остановиться; не делать `reset`, `stash` или массовый `restore` ради тестов. Если GitHub не доступен и push лога не удался, сообщить конкретную проблему, результат пока не считать подтверждённым.
 
 ## Критерии завершения
 - Команда проходит на Windows, `logs/LAST_RUN.log` появляется в GitHub и обновляется после каждого запуска.
