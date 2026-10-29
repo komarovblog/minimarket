@@ -1,7 +1,10 @@
-# MiniMarket extension sources
+# Исходники расширения MiniMarket
 
-This folder will contain `com_minimarket` and any strictly necessary Joomla 6 modules/plugins. The Joomla CMS itself is **not** stored in this repository.
+Это не сайт Joomla и не копия Joomla Core. Исходники нашего компонента и, при необходимости, модулей будут жить **вне веб-корня**.
 
-Future package layout will follow official Joomla manifests and installation/update conventions, using Joomla's own database connection and adding only `#__minimarket_*` tables.
+- `src/com_minimarket/` — исходная версия собственного компонента; после реализации из неё соберём официальный установочный ZIP.
+- После установки ZIP Joomla разместит исполняемые файлы в `public/components/com_minimarket/`, `public/administrator/components/com_minimarket/` и необходимые ресурсы в `public/media/`.
+- Эти установленные копии не редактируем напрямую. Правки — в `src` → GitHub `development` → сборка ZIP → установка/обновление в Joomla.
+- Все файлы Joomla, её админка, шаблоны и модули, используемые сайтом, находятся внутри `public`. Именно **содержимое** `public` переносим на хостинг в `public_html`.
 
-**No working component is implemented yet.** First verify Open Server / Joomla installation; then implement a minimal installable component and a reproducible package build script.
+Подробнее: `docs/STRUCTURE.md`. Реализация компонента ещё не создана; Joomla пока не установлена.
