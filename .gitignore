@@ -13,7 +13,7 @@ configuration.php
 /dist/
 /backups/
 *.zip
-*.sql
+*.dump.sql
 *.sql.gz
 *.bak
 *.log

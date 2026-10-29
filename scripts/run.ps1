@@ -88,6 +88,11 @@ try {
     $Details.Add('SYNC_PASS: origin/development=' + $SourceSha)
 
     if ($Action -eq 'preflight') {
+        # Проверяем наличие обязательных документов передачи контекста.
+        foreach ($required in @('NEW_AGENT.md', 'CURRENT_TASK.md', 'docs/CONTEXT.md', 'docs/PLAN.md')) {
+            if (-not (Test-Path -LiteralPath (Join-Path $Root $required))) { throw ('REQUIRED_DOC_MISSING: ' + $required) }
+        }
+        $Details.Add('DOC_STRUCTURE_PASS')
         $example = Join-Path $Root '.env.example'
         $envFile = Join-Path $Root '.env'
         if (-not (Test-Path -LiteralPath $example)) { throw 'ENV_EXAMPLE_MISSING' }
