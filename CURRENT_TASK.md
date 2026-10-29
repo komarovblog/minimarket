@@ -1,23 +1,35 @@
 # CURRENT_TASK — MiniMarket
-Дата: 2026-10-29. Только `komarovblog/minimarket`, ветка `development`. Shop/Symfony не затрагивать.
+Дата: 2026-10-29. Только `komarovblog/minimarket`, ветка `development`. Shop/Symfony не трогать.
 
-## Завершённый шаг 2.1a — обнаружение локального домена Open Server Panel 6
-**Статус: PASS по сообщению пользователя от 29.10.2026.** После создания `.osp/project.ini`, `public` и перезапуска Open Server Panel 6 в меню появился проект `minimarket.local`.
+## Завершено
+Этап 2.1a — по подтверждению пользователя проект `minimarket.local` появился в Open Server Panel 6. Windows 11, Apache 2.4, PHP 8.5, MySQL 8.0, исходная папка `C:\Users\User\Desktop\WebProjects\MiniMarket`.
 
-Локальное окружение: Windows 11; Open Server Panel 6; Apache 2.4, PHP 8.5, MySQL 8.0 включены; путь `C:\Users\User\Desktop\WebProjects\MiniMarket`; корень веб-проекта планируется `public` внутри этого репозитория; домен `http://minimarket.local` без SSL. Репозиторий `komarovblog/minimarket`, `development`.
+## Текущий шаг: 2.1b — диагностика HTTP без Joomla
+При открытии `minimarket.local` Яндекс Браузер показывает «Страница недоступна. Сайт пока не может обработать этот запрос». На скриншоте HTTP-код не виден. Joomla в `public` ещё не установлена. **Не утверждать 500 без измерения.**
 
-**Не проверено:** HTTP-ответ по домену, фактический DocumentRoot, исполнение PHP 8.5, установка Joomla и работа MySQL именно для нового сайта. Joomla ещё не установлена. Наличие пункта меню не является подтверждением, что URL уже обслуживается правильно.
+**Одно действие:** безопасная временная статическая проба `__mm_static_probe_20261029.txt` внутри `public`, HTTP-запрос `curl.exe` к файлу и к корню, затем удалить только тестовый файл, вывести код; попросить пользователя прислать точный результат (автоматические GitHub-логи пока не доказаны). Никаких изменений конфигурации OSP или ядра Joomla до данных.
 
-## Текущий исполняемый шаг 2.1b — проверить HTTP/DocumentRoot
-1. Открыть в браузере `http://minimarket.local`, зафиксировать тип ответа/ошибку. Поскольку `public` пока пустая, возможны 403/404/пустая страница — это не означает неисправность Joomla.
-2. При необходимости следующим отдельным шагом создать временный безопасный тестовый файл в `public`, проверить HTTP/PHP и сразу удалить его; **не** использовать `phpinfo()` с раскрытием настроек/секретов.
-3. После подтверждения правильного домена подготовить отдельную БД MySQL 8.0 и установить оригинальную Joomla 6 в `public`; провести отдельный smoke-тест совместимости с PHP 8.5, не патчить CMS.
+PowerShell (выполнять целиком):
+```powershell
+$root = 'C:\Users\User\Desktop\WebProjects\MiniMarket'
+$public = Join-Path $root 'public'
+if (-not (Test-Path -LiteralPath $public -PathType Container)) { throw 'PUBLIC_DIRECTORY_MISSING' }
+$probe = Join-Path $public '__mm_static_probe_20261029.txt'
+if (Test-Path -LiteralPath $probe) { throw 'PROBE_ALREADY_EXISTS' }
+[System.IO.File]::WriteAllText($probe, 'MINIMARKET_STATIC_OK', (New-Object System.Text.UTF8Encoding($false)))
+try {
+    curl.exe --noproxy '*' -sS --max-time 15 -i 'http://minimarket.local/__mm_static_probe_20261029.txt'
+    'FILE_CURL_EXIT=' + $LASTEXITCODE
+    curl.exe --noproxy '*' -sS --max-time 15 -o NUL -w 'ROOT_HTTP=%{http_code}' 'http://minimarket.local/'
+    'ROOT_CURL_EXIT=' + $LASTEXITCODE
+} finally {
+    Remove-Item -LiteralPath $probe -Force
+}
+```
+Ожидаемый файл при правильной настройке: `HTTP/1.1 200 OK` и `MINIMARKET_STATIC_OK`. Если он возвращает 404/403/500, посмотреть на фактическую версию Open Server и её параметр `public_dir` или `web_root` и журналы. Устанавливать Joomla только после подтверждения работы HTTP.
 
-## Другой открытый вопрос
-Этап 0.3/0.4: консольный runner и автоматическая доставка результатов в GitHub ещё не подтверждены. Локальная проверка Git по словам пользователя прошла; не выдавать автоматическую публикацию логов за PASS.
+## Другой открытый блокер
+Этап 0.3/0.4: публикация локальных тестовых логов в GitHub ещё не доказана. Не путать с текущей ошибкой локального веб-сайта.
 
-## Постоянные правила
-- Ядро Joomla не изменять ни при каких обстоятельствах; только официальные расширения.
-- `/.osp/` и `/public/` в .gitignore; Joomla и Open Server остаются локальными, исходники MiniMarket в Git.
-- Работаем только с репозиторием MiniMarket; Shop на Symfony — полностью отдельный проект.
-- Никаких reset --hard, force push, merge в main без отдельного решения.
+## Обязательные принципы
+Ядро Joomla не править, только штатные API. `public` и `.osp` не коммитить, содержимое Joomla держать отдельно. Репозиторий Shop на Symfony полностью изолирован. Без reset/force-push и без merge в main.
