@@ -4,6 +4,11 @@
 !.env.example
 configuration.php
 
+# Окружение Open Server Panel 6 и установленное ядро Joomla 6.
+# Код наших расширений разрабатываем и храним вне /public в исходниках репозитория.
+/.osp/
+/public/
+
 # Зависимости и локальные артефакты
 /vendor/
 /node_modules/
