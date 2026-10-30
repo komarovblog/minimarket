@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <fieldset name="basic" label="COM_MINIMARKET_CONFIG_BASIC">
+        <field
+            name="catalog_title"
+            type="text"
+            label="COM_MINIMARKET_CONFIG_CATALOG_TITLE"
+            description="COM_MINIMARKET_CONFIG_CATALOG_TITLE_DESC"
+            default="MiniMarket"
+            filter="string"
+        />
+    </fieldset>
+    <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
+        <field
+            name="rules"
+            type="rules"
+            component="com_minimarket"
+            section="component"
+            label="JCONFIG_PERMISSIONS_LABEL"
+            validate="rules"
+            filter="rules"
+        />
+    </fieldset>
+</config>
