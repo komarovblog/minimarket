@@ -37,3 +37,7 @@ C:\OSPanel\home\minimarket.local\
 Не выполняем обратную выгрузку всего установленного Joomla-сайта в GitHub. База данных и секреты там тоже не хранятся. Изменения исходников можно делать как через GitHub в чате, так и в локальном редакторе, но перед push проверяем статус и направление синхронизации. Автоматическая доставка логов Windows → GitHub ещё не подтверждена.
 
 **Первое действие:** [CURRENT_TASK.md](CURRENT_TASK.md). Полная схема: [docs/STRUCTURE.md](docs/STRUCTURE.md).
+
+## Как разрабатываем переносимое расширение
+**Не редактируем установленную Joomla.** Исходники расширения — `src/` в GitHub `development`, затем воспроизводимый ZIP и установка через штатный Joomla Extension Installer. Файлы сайта и БД в Git не отправляем. Первый реальный этап — `com_minimarket` + XML-манифест + сборка ZIP, затем плагины/модули и второй продукт.
+Подробнее: [docs/DEVELOPMENT_AND_PACKAGING.md](docs/DEVELOPMENT_AND_PACKAGING.md). Следующий шаг — [CURRENT_TASK.md](CURRENT_TASK.md).

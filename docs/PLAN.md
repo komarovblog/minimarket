@@ -147,3 +147,10 @@
 - [ ] **Сейчас:** проверить `public_html/.htaccess` либо переименовать штатный `htaccess.txt`; затем Joomla Global SEO: SEF Yes, URL Rewriting Yes, suffix No, Unicode aliases No. Подтвердить сайт + админку.
 - [ ] **Далее:** Articles Options → Integration → Remove IDs Yes; меню товарных категорий и один основной URL, затем тестовый content, редиректы/index.php/trailing slash и доступный System-SEF Strict Routing только после проверки.
 - [ ] **Затем:** первый функциональный ZIP MiniMarket Articles (настройка категорий Joomla и поля товаров), Schema.org Product vs Article, dataLayer, SEO-фильтр, единая корзина.
+
+## 2b. Переносимый исходный продукт, не ручная доработка Joomla — 30.10.2026
+- [x] Пользователь подтвердил Joomla 6 и первичную SEF-конфигурацию.
+- [x] Жёсткое решение: изменения только в GitHub `src`, затем пакетный ZIP Joomla, установка через штатный Installer; второй чистый экземпляр проверяет переносимость. `public_html` — тестовый результат, не источник кода.
+- [x] Новый документ `docs/DEVELOPMENT_AND_PACKAGING.md`: безопасный workflow, повторяемая установка Custom Fields, разграничение template overrides, общие A/B сервисы, критерии M0 и M1.
+- [ ] Следующая задача M0: реальный `com_minimarket`, XML-манифест, настройки Joomla товарных категорий, локальная сборка `scripts/build.ps1`, ZIP; проверить установку и обновление. Рабочий ZIP пока не создан.
+- [ ] M1: product-fields/rendering + Schema.org/dataLayer/SEO-фильтр, затем общие корзина/заказы.
