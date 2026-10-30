@@ -1,16 +1,24 @@
 # CURRENT_TASK — MiniMarket
-Дата: 2026-10-30. Только `komarovblog/minimarket` / `development`; Shop, main и другие проекты не менять.
+Актуально 2026-10-30. Только `komarovblog/minimarket` `development`; main и Shop/Symfony не трогать.
 
-## Подтверждено
-- Пользователь развернул работающую Joomla 6 в `C:\OSPanel\home\minimarket.local\public_html` (Apache, PHP 8.5, MySQL 8.0), настроил базовые SEF и `.htaccess`.
-- Продукты A (статьи/категории/поля Joomla, штатные URLs) и B (собственный каталог, плоские alias-ID URL). SEO-фильтр, Product/Offer Schema.org, dataLayer, общие защищённые заказы/checkout нужны в обоих.
-- Главное решение: **Joomla — тестовый стенд; разрабатываем в GitHub `src`, собираем устанавливаемый ZIP и устанавливаем его через Joomla Extension Installer**. Локальная Joomla core/БД/медиа/конфигурация не коммитятся. Документ: `docs/DEVELOPMENT_AND_PACKAGING.md`.
-- В репозитории есть только каркас и `src/com_minimarket/README.md`: **рабочего компонента, реального ZIP и сборочного скрипта ещё НЕТ**. Это важная следующая задача.
+## Состояние
+- Joomla 6 локально установлена и работает, SEF настроен со слов пользователя. Путь `C:\OSPanel\home\minimarket.local\public_html`; исходники нашего расширения — отдельный GitHub `src` (пока README, работающего компонента ещё нет).
+- Утверждено пользователем: два варианта товара/каталога (A Joomla articles + fields/categories и штатные URL, B собственный каталог + плоские ID URL); общее оформление заказа, оплаты, доставки, auth, уведомлений, SEO-фильтра, Schema.org и dataLayer.
+- Пользователь уточнил, что использует **Helix Ultimate и SP Page Builder**, хочет сменяемость шаблона и просит список необходимых расширений с общим кодом вместо двух независимых магазинов.
 
-## Единственная следующая задача — M0: реальный устанавливаемый компонент
-1. Создать исходники минимального `com_minimarket` с Joomla 6 XML manifest, Joomla admin меню и страницей настроек выбора товарных категорий (без изменения ядра и чужой темы).
-2. Реализовать компактный `scripts/build.ps1`, собирающий устанавливаемый ZIP из `src` в игнорируемую папку `dist`. Начинать с отдельного компонента допустимо; затем собирать `pkg_minimarket_articles.zip` с нужными плагинами/модулями.
-3. Пользователь безопасно получает GitHub `development`, запускает сборку и устанавливает ZIP через Joomla admin. Провести smoke-тест, повторную установку/обновление, отдельный чистый экземпляр Joomla. Не утверждать PASS без проверки.
-4. Затем M1 — группы/поля товара, вывод выбранных категорий, макеты, Schema.org/dataLayer/SEO-фильтр; второй каталог B позже на общем Core.
+## Проектная архитектура для обсуждения
+Создан `docs/EXTENSIONS_ARCHITECTURE.md`. Предлагается:
+- **Общий `com_minimarket`** для корзины, заказов, checkout, payment, auth, settings.
+- A: `plg_content_minimarket_articles` подключает `com_content` категории/поля и добавляет блоки товара; стандартные Joomla article/category URL сохраняются.
+- B: собственный `com_minimarket_catalog` для каталога и плоских URL, используя все общие сервисы Core.
+- Общий `plg_system_minimarket` для контекстного Schema.org/dataLayer/meta (когда дойдём до SEO/analytical этапа); опциональные Joomla modules `mod_minimarket_cart`, `mod_minimarket_filter`, `mod_minimarket_products`.
+- Не требуются отдельные торговые плагины для каждого шаблона. Торговые блоки независимы от темы через Joomla events/modules/layouts. **Полное com_content оформление template-specific**; Helix имеет собственные overrides, SPPB — Dynamic Joomla Articles + Custom Fields/Module addon. Их полное оформление — опциональная интеграция с явным назначением. Не обещать, что полные overrides переживают смену темы без настройки.
+- Два будущих ZIP `pkg_minimarket_articles.zip` и `pkg_minimarket_catalog.zip`, каждый со своим адаптером плюс тем же `com_minimarket`; считать их взаимно исключающими на одном сайте до проработки shared-package dependencies. Пока ZIP ещё нет.
 
-Не изменять установленную копию `public_html` напрямую как первичный код. Не вносить в Git Joomla core/секреты/БД/заказы. Не выполнять force push/reset, не изменять main.
+## Следующий исполняемый шаг
+**M0:** создать в `src/com_minimarket` настоящий минимальный компонент Joomla 6 + XML-манифест и `scripts/build.ps1`; собрать ZIP, установить штатно на локальной Joomla и повторить установку на чистой Joomla. Не пытаться создавать сразу десяток модулей/плагинов или править шаблон Helix вручную.
+
+После M0 — M1 с выбором товарных Joomla категорий, полями и минимальным `plg_content_minimarket_articles`, проверкой реальной страницы в Cassiopeia/Helix. Затем SEO/filter, common cart/orders и B.
+
+## Ограничения
+Только GitHub `development`, не изменять Joomla core, `public_html` как первичный код, чужой Shop/Symfony, main. Не считать архитектурный документ уже реализованным кодом. Установленные данные и секреты не отправлять в Git.

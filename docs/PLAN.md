@@ -154,3 +154,10 @@
 - [x] Новый документ `docs/DEVELOPMENT_AND_PACKAGING.md`: безопасный workflow, повторяемая установка Custom Fields, разграничение template overrides, общие A/B сервисы, критерии M0 и M1.
 - [ ] Следующая задача M0: реальный `com_minimarket`, XML-манифест, настройки Joomla товарных категорий, локальная сборка `scripts/build.ps1`, ZIP; проверить установку и обновление. Рабочий ZIP пока не создан.
 - [ ] M1: product-fields/rendering + Schema.org/dataLayer/SEO-фильтр, затем общие корзина/заказы.
+
+## 2c. Универсальная архитектура для Helix Ultimate/SP Page Builder и двух каталогов — 30.10.2026
+- [x] Составлен `docs/EXTENSIONS_ARCHITECTURE.md`: общий `com_minimarket` для cart/checkout/orders/payments/ID-login, Articles `plg_content_minimarket_articles`, Catalog `com_minimarket_catalog`, общие Schema/dataLayer и опциональные модули; никаких повторных реализаций корзины.
+- [x] Разделены независимые от шаблона торговые функции и зависящий от темы полный `com_content` override. Helix Ultimate имеет собственные template-view override paths, SP Page Builder умеет Dynamic Joomla Articles/Custom Fields и Joomla Module addon. Их адаптеры необязательны до реального теста.
+- [~] Будущие `pkg_minimarket_articles.zip` / `pkg_minimarket_catalog.zip` включают одинаковый общий `com_minimarket`, только один вариант устанавливается на конкретный сайт; если нужен режим A+B одновременно, схему shared dependencies проектировать отдельно.
+- [ ] M0: реально устанавливаемый минимальный общий компонент Joomla + ZIP-сборщик и тест чистой установки.
+- [ ] M1: Articles plugin, category selector, fields, блок товара; Helix/Cassiopeia smoke test. Далее фильтр/SEO/dataLayer/checkout и Catalog B.
