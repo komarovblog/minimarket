@@ -1,3 +1,5 @@
+> **Актуализация 30.10.2026:** вместо двух пакетов Articles/Catalog создаём **один `com_minimarket.zip`** со своими товарами/категориями/заказами. Указания ниже о двух пакетах, Joomla articles/custom fields и адаптерах устарели. Сохранённый принцип GitHub source → ZIP → Joomla installer по-прежнему обязателен. Канонический документ: [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md).
+
 # MiniMarket — разработка, сборка и установка на чистую Joomla 6
 
 Обновлено: 30.10.2026. Только `komarovblog/minimarket`, ветка `development`; Symfony Shop и `main` не трогать.

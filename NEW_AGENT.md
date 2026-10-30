@@ -1,3 +1,5 @@
+> **КРИТИЧЕСКОЕ ОБНОВЛЕНИЕ 30.10.2026 — приоритет над всей историей этого файла:** пользователь выбрал **один самостоятельный Joomla компонент `com_minimarket` со своими товарами, категориями и заказами**. Никакого варианта на Joomla Articles, плагина `plg_content_minimarket_articles`, второго `com_minimarket_catalog` или двух разных установочных пакетов. Актуальные правила: [docs/COMPONENT_ARCHITECTURE.md](docs/COMPONENT_ARCHITECTURE.md) и [CURRENT_TASK.md](CURRENT_TASK.md). Всё ниже читать как хронологию, если противоречит — приоритет у новой архитектуры.
+
 # NEW_AGENT.md — точка входа для нового чата
 
 Проект: minimarket (собственный интернет-магазин с Joomla 6 в качестве CMS).

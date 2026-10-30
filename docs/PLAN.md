@@ -1,3 +1,5 @@
+> **Актуальное решение от 30.10.2026:** разрабатываем ТОЛЬКО один `com_minimarket` со своими категориями, товарами и заказами. Старые пункты про магазин на Joomla Articles и два дистрибутива отменены. Главный план — [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md), текущая задача — [CURRENT_TASK.md](../CURRENT_TASK.md).
+
 # PLAN — этапы и подэтапы MiniMarket
 Актуально: 2026-10-29.
 Статусы: [x] проверено/зафиксировано; [~] создано, но не проверено; [ ] не выполнено; [?] требуется решение. Только один **исполняемый** текущий шаг в `CURRENT_TASK.md`.
@@ -161,3 +163,10 @@
 - [~] Будущие `pkg_minimarket_articles.zip` / `pkg_minimarket_catalog.zip` включают одинаковый общий `com_minimarket`, только один вариант устанавливается на конкретный сайт; если нужен режим A+B одновременно, схему shared dependencies проектировать отдельно.
 - [ ] M0: реально устанавливаемый минимальный общий компонент Joomla + ZIP-сборщик и тест чистой установки.
 - [ ] M1: Articles plugin, category selector, fields, блок товара; Helix/Cassiopeia smoke test. Далее фильтр/SEO/dataLayer/checkout и Catalog B.
+
+## 2d. ОКОНЧАТЕЛЬНОЕ УПРОЩЕНИЕ — один компонент, 30.10.2026
+- [x] Пользователь **отказался** от магазина на Joomla articles и второго варианта каталога. Это сознательное решение; несмотря на быстрый старт с материалами, собственный компонент проще для полноценного магазина.
+- [x] Создан актуальный `docs/COMPONENT_ARCHITECTURE.md` с одной моделью каталога/заказов, Joomla MVC, flat alias-ID URL, SEO/dataLayer и Helix/SPPB.
+- [x] **Не создавать** `plg_content_minimarket_articles`, `com_minimarket_catalog`, `pkg_minimarket_articles` / `pkg_minimarket_catalog`. Старые архитектурные документы — исторические.
+- [ ] **Текущий M0:** настоящий `com_minimarket` с установочным XML, минимальной admin/site частью и воспроизводимой ZIP-сборкой. Локальный тест установки/обновления ещё не делался.
+- [ ] M1: CRUD собственных категорий/товаров и frontend представления, затем SEO/filter, server-side cart/orders/checkout, analytics/dataLayer, Helix/SPPB тесты.
