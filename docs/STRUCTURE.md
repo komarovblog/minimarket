@@ -2,6 +2,11 @@
 
 Актуально: 2026-10-29. Только репозиторий `komarovblog/minimarket`, ветка `development`. Shop на Symfony — независимый проект.
 
+## Актуальный путь в Open Server Panel 6.5.1
+
+**С 30.10.2026 используется только стандартный каталог OSP `C:\OSPanel\home`.**
+Рабочий Git-клон и проект: `C:\OSPanel\home\minimarket.local`; веб-корень `C:\OSPanel\home\minimarket.local\public`; домен `http://minimarket.local`. Владелец проекта MiniMarket — `komarovblog/minimarket`, ветка `development`. Предыдущее размещение в `C:\Users\User\Desktop\WebProjects\MiniMarket` устарело; прежнюю папку не удалять автоматически, так как в ней могут быть локальные файлы. OSP больше не ищет там проекты.
+
 ## Главный принцип
 
 **В `public` находится ВЕСЬ РАБОТАЮЩИЙ САЙТ Joomla 6**: ядро, админка, установленные компоненты, модули, плагины, шаблоны, медиафайлы и обычный `index.php`. **Папка `public` по назначению соответствует `public_html` на обычном хостинге**. Содержимое `public` переносится в `public_html`.
@@ -11,7 +16,7 @@
 ## Структура локально ДО установки Joomla
 
 ```text
-C:\Users\User\Desktop\WebProjects\MiniMarket\
+C:\OSPanel\home\minimarket.local\
 ├── .git\
 ├── .osp\
 │   └── project.ini           # OSP 6.5.1: Apache, PHP-8.5, web_root = {base_dir}\public

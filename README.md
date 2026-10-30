@@ -25,24 +25,34 @@ MiniMarket/
 
 ## Подготовка на Windows 11 / Open Server Panel 6.5.1
 
-Клон репозитория должен находиться в:
+**Актуальное размещение (30.10.2026):** стандартный каталог Open Server Panel 6.5.1:
 
 ```text
-C:\Users\User\Desktop\WebProjects\MiniMarket
+C:\OSPanel\home\minimarket.local
 ```
 
-Если локальный клон уже существует в неправильном виде, сначала переместить **весь старый MiniMarket** в `C:\Users\User\Desktop\MiniMarket-backups` (за пределы списка проектов OSP), и лишь затем создать новый клон `development` в прежнем месте. Не удалять файлы без резервной копии.
+Домен проекта и имя директории одинаковые, поэтому Open Server обнаружит проект в `home`. Каталог `C:\Users\User\Desktop\WebProjects` **удалён пользователем из путей поиска проектов OSP и более не используется**. Старый клон оставляем нетронутым как временную резервную копию: **его не нужно переносить/удалять, чтобы создать новый клон в другом каталоге**.
 
-В консоли Open Server (CMD), после клонирования:
+В консоли Open Server (CMD) **только если каталога `C:\OSPanel\home\minimarket.local` ещё нет**:
+
 ```cmd
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\User\Desktop\WebProjects\MiniMarket\scripts\setup-local.ps1"
+git clone --branch development --single-branch https://github.com/komarovblog/minimarket.git "C:\OSPanel\home\minimarket.local"
 ```
 
-Это создаёт **только если отсутствует** временный локальный `public/index.php`, который отвечает `MINIMARKET_BOOTSTRAP_OK` и `PHP_VERSION`. При установке Joomla его должен заменить оригинальный индекс Joomla. Не коммитить файл.
+Если директория уже существует, не выполнять clone поверх неё, не удалять её и сначала выяснить содержимое.
 
-После перезапуска Open Server проверить:
+После успешного клонирования запустить:
+
+```cmd
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\setup-local.ps1"
+```
+
+Скрипт, если `index.php` не существует, создаст одноразовую локальную проверочную страницу `public/index.php` (в Git не попадает). Затем перезапустить OSP, включить модули **только** MiniMarket (Apache + PHP 8.5) и проверить:
+
 ```cmd
 curl.exe -4 --noproxy "*" --max-time 10 http://minimarket.local/
 ```
 
-Если до установки Joomla виден временный текст — HTTP и PHP работают. Затем создать отдельную БД и установить оригинальный Joomla 6 Full Package **непосредственно в `public`**, а будущий MiniMarket обновлять штатным установочным ZIP-пакетом. Актуальный один следующий шаг всегда описан в **[CURRENT_TASK.md](CURRENT_TASK.md)**.
+Ожидается `MINIMARKET_BOOTSTRAP_OK` и `PHP_VERSION=8.5.*`. Затем создать БД `minimarket` через phpMyAdmin, установить официальный Joomla 6 Full Package непосредственно в `public` (временный `index.php` заменяется штатным оригинальным), и начать установку своего пакета MiniMarket. `public` равен будущему `public_html` по содержимому.
+
+Текущий один шаг: [CURRENT_TASK.md](CURRENT_TASK.md).

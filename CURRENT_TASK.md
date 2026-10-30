@@ -1,40 +1,32 @@
 # CURRENT_TASK — MiniMarket
-Обновлено 2026-10-29. Только `komarovblog/minimarket` (`development`). Проекты Shop (Symfony) и Bidder не затрагивать.
+Обновлено: 2026-10-30. Только `komarovblog/minimarket` (ветка `development`). Shop/Symfony и прочие проекты не затрагивать.
 
-## Принятое решение: пересоздать только локальную папку MiniMarket с нуля, безопасно
-Причина: Git-клон ранее содержал только документацию и старые скрипты, а Joomla и правильная структура OSP не были установлены. В браузере была ошибка 503. Это не доказательство неисправности MySQL/Apache, а недостаток установленной локальной среды. Не делать выводов о точной причине 503 до повторной проверки.
+## Последнее решение пользователя — стандартный каталог Open Server
+Пользователь **отключил каталог `C:\Users\User\Desktop\WebProjects` в настройках поиска проектов Open Server**. Теперь единственное плановое размещение MiniMarket: **`C:\OSPanel\home\minimarket.local`**. Это стандартная папка OSP 6.5.1. Веб-корень: `C:\OSPanel\home\minimarket.local\public`, полностью аналогичен `public_html` хостинга; Joomla и установленный пакет MiniMarket будут внутри `public`, а исходники `src` и `.git` — уровнем выше.
 
-## Уточнение структуры перед локальным клонированием
-`MiniMarket/public` — **весь работающий Joomla-сайт**, на хостинге его содержимое соответствует `public_html`. После установки Joomla в `public` появятся `administrator`, `components`, `modules`, `plugins`, `media`, `templates`, `index.php`; установленный `com_minimarket` также живёт **внутри `public`**.
-`MiniMarket/src/com_minimarket` — только редактируемые исходники для сборки ZIP, НЕ второй сайт. `.git`, `docs`, `scripts`, `.osp` остаются выше публичного каталога и не копируются на хостинг. Подробности в `docs/STRUCTURE.md`. Joomla core пока **не установлена**. Старую локальную папку не удалять без резервного копирования.
+Уже в GitHub подготовлены:
+- `.osp/project.ini`: секция `[minimarket.local]`, Apache, PHP-8.5, `web_root = {base_dir}\public`, HTTP без TLS. **Профиль не зависит от абсолютного пути**, менять его не требуется.
+- `public/.gitkeep`: пустая папка для CMS; оригинальная Joomla ещё не установлена.
+- `src/com_minimarket/README.md`: только заготовка для исходников расширения; код ещё не создан.
+- `scripts/setup-local.ps1`: локальный временный PHP-smoke тест. Скрипт вычисляет корень проекта относительно собственного расположения, поэтому работает в `C:\OSPanel\home` без изменений.
+- `docs/STRUCTURE.md`: соглашение `public` = хостинговый `public_html`.
 
-## Уже сделано в GitHub
-- `.osp/project.ini`: [minimarket.local], Apache, PHP 8.5, HTTP без SSL, `web_root = {base_dir}\public`. Настройки базируются на официальной документации OSP 6.5.1, не на старом `public_dir`.
-- `public/.gitkeep`: каталог для Joomla присутствует после `git clone`; всё остальное содержимое `public` исключено из Git.
-- `src/README.md`: будущий собственный компонент (не Joomla core).
-- `scripts/setup-local.ps1`: создаёт локальный одноразовый `public/index.php`, который выводит `MINIMARKET_BOOTSTRAP_OK`, `PHP_VERSION`, `JOOMLA_NOT_INSTALLED`.
-- `README.md`, обновлённые `.gitignore`, `.env.example` и документация. Старые непроверенные скрипты runner/diagnose и INITIAL_STATE-лог удалены из текущей ветки, доступны в истории.
+### Текущий ОДИН шаг пользователя
+Откройте `C:\OSPanel\home` через Проводник. Если **папки `minimarket.local` нет**, в CMD выполнить одну команду:
 
-## Текущий шаг пользователя — резервная копия старого MiniMarket и чистый клон
-1. В Open Server выключить модули проекта **только minimarket.local**, не отключать всё и не трогать Shop/Bidder; закрыть редактор с файлами MiniMarket.
-2. В Проводнике создать `C:\Users\User\Desktop\MiniMarket-backups` (вне поиска проектов `WebProjects`). **Переместить** целиком старую папку `C:\Users\User\Desktop\WebProjects\MiniMarket` в эту резервную папку, переименовав её там, например, `MiniMarket-before-clean-20261029`. Не удалять, не очищать, не потерять `.git` и локальные секреты.
-3. В CMD/консоли Open Server выполнить:
 ```cmd
-git clone --branch development --single-branch https://github.com/komarovblog/minimarket.git "C:\Users\User\Desktop\WebProjects\MiniMarket"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Users\User\Desktop\WebProjects\MiniMarket\scripts\setup-local.ps1"
+git clone --branch development --single-branch https://github.com/komarovblog/minimarket.git "C:\OSPanel\home\minimarket.local"
 ```
-Если `git clone` или скрипт сообщает ошибку — **остановиться**, старый проект восстановим из бэкапа; не продолжать другие команды на неверном каталоге.
-4. Перезапустить Open Server Panel 6.5.1, при необходимости включить модули проекта minimarket.local (Apache и PHP-8.5), проверить:
+
+Если папка `minimarket.local` **уже существует**, НЕ удалять, НЕ копировать поверх, НЕ выполнять clone; сначала посмотреть её содержимое. Предыдущий клон в `WebProjects` не трогать, поскольку OSP его уже не сканирует. Базы данных MySQL тоже не трогать.
+
+### Следующий шаг после успешного clone
 ```cmd
-curl.exe -4 --noproxy "*" --max-time 10 http://minimarket.local/
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\setup-local.ps1"
 ```
-Ожидается `MINIMARKET_BOOTSTRAP_OK` и PHP 8.5. Этот тест ещё не выполнялся.
+После этого перезапуск OSP, включение Apache/PHP 8.5 для `minimarket.local`, `curl.exe -4 --noproxy "*" --max-time 10 http://minimarket.local/`. Ожидаемый маркер `MINIMARKET_BOOTSTRAP_OK`. **До проверки не говорить, что сайт готов или причина старого HTTP 503 найдена.**
 
-## Далее после подтверждения
-- В phpMyAdmin 5.2.3 выбрать MySQL-8.0 и создать отдельно БД `minimarket` / пользователя; её создание ещё не подтверждено.
-- Установить оригинальную Joomla 6 Full Package в `MiniMarket/public`: при распаковке заменить временный `index.php` на штатный Joomla; исходники CMS не коммитить. Проверить PHP/DB/admin/SEF, ядро не модифицировать.
-- Затем создать `src/com_minimarket`, штатный пакет установки/обновления; версионировать только собственный код.
-- GitHub-логирование и локальный push не считать подтверждёнными, старые скрипты не запускать.
+Затем создание отдельной БД `minimarket` и установка оригинальной Joomla 6 Full Package **в `public`**. Пакет расширения MiniMarket — отдельно через менеджер расширений Joomla, без правок ядра. phpMyAdmin работает через локальное исключение сертификата; позже заменить исключение доверием к локальному сертификату.
 
-## Запреты
-Никакого `Remove-Item -Recurse`, `rmdir /s /q`, `git clean -fdx`, `git reset --hard`, force-push. Сначала резервная копия. Никаких действий в Shop/Bidder и никакого изменения main.
+## Постоянные ограничения
+Никогда не трогать репозиторий Shop/Symfony, остальные проекты, настройки Open Server целиком и `main`. Не удалять старый локальный клон без сохранения. Не делать `git reset --hard`, force-push или стирание системных каталогов. Автоматическое логирование GitHub с Windows всё ещё не подтверждено.
