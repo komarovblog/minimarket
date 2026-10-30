@@ -170,3 +170,10 @@
 - [x] **Не создавать** `plg_content_minimarket_articles`, `com_minimarket_catalog`, `pkg_minimarket_articles` / `pkg_minimarket_catalog`. Старые архитектурные документы — исторические.
 - [ ] **Текущий M0:** настоящий `com_minimarket` с установочным XML, минимальной admin/site частью и воспроизводимой ZIP-сборкой. Локальный тест установки/обновления ещё не делался.
 - [ ] M1: CRUD собственных категорий/товаров и frontend представления, затем SEO/filter, server-side cart/orders/checkout, analytics/dataLayer, Helix/SPPB тесты.
+
+## 2e. Первый рабочий исходный каркас `com_minimarket` опубликован — 30.10.2026
+- [x] В GitHub `development` создан реальный `src/com_minimarket` версии 0.1.0 (Joomla component manifest, provider, MVC backend/frontend, сайт и заглушка каталога, опции заголовка, ru/en language), исходные файлы проверены на наличие.
+- [x] Добавлен PowerShell-скрипт `scripts/build.ps1`, который формирует `dist/com_minimarket.zip` из исходников и проверяет минимальный состав ZIP. `dist` игнорируется Git.
+- [ ] **Текущий шаг:** локально собрать ZIP и установить через Joomla Extension Installer на `minimarket.local`. Проверить страничку админа, опцию catalog_title и сайт, повторную установку.
+- [ ] Только после подтверждения M0: таблицы собственного каталога `#__minimarket_categories` / `#__minimarket_products`, MVC CRUD, миграции и реальный URL-роутинг (M1).
+- [ ] Проверка на чистом втором экземпляре Joomla, статические PHP lint/Runtime smoke-test и логи в GitHub; пока не считать успешными без результатов.

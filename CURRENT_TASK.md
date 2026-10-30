@@ -1,21 +1,21 @@
 # CURRENT_TASK — MiniMarket
-Дата: 2026-10-30. Только `komarovblog/minimarket`, ветка `development`, не `main` и не Shop/Symfony.
+Обновлено: 2026-10-30. Только `komarovblog/minimarket` / ветка `development`. `main`, Shop и Bidder не трогать.
 
-## Главное — изменение проекта по решению пользователя
-Пользователь отказался от MiniMarket Articles на штатных материалах Joomla и от **двух разных вариантов** магазина. Выбрана **ОДНА самостоятельная версия `com_minimarket` со своими категориями, товарами, комплектами, характеристиками и плоскими URL с ID**. Это оптимальный по общей сложности вариант для полноценного интернет-магазина, хотя первые CRUD/таблицы делать дольше, чем примитивную кнопку купить в статье.
+## Актуальная архитектура
+- **Один самостоятельный `com_minimarket`**, собственные категории, товары, комплекты и собственные защищённые заказы. Никакого магазина на материалах Joomla, `plg_content_minimarket_articles` и второго каталога. Полная спецификация в `docs/COMPONENT_ARCHITECTURE.md`.
+- Товары/категории с плоскими alias-ID URL, SEO-фильтр, ручные SEO-лендинги, Product/Offer Schema.org, GA4 dataLayer, доставка/оплата, телефон/ID авторизация и уведомления остаются обязательными на дальнейших этапах.
+- Локальная Joomla 6 установлена и работает по словам пользователя: `C:\OSPanel\home\minimarket.local\public_html`, `http://minimarket.local/`, SEF включён. Она только тестовый стенд, не источник кода.
 
-**УСТАРЕЛИ:** `docs/VARIANTS_PROPOSAL.md` и `docs/EXTENSIONS_ARCHITECTURE.md` (история). **АКТУАЛЬНО:** `docs/COMPONENT_ARCHITECTURE.md`. Не создавать `plg_content_minimarket_articles` или `com_minimarket_catalog`, не дублировать торговые сервисы. Не нужно никаких template-specific торговых плагинов для Helix Ultimate; у нашего компонента свои Joomla MVC views/layouts. Дополнительные модули/интеграции SP Page Builder — только по необходимости.
+## M0 исходники опубликованы на GitHub
+- Создан **настоящий исходный компонент версии `0.1.0`** в `src/com_minimarket/`: Joomla XML manifest, админ/сайт MVC контроллеры/представления, provider DI, ru/en переводы, admin Options `catalog_title`, тип пункта меню каталога. Пока **нет БД, товарного CRUD, корзины и оплаты**.
+- Добавлен `scripts/build.ps1` для сборки архива `dist/com_minimarket.zip` из `src` с проверками manifest/внутренних путей. `.gitignore` уже исключает `dist/`.
+- Проверено через GitHub чтение: **все 17 исходных файлов/скрипт присутствуют**, namespace/manifest и опорные пути соответствуют ожидаемым. **Не проверены** фактический запуск Windows PowerShell, PHP на установленной Joomla, установка ZIP и админский интерфейс. Не заявлять PASS до локального теста. Исходники опубликованы коммитом `3e3c36de21238baf2785559d749515aedf7666cc`.
 
-## Условия
-- Локальная Joomla 6 установлена и работает, SEF настроен пользователем, адрес `http://minimarket.local/`, каталог `C:\OSPanel\home\minimarket.local\public_html`.
-- Исходный код только в GitHub `src/`, собранный ZIP устанавливаем стандартным Joomla Installer; работающую Joomla, БД/PII и configuration.php не коммитить и не редактировать ядро. Хостинг Apache/PHP/MySQL, без Docker.
-- Сохраняются все согласованные правила: SEO-фильтр/ручные лендинги, Product/Offer Schema.org, dataLayer/ecommerce, Joomla auth с phone/ID, checkout, server-side price validation, заказы в своих таблицах, доставка, YooKassa, уведомления и минимальные отчёты.
-
-## Единственный следующий шаг — M0
-1. Создать **реально устанавливаемый Joomla 6 `com_minimarket`** с XML-манифестом, admin меню и простой страницей/параметрами, site view.
-2. Реализовать `scripts/build.ps1` для ZIP в локальном `dist/` (игнорировать в Git), проверить сборку и установку на локальной Joomla, затем повторную установку/обновление без потери данных. Пока **НЕТ рабочего компонента/ZIP**, только `src/com_minimarket/README.md`.
-3. M1: собственные таблицы категорий и товаров, админка в штатном стиле Joomla и frontend views/flat SEO routing. Не начинать с ненужных плагинов.
-4. Далее безопасные вертикальные срезы SEO/filter/cart/orders/payment, тест на чистом Joomla экземпляре, Helix и другом шаблоне.
+## Единственный следующий шаг — локальная сборка и установка
+1. Пользователь в PowerShell: `Set-Location 'C:\OSPanel\home\minimarket.local'`, `git pull --ff-only origin development`, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1`. Если есть незакоммиченные локальные изменения, сначала проверить `git status --short`; не делать force/reset.
+2. Убедиться, что создан `C:\OSPanel\home\minimarket.local\dist\com_minimarket.zip`. Никакой ручной копии в `public_html`.
+3. Joomla admin → Система → Установка → Расширения → Загрузка файла пакета, выбрать этот ZIP. После установки «Компоненты → MiniMarket»; проверить «Настройки» — поле заголовка каталога. Сайт: `http://minimarket.local/index.php?option=com_minimarket` должен показать заголовок и временное описание. Не делать публичный menu item, пока нет каталога; можно проверить прямой URL.
+4. При ошибке — показать текст ошибки Joomla или короткий результат сборки (без паролей/секретов). После фактического PASS зафиксировать в GitHub logs/validation, затем M1 CRUD категорий/товаров.
 
 ## Безопасность
-`main` не трогать, Shop/Bidder не трогать. Не менять работающую Joomla вручную как источник правок. Не создавать миграции с удалением живых заказов/данных. Все логи/отчеты в GitHub по утверждённым правилам, без секретов.
+Никогда не менять Joomla Core или `public_html` через Git напрямую. Не коммитить `.env`, CMS файлы, БД/PII, `configuration.php`; не трогать `main`, чужие проекты и существующие данные. Не называть M0 «установленным», пока пользователь не проверил.
