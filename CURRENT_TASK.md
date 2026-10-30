@@ -1,20 +1,27 @@
 # CURRENT_TASK — MiniMarket
-Актуально: 2026-10-30. Только `komarovblog/minimarket`, ветка `development`; main и отдельный проект Shop не трогать.
+Обновлено: 2026-10-30. Только `komarovblog/minimarket`, `development`; не трогать main или Shop/Symfony.
 
-## Подтверждено
-- Пользователь установил чистую Joomla 6 в `C:\OSPanel\home\minimarket.local\public_html` (со слов пользователя), база `minimarket`; проверка открытой админки ещё НЕ подтверждена скрином/тестом.
-- Нужно два варианта: **Articles** (Joomla categories/articles/custom fields, штатные Joomla SEF, template overrides) и **Catalog** (собственные категории/товары/комплекты, плоский alias-ID URL). Общие торговые сервисы, SEO-фильтр в обоих.
-- Пользователь спросил, хранить ли заказы как **неопубликованные материалы закрытой категории `Orders`**. По совокупной сложности рекомендована **одна защищённая модель заказов в собственных `#__minimarket_*` таблицах для обоих вариантов** и привычная Joomla Atum админка. Материалы Orders не создаём; персональные данные не помещаем в `#__content`. Отдельная техническая схема и тесты перед кодом.
-- Пользователь потребовал **выбирать в настройках, какие Joomla категории содержат товары**, чтобы остальные статьи оставались статьями. Вариант Articles классифицирует по category ID (с опцией вложенных категорий), использует только опубликованные доступные материалы и проверяет цену/остаток на сервере.
-- **Schema.org:** страницы товаров `Product` + `Offer` без дублирующей `Article`; категории/SEO-лендинги `CollectionPage`/`ItemList` + breadcrumbs; обычные статьи `Article`/`BlogPosting`. Не дублировать данные штатного Joomla Schema plugin.
-- **Электронная торговля через `dataLayer`** в обоих вариантах и общих checkout/order сервисах: GA4 ecommerce events от списков и карточек до корзины, checkout, `purchase` и `refund` (по подтверждённым событиям, без дублей и без персональных данных). SEO-фильтр в обоих, A — штатный Joomla SEF, B — плоские URL с ID.
-- Детальная архитектура и открытые технические вопросы: `docs/VARIANTS_PROPOSAL.md` (обновлён). Это фиксация проекта, не реализация расширений.
+## Что завершено
+- Пользователь сообщил, что **чистая Joomla 6 развернута и всё работает** по адресу `http://minimarket.local/` в `C:\OSPanel\home\minimarket.local\public_html` (Open Server Panel 6.5.1, Apache/PHP 8.5, MySQL 8.0).
+- Принята архитектура **MiniMarket Articles** (товары = материалы выбранных товарных категорий Joomla, категории/поля Joomla, штатные URL), затем **MiniMarket Catalog** (собственные таблицы товаров/категорий, плоские URL с ID).
+- Общие безопасные таблицы заказов в двух версиях, общие корзина/checkout/платежи/auth, SEO-фильтр, Schema.org и dataLayer. Подробности `docs/VARIANTS_PROPOSAL.md`.
+- Ядро Joomla, `public_html`, медиаданные, БД и секреты не попадают в GitHub; в `development` храним только наши исходники и инструкции.
 
-## Следующее исполняемое действие
-1. Подтвердить открытие `http://minimarket.local/` и `http://minimarket.local/administrator/`, версию Joomla 6/PHP 8.5 и стандартные системные категории, **не менять ядро**.
-2. Первый небольшой ZIP-прототип Articles: настройки выбора товарных категорий Joomla, простая группа полей для товаров (SKU/price/availability), безопасный вывод товара и категории, работающий на опубликованной Joomla.
-3. Затем Product/Offer JSON-LD (без дубля Article), общий минимальный dataLayer `view_item` и `view_item_list` / события кнопки add_to_cart, тест штатных URL, настройка SEO-фильтра. Не подключать реальную YooKassa/отправлять уведомления до согласования и тестов.
-4. Затем общая корзина и транзакционные заказы с безопасным UI; B — позже, переиспользуя общие сервисы и тесты.
+## Текущий ОДИН шаг — включить правильный Joomla 6 SEF
+Подготовлена инструкция `docs/JOOMLA_SEO_BASELINE.md`. Пользователь предложил сперва настроить SEF/устранение дублей — логично сделать **до создания товарных категорий и карточек**.
 
-## Правила
-Разработка только в GitHub `development` → ZIP → штатная Joomla installation. Joomla core, локальную БД, `configuration.php`, заказы/PII и секреты никогда не коммитить. Первая версия не должна превращать обычные Joomla articles в товары или регистрировать дублирующий schema/dataLayer. Не создавать `Orders` article category. Другие проекты не трогать.
+Сейчас сделать **только раздел A**:
+1. Проводник: `C:\OSPanel\home\minimarket.local\public_html`: если `.htaccess` уже существует, не перезаписывать; иначе переименовать оригинальный Joomla `htaccess.txt` → `.htaccess`. Не трогать чужие проекты.
+2. Joomla admin → System → Global Configuration → Site → SEO: `Search Engine Friendly URLs = Yes`, `Use URL Rewriting = Yes`, `Add Suffix to URL = No`, `Unicode Aliases = No`.
+3. Сохранить, проверить `http://minimarket.local/` и `http://minimarket.local/administrator/`. При ошибке 404/500 остановиться и сообщить её; не менять Apache/DB/Joomla core наугад.
+
+**Не включать Strict Routing до теста реального content URL**. Не задавать `minimarket.local` как постоянный canonical-домен будущего хостинга. `Force HTTPS` локально без доверенного сертификата не включать. Фактическое выполнение настроек пока **не подтверждено**.
+
+## После подтверждения
+- Настройки статей: `Content → Articles → Options → Integration → Routing → Remove IDs from URLs = Yes`.
+- `System - SEF` и возможную strict routing проверить на реальных товарах и категориях, 301/404/canonical.
+- Подготовить первую маленькую устанавливаемую версию MiniMarket Articles (выбор категорий Joomla как товарных, Custom Fields SKU/price, безопасный вывод, тест стандартных URL).
+- Потом schema/dataLayer, SEO-фильтр, общая корзина/заказы. Для Catalog B — собственный маршрутизатор с ID.
+
+## Ограничения
+Не выдавать установленные локальные настройки Joomla за изменённые через GitHub. Не публиковать Joomla Core, конфиги, данные или пароли; не трогать main, другие проекты и базы. Не переписывать чужой `.htaccess` без проверки.

@@ -140,3 +140,10 @@
 - [x] Schema.org: `Product`/`Offer` на товаре (A/B), `CollectionPage`/`ItemList` на категории/SEO-лендинге (A/B), `BreadcrumbList`, обычные `Article` без дублирующей торговой разметки. Учесть штатный Joomla Schema plugin; валидация Rich Results Test.
 - [x] В обоих вариантах обязательна **единая электронная торговля через `dataLayer`** (GA4-совместимые события, `purchase` один раз для подтверждённого заказа, никакой PII, уважение cookie/consent).
 - [ ] Проверить чистую Joomla 6 и спроектировать минимальную версию Articles: выбор категорий, отдельная группа полей и переопределения, затем рабочие Product JSON-LD / dataLayer. Реальный ZIP и smoke-тест ещё не выполнены.
+
+## 1d. Базовая настройка Joomla SEF до MiniMarket Articles — 30.10.2026
+- [x] Пользователь подтвердил, что локальная Joomla развернута и работает; предложил настроить SEF для предотвращения дублей перед созданием товаров.
+- [x] Создано `docs/JOOMLA_SEO_BASELINE.md`: последовательная настройка `.htaccess`, Global SEO, маршрутов com_content, System-SEF и тестов canonical/301, без SEO-расширений и правок ядра.
+- [ ] **Сейчас:** проверить `public_html/.htaccess` либо переименовать штатный `htaccess.txt`; затем Joomla Global SEO: SEF Yes, URL Rewriting Yes, suffix No, Unicode aliases No. Подтвердить сайт + админку.
+- [ ] **Далее:** Articles Options → Integration → Remove IDs Yes; меню товарных категорий и один основной URL, затем тестовый content, редиректы/index.php/trailing slash и доступный System-SEF Strict Routing только после проверки.
+- [ ] **Затем:** первый функциональный ZIP MiniMarket Articles (настройка категорий Joomla и поля товаров), Schema.org Product vs Article, dataLayer, SEO-фильтр, единая корзина.
