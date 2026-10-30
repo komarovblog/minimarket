@@ -66,3 +66,6 @@
 
 ## Актуальное переименование веб-каталога — 30.10.2026
 **Всегда используем `public_html`, не `public`.** Ветка `development` теперь содержит `.osp/project.ini` с `web_root = {base_dir}\public_html`, каталог `public_html/.gitkeep`, а `scripts/setup-local.ps1` создаёт проверочный индекс только в `public_html`. Старые `public` и `WebProjects` в историческом контексте не являются указанием к действию. Фактическая рабочая папка `C:\OSPanel\home\minimarket.local`. Joomla устанавливается внутрь `public_html`, собственный код расширения в `src`. Старую локальную папку `public` **не удалять автоматически**. См. `CURRENT_TASK.md` и `docs/STRUCTURE.md`.
+
+## Единственный актуальный процесс 30.10.2026
+**Сначала GitHub-каркас → отдельная база MySQL → оригинальная Joomla 6 в `public_html` → разработка расширения в `src`/GitHub → штатная ZIP-установка в Joomla → тесты.** Никакого обратного push всей установленной Joomla/БД в GitHub. Старый `scripts/setup-local.ps1` удалён: не создавать временный `index.php` перед установкой настоящей Joomla. Ранние хронологические указания про запуск этого скрипта считать отменёнными. Только `C:\OSPanel\home\minimarket.local`, ветка `development`, Shop не трогать. Один текущий шаг всегда в `CURRENT_TASK.md`. 

@@ -97,3 +97,10 @@
 - [x] Старая локальная `public` дополнительно исключена из Git во избежание публикации возможных файлов Joomla после обновления.
 - [ ] На ПК получить `development` в `C:\OSPanel\home\minimarket.local` (clone в пустую папку / fast-forward pull в чистый существующий клон) и проверить временный `public_html/index.php` через HTTP/PHP. Старые `public` и `WebProjects` не удалять без резервной копии.
 - [ ] Затем установить оригинальную Joomla 6 в `public_html` и подготовить БД `minimarket`. Старые разделы `PLAN` с каталогом `public` — исторические записи, не текущие команды.
+
+## 0e. Зафиксирован сквозной процесс GitHub → Joomla → расширение (30.10.2026)
+- [x] Подтверждена окончательная схема: структура MiniMarket в GitHub `development`, затем отдельная БД MySQL, оригинальная Joomla в `public_html`, затем исходники `src/com_minimarket` → ZIP → Joomla. Не коммитить ядро Joomla/сайт/БД обратно в Git.
+- [x] Удалён устаревший `scripts/setup-local.ps1` для временного `index.php` — теперь сразу штатная установка Joomla, без тестовой заглушки. Прежние пункты плана про выполнение этого скрипта — исторические, отменены.
+- [ ] Проверить, пустая ли новая локальная `C:\OSPanel\home\minimarket.local`, и выполнить clone либо безопасный fast-forward pull из `development`.
+- [ ] Через phpMyAdmin создать БД `minimarket` и своего пользователя; установить Joomla 6 в `public_html` и проверить админку (PHP 8.5 фактически).
+- [ ] Реализовать минимальный `com_minimarket`, ZIP-сборку и подтвердить end-to-end обновление в установленной Joomla.

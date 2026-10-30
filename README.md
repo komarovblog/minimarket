@@ -1,53 +1,39 @@
-# MiniMarket — компонент магазина для Joomla 6
+# MiniMarket — компонент интернет-магазина для Joomla 6
 
-Репозиторий: `komarovblog/minimarket`. Рабочая ветка: **`development`**. Проект Shop на Symfony — отдельный репозиторий; не читать и не изменять.
+Репозиторий: **`komarovblog/minimarket`**, рабочая ветка: **`development`**. Проект Shop/Symfony ведётся отдельно и не затрагивается.
 
-## Структура
+## Основной принцип
+
+**GitHub хранит исходники НАШЕГО расширения, документацию, конфигурацию локального проекта и скрипты сборки.** Официальное ядро Joomla 6, установленная копия расширений, медиа сайта и база данных **не коммитятся в Git**.
+
+Всё, что исполняет сайт, находится в `public_html`; папка `src` — редактируемые исходники расширения (ещё не готово). Не редактировать установленные копии в Joomla как источник кода, не менять Joomla core.
+
+## Актуальный локальный путь
 
 ```text
 C:\OSPanel\home\minimarket.local\
-├── .git\                     GitHub, только разработка
-├── .osp\project.ini          Конфигурация Open Server Panel 6.5.1
-├── public_html\             ВЕСЬ РАБОТАЮЩИЙ САЙТ Joomla 6
-│   ├── index.php             Файл Joomla после её установки
-│   ├── administrator\        Админка Joomla и установленный MiniMarket
-│   ├── components\           Публичная часть установленного MiniMarket
-│   ├── modules\
-│   ├── plugins\
-│   ├── media\
-│   └── templates\
-├── src\com_minimarket\       Исходники расширения, храним в GitHub
-├── scripts\                 Локальная сборка / проверки
-└── docs\                    Документация
+├── .git\                    GitHub, только исходники разработчика
+├── .osp\project.ini         Open Server 6.5.1; web_root = {base_dir}\public_html
+├── public_html\            ВЕСЬ работающий сайт Joomla (после её установки)
+│   └── .gitkeep             В Git только метка пустого каталога
+├── src\com_minimarket\     Наши исходники; пока только README
+├── scripts\                Будущие скрипты сборки, пока только README
+├── docs\                   Требования и план
+├── NEW_AGENT.md
+└── CURRENT_TASK.md
 ```
 
-На обычном хостинге веб-корень также называется **`public_html`**. На нём должны находиться файлы Joomla и **установленные** расширения, но не `.git`, `src`, `docs`, `scripts`, `.osp`.
+**После установки Joomla** внутри `public_html` будут её `index.php`, `administrator`, `components`, `modules`, `plugins`, `media` и другие официальные файлы. Они не отслеживаются Git. На хостинге сайт также располагается в `public_html`.
 
-В Git отслеживается пустой каталог `public_html/.gitkeep`, но сама Joomla, её файлы, медиа/данные и `configuration.php` в Git **не добавляются**. Разрабатываем исходники `src`, собираем Joomla-совместимый ZIP, устанавливаем и обновляем через штатный менеджер расширений. **Ядро Joomla не модифицируем**.
+## Единственный порядок работы
 
-Подробная схема: [docs/STRUCTURE.md](docs/STRUCTURE.md).
+1. **Получить каркас** из GitHub в `C:\OSPanel\home\minimarket.local`: если папка пуста — `git clone`, если MiniMarket уже клонирован — безопасный `git pull --ff-only`. Не копировать из старого `WebProjects` и не перезаписывать посторонние файлы.
+2. **Подготовить MySQL 8.0:** через phpMyAdmin создать отдельную БД `minimarket` и отдельного пользователя с правами только на неё; пароль не публиковать.
+3. **Установить чистую Joomla 6 Full Package непосредственно в `public_html`**, пройти штатный установщик, проверить админку и PHP. Для PHP 8.5 совместимость проверяется фактически, Joomla 6 официально рекомендует 8.4.
+4. **Разрабатывать расширение** в `src/com_minimarket` и коммитить его исходники в `development`. Затем собирать ZIP-пакет и устанавливать или обновлять через штатный менеджер Joomla; в `public_html` Joomla размещает установленные файлы автоматически.
+5. **Повторять:** GitHub commit → локальный fast-forward pull → сборка ZIP → установка в Joomla → тест → исправление/новый коммит. Позже автоматизировать командой сборку и тесты, только после проверки работы простого процесса.
+6. **Перенос на хостинг:** оригинальная Joomla/установленные расширения в `public_html`, БД переносится отдельно; в `public_html` не отправлять `.git`, `src`, `scripts`, `docs`, `.osp`. Обновления компонента — Joomla ZIP, без патчей ядра.
 
-## Локальный запуск (Open Server Panel 6.5.1, Windows 11)
+Не выполняем обратную выгрузку всего установленного Joomla-сайта в GitHub. База данных и секреты там тоже не хранятся. Изменения исходников можно делать как через GitHub в чате, так и в локальном редакторе, но перед push проверяем статус и направление синхронизации. Автоматическая доставка логов Windows → GitHub ещё не подтверждена.
 
-Каталог `WebProjects` больше не используется. Правильный путь: `C:\OSPanel\home\minimarket.local`. В `.osp/project.ini` задано `web_root = {base_dir}\public_html`, Apache и PHP 8.5, локальный HTTP.
-
-Если папка проекта ещё не является Git-клоном и **полностью пустая**, выполнить в CMD:
-```cmd
-git clone --branch development --single-branch https://github.com/komarovblog/minimarket.git "C:\OSPanel\home\minimarket.local"
-```
-
-Если репозиторий **уже клонирован**, вместо clone безопасно обновить `development` (при чистой рабочей папке):
-```cmd
-git -C "C:\OSPanel\home\minimarket.local" pull --ff-only origin development
-```
-
-Если папка существует, но она не пуста и не является Git-клоном, **остановиться** — ничего не перезаписывать. Старый проект `WebProjects` не удалять.
-
-Для первоначальной проверки Open Server до установки Joomla можно запустить скрипт, который создаёт **только при отсутствии** временный `public_html/index.php` с текстом `MINIMARKET_BOOTSTRAP_OK`:
-```cmd
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\setup-local.ps1"
-```
-
-Затем перезапустить профиль Open Server и открыть `http://minimarket.local/`. После проверки **вместо тестового `index.php` должен быть установлен оригинальный `index.php` Joomla 6** из официального Full Package; не хранить или редактировать копии ядра в Git.
-
-После чистой установки Joomla понадобится отдельная MySQL-база `minimarket`; компонент использует ту же БД через штатные API Joomla. Следующий шаг: [CURRENT_TASK.md](CURRENT_TASK.md).
+**Первое действие:** [CURRENT_TASK.md](CURRENT_TASK.md). Полная схема: [docs/STRUCTURE.md](docs/STRUCTURE.md).

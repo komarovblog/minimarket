@@ -1,41 +1,33 @@
 # CURRENT_TASK — MiniMarket
+Актуально: 2026-10-30. Только `komarovblog/minimarket`, ветка `development`. Проект Shop/Symfony не читать, не менять.
 
-Обновлено: 2026-10-30. Только репозиторий `komarovblog/minimarket` (ветка `development`). **Shop/Symfony не трогать.**
+## Согласованный процесс
+1. GitHub содержит каркас собственного расширения, `.osp/project.ini`, документацию, `src`, `scripts` и пустой `public_html`.
+2. На Windows в `C:\OSPanel\home\minimarket.local` получаем этот каркас (clone или fast-forward pull).
+3. В phpMyAdmin создаём отдельную MySQL БД `minimarket` и пользователя.
+4. Скачиваем оригинальный Joomla 6 Full Package и устанавливаем в `public_html` через штатный установщик.
+5. Только после запуска админки Joomla пишем `com_minimarket` в `src`, публикуем в GitHub, собираем ZIP и устанавливаем/обновляем в локальной Joomla.
+6. GitHub хранит **исходники MiniMarket, не установленную Joomla и не БД**; ZIP Joomla устанавливает файлы расширения в рабочий сайт.
 
-## Последнее согласованное решение
-С 30.10.2026 единственный веб-корень называется **`public_html`** и локально, и на хостинге.
+**Прежний `scripts/setup-local.ps1` для временного PHP `index.php` удалён как лишний шаг**, т.к. теперь сразу устанавливаем официальную Joomla. Не запускать скрипт из старого чата/клона. В текущем GitHub `public_html` содержит только `.gitkeep` до установки Joomla. Если на ПК уже есть временный `public_html/index.php` от старого скрипта, не перезаписывать вслепую: сначала проверить, что это не часть уже установленной Joomla.
 
-- Рабочая папка: `C:\OSPanel\home\minimarket.local`.
-- Веб-корень: `C:\OSPanel\home\minimarket.local\public_html`.
-- `.osp/project.ini`: `web_root = {base_dir}\public_html`.
-- В GitHub есть `public_html/.gitkeep`. Прежний `public/.gitkeep` удалён из новой версии ветки.
-- `scripts/setup-local.ps1` создаёт проверочный временный `public_html/index.php`, **только если файла ещё нет**.
-- `src/com_minimarket` — исходники; работающая Joomla и установленный MiniMarket живут в `public_html`.
-- Joomla и база данных `minimarket` пока **не установлены** и не подтверждены.
-
-Предыдущие указания, где веб-корень называется `public` или фигурирует `WebProjects`, **устарели**. Старые каталоги не удалять автоматически.
-
-## Текущий ОДИН шаг — получить новую структуру из GitHub
-Пользователь сообщил, что **создал папку вручную** в стандартном `C:\OSPanel\home`, но **не подтвердил выполнение** предыдущей команды `git clone`.
-
-Если `C:\OSPanel\home\minimarket.local` **пустая**, в CMD:
+## Текущий ОДИН шаг — проверить состояние новой локальной папки
+Пользователь сообщил, что вручную создал `C:\OSPanel\home\minimarket.local`, но **не подтвердил успешный git clone**. В CMD Open Server проверить:
+```cmd
+dir /a "C:\OSPanel\home\minimarket.local"
+```
+- Если папка **пуста**, получить структуру:
 ```cmd
 git clone --branch development --single-branch https://github.com/komarovblog/minimarket.git "C:\OSPanel\home\minimarket.local"
 ```
-
-Если в этой папке **уже есть `.git` и клонирован MiniMarket на `development`**, при чистых локальных изменениях выполнить:
+- Если папка **уже содержит `.git` именно репозитория MiniMarket**, проверить рабочую ветку, origin и отсутствие конфликтующих изменений, затем:
 ```cmd
 git -C "C:\OSPanel\home\minimarket.local" pull --ff-only origin development
 ```
+- Если папка непустая, но не содержит `.git` — **не клонировать поверх и не удалять ничего без осмотра**.
 
-Если папка непустая, но не является Git-репозиторием — не перезаписывать. Не удалять существующий старый `public`, `public_html` или скрытые файлы. Git-pull не заменяет локальную конфигурацию с секретами.
+### После подтверждения clone/pull
+Отдельная БД MySQL через phpMyAdmin → оригинальный Joomla 6 Full Package непосредственно в `public_html` → штатная установка Joomla и проверка админки → разработка `src/com_minimarket` с установкой через ZIP.
 
-## После успешного clone/pull
-1. Запустить `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\setup-local.ps1"`. Ожидаем `LOCAL_MINIMARKET_INDEX_CREATED` или `INDEX_ALREADY_EXISTS_NOT_MODIFIED`.
-2. Перезапустить профиль OSP для `minimarket.local`, включить Apache + PHP 8.5 и проверить `curl.exe -4 --noproxy "*" --max-time 10 http://minimarket.local/`. Ожидаем `MINIMARKET_BOOTSTRAP_OK` и версию PHP.
-3. Подключиться к MySQL 8.0 через phpMyAdmin, создать отдельную БД `minimarket` и локального пользователя.
-4. Скачать оригинальный Joomla 6 Full Package и распаковать **непосредственно в `public_html`**, заменив лишь временный `index.php` на оригинальный из Joomla (не затронуть другие проекты).
-5. После установки/проверки Joomla разрабатывать `src/com_minimarket` и выпускать штатный ZIP Joomla.
-
-## Ограничения
-`main` не трогать. Репозиторий Shop не читать и не менять. Старый `WebProjects` не трогать. Никаких `reset --hard`, force push, удаления локальных файлов без резервной копии или ручных патчей ядра Joomla. Автоматические Windows → GitHub-логи пока не подтверждены.
+## Правила безопасности
+Не коммитить Joomla core, `public_html` (кроме `.gitkeep`), дампы БД, `configuration.php`, `.env`, пароли. Не менять файлы системной Joomla вручную. `main` не трогать. Не удалять старые локальные файлы без бэкапа. Никаких `git reset --hard`, force push, удаления чужих сайтов/репозиториев. Логи Windows → GitHub пока не проверены.
