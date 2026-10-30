@@ -1,58 +1,53 @@
-# MiniMarket — расширение интернет-магазина для Joomla 6
+# MiniMarket — компонент магазина для Joomla 6
 
-**GitHub:** `komarovblog/minimarket`, рабочая ветка `development` (не затрагивать `main`). Проект Shop на Symfony совершенно отдельный.
+Репозиторий: `komarovblog/minimarket`. Рабочая ветка: **`development`**. Проект Shop на Symfony — отдельный репозиторий; не читать и не изменять.
 
-## Где находится сайт
-
-**ВЕСЬ РАБОТАЮЩИЙ САЙТ лежит в `public`**, включая Joomla, `administrator`, `components`, `modules`, `plugins`, `templates` и медиа. Локальная папка `MiniMarket/public` — аналог `public_html` на хостинге: при переносе в `public_html` попадает **содержимое** `public`, а не `public` как вложенная папка.
-
-При этом GitHub — это репозиторий **разработки расширения**, поэтому `.git`, `src`, `scripts`, `docs` и `.osp` находятся на уровень выше `public` и не доступны через веб-сервер. Joomla Core в GitHub **не коммитим**, никогда не редактируем системные файлы Joomla.
-
-Полная схема локального проекта, установленной Joomla и хостинга: **[docs/STRUCTURE.md](docs/STRUCTURE.md)**.
-
-## Что есть в GitHub до установки Joomla
+## Структура
 
 ```text
-MiniMarket/
-├── .osp/project.ini          # Open Server Panel 6.5.1, Apache, PHP 8.5, HTTP
-├── public/.gitkeep           # Веб-корень (Joomla будет установлена сюда)
-├── src/com_minimarket/       # Исходный код собственного расширения (пока только описание)
-├── scripts/setup-local.ps1   # Локальная временная проверочная PHP-страница
-├── docs/                     # Требования, структура, план
-├── NEW_AGENT.md
-└── CURRENT_TASK.md
+C:\OSPanel\home\minimarket.local\
+├── .git\                     GitHub, только разработка
+├── .osp\project.ini          Конфигурация Open Server Panel 6.5.1
+├── public_html\             ВЕСЬ РАБОТАЮЩИЙ САЙТ Joomla 6
+│   ├── index.php             Файл Joomla после её установки
+│   ├── administrator\        Админка Joomla и установленный MiniMarket
+│   ├── components\           Публичная часть установленного MiniMarket
+│   ├── modules\
+│   ├── plugins\
+│   ├── media\
+│   └── templates\
+├── src\com_minimarket\       Исходники расширения, храним в GitHub
+├── scripts\                 Локальная сборка / проверки
+└── docs\                    Документация
 ```
 
-## Подготовка на Windows 11 / Open Server Panel 6.5.1
+На обычном хостинге веб-корень также называется **`public_html`**. На нём должны находиться файлы Joomla и **установленные** расширения, но не `.git`, `src`, `docs`, `scripts`, `.osp`.
 
-**Актуальное размещение (30.10.2026):** стандартный каталог Open Server Panel 6.5.1:
+В Git отслеживается пустой каталог `public_html/.gitkeep`, но сама Joomla, её файлы, медиа/данные и `configuration.php` в Git **не добавляются**. Разрабатываем исходники `src`, собираем Joomla-совместимый ZIP, устанавливаем и обновляем через штатный менеджер расширений. **Ядро Joomla не модифицируем**.
 
-```text
-C:\OSPanel\home\minimarket.local
-```
+Подробная схема: [docs/STRUCTURE.md](docs/STRUCTURE.md).
 
-Домен проекта и имя директории одинаковые, поэтому Open Server обнаружит проект в `home`. Каталог `C:\Users\User\Desktop\WebProjects` **удалён пользователем из путей поиска проектов OSP и более не используется**. Старый клон оставляем нетронутым как временную резервную копию: **его не нужно переносить/удалять, чтобы создать новый клон в другом каталоге**.
+## Локальный запуск (Open Server Panel 6.5.1, Windows 11)
 
-В консоли Open Server (CMD) **только если каталога `C:\OSPanel\home\minimarket.local` ещё нет**:
+Каталог `WebProjects` больше не используется. Правильный путь: `C:\OSPanel\home\minimarket.local`. В `.osp/project.ini` задано `web_root = {base_dir}\public_html`, Apache и PHP 8.5, локальный HTTP.
 
+Если папка проекта ещё не является Git-клоном и **полностью пустая**, выполнить в CMD:
 ```cmd
 git clone --branch development --single-branch https://github.com/komarovblog/minimarket.git "C:\OSPanel\home\minimarket.local"
 ```
 
-Если директория уже существует, не выполнять clone поверх неё, не удалять её и сначала выяснить содержимое.
+Если репозиторий **уже клонирован**, вместо clone безопасно обновить `development` (при чистой рабочей папке):
+```cmd
+git -C "C:\OSPanel\home\minimarket.local" pull --ff-only origin development
+```
 
-После успешного клонирования запустить:
+Если папка существует, но она не пуста и не является Git-клоном, **остановиться** — ничего не перезаписывать. Старый проект `WebProjects` не удалять.
 
+Для первоначальной проверки Open Server до установки Joomla можно запустить скрипт, который создаёт **только при отсутствии** временный `public_html/index.php` с текстом `MINIMARKET_BOOTSTRAP_OK`:
 ```cmd
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\setup-local.ps1"
 ```
 
-Скрипт, если `index.php` не существует, создаст одноразовую локальную проверочную страницу `public/index.php` (в Git не попадает). Затем перезапустить OSP, включить модули **только** MiniMarket (Apache + PHP 8.5) и проверить:
+Затем перезапустить профиль Open Server и открыть `http://minimarket.local/`. После проверки **вместо тестового `index.php` должен быть установлен оригинальный `index.php` Joomla 6** из официального Full Package; не хранить или редактировать копии ядра в Git.
 
-```cmd
-curl.exe -4 --noproxy "*" --max-time 10 http://minimarket.local/
-```
-
-Ожидается `MINIMARKET_BOOTSTRAP_OK` и `PHP_VERSION=8.5.*`. Затем создать БД `minimarket` через phpMyAdmin, установить официальный Joomla 6 Full Package непосредственно в `public` (временный `index.php` заменяется штатным оригинальным), и начать установку своего пакета MiniMarket. `public` равен будущему `public_html` по содержимому.
-
-Текущий один шаг: [CURRENT_TASK.md](CURRENT_TASK.md).
+После чистой установки Joomla понадобится отдельная MySQL-база `minimarket`; компонент использует ту же БД через штатные API Joomla. Следующий шаг: [CURRENT_TASK.md](CURRENT_TASK.md).

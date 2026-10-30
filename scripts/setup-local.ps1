@@ -26,12 +26,12 @@ if (-not (Test-Path -LiteralPath $profile -PathType Leaf)) {
     throw 'MINIMARKET_OSP_PROJECT_CONFIG_MISSING'
 }
 
-$public = Join-Path $root 'public'
-if (-not (Test-Path -LiteralPath $public -PathType Container)) {
-    [void](New-Item -ItemType Directory -Path $public)
+$public_html = Join-Path $root 'public_html'
+if (-not (Test-Path -LiteralPath $public_html -PathType Container)) {
+    [void](New-Item -ItemType Directory -Path $public_html)
 }
 
-$index = Join-Path $public 'index.php'
+$index = Join-Path $public_html 'index.php'
 if (Test-Path -LiteralPath $index) {
     Write-Output 'INDEX_ALREADY_EXISTS_NOT_MODIFIED'
     exit 0

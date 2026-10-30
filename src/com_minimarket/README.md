@@ -5,8 +5,8 @@
 Этот каталог **не находится в web_root** и не должен обслуживаться Apache напрямую.
 
 После сборки Joomla-совместимого ZIP и штатной установки исполняемые части появятся в:
-- `public/components/com_minimarket/` — сайт магазина;
-- `public/administrator/components/com_minimarket/` — административный интерфейс;
-- `public/media/com_minimarket/` — ресурсы, если потребуются.
+- `public_html/components/com_minimarket/` — сайт магазина;
+- `public_html/administrator/components/com_minimarket/` — административный интерфейс;
+- `public_html/media/com_minimarket/` — ресурсы, если потребуются.
 
 Изменения в исходниках — в GitHub `development`. Установленные копии входят в рабочую Joomla и не попадают в репозиторий, как и ядро CMS. Дополнительные модули/плагины создаём только по необходимости.

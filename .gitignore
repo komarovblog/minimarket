@@ -9,8 +9,11 @@ configuration.php
 !/.osp/project.ini
 
 # Joomla 6 is installed only locally. Keep the directory in Git, not CMS files.
-/public/*
-!/public/.gitkeep
+/public_html/*
+!/public_html/.gitkeep
+
+# Old local webroot (before renaming). Never accidentally track Joomla files there.
+/public/
 
 # Local build outputs / runtime / backups
 /vendor/

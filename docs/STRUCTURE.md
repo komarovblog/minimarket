@@ -1,93 +1,72 @@
-# Структура MiniMarket: Joomla, исходники и хостинг
+# Структура MiniMarket: Open Server, Joomla и хостинг
 
-Актуально: 2026-10-29. Только репозиторий `komarovblog/minimarket`, ветка `development`. Shop на Symfony — независимый проект.
+Актуально: 2026-10-30. Только `komarovblog/minimarket`, ветка `development`. Shop/Symfony — другой проект.
 
-## Актуальный путь в Open Server Panel 6.5.1
+## Одно имя веб-каталога везде: `public_html`
 
-**С 30.10.2026 используется только стандартный каталог OSP `C:\OSPanel\home`.**
-Рабочий Git-клон и проект: `C:\OSPanel\home\minimarket.local`; веб-корень `C:\OSPanel\home\minimarket.local\public`; домен `http://minimarket.local`. Владелец проекта MiniMarket — `komarovblog/minimarket`, ветка `development`. Предыдущее размещение в `C:\Users\User\Desktop\WebProjects\MiniMarket` устарело; прежнюю папку не удалять автоматически, так как в ней могут быть локальные файлы. OSP больше не ищет там проекты.
+Локальный корень проекта: `C:\OSPanel\home\minimarket.local`.
 
-## Главный принцип
+Open Server Panel 6.5.1:
+```ini
+[minimarket.local]
+http_engine = Apache
+php_engine = PHP-8.5
+web_root = {base_dir}\public_html
+tls_enabled = off
+base_url = http://minimarket.local
+```
 
-**В `public` находится ВЕСЬ РАБОТАЮЩИЙ САЙТ Joomla 6**: ядро, админка, установленные компоненты, модули, плагины, шаблоны, медиафайлы и обычный `index.php`. **Папка `public` по назначению соответствует `public_html` на обычном хостинге**. Содержимое `public` переносится в `public_html`.
-
-**За пределами `public` находятся исходники и инструменты разработчика**, которые веб-сервер не должен публиковать: `.git`, `src`, `scripts`, `docs`, `.osp`, `.env`. Они нужны для разработки и сборки, но НЕ являются частью сайта на хостинге.
-
-## Структура локально ДО установки Joomla
+Структура после установки оригинальной Joomla 6 и **после** реализации/установки MiniMarket:
 
 ```text
 C:\OSPanel\home\minimarket.local\
-├── .git\
-├── .osp\
-│   └── project.ini           # OSP 6.5.1: Apache, PHP-8.5, web_root = {base_dir}\public
-├── public\
-│   └── .gitkeep              # Содержимое Joomla пока отсутствует
-├── src\
-│   ├── README.md
-│   └── com_minimarket\
-│       └── README.md         # Заготовка проекта собственного компонента
-├── scripts\
-│   └── setup-local.ps1       # Только временный локальный PHP-smoke-test
-├── docs\
-├── .gitignore
-├── README.md
-├── NEW_AGENT.md
-└── CURRENT_TASK.md
-```
-
-## Структура локально ПОСЛЕ чистой установки Joomla и пакета MiniMarket
-
-```text
-MiniMarket\
-├── .git\                    # ТОЛЬКО ДЛЯ РАЗРАБОТКИ
-├── .osp\                    # ТОЛЬКО OPEN SERVER
-├── src\                     # ИСХОДНИКИ com_minimarket (GitHub)
-├── scripts\                 # СБОРКА / ПРОВЕРКИ (GitHub)
-├── docs\                    # ДОКУМЕНТАЦИЯ (GitHub)
-└── public\                  # ВЕСЬ РАБОТАЮЩИЙ САЙТ = public_html
-    ├── index.php             # ОРИГИНАЛЬНЫЙ index.php Joomla
-    ├── administrator\        # Административная часть Joomla
-    │   └── components\
-    │       └── com_minimarket\  # УСТАНОВЛЕННЫЙ компонент (после разработки)
-    ├── components\
-    │   └── com_minimarket\  # Публичная часть УСТАНОВЛЕННОГО компонента
-    ├── modules\             # УСТАНОВЛЕННЫЕ модули MiniMarket (при необходимости)
-    ├── plugins\             # УСТАНОВЛЕННЫЕ плагины (при необходимости)
-    ├── media\
-    │   └── com_minimarket\  # Статические ресурсы компонента, если используются
+├── .git\                                история исходников MiniMarket
+├── .osp\project.ini                    локальный профиль Apache/PHP
+├── src\com_minimarket\                 исходники нашего компонента (Git)
+├── scripts\                             скрипты сборки/проверки (Git)
+├── docs\                                документация (Git)
+└── public_html\                         ВСЕ файлы работающего Joomla-сайта
+    ├── index.php                        оригинальный Joomla
+    ├── administrator\
+    │   └── components\com_minimarket\   админка установленного компонента
+    ├── components\com_minimarket\       публичная часть установленного компонента
+    ├── modules\                         модули Joomla и MiniMarket
+    ├── plugins\                         установленные плагины Joomla
+    ├── media\                           статические ресурсы и медиа
     ├── templates\
     ├── libraries\
     ├── includes\
-    └── configuration.php     # ЛОКАЛЬНЫЕ секреты Joomla, НЕ В GITHUB
+    └── configuration.php                настройки Joomla, секреты; НЕ в Git
 ```
 
-Все показанные вложенные каталоги Joomla создает **официальный Full Package** и менеджер расширений; не создавать их пустыми вручную и не добавлять оригинальные файлы Joomla в GitHub. Фактический перечень директорий зависит от версии Joomla и состава расширений.
+Это **целевая иллюстрация**, а не утверждение, что файлы CMS уже существуют: до установки в `public_html` находится лишь `.gitkeep` и, если пользователь запускал `setup-local.ps1`, временный тестовый `index.php`. Joomla и наш компонент пока не установлены.
 
-`src/com_minimarket` и `public/components/com_minimarket` **не два независимых проекта**: первый — редактируемые исходники, второй — их установленная Joomla-копия. После сборки ZIP Joomla штатно устанавливает файлы в `components`, `administrator/components` и другие необходимые места. Никогда не редактировать установленные копии как единственный источник изменений.
+На обычном хостинге работающий сайт развёртывается в `public_html`, то есть файлы Joomla находятся **непосредственно в этой папке**. Не создавать вложенную `public_html/public_html`, не переносить туда `src`, `.git`, `.osp`, `docs`, `scripts`.
 
-## Отображение на хостинг
+## Что отслеживает Git
 
-| Локальный путь | На обычном хостинге | Как переносим |
-| --- | --- | --- |
-| `MiniMarket/public/` **содержимое** | `public_html/` | Оригинальные файлы установленной Joomla и сайта; при первоначальном переносе файловую копию и отдельно БД |
-| `MiniMarket/src/com_minimarket/` | Не публикуем как каталог | Собираем ZIP и устанавливаем/обновляем через Joomla |
-| `MiniMarket/.git/`, `docs/`, `scripts/`, `.osp/` | Не переносим в `public_html` | Только локальная разработка и GitHub |
-| База MySQL `minimarket` | Отдельная БД на хостинге | Отдельный защищённый перенос/резервная копия, не Git |
-| `public/configuration.php` | `public_html/configuration.php` | Настройки окружения задаются отдельно; не коммитить секреты |
+- `public_html/.gitkeep` — создание пустой директории при клонировании.
+- `.osp/project.ini` — только безопасный шаблон OSP без секретов.
+- `src`, `scripts`, `docs`, `NEW_AGENT.md`, `CURRENT_TASK.md`, `README.md`.
 
-Не копировать папку `public` как дополнительный уровень (`public_html/public`): сайт должен открываться непосредственно по домену, а корнем будет **содержимое** `public`.
+**Всё остальное в `public_html` исключено из Git**. В частности Joomla Core, пользовательские данные/медиа, `configuration.php`, установленные копии `com_minimarket`. Старый каталог `public` также находится в `.gitignore`, чтобы случайно не отправить прежние локальные файлы на GitHub.
 
-На стандартном хостинге папка `public_html` может лежать внутри пользовательского каталога, а Open Server использует `{base_dir}\public`. В обоих случаях веб-сервер обслуживает только дерево рабочего сайта.
+## Разработка собственного расширения
 
-## Порядок первого развёртывания
-1. Сохранить старый локальный MiniMarket как резервную копию вне `WebProjects`; получить свежую `development` в `WebProjects\MiniMarket` по `CURRENT_TASK.md`. Не удалять без бэкапа.
-2. Проверить профиль `.osp/project.ini` и локальный `index.php` через `setup-local.ps1` и `curl`.
-3. В phpMyAdmin создать отдельную БД `minimarket` и собственного пользователя MySQL.
-4. Установить **официальный Joomla 6 Full Package** прямо в `MiniMarket/public`: штатный `index.php` Joomla должен заменить временный тестовый файл. Joomla ставится и использует СВОИ системные таблицы.
-5. После проверки Joomla начать `src/com_minimarket`; собирать пакет, обновлять через интерфейс Joomla; SQL-миграции затрагивают только `#__minimarket_*` в той же базе.
-6. Не менять файлы ядра Joomla. При обновлении Joomla проверять совместимость своего пакета на отдельной staging-копии.
+`src/com_minimarket` — первичные редактируемые исходники. После сборки официального ZIP менеджер расширений Joomla сам размещает нужные файлы внутри `public_html/components`, `public_html/administrator/components` и других стандартных мест.
 
-## Git-правила
-- GitHub хранит нашу разработку: `src`, `scripts`, `docs`, настройки проекта `.osp/project.ini` без секретов, заглушку `public/.gitkeep`. Рабочая ветка `development`.
-- По `.gitignore` **всё остальное содержимое `public` не отслеживается**, поскольку это развёрнутая Joomla и данные сайта.
-- `main` и чужие проекты не затрагивать. Не выполнять опасные очистки или force-push. Резервные копии сайта и MySQL хранятся отдельно.
+Правки выполняются в `src`, фиксируются в `development`, затем устанавливаются/обновляются Joomla-пакетом. Ядро Joomla не меняем, не поддерживаем две вручную редактируемые копии компонента.
+
+## Безопасный перенос с ранней структуры
+
+Прежде использовался каталог `public`; с 30.10.2026 он **отменён**, новый веб-корень — `public_html`. Если старый `public` уже существует локально, его **не удалять автоматически**. Проверить содержимое и сохранить резервную копию до ручного удаления. Если был выполнен прежний локальный скрипт, старый `index.php` игнорируем и не переносим в новый `public_html`.
+
+Новое окружение в `C:\OSPanel\home\minimarket.local` не должно зависеть от старого `WebProjects`. Если в `home` уже клонирован предыдущий `development`, выполнить безопасный fast-forward pull, а не повторное клонирование поверх непустого каталога. Проверить `CURRENT_TASK.md`.
+
+## Очередность
+
+1. Получить новую версию `development` в `C:\OSPanel\home\minimarket.local`.
+2. Временно проверить HTTP/PHP, создав проверочный `public_html/index.php` через скрипт.
+3. Создать БД `minimarket` в MySQL 8.0 через phpMyAdmin и отдельного пользователя.
+4. Установить оригинальную Joomla 6 непосредственно в `public_html`; временный индекс должен быть **заменён** оригинальным.
+5. Разрабатывать MiniMarket в `src`, собирать ZIP и устанавливать в Joomla. Переносить файлы Joomla и данные БД отдельно от GitHub.

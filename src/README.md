@@ -3,8 +3,8 @@
 Это не сайт Joomla и не копия Joomla Core. Исходники нашего компонента и, при необходимости, модулей будут жить **вне веб-корня**.
 
 - `src/com_minimarket/` — исходная версия собственного компонента; после реализации из неё соберём официальный установочный ZIP.
-- После установки ZIP Joomla разместит исполняемые файлы в `public/components/com_minimarket/`, `public/administrator/components/com_minimarket/` и необходимые ресурсы в `public/media/`.
+- После установки ZIP Joomla разместит исполняемые файлы в `public_html/components/com_minimarket/`, `public_html/administrator/components/com_minimarket/` и необходимые ресурсы в `public_html/media/`.
 - Эти установленные копии не редактируем напрямую. Правки — в `src` → GitHub `development` → сборка ZIP → установка/обновление в Joomla.
-- Все файлы Joomla, её админка, шаблоны и модули, используемые сайтом, находятся внутри `public`. Именно **содержимое** `public` переносим на хостинг в `public_html`.
+- Все файлы Joomla, её админка, шаблоны и модули, используемые сайтом, находятся внутри `public_html`. Именно **содержимое** `public_html` переносим на хостинг в `public_html`.
 
 Подробнее: `docs/STRUCTURE.md`. Реализация компонента ещё не создана; Joomla пока не установлена.
