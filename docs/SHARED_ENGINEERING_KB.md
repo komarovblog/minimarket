@@ -41,7 +41,7 @@
 | KB-0005 | Вход через внешние ID и телефон без email-логина | Оба проекта | DESIGN_ONLY | Правила общие, реализация различается |
 | KB-0006 | Joomla 6: MySQL подключён, но CREATE denied при установке | MiniMarket | VERIFIED (по итоговому подтверждению пользователя) | Оба проекта, только принцип проверки прав |
 | KB-0007 | Canonical: URL карточки через роутер, а не текущий адрес запроса | MiniMarket | DESIGN_ONLY — код опубликован, Joomla runtime ещё не проверен | Оба магазина, способ реализации разный |
-| KB-0008 | ZIP-компонента Joomla: разные разделители имён файлов внутри архива | MiniMarket | PARTIALLY_VERIFIED — диагностика, новый builder требует локального теста | Оба проекта: переносимый ZIP и согласованные тесты |
+| KB-0008 | ZIP-компонента Joomla: разные разделители имён файлов внутри архива | MiniMarket | VERIFIED — Windows build/inspect и первая Joomla install PASS 31.10.2026; админка ещё не проверена | Оба проекта: переносимый ZIP и согласованные тесты |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -116,14 +116,15 @@
 
 ## KB-0008 — ZIP: сборщик и инспектор должны проверять реальные имена записей
 
-- **Дата/источник:** 31.10.2026, MiniMarket, Windows 11/Open Server/Joomla 6. Старый `scripts/build.ps1` на PowerShell 5.1, отдельный `inspect-package.ps1`.
-- **Статус:** **PARTIALLY_VERIFIED**. Пользователь дважды получил `PACKAGE_FAIL: MISSING_COMPONENT_FILES`, в том числе **непосредственно после успешной пересборки**. Изученный GitHub-код подтвердил несогласованность проверок, исправление опубликовано; **конкретные ZIP member names пользовательского архива и фактическая установка Joomla пока не проверены**.
-- **Симптом:** Joomla `Unable to detect manifest file`; локальный build сообщал `MiniMarket ZIP: ...\dist\com_minimarket.zip`, инспектор затем `PACKAGE_FAIL: MISSING_COMPONENT_FILES`. Установленная MiniMarket-версия отсутствует со слов пользователя; прежние ответы «Готово» НЕ доказательство установки.
-- **Подтверждённая ошибка инструментария:** старый builder нормализовал `Entry.FullName.Replace('\\', '/')` перед сравнением, а inspector использовал буквальный `ZipArchive.GetEntry('admin/services/provider.php')`. Для записи `admin\\services\\provider.php` первый тест мог быть PASS, второй — FAIL. Не утверждать, что именно такой путь уже прочитан из ZIP пользователя.
-- **Исправление кода:** в `development` MiniMarket коммит [`fce8a37d`](https://github.com/komarovblog/minimarket/commit/fce8a37d4d59afa72034c8e519a94ec021203e8c) заменил `Compress-Archive` на `ZipFileExtensions.CreateEntryFromFile` с явным `/` внутри ZIP и проверкой **сырых** member names. Inspector теперь различает `NONPORTABLE_ENTRY_PATHS` и отсутствие конкретного файла.
-- **Что проверить:** после `git pull --ff-only origin development`, build, inspect получить `PACKAGE_OK: 0.3.1`; затем впервые установить ZIP через штатный Joomla Installer и проверить меню компонента. До этого `ZIP fix PASS` и `Joomla installed` — НЕ подтверждены.
-- **Применение к Symfony Shop:** принцип ZIP portable entries `/`, установка по манифесту/корректная директория, тест `build → inspect → install`, одинаковая логика сравнения archive members. **Не переносить Joomla manifest, installer, PHP framework classes или .osp настройки в Symfony**. Для Shop надо определить собственный набор обязательных файлов и свой тест дистрибутива.
-- **Безопасность:** не удалять Joomla/магазин, не сбрасывать локальный `.osp/project.ini`, не публиковать сырые логи/архивы, если они содержат секреты. [Документ диагностики](https://github.com/komarovblog/minimarket/blob/development/docs/INSTALL_ZIP_DIAGNOSTIC.md).
+- **Дата/среда:** 31.10.2026, MiniMarket, Windows 11, Open Server, Joomla 6, Windows PowerShell 5.1.
+- **Статус:** **VERIFIED — для сборки, инспекции и первой установки ZIP**. Пользователь предоставил после исправления вывод `MiniMarket ZIP: C:\\OSPanel\\home\\minimarket.local\\dist\\com_minimarket.zip`, `PACKAGE_OK: 0.3.1` и скриншот Joomla с зелёным `Installation of the component was successful.` Таким образом, сборка + проверка + штатная установка прошли на Windows пользователя. **Административный UI, категории, товары, роутинг и canonical ещё не проверены**.
+- **Исходный симптом:** Joomla `Unable to detect manifest file`; ранний инспектор возвращал `PACKAGE_FAIL: MISSING_COMPONENT_FILES` даже после формально успешной сборки.
+- **Подтверждённая ошибка исходного инструментария:** прежний builder нормализовал `Entry.FullName` перед проверкой, а inspector сравнивал сырые имена через `ZipArchive.GetEntry`. Эти проверки могли дать противоречивые результаты для Windows ZIP с `\\`. **Сырые имена прежнего пользовательского ZIP не исследованы**, поэтому этот механизм не заявляется единственной доказанной причиной раннего отказа Joomla.
+- **Исправление:** коммит MiniMarket [`fce8a37d`](https://github.com/komarovblog/minimarket/commit/fce8a37d4d59afa72034c8e519a94ec021203e8c) создаёт записи `ZipFileExtensions.CreateEntryFromFile` с `/` и валидирует сырые пути; inspector различает `NONPORTABLE_ENTRY_PATHS`, отсутствие manifest и обязательных файлов.
+- **Подтверждение PASS:** 31.10.2026 пользователь предъявил обе успешные команды и экран Joomla Installer. Границы PASS: это первая установка пакета версии 0.3.1, не функциональный smoke-test компонента.
+- **Следующий шаг MiniMarket:** открыть в Joomla **Компоненты → MiniMarket**, проверить отображение панели и ссылки категорий/товаров, затем продолжить предметные smoke-тесты; ошибки фиксировать отдельно без сброса Joomla/БД.
+- **Применение к Symfony Shop:** одинаковое правило переносимых ZIP-путей `/`, проверки реальных имён записей и цепочки `build → inspect → install`. Нельзя переносить Joomla manifest/installer или считать Symfony deployment автоматически проверенным.
+- **Безопасность:** не трогать локальный `.osp/project.ini`, Joomla core, установленный сайт и реальные данные; без секретов, SQL-дампов и сырых логов. [Диагностика MiniMarket](https://github.com/komarovblog/minimarket/blob/development/docs/INSTALL_ZIP_DIAGNOSTIC.md).
 
 ## 4. Шаблон новой записи
 
