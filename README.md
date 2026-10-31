@@ -1,4 +1,4 @@
-> **M0 готов как исходный код, ожидает локального теста установки (30.10.2026).** Исходники `src/com_minimarket` и скрипт `scripts/build.ps1` опубликованы в `development`. Это **один собственный Joomla 6 компонент**, без использования статей как товаров. Сборка ZIP → `dist/com_minimarket.zip` (выполняется локально), затем установка штатным менеджером. Инструкция: [CURRENT_TASK.md](CURRENT_TASK.md).
+> **Текущий статус 01.11.2026:** MiniMarket 0.3.2 фактически установлен и проверен (категории, товары, старые публичные URL); исходники 0.3.3 содержат перевод меню, но он ещё не проверен на Windows/Joomla. **Окончательное решение** — один обычный пункт Joomla `MiniMarket — Магазин` назначается главной `/` или разделом `/shop`, без скрытых пунктов, с настройками выводимых блоков и будущими модулями категорий/товаров. Новый роутер ещё не реализован. Полная хронология: [docs/PROJECT_PROGRESS.md](docs/PROJECT_PROGRESS.md), архитектура: [docs/COMPONENT_ARCHITECTURE.md](docs/COMPONENT_ARCHITECTURE.md), текущая задача: [CURRENT_TASK.md](CURRENT_TASK.md).
 
 # MiniMarket — компонент интернет-магазина для Joomla 6
 
@@ -20,8 +20,8 @@ C:\OSPanel\home\minimarket.local\
 ├── .osp\project.ini         Open Server 6.5.1; web_root = {base_dir}\public_html
 ├── public_html\            ВЕСЬ работающий сайт Joomla (после её установки)
 │   └── .gitkeep             В Git только метка пустого каталога
-├── src\com_minimarket\     Наши исходники; пока только README
-├── scripts\                Будущие скрипты сборки, пока только README
+├── src\com_minimarket\     Наши исходники и реализованные Joomla MVC
+├── scripts\                Реализованные build.ps1 и inspect-package.ps1
 ├── docs\                   Требования и план
 ├── NEW_AGENT.md
 └── CURRENT_TASK.md
@@ -47,4 +47,4 @@ C:\OSPanel\home\minimarket.local\
 Подробнее: [docs/DEVELOPMENT_AND_PACKAGING.md](docs/DEVELOPMENT_AND_PACKAGING.md). Следующий шаг — [CURRENT_TASK.md](CURRENT_TASK.md).
 
 ## Актуальная архитектура (решение 30.10.2026)
-**Разрабатываем один самостоятельный Joomla 6 `com_minimarket` со своими категориями и товарами** — не используем материалы Joomla как товары и не поддерживаем два альтернативных магазина. Плагины для Helix и штатного `com_content` не нужны; компонент сам выводит страницы товара/категории. Все ранее согласованные SEO-фильтры, плоские URL с ID, корзина, заказы, auth, оплата, Product Schema и dataLayer остаются. [Подробная архитектура](docs/COMPONENT_ARCHITECTURE.md), [актуальная задача](CURRENT_TASK.md). ZIP с работающим компонентом пока не создан.
+**Разрабатываем один самостоятельный Joomla 6 `com_minimarket` со своими категориями и товарами** — не используем материалы Joomla как товары и не поддерживаем два альтернативных магазина. Плагины для Helix и штатного `com_content` не нужны; компонент сам выводит страницы товара/категории. Все ранее согласованные SEO-фильтры, плоские URL с ID, корзина, заказы, auth, оплата, Product Schema и dataLayer остаются. [Подробная архитектура](docs/COMPONENT_ARCHITECTURE.md), [актуальная задача](CURRENT_TASK.md). Первый ZIP успешно собран, проверен и установлен в Joomla; новые маршруты и модули пока не реализованы.
