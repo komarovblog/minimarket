@@ -18,6 +18,7 @@ final class DisplayController extends BaseController
         }
 
         $view = $this->getView($viewName, 'html');
+        $view->setDocument($this->app->getDocument());
         $view->display();
 
         return $this;
