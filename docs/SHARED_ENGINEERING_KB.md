@@ -42,6 +42,7 @@
 | KB-0006 | Joomla 6: MySQL подключён, но CREATE denied при установке | MiniMarket | VERIFIED (по итоговому подтверждению пользователя) | Оба проекта, только принцип проверки прав |
 | KB-0007 | Canonical: URL карточки через роутер, а не текущий адрес запроса | MiniMarket | DESIGN_ONLY — код опубликован, Joomla runtime ещё не проверен | Оба магазина, способ реализации разный |
 | KB-0008 | ZIP-компонента Joomla: разные разделители имён файлов внутри архива | MiniMarket | VERIFIED — Windows build/inspect и первая Joomla install PASS 31.10.2026; админка ещё не проверена | Оба проекта: переносимый ZIP и согласованные тесты |
+| KB-0009 | Symfony Doctrine: раздельные DB_* вместо DATABASE_URL; SQLSTATE 2002 | Shop | CODE_UPDATED / RUNTIME_NOT_VERIFIED | Общий принцип конфигурации, не переносить синтаксис Doctrine в Joomla |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -125,6 +126,16 @@
 - **Следующий шаг MiniMarket:** открыть в Joomla **Компоненты → MiniMarket**, проверить отображение панели и ссылки категорий/товаров, затем продолжить предметные smoke-тесты; ошибки фиксировать отдельно без сброса Joomla/БД.
 - **Применение к Symfony Shop:** одинаковое правило переносимых ZIP-путей `/`, проверки реальных имён записей и цепочки `build → inspect → install`. Нельзя переносить Joomla manifest/installer или считать Symfony deployment автоматически проверенным.
 - **Безопасность:** не трогать локальный `.osp/project.ini`, Joomla core, установленный сайт и реальные данные; без секретов, SQL-дампов и сырых логов. [Диагностика MiniMarket](https://github.com/komarovblog/minimarket/blob/development/docs/INSTALL_ZIP_DIAGNOSTIC.md).
+
+## KB-0009 — Раздельная конфигурация MySQL вместо длинного DATABASE_URL (Symfony Shop)
+
+- **Дата / источник / среда:** 31.10.2026, Symfony 8.1 / DoctrineBundle 3.x / PHP 8.5 / MySQL Open Server.
+- **Симптом:** при попытке подключения к Shop MySQL команда `dbal:run-sql "SELECT 1 AS connected"` возвращала `SQLSTATE[HY000] [2002]` («конечный компьютер отверг запрос на подключение»). Ранее Shop использовал длинную строку `DATABASE_URL`; пользователь предпочёл один понятный `.env` с комментариями к каждому параметру.
+- **Установленное:** ошибка 2002 означает, что TCP-соединение с адресом/портом MySQL установить не удалось. Она **сама по себе** не доказывает неверный пароль или отсутствие таблиц; реальный хост/порт Open Server ещё требуют проверки. Раздельная запись параметров не лечит недоступность TCP.
+- **Решение в коде (не считать runtime PASS):** `config/packages/doctrine.yaml` использует прямые `driver: pdo_mysql`, `host: '%env(DB_HOST)%'`, `port: '%env(int:DB_PORT)%'`, `dbname`, `user`, `password`, `charset: utf8mb4`. Один приватный локальный `.env` содержит `APP_ENV`, `APP_DEBUG`, `APP_SECRET`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. В `.env.example` для каждого поля пояснения на русском; `DATABASE_URL` более не используется. Пароль в одинарных кавычках — без URL-кодирования.
+- **Проверка:** официальная [документация Symfony](https://symfony.com/doc/current/doctrine.html) разрешает отдельные параметры подключения, [конфигурация DoctrineBundle](https://symfony.com/bundles/DoctrineBundle/current/configuration.html) описывает поля. Изменённый код/шаблон опубликован в GitHub `development`; локального `connected = 1` **пока нет**. Не помечать `VERIFIED`, пока пользователь не подтвердит новый SELECT.
+- **Для MiniMarket:** принцип «разделять host/port/name/user/password и снабжать комментариями» применим, но Joomla штатно читает собственный `configuration.php` и `public $host`, `public $user`, `public $password`, `public $db`, а не Symfony Doctrine/.env. Не переносить конфигурацию Doctrine в Joomla.
+- **Безопасность:** реальные значения `.env`, пароль, SQL-дамп и другие секреты **не публиковать**. На ошибку 2002 сначала проверять статус MySQL, действительный порт и доступность hostname.
 
 ## 4. Шаблон новой записи
 
