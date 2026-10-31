@@ -43,6 +43,7 @@
 | KB-0007 | Canonical: URL карточки через роутер, а не текущий адрес запроса | MiniMarket | DESIGN_ONLY — код опубликован, Joomla runtime ещё не проверен | Оба магазина, способ реализации разный |
 | KB-0008 | ZIP-компонента Joomla: разные разделители имён файлов внутри архива | MiniMarket | VERIFIED — Windows build/inspect и первая Joomla install PASS 31.10.2026; админка ещё не проверена | Оба проекта: переносимый ZIP и согласованные тесты |
 | KB-0009 | Symfony Doctrine: раздельные DB_* вместо DATABASE_URL; SQLSTATE 2002 | Shop | CODE_UPDATED / RUNTIME_NOT_VERIFIED | Общий принцип конфигурации, не переносить синтаксис Doctrine в Joomla |
+| KB-0010 | Joomla Toolbar Save/Apply не отправляет форму без `form.validate` | MiniMarket | CODE_UPDATED / RUNTIME_NOT_VERIFIED | Проверять регистрацию JS-ресурсов для отправки и серверную валидацию |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -136,6 +137,17 @@
 - **Проверка:** официальная [документация Symfony](https://symfony.com/doc/current/doctrine.html) разрешает отдельные параметры подключения, [конфигурация DoctrineBundle](https://symfony.com/bundles/DoctrineBundle/current/configuration.html) описывает поля. Изменённый код/шаблон опубликован в GitHub `development`; локального `connected = 1` **пока нет**. Не помечать `VERIFIED`, пока пользователь не подтвердит новый SELECT.
 - **Для MiniMarket:** принцип «разделять host/port/name/user/password и снабжать комментариями» применим, но Joomla штатно читает собственный `configuration.php` и `public $host`, `public $user`, `public $password`, `public $db`, а не Symfony Doctrine/.env. Не переносить конфигурацию Doctrine в Joomla.
 - **Безопасность:** реальные значения `.env`, пароль, SQL-дамп и другие секреты **не публиковать**. На ошибку 2002 сначала проверять статус MySQL, действительный порт и доступность hostname.
+
+## KB-0010 — Joomla Toolbar Save/Apply: проверять ресурсы клиентской валидации
+
+- **Дата/среда:** 31.10.2026, MiniMarket 0.3.1 на Joomla 6.2.0, Windows/Open Server.
+- **Статус:** **CODE_UPDATED / RUNTIME_NOT_VERIFIED**. Реальный пользовательский тест сохранения категории FAIL; исправление кода опубликовано, проверка 0.3.2 на машине пользователя впереди.
+- **Симптом:** форма MiniMarket: category заполнена, Save/Save & Close не дают видимой реакции; Cancel работает; запись не создаётся.
+- **Подтверждённый пропуск исходников:** admin Category/Product View не подключали ресурс `form.validate`. Шаблоны содержат `class="form-validate"`, а Joomla Toolbar Save/Apply включает клиентскую проверку, в отличие от Cancel. Отсутствие JS является **вероятной причиной**, но без данных браузерной консоли нельзя утверждать, что других причин нет.
+- **Исправление:** в обоих HtmlView подключён штатный `Factory::getApplication()->getDocument()->getWebAssetManager()->useScript('form.validate')`; версия манифеста 0.3.2, никаких SQL-миграций, правок ядра, обхода валидации и кастомного JS.
+- **Предстоящий тест:** `build → inspect PACKAGE_OK 0.3.2 → штатное обновление Joomla 0.3.1→0.3.2 → Save & Close категории → повторно открыть категорию`. Пока **NOT RUN**. При FAIL следующий шаг — диагностика JS/Network, а не повторное изменение SQL.
+- **Для Symfony Shop:** применим принцип обязательной загрузки JS-зависимостей UI и независимой серверной валидации; `form.validate` относится только к Joomla и в Symfony не переносится.
+- **Документация:** [Joomla Client-side Validation](https://manual.joomla.org/docs/5.4/general-concepts/forms/client-side-validation/), [MiniMarket CURRENT_TASK](https://github.com/komarovblog/minimarket/blob/development/CURRENT_TASK.md).
 
 ## 4. Шаблон новой записи
 
