@@ -22,3 +22,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1
 
 ## Диагностика ZIP при ошибке Joomla
 Запустить `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-package.ps1`. Проверяется **существующий** `dist/com_minimarket.zip`: верхний `minimarket.xml` (`<extension type="component">`), версия и обязательные файлы. Выдаёт один короткий `PACKAGE_OK` или `PACKAGE_FAIL`. Это не проверка установки Joomla. Подробности: [docs/INSTALL_ZIP_DIAGNOSTIC.md](../docs/INSTALL_ZIP_DIAGNOSTIC.md).
+
+
+**31.10.2026:** ZIP теперь записывается через .NET `ZipFileExtensions.CreateEntryFromFile` с внутренними путями `/`, вместо платформозависимого `Compress-Archive`. `inspect-package.ps1` возвращает `PACKAGE_FAIL: NONPORTABLE_ENTRY_PATHS` или конкретное имя отсутствующего файла. Результат на Windows пользователя пока ожидается.

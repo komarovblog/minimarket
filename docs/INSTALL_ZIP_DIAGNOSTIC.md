@@ -30,3 +30,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-packag
 **Не выводить сырые логи и не просить пользователя удалять рабочую Joomla.**
 
 Источники Joomla 6: `libraries/src/Installer/InstallerHelper.php::detectType`, `libraries/src/Installer/Installer.php::findManifest`.
+
+## 31.10.2026 — повторная ошибка после сборки, фикс `fce8a37d`
+Пользователь после повторной сборки получил `MiniMarket ZIP: ...`, а инспектор снова `PACKAGE_FAIL: MISSING_COMPONENT_FILES`. Старый builder нормализовал ZIP entry names `\\`→`/` при проверке; inspector искал через `GetEntry` без нормализации. **Содержимое пользовательского ZIP непосредственно не прочитано**, следовательно гипотеза о `\\` внутри конкретного архива не установлена с полной достоверностью.
+
+Реализовано: `Compress-Archive` заменён на явную запись каждого файла через `ZipFileExtensions.CreateEntryFromFile` с POSIX `/` в имени ZIP entry. Builder теперь проверяет **сырые** пути. Inspector выдаёт `NONPORTABLE_ENTRY_PATHS` для `\\`, либо конкретное имя отсутствующего файла. Это исключает прежнюю несогласованность инструментов. **Windows/Joomla тест после исправления не проведён**.
+
+Следующий тест — `git pull --ff-only origin development`, `build.ps1`, `inspect-package.ps1`; ожидать `PACKAGE_OK: 0.3.1`. Только после этого впервые установить ZIP через Joomla Installer. Локальное `M .osp/project.ini` сохранить без изменений.
