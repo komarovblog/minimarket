@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Site\Helper\SeoHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 
 final class HtmlView extends BaseHtmlView
@@ -32,6 +33,7 @@ final class HtmlView extends BaseHtmlView
         $this->category = $category;
         $this->products = $repo->getProductsForCategory($id);
         $this->getDocument()->setTitle((string) $category->title);
+        SeoHelper::setCanonical($this->getDocument(), 'category', $id);
 
         parent::display($tpl);
     }
