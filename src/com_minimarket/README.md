@@ -1,3 +1,5 @@
+> **0.3.3 (01.11.2026):** в административных `com_minimarket.sys.ini` (en-GB/ru-RU) добавлены подписи для `site/tmpl/catalog/default.xml`, чтобы в выборе типа пункта меню Joomla отображались названия вместо `COM_MINIMARKET_CATALOG_MENU_TITLE/DESCRIPTION`. БД и роутер не менялись. Windows/Joomla smoke **NOT RUN**. [CURRENT_TASK.md](../../CURRENT_TASK.md).
+
 > **0.3.2 (31.10.2026):** подключён штатный JS `form.validate` для Save/Apply в административных формах категорий и товаров. Исправление создано после реального FAIL Save на Joomla 6.2.0, но Windows и Joomla smoke новой версии ещё не выполнен. SQL-миграций нет. См. [CURRENT_TASK.md](../../CURRENT_TASK.md).
 
 > **0.3.1:** канонические ссылки для каталога, категорий и товаров через официальный Joomla Router; без SQL миграций/301. В GitHub опубликовано, локальный smoke ещё не подтверждён. [Тест SEO](../../docs/M1D_CANONICAL_SMOKE.md).
