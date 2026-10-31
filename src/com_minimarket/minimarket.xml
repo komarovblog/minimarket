@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -23,7 +23,23 @@
             <folder>src</folder>
             <folder>tmpl</folder>
             <folder>language</folder>
+            <folder>forms</folder>
+            <folder>sql</folder>
         </files>
         <menu link="option=com_minimarket">COM_MINIMARKET</menu>
+        <submenu>
+            <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES</menu>
+            <menu link="option=com_minimarket&amp;view=products">COM_MINIMARKET_PRODUCTS</menu>
+        </submenu>
     </administration>
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/install.mysql.sql</file>
+        </sql>
+    </install>
+    <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates/mysql</schemapath>
+        </schemas>
+    </update>
 </extension>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <fieldset name="details" label="COM_MINIMARKET_CATEGORY_DETAILS">
+        <field name="id" type="hidden" default="0" filter="int"/>
+        <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
+        <field name="alias" type="text" label="JFIELD_ALIAS_LABEL" filter="string" size="60"/>
+        <field name="description" type="textarea" label="JGLOBAL_DESCRIPTION" filter="safehtml" rows="5"/>
+        <field name="state" type="list" label="JSTATUS" default="0" filter="int">
+            <option value="0">JUNPUBLISHED</option>
+            <option value="1">JPUBLISHED</option>
+        </field>
+    </fieldset>
+</form>

@@ -19,6 +19,15 @@ $manifestPath = Join-Path $componentRoot 'minimarket.xml'
 $needed = @(
     'minimarket.xml',
     'admin\config.xml',
+    'admin\sql\install.mysql.sql',
+    'admin\sql\updates\mysql\0.2.0.sql',
+    'admin\forms\category.xml',
+    'admin\src\Table\CategoryTable.php',
+    'admin\src\Controller\CategoryController.php',
+    'admin\src\Model\CategoryModel.php',
+    'admin\src\Model\CategoriesModel.php',
+    'admin\tmpl\category\edit.php',
+    'admin\tmpl\categories\default.php',
     'admin\services\provider.php',
     'admin\src\Controller\DisplayController.php',
     'admin\src\View\Dashboard\HtmlView.php',
@@ -60,7 +69,7 @@ try {
 
     try {
         $members = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
-        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'site/tmpl/catalog/default.php')) {
+        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php')) {
             if ($members -notcontains $entry) {
                 throw "Invalid ZIP: missing $entry"
             }
