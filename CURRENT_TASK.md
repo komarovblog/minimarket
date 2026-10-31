@@ -1,32 +1,25 @@
 # CURRENT_TASK — MiniMarket
-Дата: **2026-10-31**. Репозиторий `komarovblog/minimarket`, ветка `development`. `main`, Shop и Bidder не трогать.
+Актуально: **2026-10-31**. Репозиторий `komarovblog/minimarket`, ветка `development`; `main`, Shop и Bidder не трогать.
 
-## Что пользователь подтвердил
-- Joomla 6 на Open Server `C:\OSPanel\home\minimarket.local\public_html` работает, базовый SEF настроен.
-- Первая версия **`com_minimarket 0.1.0` собрана и установлена** через Joomla Extension Installer — пользователь сообщил «Готово» после инструкции по установке. Детальные HTTP/admin проверки не присланы; считать подтверждением пользователя, не автоматическим PASS.
-- Архитектура: **один самостоятельный компонент со своими категориями/товарами/заказами**, плоскими URL с ID. Joomla Articles и второй компонент на Articles полностью отменены.
+## Подтверждено
+- Пользователь установил `com_minimarket 0.1.0`, затем ответил «Готово» после инструкции на обновление **0.2.0**, создание тестовой категории и проверку вывода. Принимаем M1a как пользовательский PASS без отдельного автоматического HTTP/SQL readback.
+- Одна собственная система категорий, товаров и заказов MiniMarket; **НЕ использовать Joomla Articles**, никаких двух магазинов.
+- Локальный путь `C:\OSPanel\home\minimarket.local`, Joomla 6 + PHP 8.5 + MySQL 8.0 на Open Server; штатный SEF настроен.
 
-## Готово в GitHub, не проверено на локальной Joomla
-- **M1a — `com_minimarket 0.2.0`** опубликован в `development` (commit `e55de0bcb46d4a25b4d18b3950353e47c2eeefb5`).
-- SQL install+upgrade `0.2.0`: `#__minimarket_categories`, `#__minimarket_products`. Без SQL DROP и без правок существующих Joomla таблиц.
-- Админка категорий: список, создать/редактировать, статус. Товары: **только пустой/list view**, редактор следующим этапом.
-- Публично показываются опубликованные категории. В `scripts/build.ps1` обновлены обязательные файлы и ZIP-проверка.
-- **Статическая проверка файлов/манифеста/дублирования SQL завершена**, Windows PowerShell/PHP runtime/SQL upgrade/Joomla CRUD **НЕ тестированы**, не утверждать PASS.
+## В GitHub опубликовано, ещё НЕ проверено локально
+- **M1b `com_minimarket 0.2.1`**, коммит `b4bd1922a0c3289cef318a175a8bfd0bdb3ec7f6`: Joomla FormController/AdminModel/Table `Product`, форма `admin/forms/product.xml`, create/edit, SQL dropdown категорий, список товаров с кнопкой «Создать» и открытием по названию.
+- Обязательные поля: название, категория, артикул, цена и остаток, статус; уникальный alias. Server-side проверка существования категории, неотрицательной десятичной цены с двумя знаками и целочисленного остатка.
+- Схема **НЕ изменилась**: используются `#__minimarket_categories` / `#__minimarket_products` из 0.2.0. Новые SQL таблицы не создаются, заказы не затронуты.
+- Сборщик `scripts/build.ps1` теперь требует новые файлы и проверяет содержимое ZIP. Статические проверки наличия файлов, версий, UI-ссылок и серверных проверок прошли. **Реальная Windows ZIP сборка / Joomla update / FormController save / сохранение товара НЕ проверены**.
 
-## Текущий ОДИН шаг — безопасно обновить компонент до 0.2.0
-1. Перед установкой **экспортировать БД `minimarket` в приватный локальный архив через phpMyAdmin**, не публиковать.
-2. В PowerShell `C:\OSPanel\home\minimarket.local`: сначала `git status --short`. Если есть неожиданные локальные изменения — STOP.
-3. `git pull --ff-only origin development` и `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1`; ZIP `dist/com_minimarket.zip`.
-4. Joomla admin → Система → Установка → Расширения → **обновить** тот же `com_minimarket.zip` (НЕ удалять `0.1.0`).
-5. Проверить «Компоненты → MiniMarket → Категории»: создать опубликованную «Тестовая категория», затем список и фронт `http://minimarket.local/index.php?option=com_minimarket`. «Товары» показывают пустой список.
-6. Ошибки — короткий текст Joomla, никаких сырых логов/секретов; исправлять исходники, не Joomla core.
+## Следующий ОДИН шаг — обновить до 0.2.1 и проверить один товар
+1. Пользователь: `git status --short`; при чистом состоянии `git pull --ff-only origin development` и `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1` в `C:\OSPanel\home\minimarket.local`.
+2. Штатно установить `dist/com_minimarket.zip` **поверх** 0.2.0, не удаляя старую версию.
+3. В MiniMarket → Товары: «Создать» → `Тестовый товар`, тестовая категория, `TEST-001`, цена `1990.50`, остаток `3`, статус опубликован → сохранить; затем отредактировать остаток до 2; проверить не дублируется. Отрицательная цена и пустой SKU должны отклоняться.
+4. При сбое остановиться, сообщить только краткую ошибку Joomla. Подробно `docs/M1B_PRODUCT_EDITOR_SMOKE.md`.
 
-Полный чек-лист: `docs/M1A_CATEGORIES_SMOKE.md`.
+## После PASS
+M1c: **собственные frontend views товара и категории и плоский SEF router с ID**, затем изображения/характеристики, ручные SEO-фильтры, корзина/заказы и checkout. Исходники всегда через GitHub `development` → ZIP Joomla, ядро/БД/живые секреты не коммитить.
 
-## После подтверждения
-- M1b — форма товаров (категория, SKU, цена, остаток, фото позже), frontend карточки и плоские URL с ID, тест изменений.
-- SEO-фильтр/ручные SEO-лендинги/Schema.org Product/Offer/GA4 dataLayer, корзина, оформляемые заказы, OTP/ID, YooKassa и уведомления позже по плану.
-- База знаний сложных проблем `docs/SHARED_ENGINEERING_KB.md` и `AGENTS.md` применяются; не создавать KB только за рутинную работу.
-
-## Безопасность
-GitHub только наш `src`/документация; `public_html`, `configuration.php`, `.env`, дампы и реальные заказы не коммитить. Не делать reset/force push. Не изменять `main` или чужие сайты/БД.
+## Обмен знаниями
+`docs/SHARED_ENGINEERING_KB.md` читаем при сложных ошибках; новую карточку добавляем только после содержательного подтверждения/диагностики. Синхронизировать лишь разрешённый KB-документ, не чужой код.
