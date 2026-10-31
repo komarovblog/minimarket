@@ -1,19 +1,31 @@
 # CURRENT_TASK — MiniMarket
 
-Дата: 2026-10-31. Только `komarovblog/minimarket`, ветка `development`. `main`, ядро Joomla и локальную конфигурацию Open Server не менять.
+Дата: 2026-10-31. Только `komarovblog/minimarket`, `development`. `main`, ядро Joomla, установленный сайт и пользовательский `.osp/project.ini` не изменять.
 
 ## Подтверждённый статус
-- **Первая установка `com_minimarket 0.3.1` подтверждена**: пользователь получил `PACKAGE_OK: 0.3.1` после Windows PowerShell `build.ps1`/`inspect-package.ps1` и зелёное сообщение Joomla `Installation of the component was successful.`
-- **Панель администрирования MiniMarket открывается**: 31.10.2026 пользователь ответил «Готово» на конкретную просьбу открыть `Компоненты → MiniMarket` и проверить её без ошибки. Статус: пользователь подтвердил smoke PASS панели; скриншота панели нет.
-- **Пока NOT RUN**: создание/сохранение категории, товар, публичный каталог/SEF, canonical, отдельная проверка SQL-таблиц.
-- `.osp/project.ini` локально изменён пользователем; его не сбрасывать. Joomla и собственную БД вручную не переустанавливать.
+- Первая установка `com_minimarket 0.3.1`: Windows `build.ps1` PASS; `inspect-package.ps1` → `PACKAGE_OK: 0.3.1`; Joomla Installer → `Installation of the component was successful.`.
+- Панель `Компоненты → MiniMarket` открылась (пользователь подтвердил «Готово»).
+- **Категории: CRUD FAIL**. Пользователь показал форму в Joomla 6.2.0 с заполненными Title/Description/Published; Save и Save & Close визуально не реагируют, Cancel работает; категория не создана.
+- В Category/Product HtmlView отсутствовало подключение `form.validate`, хотя формы имеют `class="form-validate"` и Joomla Toolbar Save/Apply выполняет клиентскую валидацию. Это **доказанный недостающий ресурс в коде**, но без browser runtime теста нельзя гарантировать, что он единственная причина симптома.
 
-## Единственный текущий шаг пользователя — CRUD категории
-В локальной Joomla 6 открыть **Компоненты → MiniMarket → Категории → Создать**; название **Тестовая категория**, алиас пустой (генерируется автоматически), описание **Проверка каталога MiniMarket**, статус **Опубликовано**. Нажать «Сохранить», вернуться в список и **повторно открыть запись**, убедившись, что название/описание/статус сохранились.
+## Исходники исправлены до 0.3.2
+- `admin/src/View/Category/HtmlView.php` и `admin/src/View/Product/HtmlView.php` теперь подключают штатный `form.validate` через Joomla WebAssetManager. Без пользовательских JS, отключения валидации и правок ядра Joomla.
+- Версия манифеста `0.3.2` (`method="upgrade"`), новых миграций SQL **нет**; данные не должны удаляться.
+- **Ещё NOT RUN:** Windows build/inspect пакета 0.3.2, Joomla upgrade 0.3.1→0.3.2 и фактическое сохранение категории.
 
-При PASS пользователь может ответить «Готово»; при FAIL — только краткий текст ошибки или скриншот экрана, без сырых логов и секретов. **Не запускать сейчас новую сборку, git pull, SQL, создание товара или переустановку Joomla.**
+## Единственный следующий шаг пользователя
+В CMD из `C:\OSPanel\home\minimarket.local`:
+```bat
+git status --short
+git pull --ff-only origin development
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-package.ps1
+```
+При ошибке pull/build/inspect — остановиться; никаких reset/clean. Сохранить `.osp/project.ini`. Ожидаем `PACKAGE_OK: 0.3.2`.
 
-После подтверждения записи категории: перейти к одному тесту создания товара из `docs/M1B_PRODUCT_EDITOR_SMOKE.md`, затем frontend и canonical по `docs/M1C_FRONTEND_ROUTING_SMOKE.md` и `docs/M1D_CANONICAL_SMOKE.md`. Старые чек-листы M1a/M1b с требованием обновляться с 0.1.0/0.3.0 являются историческими; установлена сразу 0.3.1.
+Если OK, штатно загрузить `dist/com_minimarket.zip` в Joomla `Система → Установка → Расширения` как **обновление 0.3.1**, не удаляя компонент. Перезагрузить категорию/создать `Тестовая категория`, алиас пустой, описание `Проверка каталога MiniMarket`, статус `Опубликовано`. Проверить `Save & Close`, появление записи и повторное открытие. При ошибке — короткий симптом/скриншот, без сырых логов или секретов; диагностика JS/Network будет следующим шагом.
 
-## Регламент
-Один автономный Joomla-компонент `com_minimarket`; собственные товары и категории, не Joomla Articles. Не менять main, Shop, Joomla core. Документация KB-0008 подтверждает ZIP/первую установку; она не утверждает проверку CRUD/SEO.
+Товары, frontend и SEO тестировать **после** подтверждения категории, не смешивать несколько проблем. Код в GitHub ≠ runtime PASS.
+
+## Источники
+Joomla Client-side Validation: https://manual.joomla.org/docs/5.4/general-concepts/forms/client-side-validation/ ; общая инженерная KB-0010 в `docs/SHARED_ENGINEERING_KB.md`.
