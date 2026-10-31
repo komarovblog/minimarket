@@ -1,6 +1,6 @@
 # MiniMarket — поэтапные настройки пункта «Магазин» (MVP)
 
-**Дата:** 01.11.2026. **Статус:** архитектура согласована; этап 1 минимального menu XML + переключателя `show_categories` **реализован в исходниках 0.3.4, Joomla runtime NOT RUN**. Новые маршруты и модули пока только план. Рабочая ветка `development`; `main` не менять. Требования к маршрутам и запрету скрытых меню — [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md). Подтверждённые тесты — [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md).
+**Дата:** 01.11.2026. **Статус:** архитектура согласована; этап 1 минимального menu XML + переключателя `show_categories` **реализован в исходниках 0.3.4 и подтверждён пользовательским «Готово» после smoke (USER-REPORTED PASS)**. Новые маршруты и модули пока только план. Рабочая ветка `development`; `main` не менять. Требования к маршрутам и запрету скрытых меню — [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md). Подтверждённые тесты — [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md).
 
 ## Решение по объёму
 
