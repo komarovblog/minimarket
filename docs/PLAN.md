@@ -198,3 +198,10 @@
 - [x] Сборщик ZIP обновлён перечнем новых файлов; SQL не менялся; статически проверены провайдер/маршрутизатор/view и backend cross-alias правила.
 - [ ] **Текущий шаг:** в Joomla обновить ZIP до 0.3.0, создать menu item «MiniMarket — Каталог», проверить клики каталог→категория→товар, отсутствие родительских категорий в URL и 404 после снятия публикации. `docs/M1C_FRONTEND_ROUTING_SMOKE.md`.
 - [ ] SEO canonical/301/strict route test и Product/Offer Schema, dataLayer, фото/характеристики — только после реального frontend smoke.
+
+## M1d — SEO canonical, версия 0.3.1, 31.10.2026
+- [x] Пользователь подтвердил M1c 0.3.0 («Гтово»): каталог, категория, товар, SEF как пользовательский smoke PASS.
+- [x] Код `0.3.1` в `development`: helper canonical через Joomla `Route::_` (absolute) и `HtmlDocument::addHeadLink`, 3 view. Только ссылки в HTML head, без изменения SQL/данных/редиректов и без сторонних SEO-плагинов.
+- [x] Статический readback исходников и builder; официальные API Joomla 6 проверены.
+- [ ] **Сейчас:** обновить Joomla до 0.3.1, проверить по исходному HTML единственный абсолютный canonical на каталоге, категории и товаре, technical URL canonical; обычные страницы Joomla не менять. [Чек-лист](M1D_CANONICAL_SMOKE.md).
+- [ ] Далее: проверка 301/alias-history (не реализованы), System-SEF strict index.php/trailing slash, Schema.org и GA4 dataLayer; осторожно с дублями menu Itemid.
