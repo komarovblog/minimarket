@@ -37,7 +37,7 @@
 | KB-0001 | Пустой SQL-дамп Docker Shop и «пустой» импорт | Shop | VERIFIED (диагноз) | Оба проекта, MySQL |
 | KB-0002 | GitHub-отчёт `NOT_RUN` при повреждённом PowerShell-скрипте | Shop | PARTIALLY_VERIFIED | Оба проекта, диагностика |
 | KB-0003 | Symfony не стартовал из-за отсутствующего `.env` | Shop | VERIFIED (восстановлен HTTP) | Принцип переносим, конфиги различаются |
-| KB-0004 | PowerShell-команды в CMD-консоли Open Server | MiniMarket | DOCUMENTED_PREVENTION | Оба проекта, Windows |
+| KB-0004 | PowerShell-команды в CMD-консоли Open Server | MiniMarket / Shop | VERIFIED (реальная ошибка 31.10.2026) | Оба проекта, Windows |
 | KB-0005 | Вход через внешние ID и телефон без email-логина | Оба проекта | DESIGN_ONLY | Правила общие, реализация различается |
 | KB-0006 | Joomla 6: MySQL подключён, но CREATE denied при установке | MiniMarket | VERIFIED (по итоговому подтверждению пользователя) | Оба проекта, только принцип проверки прав |
 | KB-0007 | Canonical: URL карточки через роутер, а не текущий адрес запроса | MiniMarket | DESIGN_ONLY — код опубликован, Joomla runtime ещё не проверен | Оба магазина, способ реализации разный |
@@ -76,10 +76,10 @@
 ## KB-0004 — Не путать PowerShell с CMD в Open Server
 
 - **Источник:** MiniMarket; техническое правило для Windows 11 / Open Server Panel 6.
-- **Тип:** `DOCUMENTED_PREVENTION`, правило зафиксировано в документации MiniMarket; **отдельного воспроизведённого PASS-теста для этой карточки нет**.
+- **Статус:** `VERIFIED` для диагностики: 31.10.2026 на Shop пользователь воспроизвёл ошибку `& was unexpected at this time.` при вставке PowerShell-команды в CMD; успешная проверка MySQL этим запуском не подтверждена.
 - **Риск:** PowerShell-команда, вставленная в CMD (`C:\OSPanel>`), вызывает синтаксическую ошибку до запуска PHP/Joomla/Git.
 - **Решение:** перед выдачей команды установить оболочку. `PS C:\...>` — PowerShell, `C:\...>` — CMD; для PowerShell-команды из CMD сначала запустить `powershell` либо дать CMD-совместимый вариант. Не диагностировать ошибку оболочки как сбой магазина.
-- **Shop:** правило полностью подходит локальным скриптам Shop.
+- **Shop:** случай подтверждён на пользовательской CMD-консоли. Для CMD вызвать PHP без ведущего `&`: `"C:\OSPanel\modules\PHP-8.5\php.exe" "C:\OSPanel\home\shop.local\bin\console" doctrine:query:sql "SELECT 1 AS connected"`. Перед проверкой заменить заглушки `DATABASE_URL` в приватном `.env` на реальные реквизиты. Не публиковать пароль и не считать `& was unexpected` ошибкой Doctrine.
 - **Материалы:** [MiniMarket — инструкции агентов](https://github.com/komarovblog/minimarket/blob/development/NEW_AGENT.md).
 
 ## KB-0005 — Единый продуктовый принцип авторизации, но две разные реализации
