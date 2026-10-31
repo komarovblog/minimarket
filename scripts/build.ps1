@@ -77,13 +77,38 @@ try {
     New-Item -ItemType Directory -Path $zipDirectory -Force | Out-Null
     $temporaryZip = Join-Path $zipDirectory ("minimarket-building-" + [guid]::NewGuid().ToString('N') + '.zip')
 
-    Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $temporaryZip -CompressionLevel Optimal
-
+    # Joomla/PHP need forward-slash ZIP member names on Windows.
+    # Do not let Compress-Archive choose platform-dependent entry paths.
+    Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $writer = [System.IO.Compression.ZipFile]::Open($temporaryZip, [System.IO.Compression.ZipArchiveMode]::Create)
+    try {
+        $files = @(Get-ChildItem -LiteralPath $stage -Recurse -File | Sort-Object FullName)
+        if ($files.Count -eq 0) {
+            throw 'ZIP_STAGE_EMPTY'
+        }
+        foreach ($file in $files) {
+            $entryName = $file.FullName.Substring($stage.Length + 1).Replace('\', '/')
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+                $writer,
+                $file.FullName,
+                $entryName,
+                [System.IO.Compression.CompressionLevel]::Optimal
+            ) | Out-Null
+        }
+    }
+    finally {
+        $writer.Dispose()
+    }
+
     $archive = [System.IO.Compression.ZipFile]::OpenRead($temporaryZip)
 
     try {
-        $members = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
+        # Validate raw ZIP names, not normalized names hiding incompatibility.
+        $members = @($archive.Entries | ForEach-Object { $_.FullName })
+        if (@($members | Where-Object { $_.Contains('\') -or $_.StartsWith('/') }).Count -gt 0) {
+            throw 'ZIP_NONPORTABLE_ENTRY_PATHS'
+        }
         # The Joomla installer reads a top-level <extension> XML document.
         # Presence of an .xml filename alone is not enough.
         $manifestEntry = $archive.GetEntry('minimarket.xml')

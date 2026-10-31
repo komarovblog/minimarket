@@ -18,24 +18,28 @@ if (-not (Test-Path -LiteralPath $ZipPath -PathType Leaf)) {
 $archive = $null
 $reader = $null
 try {
+    Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $archive = [System.IO.Compression.ZipFile]::OpenRead(
         [System.IO.Path]::GetFullPath($ZipPath)
     )
+    $members = @($archive.Entries | ForEach-Object { $_.FullName })
+
+    if (@($members | Where-Object { $_.Contains('\') -or $_.StartsWith('/') }).Count -gt 0) {
+        Write-Output 'PACKAGE_FAIL: NONPORTABLE_ENTRY_PATHS'
+        exit 1
+    }
+
     $entry = $archive.GetEntry('minimarket.xml')
 
     if ($null -eq $entry) {
-        $nested = @($archive.Entries | Where-Object {
-            $_.FullName -match '(^|/)minimarket\.xml$'
-        })
-
+        $nested = @($members | Where-Object { $_ -match '(^|/)minimarket\.xml$' })
         if ($nested.Count -gt 0) {
             Write-Output 'PACKAGE_FAIL: MANIFEST_NOT_AT_ROOT'
         }
         else {
             Write-Output 'PACKAGE_FAIL: MANIFEST_MISSING'
         }
-
         exit 1
     }
 
@@ -59,7 +63,7 @@ try {
         'site/src/Controller/DisplayController.php'
     )) {
         if ($null -eq $archive.GetEntry($file)) {
-            Write-Output 'PACKAGE_FAIL: MISSING_COMPONENT_FILES'
+            Write-Output ('PACKAGE_FAIL: MISSING_COMPONENT_FILE: ' + $file)
             exit 1
         }
     }
@@ -68,7 +72,6 @@ try {
     exit 0
 }
 catch {
-    # Keep diagnostics concise and free of local paths/secrets.
     Write-Output 'PACKAGE_FAIL: ZIP_OR_XML_UNREADABLE'
     exit 1
 }
