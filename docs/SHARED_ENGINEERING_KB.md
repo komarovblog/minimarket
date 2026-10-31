@@ -42,9 +42,10 @@
 | KB-0006 | Joomla 6: MySQL подключён, но CREATE denied при установке | MiniMarket | VERIFIED (по итоговому подтверждению пользователя) | Оба проекта, только принцип проверки прав |
 | KB-0007 | Canonical: URL карточки через роутер, а не текущий адрес запроса | MiniMarket | DESIGN_ONLY — код опубликован, Joomla runtime ещё не проверен | Оба магазина, способ реализации разный |
 | KB-0008 | ZIP-компонента Joomla: разные разделители имён файлов внутри архива | MiniMarket | VERIFIED — Windows build/inspect и первая Joomla install PASS 31.10.2026; админка ещё не проверена | Оба проекта: переносимый ZIP и согласованные тесты |
-| KB-0009 | Symfony Doctrine: раздельные DB_* вместо DATABASE_URL; SQLSTATE 2002 | Shop | CODE_UPDATED / RUNTIME_NOT_VERIFIED | Общий принцип конфигурации, не переносить синтаксис Doctrine в Joomla |
+| KB-0009 | Symfony Doctrine: раздельные DB_* вместо DATABASE_URL; SQLSTATE 2002 | Shop | VERIFIED (MySQL SELECT 1, 01.11.2026) | Общий принцип конфигурации, не переносить синтаксис Doctrine в Joomla |
 | KB-0010 | Joomla Toolbar Save/Apply не отправляет форму без `form.validate` | MiniMarket | VERIFIED пользовательским smoke для Category + Product Save в 0.3.2 | Проверять регистрацию JS-ресурсов для отправки и серверную валидацию |
 | KB-0011 | Joomla не переводит название типа пункта меню MiniMarket | MiniMarket | CODE_UPDATED / RUNTIME_NOT_VERIFIED, 0.3.3 | Локализация должна быть доступна в административном контексте |
+| KB-0012 | Doctrine ORM: link entity нельзя идентифицировать связями на сущности с derived ID | Shop | CODE_UPDATED / MAPPING_RETEST_PENDING | Общий принцип моделирования составных PK и связей |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -161,6 +162,16 @@
 - **Проверка:** GitHub исходники содержат строки и manifest 0.3.3; результат Windows `PACKAGE_OK: 0.3.3` и Joomla display PASS ещё не получен.
 - **Переиспользование в Shop:** только принцип контекстного расположения переводов, а не файлы/синтаксис Joomla.
 - **Источник:** [Joomla: Menuitem Layout](https://manual.joomla.org/docs/next/building-extensions/components/component-development-tutorial/step02-menuitem/), [MiniMarket](https://github.com/komarovblog/minimarket/blob/development/CURRENT_TASK.md).
+
+## KB-0012 — Doctrine не допускает вложенные идентификаторы через связи
+
+- **Дата / система:** 01.11.2026, Shop / Symfony 8.1 / Doctrine ORM 3.x, PHP 8.5, MySQL 8.0 Open Server.
+- **Симптом:** `doctrine:schema:validate --skip-sync --no-interaction` в реальной локальной среде показал два `Mapping [FAIL]`: `LinkBundleProduct#bundle` и `#product` как identifier при target entity `Bundle` и `Product`, которые тоже определяют `#[Id]` через ассоциацию с `CatalogItem`. До этого ручной `dbal:run-sql "SELECT 1 AS connected"` вернул `connected = 1` — подключение MySQL работает, причина не в сети.
+- **Корневая причина:** Doctrine поддерживает идентификаторы через ManyToOne/OneToOne, но проверка SchemaValidator отвергает **цепочку**, когда идентификатор промежуточной сущности тоже association-based.
+- **Исправление кода:** `src/Entity/LinkBundleProduct.php`: самостоятельный технический `id` как `#[ORM\Id]` + `GeneratedValue(IDENTITY)`, а `bundle` и `product` — обычные `ManyToOne`. `migrations/Version20261026183000.php` (ещё не применялась к Shop) теперь создаёт `id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY` и `UNIQUE (bundle_id,product_id)`; оба FK, количество `quantity > 0`, сортировка и запрет вложенных комплектов сохраняются. Комплект остаётся автономным, не расходует остатки компонентов сам по себе.
+- **Проверка:** исправление и регрессионный `testBundleComponentUsesIndependentPrimaryKey` опубликованы в `development`; **локальный повторный Mapping PASS ещё не получен**. Следующее действие: после `git pull --ff-only` исполнить `doctrine:schema:validate --skip-sync --no-interaction` в CMD; SQL-миграции в основную БД не запускать. Тестирование миграций сначала на изолированной схеме.
+- **Применимость к MiniMarket:** Joomla не использует Doctrine; переносится правило различать технический первичный ключ и бизнес-уникальность пары, и обязательно обеспечивать FK и UNIQUE на уровне MySQL. Не переносить PHP Doctrine-атрибуты в Joomla.
+- **Источники:** [Doctrine — identity through foreign entities](https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html), [Shop LinkBundleProduct](https://github.com/komarovblog/shop/blob/development/src/Entity/LinkBundleProduct.php), [Shop миграция](https://github.com/komarovblog/shop/blob/development/migrations/Version20261026183000.php).
 
 ## 4. Шаблон новой записи
 
