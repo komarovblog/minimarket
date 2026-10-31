@@ -9,11 +9,9 @@ use Joomla\CMS\Menu\AbstractMenu;
 use Joomla\Database\DatabaseInterface;
 
 /**
- * One flat alias-ID segment for each category or product.
- *
- * The Joomla menu item is the routing base. When catalog is the homepage,
- * the item URLs are /alias-ID; with a "catalog" menu item, /catalog/alias-ID.
- * Neither route contains a product category ancestry.
+ * Typed category/alias-ID and product/alias-ID routes based on exactly
+ * one ordinary published Joomla Shop menu item (home or /shop).
+ * No hidden menu items or category ancestry in URLs.
  */
 final class Router implements RouterInterface
 {
@@ -28,20 +26,16 @@ final class Router implements RouterInterface
 
     public function preprocess($query)
     {
-        if (!empty($query['Itemid'])) {
-            return $query;
+        // One ordinary, published Shop menu item. Never use a foreign Itemid.
+        $items = $this->getShopItems();
+
+        if (\count($items) !== 1) {
+            throw new \RuntimeException(
+                'MiniMarket requires exactly one published Shop menu item; found ' . \count($items)
+            );
         }
 
-        // Keep generated links on the MiniMarket catalog menu rather than
-        // inheriting a menu item for an unrelated Joomla component.
-        $items = $this->menu->getItems('component', 'com_minimarket') ?: [];
-
-        foreach ($items as $item) {
-            if (($item->query['view'] ?? '') === 'catalog' && (int) ($item->published ?? 1) === 1) {
-                $query['Itemid'] = (int) $item->id;
-                break;
-            }
-        }
+        $query['Itemid'] = (int) $items[0]->id;
 
         return $query;
     }
@@ -72,7 +66,7 @@ final class Router implements RouterInterface
         }
 
         unset($query['view'], $query['id']);
-        return [$record->alias . '-' . (int) $record->id];
+        return [$view, $record->alias . '-' . (int) $record->id];
     }
 
     public function parse(&$segments)
@@ -81,12 +75,63 @@ final class Router implements RouterInterface
             return ['view' => 'catalog'];
         }
 
-        if (\count($segments) !== 1) {
-            throw new \RuntimeException('MiniMarket route not found', 404);
+        if (\count($segments) === 2) {
+            $view = (string) $segments[0];
+
+            if (!\in_array($view, ['category', 'product'], true)) {
+                throw new \RuntimeException('MiniMarket route not found', 404);
+            }
+
+            $id = $this->parseSlug((string) $segments[1], $view);
+            $segments = [];
+
+            return ['view' => $view, 'id' => $id];
         }
 
-        $slug = (string) $segments[0];
+        if (\count($segments) === 1) {
+            // Temporary legacy compatibility; 301 redirects need separate tests.
+            $matches = [];
 
+            foreach (['category', 'product'] as $view) {
+                try {
+                    $matches[] = ['view' => $view, 'id' => $this->parseSlug((string) $segments[0], $view)];
+                } catch (\RuntimeException $exception) {
+                    if ($exception->getCode() !== 404) {
+                        throw $exception;
+                    }
+                }
+            }
+
+            if (\count($matches) !== 1) {
+                throw new \RuntimeException('MiniMarket legacy route not found or ambiguous', 404);
+            }
+
+            $segments = [];
+
+            return $matches[0];
+        }
+
+        throw new \RuntimeException('MiniMarket route not found', 404);
+    }
+
+    /** @return object[] */
+    private function getShopItems(): array
+    {
+        $items = $this->menu->getItems('component', 'com_minimarket') ?: [];
+        $result = [];
+
+        foreach ($items as $item) {
+            if (($item->query['view'] ?? 'catalog') === 'catalog'
+                && (int) ($item->published ?? 0) === 1) {
+                $result[] = $item;
+            }
+        }
+
+        return $result;
+    }
+
+    private function parseSlug(string $slug, string $view): int
+    {
         if (!preg_match('/^([a-z0-9][a-z0-9-]*)-([1-9][0-9]*)$/D', $slug, $matches)) {
             throw new \RuntimeException('MiniMarket route not found', 404);
         }
@@ -97,24 +142,13 @@ final class Router implements RouterInterface
             throw new \RuntimeException('MiniMarket route not found', 404);
         }
 
-        $matchesFound = [];
+        $record = $this->getPublished($view, (int) $id);
 
-        foreach (['category', 'product'] as $view) {
-            $record = $this->getPublished($view, (int) $id);
-
-            if ($record !== null && $record->alias === $matches[1]) {
-                $matchesFound[] = $view;
-            }
+        if ($record === null || $record->alias !== $matches[1]) {
+            throw new \RuntimeException('MiniMarket route not found', 404);
         }
 
-        // Never silently serve the wrong entity if legacy records collide.
-        if (\count($matchesFound) !== 1) {
-            throw new \RuntimeException('MiniMarket route not found or ambiguous', 404);
-        }
-
-        $segments = [];
-
-        return ['view' => $matchesFound[0], 'id' => (int) $id];
+        return (int) $id;
     }
 
     private function getPublished(string $view, int $id): ?object
