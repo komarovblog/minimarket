@@ -2,6 +2,8 @@
 
 # MiniMarket — компонент интернет-магазина для Joomla 6
 
+**Для всех агентов:** [AGENTS.md](AGENTS.md) и [docs/SHARED_ENGINEERING_KB.md](docs/SHARED_ENGINEERING_KB.md) — обязательный регламент и общая с Symfony Shop база инженерных решений. Перенос между репозиториями разрешён только для этого документа, не для кода или настроек.
+
 Репозиторий: **`komarovblog/minimarket`**, рабочая ветка: **`development`**. Проект Shop/Symfony ведётся отдельно и не затрагивается.
 
 ## Основной принцип
