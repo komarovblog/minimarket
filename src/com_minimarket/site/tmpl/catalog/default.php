@@ -6,6 +6,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 ?>
 <section class="com-minimarket-catalog">
     <h1><?php echo $this->escape($this->catalogTitle); ?></h1>
+    <?php if ($this->showCategories) : ?>
     <?php if ($this->categories) : ?>
         <ul class="list-unstyled">
         <?php foreach ($this->categories as $category) : ?>
@@ -16,5 +17,6 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
         </ul>
     <?php else : ?>
         <p><?php echo Text::_('COM_MINIMARKET_CATALOG_PLACEHOLDER'); ?></p>
+    <?php endif; ?>
     <?php endif; ?>
 </section>

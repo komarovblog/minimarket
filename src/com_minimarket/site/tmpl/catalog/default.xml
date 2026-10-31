@@ -3,4 +3,20 @@
     <layout title="COM_MINIMARKET_CATALOG_MENU_TITLE" option="com_minimarket">
         <message>COM_MINIMARKET_CATALOG_MENU_DESCRIPTION</message>
     </layout>
+    <fields name="params">
+        <fieldset name="basic" label="COM_MINIMARKET_MENU_SETTINGS">
+            <field
+                name="show_categories"
+                type="radio"
+                label="COM_MINIMARKET_MENU_SHOW_CATEGORIES"
+                description="COM_MINIMARKET_MENU_SHOW_CATEGORIES_DESC"
+                default="1"
+                class="btn-group btn-group-yesno"
+                filter="integer"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+        </fieldset>
+    </fields>
 </metadata>

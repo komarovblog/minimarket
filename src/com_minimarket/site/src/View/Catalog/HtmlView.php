@@ -14,12 +14,24 @@ final class HtmlView extends BaseHtmlView
 {
     public string $catalogTitle = 'MiniMarket';
     public array $categories = [];
+    public bool $showCategories = true;
 
     public function display($tpl = null)
     {
         $this->catalogTitle = (string) ComponentHelper::getParams('com_minimarket')->get('catalog_title', 'MiniMarket');
-        $repo = new CatalogRepository(Factory::getContainer()->get(DatabaseInterface::class));
-        $this->categories = $repo->getCategories();
+        // Only the current explicit MiniMarket menu item may control this page.
+        // Old menu items and direct technical URLs retain their old default (show).
+        $active = Factory::getApplication()->getMenu()->getActive();
+
+        if ($active !== null && ($active->component ?? '') === 'com_minimarket'
+            && ($active->query['view'] ?? 'catalog') === 'catalog') {
+            $this->showCategories = (int) $active->getParams()->get('show_categories', 1) === 1;
+        }
+
+        if ($this->showCategories) {
+            $repo = new CatalogRepository(Factory::getContainer()->get(DatabaseInterface::class));
+            $this->categories = $repo->getCategories();
+        }
         $this->getDocument()->setTitle($this->catalogTitle);
         SeoHelper::setCanonical($this->getDocument(), 'catalog');
 
