@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <fieldset name="details" label="COM_MINIMARKET_PRODUCT_DETAILS">
+        <field name="id" type="hidden" default="0" filter="int"/>
+        <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
+        <field name="alias" type="text" label="JFIELD_ALIAS_LABEL" filter="string" size="60"/>
+        <field
+            name="category_id"
+            type="sql"
+            label="COM_MINIMARKET_PRODUCT_CATEGORY"
+            query="SELECT id, title FROM #__minimarket_categories ORDER BY title"
+            key_field="id"
+            value_field="title"
+            header="COM_MINIMARKET_SELECT_CATEGORY"
+            required="true"
+            filter="int"
+        />
+        <field name="sku" type="text" label="COM_MINIMARKET_PRODUCT_SKU" required="true" filter="string" size="40"/>
+        <field name="price" type="number" label="COM_MINIMARKET_PRODUCT_PRICE" default="0.00" min="0" max="9999999999999.99" step="0.01" required="true" filter="string"/>
+        <field name="stock" type="number" label="COM_MINIMARKET_PRODUCT_STOCK" default="0" min="0" max="4294967295" step="1" required="true" filter="string"/>
+        <field name="state" type="list" label="JSTATUS" default="0" filter="int">
+            <option value="0">JUNPUBLISHED</option>
+            <option value="1">JPUBLISHED</option>
+        </field>
+    </fieldset>
+</form>

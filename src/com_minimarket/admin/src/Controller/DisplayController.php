@@ -13,7 +13,7 @@ final class DisplayController extends BaseController
     {
         $viewName = $this->input->getCmd('view', 'dashboard');
 
-        if (!\in_array($viewName, ['dashboard', 'categories', 'category', 'products'], true)) {
+        if (!\in_array($viewName, ['dashboard', 'categories', 'category', 'products', 'product'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);
         }
 

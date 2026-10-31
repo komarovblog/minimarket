@@ -23,6 +23,12 @@ $needed = @(
     'admin\sql\updates\mysql\0.2.0.sql',
     'admin\forms\category.xml',
     'admin\src\Table\CategoryTable.php',
+    'admin\src\Table\ProductTable.php',
+    'admin\src\Controller\ProductController.php',
+    'admin\src\Model\ProductModel.php',
+    'admin\src\View\Product\HtmlView.php',
+    'admin\tmpl\product\edit.php',
+    'admin\forms\product.xml',
     'admin\src\Controller\CategoryController.php',
     'admin\src\Model\CategoryModel.php',
     'admin\src\Model\CategoriesModel.php',
@@ -69,7 +75,7 @@ try {
 
     try {
         $members = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
-        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php')) {
+        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/forms/product.xml', 'admin/tmpl/product/edit.php', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php')) {
             if ($members -notcontains $entry) {
                 throw "Invalid ZIP: missing $entry"
             }
