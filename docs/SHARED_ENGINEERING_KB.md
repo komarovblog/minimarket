@@ -44,6 +44,7 @@
 | KB-0008 | ZIP-компонента Joomla: разные разделители имён файлов внутри архива | MiniMarket | VERIFIED — Windows build/inspect и первая Joomla install PASS 31.10.2026; админка ещё не проверена | Оба проекта: переносимый ZIP и согласованные тесты |
 | KB-0009 | Symfony Doctrine: раздельные DB_* вместо DATABASE_URL; SQLSTATE 2002 | Shop | CODE_UPDATED / RUNTIME_NOT_VERIFIED | Общий принцип конфигурации, не переносить синтаксис Doctrine в Joomla |
 | KB-0010 | Joomla Toolbar Save/Apply не отправляет форму без `form.validate` | MiniMarket | VERIFIED пользовательским smoke для Category + Product Save в 0.3.2 | Проверять регистрацию JS-ресурсов для отправки и серверную валидацию |
+| KB-0011 | Joomla не переводит название типа пункта меню MiniMarket | MiniMarket | CODE_UPDATED / RUNTIME_NOT_VERIFIED, 0.3.3 | Локализация должна быть доступна в административном контексте |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -149,6 +150,17 @@
 - **Дополнительный smoke 31.10.2026:** пользователь ответил «Работает» на тест создания товара SKU `TEST-001`, цена `1990.50`, остаток `3`, затем редактирования остатка `3 → 2` без дубликата. Следующая проверка — публичный каталог/маршруты; эти результаты не доказывают frontend/SEO. При будущей ошибке UI исследовать конкретную сеть/JS, не менять БД или ядро наугад.
 - **Для Symfony Shop:** переносим только принцип обязательного подключения клиентских ресурсов и независимой серверной валидации; Joomla `form.validate` для Symfony не подходит.
 - **Документация:** [Joomla Client-side Validation](https://manual.joomla.org/docs/5.4/general-concepts/forms/client-side-validation/), [MiniMarket CURRENT_TASK](https://github.com/komarovblog/minimarket/blob/development/CURRENT_TASK.md).
+
+## KB-0011 — Joomla выводит языковые ключи вместо названия типа пункта меню
+
+- **Дата и среда:** 01.11.2026, MiniMarket на Joomla 6.2.0, Windows/Open Server, локально установлен 0.3.2.
+- **Статус:** **CODE_UPDATED / RUNTIME_NOT_VERIFIED**. Исправление добавлено в 0.3.3, обновление компонента и повторная проверка меню ещё не подтверждены.
+- **Симптом:** выбор типа Joomla Menu Item показывает строки `COM_MINIMARKET_CATALOG_MENU_TITLE` и `COM_MINIMARKET_CATALOG_MENU_DESCRIPTION` вместо текстов (пользовательский скриншот).
+- **Причина, подтверждённая кодом:** указанные в `site/tmpl/catalog/default.xml` значения содержались только в языковых файлах site, но отсутствовали в административных `admin/language/ru-RU/com_minimarket.sys.ini` и `en-GB/com_minimarket.sys.ini`. Меню редактируется из административной части Joomla.
+- **Исправление:** оба ключа добавлены в `admin/*.sys.ini` для двух языков; `minimarket.xml` повышен до 0.3.3. SQL, роутер, алиасы и Joomla core не затронуты.
+- **Проверка:** GitHub исходники содержат строки и manifest 0.3.3; результат Windows `PACKAGE_OK: 0.3.3` и Joomla display PASS ещё не получен.
+- **Переиспользование в Shop:** только принцип контекстного расположения переводов, а не файлы/синтаксис Joomla.
+- **Источник:** [Joomla: Menuitem Layout](https://manual.joomla.org/docs/next/building-extensions/components/component-development-tutorial/step02-menuitem/), [MiniMarket](https://github.com/komarovblog/minimarket/blob/development/CURRENT_TASK.md).
 
 ## 4. Шаблон новой записи
 
