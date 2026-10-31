@@ -1,3 +1,5 @@
+> **Корректировка 31.10.2026:** пользователь прямо заявил, что старую версию MiniMarket не ставил, и предъявил ошибку Joomla `Unable to detect manifest file`. Предыдущие галочки «локальная установка PASS по Готово» теперь **не подтверждены**. Следующий реальный шаг — `scripts/inspect-package.ps1` и [INSTALL_ZIP_DIAGNOSTIC.md](INSTALL_ZIP_DIAGNOSTIC.md), прежде чем продолжать разработку. Не считать 0.3.1 реально установленной.
+
 > **Актуальное решение от 30.10.2026:** разрабатываем ТОЛЬКО один `com_minimarket` со своими категориями, товарами и заказами. Старые пункты про магазин на Joomla Articles и два дистрибутива отменены. Главный план — [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md), текущая задача — [CURRENT_TASK.md](../CURRENT_TASK.md).
 
 # PLAN — этапы и подэтапы MiniMarket

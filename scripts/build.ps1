@@ -84,6 +84,28 @@ try {
 
     try {
         $members = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
+        # The Joomla installer reads a top-level <extension> XML document.
+        # Presence of an .xml filename alone is not enough.
+        $manifestEntry = $archive.GetEntry('minimarket.xml')
+        if ($null -eq $manifestEntry) {
+            throw 'ZIP_MANIFEST_NOT_AT_ROOT'
+        }
+        $manifestReader = New-Object System.IO.StreamReader($manifestEntry.Open())
+        try {
+            [xml]$zipManifest = $manifestReader.ReadToEnd()
+        }
+        finally {
+            $manifestReader.Dispose()
+        }
+        if (
+            $null -eq $zipManifest.DocumentElement -or
+            $zipManifest.DocumentElement.LocalName -ne 'extension' -or
+            $zipManifest.DocumentElement.GetAttribute('type') -ne 'component' -or
+            $zipManifest.extension.element -ne 'com_minimarket'
+        ) {
+            throw 'ZIP_INVALID_JOOMLA_MANIFEST'
+        }
+
         foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/forms/product.xml', 'admin/tmpl/product/edit.php', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php', 'site/tmpl/category/default.php', 'site/tmpl/product/default.php', 'site/src/Service/Router.php', 'site/src/Helper/SeoHelper.php', 'admin/src/Extension/MinimarketComponent.php')) {
             if ($members -notcontains $entry) {
                 throw "Invalid ZIP: missing $entry"

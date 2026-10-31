@@ -1,23 +1,21 @@
 # CURRENT_TASK — MiniMarket
-Дата 2026-10-31. Только `komarovblog/minimarket` и `development`. `main`, Shop и Bidder не трогать.
+Дата: 2026-10-31. Только `komarovblog/minimarket`, ветка `development`; main, Shop и Bidder не менять.
 
-## Подтверждено
-- Пользователь сообщил «Гтово» после теста **0.3.0**: фронтенд каталог → категория → товар, плоские alias-ID URL и скрытые товары. Принято как **пользовательское подтверждение** без независимого HTTP readback.
-- Один Joomla 6 компонент со своими категориями/товарами/заказами `com_minimarket`. **Никакого** магазина на Joomla Articles/двух вариантов. Open Server: `C:\OSPanel\home\minimarket.local`, `http://minimarket.local/`.
+## Критическая корректировка статуса
+- Пользователь явно сообщил: **«Старой версии у меня вообще нет, я не ставил»**. Ранее агент ошибочно считал повторяющиеся ответы «Готово» подтверждением установки версий 0.1.0–0.3.0. **Считать установку какой-либо версии MiniMarket НЕПОДТВЕРЖДЁННОЙ**, пока не будет явной проверки установленного компонента в Joomla.
+- При попытке загрузить ZIP Joomla показала **`Unable to detect manifest file.`** (скриншот от пользователя).
+- Код в GitHub `development`: `com_minimarket` manifest version `0.3.1`, source PHP/admin/site и PowerShell build. Код есть; **реальная установка на локальном Open Server сейчас НЕ ДОКАЗАНА**.
+- Общая база знаний **НЕ MySQL**: это `docs/SHARED_ENGINEERING_KB.md` в двух репозиториях, MiniMarket и Shop. Обмен — только этим документом. Причину ошибки ZIP не объявлять проверенной до изучения фактического файла.
 
-## Новый код опубликован, но ещё НЕ тестирован на локальном сайте
-- **0.3.1 SEO canonical**, исходный коммит `dc070d1f3a4848d984c487583d90e93c6ea41901`: `Site/Helper/SeoHelper.php` формирует абсолютный canonical URL через Joomla Route API, проставляет его в `HtmlDocument` для catalogue/category/product, избегает дублей ранее выставленных head canonical; версию изменили в манифесте, `scripts/build.ps1` обновлён.
-- **SQL/данные неизменны, новых 301 нет**. Встроенный Joomla System-SEF отвечает за `index.php` и trailing slash. Alias changes и несколько меню — следующие SEO задачи после проверки.
-- Исходники/манифест/путь builder проверены статически. **Windows ZIP build, Joomla update и browser head canonical пока не проверены**. Нельзя заявлять PASS до пользователя.
+## Единственный следующий шаг — диагностировать реальный ZIP
+1. В PowerShell `C:\OSPanel\home\minimarket.local` выполнить `git status --short`. Если нет незакоммиченных неожиданных изменений, `git pull --ff-only origin development`.
+2. Проверить **уже существующий архив** `dist/com_minimarket.zip` командой:
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect-package.ps1
+   ```
+   Она выводит только `PACKAGE_OK: <version>` либо `PACKAGE_FAIL: <code>`, без логов.
+3. Если **FAIL** — зафиксировать код ошибки и исследовать/исправить сборщик до нового ZIP. Если **OK**, не считать установку пройденной: следующий тест — выяснить, какой именно файл был загружен в Joomla, проверить возможные проблемы распаковки и PHP tmp permissions; при необходимости попросить сам ZIP для независимого анализа. **Не удалять Joomla или компонент**, не импортировать SQL вручную.
+4. Только после установки ZIP через Система → Установка → Расширения проверить MiniMarket в Управлении расширениями, админке и на сайте. Не называть это обновлением при отсутствии установленного компонента.
 
-## Единственный следующий шаг — обновление до 0.3.1 и canonical smoke
-1. В PowerShell `C:\OSPanel\home\minimarket.local`: `git status --short`, затем при чистом состоянии `git pull --ff-only origin development` и `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build.ps1`.
-2. Штатно загрузить `dist/com_minimarket.zip` поверх 0.3.0 через Joomla Extension Installer — **не удалять компонент**.
-3. Проверить `/catalog`, категорию, товар; в исходнике каждой страницы **ровно один `rel="canonical"`** на правильный абсолютный красивый адрес. Техническая `index.php?option=com_minimarket&view=product&id=...` должна иметь canonical на SEF. Убедиться, что нет ошибок и админка работает.
-4. Сценарий: `docs/M1D_CANONICAL_SMOKE.md`. При ошибке сообщить короткое наблюдение, без сырых логов/секретов.
-
-## После PASS
-Решить 301 для изменения псевдонимов товара, выбор единственного menu Itemid и проверку Strict System - SEF. Далее Schema.org Product/Offer и GA4 dataLayer, фото/характеристики, фильтры и корзина. Базу знаний Shop ↔ MiniMarket вести по `docs/SHARED_ENGINEERING_KB.md`, синхронизировать **только** этот документ, без чужого кода.
-
-## Безопасность
-Разрабатывать только в GitHub `src` → ZIP → Joomla installer; `main`, Joomla core, установленную папку `public_html` и чужие БД не трогать. Реальные данные/пароли/логи в GitHub не отправлять.
+## Важные правила
+Joomla core не трогать. Код только `src/`, собирать ZIP, ставить через Joomla Installer. Нет связи товаров с Joomla Articles. Не трогать `main`, Shop Symfony и чужие БД. Не публиковать личные данные, дампы, сырые логи и `.env`. Общий KB `docs/SHARED_ENGINEERING_KB.md` не пополнять неподтверждённой причиной ошибки.
