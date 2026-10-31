@@ -103,6 +103,18 @@ final class ProductTable extends Table
             return false;
         }
 
+        $crossQuery = $db->getQuery(true)
+            ->select('COUNT(*)')
+            ->from($db->quoteName('#__minimarket_categories'))
+            ->where($db->quoteName('alias') . ' = ' . $db->quote($this->alias));
+        $db->setQuery($crossQuery);
+
+        if ((int) $db->loadResult() > 0) {
+            $this->setError('Product aliases must differ from category aliases');
+
+            return false;
+        }
+
         return parent::check();
     }
 }

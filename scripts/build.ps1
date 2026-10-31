@@ -39,6 +39,14 @@ $needed = @(
     'admin\src\View\Dashboard\HtmlView.php',
     'admin\tmpl\dashboard\default.php',
     'site\src\Controller\DisplayController.php',
+    'site\src\Service\Router.php',
+    'site\src\Service\CatalogRepository.php',
+    'site\src\Helper\RouteHelper.php',
+    'site\src\View\Product\HtmlView.php',
+    'site\src\View\Category\HtmlView.php',
+    'site\tmpl\product\default.php',
+    'site\tmpl\category\default.php',
+    'admin\src\Extension\MinimarketComponent.php',
     'site\src\View\Catalog\HtmlView.php',
     'site\tmpl\catalog\default.php'
 )
@@ -75,7 +83,7 @@ try {
 
     try {
         $members = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
-        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/forms/product.xml', 'admin/tmpl/product/edit.php', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php')) {
+        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/forms/product.xml', 'admin/tmpl/product/edit.php', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php', 'site/tmpl/category/default.php', 'site/tmpl/product/default.php', 'site/src/Service/Router.php', 'admin/src/Extension/MinimarketComponent.php')) {
             if ($members -notcontains $entry) {
                 throw "Invalid ZIP: missing $entry"
             }
