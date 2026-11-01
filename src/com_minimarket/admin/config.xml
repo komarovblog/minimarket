@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <fieldset name="basic" label="COM_MINIMARKET_CONFIG_BASIC">
+    <fieldset name="basic" label="COM_MINIMARKET_CONFIG_BASIC" addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
         <field
             name="catalog_title"
             type="text"
@@ -9,6 +9,16 @@
             default="MiniMarket"
             filter="string"
         />
+        <field
+            name="primary_shop_itemid"
+            type="Shopmenu"
+            label="COM_MINIMARKET_CONFIG_PRIMARY_MENU"
+            description="COM_MINIMARKET_CONFIG_PRIMARY_MENU_DESC"
+            default="0"
+            filter="integer"
+        >
+            <option value="0">COM_MINIMARKET_CONFIG_PRIMARY_MENU_AUTO</option>
+        </field>
     </fieldset>
     <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
         <field

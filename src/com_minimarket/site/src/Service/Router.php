@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Site\Service;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Categories\CategoryFactoryInterface;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Component\Router\RouterInterface;
 use Joomla\CMS\Menu\AbstractMenu;
 use Joomla\Database\DatabaseInterface;
@@ -144,23 +145,30 @@ final class Router implements RouterInterface
     }
 
     /**
-     * Stable SEO route for products/categories with multiple public Shop items.
+     * One preferred base for generated category/product URLs.
      *
-     * 1. The explicitly checked "Primary shop URL" menu parameter.
-     * 2. An ordinary Joomla home menu item pointing to MiniMarket.
-     * 3. The oldest published MiniMarket menu item (smallest numeric ID).
+     * 1. Global MiniMarket option "primary_shop_itemid" when it points
+     *    to a currently published ordinary MiniMarket storefront item.
+     * 2. The published MiniMarket home menu item, if available.
+     * 3. The published MiniMarket item with the lowest numeric ID.
      *
-     * Never create or depend on hidden menu items.
-     * @param object[] $items Non-empty ordinary published MiniMarket items.
+     * Historical per-menu "shop_primary_route" params are deliberately
+     * ignored. No plugins or edits to Joomla menu records are required.
+     *
+     * @param object[] $items Non-empty published storefront items.
      */
     private function getPrimaryShopItem(array $items): object
     {
         usort($items, static fn ($a, $b) => (int) $a->id <=> (int) $b->id);
 
-        foreach ($items as $item) {
-            if (method_exists($item, 'getParams')
-                && (int) $item->getParams()->get('shop_primary_route', 0) === 1) {
-                return $item;
+        $configuredId = (int) ComponentHelper::getParams('com_minimarket')
+            ->get('primary_shop_itemid', 0);
+
+        if ($configuredId > 0) {
+            foreach ($items as $item) {
+                if ((int) $item->id === $configuredId) {
+                    return $item;
+                }
             }
         }
 

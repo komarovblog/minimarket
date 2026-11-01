@@ -12,22 +12,18 @@ permissions:
 
 jobs:
   windows-package:
-    name: Windows ZIP bundle
+    name: Windows component ZIP
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build component and package bundle
+      - name: Build MiniMarket component ZIP
         shell: powershell
         run: |
-          & .\scripts\build-package.ps1
-      - name: Inspect standalone component
+          & .\scripts\build.ps1
+      - name: Inspect MiniMarket component ZIP
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
-      - name: Inspect component + plugin package
-        shell: powershell
-        run: |
-          & .\scripts\inspect-package-bundle.ps1
 
   php:
     name: PHP ${{ matrix.php }}
@@ -59,5 +55,5 @@ jobs:
       - name: Catalog regression tests
         run: php scripts/test-catalog.php
 
-      - name: Menu primary sync regression tests
-        run: php scripts/test-menu-sync.php
+      - name: Shop menu selector regression tests
+        run: php scripts/test-shopmenu.php

@@ -10,6 +10,25 @@
 
 declare(strict_types=1);
 
+namespace Joomla\CMS\Component {
+    final class ComponentHelper
+    {
+        public static int $primaryMenuId = 0;
+
+        public static function getParams($component): object
+        {
+            return new class {
+                public function get(string $key, mixed $default = null): mixed
+                {
+                    return $key === 'primary_shop_itemid'
+                        ? \Joomla\CMS\Component\ComponentHelper::$primaryMenuId
+                        : $default;
+                }
+            };
+        }
+    }
+}
+
 namespace Joomla\CMS\Categories {
     interface CategoryFactoryInterface
     {
@@ -60,6 +79,7 @@ namespace Joomla\Database {
 
 namespace MiniMarket\RouterSmoke {
     use Joomla\CMS\Menu\AbstractMenu;
+    use Joomla\CMS\Component\ComponentHelper;
     use Joomla\Database\DatabaseInterface;
     use MiniMarket\Component\Minimarket\Site\Service\Router;
 
@@ -286,12 +306,30 @@ namespace MiniMarket\RouterSmoke {
     expect($twoSections->preprocess(['option' => 'com_minimarket', 'view' => 'product'])['Itemid'] === 31,
         'two shop sections choose oldest visible menu item without explicit primary');
 
-    // Explicitly marked public item overrides both the home and the fallback.
+    // Component-level option is unique. Legacy per-menu flags must be ignored.
+    ComponentHelper::$primaryMenuId = 52;
     $marked = menuItem(52, 'shop');
     $marked->shop_primary_route = 1;
     $withPrimary = router([$marked, menuItem(45, 'home', true)]);
     expect($withPrimary->preprocess(['option' => 'com_minimarket', 'view' => 'product'])['Itemid'] === 52,
-        'explicitly marked shop primary overrides homepage');
+        'global selection overrides homepage');
+
+    ComponentHelper::$primaryMenuId = 31;
+    expect($both->preprocess(['option' => 'com_minimarket', 'view' => 'category'])['Itemid'] === 31,
+        'global selection can choose secondary catalog item');
+    expect($both->preprocess(['option' => 'com_minimarket', 'view' => 'catalog', 'Itemid' => 45])['Itemid'] === 45,
+        'component selection does not change explicit storefront links');
+
+    ComponentHelper::$primaryMenuId = 999;
+    expect($both->preprocess(['option' => 'com_minimarket', 'view' => 'product'])['Itemid'] === 45,
+        'deleted or unpublished configured menu falls back to home');
+
+    ComponentHelper::$primaryMenuId = 0;
+    $legacy = menuItem(31, 'catalog');
+    $legacy->shop_primary_route = 1;
+    expect(router([$legacy, menuItem(45, 'home', true)])
+        ->preprocess(['option' => 'com_minimarket', 'view' => 'product'])['Itemid'] === 45,
+        'old per-menu flags do not override automatic configuration');
 
     // Missing menu remains an explicit configuration error. Never create hidden menu.
     try {
