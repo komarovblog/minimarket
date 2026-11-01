@@ -16,7 +16,7 @@ use Joomla\CMS\Router\Route;
  */
 final class SeoHelper
 {
-    public static function setCanonical(HtmlDocument $document, string $view, int $id = 0): void
+    public static function setCanonical(HtmlDocument $document, string $view, int $id = 0, int $page = 1): void
     {
         if (!\in_array($view, ['catalog', 'category', 'product'], true)) {
             throw new \InvalidArgumentException('Unknown MiniMarket SEO view');
@@ -44,6 +44,12 @@ final class SeoHelper
                 && ($active->query['view'] ?? null) === 'catalog') {
                 $route .= '&Itemid=' . (int) $active->id;
             }
+        }
+
+        // Each paginated assortment page has its own canonical.
+        // Deliberately avoid rewriting product/category URLs or menu aliases.
+        if ($view === 'catalog' && $page > 1) {
+            $route .= '&mm_page=' . $page;
         }
 
         // Joomla 6 API: last argument requests an absolute URL.

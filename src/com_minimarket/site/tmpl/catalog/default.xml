@@ -29,6 +29,41 @@
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>
+            <field
+                name="show_products"
+                type="radio"
+                label="COM_MINIMARKET_MENU_SHOW_PRODUCTS"
+                description="COM_MINIMARKET_MENU_SHOW_PRODUCTS_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+                filter="integer"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+            <field
+                name="products_per_page"
+                type="list"
+                label="COM_MINIMARKET_MENU_PRODUCTS_LIMIT"
+                description="COM_MINIMARKET_MENU_PRODUCTS_LIMIT_DESC"
+                default="12"
+            >
+                <option value="12">12</option>
+                <option value="24">24</option>
+                <option value="48">48</option>
+            </field>
+            <field
+                name="products_order"
+                type="list"
+                label="COM_MINIMARKET_MENU_PRODUCTS_ORDER"
+                description="COM_MINIMARKET_MENU_PRODUCTS_ORDER_DESC"
+                default="newest"
+            >
+                <option value="newest">COM_MINIMARKET_ORDER_NEWEST</option>
+                <option value="name">COM_MINIMARKET_ORDER_NAME</option>
+                <option value="price_asc">COM_MINIMARKET_ORDER_PRICE_ASC</option>
+                <option value="price_desc">COM_MINIMARKET_ORDER_PRICE_DESC</option>
+            </field>
         </fieldset>
     </fields>
 </metadata>
