@@ -1,3 +1,5 @@
+> **0.3.6 — новый обязательный regression gate перед Joomla upgrade:** `php scripts/test-router.php` (или `C:\OSPanel\modules\PHP-8.5\php.exe` из CMD). Изолированный тест использует реальный `Router.php`, имитацию Joomla 6 SiteMenu/MenuItem **без свойства `published`** и mock DB; ему не нужны Joomla, MySQL или Docker. При `ROUTER_TEST_FAIL` не устанавливать ZIP. Только после `ROUTER_TEST_OK` и `PACKAGE_OK: 0.3.6` выполнить **один** upgrade; [M1F_ROUTER_REGRESSION.md](../docs/M1F_ROUTER_REGRESSION.md).
+
 # Скрипты MiniMarket
 
 Рабочий скрипт: \`build.ps1\` — из собственных исходников \`src/com_minimarket\` собирает архив \`dist/com_minimarket.zip\` для штатного менеджера расширений Joomla 6.
