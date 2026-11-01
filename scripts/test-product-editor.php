@@ -56,9 +56,10 @@ namespace MiniMarket\ProductSmoke {
     final class FakeQuery
     {
         public string $from = '';
+        public array $conditions = [];
         public function select($columns): self { return $this; }
         public function from($table): self { $this->from = (string) $table; return $this; }
-        public function where($condition): self { return $this; }
+        public function where($condition): self { $this->conditions[] = (string) $condition; return $this; }
     }
     final class FakeDb implements DatabaseInterface
     {
@@ -69,7 +70,8 @@ namespace MiniMarket\ProductSmoke {
         public function setQuery($query): void { $this->query = $query; }
         public function loadResult(): int
         {
-            return $this->query?->from === '#__minimarket_categories' ? 1 : 0;
+            return $this->query?->from === '#__minimarket_categories'
+                && str_contains(implode(' ', $this->query->conditions), 'id = 1') ? 1 : 0;
         }
     }
 
