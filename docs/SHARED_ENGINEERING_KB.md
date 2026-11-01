@@ -49,6 +49,7 @@
 | KB-0013 | Варианты товара: единая карточка, атомарный SKU и фильтры без ложных сочетаний | Shop | DESIGN_ONLY / NOT_IMPLEMENTED | Общее правило фильтрации и идентичности; реализация магазинов разная |
 | KB-0014 | Детальная локальная диагностика с безопасной публикацией в GitHub | Shop | PARTIALLY_VERIFIED | Оба проекта (принцип) |
 | KB-0015 | Joomla Media: служебный `#joomlaImage://` и размеры не должны храниться как путь | MiniMarket | PARTIALLY_VERIFIED (UI smoke PASS; full acceptance pending) | Общее правило хранения, Joomla-специфичная обработка |
+| KB-0016 | Галерея: связь с медиафайлом вместо копии и атомарное сохранение | MiniMarket | CODE_UPDATED / CI_PASS / JOOMLA_SMOKE_NOT_RUN | Общий принцип, разные ORM и UI |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -209,6 +210,15 @@
 - **Политика:** [MiniMarket MEDIA_PATH_POLICY.md](https://github.com/komarovblog/minimarket/blob/development/docs/MEDIA_PATH_POLICY.md), версия MiniMarket 0.5.2. Обновление знания после фактического Joomla smoke.
 
 **Дополнение 01.11.2026 — подтверждённый GitHub диагноз:** структурированный отчёт `logs/shop-variant-metadata-latest.json` показал `FAIL`, `3 errors`, все `Symfony\\Component\\DependencyInjection\\Exception\\EnvNotFoundException`. Первопричина проверена в `phpunit.xml.dist`: запуск тестов выполнялся с `bootstrap="vendor/autoload.php"`, не загружал приватный `.env` перед инициализацией Symfony Kernel. Исправление в Shop: `tests/bootstrap.php` вызывает Symfony Dotenv::load() для **существующего единственного .env**, а `phpunit.xml.dist` использует этот bootstrap; `APP_ENV=test` сохраняется, секреты в GitHub не попадают. Фактический PHPUnit PASS после изменения пока `NOT_RUN`. Для Joomla переносится только принцип корректной инициализации тестового окружения без публикации секретов, не код Symfony. Источники: https://github.com/komarovblog/shop/blob/development/tests/bootstrap.php , https://github.com/komarovblog/shop/blob/development/logs/shop-variant-metadata-latest.json .
+
+## KB-0016 — Галерея товара: отдельная связь с файлом и транзакционное сохранение
+
+- **Дата/среда:** 01.11.2026, Joomla MiniMarket 0.5.3, PHP 8.4/8.5, MySQL 8. **Статус:** CODE_UPDATED / CI_PASS / JOOMLA_SMOKE_NOT_RUN; проверка реальной Joomla остаётся отдельной задачей.
+- **Задача:** у одного товара должно быть несколько фото с alt и сортировкой, одна главная обложка, удаление фото из карточки без удаления реального файла. Будущие варианты по цвету/SKU должны переиспользовать тот же файл без копий. Нельзя записывать служебное `#joomlaImage://`, дублировать цену/остаток или влиять на старые товары.
+- **Решение MiniMarket:** историческая `products.image` сохраняется как единственная главная обложка; дополнительные пути/alt/order находятся в `#__minimarket_product_images`, связанной через `product_id`. Joomla `subform` с повторяемыми Media-полями, drag reorder, текстовым alt и скрытым признаком присутствия формы для корректного удаления всех строк. Вход проверяет `ProductGallery::normalizeRows()`, сохранение товара и связей обёрнуто в транзакцию. Пустые/опасные/повторные пути и повтор главной обложки отклоняются. Физический файл Joomla Media никогда не удаляется из этой операции.
+- **Тесты:** [MiniMarket Actions](https://github.com/komarovblog/minimarket/actions) — PHP (валидация/поля Joomla), MySQL 8 (legacy 0.5.2→0.5.3 и fresh install), Windows ZIP, синтаксис JS; к моменту публикации CI завершился успешно. **Живой Joomla Subform и просмотр в браузере ещё НЕ проверены**, приёмка [M3](https://github.com/komarovblog/minimarket/blob/development/docs/M3_PRODUCT_GALLERY_053_SMOKE.md).
+- **Для Shop Symfony:** переносится принцип «один физический файл, отношения товара и вариантов, alt/order отдельно, атомарность записи и удаление только связи». **Не переносить** Joomla Subform, MVC и SQL таблицу в Doctrine/Symfony без собственного проектирования.
+- **Внимание:** сортировка, галерея и сохранение привязок к конкретному цвету/SKU требуют реальной приёмки; эти привязки пока не реализованы.
 
 ## 4. Шаблон новой записи
 
