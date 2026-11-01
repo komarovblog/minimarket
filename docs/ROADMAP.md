@@ -1,3 +1,5 @@
+> **Этап 6.1: 0.5.4 SOURCE, CI PASS.** Справочники характеристик и значений, но назначение товару и варианты ещё не готовы. Этап 7 DESIGN ONLY. Реальную Joomla проверить по [M4_ATTRIBUTES_054_SMOKE.md](M4_ATTRIBUTES_054_SMOKE.md); [правила вариантов](M4_VARIANT_COMBINATIONS_PLAN.md).
+
 > **0.5.3:** базовая галерея товара (этап 3.3 и часть 3.1/3.2) реализована в коде: несколько фото, alt, порядок, удаление связей, адаптивный просмотр. Реальная Joomla приёмка ещё NOT RUN. Зависимость галереи от конкретного цвета/SKU (3.4) пока DESIGN ONLY. [Проверка](M3_PRODUCT_GALLERY_053_SMOKE.md).
 
 > **Стандарт для этапов 3, 7, 8 и 11 (0.5.2):** чистый media path `images/...` без `#joomlaImage://` и width/height; единственный справочник файлов Joomla + связи с category/product/bundle/color/SKU, отдельные alt/order/area; единый серверный validator, никакой копии служебного URL. [MEDIA_PATH_POLICY.md](MEDIA_PATH_POLICY.md). Проверка реальной Joomla после обновления ещё требуется.
