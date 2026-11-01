@@ -19,6 +19,12 @@
         >
             <option value="0">COM_MINIMARKET_CONFIG_PRIMARY_MENU_AUTO</option>
         </field>
+        <field name="category_show_children" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_CHILDREN" default="1" filter="int">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_show_products" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_PRODUCTS" default="1" filter="int">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
     </fieldset>
     <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
         <field

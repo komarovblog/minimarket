@@ -83,7 +83,8 @@ final class CategoryTree
         }
 
         usort($result, static function (object $a, object $b): int {
-            return strcasecmp((string) $a->title, (string) $b->title)
+            return ((int) ($a->sort_order ?? 0) <=> (int) ($b->sort_order ?? 0))
+                ?: strcasecmp((string) $a->title, (string) $b->title)
                 ?: (int) $a->id <=> (int) $b->id;
         });
 

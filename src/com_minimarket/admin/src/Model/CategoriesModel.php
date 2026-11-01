@@ -18,6 +18,7 @@ final class CategoriesModel extends ListModel
                 $db->quoteName('c.alias'),
                 $db->quoteName('c.parent_id'),
                 $db->quoteName('c.state'),
+                $db->quoteName('c.sort_order'),
                 $db->quoteName('p.title', 'parent_title'),
             ])
             ->from($db->quoteName('#__minimarket_categories', 'c'))
@@ -26,6 +27,6 @@ final class CategoriesModel extends ListModel
                 $db->quoteName('#__minimarket_categories', 'p')
                 . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('c.parent_id')
             )
-            ->order($db->quoteName('c.id') . ' DESC');
+            ->order($db->quoteName('c.parent_id') . ' ASC, ' . $db->quoteName('c.sort_order') . ' ASC, ' . $db->quoteName('c.id') . ' ASC');
     }
 }

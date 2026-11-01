@@ -21,6 +21,7 @@ $needed = @(
     'admin\config.xml',
     'admin\sql\install.mysql.sql',
     'admin\sql\updates\mysql\0.2.0.sql',
+    'admin\sql\updates\mysql\0.4.1.sql',
     'admin\forms\category.xml',
     'admin\src\Table\CategoryTable.php',
     'admin\src\Table\ProductTable.php',

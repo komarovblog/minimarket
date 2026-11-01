@@ -30,6 +30,7 @@ final class CatalogRepository
                     $this->db->quoteName('title'),
                     $this->db->quoteName('alias'),
                     $this->db->quoteName('state'),
+                    $this->db->quoteName('sort_order'),
                 ])
                 ->from($this->db->quoteName('#__minimarket_categories'));
             $this->db->setQuery($q);
@@ -138,7 +139,7 @@ final class CatalogRepository
         }
 
         $q = $this->db->getQuery(true)
-            ->select([$this->db->quoteName('id'), $this->db->quoteName('title'), $this->db->quoteName('description')])
+            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products']))
             ->from($this->db->quoteName('#__minimarket_categories'))
             ->where($this->db->quoteName('id') . ' = ' . $id)
             ->where($this->db->quoteName('state') . ' = 1');

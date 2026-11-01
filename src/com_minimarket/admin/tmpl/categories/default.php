@@ -9,7 +9,7 @@ use Joomla\CMS\Router\Route;
       name="adminForm" id="adminForm">
     <table class="table">
         <thead>
-        <tr><th><?php echo Text::_('JGLOBAL_TITLE'); ?></th><th><?php echo Text::_('JFIELD_ALIAS_LABEL'); ?></th><th><?php echo Text::_('COM_MINIMARKET_CATEGORY_PARENT'); ?></th><th><?php echo Text::_('JSTATUS'); ?></th><th>ID</th></tr>
+        <tr><th><?php echo Text::_('JGLOBAL_TITLE'); ?></th><th><?php echo Text::_('JFIELD_ALIAS_LABEL'); ?></th><th><?php echo Text::_('COM_MINIMARKET_CATEGORY_PARENT'); ?></th><th><?php echo Text::_('COM_MINIMARKET_CATEGORY_ORDER'); ?></th><th><?php echo Text::_('JSTATUS'); ?></th><th>ID</th></tr>
         </thead>
         <tbody>
         <?php foreach ($this->items as $item) : ?>
@@ -19,12 +19,13 @@ use Joomla\CMS\Router\Route;
                 <td><?php echo (int) ($item->parent_id ?? 0) > 0
                     ? $this->escape((string) ($item->parent_title ?? 'ID ' . (int) $item->parent_id))
                     : Text::_('COM_MINIMARKET_CATEGORY_PARENT_ROOT'); ?></td>
+                <td><?php echo (int) $item->sort_order; ?></td>
                 <td><?php echo (int) $item->state === 1 ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED'); ?></td>
                 <td><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
-            <tr><td colspan="5"><?php echo Text::_('COM_MINIMARKET_NO_CATEGORIES'); ?></td></tr>
+            <tr><td colspan="6"><?php echo Text::_('COM_MINIMARKET_NO_CATEGORIES'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>

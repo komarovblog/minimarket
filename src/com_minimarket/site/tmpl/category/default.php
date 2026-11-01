@@ -2,6 +2,7 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 ?>
 <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BREADCRUMB')); ?>">
@@ -9,6 +10,19 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 </nav>
 <section class="com-minimarket-category">
     <h1><?php echo $this->escape($this->category->title); ?></h1>
+    <?php
+    $image = explode('#', (string) ($this->category->image ?? ''), 2)[0];
+    $safeImage = str_starts_with($image, 'images/') && !str_contains($image, '..')
+        && !preg_match('/[\x00-\x1f<>]/', $image);
+    ?>
+    <?php if ($safeImage) : ?>
+        <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
+             alt="<?php echo $this->escape((string) ($this->category->image_alt ?: $this->category->title)); ?>"
+             loading="lazy" class="com-minimarket-category__image">
+    <?php endif; ?>
+    <?php if (trim((string) ($this->category->introtext ?? '')) !== '') : ?>
+        <p><?php echo $this->escape(strip_tags((string) $this->category->introtext)); ?></p>
+    <?php endif; ?>
     <?php if ((string) $this->category->description !== '') : ?>
         <p><?php echo $this->escape(strip_tags((string) $this->category->description)); ?></p>
     <?php endif; ?>

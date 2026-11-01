@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Site\View\Category;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
@@ -32,8 +33,13 @@ final class HtmlView extends BaseHtmlView
         }
 
         $this->category = $category;
-        $this->children = $repo->getChildCategories($id);
-        $this->products = $repo->getProductsForCategory($id);
+        $options = ComponentHelper::getParams('com_minimarket');
+        $children = (int) ($category->show_children ?? -1);
+        $products = (int) ($category->show_products ?? -1);
+        $this->children = ($children === 1 || ($children === -1 && (int) $options->get('category_show_children', 1) === 1))
+            ? $repo->getChildCategories($id) : [];
+        $this->products = ($products === 1 || ($products === -1 && (int) $options->get('category_show_products', 1) === 1))
+            ? $repo->getProductsForCategory($id) : [];
         $this->getDocument()->setTitle((string) $category->title);
         SeoHelper::setCanonical($this->getDocument(), 'category', $id);
 
