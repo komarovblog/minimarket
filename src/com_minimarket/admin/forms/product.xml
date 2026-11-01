@@ -21,6 +21,7 @@
         <field name="description" type="editor" label="JGLOBAL_DESCRIPTION" filter="safehtml" buttons="true"/>
     </fieldset>
     <fieldset name="images" label="COM_MINIMARKET_PRODUCT_TAB_IMAGES">
+        <field name="gallery_present" type="hidden" default="1" filter="int"/>
         <field name="image" type="media" label="COM_MINIMARKET_PRODUCT_IMAGE" filter="string" directory="images"/>
         <field name="image_alt" type="text" label="COM_MINIMARKET_CATEGORY_IMAGE_ALT" filter="string" maxlength="255"/>
         <field name="gallery" type="subform" label="COM_MINIMARKET_GALLERY_ADDITIONAL"

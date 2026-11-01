@@ -82,6 +82,11 @@ try {
         'admin/sql/updates/mysql/0.4.2.sql',
         'admin/sql/updates/mysql/0.5.0.sql',
         'admin/sql/updates/mysql/0.5.2.sql',
+        'admin/sql/updates/mysql/0.5.3.sql',
+        'admin/forms/product_gallery.xml',
+        'admin/src/Service/ProductGallery.php',
+        'media/js/gallery.js',
+        'media/css/gallery.css',
         'admin/src/Service/MediaPath.php',
         'media/js/clean-media.js',
         'admin/src/Field/ProductcategoryField.php',
@@ -117,6 +122,11 @@ try {
         exit 1
     }
 
+    if ($null -eq $xml.SelectSingleNode("/extension/media[@destination='com_minimarket']/folder[text()='css']")) {
+        Write-Output 'PACKAGE_FAIL: GALLERY_CSS_NOT_DECLARED'
+        exit 1
+    }
+
     # Inspect exactly what Joomla will install: the five editor tabs and image fields.
     $formEntry = $archive.GetEntry('admin/forms/product.xml')
     $formReader = New-Object System.IO.StreamReader($formEntry.Open())
@@ -136,6 +146,12 @@ try {
     if ($null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='image' and @type='media']") -or
         $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='image_alt']")) {
         Write-Output 'PACKAGE_FAIL: PRODUCT_IMAGE_FIELDS_MISSING'
+        exit 1
+    }
+
+    if ($null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='gallery' and @type='subform']") -or
+        $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='gallery_present']")) {
+        Write-Output 'PACKAGE_FAIL: REPEATABLE_GALLERY_FIELDS_MISSING'
         exit 1
     }
 

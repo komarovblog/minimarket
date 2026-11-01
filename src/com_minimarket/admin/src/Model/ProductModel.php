@@ -37,7 +37,10 @@ final class ProductModel extends AdminModel
      */
     public function save($data)
     {
-        $hasGallery = array_key_exists('gallery', $data);
+        // Joomla repeatable subform posts no rows when the last row is removed.
+        // Hidden sentinel makes an explicit empty gallery distinct from a legacy
+        // form that never offered gallery editing.
+        $hasGallery = array_key_exists('gallery', $data) || !empty($data['gallery_present']);
         try {
             $rows = $hasGallery
                 ? ProductGallery::normalizeRows($data['gallery'], (string) ($data['image'] ?? ''))
@@ -47,7 +50,12 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['gallery']);
+        if ($hasGallery && $rows && trim((string) ($data['image'] ?? '')) === '') {
+            $this->setError(Text::_('COM_MINIMARKET_GALLERY_COVER_REQUIRED'));
+            return false;
+        }
+
+        unset($data['gallery'], $data['gallery_present']);
         $db = $this->getDatabase();
         $db->transactionStart();
 
