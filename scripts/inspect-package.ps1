@@ -110,12 +110,10 @@ try {
         }
     }
 
-    # Deferred stage-6 attributes must never be included in category releases.
+    # Only the abandoned pre-0.5.4 migration remains prohibited.
+    # Attribute editors themselves are required by release 0.5.4.
     foreach ($deferred in @(
-        'admin/sql/updates/mysql/0.4.0.sql',
-        'admin/forms/attribute.xml',
-        'admin/tmpl/attributes/default.php',
-        'admin/src/Table/AttributeTable.php'
+        'admin/sql/updates/mysql/0.4.0.sql'
     )) {
         if ($null -ne $archive.GetEntry($deferred)) {
             Write-Output ('PACKAGE_FAIL: PREMATURE_ATTRIBUTES_IN_PACKAGE: ' + $deferred)
