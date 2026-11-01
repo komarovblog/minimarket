@@ -16,6 +16,16 @@ namespace Joomla\Database {
     }
 }
 
+namespace Joomla\CMS\Language {
+    final class Text
+    {
+        public static function _(string $key): string
+        {
+            return $key;
+        }
+    }
+}
+
 namespace Joomla\CMS\Filter {
     final class OutputFilter
     {
