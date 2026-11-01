@@ -24,6 +24,14 @@ final class HtmlView extends BaseHtmlView
 
         // Joomla Save/Apply проверяет form-validate; без скрипта сохранение может не начаться.
         Factory::getApplication()->getDocument()->getWebAssetManager()->useScript('form.validate');
+        // Component-local Joomla Media cleanup; no Joomla core modifications.
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript(
+                'com_minimarket.clean-media',
+                'media/com_minimarket/js/clean-media.js',
+                [],
+                ['defer' => true]
+            );
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PRODUCT_EDIT_TITLE'));
         ToolbarHelper::apply('product.apply');
