@@ -57,3 +57,6 @@ jobs:
 
       - name: Shop menu selector regression tests
         run: php scripts/test-shopmenu.php
+
+      - name: Admin settings visibility regression tests
+        run: php scripts/test-admin-options.php
