@@ -130,6 +130,18 @@ requireTrue((int) $pdo->query("SELECT COUNT(*) FROM " . $attributes)->fetchColum
 requireTrue(one($pdo, "SELECT * FROM " . $products . " WHERE id = 1") === $before,
     'repeatable migration preserves old product');
 
+// A MySQL schema requires foreign-key CONSTRAINT names to be unique,
+// even across differently prefixed tables. This is a throwaway CI database:
+// clear only the known test tables before exercising the fresh-install path.
+foreach ([
+    'upgrade_mmci_minimarket_attribute_values',
+    'upgrade_mmci_minimarket_attributes',
+    'upgrade_mmci_minimarket_products',
+    'upgrade_mmci_minimarket_categories',
+] as $testTable) {
+    $pdo->exec('DROP TABLE ' . tbl($testTable));
+}
+
 $fresh = 'fresh_mmci_';
 executeSqlFile($pdo, $dir . 'install.mysql.sql', $fresh);
 $freshTables = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = "
