@@ -97,6 +97,9 @@ jobs:
       - name: Administrator category hierarchy and counts
         run: php scripts/test-admin-category-tree.php
 
+      - name: Product editor validation and source contract
+        run: php scripts/test-product-editor.php
+
       - name: Shop menu selector regression tests
         run: php scripts/test-shopmenu.php
 

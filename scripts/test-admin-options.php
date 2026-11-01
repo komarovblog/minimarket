@@ -101,6 +101,7 @@ namespace MiniMarket\AdminOptionsTest {
                 $this->input = new class {
                     public function getString(string $key, string $default = ''): string { return $default; }
                     public function getCmd(string $key, string $default = ''): string { return $default; }
+                    public function getInt(string $key, int $default = 0): int { return $default; }
                 };
             }
 

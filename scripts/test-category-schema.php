@@ -68,6 +68,32 @@ verify(row($pdo, 'catci_minimarket_categories')['introtext'] === 'Intro',
     'updated category description saved');
 verify($beforeProduct === row($pdo, 'catci_minimarket_products'), 'product unchanged on edit');
 
+// Product 0.5.0 upgrade: existing trading fields and ID must not change.
+runSql($pdo, $dir . 'updates/mysql/0.5.0.sql', 'catci_');
+$afterProduct = row($pdo, 'catci_minimarket_products');
+foreach ($beforeProduct as $col => $value) {
+    verify(array_key_exists($col, $afterProduct) && $value === $afterProduct[$col],
+        '0.5.0 preserved product ' . $col);
+}
+$productEditorColumns = [
+    'introtext', 'description', 'sort_order', 'image', 'image_alt',
+    'meta_title', 'meta_description', 'meta_robots',
+    'og_title', 'og_description', 'og_image', 'og_image_alt',
+];
+foreach ($productEditorColumns as $col) {
+    verify(array_key_exists($col, $afterProduct), '0.5.0 product column ' . $col);
+}
+$pdo->exec("UPDATE catci_minimarket_products SET introtext='<p>Short</p>',
+    description='<p>Full</p>', image='images/sample.jpg', image_alt='Cover',
+    meta_title='Title', meta_description='Description', meta_robots='noindex,follow',
+    og_title='Shared title', og_image='images/social.jpg', sort_order=4 WHERE id=1");
+verify(row($pdo, 'catci_minimarket_products')['meta_title'] === 'Title',
+    '0.5.0 SEO persists');
+verify(row($pdo, 'catci_minimarket_products')['sku'] === 'TEST-001',
+    '0.5.0 legacy SKU unchanged by editor update');
+verify((string) row($pdo, 'catci_minimarket_products')['price'] === (string) $beforeProduct['price'],
+    '0.5.0 legacy price unchanged by editor update');
+
 // MySQL FK constraint identifiers are database-wide: clean only CI test tables.
 $pdo->exec('DROP TABLE catci_minimarket_products');
 $pdo->exec('DROP TABLE catci_minimarket_categories');
@@ -77,6 +103,11 @@ $columns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_categories')
 foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description', 'meta_robots',
     'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(in_array($col, $columns, true), 'fresh-install column ' . $col);
+}
+$freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach ($productEditorColumns as $col) {
+    verify(in_array($col, $freshProducts, true), 'fresh 0.5.0 product column ' . $col);
 }
 $pdo->exec("INSERT INTO freshcatci_minimarket_categories
     (id,title,alias,state) VALUES (1,'New category','new-category',1)");
