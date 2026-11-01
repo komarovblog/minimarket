@@ -208,6 +208,8 @@
 - **Для Shop Symfony:** переносится только принцип «сохранять стабильную ссылку на файл, а служебные метаданные/размеры отделять от пути». **Не** переносить Joomla суффикс, JS или SQL-таблицы в Shop: у Symfony другие API и модель хранения. Изначальные файлы изображений не удалять.
 - **Политика:** [MiniMarket MEDIA_PATH_POLICY.md](https://github.com/komarovblog/minimarket/blob/development/docs/MEDIA_PATH_POLICY.md), версия MiniMarket 0.5.2. Обновление знания после фактического Joomla smoke.
 
+**Дополнение 01.11.2026 — подтверждённый GitHub диагноз:** структурированный отчёт `logs/shop-variant-metadata-latest.json` показал `FAIL`, `3 errors`, все `Symfony\\Component\\DependencyInjection\\Exception\\EnvNotFoundException`. Первопричина проверена в `phpunit.xml.dist`: запуск тестов выполнялся с `bootstrap="vendor/autoload.php"`, не загружал приватный `.env` перед инициализацией Symfony Kernel. Исправление в Shop: `tests/bootstrap.php` вызывает Symfony Dotenv::load() для **существующего единственного .env**, а `phpunit.xml.dist` использует этот bootstrap; `APP_ENV=test` сохраняется, секреты в GitHub не попадают. Фактический PHPUnit PASS после изменения пока `NOT_RUN`. Для Joomla переносится только принцип корректной инициализации тестового окружения без публикации секретов, не код Symfony. Источники: https://github.com/komarovblog/shop/blob/development/tests/bootstrap.php , https://github.com/komarovblog/shop/blob/development/logs/shop-variant-metadata-latest.json .
+
 ## 4. Шаблон новой записи
 
 ```markdown
