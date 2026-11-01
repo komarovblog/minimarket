@@ -63,6 +63,7 @@ namespace MiniMarket\CategoryTreeSmoke {
     use MiniMarket\Component\Minimarket\Site\Service\CategoryTree;
 
     \define('_JEXEC', 1);
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/MediaPath.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Table/CategoryTable.php';
     require __DIR__ . '/../src/com_minimarket/site/src/Service/CategoryTree.php';
 
