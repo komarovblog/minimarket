@@ -74,6 +74,7 @@ namespace MiniMarket\AdminOptionsTest {
 
     \define('_JEXEC', 1);
     require __DIR__ . '/../src/com_minimarket/admin/src/View/Dashboard/HtmlView.php';
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/CategoryAdminTree.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/View/Categories/HtmlView.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/View/Products/HtmlView.php';
 
@@ -93,8 +94,14 @@ namespace MiniMarket\AdminOptionsTest {
         'none' => [],
     ] as $role => $allowed) {
         Factory::$application = new class($allowed) {
+            public object $input;
+
             public function __construct(private array $allowed)
             {
+                $this->input = new class {
+                    public function getString(string $key, string $default = ''): string { return $default; }
+                    public function getCmd(string $key, string $default = ''): string { return $default; }
+                };
             }
 
             public function getIdentity(): object
