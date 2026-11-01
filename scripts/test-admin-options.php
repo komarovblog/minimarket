@@ -37,7 +37,7 @@ namespace Joomla\CMS\MVC\View {
             return [];
         }
 
-        public function display($tpl = null): void
+        public function display($tpl = null)
         {
         }
     }
