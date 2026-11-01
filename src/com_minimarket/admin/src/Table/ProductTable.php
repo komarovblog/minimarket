@@ -71,6 +71,49 @@ final class ProductTable extends Table
             return false;
         }
 
+        // The current release keeps the existing simple product SKU/price/stock.
+        // Variant records become the source of truth only in the later atomic
+        // SKU migration; do not add a second editable price or stock column.
+        $order = trim((string) ($this->sort_order ?? '0'));
+        if (!preg_match('/^(0|[1-9][0-9]*)$/D', $order)
+            || strlen($order) > 10
+            || (strlen($order) === 10 && strcmp($order, '4294967295') > 0)) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_ORDER_INVALID'));
+            return false;
+        }
+        $this->sort_order = (int) $order;
+
+        foreach (['image' => 1024, 'og_image' => 1024] as $field => $maxLength) {
+            $path = trim((string) ($this->$field ?? ''));
+            if (mb_strlen($path) > $maxLength
+                || ($path !== '' && (!str_starts_with($path, 'images/')
+                    || str_contains($path, '..')
+                    || preg_match('/[\x00-\x1f<>]/', $path)))) {
+                $this->setError(Text::_('COM_MINIMARKET_PRODUCT_MEDIA_INVALID'));
+                return false;
+            }
+            $this->$field = $path;
+        }
+
+        foreach ([
+            'image_alt' => 255, 'meta_title' => 255, 'meta_description' => 320,
+            'og_title' => 255, 'og_description' => 320, 'og_image_alt' => 255,
+        ] as $field => $limit) {
+            $value = trim((string) ($this->$field ?? ''));
+            if (mb_strlen($value) > $limit || preg_match('/[\x00-\x1f<>]/', $value)) {
+                $this->setError(Text::_('COM_MINIMARKET_PRODUCT_SEO_INVALID'));
+                return false;
+            }
+            $this->$field = $value;
+        }
+
+        $this->meta_robots = trim((string) ($this->meta_robots ?? ''));
+        if (!in_array($this->meta_robots,
+            ['', 'index,follow', 'noindex,follow', 'noindex,nofollow'], true)) {
+            $this->setError(Text::_('COM_MINIMARKET_PRODUCT_SEO_INVALID'));
+            return false;
+        }
+
         $db = $this->getDbo();
         $categoryQuery = $db->getQuery(true)
             ->select('COUNT(*)')
