@@ -60,11 +60,6 @@ try {
     foreach ($file in @(
         'admin/services/provider.php',
         'admin/src/Field/ShopmenuField.php',
-        'admin/sql/updates/mysql/0.4.0.sql',
-        'admin/src/Table/AttributeTable.php',
-        'admin/src/Table/ValueTable.php',
-        'admin/tmpl/attributes/default.php',
-        'admin/tmpl/values/default.php',
         'admin/src/Extension/MinimarketComponent.php',
         'site/src/Controller/DisplayController.php'
     )) {

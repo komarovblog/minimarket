@@ -11,42 +11,6 @@ permissions:
   contents: read
 
 jobs:
-  mysql-attributes:
-    name: MySQL 8 additive attribute migration
-    runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ci_root_password
-          MYSQL_DATABASE: minimarket_ci_test
-          MYSQL_USER: mmci
-          MYSQL_PASSWORD: ci_database_password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u mmci -pci_database_password"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=18
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up PHP with MySQL PDO
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-          extensions: pdo_mysql
-          coverage: none
-      - name: Verify additive install and upgrade SQL in isolated MySQL
-        env:
-          MINIMARKET_SCHEMA_TEST: '1'
-          MM_CI_DB_HOST: 127.0.0.1
-          MM_CI_DB_PORT: '3306'
-          MM_CI_DB_DATABASE: minimarket_ci_test
-          MM_CI_DB_USER: mmci
-          MM_CI_DB_PASSWORD: ci_database_password
-        run: php scripts/test-attribute-schema.php
-
   windows-package:
     name: Windows component ZIP
     runs-on: windows-latest
@@ -99,6 +63,3 @@ jobs:
 
       - name: Admin settings visibility regression tests
         run: php scripts/test-admin-options.php
-
-      - name: Attribute dictionary validation regression tests
-        run: php scripts/test-attributes.php
