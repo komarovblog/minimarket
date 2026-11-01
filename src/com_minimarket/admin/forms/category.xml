@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form>
-    <fieldset name="details" label="COM_MINIMARKET_CATEGORY_DETAILS">
-        <field name="id" type="hidden" default="0" filter="int"/>
-        <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
-        <field name="alias" type="text" label="JFIELD_ALIAS_LABEL" filter="string" size="60"/>
-        <field name="parent_id" type="sql"
-            label="COM_MINIMARKET_CATEGORY_PARENT"
-            description="COM_MINIMARKET_CATEGORY_PARENT_DESC"
-            query="SELECT id, title FROM #__minimarket_categories ORDER BY title ASC, id ASC"
-            key_field="id" value_field="title" default="0" filter="int">
-            <option value="0">COM_MINIMARKET_CATEGORY_PARENT_ROOT</option>
-        </field>
-        <field name="description" type="textarea" label="JGLOBAL_DESCRIPTION" filter="safehtml" rows="5"/>
-        <field name="state" type="list" label="JSTATUS" default="0" filter="int">
-            <option value="0">JUNPUBLISHED</option>
-            <option value="1">JPUBLISHED</option>
-        </field>
-    </fieldset>
+ <fieldset name="details" label="COM_MINIMARKET_CATEGORY_DETAILS">
+  <field name="id" type="hidden" default="0" filter="int"/>
+  <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
+  <field name="alias" type="text" label="JFIELD_ALIAS_LABEL" filter="string" size="60"/>
+  <field name="parent_id" type="sql" label="COM_MINIMARKET_CATEGORY_PARENT" description="COM_MINIMARKET_CATEGORY_PARENT_DESC"
+   query="SELECT id, title FROM #__minimarket_categories ORDER BY title ASC, id ASC"
+   key_field="id" value_field="title" default="0" filter="int">
+   <option value="0">COM_MINIMARKET_CATEGORY_PARENT_ROOT</option>
+  </field>
+  <field name="sort_order" type="number" label="COM_MINIMARKET_CATEGORY_ORDER" filter="uint" default="0" min="0" max="4294967295"/>
+  <field name="introtext" type="textarea" label="COM_MINIMARKET_CATEGORY_INTRO" filter="safehtml" rows="4"/>
+  <field name="description" type="editor" label="JGLOBAL_DESCRIPTION" filter="safehtml" buttons="true"/>
+  <field name="image" type="media" label="COM_MINIMARKET_CATEGORY_IMAGE" filter="string" directory="images"/>
+  <field name="image_alt" type="text" label="COM_MINIMARKET_CATEGORY_IMAGE_ALT" filter="string" size="60"/>
+  <field name="show_children" type="list" label="COM_MINIMARKET_CATEGORY_SHOW_CHILDREN" filter="int" default="-1">
+   <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option><option value="1">JYES</option><option value="0">JNO</option>
+  </field>
+  <field name="show_products" type="list" label="COM_MINIMARKET_CATEGORY_SHOW_PRODUCTS" filter="int" default="-1">
+   <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option><option value="1">JYES</option><option value="0">JNO</option>
+  </field>
+  <field name="state" type="list" label="JSTATUS" default="0" filter="int"><option value="0">JUNPUBLISHED</option><option value="1">JPUBLISHED</option></field>
+ </fieldset>
 </form>

@@ -74,6 +74,32 @@ final class CategoryTable extends Table
             }
         }
 
+        $order = trim((string) ($this->sort_order ?? 0));
+        if (!preg_match('/^(0|[1-9][0-9]*)$/D', $order)
+            || strlen($order) > 10
+            || (strlen($order) === 10 && strcmp($order, '4294967295') > 0)) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_ORDER_INVALID'));
+            return false;
+        }
+        $this->sort_order = (int) $order;
+        foreach (['show_children', 'show_products'] as $field) {
+            $flag = (int) ($this->$field ?? -1);
+            if (!in_array($flag, [-1, 0, 1], true)) {
+                $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));
+                return false;
+            }
+            $this->$field = $flag;
+        }
+        $this->image = trim((string) ($this->image ?? ''));
+        $this->image_alt = trim((string) ($this->image_alt ?? ''));
+        if (mb_strlen($this->image) > 1024 || mb_strlen($this->image_alt) > 255
+            || ($this->image !== '' && (!str_starts_with($this->image, 'images/')
+                || str_contains($this->image, '..')
+                || preg_match('/[\x00-\x1f<>]/', $this->image)))) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_IMAGE_INVALID'));
+            return false;
+        }
+
         $db = $this->getDbo();
         $query = $db->getQuery(true)
             ->select('COUNT(*)')
