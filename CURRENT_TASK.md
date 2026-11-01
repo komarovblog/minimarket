@@ -17,6 +17,10 @@
 - Манифест `0.3.11`. Нет миграций DB или изменения данных. Только `dist/com_minimarket.zip`; сборка `scripts/build.ps1` и инспекция `scripts/inspect-package.ps1`.
 - **Joomla 0.3.11 НЕ ПРОВЕРЕНА**; убедиться в наличии кнопок после обновления. Проверки CI — отдельно записать после статуса GitHub Actions.
 
+## CI версии 0.3.11 — PASS
+
+GitHub Actions по коммиту `63ee5807`: [run 41300073360](https://github.com/komarovblog/minimarket/actions/runs/41300073360), **PHP 8.4 и 8.5 lint / Router / Catalog / Shop Menu selector / Admin Options ACL regression** и **Windows компонентная ZIP сборка + инспектор** — все задания PASS. Ранние CI FAIL были вызваны сигнатурой тестовой заглушки HtmlView::display():void, исправлены только в тесте. **Реальная Joomla 6.2 0.3.11 ещё НЕ проверена.**
+
 ## Один следующий тест пользователя
 
 В CMD из `C:\OSPanel\home\minimarket.local`: `git status --short` (не сбрасывать `.osp/project.ini`), `git pull --ff-only origin development`, `scripts/build.ps1`, `scripts/inspect-package.ps1` и при желании PHP тест. Ожидать `PACKAGE_OK: 0.3.11`. Если есть ошибки — не ставить ZIP.
