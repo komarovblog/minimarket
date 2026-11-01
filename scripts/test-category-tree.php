@@ -132,6 +132,28 @@ namespace MiniMarket\CategoryTreeSmoke {
     expect($table->check() === true, 'root category accepted');
     $table->parent_id = -1;
     expect($table->check() === false, 'negative parent rejected');
+    $table->parent_id = 0;
+    $table->sort_order = 15;
+    $table->show_children = -1;
+    $table->show_products = 0;
+    $table->image = 'images/example.png';
+    $table->image_alt = 'Example';
+    expect($table->check() === true, 'new category fields and media accepted');
+    expect($table->sort_order === 15 && $table->show_products === 0, 'order and local visibility retained');
+    $table->sort_order = -1;
+    expect($table->check() === false, 'negative sort order rejected');
+    $table->sort_order = 4294967296;
+    expect($table->check() === false, 'overflow sort order rejected');
+    $table->sort_order = 0;
+    $table->show_children = 3;
+    expect($table->check() === false, 'invalid visibility flag rejected');
+    $table->show_children = -1;
+    $table->image = 'https://example.com/img.jpg';
+    expect($table->check() === false, 'external media URL rejected');
+    $table->image = '../configuration.php';
+    expect($table->check() === false, 'media path traversal rejected');
+    $table->image = 'images/example.png';
+
 
     $tree = new CategoryTree([
         (object) ['id' => 1, 'title' => 'Root', 'parent_id' => 0, 'state' => 1],
@@ -158,6 +180,14 @@ namespace MiniMarket\CategoryTreeSmoke {
     expect(array_map(static fn ($r) => (int) $r->id, $tree->children(2)) === [3],
         'nested category displays direct grandchildren');
     expect($tree->children(4) === [], 'unpublished parent has no visible children');
+    $orderedTree = new CategoryTree([
+        (object) ['id' => 11, 'title' => 'Alpha', 'parent_id' => 0, 'state' => 1, 'sort_order' => 20],
+        (object) ['id' => 12, 'title' => 'Zulu', 'parent_id' => 0, 'state' => 1, 'sort_order' => 5],
+        (object) ['id' => 13, 'title' => 'Bravo', 'parent_id' => 0, 'state' => 1, 'sort_order' => 20],
+    ]);
+    expect(array_map(static fn ($c) => (int) $c->id, $orderedTree->children(0)) === [12, 11, 13],
+        'siblings sorted by manual order then title then stable ID');
+
 
     if ($failed !== []) {
         fwrite(STDERR, 'CATEGORY_TREE_TEST_FAIL: ' . implode('; ', $failed) . PHP_EOL);
