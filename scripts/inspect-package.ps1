@@ -70,6 +70,19 @@ try {
         }
     }
 
+    # Deferred stage-6 attributes must never be included in category releases.
+    foreach ($deferred in @(
+        'admin/sql/updates/mysql/0.4.0.sql',
+        'admin/forms/attribute.xml',
+        'admin/tmpl/attributes/default.php',
+        'admin/src/Table/AttributeTable.php'
+    )) {
+        if ($null -ne $archive.GetEntry($deferred)) {
+            Write-Output ('PACKAGE_FAIL: PREMATURE_ATTRIBUTES_IN_PACKAGE: ' + $deferred)
+            exit 1
+        }
+    }
+
     Write-Output ('PACKAGE_OK: ' + [string]$xml.extension.version)
     exit 0
 }
