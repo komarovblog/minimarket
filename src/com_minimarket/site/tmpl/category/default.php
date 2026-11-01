@@ -51,7 +51,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
             </li>
         <?php endforeach; ?>
         </ul>
-    <?php else : ?>
+    <?php elseif ($this->displayProducts && !$this->children) : ?>
         <p><?php echo Text::_('COM_MINIMARKET_CATEGORY_EMPTY'); ?></p>
     <?php endif; ?>
 </section>

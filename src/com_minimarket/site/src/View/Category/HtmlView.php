@@ -16,6 +16,7 @@ final class HtmlView extends BaseHtmlView
     public object $category;
     public array $products = [];
     public array $children = [];
+    public bool $displayProducts = true;
 
     public function display($tpl = null)
     {
@@ -38,8 +39,9 @@ final class HtmlView extends BaseHtmlView
         $products = (int) ($category->show_products ?? -1);
         $this->children = ($children === 1 || ($children === -1 && (int) $options->get('category_show_children', 1) === 1))
             ? $repo->getChildCategories($id) : [];
-        $this->products = ($products === 1 || ($products === -1 && (int) $options->get('category_show_products', 1) === 1))
-            ? $repo->getProductsForCategory($id) : [];
+        $this->displayProducts = ($products === 1
+            || ($products === -1 && (int) $options->get('category_show_products', 1) === 1));
+        $this->products = $this->displayProducts ? $repo->getProductsForCategory($id) : [];
         $this->getDocument()->setTitle((string) $category->title);
         SeoHelper::setCanonical($this->getDocument(), 'category', $id);
 
