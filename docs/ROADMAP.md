@@ -1,3 +1,5 @@
+> **Стандарт для этапов 3, 7, 8 и 11 (0.5.2):** чистый media path `images/...` без `#joomlaImage://` и width/height; единственный справочник файлов Joomla + связи с category/product/bundle/color/SKU, отдельные alt/order/area; единый серверный validator, никакой копии служебного URL. [MEDIA_PATH_POLICY.md](MEDIA_PATH_POLICY.md). Проверка реальной Joomla после обновления ещё требуется.
+
 # MiniMarket — полная дорожная карта (основной план)
 
 **Версия плана:** 1.0 · **Дата:** 01.11.2026 · **Репозиторий:** `komarovblog/minimarket` · **Рабочая ветка:** `development`.  
