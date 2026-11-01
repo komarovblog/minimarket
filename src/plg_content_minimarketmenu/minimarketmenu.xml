@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="content" method="upgrade">
+    <name>plg_content_minimarketmenu</name>
+    <author>MiniMarket</author>
+    <creationDate>2026-11-01</creationDate>
+    <copyright>Copyright (C) MiniMarket contributors</copyright>
+    <license>GNU General Public License version 3 or later</license>
+    <version>0.3.9</version>
+    <description>PLG_CONTENT_MINIMARKETMENU_XML_DESCRIPTION</description>
+    <namespace path="src">Joomla\Plugin\Content\Minimarketmenu</namespace>
+    <files>
+        <folder plugin="minimarketmenu">services</folder>
+        <folder>src</folder>
+    </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/plg_content_minimarketmenu.sys.ini</language>
+        <language tag="ru-RU">language/ru-RU/plg_content_minimarketmenu.sys.ini</language>
+    </languages>
+</extension>
