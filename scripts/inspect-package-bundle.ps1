@@ -48,7 +48,7 @@ try {
         try { $stream.CopyTo($memory) }
         finally { $stream.Dispose() }
         $memory.Position = 0
-        $zip = New-Object System.IO.Compression.ZipArchive(
+        $zip = [System.IO.Compression.ZipArchive]::new(
             $memory, [System.IO.Compression.ZipArchiveMode]::Read, $false
         )
         $children += $zip
