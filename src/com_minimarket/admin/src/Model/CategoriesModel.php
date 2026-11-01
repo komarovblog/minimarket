@@ -19,6 +19,8 @@ final class CategoriesModel extends ListModel
                 $db->quoteName('c.parent_id'),
                 $db->quoteName('c.state'),
                 $db->quoteName('c.sort_order'),
+                $db->quoteName('c.image'),
+                $db->quoteName('c.image_alt'),
                 $db->quoteName('p.title', 'parent_title'),
             ])
             ->from($db->quoteName('#__minimarket_categories', 'c'))
@@ -27,6 +29,31 @@ final class CategoriesModel extends ListModel
                 $db->quoteName('#__minimarket_categories', 'p')
                 . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('c.parent_id')
             )
-            ->order($db->quoteName('c.parent_id') . ' ASC, ' . $db->quoteName('c.sort_order') . ' ASC, ' . $db->quoteName('c.id') . ' ASC');
+            ->order($db->quoteName('c.id') . ' ASC');
+    }
+    /** All categories are required to assemble the tree, not a single flat page. */
+    public function getItems()
+    {
+        $db = $this->getDatabase();
+        $db->setQuery($this->getListQuery());
+
+        return (array) $db->loadObjectList();
+    }
+
+    /** One GROUP BY replaces one product-count query for every category. */
+    public function getProductCounts(): array
+    {
+        $db = $this->getDatabase();
+        $q = $db->getQuery(true)
+            ->select([$db->quoteName('category_id'), 'COUNT(*) AS total'])
+            ->from($db->quoteName('#__minimarket_products'))
+            ->group($db->quoteName('category_id'));
+        $db->setQuery($q);
+        $counts = [];
+        foreach ((array) $db->loadObjectList() as $row) {
+            $counts[(int) $row->category_id] = (int) $row->total;
+        }
+
+        return $counts;
     }
 }

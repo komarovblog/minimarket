@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form>
+<form addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
  <fieldset name="details" label="COM_MINIMARKET_CATEGORY_DETAILS">
   <field name="id" type="hidden" default="0" filter="int"/>
   <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
   <field name="alias" type="text" label="JFIELD_ALIAS_LABEL" filter="string" size="60"/>
-  <field name="parent_id" type="sql" label="COM_MINIMARKET_CATEGORY_PARENT" description="COM_MINIMARKET_CATEGORY_PARENT_DESC"
-   query="SELECT id, title FROM #__minimarket_categories ORDER BY title ASC, id ASC"
-   key_field="id" value_field="title" default="0" filter="int">
+  <field name="parent_id" type="Categoryparent" label="COM_MINIMARKET_CATEGORY_PARENT" description="COM_MINIMARKET_CATEGORY_PARENT_DESC" default="0" filter="int">
    <option value="0">COM_MINIMARKET_CATEGORY_PARENT_ROOT</option>
   </field>
   <field name="sort_order" type="number" label="COM_MINIMARKET_CATEGORY_ORDER" filter="uint" default="0" min="0" max="4294967295"/>

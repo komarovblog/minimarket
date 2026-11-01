@@ -7,14 +7,29 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAdminTree;
 
 final class HtmlView extends BaseHtmlView
 {
     public array $items = [];
+    public array $rows = [];
+    public string $search = '';
+    public string $stateFilter = 'all';
 
     public function display($tpl = null)
     {
         $this->items = $this->get('Items');
+        $input = Factory::getApplication()->input;
+        $this->search = trim($input->getString('mm_search', ''));
+        $requestedState = $input->getCmd('mm_state', 'all');
+        $this->stateFilter = in_array($requestedState, ['all', '0', '1'], true)
+            ? $requestedState : 'all';
+        $this->rows = CategoryAdminTree::flatten(
+            $this->items,
+            $this->get('ProductCounts'),
+            $this->search,
+            $this->stateFilter === 'all' ? null : (int) $this->stateFilter
+        );
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_CATEGORIES'));
 

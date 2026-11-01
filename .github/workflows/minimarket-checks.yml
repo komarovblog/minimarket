@@ -94,6 +94,9 @@ jobs:
       - name: Category parent and visibility regression tests
         run: php scripts/test-category-tree.php
 
+      - name: Administrator category hierarchy and counts
+        run: php scripts/test-admin-category-tree.php
+
       - name: Shop menu selector regression tests
         run: php scripts/test-shopmenu.php
 
