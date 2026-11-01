@@ -2,6 +2,7 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 ?>
 <section class="com-minimarket-catalog">
@@ -33,6 +34,15 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
                 <ul class="list-unstyled">
                     <?php foreach ($this->products as $product) : ?>
                         <li>
+                            <?php
+                            $photo = explode('#', (string) ($product->image ?? ''), 2)[0];
+                            if (str_starts_with($photo, 'images/') && !str_contains($photo, '..')
+                                && !preg_match('/[\x00-\x1f<>]/', $photo)) :
+                            ?>
+                                <img src="<?php echo $this->escape(Uri::root() . $photo); ?>"
+                                     alt="<?php echo $this->escape((string) ($product->image_alt ?: $product->title)); ?>"
+                                     width="96" height="96" loading="lazy" style="object-fit:contain">
+                            <?php endif; ?>
                             <a href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
                                 <?php echo $this->escape($product->title); ?>
                             </a>

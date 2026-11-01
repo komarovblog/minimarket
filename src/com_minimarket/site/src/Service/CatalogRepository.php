@@ -114,6 +114,8 @@ final class CatalogRepository
                 $this->db->quoteName('p.sku'),
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.image'),
+                $this->db->quoteName('p.image_alt'),
             ])
             ->from($this->db->quoteName('#__minimarket_products', 'p'))
             ->join(
@@ -162,6 +164,8 @@ final class CatalogRepository
                 $this->db->quoteName('p.sku'),
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.image'),
+                $this->db->quoteName('p.image_alt'),
             ])
             ->from($this->db->quoteName('#__minimarket_products', 'p'))
             ->join(
@@ -186,9 +190,20 @@ final class CatalogRepository
                 $this->db->quoteName('p.id'),
                 $this->db->quoteName('p.title'),
                 $this->db->quoteName('p.alias'),
+                $this->db->quoteName('p.introtext'),
+                $this->db->quoteName('p.description'),
+                $this->db->quoteName('p.meta_title'),
+                $this->db->quoteName('p.meta_description'),
+                $this->db->quoteName('p.meta_robots'),
+                $this->db->quoteName('p.og_title'),
+                $this->db->quoteName('p.og_description'),
+                $this->db->quoteName('p.og_image'),
+                $this->db->quoteName('p.og_image_alt'),
                 $this->db->quoteName('p.sku'),
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.image'),
+                $this->db->quoteName('p.image_alt'),
                 $this->db->quoteName('p.category_id'),
                 $this->db->quoteName('c.title', 'category_title'),
             ])

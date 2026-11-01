@@ -11,10 +11,29 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 final class HtmlView extends BaseHtmlView
 {
     public array $items = [];
+    public array $categoryOptions = [];
+    public $pagination;
+    public string $search = '';
+    public string $stateFilter = 'all';
+    public int $categoryFilter = 0;
+    public string $sort = 'newest';
 
     public function display($tpl = null)
     {
         $this->items = $this->get('Items');
+        $this->pagination = $this->get('Pagination');
+        $this->categoryOptions = $this->get('CategoryOptions');
+        $input = Factory::getApplication()->input;
+        $this->search = trim($input->getString('mm_search', ''));
+        $this->categoryFilter = max(0, $input->getInt('mm_category', 0));
+        $this->stateFilter = $input->getCmd('mm_state', 'all');
+        if (!in_array($this->stateFilter, ['all', '1', '0'], true)) {
+            $this->stateFilter = 'all';
+        }
+        $this->sort = $input->getCmd('mm_sort', 'newest');
+        if (!in_array($this->sort, ['newest', 'title', 'price_asc', 'price_desc', 'order'], true)) {
+            $this->sort = 'newest';
+        }
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PRODUCTS'));
 
