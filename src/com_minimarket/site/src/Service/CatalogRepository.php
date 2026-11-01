@@ -10,20 +10,49 @@ use Joomla\Database\DatabaseInterface;
  */
 final class CatalogRepository
 {
+    private ?CategoryTree $categoryTree = null;
+
     public function __construct(private DatabaseInterface $db)
     {
     }
 
+    /**
+     * A single category read per request powers navigation and guarantees
+     * published ancestors throughout product/category storefront queries.
+     */
+    private function categoryTree(): CategoryTree
+    {
+        if ($this->categoryTree === null) {
+            $q = $this->db->getQuery(true)
+                ->select([
+                    $this->db->quoteName('id'),
+                    $this->db->quoteName('parent_id'),
+                    $this->db->quoteName('title'),
+                    $this->db->quoteName('alias'),
+                    $this->db->quoteName('state'),
+                ])
+                ->from($this->db->quoteName('#__minimarket_categories'));
+            $this->db->setQuery($q);
+            $this->categoryTree = new CategoryTree((array) $this->db->loadObjectList());
+        }
+
+        return $this->categoryTree;
+    }
+
     public function getCategories(): array
     {
-        $q = $this->db->getQuery(true)
-            ->select([$this->db->quoteName('id'), $this->db->quoteName('title'), $this->db->quoteName('alias')])
-            ->from($this->db->quoteName('#__minimarket_categories'))
-            ->where($this->db->quoteName('state') . ' = 1')
-            ->order($this->db->quoteName('title') . ' ASC');
-        $this->db->setQuery($q);
+        // Only published root categories appear at storefront root.
+        return $this->categoryTree()->children(0);
+    }
 
-        return (array) $this->db->loadObjectList();
+    public function getChildCategories(int $parentId): array
+    {
+        return $this->categoryTree()->children($parentId);
+    }
+
+    private function visibleCategoryIdsSql(): string
+    {
+        return implode(',', $this->categoryTree()->visibleIds());
     }
 
     /**
@@ -32,6 +61,12 @@ final class CatalogRepository
      */
     public function countAllProducts(): int
     {
+        $visibleIds = $this->visibleCategoryIdsSql();
+
+        if ($visibleIds === '') {
+            return 0;
+        }
+
         $q = $this->db->getQuery(true)
             ->select('COUNT(*)')
             ->from($this->db->quoteName('#__minimarket_products', 'p'))
@@ -42,7 +77,8 @@ final class CatalogRepository
                 . ' = ' . $this->db->quoteName('c.id')
             )
             ->where($this->db->quoteName('p.state') . ' = 1')
-            ->where($this->db->quoteName('c.state') . ' = 1');
+            ->where($this->db->quoteName('c.state') . ' = 1')
+            ->where($this->db->quoteName('p.category_id') . ' IN (' . $visibleIds . ')');
 
         $this->db->setQuery($q);
 
@@ -57,6 +93,12 @@ final class CatalogRepository
      */
     public function getAllProductsPage(int $offset, int $limit, string $order): array
     {
+        $visibleIds = $this->visibleCategoryIdsSql();
+
+        if ($visibleIds === '') {
+            return [];
+        }
+
         $orders = [
             'newest' => $this->db->quoteName('p.id') . ' DESC',
             'name' => $this->db->quoteName('p.title') . ' ASC, ' . $this->db->quoteName('p.id') . ' ASC',
@@ -81,6 +123,7 @@ final class CatalogRepository
             )
             ->where($this->db->quoteName('p.state') . ' = 1')
             ->where($this->db->quoteName('c.state') . ' = 1')
+            ->where($this->db->quoteName('p.category_id') . ' IN (' . $visibleIds . ')')
             ->order($orders[$order] ?? $orders['newest']);
 
         $this->db->setQuery($q, max(0, $offset), max(1, min($limit, 48)));
@@ -90,6 +133,10 @@ final class CatalogRepository
 
     public function getCategory(int $id): ?object
     {
+        if (!$this->categoryTree()->isVisible($id)) {
+            return null;
+        }
+
         $q = $this->db->getQuery(true)
             ->select([$this->db->quoteName('id'), $this->db->quoteName('title'), $this->db->quoteName('description')])
             ->from($this->db->quoteName('#__minimarket_categories'))
@@ -102,6 +149,10 @@ final class CatalogRepository
 
     public function getProductsForCategory(int $id): array
     {
+        if (!$this->categoryTree()->isVisible($id)) {
+            return [];
+        }
+
         $q = $this->db->getQuery(true)
             ->select([
                 $this->db->quoteName('p.id'),
@@ -151,6 +202,10 @@ final class CatalogRepository
 
         $this->db->setQuery($q);
 
-        return $this->db->loadObject() ?: null;
+        $product = $this->db->loadObject();
+
+        return $product !== null && $this->categoryTree()->isVisible((int) $product->category_id)
+            ? $product
+            : null;
     }
 }

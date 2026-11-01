@@ -13,6 +13,19 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
         <p><?php echo $this->escape(strip_tags((string) $this->category->description)); ?></p>
     <?php endif; ?>
 
+    <?php if ($this->children) : ?>
+        <section class="com-minimarket-category__children">
+            <h2><?php echo Text::_('COM_MINIMARKET_CHILD_CATEGORIES'); ?></h2>
+            <ul class="list-unstyled">
+                <?php foreach ($this->children as $child) : ?>
+                    <li><a href="<?php echo $this->escape(RouteHelper::category((int) $child->id)); ?>">
+                        <?php echo $this->escape($child->title); ?>
+                    </a></li>
+                <?php endforeach; ?>
+            </ul>
+        </section>
+    <?php endif; ?>
+
     <?php if ($this->products) : ?>
         <ul class="list-unstyled">
         <?php foreach ($this->products as $product) : ?>
