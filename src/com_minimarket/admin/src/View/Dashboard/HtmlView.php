@@ -14,7 +14,9 @@ final class HtmlView extends BaseHtmlView
     {
         ToolbarHelper::title(Text::_('COM_MINIMARKET_DASHBOARD_TITLE'));
 
-        if (Factory::getApplication()->getIdentity()->authorise('core.admin', 'com_minimarket')) {
+        $user = Factory::getApplication()->getIdentity();
+        if ($user->authorise('core.admin', 'com_minimarket')
+            || $user->authorise('core.options', 'com_minimarket')) {
             ToolbarHelper::preferences('com_minimarket');
         }
 

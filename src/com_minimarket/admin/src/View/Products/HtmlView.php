@@ -22,6 +22,14 @@ final class HtmlView extends BaseHtmlView
             ToolbarHelper::addNew('product.add');
         }
 
+        // Joomla component Options are not a separate MiniMarket MVC view.
+        // Show the standard Options action on the pages admins use most.
+        $user = Factory::getApplication()->getIdentity();
+        if ($user->authorise('core.admin', 'com_minimarket')
+            || $user->authorise('core.options', 'com_minimarket')) {
+            ToolbarHelper::preferences('com_minimarket');
+        }
+
         parent::display($tpl);
     }
 }
