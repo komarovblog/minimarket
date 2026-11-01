@@ -4,7 +4,7 @@
 
 # MiniMarket — SEO, Schema.org, Open Graph, аналитика и AI-поиск
 
-**Статус 01.11.2026: SPEC / NOT IMPLEMENTED.** Актуальный порядок: [ROADMAP.md](ROADMAP.md), этапы 3, 4, 5, 7, 8, 10, 12. Ниже — требования и приёмка, не заявление о готовой интеграции.
+**Статус 01.11.2026: SPEC / NOT IMPLEMENTED.** Дополнено режимом JSON-LD/Microdata и отдельным управлением фидами. Актуальный порядок: [ROADMAP.md](ROADMAP.md), этапы 3, 4, 5, 7, 8, 10, 12. Ниже — требования и приёмка, не заявление о готовой интеграции.
 
 ## 1. SEO и URL
 
@@ -28,6 +28,23 @@
 Внешние фиды: Яндекс Товары/YML и Google Merchant Center лишь после стабилизации реального каталога; соответствие цен/остатков/изображений. Группировка variant SKU через item_group_id; is_bundle в Google Merchant — только для комплектов, соответствующих его конкретным требованиям.
 
 Источники: https://developers.google.com/search/docs/appearance/structured-data/product-snippet ; https://developers.google.com/search/docs/appearance/structured-data/product-variants ; https://yandex.ru/support/merchants/ru/microdata ; https://support.google.com/merchants/answer/6324507
+
+## 2.1. Формат Schema.org: JSON-LD или Microdata
+
+**Важное уточнение 01.11.2026:** Schema.org — словарь сущностей, **JSON-LD и Microdata являются форматами сериализации**, а не разными схемами для разных поисковиков. Google поддерживает JSON-LD, Microdata и RDFa, рекомендуя JSON-LD. Яндекс Товары поддерживает и JSON-LD, и Microdata. Для MiniMarket выбор в **компонентных Options**: **JSON-LD (по умолчанию)** / **Microdata (режим совместимости)** / **Не выводить компонентом (внешний SEO-инструмент)**.
+
+- Генерировать один нормализованный объект Product/Offer/Group/BreadcrumbList с одними ID, SKU, ценой, валютой, availability и URL; затем только менять выходной формат.
+- JSON-LD должен присутствовать в серверном HTML, Microdata — в видимом HTML через itemscope/itemtype/itemprop. **Не выдавать две конфликтующие или дублирующиеся независимые сущности Product/Offer на одной странице.**
+- Проверка **эквивалентности** форматов на тестовых товарах и вариантах, отсутствие вторых конфликтующих сущностей от Joomla template/plugin, валидаторы Google и Яндекс; корректные Offer и ProductGroup.
+- Не заводить SEO-галочку формата на каждый отдельный SKU и не писать JSON вручную в SEO вкладке. Только глобальный режим и автоматический рендерер.
+
+Официальная документация: https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data и https://yandex.ru/support/merchants/ru/microdata .
+
+## 2.2. Связь товарной разметки и экспортируемых фидов
+
+Вкладка SEO товара/комплекта отвечает за **публичную HTML-разметку**, а самостоятельный раздел **MiniMarket → Фиды** — за **экспортируемые файлы**. Фид может отбирать только выбранные категории с потомками, конкретные SKU и только опубликованные предложения, но обязан отображать ту же цену, доступность и изображение, что и соответствующая страница и JSON-LD/Microdata. Фид не может создавать «виртуально опубликованный» товар.
+
+Админка с выбором YML/Google/CSV профилей, категориями, экспортными флагами, предпросмотром, причиной исключения и периодической генерацией описана в [FEEDS_SPEC.md](FEEDS_SPEC.md); она **не реализована**. Внешние сервисы могут предъявлять разные требования к `available`, поэтому настройка выгрузки товаров без остатка зависит от получателя (см. официальный Яндекс Директ и Google Merchant).
 
 ## 3. Open Graph и изображения
 
