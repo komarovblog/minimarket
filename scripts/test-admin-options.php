@@ -127,15 +127,26 @@ namespace MiniMarket\AdminOptionsTest {
         }
     }
 
+    // Use Joomla's standard Options toolbar and avoid a duplicate custom link.
     $dashboard = file_get_contents(
         __DIR__ . '/../src/com_minimarket/admin/tmpl/dashboard/default.php'
     );
-    $check($dashboard !== false && str_contains(
-        $dashboard,
-        'index.php?option=com_config&amp;view=component&amp;component=com_minimarket'
-    ), 'Dashboard has direct standard Joomla com_config link');
-    $check($dashboard !== false && str_contains($dashboard, '$canConfigure'),
-        'Dashboard settings link is permission-gated');
+    $check($dashboard !== false && !str_contains($dashboard, 'COM_MINIMARKET_OPEN_SETTINGS'),
+        'No duplicate custom dashboard Options button');
+
+    foreach ([
+        'ru-RU' => 'MiniMarket: Настройки',
+        'en-GB' => 'MiniMarket: Options',
+    ] as $language => $expected) {
+        foreach (['ini', 'sys.ini'] as $ext) {
+            $path = __DIR__ . '/../src/com_minimarket/admin/language/' . $language
+                . '/com_minimarket.' . $ext;
+            $strings = parse_ini_file($path);
+            $check(is_array($strings)
+                && ($strings['COM_MINIMARKET_CONFIGURATION'] ?? null) === $expected,
+                "$language $ext translates Joomla's component Options title");
+        }
+    }
 
     $config = file_get_contents(__DIR__ . '/../src/com_minimarket/admin/config.xml');
     $check($config !== false && str_contains($config, 'name="primary_shop_itemid"'),

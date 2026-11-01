@@ -1,26 +1,12 @@
 <?php
 \defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 ?>
 <div class="com-minimarket-dashboard">
     <p><a class="btn btn-primary" href="index.php?option=com_minimarket&amp;view=categories"><?php echo Text::_('COM_MINIMARKET_CATEGORIES'); ?></a>
     <a class="btn btn-outline-secondary" href="index.php?option=com_minimarket&amp;view=products"><?php echo Text::_('COM_MINIMARKET_PRODUCTS'); ?></a></p>
-    <?php
-    $identity = Factory::getApplication()->getIdentity();
-    $canConfigure = $identity->authorise('core.admin', 'com_minimarket')
-        || $identity->authorise('core.options', 'com_minimarket');
-    ?>
-    <?php if ($canConfigure) : ?>
-        <p>
-            <a class="btn btn-outline-secondary"
-               href="index.php?option=com_config&amp;view=component&amp;component=com_minimarket">
-                <?php echo $this->escape(Text::_('COM_MINIMARKET_OPEN_SETTINGS')); ?>
-            </a>
-        </p>
-    <?php endif; ?>
     <h2><?php echo Text::_('COM_MINIMARKET_DASHBOARD_HEADING'); ?></h2>
     <p><?php echo Text::_('COM_MINIMARKET_DASHBOARD_DESCRIPTION'); ?></p>
     <p>
