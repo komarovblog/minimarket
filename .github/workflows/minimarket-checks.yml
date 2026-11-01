@@ -116,6 +116,9 @@ jobs:
       - name: Relational product gallery and Joomla Subform regression
         run: php scripts/test-product-gallery.php
 
+      - name: Attribute/value dictionaries and validation
+        run: php scripts/test-attributes.php
+
       - name: Product gallery JavaScript syntax
         run: node --check src/com_minimarket/media/js/gallery.js
 

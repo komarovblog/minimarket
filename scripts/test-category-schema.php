@@ -144,6 +144,48 @@ verify(row($pdo, 'catci_minimarket_products')['sku'] === 'TEST-001',
     '0.5.3 keeps SKU, stock and legacy item');
 $pdo->exec('DROP TABLE catci_minimarket_product_images');
 
+// 0.5.4: characteristics dictionaries are additive; existing product/gallery untouched.
+$preAttributesProduct = row($pdo, 'catci_minimarket_products');
+runSql($pdo, $dir . 'updates/mysql/0.5.4.sql', 'catci_');
+verify($preAttributesProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.4 preserves existing product SKU/price/stock and fields');
+$pdo->exec("INSERT INTO catci_minimarket_attributes
+    (id,title,code,input_type,is_variant,is_filterable,state)
+    VALUES (1,'Color','color','list',1,1,1), (2,'Size','size','list',1,1,1)");
+$pdo->exec("INSERT INTO catci_minimarket_attribute_values
+    (attribute_id,title,code,state)
+    VALUES (1,'Red','red',1),(1,'Yellow','yellow',1),(2,'S','s',1),(2,'M','m',1)");
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_attribute_values')->fetchColumn() === 4,
+    '0.5.4 creates reusable color and size dictionaries');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_attribute_values
+        (attribute_id,title,code) VALUES (1,'Duplicate Red','red')");
+    verify(false, 'duplicate value in same attribute rejected');
+} catch (PDOException $e) {
+    verify(true, 'duplicate value in same attribute rejected');
+}
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_attribute_values
+        (attribute_id,title,code) VALUES (999,'Orphan','missing')");
+    verify(false, 'orphan value rejected');
+} catch (PDOException $e) {
+    verify(true, 'orphan value rejected');
+}
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_attributes
+        (title,code) VALUES ('Duplicate','color')");
+    verify(false, 'duplicate attribute code rejected');
+} catch (PDOException $e) {
+    verify(true, 'duplicate attribute code rejected');
+}
+runSql($pdo, $dir . 'updates/mysql/0.5.4.sql', 'catci_');
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_attributes')->fetchColumn() === 2,
+    '0.5.4 migration can be rerun without duplicate dictionaries');
+verify($preAttributesProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.4 remains safe on repeat');
+$pdo->exec('DROP TABLE catci_minimarket_attribute_values');
+$pdo->exec('DROP TABLE catci_minimarket_attributes');
+
 // MySQL FK constraint identifiers are database-wide: clean only CI test tables.
 $pdo->exec('DROP TABLE catci_minimarket_products');
 $pdo->exec('DROP TABLE catci_minimarket_categories');
@@ -163,6 +205,16 @@ $freshGalleryColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_prod
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','product_id','path','alt','sort_order'] as $col) {
     verify(in_array($col, $freshGalleryColumns, true), 'fresh 0.5.3 gallery column ' . $col);
+}
+$freshAttrColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attributes')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','title','code','input_type','is_variant','is_filterable','sort_order','state'] as $col) {
+    verify(in_array($col, $freshAttrColumns, true), 'fresh 0.5.4 attribute column ' . $col);
+}
+$freshValueColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attribute_values')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','attribute_id','title','code','sort_order','state'] as $col) {
+    verify(in_array($col, $freshValueColumns, true), 'fresh 0.5.4 value column ' . $col);
 }
 $pdo->exec("INSERT INTO freshcatci_minimarket_categories
     (id,title,alias,state) VALUES (1,'New category','new-category',1)");
