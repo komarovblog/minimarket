@@ -11,6 +11,24 @@ permissions:
   contents: read
 
 jobs:
+  windows-package:
+    name: Windows ZIP bundle
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build component and package bundle
+        shell: powershell
+        run: |
+          & .\scripts\build-package.ps1
+      - name: Inspect standalone component
+        shell: powershell
+        run: |
+          & .\scripts\inspect-package.ps1
+      - name: Inspect component + plugin package
+        shell: powershell
+        run: |
+          & .\scripts\inspect-package-bundle.ps1
+
   php:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
