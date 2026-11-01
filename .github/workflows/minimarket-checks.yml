@@ -60,6 +60,19 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
+      - name: Get component version for release archive
+        id: component_version
+        shell: powershell
+        run: |
+          [xml]$manifest = Get-Content .\src\com_minimarket\minimarket.xml -Raw -Encoding UTF8
+          "value=$($manifest.extension.version)" >> $env:GITHUB_OUTPUT
+      - name: Upload numbered component ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: com_minimarket-${{ steps.component_version.outputs.value }}
+          path: dist/com_minimarket-${{ steps.component_version.outputs.value }}.zip
+          if-no-files-found: error
+          retention-days: 14
 
   php:
     name: PHP ${{ matrix.php }}
