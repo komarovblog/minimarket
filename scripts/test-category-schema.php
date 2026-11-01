@@ -118,6 +118,32 @@ runSql($pdo, $dir . 'updates/mysql/0.5.2.sql', 'catci_');
 verify(row($pdo, 'catci_minimarket_products')['image'] === 'images/powered_by.png',
     'clean media migration is idempotent');
 
+// New 0.5.3 media relation; old item must not be modified by upgrade.
+$preGalleryProduct = row($pdo, 'catci_minimarket_products');
+runSql($pdo, $dir . 'updates/mysql/0.5.3.sql', 'catci_');
+verify($preGalleryProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.3 schema upgrade preserves all existing product columns');
+$pdo->exec("INSERT INTO catci_minimarket_product_images
+    (product_id,path,alt,sort_order) VALUES
+    (1,'images/side.jpg','Side',0),(1,'images/back.jpg','Back',1)");
+$gallery = $pdo->query("SELECT path,alt FROM catci_minimarket_product_images
+    WHERE product_id=1 ORDER BY sort_order,id")->fetchAll(PDO::FETCH_ASSOC);
+verify(count($gallery) === 2 && $gallery[0]['path'] === 'images/side.jpg',
+    '0.5.3 gallery relations maintain order');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_product_images
+        (product_id,path) VALUES (1,'images/side.jpg')");
+    verify(false, 'duplicate gallery path rejected');
+} catch (PDOException $e) {
+    verify(true, 'duplicate gallery path rejected');
+}
+$pdo->exec("DELETE FROM catci_minimarket_product_images WHERE path='images/side.jpg'");
+verify((int) $pdo->query("SELECT COUNT(*) FROM catci_minimarket_product_images")->fetchColumn() === 1,
+    'removing gallery link does not delete product');
+verify(row($pdo, 'catci_minimarket_products')['sku'] === 'TEST-001',
+    '0.5.3 keeps SKU, stock and legacy item');
+$pdo->exec('DROP TABLE catci_minimarket_product_images');
+
 // MySQL FK constraint identifiers are database-wide: clean only CI test tables.
 $pdo->exec('DROP TABLE catci_minimarket_products');
 $pdo->exec('DROP TABLE catci_minimarket_categories');
@@ -132,6 +158,11 @@ $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach ($productEditorColumns as $col) {
     verify(in_array($col, $freshProducts, true), 'fresh 0.5.0 product column ' . $col);
+}
+$freshGalleryColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_images')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','product_id','path','alt','sort_order'] as $col) {
+    verify(in_array($col, $freshGalleryColumns, true), 'fresh 0.5.3 gallery column ' . $col);
 }
 $pdo->exec("INSERT INTO freshcatci_minimarket_categories
     (id,title,alias,state) VALUES (1,'New category','new-category',1)");

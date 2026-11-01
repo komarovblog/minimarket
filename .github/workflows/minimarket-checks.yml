@@ -113,6 +113,12 @@ jobs:
       - name: Product editor and clean media validation
         run: php scripts/test-product-editor.php
 
+      - name: Relational product gallery and Joomla Subform regression
+        run: php scripts/test-product-gallery.php
+
+      - name: Product gallery JavaScript syntax
+        run: node --check src/com_minimarket/media/js/gallery.js
+
       - name: Clean Media JavaScript syntax
         run: node --check src/com_minimarket/media/js/clean-media.js
 
