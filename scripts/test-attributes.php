@@ -91,6 +91,7 @@ namespace MiniMarket\AttributesSmoke {
         private ?Query $query = null;
         public bool $duplicateAttribute = false;
         public bool $duplicateValue = false;
+        public bool $existingValues = false;
         public string $parentType = 'list';
         public array $queries = [];
 
@@ -113,7 +114,7 @@ namespace MiniMarket\AttributesSmoke {
             }
 
             if ($this->query?->from === '#__minimarket_attribute_values') {
-                return $this->duplicateValue ? 1 : 0;
+                return ($this->duplicateValue || $this->existingValues) ? 1 : 0;
             }
 
             throw new \RuntimeException('Unexpected test query');
@@ -144,6 +145,14 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->input_type = 'number';
     $attribute->is_variant = 0;
     $check($attribute->check() === true, 'number allowed for shared properties');
+    $attribute->input_type = 'list';
+    $attribute->is_variant = 1;
+    $attribute->id = 10;
+    $attribute->input_type = 'number';
+    $attribute->is_variant = 0;
+    $db->existingValues = true;
+    $check($attribute->check() === false, 'cannot change list type with saved dictionary values');
+    $db->existingValues = false;
     $attribute->input_type = 'list';
     $attribute->is_variant = 1;
 

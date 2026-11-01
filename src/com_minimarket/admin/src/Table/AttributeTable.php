@@ -81,6 +81,22 @@ final class AttributeTable extends Table
             return false;
         }
 
+        // Existing list dictionaries must not become uneditable or orphaned
+        // when an admin changes the input type to text/number/boolean.
+        if ((int) $this->id > 0 && $this->input_type !== 'list') {
+            $valuesQuery = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_attribute_values'))
+                ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id);
+            $db->setQuery($valuesQuery);
+
+            if ((int) $db->loadResult() > 0) {
+                $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE_HAS_VALUES'));
+
+                return false;
+            }
+        }
+
         return parent::check();
     }
 }
