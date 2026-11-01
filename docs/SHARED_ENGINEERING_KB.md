@@ -48,6 +48,7 @@
 | KB-0012 | Doctrine ORM: link entity нельзя идентифицировать связями на сущности с derived ID | Shop | CODE_UPDATED / MAPPING_RETEST_PENDING | Общий принцип моделирования составных PK и связей |
 | KB-0013 | Варианты товара: единая карточка, атомарный SKU и фильтры без ложных сочетаний | Shop | DESIGN_ONLY / NOT_IMPLEMENTED | Общее правило фильтрации и идентичности; реализация магазинов разная |
 | KB-0014 | Детальная локальная диагностика с безопасной публикацией в GitHub | Shop | PARTIALLY_VERIFIED | Оба проекта (принцип) |
+| KB-0015 | Joomla Media: служебный `#joomlaImage://` и размеры не должны храниться как путь | MiniMarket | CODE_UPDATED / CI_PASS / JOOMLA_SMOKE_NOT_RUN | Общее правило хранения, Joomla-специфичная обработка |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -196,6 +197,16 @@
 - **Проверка:** код опубликован; Windows test runner и upload в GitHub NOT_RUN; PHPUnit FAIL наблюдался до создания runner. После первого запуска проверить наличие JSON и совпадение числа ошибок, только затем фиксировать доказанный результат.
 - **Применимость ко второму магазину:** повторно используемый принцип «полный лог локально, структурированная безопасная диагностика в репозитории». Для Joomla нужен отдельный адаптер на её команды и версии; не переносить код Symfony/Doctrine и не менять MiniMarket без поручения.
 - **Источники:** https://github.com/komarovblog/shop/blob/development/scripts/report-shop-variant-phpunit.ps1 ; https://github.com/komarovblog/shop/blob/development/docs/CATALOG_VARIANTS_DDL_STATUS_2026-11-01.md
+
+## KB-0015 — Joomla Media: чистый путь изображения без дублирования и размеров
+
+- **Дата, источник, среда:** 01.11.2026, MiniMarket Joomla 6.2, PHP 8.5, OpenServer, Windows 11. Статус: **CODE_UPDATED / CI_PASS / JOOMLA_SMOKE_NOT_RUN**.
+- **Симптом:** пользователь при выборе файла видит вместо `images/powered_by.png` строку `images/powered_by.png#joomlaImage://local-images/powered_by.png?width=294&height=44` и справедливо не хочет дублированный путь или ручные width/height.
+- **Подтверждённая причина:** Joomla Media Field по дизайну добавляет адаптер и исходные размеры после `#joomlaImage://`. Это одно изображение, не второй файл; Joomla работает с расширенным значением, но MiniMarket должен хранить только reusable path. См. [Joomla issue 35871](https://github.com/joomla/joomla-cms/issues/35871) и [Joomla issue 39225](https://github.com/joomla/joomla-cms/issues/39225).
+- **Решение MiniMarket:** вся категория, товар, OG и будущие galleries/variants используют единый относительный `images/...` без метафрагмента и width/height. На сервере чистый путь валидирует `admin/src/Service/MediaPath.php`; таблицы Category/Product вызывают его при сохранении. Скрипт MiniMarket в `media/js/clean-media.js` очищает видимую строку и пользуется `joomla-field-media.setValue()` без изменения Joomla core. Штатная миграция 0.5.2 удаляет только `#joomlaImage://` из image/og_image обеих сущностей, сохраняя файлы и торговые поля.
+- **Проверка:** GitHub MiniMarket [CI 0.5.2](https://github.com/komarovblog/minimarket/actions/runs/41344451056) — PHP 8.4/8.5, Windows ZIP/inspect, MySQL 8 миграция **PASS**. Автоматический тест принимает путь из примера, проверяет 4 поля, отказы опасным путям, идемпотентность очистки, неизменность SKU/price/stock. Работу клиентского элемента непосредственно в Joomla после выбора файла ещё **НЕ подтвердили** (требуется реальный smoke).
+- **Для Shop Symfony:** переносится только принцип «сохранять стабильную ссылку на файл, а служебные метаданные/размеры отделять от пути». **Не** переносить Joomla суффикс, JS или SQL-таблицы в Shop: у Symfony другие API и модель хранения. Изначальные файлы изображений не удалять.
+- **Политика:** [MiniMarket MEDIA_PATH_POLICY.md](https://github.com/komarovblog/minimarket/blob/development/docs/MEDIA_PATH_POLICY.md), версия MiniMarket 0.5.2. Обновление знания после фактического Joomla smoke.
 
 ## 4. Шаблон новой записи
 
