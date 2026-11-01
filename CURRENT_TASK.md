@@ -1,24 +1,28 @@
 # CURRENT_TASK — MiniMarket
 
-**Дата:** 2026-11-01. Рабочая ветка `development`, `main` не изменять. Joomla core, данные товаров, локальный `.osp/project.ini` и другой проект Shop не менять.
+**Дата:** 2026-11-01. Репозиторий `komarovblog/minimarket`, ветка `development`. `main` не изменять. Не менять ядро Joomla, данные пользователей/магазина, `.osp/project.ini` и соседний Shop.
 
-## Согласованное окончательное решение по выбору пункта меню
+## Реальный отзыв пользователя по 0.3.10
 
-Пользователь отказался от автоотключения флагов в других пунктах и от служебного Joomla-плагина. **Одна глобальная настройка в самом `com_minimarket`: «Основной пункт меню для ссылок».** Значения: «Автоматически» (MiniMarket на главной, иначе пункт с минимальным ID) либо один из опубликованных обычных пунктов `MiniMarket → Магазин`. Выбранный пункт используется для генерации category/product ссылок и canonical; каждая страница `/`, `/catalog`, `/shop` остаётся самостоятельной. Пунктов магазина — неограниченно, никаких запретов на SEO-дубли. Если выбранный пункт удалён или не опубликован — fallback «Автоматически».
+Пользователь сообщил, что после установки 0.3.10 **в меню MiniMarket видны только «Категории» и «Товары» и новая настройка не обнаружена**. Причина: `primary_shop_itemid` находится в стандартных Joomla Component Options (`com_config`), а не является отдельным подразделом `com_minimarket`. Уже в исходниках 0.3.10 `Dashboard/HtmlView.php` имел `ToolbarHelper::preferences('com_minimarket')`, но только при `core.admin`, а экран списков Categories/Products вообще не показывал кнопку. Это проблема доступности настроек, а не подтверждённый отказ поля `ShopmenuField`.
 
-**Устаревшие настройки per-menu `shop_primary_route` из старых версий больше не используются и не отображаются.** Их сохранённые данные в параметрах Joomla не стираются автоматически; выбирается значение в общих настройках. Ни чужие menu items, ни SQL-схема не меняются.
+**Рабочий прямой путь уже в установленном 0.3.10:** `http://minimarket.local/administrator/index.php?option=com_config&view=component&component=com_minimarket`. Для открытия нужна роль с `core.admin` или `core.options` на `com_minimarket`. Если по прямой ссылке появляется ошибка самого поля, тестировать отдельно, не утверждать заранее PASS.
 
-## Сейчас в GitHub: com_minimarket 0.3.10 — готов к Joomla smoke
+## Исправление в исходниках: MiniMarket 0.3.11 — Joomla RUNTIME NOT RUN
 
-- В `admin/config.xml` новое поле `primary_shop_itemid` типа `Shopmenu`, с одним выбором; `admin/src/Field/ShopmenuField.php` получает из БД опубликованные ordinary Joomla `MiniMarket → Магазин` menu items и исключает Menu Item Alias/другие компоненты; для понятности показывает название, путь, ID.
-- `site/src/Service/Router.php` использует `ComponentHelper::getParams('com_minimarket')->get('primary_shop_itemid', 0)` и сверяет ID с реально доступными опубликованными Shop Menu Items. Когда ID отсутствует/не подходит — home или наименьший ID. **Явный Itemid для страницы каталога** сохраняется; продукт и категория всегда формируют ссылки через один выбранный пункт. Исторический per-menu flag игнорируется.
-- Сохранена функциональность ранее установленной и проверенной пользователем 0.3.8: категории, общая выдача товаров, независимые настройки отображения пунктов меню, сортировка, пагинация и typed/legacy URL.
-- Из GitHub `development` **удалены** `src/plg_content_minimarketmenu`, `src/pkg_minimarket`, `scripts/build-package.ps1`, `scripts/inspect-package-bundle.ps1`, `scripts/test-menu-sync.php`. Ранее планировавшаяся 0.3.9 **ОТМЕНЕНА** — `pkg_minimarket.zip` **НЕ устанавливать**; плагин НЕ нужен. Нужен только `dist/com_minimarket.zip`, собрать через `scripts/build.ps1`.
-- Регрессионные `scripts/test-router.php` (глобальный выбор, fallback, legacy flag ignored), `scripts/test-shopmenu.php` (опции, фильтрация, контекст menu items), `scripts/test-catalog.php`. GitHub CI запускает PHP 8.4/8.5 lint/tests и Windows build/inspect; **Joomla 0.3.10 runtime ещё NOT RUN**.
-- Порядок изменения: только `development`, не удалять Joomla компонент или меню; не делать прямых SQL корректировок реальной БД. Joomla plugin из прежней 0.3.9 не устанавливался пользователем согласно имеющейся истории; если был — отдельно отключить/удалить через Joomla Extension Manager, не автоматически из исходников.
+- **Один компонент**, никаких плагинов, скрытых menu items или пакетов. Глобальный `primary_shop_itemid` сохраняет прежнюю согласованную логику: «Автоматически» → MiniMarket на главной / min опубликованный ID, либо один опубликованный обычный MiniMarket menu item. Независимые пункты `/`, `/catalog`, `/shop` остаются.
+- В стандартной панели инструментов Dashboard, Categories, Products теперь показывается Joomla `ToolbarHelper::preferences('com_minimarket')` при `core.admin` **или** `core.options`. В Dashboard шаблоне также явная кнопка «Настройки MiniMarket» (с проверкой тех же разрешений), ведущая в `com_config` без дополнительного самописного MVC view.
+- **Не добавляем новый пункт в административное подменю** для существующих установок: Joomla installer не гарантирует добавления нового подменю без полной перестройки, а перестраивать меню в работающей базе недопустимо. Слева по-прежнему могут отображаться только «Категории» и «Товары» — это нормально; настройки открываются сверху кнопкой «Настройки / Options».
+- `scripts/test-admin-options.php` — независимые mock-проверки прав доступа к стандартной кнопке на 3 экранах + наличие видимой ссылки Dashboard и поля Options; включён в GitHub CI вместе с прежним `test-router.php`, `test-catalog.php`, `test-shopmenu.php`.
+- Манифест `0.3.11`. Нет миграций DB или изменения данных. Только `dist/com_minimarket.zip`; сборка `scripts/build.ps1` и инспекция `scripts/inspect-package.ps1`.
+- **Joomla 0.3.11 НЕ ПРОВЕРЕНА**; убедиться в наличии кнопок после обновления. Проверки CI — отдельно записать после статуса GitHub Actions.
 
-## Следующий пользовательский шаг
+## Один следующий тест пользователя
 
-`docs/M1K_GLOBAL_MENU_SELECTOR_SMOKE.md` — единая проверка: `git pull --ff-only origin development`, выполнить 3 PHP теста, `build.ps1`, `inspect-package.ps1`. Ожидаемый `PACKAGE_OK: 0.3.10`. Один штатный upgrade `dist/com_minimarket.zip` поверх текущей работающей Joomla 0.3.8; не ставить старый `pkg_minimarket.zip`. В **Компоненты → MiniMarket → Настройки** выбрать «Автоматически»/«Каталог»/«Главная», проверить изменение ссылок товара/категории и canonical; все обычные пункты MiniMarket остаются доступны. `TEST-001` и админские Save не ломаются.
+В CMD из `C:\OSPanel\home\minimarket.local`: `git status --short` (не сбрасывать `.osp/project.ini`), `git pull --ff-only origin development`, `scripts/build.ps1`, `scripts/inspect-package.ps1` и при желании PHP тест. Ожидать `PACKAGE_OK: 0.3.11`. Если есть ошибки — не ставить ZIP.
 
-Следующий крупный функциональный срез только после пользовательского PASS: модель характеристик/вариантов товара по `docs/PRODUCT_VARIANTS.md`, затем фото по цвету; не смешивать с обновлением роутера/настроек.
+Через Joomla Extensions Installer обновить **только `dist/com_minimarket.zip`** поверх существующей 0.3.10, не удалять компонент. Затем открыть **Компоненты → MiniMarket → Категории или Товары** и проверить кнопку «Настройки / Options» в верхнем тулбаре; либо открыть главный Dashboard MiniMarket и видимую кнопку «Настройки MiniMarket»; либо напрямую `com_config` URL выше. Выбрать «Каталог» в `primary_shop_itemid`, сохранить, проверить автоматические URL `/catalog/category/...` и `/catalog/product/...`, вернуть нужный основной пункт. Остальные параметры/данные/публикации/URLs не должны измениться.
+
+## Следующий крупный функциональный срез только после PASS
+
+`docs/PRODUCT_VARIANTS.md`: характеристики/варианты SKU, цены, остатки, цвет/размер, фотографии, без замены существующего родительского URL и без разрушительных SQL/миграций. Решение об auto-disable и служебном Joomla content plugin **ОТМЕНЕНО** окончательно.
