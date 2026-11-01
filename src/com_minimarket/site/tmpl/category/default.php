@@ -4,7 +4,6 @@
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Filter\InputFilter;
-use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 ?>
 <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BREADCRUMB')); ?>">
