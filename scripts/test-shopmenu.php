@@ -87,10 +87,10 @@ namespace MiniMarket\ShopMenuTest {
         }
     }
 
-    final class TestingField extends ShopmenuField
-    {
-        public function optionsForTest(): array { return $this->getOptions(); }
-    }
+    // Reflection calls the protected Joomla ListField option builder without
+    // loosening the final extension field's public contract.
+    $field = new ShopmenuField();
+    $readOptions = new \ReflectionMethod(ShopmenuField::class, 'getOptions');
 
     $db = new FakeDb();
     Factory::$container = new class($db) {
@@ -98,7 +98,7 @@ namespace MiniMarket\ShopMenuTest {
         public function get(string $type): FakeDb { return $this->db; }
     };
 
-    $options = (new TestingField())->optionsForTest();
+    $options = $readOptions->invoke($field);
     $errors = [];
     $tests = 0;
     $check = static function (bool $ok, string $label) use (&$tests, &$errors): void {
