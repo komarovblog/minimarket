@@ -1,0 +1,72 @@
+# MiniMarket — SEO, Schema.org, Open Graph, аналитика и AI-поиск
+
+**Статус 01.11.2026: SPEC / NOT IMPLEMENTED.** Актуальный порядок: [ROADMAP.md](ROADMAP.md), этапы 3, 4, 5, 7, 8, 10, 12. Ниже — требования и приёмка, не заявление о готовой интеграции.
+
+## 1. SEO и URL
+
+Категории, товары и комплекты имеют title, description, canonical, robots по понятным правилам наследования из Joomla и собственных настроек. Без дублирующихся meta-тегов из шаблона.
+
+Один базовый Itemid выбирается в глобальных Options MiniMarket, но не запрещает другие стандартные пункты меню Joomla. Товар с вариантами имеет **один канонический URL**, хотя поисковый робот должен иметь возможность прямой ссылки на предвыбранный вариант (например query-параметр); вывод изображения/цены/наличия на таком URL должен соответствовать выбранному варианту. Реальные 200/301/404, noindex и sitemap. Не индексировать несуществующие, неопубликованные позиции и технические страницы.
+
+## 2. JSON-LD Schema.org
+
+| Страница | Разметка | Условия |
+|---|---|---|
+| Главная | Organization / WebSite | Только фактические реквизиты; SearchAction только при работающем поиске |
+| Категория | BreadcrumbList, возможно CollectionPage / ItemList | Категория не является одним Product |
+| Обычный товар | Product и Offer | name, sku, brand (если известен), image, description, price, priceCurrency, availability, url; только актуальные данные |
+| Товар с вариантами | ProductGroup, hasVariant, variesBy, productGroupID; Product+Offer каждого варианта | Уникальные SKU/ID, один canonical родителя, возможность предвыбрать вариант прямой ссылкой |
+| Комплект | Product+Offer, BreadcrumbList | Своя продаваемая позиция, состав виден, цена и доступность реальные |
+| Доставка/возвраты | OfferShippingDetails, MerchantReturnPolicy | Только когда правила реально существуют и отражены в checkout |
+
+Формировать JSON-LD в **первоначальном серверном HTML**, а не только JavaScript. Schema должна совпадать с видимым контентом и серверным источником цены и остатка. Не придумывать Review, AggregateRating или FAQ. ProductGroup — не AggregateOffer; разные предложения продавцов и варианты одного товара — разные вещи. Разметка не гарантирует расширенный сниппет.
+
+Внешние фиды: Яндекс Товары/YML и Google Merchant Center лишь после стабилизации реального каталога; соответствие цен/остатков/изображений. Группировка variant SKU через item_group_id; is_bundle в Google Merchant — только для комплектов, соответствующих его конкретным требованиям.
+
+Источники: https://developers.google.com/search/docs/appearance/structured-data/product-snippet ; https://developers.google.com/search/docs/appearance/structured-data/product-variants ; https://yandex.ru/support/merchants/ru/microdata ; https://support.google.com/merchants/answer/6324507
+
+## 3. Open Graph и изображения
+
+Набор og:title, og:description, og:type, og:url, og:image, og:image:alt; при наличии локализаций og:locale. Twitter/X card (twitter:card и image/title) по необходимости.
+
+og:url и canonical согласованы; og:image — абсолютный доступный URL. Для соцсетей предусмотреть отдельное горизонтальное превью (ориентир 1200×630), а также fallback на обложку категории, товара, комплекта, магазина. Это **не требование делать все фотографии товара одного размера**. При наличии сторонних шаблонов Joomla не создавать двух конфликтующих наборов OG.
+
+Источник: https://ogp.me/
+
+## 4. Электронная торговля — GA4 и Яндекс Метрика
+
+Одна внутренняя модель бизнес-событий для MiniMarket, адаптация под GA4/Метрику. У Метрики есть совместимость с GA4, но требуется проверить подключение и **не дублировать отправку покупки**.
+
+| Действие | GA4 event |
+|---|---|
+| Показ товаров в списке, клик по карточке | view_item_list, select_item |
+| Открытие карточки | view_item |
+| Корзина | add_to_cart, remove_from_cart, view_cart |
+| Оформление | begin_checkout, add_shipping_info, add_payment_info |
+| Покупка и возврат | purchase, refund |
+| При необходимости реклама | view_promotion, select_promotion |
+
+Данные items: стабильные product_id/SKU и variant_id (item_variant), bundle_id как самостоятельная продаваемая позиция, название, бренд, категории, price, quantity, discount, currency=RUB, контекст списка; для purchase/refund — transaction_id и серверная сумма. **Комплект не должен удваивать выручку отдельной передачей стоимости входящих товаров.**
+
+Purchase только после согласованного серверного статуса успешной покупки, не после клика по кнопке; повторная загрузка Thank you и webhook не дают дубликата. Refund привязан к исходному заказу, включая частичный возврат. GTM/счётчики подключаются опционально. Согласия на аналитику и отсутствие телефонов, email, адресов, ФИО и другого PII в dataLayer обязательны. Проверить GTM Preview, GA4 DebugView, Яндекс Метрику и заказ по одной тестовой операции.
+
+Источники: https://developers.google.com/analytics/devguides/collection/ga4/ecommerce ; https://support.google.com/analytics/answer/12200568 ; https://yandex.ru/support/metrica/ru/ecommerce/data ; https://yandex.ru/support/metrica/ru/data/e-commerce.html
+
+## 5. AI-поиск и управление индексированием
+
+Отдельного **обязательного «AI Schema» нет**. Google для AI Overviews/AI Mode рекомендует обычное индексирование, качественный текстовый контент, внутренние ссылки, серверный HTML и правдивые структурированные данные. Выводим характеристики, цену, доступность, состав комплекта и ссылки в доступном HTML.
+
+Для краулеров предусмотреть настройку robots.txt на уровне сайта, отдельно цели «показ в AI-поиске» и «использование для обучения». По официальной документации OpenAI: OAI-SearchBot связан с ChatGPT Search, GPTBot — с обучением, ChatGPT-User — с запросом пользователя. Не устанавливать всем один непрозрачный флажок. Правила Joomla/сайта не ломать.
+
+llms.txt можно изучить как **необязательный эксперимент** после основного SEO: Google не использует его как специальный фактор/обязательный способ индексации AI. Не обещать продвижения благодаря отдельным файлам/AI метатегам. Покупки через AI-агентов в будущем потребуют отдельного защищённого API и подтверждения действий, одной Schema.org для этого мало.
+
+Источники: https://developers.google.com/search/docs/appearance/ai-features ; https://developers.google.com/search/docs/fundamentals/ai-optimization-guide ; https://developers.openai.com/api/docs/bots
+
+## 6. Проверки перед закрытием задач
+
+- [ ] SEO/HTML/Canonical/H1 + OG категории, товара, комплекта и каждого выбранного варианта; актуальные серверные цены/наличие.
+- [ ] Google Rich Results Test / Search Console, валидатор JSON-LD, Яндекс Вебмастер, социальные превью.
+- [ ] Варианты ProductGroup, hasVariant, уникальные SKU и прямые ссылки на предвыбранные варианты.
+- [ ] Комплект Product/Offer, собственная цена, состав, stock и нормальные ссылки.
+- [ ] Полнaя воронка GA4/Яндекс Метрики и возвраты: без двойной выручки/событий/PII.
+- [ ] AI robots/sitemap, правильная индексация, без выдуманных обязательных AI тегов.
