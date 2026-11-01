@@ -11,6 +11,42 @@ permissions:
   contents: read
 
 jobs:
+  mysql-category:
+    name: MySQL 8 category editor upgrade
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_root_password
+          MYSQL_DATABASE: minimarket_ci_category
+          MYSQL_USER: categoryci
+          MYSQL_PASSWORD: test_category_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u categoryci -ptest_category_password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP with PDO MySQL
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql
+          coverage: none
+      - name: Check legacy product and category preservation
+        env:
+          MINIMARKET_CATEGORY_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_category
+          MM_CI_DB_USER: categoryci
+          MM_CI_DB_PASSWORD: test_category_password
+        run: php scripts/test-category-schema.php
+
   windows-package:
     name: Windows component ZIP
     runs-on: windows-latest
