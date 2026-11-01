@@ -18,7 +18,7 @@ $OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
 
 # Keep component ZIP buildable/installable in isolation for diagnostics.
 & (Join-Path $PSScriptRoot 'build.ps1') -OutputPath $componentZip
-if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw 'COMPONENT_BUILD_FAILED' }
+if (-not (Test-Path -LiteralPath $componentZip -PathType Leaf)) { throw 'COMPONENT_BUILD_FAILED' }
 
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem

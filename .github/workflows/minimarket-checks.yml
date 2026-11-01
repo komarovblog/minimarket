@@ -40,3 +40,6 @@ jobs:
 
       - name: Catalog regression tests
         run: php scripts/test-catalog.php
+
+      - name: Menu primary sync regression tests
+        run: php scripts/test-menu-sync.php
