@@ -60,3 +60,6 @@ jobs:
 
       - name: Admin settings visibility regression tests
         run: php scripts/test-admin-options.php
+
+      - name: Attribute dictionary validation regression tests
+        run: php scripts/test-attributes.php
