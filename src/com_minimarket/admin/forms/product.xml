@@ -23,6 +23,11 @@
     <fieldset name="images" label="COM_MINIMARKET_PRODUCT_TAB_IMAGES">
         <field name="image" type="media" label="COM_MINIMARKET_PRODUCT_IMAGE" filter="string" directory="images"/>
         <field name="image_alt" type="text" label="COM_MINIMARKET_CATEGORY_IMAGE_ALT" filter="string" maxlength="255"/>
+        <field name="gallery" type="subform" label="COM_MINIMARKET_GALLERY_ADDITIONAL"
+               description="COM_MINIMARKET_GALLERY_HELP"
+               formsource="administrator/components/com_minimarket/forms/product_gallery.xml"
+               multiple="true" min="0" max="30" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform" />
     </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>
