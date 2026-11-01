@@ -34,8 +34,44 @@ final class CategoryTable extends Table
             return false;
         }
 
-        // Hierarchical editing starts in M1b; avoid unsupported parent loops in M1a.
-        $this->parent_id = 0;
+        // A category can have any existing parent except itself or its descendants.
+        // Preserve the column on edit: never silently reset it to root.
+        $this->parent_id = (int) ($this->parent_id ?? 0);
+
+        if ($this->parent_id < 0) {
+            $this->setError('COM_MINIMARKET_CATEGORY_PARENT_INVALID');
+
+            return false;
+        }
+
+        if ($this->parent_id > 0) {
+            $seen = [];
+            $parentId = $this->parent_id;
+
+            while ($parentId > 0) {
+                if (isset($seen[$parentId]) || ($this->id > 0 && $parentId === (int) $this->id)) {
+                    $this->setError('COM_MINIMARKET_CATEGORY_PARENT_CYCLE');
+
+                    return false;
+                }
+
+                $seen[$parentId] = true;
+                $parentQuery = $this->getDbo()->getQuery(true)
+                    ->select($this->getDbo()->quoteName('parent_id'))
+                    ->from($this->getDbo()->quoteName('#__minimarket_categories'))
+                    ->where($this->getDbo()->quoteName('id') . ' = ' . $parentId);
+                $this->getDbo()->setQuery($parentQuery);
+                $next = $this->getDbo()->loadResult();
+
+                if ($next === null) {
+                    $this->setError('COM_MINIMARKET_CATEGORY_PARENT_MISSING');
+
+                    return false;
+                }
+
+                $parentId = (int) $next;
+            }
+        }
 
         $db = $this->getDbo();
         $query = $db->getQuery(true)

@@ -4,6 +4,13 @@
         <field name="id" type="hidden" default="0" filter="int"/>
         <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
         <field name="alias" type="text" label="JFIELD_ALIAS_LABEL" filter="string" size="60"/>
+        <field name="parent_id" type="sql"
+            label="COM_MINIMARKET_CATEGORY_PARENT"
+            description="COM_MINIMARKET_CATEGORY_PARENT_DESC"
+            query="SELECT id, title FROM #__minimarket_categories ORDER BY title ASC, id ASC"
+            key_field="id" value_field="title" default="0" filter="int">
+            <option value="0">COM_MINIMARKET_CATEGORY_PARENT_ROOT</option>
+        </field>
         <field name="description" type="textarea" label="JGLOBAL_DESCRIPTION" filter="safehtml" rows="5"/>
         <field name="state" type="list" label="JSTATUS" default="0" filter="int">
             <option value="0">JUNPUBLISHED</option>
