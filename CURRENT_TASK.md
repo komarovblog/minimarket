@@ -16,6 +16,10 @@
 - Версия манифеста `0.3.8`, новых SQL/миграций/таблиц и правок Joomla core нет.
 - Новый автономный `scripts/test-catalog.php` для COUNT, опубликованности, LIMIT/OFFSET и SQL sorting allowlist. Предыдущий `scripts/test-router.php` тестирует multi-menu. **PHP и Joomla runtime новой версии ещё НЕ подтверждены.**
 
+## Автоматическая проверка GitHub — PASS (без Joomla runtime)
+
+Workflow `MiniMarket PHP checks` успешно завершён для коммита `3cd0eaf5`: **PHP 8.4 и PHP 8.5**, lint всех PHP-файлов компонента/скриптов, `scripts/test-router.php` и `scripts/test-catalog.php` — **PASS**. [GitHub Actions run](https://github.com/komarovblog/minimarket/actions/runs/41288143657). Это подтверждает кодовую регрессию, **не** установку ZIP/поведение в Joomla и не контроль MySQL на реальной базе.
+
 ## Один следующий шаг пользователя — общий smoke 0.3.8
 Точная инструкция: `docs/M1I_CATALOG_ASSORTMENT_SMOKE.md`. Из `C:\OSPanel\home\minimarket.local` проверить `git status --short` (сохранить пользовательский `.osp/project.ini`), `git pull --ff-only origin development`, выполнить PHP lint трёх файлов, `scripts/test-router.php` и `scripts/test-catalog.php`, затем `build.ps1` и `inspect-package.ps1` (**ожидаемый `PACKAGE_OK: 0.3.8`**). При ошибке STOP — ZIP не устанавливать. После PASS **один** штатный Joomla upgrade поверх установленной версии (не удалять компонент).
 

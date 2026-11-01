@@ -2,6 +2,10 @@
 
 **Дата:** 01.11.2026. **Репозиторий:** `komarovblog/minimarket`. **Ветка:** `development`; `main` не менять. Это сводка проверенного и согласованного, а не утверждение о готовности всего интернет-магазина. Архитектура: [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md). Актуальный шаг: [CURRENT_TASK.md](../CURRENT_TASK.md).
 
+## Автоматическая проверка GitHub — PASS (без Joomla runtime)
+
+Workflow `MiniMarket PHP checks` успешно завершён для коммита `3cd0eaf5`: **PHP 8.4 и PHP 8.5**, lint всех PHP-файлов компонента/скриптов, `scripts/test-router.php` и `scripts/test-catalog.php` — **PASS**. [GitHub Actions run](https://github.com/komarovblog/minimarket/actions/runs/41288143657). Это подтверждает кодовую регрессию, **не** установку ZIP/поведение в Joomla и не контроль MySQL на реальной базе.
+
 ## 01.11.2026 — исходники 0.3.8: общая выдача товаров с пагинацией (Joomla NOT RUN)
 
 В `development` опубликован консолидированный 0.3.8 с ранее не проверенным 0.3.7 multi-menu router и новой необязательной выдачей **всех товаров** на странице обычного пункта MiniMarket. `show_products` = Нет по умолчанию; при Да — опубликованные товары всех опубликованных категорий, серверный COUNT, SQL LIMIT/OFFSET, список 12/24/48 и сортировки newest(ID)/name/price asc/desc из allowlist. `show_categories` независим; параметры каждого Joomla пункта собственные. `mm_page` и canonical сохраняют фактически открытый storefront Itemid, категорийные/товарные URL остаются по одному основному. Новые `scripts/test-catalog.php` (мок запросов) и прежний `scripts/test-router.php` — обязательные тесты перед одной установкой. **PHP и Joomla runtime 0.3.8 ещё NOT RUN**; 0.3.7 отдельно не ставить, ошибок после 0.3.6 пока не объявлять исправленными. Ни БД/SQL, ни ядро, ни старые товары не меняли. Полный чек-лист: [M1I_CATALOG_ASSORTMENT_SMOKE.md](M1I_CATALOG_ASSORTMENT_SMOKE.md).
