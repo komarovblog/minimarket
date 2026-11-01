@@ -1,0 +1,42 @@
+name: MiniMarket PHP checks
+
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [development]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Lint extension and regression scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src/com_minimarket scripts -type f -name '*.php' -print0 \
+            | xargs -0 -n 1 php -l > /dev/null
+          echo "PHP_LINT_OK"
+
+      - name: Router regression tests
+        run: php scripts/test-router.php
+
+      - name: Catalog regression tests
+        run: php scripts/test-catalog.php
