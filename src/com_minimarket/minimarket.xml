@@ -18,6 +18,7 @@
 
     <media destination="com_minimarket" folder="media">
         <folder>js</folder>
+        <folder>css</folder>
     </media>
 
     <administration>

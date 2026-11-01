@@ -10,7 +10,8 @@
   'use strict';
 
   const selector = 'joomla-field-media input[name="jform[image]"], ' +
-    'joomla-field-media input[name="jform[og_image]"]';
+    'joomla-field-media input[name="jform[og_image]"], ' +
+    'joomla-field-media input[name^="jform[gallery]"][name$="[path]"]';
   const marker = '#joomlaImage://';
 
   function clean(input) {
@@ -43,6 +44,7 @@
 
   document.addEventListener('input', handleChange, true);
   document.addEventListener('change', handleChange, true);
+  document.addEventListener('joomla:updated', cleanAll);
   document.addEventListener('submit', cleanAll, true);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', cleanAll, { once: true });

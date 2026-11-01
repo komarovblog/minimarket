@@ -183,6 +183,32 @@ final class CatalogRepository
         return (array) $this->db->loadObjectList();
     }
 
+    /**
+     * One query for the currently opened product, not one per image or SKU.
+     * File paths come from Joomla Media; this does not read binary image data.
+     *
+     * @return object[]
+     */
+    public function getProductGallery(int $productId): array
+    {
+        if ($productId < 1) {
+            return [];
+        }
+        $query = $this->db->getQuery(true)
+            ->select([
+                $this->db->quoteName('path'),
+                $this->db->quoteName('alt'),
+                $this->db->quoteName('sort_order'),
+            ])
+            ->from($this->db->quoteName('#__minimarket_product_images'))
+            ->where($this->db->quoteName('product_id') . ' = ' . $productId)
+            ->order($this->db->quoteName('sort_order') . ' ASC, '
+                . $this->db->quoteName('id') . ' ASC');
+        $this->db->setQuery($query);
+
+        return (array) $this->db->loadObjectList();
+    }
+
     public function getProduct(int $id): ?object
     {
         $q = $this->db->getQuery(true)

@@ -14,6 +14,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 final class HtmlView extends BaseHtmlView
 {
     public object $product;
+    public array $gallery = [];
 
     public function display($tpl = null)
     {
@@ -31,6 +32,13 @@ final class HtmlView extends BaseHtmlView
         }
 
         $this->product = $product;
+        $this->gallery = $repo->getProductGallery($id);
+        // Gallery behavior is progressive-enhancement: images stay clickable
+        // even if JS is blocked or the currently active template changes.
+        $this->getDocument()->getWebAssetManager()
+            ->registerAndUseScript('com_minimarket.gallery', 'media/com_minimarket/js/gallery.js',
+                [], ['defer' => true])
+            ->registerAndUseStyle('com_minimarket.gallery', 'media/com_minimarket/css/gallery.css');
         $document = $this->getDocument();
         $metaTitle = trim((string) ($product->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $product->title);
