@@ -1,3 +1,7 @@
+## 01.11.2026 — 0.4.0: первый безопасный этап характеристик (Joomla NOT RUN)
+
+Пользователь подтвердил стандартные Options и выбор `primary_shop_itemid` (0.3.11 PASS в локальной Joomla). В `development` реализован самостоятельный справочник характеристик и значений MiniMarket: Joomla MVC Lists/Forms, `AttributeTable`/`ValueTable` с проверкой допустимых типов `list/text/number/boolean`, уникальности code, list-only для `is_variant` и запрета изменения type при существующих значениях. Две аддитивные таблицы MySQL `#__minimarket_attributes` и `#__minimarket_attribute_values` с FK и уникальными индексами. Добавлено меню/ссылка с Dashboard, русские и английские языковые строки, bundle остаётся **одним компонентом** `com_minimarket.zip`. `0.4.0.sql` не меняет ни один существующий продукт/категорию, не мигрирует SKU/цены/остатки. Новые проверки PHP 8.4/8.5, Windows ZIP и MySQL 8 disposable migration; real Joomla NOT RUN. Настоящие варианты SKU, фото и фильтры ещё не реализованы. [M2A_ATTRIBUTES_SMOKE.md](M2A_ATTRIBUTES_SMOKE.md) — единственный smoke.
+
 ## 01.11.2026 — CI 0.3.11 PASS
 
 GitHub Actions [run 41300073360](https://github.com/komarovblog/minimarket/actions/runs/41300073360) проверил PHP 8.4/8.5 syntax, автономные Router, Catalog, Shopmenu и Admin Options ACL тесты, а также Windows сборку ZIP и инспекцию — **PASS**. Ранний отказ нового теста был связан с неверной сигнатурой мока Joomla `HtmlView::display():void`; исправлен только тест, код компонента оставлен. Joomla runtime всё ещё **NOT RUN**.

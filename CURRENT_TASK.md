@@ -1,32 +1,31 @@
 # CURRENT_TASK — MiniMarket
 
-**Дата:** 2026-11-01. Репозиторий `komarovblog/minimarket`, ветка `development`. `main` не изменять. Не менять ядро Joomla, данные пользователей/магазина, `.osp/project.ini` и соседний Shop.
+**Дата:** 2026-11-01. Рабочая ветка `development` в `komarovblog/minimarket`; **не изменять `main`**. Не менять Joomla core, пользовательский `.osp/project.ini`, соседний Shop и существующие строки товаров.
 
-## Реальный отзыв пользователя по 0.3.10
+## Подтверждение пользователя по маршрутизации/Options
 
-Пользователь сообщил, что после установки 0.3.10 **в меню MiniMarket видны только «Категории» и «Товары» и новая настройка не обнаружена**. Причина: `primary_shop_itemid` находится в стандартных Joomla Component Options (`com_config`), а не является отдельным подразделом `com_minimarket`. Уже в исходниках 0.3.10 `Dashboard/HtmlView.php` имел `ToolbarHelper::preferences('com_minimarket')`, но только при `core.admin`, а экран списков Categories/Products вообще не показывал кнопку. Это проблема доступности настроек, а не подтверждённый отказ поля `ShopmenuField`.
+В установленной Joomla 6.2 пользователь подтвердил, что **стандартная кнопка Options в MiniMarket появилась**, настройка **«Основной пункт меню для ссылок»** корректно выбирает каталог/главную и ссылки формируются правильно. Пользователь завершил этот smoke сообщением **«Все правильно»**. Не требовать повторной установки или тестирования 0.3.11 только из-за локализации: переводы `COM_MINIMARKET_CONFIGURATION` опубликованы в `development` и включены в следующий ZIP.
 
-**Рабочий прямой путь уже в установленном 0.3.10:** `http://minimarket.local/administrator/index.php?option=com_config&view=component&component=com_minimarket`. Для открытия нужна роль с `core.admin` или `core.options` на `com_minimarket`. Если по прямой ссылке появляется ошибка самого поля, тестировать отдельно, не утверждать заранее PASS.
+Окончательная архитектура: **одна глобальная настройка `primary_shop_itemid` в Options компонента**, «Автоматически» → MiniMarket home → min ID или выбранный опубликованный ordinary Shop menu item. Никаких per-menu флагов, автоматического выключения флагов, служебного плагина, пакета или скрытых пунктов меню. Пунктов MiniMarket может быть сколько угодно; они не ограничены одним URL.
 
-## Исправление в исходниках: MiniMarket 0.3.11 — Joomla RUNTIME NOT RUN
+## Текущий код: MiniMarket 0.4.0 — справочники характеристик, Joomla runtime NOT RUN
 
-- **Один компонент**, никаких плагинов, скрытых menu items или пакетов. Глобальный `primary_shop_itemid` сохраняет прежнюю согласованную логику: «Автоматически» → MiniMarket на главной / min опубликованный ID, либо один опубликованный обычный MiniMarket menu item. Независимые пункты `/`, `/catalog`, `/shop` остаются.
-- В стандартной панели инструментов Dashboard, Categories, Products теперь показывается Joomla `ToolbarHelper::preferences('com_minimarket')` при `core.admin` **или** `core.options`. В Dashboard шаблоне также явная кнопка «Настройки MiniMarket» (с проверкой тех же разрешений), ведущая в `com_config` без дополнительного самописного MVC view.
-- **Не добавляем новый пункт в административное подменю** для существующих установок: Joomla installer не гарантирует добавления нового подменю без полной перестройки, а перестраивать меню в работающей базе недопустимо. Слева по-прежнему могут отображаться только «Категории» и «Товары» — это нормально; настройки открываются сверху кнопкой «Настройки / Options».
-- `scripts/test-admin-options.php` — независимые mock-проверки прав доступа к стандартной кнопке на 3 экранах + наличие видимой ссылки Dashboard и поля Options; включён в GitHub CI вместе с прежним `test-router.php`, `test-catalog.php`, `test-shopmenu.php`.
-- Манифест `0.3.11`. Нет миграций DB или изменения данных. Только `dist/com_minimarket.zip`; сборка `scripts/build.ps1` и инспекция `scripts/inspect-package.ps1`.
-- **Joomla 0.3.11 НЕ ПРОВЕРЕНА**; убедиться в наличии кнопок после обновления. Проверки CI — отдельно записать после статуса GitHub Actions.
+**Первый реальный этап вариантов без изменения существующих товаров.** Добавлены две новые таблицы:
+- `#__minimarket_attributes`: ID, title, уникальный латинский code, `input_type` = `list/text/number/boolean`, `is_variant` (только для list), `is_filterable` (пока только флажок будущих фильтров), порядок, публикация.
+- `#__minimarket_attribute_values`: ID, `attribute_id` (FK), title, code уникальный в пределах характеристик, порядок, публикация.
 
-## CI версии 0.3.11 — PASS
+Есть Joomla MVC CRUD для `Attribute`/`Value`, списки `Attributes`/`Values`, формы `admin/forms/attribute.xml` и `value.xml`, пункт «Характеристики» в manifest и ссылка с Dashboard (если Joomla не обновит левое подменю при upgrade). Все операции сохранения используют штатную Joomla CSRF-проверку через FormController и штатную таблицу; ручного SQL для управления данными администратору не нужно. Валидация: без дублей, list-only для variant, нельзя менять тип list при наличии словарных значений, уникальные индексы/FK в БД.
 
-GitHub Actions по коммиту `63ee5807`: [run 41300073360](https://github.com/komarovblog/minimarket/actions/runs/41300073360), **PHP 8.4 и 8.5 lint / Router / Catalog / Shop Menu selector / Admin Options ACL regression** и **Windows компонентная ZIP сборка + инспектор** — все задания PASS. Ранние CI FAIL были вызваны сигнатурой тестовой заглушки HtmlView::display():void, исправлены только в тесте. **Реальная Joomla 6.2 0.3.11 ещё НЕ проверена.**
+**0.4.0 upgrade SQL только CREATE TABLE IF NOT EXISTS** (`admin/sql/updates/mysql/0.4.0.sql`); для чистой установки аналогичные CREATE в `install.mysql.sql`. **Не создаёт новых SKU/вариантов, не меняет `#__minimarket_products` или `#__minimarket_categories`, не переносит цену/остаток/URL, не изменяет Joomla core.** Состояние товара `TEST-001` по последнему скриншоту: SKU `TEST-001`, цена `1990.50`, остаток `3`. Проверить, что всё остаётся как перед установкой.
 
-## Один следующий тест пользователя
+Новые регрессионные проверки `scripts/test-attributes.php` (без Joomla и БД), `scripts/test-attribute-schema.php` (**ТОЛЬКО disposable MySQL CI**, защита по env и имени базы). GitHub Actions PHP 8.4/8.5 lint и тесты; Windows ZIP build + inspect; отдельный MySQL 8 upgrade/fresh-install test проверяет сохранность строки TEST-001 и FK/уникальность. Настоящий Joomla runtime **ещё НЕ подтверждён**. В GitHub CI найдено и исправлено столкновение названий FK при одновременном тесте двух префиксов в одной временной базе; тест теперь очищает только свои тестовые таблицы между сценариями.
 
-В CMD из `C:\OSPanel\home\minimarket.local`: `git status --short` (не сбрасывать `.osp/project.ini`), `git pull --ff-only origin development`, `scripts/build.ps1`, `scripts/inspect-package.ps1` и при желании PHP тест. Ожидать `PACKAGE_OK: 0.3.11`. Если есть ошибки — не ставить ZIP.
+## Единственный пользовательский шаг — один smoke 0.4.0
 
-Через Joomla Extensions Installer обновить **только `dist/com_minimarket.zip`** поверх существующей 0.3.10, не удалять компонент. Затем открыть **Компоненты → MiniMarket → Категории или Товары** и проверить кнопку «Настройки / Options» в верхнем тулбаре; либо открыть главный Dashboard MiniMarket и видимую кнопку «Настройки MiniMarket»; либо напрямую `com_config` URL выше. Выбрать «Каталог» в `primary_shop_itemid`, сохранить, проверить автоматические URL `/catalog/category/...` и `/catalog/product/...`, вернуть нужный основной пункт. Остальные параметры/данные/публикации/URLs не должны измениться.
+**Полная инструкция:** `docs/M2A_ATTRIBUTES_SMOKE.md`. Перед установкой создать резервную копию БД; в CMD `C:\OSPanel\home\minimarket.local` выполнить `git status --short`, `git pull --ff-only origin development`, PHP `scripts/test-attributes.php`, прежние тесты Router/Catalog, `scripts/build.ps1`, `scripts/inspect-package.ps1`; ожидать `PACKAGE_OK: 0.4.0`. При FAIL НЕ устанавливать.
 
-## Следующий крупный функциональный срез только после PASS
+Затем один стандартный upgrade **только `dist/com_minimarket.zip`** поверх действующей версии, компонент/данные не удалять. В MiniMarket → «Характеристики» создать списки `color` (Красный/red, Жёлтый/yellow), `size` (S/s, M/m, L/l); проверить редактирование, сохранение, дубли и запрет смены типа со значениями, а также регрессию товара/URL/Options. Не создавать фиктивные товары и не менять товарные цены/остатки.
 
-`docs/PRODUCT_VARIANTS.md`: характеристики/варианты SKU, цены, остатки, цвет/размер, фотографии, без замены существующего родительского URL и без разрушительных SQL/миграций. Решение об auto-disable и служебном Joomla content plugin **ОТМЕНЕНО** окончательно.
+## После подтверждения PASS
+
+**Следующий этап — реальная связь со SKU/вариантами**, с одним URL товара. Перед первым SQL переносом из старого `sku/price/stock` обязательны тестовая миграция, rollback plan и гарантия одного авторитетного источника цены/остатка; `docs/PRODUCT_VARIANTS.md`. Затем фотографии общие/по значению цвета/по конкретному SKU. Фильтры и корзина — отдельно. Не объявлять готовыми раньше кода и реального Joomla smoke.
