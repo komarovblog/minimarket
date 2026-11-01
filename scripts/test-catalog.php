@@ -24,6 +24,7 @@ namespace MiniMarket\CatalogSmoke {
     use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 
     \define('_JEXEC', 1);
+    require_once __DIR__ . '/../src/com_minimarket/site/src/Service/CategoryTree.php';
     require_once __DIR__ . '/../src/com_minimarket/site/src/Service/CatalogRepository.php';
 
     final class FakeQuery
@@ -99,6 +100,13 @@ namespace MiniMarket\CatalogSmoke {
 
         public function loadObjectList(): array
         {
+            if ($this->lastQuery?->from === '#__minimarket_categories') {
+                return [(object) [
+                    'id' => 1, 'title' => 'Published root', 'alias' => 'published-root',
+                    'parent_id' => 0, 'state' => 1,
+                ]];
+            }
+
             return [(object) ['id' => 1, 'title' => 'Example product']];
         }
 
@@ -131,6 +139,7 @@ namespace MiniMarket\CatalogSmoke {
     check(count($db->lastQuery?->joins ?? []) === 1, 'total joins category once');
     check(in_array('p.state = 1', $db->lastQuery?->conditions ?? [], true), 'total excludes unpublished products');
     check(in_array('c.state = 1', $db->lastQuery?->conditions ?? [], true), 'total excludes unpublished categories');
+    check(in_array('p.category_id IN (1)', $db->lastQuery?->conditions ?? [], true), 'total restricts to visible parent chains');
 
     $items = $repository->getAllProductsPage(24, 12, 'price_asc');
     check(count($items) === 1, 'page returns database result list');
@@ -151,7 +160,7 @@ namespace MiniMarket\CatalogSmoke {
 
     $repository->getAllProductsPage(0, 12, 'untrusted SQL; DROP TABLE products');
     check(($db->lastQuery?->orders[0] ?? '') === 'p.id DESC', 'unexpected order falls back to safe allowlist');
-    check($db->queryCount === 5, 'count and four page calls issue exactly five queries');
+    check($db->queryCount === 6, 'one cached category read, one count and four page queries');
 
     if ($failures !== []) {
         fwrite(STDERR, 'CATALOG_TEST_FAIL: ' . implode('; ', $failures) . PHP_EOL);
