@@ -147,17 +147,39 @@ namespace MiniMarket\RouterSmoke {
         }
     }
 
+    // Matches Joomla MenuItem::getParams() and omits the non-selected
+    // "published" column: SiteMenu already returned published items only.
+    final class FakeMenuItem
+    {
+        public int $shop_primary_route = 0;
+
+        public function __construct(
+            public int $id,
+            public string $alias,
+            public bool $home,
+            public string $component = 'com_minimarket',
+            public array $query = ['view' => 'catalog'],
+        ) {
+        }
+
+        public function getParams(): object
+        {
+            return new class($this->shop_primary_route) {
+                public function __construct(private int $primary)
+                {
+                }
+
+                public function get(string $key, mixed $default = null): mixed
+                {
+                    return $key === 'shop_primary_route' ? $this->primary : $default;
+                }
+            };
+        }
+    }
+
     function menuItem(int $id = 31, string $alias = 'catalog', bool $home = false): object
     {
-        // No "published" field! Joomla SiteMenu filtered it before getItems().
-        return (object) [
-            'id' => $id,
-            'component' => 'com_minimarket',
-            'query' => ['view' => 'catalog'],
-            'alias' => $alias,
-            'route' => $home ? '' : $alias,
-            'home' => $home,
-        ];
+        return new FakeMenuItem($id, $alias, $home);
     }
 
     function router(array $items, ?FakeDb $db = null): Router
@@ -244,13 +266,40 @@ namespace MiniMarket\RouterSmoke {
     $home = router([menuItem(45, 'home', true)]);
     expect($home->preprocess(['option' => 'com_minimarket'])['Itemid'] === 45, 'explicit Joomla homepage item accepted');
 
-    foreach ([[], [menuItem(31), menuItem(32, 'shop')]] as $items) {
-        try {
-            router($items)->preprocess(['option' => 'com_minimarket']);
-            expect(false, 'invalid menu count rejected');
-        } catch (\RuntimeException $e) {
-            expect(str_contains($e->getMessage(), 'exactly one'), 'invalid menu count rejected');
-        }
+    // Multiple ordinary visible Shop menu items are allowed.
+    // The homepage wins for product/category links if none is explicitly primary.
+    $both = router([menuItem(31, 'catalog'), menuItem(45, 'home', true)]);
+    $query = $both->preprocess(['option' => 'com_minimarket', 'view' => 'product', 'id' => 1]);
+    expect($query['Itemid'] === 45, 'home takes primary SEO route when Shop is homepage');
+    $query = $both->preprocess(['option' => 'com_minimarket', 'view' => 'catalog', 'Itemid' => 31]);
+    expect($query['Itemid'] === 31, 'explicit secondary storefront /catalog stays on its own menu');
+    expect($both->build($query) === [], 'secondary storefront builds without a product segment');
+    $query = $both->preprocess(['option' => 'com_minimarket', 'view' => 'catalog', 'Itemid' => 45]);
+    expect($query['Itemid'] === 45, 'explicit homepage storefront stays on homepage');
+    $query = $both->preprocess(['option' => 'com_minimarket', 'view' => 'product', 'id' => 1, 'Itemid' => 31]);
+    expect($query['Itemid'] === 45, 'entity links use primary, not secondary storefront Itemid');
+    $query = $both->preprocess(['option' => 'com_minimarket', 'view' => 'catalog', 'Itemid' => 999]);
+    expect($query['Itemid'] === 45, 'foreign Itemid not accepted as a storefront URL');
+
+    // Without a Shop homepage, lowest menu ID is a documented deterministic fallback.
+    $twoSections = router([menuItem(52, 'shop'), menuItem(31, 'catalog')]);
+    expect($twoSections->preprocess(['option' => 'com_minimarket', 'view' => 'product'])['Itemid'] === 31,
+        'two shop sections choose oldest visible menu item without explicit primary');
+
+    // Explicitly marked public item overrides both the home and the fallback.
+    $marked = menuItem(52, 'shop');
+    $marked->shop_primary_route = 1;
+    $withPrimary = router([$marked, menuItem(45, 'home', true)]);
+    expect($withPrimary->preprocess(['option' => 'com_minimarket', 'view' => 'product'])['Itemid'] === 52,
+        'explicitly marked shop primary overrides homepage');
+
+    // Missing menu remains an explicit configuration error. Never create hidden menu.
+    try {
+        router([])->preprocess(['option' => 'com_minimarket', 'view' => 'product']);
+        expect(false, 'zero shop menus rejected');
+    } catch (\RuntimeException $e) {
+        expect(str_contains($e->getMessage(), 'requires a published Shop menu item'),
+            'zero shop menus rejected');
     }
 
     $collision = router([menuItem()], new FakeDb([

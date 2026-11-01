@@ -17,6 +17,18 @@
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>
+            <field
+                name="shop_primary_route"
+                type="radio"
+                label="COM_MINIMARKET_MENU_PRIMARY_ROUTE"
+                description="COM_MINIMARKET_MENU_PRIMARY_ROUTE_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+                filter="integer"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
         </fieldset>
     </fields>
 </metadata>

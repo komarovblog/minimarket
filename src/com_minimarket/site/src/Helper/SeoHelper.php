@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Site\Helper;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Document\HtmlDocument;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Router\Route;
 
 /**
@@ -29,6 +30,20 @@ final class SeoHelper
 
         if ($view !== 'catalog') {
             $route .= '&id=' . $id;
+        }
+
+        // Storefront menu items are independent Joomla pages: if the menu
+        // points directly to MiniMarket, keep that page's own canonical.
+        // Category and product URLs, in contrast, use the single primary
+        // Shop item selected by the component router.
+        if ($view === 'catalog') {
+            $active = Factory::getApplication()->getMenu()->getActive();
+
+            if ($active !== null
+                && ($active->component ?? '') === 'com_minimarket'
+                && ($active->query['view'] ?? null) === 'catalog') {
+                $route .= '&Itemid=' . (int) $active->id;
+            }
         }
 
         // Joomla 6 API: last argument requests an absolute URL.

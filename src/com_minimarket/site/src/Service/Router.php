@@ -9,8 +9,9 @@ use Joomla\CMS\Menu\AbstractMenu;
 use Joomla\Database\DatabaseInterface;
 
 /**
- * Typed category/alias-ID and product/alias-ID routes based on exactly
- * one ordinary published Joomla Shop menu item (home or /shop).
+ * Typed category/alias-ID and product/alias-ID routes through ordinary
+ * public Joomla Shop menu items (home or /shop). Multiple items are allowed;
+ * product/category URLs have one deterministic primary route.
  * No hidden menu items or category ancestry in URLs.
  */
 final class Router implements RouterInterface
@@ -26,16 +27,27 @@ final class Router implements RouterInterface
 
     public function preprocess($query)
     {
-        // One ordinary, published Shop menu item. Never use a foreign Itemid.
         $items = $this->getShopItems();
 
-        if (\count($items) !== 1) {
-            throw new \RuntimeException(
-                'MiniMarket requires exactly one published Shop menu item; found ' . \count($items)
-            );
+        if (!$items) {
+            throw new \RuntimeException('MiniMarket requires a published Shop menu item');
         }
 
-        $query['Itemid'] = (int) $items[0]->id;
+        $view = (string) ($query['view'] ?? 'catalog');
+        $requestedId = (int) ($query['Itemid'] ?? 0);
+
+        // Each ordinary Joomla Shop menu entry may open its own storefront.
+        // An explicit Itemid is preserved ONLY for the storefront view.
+        // Product/category links always use a single canonical route.
+        if ($view === 'catalog' && $requestedId > 0) {
+            foreach ($items as $item) {
+                if ((int) $item->id === $requestedId) {
+                    return $query;
+                }
+            }
+        }
+
+        $query['Itemid'] = (int) $this->getPrimaryShopItem($items)->id;
 
         return $query;
     }
@@ -117,13 +129,11 @@ final class Router implements RouterInterface
     /** @return object[] */
     private function getShopItems(): array
     {
+        // SiteMenu already filters out unpublished entries; Joomla 6 menu
+        // objects do not expose a "published" property.
         $items = $this->menu->getItems('component', 'com_minimarket') ?: [];
         $result = [];
 
-        // Joomla's SiteMenu::load() already loads only published menu items.
-        // Joomla 6 SiteMenu does NOT select a "published" field on MenuItem.
-        // Inspecting $item->published (or defaulting it to 0) therefore
-        // incorrectly treats every legitimate Shop menu item as missing.
         foreach ($items as $item) {
             if (($item->query['view'] ?? null) === 'catalog') {
                 $result[] = $item;
@@ -131,6 +141,36 @@ final class Router implements RouterInterface
         }
 
         return $result;
+    }
+
+    /**
+     * Stable SEO route for products/categories with multiple public Shop items.
+     *
+     * 1. The explicitly checked "Primary shop URL" menu parameter.
+     * 2. An ordinary Joomla home menu item pointing to MiniMarket.
+     * 3. The oldest published MiniMarket menu item (smallest numeric ID).
+     *
+     * Never create or depend on hidden menu items.
+     * @param object[] $items Non-empty ordinary published MiniMarket items.
+     */
+    private function getPrimaryShopItem(array $items): object
+    {
+        usort($items, static fn ($a, $b) => (int) $a->id <=> (int) $b->id);
+
+        foreach ($items as $item) {
+            if (method_exists($item, 'getParams')
+                && (int) $item->getParams()->get('shop_primary_route', 0) === 1) {
+                return $item;
+            }
+        }
+
+        foreach ($items as $item) {
+            if ((int) ($item->home ?? 0) !== 0) {
+                return $item;
+            }
+        }
+
+        return $items[0];
     }
 
     private function parseSlug(string $slug, string $view): int
