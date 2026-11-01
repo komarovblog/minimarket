@@ -81,6 +81,9 @@ try {
         'admin/sql/updates/mysql/0.4.1.sql',
         'admin/sql/updates/mysql/0.4.2.sql',
         'admin/sql/updates/mysql/0.5.0.sql',
+        'admin/sql/updates/mysql/0.5.2.sql',
+        'admin/src/Service/MediaPath.php',
+        'media/js/clean-media.js',
         'admin/src/Field/ProductcategoryField.php',
         'admin/forms/product.xml',
         'admin/tmpl/product/edit.php',
@@ -106,6 +109,12 @@ try {
             Write-Output ('PACKAGE_FAIL: PREMATURE_ATTRIBUTES_IN_PACKAGE: ' + $deferred)
             exit 1
         }
+    }
+
+    # Ensure image cleanup UI asset will be installed by the component.
+    if ($null -eq $xml.SelectSingleNode("/extension/media[@destination='com_minimarket']/folder[text()='js']")) {
+        Write-Output 'PACKAGE_FAIL: CLEAN_MEDIA_ASSET_NOT_DECLARED'
+        exit 1
     }
 
     # Inspect exactly what Joomla will install: the five editor tabs and image fields.

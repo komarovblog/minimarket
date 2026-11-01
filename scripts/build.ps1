@@ -30,6 +30,9 @@ $needed = @(
     'admin\sql\updates\mysql\0.4.1.sql',
     'admin\sql\updates\mysql\0.4.2.sql',
     'admin\sql\updates\mysql\0.5.0.sql',
+    'admin\sql\updates\mysql\0.5.2.sql',
+    'admin\src\Service\MediaPath.php',
+    'media\js\clean-media.js',
     'admin\src\Field\ProductcategoryField.php',
     'admin\forms\category.xml',
     'admin\src\Table\CategoryTable.php',
@@ -78,7 +81,7 @@ $temporaryZip = $null
 try {
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
     Copy-Item -LiteralPath $manifestPath -Destination $stage
-    foreach ($folder in @('admin', 'site')) {
+    foreach ($folder in @('admin', 'site', 'media')) {
         Copy-Item -LiteralPath (Join-Path $componentRoot $folder) -Destination $stage -Recurse
     }
 
@@ -140,7 +143,7 @@ try {
             throw 'ZIP_INVALID_JOOMLA_MANIFEST'
         }
 
-        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/forms/product.xml', 'admin/tmpl/product/edit.php', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php', 'site/tmpl/category/default.php', 'site/tmpl/product/default.php', 'site/src/Service/Router.php', 'site/src/Helper/SeoHelper.php', 'admin/src/Extension/MinimarketComponent.php')) {
+        foreach ($entry in @('minimarket.xml', 'admin/services/provider.php', 'admin/sql/install.mysql.sql', 'admin/sql/updates/mysql/0.2.0.sql', 'admin/forms/category.xml', 'admin/forms/product.xml', 'admin/tmpl/product/edit.php', 'admin/sql/updates/mysql/0.5.2.sql', 'media/js/clean-media.js', 'admin/tmpl/categories/default.php', 'site/tmpl/catalog/default.php', 'site/tmpl/category/default.php', 'site/tmpl/product/default.php', 'site/src/Service/Router.php', 'site/src/Helper/SeoHelper.php', 'admin/src/Extension/MinimarketComponent.php')) {
             if ($members -notcontains $entry) {
                 throw "Invalid ZIP: missing $entry"
             }

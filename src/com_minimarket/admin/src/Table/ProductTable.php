@@ -7,6 +7,7 @@ use Joomla\CMS\Filter\OutputFilter;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\MediaPath;
 
 final class ProductTable extends Table
 {
@@ -83,12 +84,9 @@ final class ProductTable extends Table
         }
         $this->sort_order = (int) $order;
 
-        foreach (['image' => 1024, 'og_image' => 1024] as $field => $maxLength) {
-            $path = trim((string) ($this->$field ?? ''));
-            if (mb_strlen($path) > $maxLength
-                || ($path !== '' && (!str_starts_with($path, 'images/')
-                    || str_contains($path, '..')
-                    || preg_match('/[\x00-\x1f<>]/', $path)))) {
+        foreach (['image', 'og_image'] as $field) {
+            $path = MediaPath::normalize((string) ($this->$field ?? ''));
+            if ($path === null) {
                 $this->setError(Text::_('COM_MINIMARKET_PRODUCT_MEDIA_INVALID'));
                 return false;
             }

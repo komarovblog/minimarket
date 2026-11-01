@@ -7,6 +7,7 @@ use Joomla\CMS\Filter\OutputFilter;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\MediaPath;
 
 final class CategoryTable extends Table
 {
@@ -90,15 +91,13 @@ final class CategoryTable extends Table
             }
             $this->$field = $flag;
         }
-        $this->image = trim((string) ($this->image ?? ''));
         $this->image_alt = trim((string) ($this->image_alt ?? ''));
-        if (mb_strlen($this->image) > 1024 || mb_strlen($this->image_alt) > 255
-            || ($this->image !== '' && (!str_starts_with($this->image, 'images/')
-                || str_contains($this->image, '..')
-                || preg_match('/[\x00-\x1f<>]/', $this->image)))) {
+        $cover = MediaPath::normalize((string) ($this->image ?? ''));
+        if ($cover === null || mb_strlen($this->image_alt) > 255) {
             $this->setError(Text::_('COM_MINIMARKET_CATEGORY_IMAGE_INVALID'));
             return false;
         }
+        $this->image = $cover;
 
         // Keep explicit SEO/OG overrides plain, bounded and independent of fallbacks.
         foreach ([
@@ -117,14 +116,12 @@ final class CategoryTable extends Table
             $this->setError(Text::_('COM_MINIMARKET_CATEGORY_SEO_INVALID'));
             return false;
         }
-        $this->og_image = trim((string) ($this->og_image ?? ''));
-        if (mb_strlen($this->og_image) > 1024
-            || ($this->og_image !== '' && (!str_starts_with($this->og_image, 'images/')
-                || str_contains($this->og_image, '..')
-                || preg_match('/[\x00-\x1f<>]/', $this->og_image)))) {
+        $socialImage = MediaPath::normalize((string) ($this->og_image ?? ''));
+        if ($socialImage === null) {
             $this->setError(Text::_('COM_MINIMARKET_CATEGORY_SEO_INVALID'));
             return false;
         }
+        $this->og_image = $socialImage;
 
         $db = $this->getDbo();
         $query = $db->getQuery(true)
