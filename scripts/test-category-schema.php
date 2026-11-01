@@ -94,6 +94,30 @@ verify(row($pdo, 'catci_minimarket_products')['sku'] === 'TEST-001',
 verify((string) row($pdo, 'catci_minimarket_products')['price'] === (string) $beforeProduct['price'],
     '0.5.0 legacy price unchanged by editor update');
 
+// 0.5.2 metadata cleanup: only remove Joomla Media's adapter fragment.
+$rich = 'images/powered_by.png#joomlaImage://local-images/powered_by.png?width=294&height=44';
+$pdo->exec("UPDATE catci_minimarket_categories SET image=" . $pdo->quote($rich) .
+    ", og_image=" . $pdo->quote($rich) . " WHERE id=1");
+$pdo->exec("UPDATE catci_minimarket_products SET image=" . $pdo->quote($rich) .
+    ", og_image=" . $pdo->quote($rich) . " WHERE id=1");
+runSql($pdo, $dir . 'updates/mysql/0.5.2.sql', 'catci_');
+foreach (['catci_minimarket_categories', 'catci_minimarket_products'] as $tableName) {
+    $clean = row($pdo, $tableName);
+    verify($clean['image'] === 'images/powered_by.png', $tableName . ' cleans image');
+    verify($clean['og_image'] === 'images/powered_by.png', $tableName . ' cleans OG image');
+}
+$cleanProduct = row($pdo, 'catci_minimarket_products');
+foreach (['id', 'sku', 'price', 'stock', 'category_id', 'state'] as $column) {
+    verify($cleanProduct[$column] === $afterProduct[$column],
+        '0.5.2 preserves product ' . $column);
+}
+$cleanCategory = row($pdo, 'catci_minimarket_categories');
+verify($cleanCategory['parent_id'] === $after['parent_id']
+    && $cleanCategory['title'] === $after['title'], 'category hierarchy/title unchanged');
+runSql($pdo, $dir . 'updates/mysql/0.5.2.sql', 'catci_');
+verify(row($pdo, 'catci_minimarket_products')['image'] === 'images/powered_by.png',
+    'clean media migration is idempotent');
+
 // MySQL FK constraint identifiers are database-wide: clean only CI test tables.
 $pdo->exec('DROP TABLE catci_minimarket_products');
 $pdo->exec('DROP TABLE catci_minimarket_categories');

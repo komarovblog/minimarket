@@ -49,9 +49,13 @@ namespace Joomla\CMS\Table {
 namespace MiniMarket\ProductSmoke {
     use Joomla\Database\DatabaseInterface;
     use MiniMarket\Component\Minimarket\Administrator\Table\ProductTable;
+    use MiniMarket\Component\Minimarket\Administrator\Table\CategoryTable;
+    use MiniMarket\Component\Minimarket\Administrator\Service\MediaPath;
 
     \define('_JEXEC', 1);
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/MediaPath.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Table/ProductTable.php';
+    require __DIR__ . '/../src/com_minimarket/admin/src/Table/CategoryTable.php';
 
     final class FakeQuery
     {
@@ -103,6 +107,45 @@ namespace MiniMarket\ProductSmoke {
     $t->og_image_alt = 'Social cover';
     verify($t->check() === true, 'valid editor attributes accepted');
     verify($t->price === '1990.50' && $t->stock === 3, 'legacy trading values preserved');
+
+    // Joomla Media's suffix must never reach category/product/OG database fields.
+    $rich = 'images/powered_by.png#joomlaImage://local-images/powered_by.png?width=294&height=44';
+    verify(MediaPath::normalize($rich) === 'images/powered_by.png', 'Joomla rich field gives one clean path');
+    verify(MediaPath::normalize('images/powered_by.png') === 'images/powered_by.png', 'clean paths are unchanged');
+    verify(MediaPath::normalize('') === '', 'empty selection stays empty');
+    foreach ([
+        'images/image.png#other://meta',
+        'https://example.com/image.png',
+        'images/../../configuration.php',
+        'images/image.png?width=294',
+        'images\image.png',
+        'images/img.png#',
+    ] as $invalidMedia) {
+        verify(MediaPath::normalize($invalidMedia) === null, 'unsupported or unsafe media rejected');
+    }
+
+    $t->image = $rich;
+    $t->og_image = $rich;
+    verify($t->check() === true, 'product accepts native Joomla Media selection');
+    verify($t->image === 'images/powered_by.png' && $t->og_image === 'images/powered_by.png',
+        'product image and OG write one clean path, without dimensions');
+
+    $category = new CategoryTable(new FakeDb());
+    $category->title = 'Category';
+    $category->alias = 'category';
+    $category->parent_id = 0;
+    $category->sort_order = 0;
+    $category->show_children = -1;
+    $category->show_products = -1;
+    $category->image = $rich;
+    $category->og_image = $rich;
+    verify($category->check() === true, 'category accepts Joomla Media selection');
+    verify($category->image === 'images/powered_by.png'
+        && $category->og_image === 'images/powered_by.png',
+        'category image and OG are normalized too');
+    $category->image = 'images/picture.jpg#untrusted';
+    verify(!$category->check(), 'unrecognized category image metadata rejected');
+
 
     $t->image = '../configuration.php';
     verify(!$t->check(), 'image traversal rejected');

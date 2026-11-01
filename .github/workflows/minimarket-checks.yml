@@ -110,8 +110,11 @@ jobs:
       - name: Administrator category hierarchy and counts
         run: php scripts/test-admin-category-tree.php
 
-      - name: Product editor validation and source contract
+      - name: Product editor and clean media validation
         run: php scripts/test-product-editor.php
+
+      - name: Clean Media JavaScript syntax
+        run: node --check src/com_minimarket/media/js/clean-media.js
 
       - name: Shop menu selector regression tests
         run: php scripts/test-shopmenu.php
