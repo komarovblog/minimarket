@@ -120,9 +120,12 @@ final class Router implements RouterInterface
         $items = $this->menu->getItems('component', 'com_minimarket') ?: [];
         $result = [];
 
+        // Joomla's SiteMenu::load() already loads only published menu items.
+        // Joomla 6 SiteMenu does NOT select a "published" field on MenuItem.
+        // Inspecting $item->published (or defaulting it to 0) therefore
+        // incorrectly treats every legitimate Shop menu item as missing.
         foreach ($items as $item) {
-            if (($item->query['view'] ?? 'catalog') === 'catalog'
-                && (int) ($item->published ?? 0) === 1) {
+            if (($item->query['view'] ?? null) === 'catalog') {
                 $result[] = $item;
             }
         }
