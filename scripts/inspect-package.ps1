@@ -59,6 +59,7 @@ try {
 
     foreach ($file in @(
         'admin/services/provider.php',
+        'admin/src/Field/ShopmenuField.php',
         'admin/src/Extension/MinimarketComponent.php',
         'site/src/Controller/DisplayController.php'
     )) {
