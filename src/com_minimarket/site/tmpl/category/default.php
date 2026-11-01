@@ -2,6 +2,7 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Filter\InputFilter;
 use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 ?>
@@ -21,10 +22,10 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
              loading="lazy" class="com-minimarket-category__image">
     <?php endif; ?>
     <?php if (trim((string) ($this->category->introtext ?? '')) !== '') : ?>
-        <p><?php echo $this->escape(strip_tags((string) $this->category->introtext)); ?></p>
+        <div class="com-minimarket-category__intro"><?php echo InputFilter::getInstance()->clean((string) $this->category->introtext, 'HTML'); ?></div>
     <?php endif; ?>
     <?php if ((string) $this->category->description !== '') : ?>
-        <p><?php echo $this->escape(strip_tags((string) $this->category->description)); ?></p>
+        <div class="com-minimarket-category__description"><?php echo InputFilter::getInstance()->clean((string) $this->category->description, 'HTML'); ?></div>
     <?php endif; ?>
 
     <?php if ($this->children) : ?>

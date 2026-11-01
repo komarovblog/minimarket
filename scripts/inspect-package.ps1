@@ -61,6 +61,9 @@ try {
         'admin/services/provider.php',
         'admin/src/Field/ShopmenuField.php',
         'admin/sql/updates/mysql/0.4.1.sql',
+        'admin/sql/updates/mysql/0.4.2.sql',
+        'admin/src/Service/CategoryAdminTree.php',
+        'admin/src/Field/CategoryparentField.php',
         'admin/src/Extension/MinimarketComponent.php',
         'site/src/Controller/DisplayController.php'
     )) {

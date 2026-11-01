@@ -100,6 +100,32 @@ final class CategoryTable extends Table
             return false;
         }
 
+        // Keep explicit SEO/OG overrides plain, bounded and independent of fallbacks.
+        foreach ([
+            'meta_title' => 255, 'meta_description' => 320,
+            'og_title' => 255, 'og_description' => 320, 'og_image_alt' => 255,
+        ] as $field => $maxLength) {
+            $value = trim((string) ($this->$field ?? ''));
+            if (mb_strlen($value) > $maxLength || preg_match('/[\x00-\x1f<>]/', $value)) {
+                $this->setError(Text::_('COM_MINIMARKET_CATEGORY_SEO_INVALID'));
+                return false;
+            }
+            $this->$field = $value;
+        }
+        $this->meta_robots = trim((string) ($this->meta_robots ?? ''));
+        if (!in_array($this->meta_robots, ['', 'index,follow', 'noindex,follow', 'noindex,nofollow'], true)) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_SEO_INVALID'));
+            return false;
+        }
+        $this->og_image = trim((string) ($this->og_image ?? ''));
+        if (mb_strlen($this->og_image) > 1024
+            || ($this->og_image !== '' && (!str_starts_with($this->og_image, 'images/')
+                || str_contains($this->og_image, '..')
+                || preg_match('/[\x00-\x1f<>]/', $this->og_image)))) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_SEO_INVALID'));
+            return false;
+        }
+
         $db = $this->getDbo();
         $query = $db->getQuery(true)
             ->select('COUNT(*)')

@@ -44,13 +44,15 @@ $pdo->exec("INSERT INTO catci_minimarket_products
 $beforeCategory = row($pdo, 'catci_minimarket_categories');
 $beforeProduct = row($pdo, 'catci_minimarket_products');
 runSql($pdo, $dir . 'updates/mysql/0.4.1.sql', 'catci_');
+runSql($pdo, $dir . 'updates/mysql/0.4.2.sql', 'catci_');
 $after = row($pdo, 'catci_minimarket_categories');
 foreach ($beforeCategory as $col => $value) {
     verify(array_key_exists($col, $after) && $value === $after[$col],
         'existing category column ' . $col);
 }
 verify($beforeProduct === row($pdo, 'catci_minimarket_products'), 'product unchanged on upgrade');
-foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products'] as $col) {
+foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description', 'meta_robots',
+    'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(array_key_exists($col, $after), 'new column ' . $col);
 }
 verify((int) $after['sort_order'] === 0, 'order default zero');
@@ -59,6 +61,9 @@ verify((int) $after['show_products'] === -1, 'inherit products');
 $pdo->exec("UPDATE catci_minimarket_categories
     SET introtext='Intro', sort_order=4, image='images/cover.jpg', image_alt='Cover',
     show_children=1, show_products=0 WHERE id=1");
+$pdo->exec("UPDATE catci_minimarket_categories SET meta_title='SEO title', meta_description='SEO description', meta_robots='noindex,follow', og_title='OG title' WHERE id=1");
+verify(row($pdo, 'catci_minimarket_categories')['meta_title'] === 'SEO title', 'SEO field persisted');
+verify(row($pdo, 'catci_minimarket_categories')['meta_robots'] === 'noindex,follow', 'Robots field persisted');
 verify(row($pdo, 'catci_minimarket_categories')['introtext'] === 'Intro',
     'updated category description saved');
 verify($beforeProduct === row($pdo, 'catci_minimarket_products'), 'product unchanged on edit');
@@ -69,7 +74,8 @@ $pdo->exec('DROP TABLE catci_minimarket_categories');
 runSql($pdo, $dir . 'install.mysql.sql', 'freshcatci_');
 $columns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_categories')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products'] as $col) {
+foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description', 'meta_robots',
+    'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(in_array($col, $columns, true), 'fresh-install column ' . $col);
 }
 $pdo->exec("INSERT INTO freshcatci_minimarket_categories
