@@ -13,13 +13,19 @@ final class CategoriesModel extends ListModel
 
         return $db->getQuery(true)
             ->select([
-                $db->quoteName('id'),
-                $db->quoteName('title'),
-                $db->quoteName('alias'),
-                $db->quoteName('state'),
-                $db->quoteName('parent_id'),
+                $db->quoteName('c.id'),
+                $db->quoteName('c.title'),
+                $db->quoteName('c.alias'),
+                $db->quoteName('c.parent_id'),
+                $db->quoteName('c.state'),
+                $db->quoteName('p.title', 'parent_title'),
             ])
-            ->from($db->quoteName('#__minimarket_categories'))
-            ->order($db->quoteName('id') . ' DESC');
+            ->from($db->quoteName('#__minimarket_categories', 'c'))
+            ->join(
+                'LEFT',
+                $db->quoteName('#__minimarket_categories', 'p')
+                . ' ON ' . $db->quoteName('p.id') . ' = ' . $db->quoteName('c.parent_id')
+            )
+            ->order($db->quoteName('c.id') . ' DESC');
     }
 }

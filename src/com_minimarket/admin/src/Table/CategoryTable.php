@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Table;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Filter\OutputFilter;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseInterface;
 
@@ -39,7 +40,7 @@ final class CategoryTable extends Table
         $this->parent_id = (int) ($this->parent_id ?? 0);
 
         if ($this->parent_id < 0) {
-            $this->setError('COM_MINIMARKET_CATEGORY_PARENT_INVALID');
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_PARENT_INVALID'));
 
             return false;
         }
@@ -50,7 +51,7 @@ final class CategoryTable extends Table
 
             while ($parentId > 0) {
                 if (isset($seen[$parentId]) || ($this->id > 0 && $parentId === (int) $this->id)) {
-                    $this->setError('COM_MINIMARKET_CATEGORY_PARENT_CYCLE');
+                    $this->setError(Text::_('COM_MINIMARKET_CATEGORY_PARENT_CYCLE'));
 
                     return false;
                 }
@@ -64,7 +65,7 @@ final class CategoryTable extends Table
                 $next = $this->getDbo()->loadResult();
 
                 if ($next === null) {
-                    $this->setError('COM_MINIMARKET_CATEGORY_PARENT_MISSING');
+                    $this->setError(Text::_('COM_MINIMARKET_CATEGORY_PARENT_MISSING'));
 
                     return false;
                 }
