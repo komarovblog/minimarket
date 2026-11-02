@@ -1,3 +1,7 @@
+## 02.11.2026 — MiniMarket 0.5.12: отдельно тип данных, способ заполнения и фильтр
+
+В разработке семь типов List/Text/Number/Textarea/Date/Boolean/URL, input_mode для List/Number, number preset numeric CSV/min/max/step/unit, filter_mode и filter_multiple только как сохранённые настройки БУДУЩЕГО фасетного UI. В админке товара новые типизированные поля, серверная защита комбинаций и даты/URL, безопасная additive MySQL 8 миграция. Старые товарные значения, галереи и торговые данные не переписывать. PHP/Windows ZIP/MySQL CI и browser smoke по [M12_ATTRIBUTE_TYPES_0512_SMOKE.md](M12_ATTRIBUTE_TYPES_0512_SMOKE.md). Реальный каталог с фильтром и SKU-combinations — следующие этапы.
+
 ## 02.11.2026 — 0.5.11: отдельное число значений атрибута
 
 Кардинальность List (One/Multiple) выведена в отдельную настройку `is_multiple`, независимо от признака `is_variant`. Аддитивная миграция 0.5.11 сохраняет мультивыбор существующих variant-list, серверный guard запрещает обрезать уже выбранные значения. В редакторе товара селект/чекбоксы и валидация зависят только от `is_multiple`. PHP/MySQL8/Windows ZIP CI PASS; Joomla runtime NOT RUN. [Smoke](M11_ATTRIBUTE_CARDINALITY_0511_SMOKE.md).
