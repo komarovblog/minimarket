@@ -130,7 +130,8 @@ final class ProductAttributes
      * @return array{scalars:array<int,array{type:string,value:string}>,options:array<int,int[]>}
      */
     public static function normalize(
-        mixed $posted, int $categoryId, array $definitions, array $categoryMap
+        mixed $posted, int $categoryId, array $definitions, array $categoryMap,
+        array $requiredIds = []
     ): array {
         if (!is_array($posted) && $posted !== null) {
             throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
@@ -264,6 +265,15 @@ final class ProductAttributes
                 throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
             }
             $out['scalars'][$id] = ['type'=>$type,'value'=>$value];
+        }
+        foreach ($requiredIds as $id) {
+            $id = (int) $id;
+            if (!isset($allowed[$id]) || !isset($definitions[$id])) continue;
+            // A boolean value of 0 is valid and already present as a scalar.
+            if (!isset($out['scalars'][$id]) && empty($out['options'][$id])
+                && empty($out['multi_values'][$id])) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_REQUIRED:' . $id);
+            }
         }
         return $out;
     }

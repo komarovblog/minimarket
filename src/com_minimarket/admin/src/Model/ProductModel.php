@@ -74,16 +74,28 @@ final class ProductModel extends AdminModel
                 $definitions = ProductAttributes::definitions($db);
                 $hierarchy = CategoryAttributes::loadHierarchy($db);
                 $categoryMap = ProductAttributes::categoryMap($hierarchy, $definitions);
+                $requiredIds = CategoryAttributes::requiredForCategory(
+                    (int) ($data['category_id'] ?? 0), $hierarchy['parents'], $hierarchy['rules']
+                );
                 $normalized = ProductAttributes::normalize(
                     $data['attribute_values'] ?? [],
                     (int) ($data['category_id'] ?? 0),
                     $definitions,
-                    $categoryMap
+                    $categoryMap,
+                    $requiredIds
                 );
             } catch (\InvalidArgumentException $error) {
                 $message = $error->getMessage();
-                $this->setError(Text::_(str_starts_with($message, 'COM_MINIMARKET_')
-                    ? $message : 'COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID'));
+                if (str_starts_with($message, 'COM_MINIMARKET_PRODUCT_ATTRIBUTES_REQUIRED:')) {
+                    $attributeId = (int) substr($message, strlen('COM_MINIMARKET_PRODUCT_ATTRIBUTES_REQUIRED:'));
+                    $this->setError(Text::sprintf(
+                        'COM_MINIMARKET_PRODUCT_ATTRIBUTES_REQUIRED',
+                        (string) ($definitions[$attributeId]['title'] ?? '#' . $attributeId)
+                    ));
+                } else {
+                    $this->setError(Text::_(str_starts_with($message, 'COM_MINIMARKET_')
+                        ? $message : 'COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID'));
+                }
                 return false;
             }
         }

@@ -28,12 +28,16 @@ final class ProductattributesField extends FormField
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $definitions = ProductAttributes::definitions($db);
-        $map = ProductAttributes::categoryMap(CategoryAttributes::loadHierarchy($db), $definitions);
+        $hierarchy = CategoryAttributes::loadHierarchy($db);
+        $map = ProductAttributes::categoryMap($hierarchy, $definitions);
         $categoryId = (int) ($this->form->getValue('category_id') ?? 0);
         $selected = is_array($this->value) ? $this->value : [];
         $escape = static fn (string $text): string =>
             htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $initial = array_fill_keys($map[$categoryId] ?? [], true);
+        $required = array_fill_keys(CategoryAttributes::requiredForCategory(
+            $categoryId, $hierarchy['parents'], $hierarchy['rules']
+        ), true);
         $used = [];
         foreach ($map as $ids) {
             foreach ($ids as $id) {
@@ -74,7 +78,10 @@ final class ProductattributesField extends FormField
             $html .= '<div class="mb-3 border-bottom pb-3' . ($visible ? '' : ' d-none')
                 . '" data-mm-attribute-row="' . $id . '">'
                 . '<label class="form-label fw-semibold" for="' . $escape($inputId) . '">'
-                . $escape($def['title']) . '</label>';
+                . $escape($def['title'])
+                . (isset($required[$id]) ? ' <span class="text-danger" aria-label="'
+                    . $escape(Text::_('COM_MINIMARKET_CATATTR_MODE_REQUIRED'))
+                    . '">*</span>' : '') . '</label>';
             if ($def['state'] !== 1) {
                 $html .= ' <small class="badge bg-secondary">'
                     . $escape(Text::_('JUNPUBLISHED')) . '</small>';
