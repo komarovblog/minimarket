@@ -8,7 +8,7 @@ use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
-use MiniMarket\Component\Minimarket\Administrator\Service\AttributeValueOrdering;
+use MiniMarket\Component\Minimarket\Administrator\Service\AttributeValueRows;
 
 final class AttributeModel extends AdminModel
 {
@@ -26,6 +26,9 @@ final class AttributeModel extends AdminModel
         $item = parent::getItem($pk);
         if ($item) {
             $item->category_rules = CategoryAttributes::loadForAttribute(
+                $this->getDatabase(), (int) ($item->id ?? 0)
+            );
+            $item->values = AttributeValueRows::formRows(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
         }
@@ -52,23 +55,31 @@ final class AttributeModel extends AdminModel
             return false;
         }
 
-        // Values are a single sortable list within this attribute.
-        $hasOrdering = !empty($data['values_order_present']);
-        $orders = [];
-        if ($hasOrdering) {
+        // The native Subform provides rows in drag/drop order. Missing rows
+        // with the hidden sentinel mean explicit removal of the final row.
+        $hasValues = array_key_exists('values', $data)
+            || !empty($data['values_present']);
+        $oldValues = [];
+        $newValues = [];
+        if ($hasValues) {
             try {
                 $attributeId = (int) ($data['id'] ?? 0);
-                $orders = AttributeValueOrdering::normalize(
-                    $data['values_order'] ?? [],
-                    AttributeValueOrdering::ids($db, $attributeId)
+                $oldValues = AttributeValueRows::load($db, $attributeId);
+                $newValues = AttributeValueRows::normalize(
+                    $data['values'] ?? [], $oldValues
                 );
-            } catch (\InvalidArgumentException $error) {
-                $this->setError(Text::_('COM_MINIMARKET_VALUE_ORDER_INVALID'));
+                if ((string) ($data['input_type'] ?? '') !== 'list'
+                    && $newValues !== []) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_VALUE_ROWS_INVALID');
+                }
+            } catch (\InvalidArgumentException | \JsonException $error) {
+                $this->setError(Text::_('COM_MINIMARKET_VALUE_ROWS_INVALID'));
                 return false;
             }
         }
 
         unset($data['category_rules'], $data['categories_present'],
+            $data['values'], $data['values_present'],
             $data['values_order'], $data['values_order_present']);
         $db->transactionStart();
         try {
@@ -80,15 +91,18 @@ final class AttributeModel extends AdminModel
                 $id = (int) $this->getState($this->getName() . '.id');
                 CategoryAttributes::replaceForAttribute($db, $id, $rules);
             }
-            if ($hasOrdering) {
+            if ($hasValues && (string) ($data['input_type'] ?? '') === 'list') {
                 $attributeId = (int) $this->getState($this->getName() . '.id');
-                AttributeValueOrdering::apply($db, $attributeId, $orders);
+                AttributeValueRows::apply($db, $attributeId, $oldValues, $newValues);
             }
             $db->transactionCommit();
             return true;
         } catch (\Throwable $error) {
             $db->transactionRollback();
-            $this->setError(Text::_('COM_MINIMARKET_ATTRCAT_SAVE_FAILED'));
+            $message = $error->getMessage() === 'COM_MINIMARKET_VALUE_ROWS_IN_USE'
+                ? 'COM_MINIMARKET_VALUE_ROWS_IN_USE'
+                : 'COM_MINIMARKET_ATTRCAT_SAVE_FAILED';
+            $this->setError(Text::_($message));
             return false;
         }
     }
