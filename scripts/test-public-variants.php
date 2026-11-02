@@ -78,7 +78,7 @@ namespace MiniMarket\PublicVariantsSmoke {
     check($result['axes'][11]['options'][1]['value']==='t:M','size text preset available');
     check(in_array('state = 1', $db->queries[0]->where, true),
         'only published variant rows queried');
-    check(count($db->queries)===6,'batched reads independent of SKU count');
+    check(count($db->queries)===5,'batched reads independent of SKU count');
     $site=file_get_contents(__DIR__.'/../src/com_minimarket/site/tmpl/product/default.php');
     check(str_contains($site,'data-mm-variant-price')
         && str_contains($site,'data-mm-variant-stock'),

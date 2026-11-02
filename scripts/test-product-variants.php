@@ -70,6 +70,39 @@ namespace MiniMarket\VariantSmoke {
         try {V::normalize($bad,$axes);ok(false,$label);}
         catch (\InvalidArgumentException $e) {ok(true,$label);}
     }
+    require __DIR__.'/../src/com_minimarket/admin/src/Service/VariantDependencies.php';
+    $deps = new class implements \Joomla\Database\DatabaseInterface {
+        public array $values=['{"10":"d:100","11":"t:M"}'];
+        public function getQuery($new=true):object {
+            return new class {
+                public function select($v):self{return $this;}
+                public function from($v):self{return $this;}
+                public function where($v):self{return $this;}
+            };
+        }
+        public function quoteName($value):string{return (string)$value;}
+        public function quote($value):string{return "'".str_replace("'","''",(string)$value)."'";}
+        public function setQuery($q):void{}
+        public function loadColumn():array{return $this->values;}
+    };
+    $guard=\MiniMarket\Component\Minimarket\Administrator\Service\VariantDependencies::class;
+    $guard::assertAttributeChange($deps,10,'color','auto',1,'',
+        [['id'=>100],['id'=>101]]);
+    ok(true,'used color option can be updated without deletion');
+    foreach ([
+        [10,'color','auto',0,'',[['id'=>100]]],
+        [10,'color','auto',1,'',[['id'=>101]]],
+        [11,'text','presets',1,'["S","L"]',[]],
+    ] as [$id,$type,$mode,$flag,$text,$dict]) {
+        try {
+            $guard::assertAttributeChange($deps,$id,$type,$mode,$flag,$text,$dict);
+            ok(false,'referenced variant axis cannot be invalidated');
+        } catch (\RuntimeException $error) {
+            ok($error->getMessage()==='COM_MINIMARKET_VARIANT_REFERENCES_IN_USE',
+                'referenced SKU value protected');
+        }
+    }
+
     $form=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_variant.xml');
     $parent=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
     ok($form!==false && $parent!==false,'XML forms valid');

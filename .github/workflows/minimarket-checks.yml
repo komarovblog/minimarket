@@ -119,6 +119,9 @@ jobs:
       - name: Real variant SKU combinations and per-variant photo validation
         run: php scripts/test-product-variants.php
 
+      - name: Public variant SKU, image and stock reads
+        run: php scripts/test-public-variants.php
+
       - name: Published product attributes on storefront
         run: php scripts/test-public-product-attributes.php
       - name: Attribute input and filter mode JS syntax
