@@ -183,9 +183,6 @@ verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_attributes')->fe
     '0.5.4 migration can be rerun without duplicate dictionaries');
 verify($preAttributesProduct === row($pdo, 'catci_minimarket_products'),
     '0.5.4 remains safe on repeat');
-$pdo->exec('DROP TABLE catci_minimarket_attribute_values');
-$pdo->exec('DROP TABLE catci_minimarket_attributes');
-
 // 0.5.5: category assignments, inheritance rules and legacy data safety.
 $beforeCatAssignProduct = row($pdo, 'catci_minimarket_products');
 $beforeCatAssignCategory = row($pdo, 'catci_minimarket_categories');
@@ -218,6 +215,8 @@ verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_category_attribu
 verify($beforeCatAssignProduct === row($pdo, 'catci_minimarket_products'),
     '0.5.5 rerun preserves trading data');
 $pdo->exec('DROP TABLE catci_minimarket_category_attributes');
+$pdo->exec('DROP TABLE catci_minimarket_attribute_values');
+$pdo->exec('DROP TABLE catci_minimarket_attributes');
 
 // MySQL FK constraint identifiers are database-wide: clean only CI test tables.
 $pdo->exec('DROP TABLE catci_minimarket_products');
