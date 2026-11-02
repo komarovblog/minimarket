@@ -91,6 +91,14 @@ try {
         'admin/sql/updates/mysql/0.5.14.sql',
         'admin/sql/updates/mysql/0.5.15.sql',
         'admin/sql/updates/mysql/0.5.16.sql',
+        'admin/sql/updates/mysql/0.5.17.sql',
+        'admin/forms/product_variant.xml',
+        'admin/src/Service/ProductVariants.php',
+        'admin/src/Field/VariantinfoField.php',
+        'site/src/Service/VariantCatalog.php',
+        'media/js/variants-admin.js',
+        'media/js/variants.js',
+        'media/css/variants.css',
         'site/src/Service/ProductAttributeCatalog.php',
         'media/css/attributes.css',
         'admin/src/Service/TextPresetRows.php',
@@ -262,12 +270,17 @@ try {
     finally {
         $formReader.Dispose()
     }
-    foreach ($tab in @('details', 'descriptions', 'images', 'videos', 'seo', 'publishing')) {
+    foreach ($tab in @('details', 'descriptions', 'images', 'videos', 'variants', 'seo', 'publishing')) {
         $xpath = "/form/fieldset[@name='" + $tab + "']"
         if ($null -eq $productForm.SelectSingleNode($xpath)) {
             Write-Output ('PACKAGE_FAIL: PRODUCT_TAB_MISSING_' + $tab)
             exit 1
         }
+    }
+    if ($null -eq $productForm.SelectSingleNode("/form/fieldset[@name='variants']/field[@name='variants' and @type='subform']") -or
+        $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='variants']/field[@name='variant_info' and @type='Variantinfo']")) {
+        Write-Output 'PACKAGE_FAIL: VARIANT_SKU_FIELDS_MISSING'
+        exit 1
     }
     if ($null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='image' and @type='media']") -or
         $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='image_alt']")) {

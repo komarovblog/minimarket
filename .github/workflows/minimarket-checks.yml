@@ -116,6 +116,9 @@ jobs:
       - name: Typed category-scoped product attributes
         run: php scripts/test-product-attributes.php
 
+      - name: Real variant SKU combinations and per-variant photo validation
+        run: php scripts/test-product-variants.php
+
       - name: Published product attributes on storefront
         run: php scripts/test-public-product-attributes.php
       - name: Attribute input and filter mode JS syntax
@@ -123,6 +126,11 @@ jobs:
 
       - name: Product attributes category UI JavaScript syntax
         run: node --check src/com_minimarket/media/js/product-attributes.js
+
+      - name: Native variant rows and storefront variant switching JavaScript
+        run: |
+          node --check src/com_minimarket/media/js/variants-admin.js
+          node --check src/com_minimarket/media/js/variants.js
 
       - name: Relational product gallery and Joomla Subform regression
         run: php scripts/test-product-gallery.php

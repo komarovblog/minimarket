@@ -337,6 +337,30 @@ verify((int) $pdo->query("SELECT required FROM catci_minimarket_category_attribu
     'required flag can be saved');
 verify($beforeMandatoryProduct === row($pdo, 'catci_minimarket_products'),
     '0.5.16 does not modify product data or URL');
+$preVariantProduct = row($pdo,'catci_minimarket_products');
+runSql($pdo, $dir . 'updates/mysql/0.5.17.sql', 'catci_');
+$pdo->exec("INSERT INTO catci_minimarket_product_variants
+    (product_id,sku,selection_json,signature,price,stock,image,sort_order)
+    VALUES (1,'RED-S','{\"1\":\"d:1\"}','".str_repeat('a',64)."',1590.00,5,'images/red.webp',0),
+           (1,'RED-M','{\"1\":\"d:1\"}','".str_repeat('b',64)."',1790.00,0,'images/red-m.webp',1)");
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_variants')->fetchColumn() === 2,
+    'multiple SKU rows under same product');
+$pdo->exec("INSERT INTO catci_minimarket_product_variant_images (variant_id,path,alt,sort_order)
+    VALUES (1,'images/red-back.webp','Back',0)");
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_variant_images')->fetchColumn() === 1,
+    'variant gallery linked');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_product_variants
+        (product_id,sku,selection_json,signature,price,stock)
+        VALUES (1,'RED-S-DUP','{}','".str_repeat('a',64)."',1500,1)");
+    verify(false,'duplicate SKU combination prevented');
+} catch (PDOException $e) {
+    verify(true,'duplicate SKU combination prevented');
+}
+verify($preVariantProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.17 preserves product ID, URL, price, SKU, stock, and photos');
+$pdo->exec('DROP TABLE catci_minimarket_product_variant_images');
+$pdo->exec('DROP TABLE catci_minimarket_product_variants');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_multi_values');
 $pdo->exec('DROP TABLE catci_minimarket_product_videos');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_options');
