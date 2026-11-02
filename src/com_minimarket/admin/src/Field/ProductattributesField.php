@@ -56,6 +56,9 @@ final class ProductattributesField extends FormField
             $type = $def['type'];
             $value = $selected[$id] ?? ($selected[(string) $id] ?? '');
             $values = is_array($value) ? array_map('intval', $value) : [(int) $value];
+            // List data is stored as value IDs even when the field is single-
+            // select; restore the selected option instead of stringifying Array.
+            $singleValue = is_array($value) ? (string) (reset($value) ?: '') : (string) $value;
             $name = $this->name . '[' . $id . ']';
             $inputId = $this->id . '_' . $id;
             $isApplicable = isset($initial[$id]);
@@ -102,7 +105,7 @@ final class ProductattributesField extends FormField
                     : $def['values'];
                 foreach ($options as $optionId => $option) {
                     $label = $type === 'boolean' ? $option : $option['title'];
-                    $selectedOption = (string) $optionId === (string) $value && $hasStored;
+                    $selectedOption = (string) $optionId === $singleValue && $hasStored;
                     $html .= '<option value="' . $escape((string) $optionId) . '"'
                         . ($selectedOption ? ' selected' : '')
                         . '>' . $escape((string) $label)
