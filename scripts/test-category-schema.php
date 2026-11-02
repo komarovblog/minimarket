@@ -214,6 +214,43 @@ verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_category_attribu
     '0.5.5 migration repeat does not lose assignments');
 verify($beforeCatAssignProduct === row($pdo, 'catci_minimarket_products'),
     '0.5.5 rerun preserves trading data');
+// 0.5.7: typed product attributes are relations, not product trading columns.
+$beforeAttributeProduct = row($pdo, 'catci_minimarket_products');
+runSql($pdo, $dir . 'updates/mysql/0.5.7.sql', 'catci_');
+verify($beforeAttributeProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.7 keeps all legacy product SKU/price/stock/media');
+$pdo->exec("INSERT INTO catci_minimarket_attributes
+    (id,title,code,input_type,state) VALUES (3,'Width','width','number',1)");
+$pdo->exec("INSERT INTO catci_minimarket_product_attribute_scalars
+    (product_id,attribute_id,value_number) VALUES (1,3,12.5000)");
+$pdo->exec("INSERT INTO catci_minimarket_product_attribute_options
+    (product_id,attribute_id,value_id) VALUES (1,1,1),(1,1,2)");
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_attribute_options')->fetchColumn() === 2,
+    '0.5.7 allows two color selections for one product');
+verify((string) $pdo->query('SELECT value_number FROM catci_minimarket_product_attribute_scalars')->fetchColumn() === '12.5000',
+    '0.5.7 preserves typed decimal');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_product_attribute_options
+        (product_id,attribute_id,value_id) VALUES (1,1,1)");
+    verify(false,'duplicate option blocked by primary key');
+} catch (PDOException $e) {
+    verify(true, 'duplicate option blocked by primary key');
+}
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_product_attribute_options
+        (product_id,attribute_id,value_id) VALUES (1,1,999)");
+    verify(false,'unknown value blocked by FK');
+} catch (PDOException $e) {
+    verify(true, 'unknown value blocked by FK');
+}
+runSql($pdo, $dir . 'updates/mysql/0.5.7.sql', 'catci_');
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_attribute_options')->fetchColumn() === 2,
+    'rerun 0.5.7 does not remove selected values');
+verify($beforeAttributeProduct === row($pdo, 'catci_minimarket_products'),
+    'rerun 0.5.7 preserves trading columns');
+$pdo->exec('DROP TABLE catci_minimarket_product_attribute_options');
+$pdo->exec('DROP TABLE catci_minimarket_product_attribute_scalars');
+
 $pdo->exec('DROP TABLE catci_minimarket_category_attributes');
 $pdo->exec('DROP TABLE catci_minimarket_attribute_values');
 $pdo->exec('DROP TABLE catci_minimarket_attributes');
@@ -252,6 +289,16 @@ $freshAssignmentColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_c
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['category_id','attribute_id','enabled'] as $col) {
     verify(in_array($col, $freshAssignmentColumns, true), 'fresh 0.5.5 assignment column ' . $col);
+}
+$freshScalars = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_attribute_scalars')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['product_id','attribute_id','value_text','value_number','value_boolean'] as $col) {
+    verify(in_array($col,$freshScalars,true),'fresh 0.5.7 scalar column ' . $col);
+}
+$freshOptions = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_attribute_options')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['product_id','attribute_id','value_id'] as $col) {
+    verify(in_array($col,$freshOptions,true),'fresh 0.5.7 option column ' . $col);
 }
 $pdo->exec("INSERT INTO freshcatci_minimarket_categories
     (id,title,alias,state) VALUES (1,'New category','new-category',1)");
