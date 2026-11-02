@@ -134,6 +134,10 @@ namespace MiniMarket\AttributesSmoke {
                 return $this->invalidPresetProducts ? 1 : 0;
             }
 
+            if ($this->query?->from === '#__minimarket_product_attribute_multi_values') {
+                return 0;
+            }
+
             if ($this->query?->from === '#__minimarket_product_attribute_options') {
                 return $this->multipleProducts ? 2 : 0;
             }

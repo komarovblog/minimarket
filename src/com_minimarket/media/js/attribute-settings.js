@@ -24,6 +24,7 @@
     const filter = document.getElementById('jform_filter_mode');
     const multi = document.getElementById('jform_is_multiple');
     const variant = document.querySelector('[name="jform[is_variant]"]:checked');
+    const multiGroup = multi?.closest('.control-group, .mb-3');
     if (!type || !mode || !filter) return;
     // Pre-existing List / URL / Date / Textarea remain editable; only NEW
     // attributes are limited to Text, Number, HTML editor, Yes/No.
@@ -59,6 +60,9 @@
       busy = true;
       try {
         const t = type.value;
+        if (multiGroup) {
+          multiGroup.hidden = t === 'text' && mode.value !== 'presets';
+        }
         updateOptions(mode, product[t] || ['auto'], 'auto');
         // Legacy types remain selectable only when editing the same old kind.
         const legacy = ['list','textarea','date','url'];

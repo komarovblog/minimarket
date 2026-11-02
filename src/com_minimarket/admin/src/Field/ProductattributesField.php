@@ -253,7 +253,7 @@ final class ProductattributesField extends FormField
                 }
                 $html .= '<input class="form-control" type="' . $inputType
                     . '" id="' . $escape($inputId) . '" name="' . $escape($name) . '" value="'
-                    . $escape(is_scalar($value) ? (string) $value : '') . '"' . $extra . '>';
+                    . $escape($type === 'text' ? $singleValue : (is_scalar($value) ? (string) $value : '')) . '"' . $extra . '>';
             }
             if ($type === 'number' && trim((string) ($def['number_unit'] ?? '')) !== '') {
                 $html .= ' <small class="text-muted">'
