@@ -33,6 +33,14 @@ final class HtmlView extends BaseHtmlView
                 ['defer' => true]
             );
 
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript(
+                'com_minimarket.product-attributes',
+                'media/com_minimarket/js/product-attributes.js',
+                [],
+                ['defer' => true]
+            );
+
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PRODUCT_EDIT_TITLE'));
         ToolbarHelper::apply('product.apply');
         ToolbarHelper::save('product.save');

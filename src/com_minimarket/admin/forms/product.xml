@@ -20,6 +20,11 @@
         <field name="introtext" type="editor" label="COM_MINIMARKET_CATEGORY_INTRO" filter="safehtml" buttons="true"/>
         <field name="description" type="editor" label="JGLOBAL_DESCRIPTION" filter="safehtml" buttons="true"/>
     </fieldset>
+    <fieldset name="attributes" label="COM_MINIMARKET_PRODUCT_TAB_ATTRIBUTES">
+        <field name="attributes_present" type="hidden" filter="int" default="1"/>
+        <field name="attribute_values" type="Productattributes" filter="raw"
+               label="COM_MINIMARKET_PRODUCT_TAB_ATTRIBUTES"/>
+    </fieldset>
     <fieldset name="images" label="COM_MINIMARKET_PRODUCT_TAB_IMAGES">
         <field name="gallery_present" type="hidden" default="1" filter="int"/>
         <field name="image" type="media" label="COM_MINIMARKET_PRODUCT_IMAGE" filter="string" directory="images"/>

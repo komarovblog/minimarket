@@ -1,0 +1,116 @@
+<?php
+namespace MiniMarket\Component\Minimarket\Administrator\Field;
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Form\FormField;
+use Joomla\CMS\Language\Text;
+use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
+
+/**
+ * One editor for all possible attributes, with client-side category switching.
+ * The backend validates again and never trusts JS or hidden inputs.
+ */
+final class ProductattributesField extends FormField
+{
+    protected $type = 'Productattributes';
+
+    protected function getInput()
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $definitions = ProductAttributes::definitions($db);
+        $map = ProductAttributes::categoryMap(CategoryAttributes::loadHierarchy($db), $definitions);
+        $categoryId = (int) ($this->form->getValue('category_id') ?? 0);
+        $selected = is_array($this->value) ? $this->value : [];
+        $escape = static fn (string $text): string =>
+            htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $initial = array_fill_keys($map[$categoryId] ?? [], true);
+        $used = [];
+        foreach ($map as $ids) {
+            foreach ($ids as $id) {
+                $used[(int) $id] = true;
+            }
+        }
+
+        $html = '<div data-mm-product-attributes data-mm-category-map="'
+            . $escape((string) json_encode($map, JSON_THROW_ON_ERROR))
+            . '"><p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_HELP'))
+            . '</p><p data-mm-attr-empty class="text-muted">'
+            . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_SELECT_CATEGORY')) . '</p>';
+
+        foreach ($definitions as $id => $def) {
+            if (!isset($used[$id])) {
+                continue;
+            }
+            $type = $def['type'];
+            $value = $selected[$id] ?? ($selected[(string) $id] ?? '');
+            $values = is_array($value) ? array_map('intval', $value) : [(int) $value];
+            $name = $this->name . '[' . $id . ']';
+            $inputId = $this->id . '_' . $id;
+            $isApplicable = isset($initial[$id]);
+            $hasStored = $value !== '' && $value !== null && $value !== [];
+            $visible = $isApplicable || $hasStored;
+
+            $html .= '<div class="mb-3 border-bottom pb-3' . ($visible ? '' : ' d-none')
+                . '" data-mm-attribute-row="' . $id . '">'
+                . '<label class="form-label fw-semibold" for="' . $escape($inputId) . '">'
+                . $escape($def['title']) . '</label>';
+            if ($def['is_variant']) {
+                $html .= ' <small class="text-muted">'
+                    . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_VARIANT_NOTICE')) . '</small>';
+            }
+            $html .= '<div class="text-warning small' . ($isApplicable ? ' d-none' : '')
+                . '" data-mm-attribute-incompatible>'
+                . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . '</div>';
+
+            if ($type === 'list' && $def['is_variant']) {
+                $n = 0;
+                foreach ($def['values'] as $optionId => $option) {
+                    if ($option['state'] !== 1 && !in_array($optionId, $values, true)) {
+                        continue;
+                    }
+                    $checked = in_array($optionId, $values, true) && $hasStored;
+                    $html .= '<div class="form-check"><input class="form-check-input" type="checkbox"'
+                        . ' id="' . $escape($inputId . '_' . $n) . '" name="' . $escape($name . '[]')
+                        . '" value="' . $optionId . '"' . ($checked ? ' checked' : '')
+                        . ($option['state'] !== 1 ? ' disabled' : '') . '>'
+                        . '<label class="form-check-label" for="' . $escape($inputId . '_' . $n) . '">'
+                        . $escape($option['title']) . '</label></div>';
+                    ++$n;
+                }
+            } elseif ($type === 'list' || $type === 'boolean') {
+                $html .= '<select class="form-select" id="' . $escape($inputId)
+                    . '" name="' . $escape($name) . '"><option value="">'
+                    . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
+                $options = $type === 'boolean'
+                    ? ['1' => Text::_('JYES'), '0' => Text::_('JNO')]
+                    : $def['values'];
+                foreach ($options as $optionId => $option) {
+                    if ($type === 'list' && $option['state'] !== 1
+                        && (string) $optionId !== (string) $value) {
+                        continue;
+                    }
+                    $label = $type === 'boolean' ? $option : $option['title'];
+                    $selectedOption = (string) $optionId === (string) $value && $hasStored;
+                    $html .= '<option value="' . $escape((string) $optionId) . '"'
+                        . ($selectedOption ? ' selected' : '')
+                        . ($type === 'list' && $option['state'] !== 1 ? ' disabled' : '')
+                        . '>' . $escape((string) $label) . '</option>';
+                }
+                $html .= '</select>';
+            } else {
+                $inputType = $type === 'number' ? 'number' : 'text';
+                $html .= '<input class="form-control" type="' . $inputType
+                    . '" id="' . $escape($inputId) . '" name="' . $escape($name) . '" value="'
+                    . $escape(is_scalar($value) ? (string) $value : '') . '"'
+                    . ($type === 'number' ? ' step="0.0001"' : ' maxlength="1024"') . '>';
+            }
+            $html .= '</div>';
+        }
+
+        return $html . '</div>';
+    }
+}

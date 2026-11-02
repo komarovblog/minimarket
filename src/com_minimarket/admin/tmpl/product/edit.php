@@ -11,6 +11,7 @@ use Joomla\CMS\Router\Route;
     <?php foreach ([
         'details' => 'COM_MINIMARKET_PRODUCT_TAB_DETAILS',
         'descriptions' => 'COM_MINIMARKET_PRODUCT_TAB_DESCRIPTIONS',
+        'attributes' => 'COM_MINIMARKET_PRODUCT_TAB_ATTRIBUTES',
         'images' => 'COM_MINIMARKET_PRODUCT_TAB_IMAGES',
         'seo' => 'COM_MINIMARKET_CATEGORY_TAB_SEO',
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
