@@ -6,6 +6,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Table;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\AttributeSettings;
 
 final class AttributeTable extends Table
 {
@@ -34,7 +35,7 @@ final class AttributeTable extends Table
             return false;
         }
 
-        if (!\in_array($this->input_type, ['list', 'text', 'number', 'boolean'], true)) {
+        if (!\in_array($this->input_type, AttributeSettings::TYPES, true)) {
             $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE_INVALID'));
 
             return false;
@@ -59,6 +60,12 @@ final class AttributeTable extends Table
         if ($this->is_variant === 1 && $this->input_type !== 'list') {
             $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT_REQUIRES_LIST'));
 
+            return false;
+        }
+
+        $settingError = AttributeSettings::normalize($this);
+        if ($settingError !== null) {
+            $this->setError(Text::_($settingError));
             return false;
         }
 
@@ -103,6 +110,28 @@ final class AttributeTable extends Table
             if ((int) $db->loadResult() > 1) {
                 $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_MULTIPLE_IN_USE'));
                 return false;
+            }
+        }
+
+        // Preserve stored scalar values: a type change may reinterpret values
+        // (e.g. text -> date). Require explicit cleanup before changing type.
+        if ((int) $this->id > 0 && $this->input_type !== 'list') {
+            $typeQuery = $db->getQuery(true)
+                ->select($db->quoteName('input_type'))
+                ->from($db->quoteName('#__minimarket_attributes'))
+                ->where($db->quoteName('id') . ' = ' . (int) $this->id);
+            $db->setQuery($typeQuery);
+            $previousType = (string) ($db->loadResult() ?? '');
+            if ($previousType !== '' && $previousType !== $this->input_type) {
+                $existingScalar = $db->getQuery(true)
+                    ->select('COUNT(*)')
+                    ->from($db->quoteName('#__minimarket_product_attribute_scalars'))
+                    ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id);
+                $db->setQuery($existingScalar);
+                if ((int) $db->loadResult() > 0) {
+                    $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE_HAS_VALUES'));
+                    return false;
+                }
             }
         }
 
