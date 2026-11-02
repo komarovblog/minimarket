@@ -39,7 +39,7 @@ final class NumericPresetRows
             if (is_object($row)) {
                 $row = (array) $row;
             }
-            if (!is_array($row) || !is_scalar($row['number'] ?? '')) {
+            if (!is_array($row) || !array_key_exists('number', $row) || !is_scalar($row['number'])) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID');
             }
             $number = trim((string) $row['number']);
