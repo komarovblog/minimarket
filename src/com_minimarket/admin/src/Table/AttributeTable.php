@@ -40,7 +40,13 @@ final class AttributeTable extends Table
             return false;
         }
 
-        foreach (['is_variant', 'is_filterable', 'state'] as $field) {
+        // When switching from List to another type the hidden List-specific
+        // cardinality control must not leave an invalid flag behind.
+        if ($this->input_type !== 'list') {
+            $this->is_multiple = 0;
+        }
+
+        foreach (['is_variant', 'is_multiple', 'is_filterable', 'state'] as $field) {
             if (!\in_array((int) $this->$field, [0, 1], true)) {
                 $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_FLAGS_INVALID'));
 
@@ -81,6 +87,23 @@ final class AttributeTable extends Table
             $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_CODE_DUPLICATE'));
 
             return false;
+        }
+
+        // Do not silently discard additional product choices when an
+        // administrator changes a multi-select list to single-select.
+        if ((int) $this->id > 0 && $this->input_type === 'list'
+            && $this->is_multiple === 0) {
+            $multipleQuery = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_product_attribute_options'))
+                ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id)
+                ->group($db->quoteName('product_id'))
+                ->having('COUNT(*) > 1');
+            $db->setQuery($multipleQuery);
+            if ((int) $db->loadResult() > 1) {
+                $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_MULTIPLE_IN_USE'));
+                return false;
+            }
         }
 
         // Existing list dictionaries must not become uneditable or orphaned
