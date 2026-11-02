@@ -32,9 +32,17 @@ namespace Joomla\CMS\Language {
 namespace Joomla\CMS\MVC\View {
     class HtmlView
     {
-        public function get(string $name): array
+        public function get(string $name): mixed
         {
-            return [];
+            // Joomla ListModel returns a Registry for the State property,
+            // while Items / ActiveFilters / ProductCounts are collections.
+            return $name === 'State'
+                ? new class {
+                    public function get(string $key, mixed $default = null): mixed {
+                        return $default;
+                    }
+                }
+                : [];
         }
 
         public function display($tpl = null)
