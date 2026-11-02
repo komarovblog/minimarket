@@ -14,6 +14,8 @@ final class CategoryTable extends Table
     public function __construct(DatabaseInterface $db)
     {
         parent::__construct('#__minimarket_categories', 'id', $db);
+        // Joomla bulk publish expects the standard 'published' alias.
+        $this->setColumnAlias('published', 'state');
     }
 
     public function check()

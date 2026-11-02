@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
 
 final class AttributeModel extends AdminModel
 {
@@ -68,6 +69,26 @@ final class AttributeModel extends AdminModel
             $this->setError(Text::_('COM_MINIMARKET_ATTRCAT_SAVE_FAILED'));
             return false;
         }
+    }
+
+    /**
+     * Delete only unused attributes. Keep all values and category assignments
+     * intact if any selected attribute is in use.
+     */
+    public function delete(&$pks)
+    {
+        $ids = BulkDeleteGuard::normalizeIds($pks);
+        if (!$ids) {
+            $this->setError(Text::_('COM_MINIMARKET_BULK_EMPTY'));
+            return false;
+        }
+        try {
+            BulkDeleteGuard::assertNoDependencies($this->getDatabase(), 'attribute', $ids);
+        } catch (\RuntimeException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_BULK_ATTRIBUTE_IN_USE'));
+            return false;
+        }
+        return parent::delete($pks);
     }
 
     protected function loadFormData()

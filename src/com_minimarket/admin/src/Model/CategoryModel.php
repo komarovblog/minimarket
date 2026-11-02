@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
 
 final class CategoryModel extends AdminModel
 {
@@ -69,6 +70,26 @@ final class CategoryModel extends AdminModel
             $this->setError(Text::_('COM_MINIMARKET_CATATTR_SAVE_FAILED'));
             return false;
         }
+    }
+
+    /**
+     * Never orphan subcategories. Products are protected by their category FK.
+     * Validate every selected ID before deleting any category.
+     */
+    public function delete(&$pks)
+    {
+        $ids = BulkDeleteGuard::normalizeIds($pks);
+        if (!$ids) {
+            $this->setError(Text::_('COM_MINIMARKET_BULK_EMPTY'));
+            return false;
+        }
+        try {
+            BulkDeleteGuard::assertNoDependencies($this->getDatabase(), 'category', $ids);
+        } catch (\RuntimeException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_BULK_CATEGORY_IN_USE'));
+            return false;
+        }
+        return parent::delete($pks);
     }
 
     protected function loadFormData()
