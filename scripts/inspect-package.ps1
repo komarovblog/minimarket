@@ -92,6 +92,7 @@ try {
         'admin/sql/updates/mysql/0.5.15.sql',
         'admin/sql/updates/mysql/0.5.16.sql',
         'admin/sql/updates/mysql/0.5.17.sql',
+        'admin/sql/updates/mysql/0.5.20.sql',
         'admin/forms/product_variant.xml',
         'admin/src/Service/ProductVariants.php',
         'admin/src/Service/VariantDependencies.php',
