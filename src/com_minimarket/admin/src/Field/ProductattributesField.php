@@ -95,45 +95,106 @@ final class ProductattributesField extends FormField
                 . '" data-mm-attribute-incompatible>'
                 . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . '</div>';
 
-            if ($type === 'list' && $def['is_multiple']) {
-                $n = 0;
-                foreach ($def['values'] as $optionId => $option) {
-                    $checked = in_array($optionId, $values, true) && $hasStored;
-                    $html .= '<div class="form-check"><input class="form-check-input" type="checkbox"'
-                        . ' id="' . $escape($inputId . '_' . $n) . '" name="' . $escape($name . '[]')
-                        . '" value="' . $optionId . '"' . ($checked ? ' checked' : '')
-                        . '>'
-                        . '<label class="form-check-label" for="' . $escape($inputId . '_' . $n) . '">'
-                        . $escape($option['title'])
-                        . ($option['state'] !== 1
-                            ? ' (' . $escape(Text::_('JUNPUBLISHED')) . ')' : '')
-                        . '</label></div>';
-                    ++$n;
+            $mode = (string) ($def['input_mode'] ?? 'auto');
+            if ($type === 'list') {
+                $mode = $mode === 'auto'
+                    ? ($def['is_multiple'] ? 'checkboxes' : 'dropdown') : $mode;
+                if ($mode === 'checkboxes' || $mode === 'radio') {
+                    $counter = 0;
+                    foreach ($def['values'] as $optionId => $option) {
+                        $multiple = $mode === 'checkboxes';
+                        $checked = in_array($optionId, $values, true) && $hasStored;
+                        $html .= '<div class="form-check"><input class="form-check-input" type="'
+                            . ($multiple ? 'checkbox' : 'radio')
+                            . '" id="' . $escape($inputId . '_' . $counter) . '" name="'
+                            . $escape($name . ($multiple ? '[]' : '')) . '" value="' . $optionId . '"'
+                            . ($checked ? ' checked' : '') . '>'
+                            . '<label class="form-check-label" for="'
+                            . $escape($inputId . '_' . $counter) . '">'
+                            . $escape($option['title'])
+                            . ($option['state'] !== 1
+                                ? ' (' . $escape(Text::_('JUNPUBLISHED')) . ')' : '')
+                            . '</label></div>';
+                        ++$counter;
+                    }
+                } else {
+                    $multiple = $def['is_multiple'];
+                    $html .= '<select class="form-select" id="' . $escape($inputId)
+                        . '" name="' . $escape($name . ($multiple ? '[]' : '')) . '"'
+                        . ($multiple ? ' multiple size="5"' : '') . '>';
+                    if (!$multiple) {
+                        $html .= '<option value="">'
+                            . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
+                    }
+                    foreach ($def['values'] as $optionId => $option) {
+                        $checked = in_array($optionId, $values, true) && $hasStored;
+                        $html .= '<option value="' . $optionId . '"'
+                            . ($checked ? ' selected' : '') . '>'
+                            . $escape($option['title'])
+                            . ($option['state'] !== 1
+                                ? ' (' . $escape(Text::_('JUNPUBLISHED')) . ')' : '')
+                            . '</option>';
+                    }
+                    $html .= '</select>';
                 }
-            } elseif ($type === 'list' || $type === 'boolean') {
+            } elseif ($type === 'boolean') {
                 $html .= '<select class="form-select" id="' . $escape($inputId)
                     . '" name="' . $escape($name) . '"><option value="">'
                     . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
-                $options = $type === 'boolean'
-                    ? ['1' => Text::_('JYES'), '0' => Text::_('JNO')]
-                    : $def['values'];
-                foreach ($options as $optionId => $option) {
-                    $label = $type === 'boolean' ? $option : $option['title'];
-                    $selectedOption = (string) $optionId === $singleValue && $hasStored;
-                    $html .= '<option value="' . $escape((string) $optionId) . '"'
-                        . ($selectedOption ? ' selected' : '')
-                        . '>' . $escape((string) $label)
-                        . ($type === 'list' && $option['state'] !== 1
-                            ? ' (' . $escape(Text::_('JUNPUBLISHED')) . ')' : '')
-                        . '</option>';
+                foreach (['1' => Text::_('JYES'), '0' => Text::_('JNO')] as $key => $label) {
+                    $html .= '<option value="' . $key . '"'
+                        . ($singleValue === (string) $key && $hasStored ? ' selected' : '') . '>'
+                        . $escape($label) . '</option>';
                 }
                 $html .= '</select>';
+            } elseif ($type === 'number' && $mode === 'presets') {
+                $html .= '<select class="form-select" id="' . $escape($inputId)
+                    . '" name="' . $escape($name) . '"><option value="">'
+                    . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
+                $numbers = AttributeSettings::numericOptions((string) ($def['number_options'] ?? ''));
+                // An old number that no longer belongs to the preset set remains
+                // visible rather than silently disappearing from the editor.
+                if ($hasStored && is_scalar($value)
+                    && !in_array(AttributeSettings::canonicalDecimal((string) $value), $numbers, true)) {
+                    $html .= '<option value="' . $escape((string) $value) . '" selected>'
+                        . $escape((string) $value) . ' ('
+                        . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . ')</option>';
+                }
+                foreach ($numbers as $n) {
+                    $html .= '<option value="' . $escape($n) . '"'
+                        . ($hasStored && is_scalar($value)
+                            && AttributeSettings::canonicalDecimal((string) $value) === $n
+                            ? ' selected' : '') . '>'
+                        . $escape($n) . '</option>';
+                }
+                $html .= '</select>';
+            } elseif ($type === 'textarea') {
+                $html .= '<textarea class="form-control" rows="5" maxlength="10000"'
+                    . ' id="' . $escape($inputId) . '" name="' . $escape($name) . '">'
+                    . $escape(is_scalar($value) ? (string) $value : '') . '</textarea>';
             } else {
-                $inputType = $type === 'number' ? 'number' : 'text';
+                $inputType = match ($type) {
+                    'number' => 'number', 'date' => 'date', 'url' => 'url', default => 'text'
+                };
+                $extra = '';
+                if ($type === 'number') {
+                    $extra = ' step="' . $escape((string) ($def['number_step'] ?? '0.0001')) . '"';
+                    if (($def['number_min'] ?? null) !== null) {
+                        $extra .= ' min="' . $escape((string) $def['number_min']) . '"';
+                    }
+                    if (($def['number_max'] ?? null) !== null) {
+                        $extra .= ' max="' . $escape((string) $def['number_max']) . '"';
+                    }
+                } elseif ($type === 'text' || $type === 'url') {
+                    $extra = ' maxlength="1024"';
+                }
                 $html .= '<input class="form-control" type="' . $inputType
                     . '" id="' . $escape($inputId) . '" name="' . $escape($name) . '" value="'
-                    . $escape(is_scalar($value) ? (string) $value : '') . '"'
-                    . ($type === 'number' ? ' step="0.0001"' : ' maxlength="1024"') . '>';
+                    . $escape(is_scalar($value) ? (string) $value : '') . '"' . $extra . '>';
+            }
+            if ($type === 'number' && trim((string) ($def['number_unit'] ?? '')) !== '') {
+                $html .= ' <small class="text-muted">'
+                    . $escape((string) $def['number_unit']) . '</small>';
             }
             $html .= '</div>';
         }
