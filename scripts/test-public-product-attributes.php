@@ -88,7 +88,7 @@ namespace MiniMarket\PublicAttributeSmoke {
                 ],
                 default=>throw new \RuntimeException('Unexpected query table: '.$table),
             };
-            return array_map(static fn(array $row):(object) $row, $rows);
+            return array_map(static fn(array $row): object => (object) $row, $rows);
         }
     }
     $cases=0;
