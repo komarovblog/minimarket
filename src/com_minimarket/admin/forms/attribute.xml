@@ -9,7 +9,30 @@
             <option value="text">COM_MINIMARKET_ATTRIBUTE_TEXT</option>
             <option value="number">COM_MINIMARKET_ATTRIBUTE_NUMBER</option>
             <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
+            <option value="textarea">COM_MINIMARKET_ATTRIBUTE_TEXTAREA</option>
+            <option value="date">COM_MINIMARKET_ATTRIBUTE_DATE</option>
+            <option value="url">COM_MINIMARKET_ATTRIBUTE_URL</option>
         </field>
+        <field name="input_mode" type="list" label="COM_MINIMARKET_INPUT_MODE"
+               description="COM_MINIMARKET_INPUT_MODE_DESC" default="auto" filter="cmd">
+            <option value="auto">COM_MINIMARKET_MODE_AUTO</option>
+            <option value="number">COM_MINIMARKET_MODE_NUMBER</option>
+            <option value="presets">COM_MINIMARKET_MODE_PRESETS</option>
+            <option value="dropdown">COM_MINIMARKET_MODE_DROPDOWN</option>
+            <option value="radio">COM_MINIMARKET_MODE_RADIO</option>
+            <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
+        </field>
+        <field name="number_options" type="textarea" rows="2"
+               label="COM_MINIMARKET_NUMBER_OPTIONS" description="COM_MINIMARKET_NUMBER_OPTIONS_DESC"
+               filter="string" showon="input_type:number"/>
+        <field name="number_unit" type="text" label="COM_MINIMARKET_NUMBER_UNIT"
+               maxlength="32" filter="string" showon="input_type:number"/>
+        <field name="number_min" type="number" label="COM_MINIMARKET_NUMBER_MIN"
+               step="0.0001" filter="raw" showon="input_type:number"/>
+        <field name="number_max" type="number" label="COM_MINIMARKET_NUMBER_MAX"
+               step="0.0001" filter="raw" showon="input_type:number"/>
+        <field name="number_step" type="number" label="COM_MINIMARKET_NUMBER_STEP"
+               min="0.0001" step="0.0001" filter="raw" showon="input_type:number"/>
         <field name="is_multiple" type="list" label="COM_MINIMARKET_ATTRIBUTE_MULTIPLE"
                description="COM_MINIMARKET_ATTRIBUTE_MULTIPLE_DESC"
                default="0" filter="int" showon="input_type:list">
@@ -22,6 +45,26 @@
         <field name="is_filterable" type="radio" label="COM_MINIMARKET_ATTRIBUTE_FILTERABLE" description="COM_MINIMARKET_ATTRIBUTE_FILTERABLE_DESC" default="0" filter="integer">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
+        <field name="filter_mode" type="list" label="COM_MINIMARKET_FILTER_MODE"
+               description="COM_MINIMARKET_FILTER_MODE_DESC" default="none" filter="cmd" showon="is_filterable:1">
+            <option value="none">COM_MINIMARKET_MODE_NONE</option>
+            <option value="text">COM_MINIMARKET_FILTER_TEXT</option>
+            <option value="values">COM_MINIMARKET_FILTER_VALUES</option>
+            <option value="range">COM_MINIMARKET_FILTER_RANGE</option>
+            <option value="slider">COM_MINIMARKET_FILTER_SLIDER</option>
+            <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
+            <option value="radio">COM_MINIMARKET_MODE_RADIO</option>
+            <option value="dropdown">COM_MINIMARKET_MODE_DROPDOWN</option>
+            <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
+            <option value="date_range">COM_MINIMARKET_FILTER_DATE_RANGE</option>
+        </field>
+        <field name="filter_multiple" type="radio" label="COM_MINIMARKET_FILTER_MULTIPLE"
+               description="COM_MINIMARKET_FILTER_MULTIPLE_DESC" default="0" filter="int"
+               showon="is_filterable:1[AND]filter_mode:dropdown,values">
+            <option value="0">JNO</option><option value="1">JYES</option>
+        </field>
+        <field name="filter_planned_notice" type="note" label="COM_MINIMARKET_FILTER_PLANNED"
+               description="COM_MINIMARKET_FILTER_PLANNED_DESC" showon="is_filterable:1"/>
         <field name="sort_order" type="number" label="JGRID_HEADING_ORDERING" default="0" min="0" max="4294967295" step="1" filter="uint"/>
         <field name="state" type="list" label="JSTATUS" default="0" filter="int">
             <option value="0">JUNPUBLISHED</option><option value="1">JPUBLISHED</option>
