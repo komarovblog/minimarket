@@ -10,6 +10,12 @@
             <option value="number">COM_MINIMARKET_ATTRIBUTE_NUMBER</option>
             <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
         </field>
+        <field name="is_multiple" type="list" label="COM_MINIMARKET_ATTRIBUTE_MULTIPLE"
+               description="COM_MINIMARKET_ATTRIBUTE_MULTIPLE_DESC"
+               default="0" filter="int" showon="input_type:list">
+            <option value="0">COM_MINIMARKET_ATTRIBUTE_SINGLE</option>
+            <option value="1">COM_MINIMARKET_ATTRIBUTE_MULTI</option>
+        </field>
         <field name="is_variant" type="radio" label="COM_MINIMARKET_ATTRIBUTE_VARIANT" description="COM_MINIMARKET_ATTRIBUTE_VARIANT_DESC" default="0" filter="integer">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>

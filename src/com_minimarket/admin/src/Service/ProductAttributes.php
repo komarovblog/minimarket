@@ -11,11 +11,11 @@ use Joomla\Database\DatabaseInterface;
  */
 final class ProductAttributes
 {
-    /** @return array<int,array{id:int,title:string,type:string,is_variant:bool,state:int,values:array<int,array{title:string,state:int}>}> */
+    /** @return array<int,array{id:int,title:string,type:string,is_variant:bool,is_multiple:bool,state:int,values:array<int,array{title:string,state:int}>}> */
     public static function definitions(DatabaseInterface $db): array
     {
         $q = $db->getQuery(true)
-            ->select(['id','title','input_type','is_variant','state'])
+            ->select(['id','title','input_type','is_variant','is_multiple','state'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -27,6 +27,7 @@ final class ProductAttributes
                 'title' => (string) $row['title'],
                 'type' => (string) $row['input_type'],
                 'is_variant' => (int) $row['is_variant'] === 1,
+                'is_multiple' => (int) $row['is_multiple'] === 1,
                 'state' => (int) $row['state'],
                 'values' => [],
             ];
@@ -129,7 +130,7 @@ final class ProductAttributes
             $type = $def['type'];
             if ($type === 'list') {
                 $items = is_array($value) ? $value : [$value];
-                if (!$def['is_variant'] && count($items) > 1) {
+                if (!$def['is_multiple'] && count($items) > 1) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                 }
                 $selected = [];

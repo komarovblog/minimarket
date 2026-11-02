@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_attributes` (
     `code` VARCHAR(100) NOT NULL,
     `input_type` VARCHAR(16) NOT NULL DEFAULT 'list',
     `is_variant` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `is_multiple` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `is_filterable` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     `state` TINYINT NOT NULL DEFAULT 0,

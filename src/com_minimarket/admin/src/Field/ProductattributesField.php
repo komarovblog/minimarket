@@ -74,7 +74,7 @@ final class ProductattributesField extends FormField
                 $html .= ' <small class="badge bg-secondary">'
                     . $escape(Text::_('JUNPUBLISHED')) . '</small>';
             }
-            if ($def['is_variant']) {
+            if ($type === 'list' && $def['is_multiple']) {
                 $html .= ' <small class="text-muted">'
                     . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_VARIANT_NOTICE')) . '</small>';
             }
@@ -95,7 +95,7 @@ final class ProductattributesField extends FormField
                 . '" data-mm-attribute-incompatible>'
                 . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . '</div>';
 
-            if ($type === 'list' && $def['is_variant']) {
+            if ($type === 'list' && $def['is_multiple']) {
                 $n = 0;
                 foreach ($def['values'] as $optionId => $option) {
                     $checked = in_array($optionId, $values, true) && $hasStored;
