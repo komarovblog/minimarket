@@ -29,17 +29,18 @@ use Joomla\CMS\Uri\Uri;
     <table class="table table-striped" id="mm-category-tree">
         <thead>
         <tr>
+            <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_THUMB'); ?></th>
             <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_COUNT_DIRECT'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_COUNT_BRANCH'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_ORDER'); ?></th>
-            <th><?php echo Text::_('JSTATUS'); ?></th>
+            <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
             <th>ID</th>
         </tr>
         </thead>
         <tbody>
-        <?php foreach ($this->rows as $row) :
+        <?php foreach ($this->rows as $i => $row) :
             $item = $row['item'];
             $id = (int) $item->id;
             $depth = (int) $row['depth'];
@@ -48,6 +49,7 @@ use Joomla\CMS\Uri\Uri;
                 && !preg_match('/[\x00-\x1f<>]/', $image);
         ?>
             <tr data-mm-depth="<?php echo $depth; ?>">
+                <td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, $id); ?></td>
                 <td>
                     <?php if ($safeImage) : ?>
                         <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
@@ -79,10 +81,11 @@ use Joomla\CMS\Uri\Uri;
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->rows) : ?>
-            <tr><td colspan="7"><?php echo Text::_('COM_MINIMARKET_NO_CATEGORIES'); ?></td></tr>
+            <tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_NO_CATEGORIES'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>
+    <input type="hidden" name="boxchecked" value="0">
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

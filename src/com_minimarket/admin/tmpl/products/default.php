@@ -56,23 +56,25 @@ use Joomla\CMS\Uri\Uri;
     <table class="table table-striped">
         <thead>
         <tr>
+            <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_IMAGE'); ?></th>
             <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_PRICE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_CATEGORIES'); ?></th>
-            <th><?php echo Text::_('JSTATUS'); ?></th>
+            <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
             <th>ID</th>
         </tr>
         </thead>
         <tbody>
-        <?php foreach ($this->items as $item) :
+        <?php foreach ($this->items as $i => $item) :
             $image = explode('#', (string) ($item->image ?? ''), 2)[0];
             $safeImage = str_starts_with($image, 'images/') && !str_contains($image, '..')
                 && !preg_match('/[\x00-\x1f<>]/', $image);
         ?>
             <tr>
+                <td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, (int) $item->id); ?></td>
                 <td>
                     <?php if ($safeImage) : ?>
                         <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
@@ -92,13 +94,14 @@ use Joomla\CMS\Uri\Uri;
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
-            <tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_NO_PRODUCTS'); ?></td></tr>
+            <tr><td colspan="9"><?php echo Text::_('COM_MINIMARKET_NO_PRODUCTS'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>
     <?php if (is_object($this->pagination) && method_exists($this->pagination, 'getListFooter')) : ?>
         <?php echo $this->pagination->getListFooter(); ?>
     <?php endif; ?>
+    <input type="hidden" name="boxchecked" value="0">
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

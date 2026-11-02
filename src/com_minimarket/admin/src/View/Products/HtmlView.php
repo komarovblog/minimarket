@@ -44,6 +44,16 @@ final class HtmlView extends BaseHtmlView
         // Joomla component Options are not a separate MiniMarket MVC view.
         // Show the standard Options action on the pages admins use most.
         $user = Factory::getApplication()->getIdentity();
+        // Joomla's standard toolbar acts on selected cid[] checkboxes.
+        if ($user->authorise('core.edit.state', 'com_minimarket')) {
+            ToolbarHelper::publishList('products.publish');
+            ToolbarHelper::unpublishList('products.unpublish');
+        }
+        if ($user->authorise('core.delete', 'com_minimarket')) {
+            ToolbarHelper::deleteList(
+                Text::_('COM_MINIMARKET_BULK_DELETE_CONFIRM'), 'products.delete'
+            );
+        }
         if ($user->authorise('core.admin', 'com_minimarket')
             || $user->authorise('core.options', 'com_minimarket')) {
             ToolbarHelper::preferences('com_minimarket');

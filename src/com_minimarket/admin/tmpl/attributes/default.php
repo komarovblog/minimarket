@@ -9,17 +9,19 @@ use Joomla\CMS\Router\Route;
       method="post" name="adminForm" id="adminForm">
     <table class="table">
         <thead><tr>
+            <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
             <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_CODE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_FILTERABLE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_VALUES'); ?></th>
-            <th><?php echo Text::_('JSTATUS'); ?></th><th>ID</th>
+            <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th><th>ID</th>
         </tr></thead>
         <tbody>
-        <?php foreach ($this->items as $item) : ?>
+        <?php foreach ($this->items as $i => $item) : ?>
             <tr>
+                <td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, (int) $item->id); ?></td>
                 <td><a href="<?php echo Route::_('index.php?option=com_minimarket&task=attribute.edit&id=' . (int) $item->id); ?>"><?php echo $this->escape($item->title); ?></a></td>
                 <td><?php echo $this->escape($item->code); ?></td>
                 <td><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_' . strtoupper((string) $item->input_type)); ?></td>
@@ -37,10 +39,11 @@ use Joomla\CMS\Router\Route;
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
-            <tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_NO_ATTRIBUTES'); ?></td></tr>
+            <tr><td colspan="9"><?php echo Text::_('COM_MINIMARKET_NO_ATTRIBUTES'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>
+    <input type="hidden" name="boxchecked" value="0">
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>

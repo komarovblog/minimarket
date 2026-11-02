@@ -22,6 +22,16 @@ final class HtmlView extends BaseHtmlView
         }
 
         $user = Factory::getApplication()->getIdentity();
+        // Joomla's standard toolbar acts on selected cid[] checkboxes.
+        if ($user->authorise('core.edit.state', 'com_minimarket')) {
+            ToolbarHelper::publishList('attributes.publish');
+            ToolbarHelper::unpublishList('attributes.unpublish');
+        }
+        if ($user->authorise('core.delete', 'com_minimarket')) {
+            ToolbarHelper::deleteList(
+                Text::_('COM_MINIMARKET_BULK_DELETE_CONFIRM'), 'attributes.delete'
+            );
+        }
         if ($user->authorise('core.admin', 'com_minimarket')
             || $user->authorise('core.options', 'com_minimarket')) {
             ToolbarHelper::preferences('com_minimarket');
