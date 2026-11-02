@@ -9,7 +9,10 @@
     if (!root || !category) return;
     let map = {};
     try { map = JSON.parse(root.dataset.mmCategoryMap || '{}'); } catch (_) {}
+    let requiredMap = {};
+    try { requiredMap = JSON.parse(root.dataset.mmCategoryRequired || '{}'); } catch (_) {}
     const allowed = new Set((map[category.value] || []).map(String));
+    const required = new Set((requiredMap[category.value] || []).map(String));
     let count = 0;
     for (const row of root.querySelectorAll('[data-mm-attribute-row]')) {
       const valid = allowed.has(row.dataset.mmAttributeRow);
@@ -20,6 +23,8 @@
       // Keep a filled but no longer applicable attribute visible so the
       // administrator can clear it; PHP will reject it unless cleared.
       row.classList.toggle('d-none', !valid && !hasValue);
+      const marker = row.querySelector('[data-mm-required-indicator]');
+      if (marker) marker.classList.toggle('d-none', !valid || !required.has(row.dataset.mmAttributeRow));
       const warning = row.querySelector('[data-mm-attribute-incompatible]');
       if (warning) warning.classList.toggle('d-none', valid);
       if (valid) count++;

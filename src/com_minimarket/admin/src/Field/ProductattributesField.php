@@ -35,9 +35,13 @@ final class ProductattributesField extends FormField
         $escape = static fn (string $text): string =>
             htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $initial = array_fill_keys($map[$categoryId] ?? [], true);
-        $required = array_fill_keys(CategoryAttributes::requiredForCategory(
-            $categoryId, $hierarchy['parents'], $hierarchy['rules']
-        ), true);
+        $requiredByCategory = [];
+        foreach (array_keys($map) as $cat) {
+            $requiredByCategory[(int) $cat] = CategoryAttributes::requiredForCategory(
+                (int) $cat, $hierarchy['parents'], $hierarchy['rules']
+            );
+        }
+        $required = array_fill_keys($requiredByCategory[$categoryId] ?? [], true);
         $used = [];
         foreach ($map as $ids) {
             foreach ($ids as $id) {
@@ -55,6 +59,8 @@ final class ProductattributesField extends FormField
 
         $html = '<div data-mm-product-attributes data-mm-category-map="'
             . $escape((string) json_encode($map, JSON_THROW_ON_ERROR))
+            . '" data-mm-category-required="'
+            . $escape((string) json_encode($requiredByCategory, JSON_THROW_ON_ERROR))
             . '"><p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_HELP'))
             . '</p><p data-mm-attr-empty class="text-muted">'
             . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_SELECT_CATEGORY')) . '</p>';
@@ -79,9 +85,11 @@ final class ProductattributesField extends FormField
                 . '" data-mm-attribute-row="' . $id . '">'
                 . '<label class="form-label fw-semibold" for="' . $escape($inputId) . '">'
                 . $escape($def['title'])
-                . (isset($required[$id]) ? ' <span class="text-danger" aria-label="'
-                    . $escape(Text::_('COM_MINIMARKET_CATATTR_MODE_REQUIRED'))
-                    . '">*</span>' : '') . '</label>';
+                . ' <span class="text-danger'
+                . (isset($required[$id]) ? '' : ' d-none')
+                . '" data-mm-required-indicator aria-label="'
+                . $escape(Text::_('COM_MINIMARKET_CATATTR_MODE_REQUIRED'))
+                . '">*</span></label>';
             if ($def['state'] !== 1) {
                 $html .= ' <small class="badge bg-secondary">'
                     . $escape(Text::_('JUNPUBLISHED')) . '</small>';
