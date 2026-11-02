@@ -119,6 +119,9 @@ jobs:
       - name: Attribute/value dictionaries and validation
         run: php scripts/test-attributes.php
 
+      - name: Category attribute inheritance and update regression
+        run: php scripts/test-category-attributes.php
+
       - name: Product gallery JavaScript syntax
         run: node --check src/com_minimarket/media/js/gallery.js
 

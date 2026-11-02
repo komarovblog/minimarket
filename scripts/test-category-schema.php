@@ -186,6 +186,39 @@ verify($preAttributesProduct === row($pdo, 'catci_minimarket_products'),
 $pdo->exec('DROP TABLE catci_minimarket_attribute_values');
 $pdo->exec('DROP TABLE catci_minimarket_attributes');
 
+// 0.5.5: category assignments, inheritance rules and legacy data safety.
+$beforeCatAssignProduct = row($pdo, 'catci_minimarket_products');
+$beforeCatAssignCategory = row($pdo, 'catci_minimarket_categories');
+runSql($pdo, $dir . 'updates/mysql/0.5.5.sql', 'catci_');
+verify($beforeCatAssignProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.5 keeps legacy product SKU/price/stock');
+verify($beforeCatAssignCategory === row($pdo, 'catci_minimarket_categories'),
+    '0.5.5 keeps category fields and parent');
+$pdo->exec("INSERT INTO catci_minimarket_category_attributes (category_id,attribute_id,enabled)
+    VALUES (1,1,1),(1,2,0)");
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_category_attributes')->fetchColumn() === 2,
+    'category can include and explicitly exclude attributes');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_category_attributes
+        (category_id,attribute_id,enabled) VALUES (1,1,0)");
+    verify(false, 'duplicate assignment rejected by DB');
+} catch (PDOException $error) {
+    verify(true, 'duplicate assignment rejected by DB');
+}
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_category_attributes
+        (category_id,attribute_id,enabled) VALUES (1,999,1)");
+    verify(false, 'invalid attribute FK rejected');
+} catch (PDOException $error) {
+    verify(true, 'invalid attribute FK rejected');
+}
+runSql($pdo, $dir . 'updates/mysql/0.5.5.sql', 'catci_');
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_category_attributes')->fetchColumn() === 2,
+    '0.5.5 migration repeat does not lose assignments');
+verify($beforeCatAssignProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.5 rerun preserves trading data');
+$pdo->exec('DROP TABLE catci_minimarket_category_attributes');
+
 // MySQL FK constraint identifiers are database-wide: clean only CI test tables.
 $pdo->exec('DROP TABLE catci_minimarket_products');
 $pdo->exec('DROP TABLE catci_minimarket_categories');
@@ -215,6 +248,11 @@ $freshValueColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attrib
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','attribute_id','title','code','sort_order','state'] as $col) {
     verify(in_array($col, $freshValueColumns, true), 'fresh 0.5.4 value column ' . $col);
+}
+$freshAssignmentColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_category_attributes')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['category_id','attribute_id','enabled'] as $col) {
+    verify(in_array($col, $freshAssignmentColumns, true), 'fresh 0.5.5 assignment column ' . $col);
 }
 $pdo->exec("INSERT INTO freshcatci_minimarket_categories
     (id,title,alias,state) VALUES (1,'New category','new-category',1)");
