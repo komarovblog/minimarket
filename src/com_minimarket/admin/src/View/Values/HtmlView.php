@@ -12,10 +12,14 @@ final class HtmlView extends BaseHtmlView
 {
     public array $items = [];
     public int $attributeId = 0;
+    public string $sort = 'order';
+    public string $direction = 'asc';
 
     public function display($tpl = null)
     {
         $this->attributeId = Factory::getApplication()->input->getInt('attribute_id', 0);
+        $this->sort = Factory::getApplication()->input->getCmd('sort', 'order');
+        $this->direction = Factory::getApplication()->input->getCmd('direction', 'asc');
         $this->items = $this->get('Items');
         ToolbarHelper::title(Text::_('COM_MINIMARKET_VALUES'));
 
