@@ -128,6 +128,10 @@ namespace MiniMarket\AttributesSmoke {
                 return $this->duplicateAttribute ? 1 : 0;
             }
 
+            if ($this->query?->from === '#__minimarket_product_attribute_scalars') {
+                return 0;
+            }
+
             if ($this->query?->from === '#__minimarket_product_attribute_options') {
                 return $this->multipleProducts ? 2 : 0;
             }
