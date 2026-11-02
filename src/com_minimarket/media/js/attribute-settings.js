@@ -23,7 +23,7 @@
     const mode = document.getElementById('jform_input_mode');
     const filter = document.getElementById('jform_filter_mode');
     const multi = document.getElementById('jform_is_multiple');
-    const variant = document.querySelector('[name="jform[is_variant]"]:checked');
+    // The variant flag supports List, Color and Text with predefined choices.
     const multiGroup = multi?.closest('.control-group, .mb-3');
     if (!type || !mode || !filter) return;
     // Pre-existing List / URL / Date / Textarea remain editable; only NEW

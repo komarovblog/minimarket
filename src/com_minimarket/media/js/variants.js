@@ -21,10 +21,10 @@
   const mainLink = gallery?.querySelector('[data-mm-gallery-main-link]');
   const thumbs = gallery?.querySelector('[data-mm-gallery-thumb]')?.parentElement;
   const fallback = main ? { url: main.src, alt: main.alt } : null;
-  const rootUrl = document.documentElement.dataset.mmRoot || '';
+  const rootUrl = root.dataset.mmRoot || document.baseURI;
   const makeUrl = (path) => {
     if (!path || path.includes('..') || !path.startsWith('images/')) return '';
-    return new URL(path, document.baseURI).href;
+    return new URL(path, rootUrl).href;
   };
   const updateGallery = (variant) => {
     if (!main || !mainLink) return;

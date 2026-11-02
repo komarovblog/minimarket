@@ -30,9 +30,28 @@ foreach ($this->gallery as $photo) {
     }
 }
 $images = array_values($images);
-$main = $images[0] ?? null;
-$defaultVariant = $this->variants['items'][0] ?? null;
 $baseImages = $images;
+$defaultVariant = $this->variants['items'][0] ?? null;
+if ($defaultVariant) {
+    $variantImages = [];
+    $variantCover = (string) $defaultVariant['image'];
+    if ($variantCover !== '' && $isSafeImage($variantCover)) {
+        $variantImages[] = [
+            'url' => Uri::root() . $variantCover,
+            'alt' => (string) ($defaultVariant['image_alt'] ?: $this->product->title),
+        ];
+    }
+    foreach ($defaultVariant['photos'] as $photo) {
+        if ($isSafeImage($photo['path'])) {
+            $variantImages[] = [
+                'url' => Uri::root() . $photo['path'],
+                'alt' => (string) ($photo['alt'] ?: $this->product->title),
+            ];
+        }
+    }
+    if ($variantImages) $images = $variantImages;
+}
+$main = $images[0] ?? null;
 ?>
 <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BREADCRUMB')); ?>">
     <a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CATALOG_MENU_TITLE'); ?></a>
@@ -50,9 +69,8 @@ $baseImages = $images;
                      src="<?php echo $this->escape($main['url']); ?>"
                      alt="<?php echo $this->escape($main['alt']); ?>">
             </a>
-            <?php if (count($images) > 1) : ?>
-                <div class="mm-product-gallery__thumbs" role="group"
-                     aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_GALLERY_IMAGES')); ?>">
+            <div class="mm-product-gallery__thumbs" role="group"
+                     aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_GALLERY_IMAGES')); ?>" <?php echo count($images) <= 1 ? 'hidden' : ''; ?>>
                     <?php foreach ($images as $i => $img) : ?>
                         <button type="button" class="mm-product-gallery__thumb"
                                 data-mm-gallery-thumb data-mm-gallery-src="<?php echo $this->escape($img['url']); ?>"
@@ -64,7 +82,6 @@ $baseImages = $images;
                         </button>
                     <?php endforeach; ?>
                 </div>
-            <?php endif; ?>
         </div>
     <?php endif; ?>
     <?php if (!empty($this->videos)) : ?>
@@ -128,6 +145,7 @@ $baseImages = $images;
                  $this->variants['items'],
                  JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
              )); ?>"
+             data-mm-root="<?php echo $this->escape(Uri::root()); ?>"
              data-mm-in-stock="<?php echo $this->escape(Text::_('COM_MINIMARKET_VARIANT_IN_STOCK')); ?>"
              data-mm-out-of-stock="<?php echo $this->escape(Text::_('COM_MINIMARKET_VARIANT_OUT_OF_STOCK')); ?>"
              data-mm-gallery-base="<?php echo $this->escape(json_encode(
