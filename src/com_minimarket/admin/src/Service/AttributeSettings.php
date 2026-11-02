@@ -8,7 +8,7 @@ final class AttributeSettings
 {
     // Legacy kinds remain supported for existing stored records only.
     public const TYPES = ['text','number','editor','boolean','document','color','list','textarea','date','url'];
-    public const NEW_TYPES = ['text','number','editor','boolean'];
+    public const NEW_TYPES = ['text','number','editor','boolean','document','color'];
     public const INPUTS = [
         'list' => ['auto','dropdown','radio','checkboxes'],
         'text' => ['auto','presets'],
@@ -93,7 +93,8 @@ final class AttributeSettings
             || !in_array($a->filter_multiple, [0,1], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
-        if (in_array($type, ['list','color'], true)) {
+        if (in_array($type, ['list','color','text'], true)) {
+            if ($type === 'text' && $a->input_mode !== 'presets') $a->is_multiple = 0;
             if (($a->input_mode === 'radio' && (int) $a->is_multiple !== 0)
                 || ($a->input_mode === 'checkboxes' && (int) $a->is_multiple !== 1)) {
                 return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
@@ -122,7 +123,7 @@ final class AttributeSettings
             if ($a->input_mode === 'presets' && !$textPresets) {
                 return 'COM_MINIMARKET_TEXT_PRESETS_INVALID';
             }
-            $a->text_options = json_encode($textPresets, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            $a->text_options = TextPresetRows::encode(TextPresetRows::rows($a->text_options));
         } else {
             // Keep previously configured text values when changing a legacy
             // input type back and forth, but never apply them to other types.

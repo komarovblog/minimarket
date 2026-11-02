@@ -12,9 +12,9 @@
             <option value="number">COM_MINIMARKET_ATTRIBUTE_NUMBER</option>
             <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
             <option value="editor">COM_MINIMARKET_ATTRIBUTE_EDITOR</option>
-            <!-- Legacy Document remains editable; not a new attribute type. -->
+            <!-- Document and Color are new first-class types. -->
             <option value="document">COM_MINIMARKET_ATTRIBUTE_DOCUMENT</option>
-            <!-- Legacy Color remains editable; not a new attribute type. -->
+            <!-- Color HEX swatches can be selected in products. -->
             <option value="color">COM_MINIMARKET_ATTRIBUTE_COLOR</option>
             <!-- Older records still use these types. No new records may select them. -->
             <option value="textarea">COM_MINIMARKET_ATTRIBUTE_TEXTAREA</option>
@@ -58,7 +58,7 @@
                min="0.0001" step="0.0001" filter="raw" showon="input_type:number"/>
         <field name="is_multiple" type="list" label="COM_MINIMARKET_ATTRIBUTE_MULTIPLE"
                description="COM_MINIMARKET_ATTRIBUTE_MULTIPLE_DESC"
-               default="0" filter="int" showon="input_type:list,color">
+               default="0" filter="int" showon="input_type:list,color,text">
             <option value="0">COM_MINIMARKET_ATTRIBUTE_SINGLE</option>
             <option value="1">COM_MINIMARKET_ATTRIBUTE_MULTI</option>
         </field>

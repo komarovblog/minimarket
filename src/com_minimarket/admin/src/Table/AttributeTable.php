@@ -50,7 +50,8 @@ final class AttributeTable extends Table
 
         // When switching from List to another type the hidden List-specific
         // cardinality control must not leave an invalid flag behind.
-        if (!in_array($this->input_type, ['list','color'], true)) {
+        if (!in_array($this->input_type, ['list','color'], true)
+            && !($this->input_type === 'text' && $this->input_mode === 'presets')) {
             $this->is_multiple = 0;
         }
 
@@ -151,7 +152,20 @@ final class AttributeTable extends Table
                 ->group($db->quoteName('product_id'))
                 ->having('COUNT(*) > 1');
             $db->setQuery($multipleQuery);
-            if ((int) $db->loadResult() > 1) {
+            if ((int) $db->loadResult() > 0) {
+                $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_MULTIPLE_IN_USE'));
+                return false;
+            }
+        }
+
+        // Changing Text presets to single or manual must not erase multiple selections.
+        if ((int) $this->id > 0 && $this->input_type === 'text' && $this->is_multiple === 0) {
+            $q = $db->getQuery(true)->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_product_attribute_multi_values'))
+                ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id)
+                ->group($db->quoteName('product_id'))->having('COUNT(*) > 1');
+            $db->setQuery($q);
+            if ((int) $db->loadResult() > 0) {
                 $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_MULTIPLE_IN_USE'));
                 return false;
             }

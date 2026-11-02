@@ -61,7 +61,7 @@
         const t = type.value;
         updateOptions(mode, product[t] || ['auto'], 'auto');
         // Legacy types remain selectable only when editing the same old kind.
-        const legacy = ['list','textarea','date','url','document','color'];
+        const legacy = ['list','textarea','date','url'];
         for (const option of type.options) {
           if (legacy.includes(option.value)) {
             const allow = Number(attributeId?.value || 0) > 0 && option.value === t;
@@ -79,7 +79,7 @@
             disabledFilter.dispatchEvent(new Event('change', { bubbles: true }));
           }
         }
-        if (t === 'list' || t === 'color') {
+        if (t === 'list' || t === 'color' || (t === 'text' && mode.value === 'presets')) {
           if (mode.value === 'radio' || mode.value === 'checkboxes') {
             if (multi) {
               multi.value = mode.value === 'checkboxes' ? '1' : '0';
