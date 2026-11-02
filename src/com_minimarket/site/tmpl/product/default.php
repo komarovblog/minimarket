@@ -5,6 +5,7 @@ use Joomla\CMS\Filter\InputFilter;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
+use MiniMarket\Component\Minimarket\Site\Service\ProductAttributeCatalog;
 
 // Primary cover remains products.image, so old products retain their image.
 $images = [];
@@ -132,6 +133,75 @@ $main = $images[0] ?? null;
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
         <dd><?php echo (int) $this->product->stock; ?></dd>
     </dl>
+    <?php if (!empty($this->attributes)) : ?>
+        <section class="mm-product-attributes" aria-labelledby="mm-product-attributes-heading">
+            <h2 id="mm-product-attributes-heading"><?php echo Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES'); ?></h2>
+            <dl class="mm-product-attributes__list">
+                <?php foreach ($this->attributes as $attribute) : ?>
+                    <div class="mm-product-attributes__row">
+                        <dt><?php echo $this->escape($attribute['title']); ?></dt>
+                        <dd>
+                            <?php if ($attribute['type'] === 'editor') : ?>
+                                <?php foreach ($attribute['values'] as $entry) : ?>
+                                    <div class="mm-product-attributes__html">
+                                        <?php echo InputFilter::getInstance()->clean($entry['text'], 'HTML'); ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <?php foreach ($attribute['values'] as $entry) : ?>
+                                    <?php
+                                    $value = $entry['text'];
+                                    $type = $attribute['type'];
+                                    $file = $type === 'document' ? ProductAttributeCatalog::safeDocument($value) : '';
+                                    $url = $type === 'url' ? ProductAttributeCatalog::safeUrl($value) : '';
+                                    $image = ProductAttributeCatalog::safeImage($entry['image']);
+                                    $hex = $type === 'color' && preg_match('/^#[a-fA-F0-9]{6}$/D', $entry['hex'])
+                                        ? $entry['hex'] : '';
+                                    ?>
+                                    <?php if ($type === 'document' && $file === '') : ?>
+                                        <?php continue; ?>
+                                    <?php elseif ($type === 'url' && $url === '') : ?>
+                                        <?php continue; ?>
+                                    <?php endif; ?>
+                                    <span class="mm-product-attributes__value">
+                                        <?php if ($image !== '') : ?>
+                                            <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
+                                                 alt="" loading="lazy" class="mm-product-attributes__sample">
+                                        <?php elseif ($hex !== '') : ?>
+                                            <span aria-hidden="true" class="mm-product-attributes__swatch"
+                                                  style="background-color:<?php echo $this->escape($hex); ?>"></span>
+                                        <?php endif; ?>
+                                        <?php if ($file !== '') : ?>
+                                            <a href="<?php echo $this->escape(Uri::root() . $file); ?>"
+                                               target="_blank" rel="noopener">
+                                                <?php echo Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTE_OPEN_FILE'); ?>
+                                            </a>
+                                        <?php elseif ($url !== '') : ?>
+                                            <a href="<?php echo $this->escape($url); ?>"
+                                               target="_blank" rel="noopener noreferrer">
+                                                <?php echo $this->escape($value); ?>
+                                            </a>
+                                        <?php elseif ($type === 'boolean') : ?>
+                                            <?php echo Text::_($value === '1' ? 'JYES' : 'JNO'); ?>
+                                        <?php else : ?>
+                                            <?php
+                                            $displayValue = $type === 'number' && str_contains($value, '.')
+                                                ? rtrim(rtrim($value, '0'), '.') : $value;
+                                            echo $this->escape($displayValue);
+                                            ?>
+                                            <?php if ($type === 'number' && $attribute['unit'] !== '') : ?>
+                                                <?php echo ' ' . $this->escape($attribute['unit']); ?>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </dd>
+                    </div>
+                <?php endforeach; ?>
+            </dl>
+        </section>
+    <?php endif; ?>
     <?php if (trim((string) ($this->product->description ?? '')) !== '') : ?>
         <div class="com-minimarket-product__description">
             <?php echo InputFilter::getInstance()->clean((string) $this->product->description, 'HTML'); ?>

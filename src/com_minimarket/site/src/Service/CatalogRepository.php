@@ -214,12 +214,24 @@ final class CatalogRepository
     {
         if ($id < 1) return [];
         $q = $this->db->getQuery(true)
-            ->select(['title','source'])
+            ->select(['title','source','poster'])
             ->from($this->db->quoteName('#__minimarket_product_videos'))
             ->where($this->db->quoteName('product_id') . ' = ' . $id)
             ->order('sort_order ASC, id ASC');
         $this->db->setQuery($q);
         return (array) $this->db->loadObjectList();
+    }
+
+    /**
+     * Published attributes only, with category rule inheritance.
+     * Called after getProduct() has confirmed visible product and category.
+     */
+    public function getProductAttributes(int $productId, int $categoryId): array
+    {
+        if ($productId < 1) return [];
+        return ProductAttributeCatalog::load(
+            $this->db, $productId, $this->categoryTree()->ancestorIds($categoryId)
+        );
     }
 
     public function getProduct(int $id): ?object

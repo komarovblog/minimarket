@@ -16,6 +16,7 @@ final class HtmlView extends BaseHtmlView
     public object $product;
     public array $gallery = [];
     public array $videos = [];
+    public array $attributes = [];
 
     public function display($tpl = null)
     {
@@ -35,12 +36,14 @@ final class HtmlView extends BaseHtmlView
         $this->product = $product;
         $this->gallery = $repo->getProductGallery($id);
         $this->videos = $repo->getProductVideos($id);
+        $this->attributes = $repo->getProductAttributes($id, (int) $product->category_id);
         // Gallery behavior is progressive-enhancement: images stay clickable
         // even if JS is blocked or the currently active template changes.
         $this->getDocument()->getWebAssetManager()
             ->registerAndUseScript('com_minimarket.gallery', 'media/com_minimarket/js/gallery.js',
                 [], ['defer' => true])
-            ->registerAndUseStyle('com_minimarket.gallery', 'media/com_minimarket/css/gallery.css');
+            ->registerAndUseStyle('com_minimarket.gallery', 'media/com_minimarket/css/gallery.css')
+            ->registerAndUseStyle('com_minimarket.attributes', 'media/com_minimarket/css/attributes.css');
         $document = $this->getDocument();
         $metaTitle = trim((string) ($product->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $product->title);

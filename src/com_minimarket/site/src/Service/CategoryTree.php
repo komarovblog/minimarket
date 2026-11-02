@@ -50,6 +50,18 @@ final class CategoryTree
         return $visited !== [];
     }
 
+    /** @return int[] Published root-to-leaf IDs for attribute inheritance. */
+    public function ancestorIds(int $id): array
+    {
+        if (!$this->isVisible($id)) return [];
+        $ids = [];
+        while ($id > 0) {
+            $ids[] = $id;
+            $id = (int) $this->items[$id]->parent_id;
+        }
+        return array_reverse($ids);
+    }
+
     /** @return int[] */
     public function visibleIds(): array
     {
