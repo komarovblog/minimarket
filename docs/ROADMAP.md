@@ -1,3 +1,5 @@
+> **0.5.13:** нативные Joomla SearchTools и кнопки публикации для трёх списков, подформа с +/−/drag для Number preset values. У категории остаётся дерево и счётчики. Без миграций, ZIP c номером версии. [Smoke](M13_NATIVE_ADMIN_0513_SMOKE.md).
+
 > **0.5.12 — код:** семь типов значений и независимые настройки input/filter. Реальный динамический filter endpoint и оформление результата в каталоге ещё **НЕ реализованы**. [Browser smoke](M12_ATTRIBUTE_TYPES_0512_SMOKE.md), [модель фильтров](CATEGORY_ATTRIBUTES_FACETS_SPEC.md).
 
 > **0.5.11 — One/Multiple независимо от is_variant:** отдельное `is_multiple` с миграцией старого выбора, dropdown/checkbox в товаре и защитой от потери выбранных значений. Реальные SKU-комбинации ещё не реализованы. [Проверка](M11_ATTRIBUTE_CARDINALITY_0511_SMOKE.md).

@@ -1,3 +1,7 @@
+## 02.11.2026 — 0.5.13: нативная админка, числовые варианты как галерея
+
+Списки Products, Attributes и Categories используют core Joomla SearchTools + PublishedButton и table styling. Плоские списки получили native filter forms и pagination/sort; дерево категорий сохраняет родительско-дочернюю структуру/превью/подсчёты и не режется по страницам. Для Number настроена native Joomla repeatable Subform +/−/move для допустимых чисел вместо CSV textarea. Значения при этом остаются реальными numbers в старой колонке number_options, ID/Stock/SKU/URL/Images неизменны. SQL миграций нет. CI и реальная Joomla smoke разграничены. [Проверка](M13_NATIVE_ADMIN_0513_SMOKE.md).
+
 ## 02.11.2026 — MiniMarket 0.5.12: отдельно тип данных, способ заполнения и фильтр
 
 В разработке семь типов List/Text/Number/Textarea/Date/Boolean/URL, input_mode для List/Number, number preset numeric CSV/min/max/step/unit, filter_mode и filter_multiple только как сохранённые настройки БУДУЩЕГО фасетного UI. В админке товара новые типизированные поля, серверная защита комбинаций и даты/URL, безопасная additive MySQL 8 миграция. Старые товарные значения, галереи и торговые данные не переписывать. PHP/Windows ZIP/MySQL CI и browser smoke по [M12_ATTRIBUTE_TYPES_0512_SMOKE.md](M12_ATTRIBUTE_TYPES_0512_SMOKE.md). Реальный каталог с фильтром и SKU-combinations — следующие этапы.
