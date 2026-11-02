@@ -1,3 +1,7 @@
+## 02.11.2026 — 0.5.6: двусторонние категории у атрибутов и Joomla bulk admin
+
+В `development` реализована обратная вкладка Categories в редакторе Attribute с использованием той же таблицы связей, что и category; отдельные переводы RU/EN. Добавлены стандартные checkbox/select all и bulk Publish/Unpublish/Delete в существующие списки categories/products/attributes/values, явная колонка Published и безопасные ограничения удаления и публикации по alias. Без SQL-миграции и изменений SKU/остатков/галерей. PHP 8.4/8.5, MySQL 8, Windows ZIP CI PASS до документационного коммита; Joomla UI NOT RUN. [Приёмка](M6_ADMIN_BULK_ATTRIBUTE_056_SMOKE.md). Этот стандарт затем применять к новым сущностям.
+
 ## 02.11.2026 — 0.5.5: category attribute assignments
 
 В development добавлены таблица прямых правил категории, трёхпозиционные режимы inherit/enable/exclude, вычисление эффективного набора по родительской цепочке, Joomla поле и вкладка RU/EN, атомарный Save/Apply категории+связей. Pure PHP regression тестирует корень, дочернюю, внучатую, отключение и восстановление; MySQL CI — upgrade/fresh install и сохранение старых товаров. **Реальная Joomla NOT RUN.** [Сценарий](M5_CATEGORY_ATTRIBUTES_055_SMOKE.md). Характеристики у товара и публичные фильтры — позже.
