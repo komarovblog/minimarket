@@ -109,6 +109,15 @@ final class CategoryAttributes
         return array_map('intval', (array) $db->loadColumn());
     }
 
+    /** @return int[] Real category IDs for validating reverse form submissions. */
+    public static function categoryIds(DatabaseInterface $db): array
+    {
+        $q = $db->getQuery(true)->select($db->quoteName('id'))
+            ->from($db->quoteName('#__minimarket_categories'));
+        $db->setQuery($q);
+        return array_map('intval', (array) $db->loadColumn());
+    }
+
     /**
      * Read all hierarchical parents and direct assignments in two queries;
      * no query per property, category or level. Admin-only.
@@ -135,6 +144,51 @@ final class CategoryAttributes
             $rules[(int) $row['category_id']][(int) $row['attribute_id']] = (int) $row['enabled'];
         }
         return ['parents' => $parents, 'rules' => $rules];
+    }
+
+    /** @return array<int,int> Direct category ID=>mode for one attribute. */
+    public static function loadForAttribute(DatabaseInterface $db, int $attributeId): array
+    {
+        if ($attributeId < 1) {
+            return [];
+        }
+        $q = $db->getQuery(true)
+            ->select([$db->quoteName('category_id'), $db->quoteName('enabled')])
+            ->from($db->quoteName('#__minimarket_category_attributes'))
+            ->where($db->quoteName('attribute_id') . ' = ' . $attributeId);
+        $db->setQuery($q);
+        $rows = [];
+        foreach ((array) $db->loadAssocList() as $row) {
+            $rows[(int) $row['category_id']] = (int) $row['enabled'];
+        }
+        return $rows;
+    }
+
+    /**
+     * Same relationship table as category editor; never erase rules of other
+     * attributes in those categories. Caller starts category/attribute txn.
+     */
+    public static function replaceForAttribute(DatabaseInterface $db, int $attributeId, array $rules): void
+    {
+        if ($attributeId < 1) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_CATATTR_INVALID');
+        }
+        $q = $db->getQuery(true)
+            ->delete($db->quoteName('#__minimarket_category_attributes'))
+            ->where($db->quoteName('attribute_id') . ' = ' . $attributeId);
+        $db->setQuery($q);
+        $db->execute();
+        if (!$rules) {
+            return;
+        }
+        $q = $db->getQuery(true)
+            ->insert($db->quoteName('#__minimarket_category_attributes'))
+            ->columns($db->quoteName(['category_id','attribute_id','enabled']));
+        foreach ($rules as $categoryId => $mode) {
+            $q->values(implode(',', [(int) $categoryId, $attributeId, (int) $mode]));
+        }
+        $db->setQuery($q);
+        $db->execute();
     }
 
     /**

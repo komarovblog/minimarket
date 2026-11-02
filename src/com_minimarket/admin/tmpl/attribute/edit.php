@@ -6,9 +6,16 @@ use Joomla\CMS\Router\Route;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=attribute&layout=edit&id=' . (int) $this->item->id); ?>"
       method="post" name="adminForm" id="adminForm" class="form-validate">
-    <div class="card card-body">
-        <?php echo $this->form->renderFieldset('details'); ?>
-    </div>
+    <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-attribute', ['active' => 'details']); ?>
+    <?php foreach ([
+        'details' => 'COM_MINIMARKET_ATTRIBUTE_DETAILS',
+        'categories' => 'COM_MINIMARKET_ATTRCAT_TAB',
+    ] as $section => $title) : ?>
+        <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-attribute', $section, \Joomla\CMS\Language\Text::_($title)); ?>
+        <div class="card card-body"><?php echo $this->form->renderFieldset($section); ?></div>
+        <?php echo HTMLHelper::_('uitab.endTab'); ?>
+    <?php endforeach; ?>
+    <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
