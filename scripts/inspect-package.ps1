@@ -104,6 +104,11 @@ try {
         'admin/forms/attribute.xml',
         'admin/src/Service/AttributeValueRows.php',
         'admin/forms/attribute_value_row.xml',
+        'admin/forms/attribute_number_preset_row.xml',
+        'admin/src/Service/NumericPresetRows.php',
+        'admin/forms/filter_products.xml',
+        'admin/forms/filter_attributes.xml',
+        'admin/forms/filter_categories.xml',
         'admin/src/Service/AttributeValueOrdering.php',
         'media/js/attribute-values-sort.js',
         'admin/forms/value.xml',
@@ -182,6 +187,25 @@ try {
         Write-Output 'PACKAGE_FAIL: ATTRIBUTE_SUBFORM_FIELDS_MISSING'
         exit 1
     }
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='number_preset_rows' and @type='subform' and @multiple='true' and @buttons='add,remove,move']")) {
+        Write-Output 'PACKAGE_FAIL: NUMERIC_PRESET_SUBFORM_MISSING'
+        exit 1
+    }
+    foreach ($name in @('products','attributes','categories')) {
+        if ($null -eq $archive.GetEntry('admin/forms/filter_' + $name + '.xml')) {
+            Write-Output ('PACKAGE_FAIL: NATIVE_FILTER_FORM_MISSING_' + $name)
+            exit 1
+        }
+        $listEntry = $archive.GetEntry('admin/tmpl/' + $name + '/default.php')
+        $listReader = New-Object System.IO.StreamReader($listEntry.Open())
+        try { $listSource = $listReader.ReadToEnd() }
+        finally { $listReader.Dispose() }
+        if (-not $listSource.Contains('joomla.searchtools.default')) {
+            Write-Output ('PACKAGE_FAIL: NATIVE_SEARCHTOOLS_MISSING_' + $name)
+            exit 1
+        }
+    }
+
     $valueRowFormEntry = $archive.GetEntry('admin/forms/attribute_value_row.xml')
     $valueRowReader = New-Object System.IO.StreamReader($valueRowFormEntry.Open())
     try {

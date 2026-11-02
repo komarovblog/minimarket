@@ -131,6 +131,11 @@ jobs:
 
       - name: Attribute values repeatable Joomla subform and data safety
         run: php scripts/test-attribute-value-rows.php
+      - name: Native Joomla numeric preset repeatable input
+        run: php scripts/test-numeric-preset-rows.php
+
+      - name: Native Joomla admin SearchTools and publish indicators
+        run: php scripts/test-native-admin-lists.php
 
       - name: Bulk admin actions and reverse category relation
         run: php scripts/test-admin-bulk.php
