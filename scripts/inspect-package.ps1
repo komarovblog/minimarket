@@ -87,6 +87,12 @@ try {
         'admin/sql/updates/mysql/0.5.5.sql',
         'admin/src/Service/CategoryAttributes.php',
         'admin/src/Field/CategoryattributesField.php',
+        'admin/src/Field/AttributecategoriesField.php',
+        'admin/src/Service/BulkDeleteGuard.php',
+        'admin/src/Controller/CategoriesController.php',
+        'admin/src/Controller/ProductsController.php',
+        'admin/src/Controller/AttributesController.php',
+        'admin/src/Controller/ValuesController.php',
         'admin/forms/attribute.xml',
         'admin/forms/value.xml',
         'admin/src/Table/AttributeTable.php',
@@ -132,6 +138,19 @@ try {
 
     if ($null -eq $xml.SelectSingleNode("/extension/media[@destination='com_minimarket']/folder[text()='css']")) {
         Write-Output 'PACKAGE_FAIL: GALLERY_CSS_NOT_DECLARED'
+        exit 1
+    }
+
+    $attributeFormEntry = $archive.GetEntry('admin/forms/attribute.xml')
+    $attrReader = New-Object System.IO.StreamReader($attributeFormEntry.Open())
+    try {
+        [xml]$attrXml = $attrReader.ReadToEnd()
+    }
+    finally {
+        $attrReader.Dispose()
+    }
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='categories']/field[@name='category_rules' and @type='Attributecategories']")) {
+        Write-Output 'PACKAGE_FAIL: REVERSE_CATEGORY_FIELD_MISSING'
         exit 1
     }
 
