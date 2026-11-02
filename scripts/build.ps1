@@ -47,6 +47,8 @@ $needed = @(
     'admin\src\Controller\AttributesController.php',
     'admin\src\Controller\ValuesController.php',
     'admin\forms\attribute.xml',
+    'admin\src\Service\AttributeValueRows.php',
+    'admin\forms\attribute_value_row.xml',
     'admin\src\Service\AttributeValueOrdering.php',
     'media\js\attribute-values-sort.js',
     'admin\forms\value.xml',

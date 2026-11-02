@@ -98,6 +98,8 @@ try {
         'admin/src/Controller/AttributesController.php',
         'admin/src/Controller/ValuesController.php',
         'admin/forms/attribute.xml',
+        'admin/src/Service/AttributeValueRows.php',
+        'admin/forms/attribute_value_row.xml',
         'admin/src/Service/AttributeValueOrdering.php',
         'media/js/attribute-values-sort.js',
         'admin/forms/value.xml',
@@ -155,9 +157,22 @@ try {
     finally {
         $attrReader.Dispose()
     }
-    if ($null -eq $attrXml.SelectSingleNode("/form/field[@name='values_order' and @filter='raw']") -or
-        $null -eq $attrXml.SelectSingleNode("/form/field[@name='values_order_present']")) {
-        Write-Output 'PACKAGE_FAIL: VALUES_ORDER_FORM_FIELDS_MISSING'
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='values' and @type='subform' and @multiple='true' and @buttons='add,remove,move']") -or
+        $null -eq $attrXml.SelectSingleNode("/form/field[@name='values_present']")) {
+        Write-Output 'PACKAGE_FAIL: ATTRIBUTE_SUBFORM_FIELDS_MISSING'
+        exit 1
+    }
+    $valueRowFormEntry = $archive.GetEntry('admin/forms/attribute_value_row.xml')
+    $valueRowReader = New-Object System.IO.StreamReader($valueRowFormEntry.Open())
+    try {
+        [xml]$valueRowXml = $valueRowReader.ReadToEnd()
+    }
+    finally {
+        $valueRowReader.Dispose()
+    }
+    if ($null -eq $valueRowXml.SelectSingleNode("/form/field[@name='id' and @type='hidden']") -or
+        $null -eq $valueRowXml.SelectSingleNode("/form/field[@name='title']")) {
+        Write-Output 'PACKAGE_FAIL: ATTRIBUTE_SUBFORM_ROW_MISSING'
         exit 1
     }
 
@@ -174,11 +189,10 @@ try {
     finally {
         $attributeEditReader.Dispose()
     }
-    if (-not $attributeEditSource.Contains("'minimarket-attribute', 'values'") -or
-        -not $attributeEditSource.Contains('view=value&layout=edit&attribute_id=') -or
-        -not $attributeEditSource.Contains('data-mm-values-sort') -or
+    if (-not $attributeEditSource.Contains("renderFieldset(") -or
+        $attributeEditSource.Contains("'minimarket-attribute', 'values'") -or
         $attributeEditSource.Contains('COM_MINIMARKET_EDIT_VALUES')) {
-        Write-Output 'PACKAGE_FAIL: ATTRIBUTE_VALUES_TAB_NOT_RENDERED'
+        Write-Output 'PACKAGE_FAIL: ATTRIBUTE_SUBFORM_NOT_INLINE'
         exit 1
     }
 
