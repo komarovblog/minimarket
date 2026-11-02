@@ -209,6 +209,19 @@ final class CatalogRepository
         return (array) $this->db->loadObjectList();
     }
 
+    /** Ordered media references for an already-published product. */
+    public function getProductVideos(int $id): array
+    {
+        if ($id < 1) return [];
+        $q = $this->db->getQuery(true)
+            ->select(['title','source'])
+            ->from($this->db->quoteName('#__minimarket_product_videos'))
+            ->where($this->db->quoteName('product_id') . ' = ' . $id)
+            ->order('sort_order ASC, id ASC');
+        $this->db->setQuery($q);
+        return (array) $this->db->loadObjectList();
+    }
+
     public function getProduct(int $id): ?object
     {
         $q = $this->db->getQuery(true)

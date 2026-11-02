@@ -78,6 +78,7 @@
             <option value="dropdown">COM_MINIMARKET_MODE_DROPDOWN</option>
             <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
             <option value="date_range">COM_MINIMARKET_FILTER_DATE_RANGE</option>
+            <option value="swatches">COM_MINIMARKET_FILTER_SWATCHES</option>
         </field>
         <field name="filter_multiple" type="radio" label="COM_MINIMARKET_FILTER_MULTIPLE"
                description="COM_MINIMARKET_FILTER_MULTIPLE_DESC" default="0" filter="int"

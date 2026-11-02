@@ -15,6 +15,7 @@ final class HtmlView extends BaseHtmlView
 {
     public object $product;
     public array $gallery = [];
+    public array $videos = [];
 
     public function display($tpl = null)
     {
@@ -33,6 +34,7 @@ final class HtmlView extends BaseHtmlView
 
         $this->product = $product;
         $this->gallery = $repo->getProductGallery($id);
+        $this->videos = $repo->getProductVideos($id);
         // Gallery behavior is progressive-enhancement: images stay clickable
         // even if JS is blocked or the currently active template changes.
         $this->getDocument()->getWebAssetManager()

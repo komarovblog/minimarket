@@ -6,13 +6,15 @@
   const product = {
     list: ['auto','dropdown','radio','checkboxes'],
     number: ['auto','number','presets'],
-    text: ['auto','presets'], editor: ['auto'], textarea: ['auto'], date: ['auto'],
+    text: ['auto','presets'], editor: ['auto'], document: ['auto'],
+    color: ['auto','dropdown','radio','checkboxes'], textarea: ['auto'], date: ['auto'],
     boolean: ['auto'], url: ['auto']
   };
   const filters = {
     list: ['none','checkboxes','radio','dropdown'],
     number: ['none','range','slider','checkboxes','dropdown'],
-    text: ['none','text','values','checkboxes','dropdown'], editor: ['none'],
+    text: ['none','text','values','checkboxes','dropdown'], editor: ['none'], document: ['none'],
+    color: ['none','swatches','checkboxes','radio','dropdown'],
     textarea: ['none'], date: ['none','date_range'],
     boolean: ['none','boolean'], url: ['none']
   };
@@ -29,7 +31,7 @@
       || !document.getElementById('jform_id')?.value;
     if (isNew) {
       for (const option of type.options) {
-        if (!['text','number','editor','boolean'].includes(option.value)) {
+        if (!['text','number','editor','boolean','document','color'].includes(option.value)) {
           option.hidden = true;
           option.disabled = true;
         }
@@ -59,7 +61,7 @@
         updateOptions(mode, product[t] || ['auto'], 'auto');
         updateOptions(filter, filters[t] || ['none'], 'none');
         // Long descriptive text and URLs are not faceted catalog properties.
-        if (t === 'editor' || t === 'textarea' || t === 'url') {
+        if (t === 'editor' || t === 'document' || t === 'textarea' || t === 'url') {
           const enabledFilter = document.querySelector('[name="jform[is_filterable]"][value="1"]');
           const disabledFilter = document.querySelector('[name="jform[is_filterable]"][value="0"]');
           if (enabledFilter?.checked && disabledFilter) {
@@ -67,7 +69,7 @@
             disabledFilter.dispatchEvent(new Event('change', { bubbles: true }));
           }
         }
-        if (t === 'list') {
+        if (t === 'list' || t === 'color') {
           if (mode.value === 'radio' || mode.value === 'checkboxes') {
             if (multi) {
               multi.value = mode.value === 'checkboxes' ? '1' : '0';
@@ -89,7 +91,7 @@
         const filterMulti = document.querySelector('[name="jform[filter_multiple]"][value="1"]');
         const filterSingle = document.querySelector('[name="jform[filter_multiple]"][value="0"]');
         if (filterMulti && filterSingle) {
-          if (filter.value === 'checkboxes') {
+          if (filter.value === 'checkboxes' || filter.value === 'swatches') {
             filterMulti.checked = true;
             filterMulti.dispatchEvent(new Event('change', { bubbles: true }));
           } else if (!['values', 'dropdown'].includes(filter.value)) {

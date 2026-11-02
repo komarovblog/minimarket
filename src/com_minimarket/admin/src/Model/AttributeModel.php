@@ -33,8 +33,7 @@ final class AttributeModel extends AdminModel
             $item->values = AttributeValueRows::formRows(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
-            $item->color_values = (string) ($item->input_type ?? '') === 'color'
-                ? $item->values : [];
+            $item->color_values = $item->values;
             $item->number_preset_rows = NumericPresetRows::formRows(
                 (string) ($item->number_options ?? '')
             );

@@ -64,6 +64,49 @@ $main = $images[0] ?? null;
             <?php endif; ?>
         </div>
     <?php endif; ?>
+    <?php if (!empty($this->videos)) : ?>
+        <section class="mm-product-videos" aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS')); ?>">
+            <h2><?php echo Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS'); ?></h2>
+            <?php foreach ($this->videos as $item) : ?>
+                <?php
+                // Never render admin-entered HTML/iframe src directly.
+                $src = trim((string) ($item->source ?? ''));
+                $kind = '';
+                $player = '';
+                if (preg_match('~^(images|media)/[a-zA-Z0-9_./ -]+\\.(?:mp4|webm)$~iD', $src)
+                    && !str_contains($src, '..') && !str_contains($src, '//')) {
+                    $kind = 'file';
+                    $player = Uri::root() . $src;
+                } elseif (preg_match('~^https://www\\.youtube\\.com/watch\\?v=([a-zA-Z0-9_-]{11})$~D', $src, $m)) {
+                    $kind = 'embed';
+                    $player = 'https://www.youtube-nocookie.com/embed/' . $m[1];
+                } elseif (preg_match('~^https://rutube\\.ru/video/([a-zA-Z0-9]{12,50})/$~D', $src, $m)) {
+                    $kind = 'embed';
+                    $player = 'https://rutube.ru/play/embed/' . $m[1];
+                }
+                ?>
+                <?php if ($kind !== '') : ?>
+                    <div class="mm-product-videos__item">
+                        <?php if (trim((string) ($item->title ?? '')) !== '') : ?>
+                            <h3><?php echo $this->escape((string) $item->title); ?></h3>
+                        <?php endif; ?>
+                        <?php if ($kind === 'file') : ?>
+                            <video controls preload="metadata" style="width:100%;max-width:720px">
+                                <source src="<?php echo $this->escape($player); ?>">
+                            </video>
+                        <?php else : ?>
+                            <iframe src="<?php echo $this->escape($player); ?>" title="<?php echo $this->escape(
+                                (string) ($item->title ?: Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS'))
+                            ); ?>" loading="lazy" allowfullscreen
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allow="accelerometer; encrypted-media; picture-in-picture; fullscreen"
+                                style="width:100%;max-width:720px;aspect-ratio:16/9;border:0"></iframe>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </section>
+    <?php endif; ?>
     <?php if (trim((string) ($this->product->introtext ?? '')) !== '') : ?>
         <div class="com-minimarket-product__intro">
             <?php echo InputFilter::getInstance()->clean((string) $this->product->introtext, 'HTML'); ?>
