@@ -234,6 +234,12 @@ final class CatalogRepository
         );
     }
 
+    public function getProductVariants(int $productId, int $categoryId): array
+    {
+        return VariantCatalog::load($this->db, $productId,
+            $this->categoryTree()->ancestorIds($categoryId));
+    }
+
     public function getProduct(int $id): ?object
     {
         $q = $this->db->getQuery(true)

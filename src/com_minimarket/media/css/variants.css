@@ -1,0 +1,5 @@
+.mm-variants{margin:1.5rem 0}
+.mm-variants__axes{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0}
+.mm-variants__axis{display:flex;flex-direction:column;gap:.4rem;min-width:11rem}
+.mm-variants__axis select{min-height:2.5rem}
+.mm-variants [data-mm-variant-availability]{font-weight:600}
