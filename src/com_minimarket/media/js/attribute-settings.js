@@ -41,6 +41,7 @@
       }
     }
 
+    const attributeId = document.getElementById('jform_id');
     const updateOptions = (field, accepted, fallback) => {
       for (const option of field.options) {
         const allowed = accepted.includes(option.value);
@@ -59,6 +60,15 @@
       try {
         const t = type.value;
         updateOptions(mode, product[t] || ['auto'], 'auto');
+        // Legacy types remain selectable only when editing the same old kind.
+        const legacy = ['list','textarea','date','url'];
+        for (const option of type.options) {
+          if (legacy.includes(option.value)) {
+            const allow = Number(attributeId?.value || 0) > 0 && option.value === t;
+            option.hidden = !allow;
+            option.disabled = !allow;
+          }
+        }
         updateOptions(filter, filters[t] || ['none'], 'none');
         // Long descriptive text and URLs are not faceted catalog properties.
         if (t === 'editor' || t === 'document' || t === 'textarea' || t === 'url') {

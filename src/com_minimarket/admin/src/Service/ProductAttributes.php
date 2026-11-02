@@ -15,7 +15,7 @@ final class ProductAttributes
     public static function definitions(DatabaseInterface $db): array
     {
         $q = $db->getQuery(true)
-            ->select(['id','title','input_type','input_mode','text_options','number_options','number_unit','number_min','number_max','number_step','is_variant','is_multiple','state'])
+            ->select(['id','title','input_type','input_mode','text_options','number_options','text_options','number_unit','number_min','number_max','number_step','is_variant','is_multiple','state'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -31,6 +31,7 @@ final class ProductAttributes
                 'input_mode' => (string) ($row['input_mode'] ?? 'auto'),
                 'text_options' => (string) ($row['text_options'] ?? ''),
                 'number_options' => (string) ($row['number_options'] ?? ''),
+                'text_options' => (string) ($row['text_options'] ?? ''),
                 'number_unit' => (string) ($row['number_unit'] ?? ''),
                 'number_min' => isset($row['number_min']) ? (string) $row['number_min'] : null,
                 'number_max' => isset($row['number_max']) ? (string) $row['number_max'] : null,
@@ -163,10 +164,11 @@ final class ProductAttributes
             if ($value === '') {
                 continue;
             }
-            if ($type === 'text' || $type === 'textarea') {
-                $limit = $type === 'text' ? 1024 : 10000;
+            if (in_array($type, ['text','textarea','editor'], true)) {
+                $limit = $type === 'text' ? 1024 : 60000;
                 if (mb_strlen($value) > $limit
-                    || preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u', $value)) {
+                    || ($type !== 'editor' && preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u', $value))
+                    || ($type === 'editor' && preg_match('/<\s*(script|iframe|object|embed|form|svg|math)\b|\bon\w+\s*=|javascript\s*:/iu', $value))) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                 }
                 if ($type === 'text' && ($def['input_mode'] ?? 'auto') === 'presets'
@@ -185,6 +187,10 @@ final class ProductAttributes
                     || !preg_match('~^(?:images|media)/[a-zA-Z0-9_./ -]+\.(?:pdf|doc|docx|xls|xlsx|txt|md)$~iD', $value)
                     || str_contains($value, '..') || str_contains($value, '//')) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_DOCUMENT_INVALID');
+                }
+                if ($type === 'text' && ($def['input_mode'] ?? 'auto') === 'presets'
+                    && !in_array($value, TextPresetRows::values((string) ($def['text_options'] ?? '')), true)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                 }
             } elseif ($type === 'number') {
                 if (!AttributeSettings::decimal($value)) {

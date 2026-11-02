@@ -12,6 +12,9 @@ use Joomla\CMS\Form\Field\MediaField;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\TextPresetRows;
+use MiniMarket\Component\Minimarket\Administrator\Service\AttributeSettings;
+use Joomla\CMS\Editor\Editor;
 
 /**
  * One editor for all possible attributes, with client-side category switching.
@@ -207,6 +210,27 @@ final class ProductattributesField extends FormField
                         . $escape($n) . '</option>';
                 }
                 $html .= '</select>';
+            } elseif ($type === 'text' && $mode === 'presets') {
+                $html .= '<select class="form-select" id="' . $escape($inputId)
+                    . '" name="' . $escape($name) . '"><option value="">'
+                    . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
+                $choices = TextPresetRows::values((string) ($def['text_options'] ?? ''));
+                if ($hasStored && is_scalar($value) && !in_array((string) $value, $choices, true)) {
+                    $html .= '<option selected value="' . $escape((string) $value) . '">'
+                        . $escape((string) $value) . '</option>';
+                }
+                foreach ($choices as $choice) {
+                    $html .= '<option value="' . $escape($choice) . '"'
+                        . ($hasStored && (string) $value === $choice ? ' selected' : '') . '>'
+                        . $escape($choice) . '</option>';
+                }
+                $html .= '</select>';
+            } elseif ($type === 'editor') {
+                $html .= Editor::getInstance(Factory::getApplication()->getIdentity()
+                    ->getParam('editor', 'tinymce'))->display(
+                        $name, is_scalar($value) ? (string) $value : '',
+                        '100%', '260', '55', '12', false, $inputId
+                    );
             } elseif ($type === 'textarea') {
                 $html .= '<textarea class="form-control" rows="5" maxlength="10000"'
                     . ' id="' . $escape($inputId) . '" name="' . $escape($name) . '">'
