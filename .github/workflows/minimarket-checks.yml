@@ -119,6 +119,9 @@ jobs:
       - name: Real variant SKU combinations and per-variant photo validation
         run: php scripts/test-product-variants.php
 
+      - name: New product-local SKU matrix planner
+        run: php scripts/test-variant-matrix.php
+
       - name: Public variant SKU, image and stock reads
         run: php scripts/test-public-variants.php
 
