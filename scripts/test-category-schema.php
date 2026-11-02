@@ -359,6 +359,80 @@ try {
 }
 verify($preVariantProduct === row($pdo, 'catci_minimarket_products'),
     '0.5.17 preserves product ID, URL, price, SKU, stock, and photos');
+// 0.5.20 — additive normalized local options and source/external identities.
+// Never rewrite existing product, variant IDs, SKU, price, stock, URLs or gallery.
+$beforeV2Product = row($pdo, 'catci_minimarket_products');
+$beforeV2Variants = $pdo->query(
+    'SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id'
+)->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo, $dir . 'updates/mysql/0.5.20.sql', 'catci_');
+verify($beforeV2Product === row($pdo, 'catci_minimarket_products'),
+    '0.5.20 keeps all legacy product data untouched');
+verify($beforeV2Variants === $pdo->query(
+    'SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id'
+)->fetchAll(PDO::FETCH_ASSOC), '0.5.20 keeps all variant IDs and trade data untouched');
+
+$pdo->exec("INSERT INTO catci_minimarket_variant_dimensions (id,product_id,code,title,sort_order)
+    VALUES (1,1,'color','Цвет',0),(2,1,'size','Размер',1)");
+$pdo->exec("INSERT INTO catci_minimarket_variant_dimension_values
+    (id,dimension_id,code,title,sort_order) VALUES
+    (1,1,'red','Красный',0),(2,1,'blue','Синий',1),
+    (3,2,'s','S',0),(4,2,'m','M',1)");
+$pdo->exec("INSERT INTO catci_minimarket_variant_value_assignments (variant_id,dimension_id,value_id)
+    VALUES (1,1,1),(1,2,3),(2,1,1),(2,2,4)");
+verify((int) $pdo->query("SELECT COUNT(*) FROM catci_minimarket_variant_value_assignments")
+    ->fetchColumn() === 4, 'two SKUs with local Color and Size assignments');
+$pdo->exec("INSERT INTO catci_minimarket_import_product_keys
+    (source_key,external_product_key,product_id) VALUES ('erp','group-1001',1)");
+$pdo->exec("INSERT INTO catci_minimarket_import_sku_keys
+    (source_key,external_sku_key,variant_id) VALUES
+    ('erp','line-a',1),('erp','line-b',2)");
+verify((int) $pdo->query("SELECT variant_id FROM catci_minimarket_import_sku_keys
+    WHERE source_key='erp' AND external_sku_key='line-a'")->fetchColumn() === 1,
+    'external SKU identity maps to stable variant ID');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_import_sku_keys
+        (source_key,external_sku_key,variant_id) VALUES ('erp','line-a',2)");
+    verify(false,'duplicate external SKU reference must fail');
+} catch (PDOException $e) {
+    verify(true,'duplicate external SKU reference rejected');
+}
+try {
+    $pdo->exec("DELETE FROM catci_minimarket_product_variants WHERE id=1");
+    verify(false,'SKU with external identity cannot be deleted');
+} catch (PDOException $e) {
+    verify(true,'SKU with external identity protected');
+}
+try {
+    $pdo->exec("DELETE FROM catci_minimarket_variant_dimension_values WHERE id=1");
+    verify(false,'assigned option cannot be deleted');
+} catch (PDOException $e) {
+    verify(true,'assigned option protected');
+}
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_variant_dimensions
+        (product_id,code,title) VALUES (1,'color','Duplicate')");
+    verify(false,'dimension code unique per product');
+} catch (PDOException $e) {
+    verify(true,'dimension code unique per product');
+}
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_variant_dimension_values
+        (dimension_id,code,title) VALUES (2,'s','Duplicate')");
+    verify(false,'value code unique per axis');
+} catch (PDOException $e) {
+    verify(true,'value code unique per axis');
+}
+$pdo->exec("INSERT INTO catci_minimarket_import_sku_keys
+    (source_key,external_sku_key,variant_id) VALUES ('ERP','line-a',2)");
+verify((int) $pdo->query("SELECT COUNT(*) FROM catci_minimarket_import_sku_keys
+    WHERE external_sku_key='line-a'")->fetchColumn() === 2,
+    'external source keys are case-sensitive');
+$pdo->exec('DROP TABLE catci_minimarket_import_sku_keys');
+$pdo->exec('DROP TABLE catci_minimarket_import_product_keys');
+$pdo->exec('DROP TABLE catci_minimarket_variant_value_assignments');
+$pdo->exec('DROP TABLE catci_minimarket_variant_dimension_values');
+$pdo->exec('DROP TABLE catci_minimarket_variant_dimensions');
 $pdo->exec('DROP TABLE catci_minimarket_product_variant_images');
 $pdo->exec('DROP TABLE catci_minimarket_product_variants');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_multi_values');
@@ -421,6 +495,20 @@ $freshOptions = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_att
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['product_id','attribute_id','value_id'] as $col) {
     verify(in_array($col,$freshOptions,true),'fresh 0.5.7 option column ' . $col);
+}
+foreach ([
+    'variant_dimensions' => ['id','product_id','code','title','sort_order'],
+    'variant_dimension_values' => ['id','dimension_id','code','title','image','color_hex','sort_order'],
+    'variant_value_assignments' => ['variant_id','dimension_id','value_id'],
+    'import_product_keys' => ['source_key','external_product_key','product_id'],
+    'import_sku_keys' => ['source_key','external_sku_key','variant_id'],
+] as $tableSuffix => $requiredColumns) {
+    $columns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_' . $tableSuffix)
+        ->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($requiredColumns as $column) {
+        verify(in_array($column, $columns, true), 'fresh 0.5.20 '
+            . $tableSuffix . ' column ' . $column);
+    }
 }
 $pdo->exec("INSERT INTO freshcatci_minimarket_categories
     (id,title,alias,state) VALUES (1,'New category','new-category',1)");
