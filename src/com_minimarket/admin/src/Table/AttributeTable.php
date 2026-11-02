@@ -83,6 +83,24 @@ final class AttributeTable extends Table
         $this->sort_order = (int) $sort;
 
         $db = $this->getDbo();
+        // Switching an existing free-number attribute to preset-only input
+        // must not strand saved values outside the newly allowed set.
+        if ((int) $this->id > 0 && $this->input_type === 'number'
+            && $this->input_mode === 'presets') {
+            $numbers = AttributeSettings::numericOptions($this->number_options);
+            $presetQuery = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_product_attribute_scalars'))
+                ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id)
+                ->where($db->quoteName('value_number') . ' IS NOT NULL')
+                ->where($db->quoteName('value_number') . ' NOT IN (' . implode(',', $numbers) . ')');
+            $db->setQuery($presetQuery);
+            if ((int) $db->loadResult() > 0) {
+                $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_PRESET_IN_USE'));
+                return false;
+            }
+        }
+
         $query = $db->getQuery(true)
             ->select('COUNT(*)')
             ->from($db->quoteName('#__minimarket_attributes'))
