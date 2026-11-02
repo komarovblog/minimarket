@@ -40,6 +40,8 @@ namespace Joomla\CMS\Table {
         public int $id = 0;
         public string $error = '';
         public function __construct($table, $key, protected DatabaseInterface $db) {}
+        public array $columnAliases = [];
+        public function setColumnAlias(string $name, string $alias): void { $this->columnAliases[$name] = $alias; }
         public function setError(string $error): void { $this->error = $error; }
         public function getDbo(): DatabaseInterface { return $this->db; }
         public function check() { return true; }
@@ -88,6 +90,7 @@ namespace MiniMarket\ProductSmoke {
     }
 
     $t = new ProductTable(new FakeDb());
+    verify($t->columnAliases['published'] === 'state', 'product bulk publish targets state column');
     $t->title = 'Product';
     $t->alias = 'product';
     $t->sku = 'TEST-001';

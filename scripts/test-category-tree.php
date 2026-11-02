@@ -51,6 +51,8 @@ namespace Joomla\CMS\Table {
         {
         }
 
+        public array $columnAliases = [];
+        public function setColumnAlias(string $name, string $alias): void { $this->columnAliases[$name] = $alias; }
         public function setError(string $error): void { $this->error = $error; }
         public function getDbo(): DatabaseInterface { return $this->db; }
         public function check() { return true; }
@@ -111,6 +113,7 @@ namespace MiniMarket\CategoryTreeSmoke {
 
     $db = new FakeDb();
     $table = new CategoryTable($db);
+    expect($table->columnAliases['published'] === 'state', 'category bulk publish targets state column');
     $table->id = 5;
     $table->title = 'Child';
     $table->alias = 'child';

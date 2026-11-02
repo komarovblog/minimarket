@@ -48,6 +48,8 @@ namespace Joomla\CMS\Table {
         ) {
         }
 
+        public array $columnAliases = [];
+        public function setColumnAlias(string $name, string $alias): void { $this->columnAliases[$name] = $alias; }
         public function setError(string $message): void { $this->error = $message; }
         public function getDbo(): DatabaseInterface { return $this->db; }
         public function check() { return true; }
@@ -138,6 +140,7 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->is_filterable = 1;
     $attribute->state = 1;
     $check($attribute->check() === true, 'color is a valid variant attribute');
+    $check($attribute->columnAliases['published'] === 'state', 'attribute bulk publishing targets state');
     $check($attribute->code === 'color' && $attribute->title === 'Цвет', 'name and code normalized');
 
     $attribute->input_type = 'text';
@@ -178,6 +181,7 @@ namespace MiniMarket\AttributesSmoke {
     $value->code = 'RED';
     $value->state = 1;
     $check($value->check() === true, 'color dictionary entry accepted');
+    $check($value->columnAliases['published'] === 'state', 'value bulk publishing targets state');
     $check($value->code === 'red' && $value->title === 'Красный', 'value normalized');
     $check(count($db->queries) > 1 && str_contains(
         implode(' ', $db->queries[count($db->queries) - 1]->where), 'attribute_id = 4'
