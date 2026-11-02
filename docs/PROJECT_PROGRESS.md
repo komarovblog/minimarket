@@ -1,3 +1,7 @@
+## 02.11.2026 — 0.5.5: category attribute assignments
+
+В development добавлены таблица прямых правил категории, трёхпозиционные режимы inherit/enable/exclude, вычисление эффективного набора по родительской цепочке, Joomla поле и вкладка RU/EN, атомарный Save/Apply категории+связей. Pure PHP regression тестирует корень, дочернюю, внучатую, отключение и восстановление; MySQL CI — upgrade/fresh install и сохранение старых товаров. **Реальная Joomla NOT RUN.** [Сценарий](M5_CATEGORY_ATTRIBUTES_055_SMOKE.md). Характеристики у товара и публичные фильтры — позже.
+
 ## 01.11.2026 — 0.5.4: справочники характеристик
 
 В development появились таблицы характеристик/значений и Joomla редакторы. Типы список/текст/число/да-нет, флаги is_variant/is_filterable (пока подготовка). PHPUnit/PHP и MySQL CI проверяют новые таблицы, отсутствие изменений legacy SKU/price/stock и уникальность значений; Windows ZIP. Отдельно нужна установка и smoke в настоящей Joomla. Варианты и фильтры не реализованы. [Приёмка](M4_ATTRIBUTES_054_SMOKE.md), [следующий этап](M4_VARIANT_COMBINATIONS_PLAN.md).
