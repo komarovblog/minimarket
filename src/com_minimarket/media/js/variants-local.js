@@ -57,10 +57,12 @@
         throw new Error(t('incomplete','Specify a name and at least one value for each parameter.'));
       codes.add(axis.code);
       const vals=new Set();
+      const names=new Set();
       for(const value of axis.values){
-        if(!value.title?.trim() || vals.has(value.code))
+        if(!value.title?.trim() || vals.has(value.code) || names.has(value.title.trim().toLocaleLowerCase()))
           throw new Error(t('incomplete','Fill every value without duplicates.'));
         vals.add(value.code);
+        names.add(value.title.trim().toLocaleLowerCase());
       }
       count*=axis.values.length;
       if(count>200)throw new Error(t('limit','Maximum 200 combinations.'));
@@ -208,7 +210,11 @@
       if(target && !target.value) target.value=value;
     };
     const base=by('[name="jform[sku]"]')?.value || 'SKU';
-    const slug=Object.values(row.selection).map(v=>String(v).slice(2).toUpperCase()).join('-');
+    const slug=row.title.split(' / ').map(v=>{
+      const part=v.trim().normalize('NFKD').replace(/[^a-zA-Z0-9]+/g,'-')
+        .replace(/^-|-$/g,'').toUpperCase();
+      return part || 'VAR';
+    }).join('-');
     set('sku',base+'-'+slug);
     set('price',by('[name="jform[price]"]')?.value || '0.00');
     set('stock','0');
