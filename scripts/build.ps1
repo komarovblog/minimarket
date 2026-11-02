@@ -35,6 +35,7 @@ $needed = @(
     'admin\sql\updates\mysql\0.5.4.sql',
     'admin\sql\updates\mysql\0.5.5.sql',
     'admin\sql\updates\mysql\0.5.7.sql',
+    'admin\sql\updates\mysql\0.5.11.sql',
     'admin\src\Service\ProductAttributes.php',
     'admin\src\Field\ProductattributesField.php',
     'media\js\product-attributes.js',

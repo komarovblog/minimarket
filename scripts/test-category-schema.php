@@ -248,6 +248,22 @@ verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_attribut
     'rerun 0.5.7 does not remove selected values');
 verify($beforeAttributeProduct === row($pdo, 'catci_minimarket_products'),
     'rerun 0.5.7 preserves trading columns');
+// 0.5.11: separate list single/multiple from is_variant without losing data.
+$beforeMultipleProduct = row($pdo, 'catci_minimarket_products');
+runSql($pdo, $dir . 'updates/mysql/0.5.11.sql', 'catci_');
+verify($beforeMultipleProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.11 preserves all product trading fields and URL');
+verify((int) $pdo->query('SELECT is_multiple FROM catci_minimarket_attributes WHERE id=1')->fetchColumn() === 1,
+    '0.5.11 preserves legacy multi color from is_variant');
+verify((int) $pdo->query('SELECT is_multiple FROM catci_minimarket_attributes WHERE id=2')->fetchColumn() === 1,
+    '0.5.11 preserves legacy multi size from is_variant');
+verify((int) $pdo->query('SELECT is_multiple FROM catci_minimarket_attributes WHERE id=3')->fetchColumn() === 0,
+    '0.5.11 leaves non-list cardinality single');
+verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_attribute_options')->fetchColumn() === 2,
+    '0.5.11 keeps all selected dictionary value IDs');
+$pdo->exec('UPDATE catci_minimarket_attributes SET is_variant=0 WHERE id=1');
+verify((int) $pdo->query('SELECT is_multiple FROM catci_minimarket_attributes WHERE id=1')->fetchColumn() === 1,
+    '0.5.11 allows normal multi-select without SKU flag');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_options');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_scalars');
 
@@ -277,7 +293,7 @@ foreach (['id','product_id','path','alt','sort_order'] as $col) {
 }
 $freshAttrColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','title','code','input_type','is_variant','is_filterable','sort_order','state'] as $col) {
+foreach (['id','title','code','input_type','is_variant','is_multiple','is_filterable','sort_order','state'] as $col) {
     verify(in_array($col, $freshAttrColumns, true), 'fresh 0.5.4 attribute column ' . $col);
 }
 $freshValueColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attribute_values')

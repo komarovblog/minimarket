@@ -35,6 +35,7 @@ namespace Joomla\CMS\Table {
         public $code = '';
         public $input_type = 'list';
         public $is_variant = 0;
+        public $is_multiple = 0;
         public $is_filterable = 0;
         public $sort_order = 0;
         public $state = 0;
@@ -86,6 +87,8 @@ namespace MiniMarket\AttributesSmoke {
             $this->where[] = (string) $value;
             return $this;
         }
+        public function group($column): self { return $this; }
+        public function having($condition): self { return $this; }
     }
 
     final class DB implements DatabaseInterface
@@ -94,6 +97,7 @@ namespace MiniMarket\AttributesSmoke {
         public bool $duplicateAttribute = false;
         public bool $duplicateValue = false;
         public bool $existingValues = false;
+        public bool $multipleProducts = false;
         public string $parentType = 'list';
         public array $queries = [];
 
@@ -113,6 +117,10 @@ namespace MiniMarket\AttributesSmoke {
 
             if ($this->query?->from === '#__minimarket_attributes') {
                 return $this->duplicateAttribute ? 1 : 0;
+            }
+
+            if ($this->query?->from === '#__minimarket_product_attribute_options') {
+                return $this->multipleProducts ? 2 : 0;
             }
 
             if ($this->query?->from === '#__minimarket_attribute_values') {
@@ -137,11 +145,20 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->code = 'COLOR';
     $attribute->input_type = 'list';
     $attribute->is_variant = 1;
+    $attribute->is_multiple = 1;
     $attribute->is_filterable = 1;
     $attribute->state = 1;
     $check($attribute->check() === true, 'color is a valid variant attribute');
     $check($attribute->columnAliases['published'] === 'state', 'attribute bulk publishing targets state');
     $check($attribute->code === 'color' && $attribute->title === 'Цвет', 'name and code normalized');
+    // SKU flag and number of selectable values are independent settings.
+    $attribute->is_variant = 0;
+    $attribute->is_multiple = 1;
+    $check($attribute->check() === true, 'ordinary attribute can offer multiple values');
+    $attribute->is_variant = 1;
+    $attribute->is_multiple = 0;
+    $check($attribute->check() === true, 'variant-defining attribute can allow only one value');
+    $attribute->is_multiple = 1;
 
     $attribute->input_type = 'text';
     $check($attribute->check() === false, 'text cannot define a variant');
@@ -151,6 +168,11 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->input_type = 'list';
     $attribute->is_variant = 1;
     $attribute->id = 10;
+    $attribute->is_multiple = 0;
+    $db->multipleProducts = true;
+    $check($attribute->check() === false, 'cannot switch multi list to single with used selections');
+    $attribute->is_multiple = 1;
+    $db->multipleProducts = false;
     $attribute->input_type = 'number';
     $attribute->is_variant = 0;
     $db->existingValues = true;
@@ -158,6 +180,17 @@ namespace MiniMarket\AttributesSmoke {
     $db->existingValues = false;
     $attribute->input_type = 'list';
     $attribute->is_variant = 1;
+
+    $attribute->is_multiple = 5;
+    $check($attribute->check() === false, 'invalid multiple flag rejected');
+    $attribute->is_multiple = 1;
+    $attribute->is_variant = 0;
+    $attribute->input_type = 'text';
+    $check($attribute->check() === true && $attribute->is_multiple === 0,
+        'non-list attribute clears hidden cardinality');
+    $attribute->input_type = 'list';
+    $attribute->is_variant = 1;
+    $attribute->is_multiple = 1;
 
     $attribute->code = 'color&illegal';
     $check($attribute->check() === false, 'invalid attribute code rejected');

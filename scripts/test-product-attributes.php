@@ -26,26 +26,34 @@ namespace MiniMarket\ProductAttributesSmoke {
     }
 
     $defs = [
-        10=>['id'=>10,'title'=>'Color','type'=>'list','is_variant'=>true,'state'=>1,
+        10=>['id'=>10,'title'=>'Color','type'=>'list','is_variant'=>true,'is_multiple'=>true,'state'=>1,
             'values'=>[100=>['title'=>'Red','state'=>1],101=>['title'=>'Yellow','state'=>1],
                 102=>['title'=>'Black','state'=>0]]],
-        11=>['id'=>11,'title'=>'Size','type'=>'list','is_variant'=>true,'state'=>1,
+        11=>['id'=>11,'title'=>'Size','type'=>'list','is_variant'=>true,'is_multiple'=>true,'state'=>1,
             'values'=>[110=>['title'=>'S','state'=>1],111=>['title'=>'M','state'=>1]]],
-        12=>['id'=>12,'title'=>'Material','type'=>'list','is_variant'=>false,'state'=>1,
+        12=>['id'=>12,'title'=>'Material','type'=>'list','is_variant'=>false,'is_multiple'=>false,'state'=>1,
             'values'=>[120=>['title'=>'Denim','state'=>1],121=>['title'=>'Cotton','state'=>1]]],
-        13=>['id'=>13,'title'=>'Width','type'=>'number','is_variant'=>false,'state'=>1,'values'=>[]],
-        14=>['id'=>14,'title'=>'Summary','type'=>'text','is_variant'=>false,'state'=>1,'values'=>[]],
-        15=>['id'=>15,'title'=>'Eco','type'=>'boolean','is_variant'=>false,'state'=>1,'values'=>[]],
-        16=>['id'=>16,'title'=>'Hidden','type'=>'text','is_variant'=>false,'state'=>0,'values'=>[]],
+        13=>['id'=>13,'title'=>'Width','type'=>'number','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
+        14=>['id'=>14,'title'=>'Summary','type'=>'text','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
+        15=>['id'=>15,'title'=>'Eco','type'=>'boolean','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
+        16=>['id'=>16,'title'=>'Hidden','type'=>'text','is_variant'=>false,'is_multiple'=>false,'state'=>0,'values'=>[]],
+        17=>['id'=>17,'title'=>'Compatible devices','type'=>'list','is_variant'=>false,'is_multiple'=>true,'state'=>1,
+            'values'=>[170=>['title'=>'Phone','state'=>1],171=>['title'=>'Tablet','state'=>1]]],
+        18=>['id'=>18,'title'=>'Single variant field','type'=>'list','is_variant'=>true,'is_multiple'=>false,'state'=>1,
+            'values'=>[180=>['title'=>'Left','state'=>1],181=>['title'=>'Right','state'=>1]]],
     ];
     $hierarchy=['parents'=>[1=>0,2=>1,3=>1,4=>0],
         'rules'=>[1=>[10=>1,11=>1,12=>1,13=>1,14=>1,15=>1],
-            2=>[11=>0],3=>[13=>0],4=>[16=>1]]];
+            2=>[11=>0],3=>[13=>0],4=>[16=>1,17=>1,18=>1]]];
     $map = ProductAttributes::categoryMap($hierarchy,$defs);
     verify($map[1] === [10,11,12,13,14,15], 'parent category includes all published assignments');
     verify($map[2] === [10,12,13,14,15], 'child excludes inherited Size');
     verify($map[3] === [10,11,12,14,15], 'sibling excludes Width only');
-    verify($map[4] === [16], 'draft attribute remains editable in admin, hidden publicly later');
+    verify($map[4] === [16,17,18], 'draft and new list attributes remain editable');
+    verify(ProductAttributes::normalize(['17'=>['170','171']],4,$defs,$map)['options'][17] === [170,171],
+        'ordinary nonvariant attribute can select multiple values');
+    verify(ProductAttributes::normalize(['18'=>'180'],4,$defs,$map)['options'][18] === [180],
+        'variant attribute can select a single value');
     $selection=ProductAttributes::normalize([
         '10'=>['100','101'], '11'=>['110','111'], '12'=>'120',
         '13'=>'-12.5', '14'=>'Heavy cotton', '15'=>'0'
@@ -70,6 +78,7 @@ namespace MiniMarket\ProductAttributesSmoke {
         [1,['10'=>['999']], 'unknown dictionary value'],
         [1,['10'=>['120']], 'value belongs to different property'],
         [1,['12'=>['120','121']], 'single-valued list cannot accept two'],
+        [4,['18'=>['180','181']], 'variant list with single cardinality rejects two'],
         [1,['10'=>['100','100']], 'repeated list option'],
         [1,['13'=>'1e9'], 'number cannot use exponent'],
         [1,['13'=>'12.12345'], 'number exceeds precision'],
@@ -109,7 +118,7 @@ namespace MiniMarket\ProductAttributesSmoke {
         public function setQuery($q): void {$this->q=$q;}
         public function loadAssocList(): array {
             if ($this->q->table==='#__minimarket_attributes') {
-                return [['id'=>10,'title'=>'Color','input_type'=>'list','is_variant'=>1,'state'=>1]];
+                return [['id'=>10,'title'=>'Color','input_type'=>'list','is_variant'=>1,'is_multiple'=>1,'state'=>1]];
             }
             if ($this->q->table==='#__minimarket_attribute_values') {
                 return [['id'=>100,'attribute_id'=>10,'title'=>'Red','state'=>1]];
@@ -127,6 +136,7 @@ namespace MiniMarket\ProductAttributesSmoke {
     $db = new Db();
     $real = ProductAttributes::definitions($db);
     verify($real[10]['values'][100]['title']==='Red','definitions and matching dictionary loaded in two reads');
+    verify($real[10]['is_multiple'] === true, 'definition reads independent list cardinality');
     verify(ProductAttributes::load($db,0)===[],'new product has empty attributes');
     $loaded=ProductAttributes::load($db,12);
     verify($loaded[15]==='0' && $loaded[10]===[100],'typed values loaded with boolean false and options');

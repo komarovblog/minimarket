@@ -86,6 +86,7 @@ try {
         'admin/sql/updates/mysql/0.5.4.sql',
         'admin/sql/updates/mysql/0.5.5.sql',
         'admin/sql/updates/mysql/0.5.7.sql',
+        'admin/sql/updates/mysql/0.5.11.sql',
         'admin/src/Service/ProductAttributes.php',
         'admin/src/Field/ProductattributesField.php',
         'media/js/product-attributes.js',
@@ -149,6 +150,12 @@ try {
         exit 1
     }
 
+    # New cardinality is a real schema field, distinct from the SKU flag.
+    $schemaUpdateEntry = $archive.GetEntry('admin/sql/updates/mysql/0.5.11.sql')
+    if ($null -eq $schemaUpdateEntry) {
+        Write-Output 'PACKAGE_FAIL: MULTI_VALUE_MIGRATION_MISSING'
+        exit 1
+    }
     $attributeFormEntry = $archive.GetEntry('admin/forms/attribute.xml')
     $attrReader = New-Object System.IO.StreamReader($attributeFormEntry.Open())
     try {
@@ -156,6 +163,10 @@ try {
     }
     finally {
         $attrReader.Dispose()
+    }
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple' and @type='list' and @showon='input_type:list']")) {
+        Write-Output 'PACKAGE_FAIL: VALUE_CARDINALITY_FORM_MISSING'
+        exit 1
     }
     if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='values' and @type='subform' and @multiple='true' and @buttons='add,remove,move']") -or
         $null -eq $attrXml.SelectSingleNode("/form/field[@name='values_present']")) {
