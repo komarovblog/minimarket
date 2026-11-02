@@ -113,6 +113,12 @@ jobs:
       - name: Product editor and clean media validation
         run: php scripts/test-product-editor.php
 
+      - name: Typed category-scoped product attributes
+        run: php scripts/test-product-attributes.php
+
+      - name: Product attributes category UI JavaScript syntax
+        run: node --check src/com_minimarket/media/js/product-attributes.js
+
       - name: Relational product gallery and Joomla Subform regression
         run: php scripts/test-product-gallery.php
 

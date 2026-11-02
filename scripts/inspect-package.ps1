@@ -85,6 +85,10 @@ try {
         'admin/sql/updates/mysql/0.5.3.sql',
         'admin/sql/updates/mysql/0.5.4.sql',
         'admin/sql/updates/mysql/0.5.5.sql',
+        'admin/sql/updates/mysql/0.5.7.sql',
+        'admin/src/Service/ProductAttributes.php',
+        'admin/src/Field/ProductattributesField.php',
+        'media/js/product-attributes.js',
         'admin/src/Service/CategoryAttributes.php',
         'admin/src/Field/CategoryattributesField.php',
         'admin/src/Field/AttributecategoriesField.php',
@@ -179,6 +183,12 @@ try {
     if ($null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='gallery' and @type='subform']") -or
         $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='images']/field[@name='gallery_present']")) {
         Write-Output 'PACKAGE_FAIL: REPEATABLE_GALLERY_FIELDS_MISSING'
+        exit 1
+    }
+
+    if ($null -eq $productForm.SelectSingleNode("/form/fieldset[@name='attributes']/field[@name='attribute_values' and @type='Productattributes']") -or
+        $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='attributes']/field[@name='attributes_present']")) {
+        Write-Output 'PACKAGE_FAIL: PRODUCT_ATTRIBUTES_TAB_MISSING'
         exit 1
     }
 
