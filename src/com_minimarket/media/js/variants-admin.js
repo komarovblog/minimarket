@@ -13,7 +13,7 @@
     const axes = optionsFor();
     const axisEntries = Object.entries(axes);
     if (warning) {
-      warning.textContent = axisEntries.length === 0
+      const message = axisEntries.length === 0
         ? (document.documentElement.lang?.startsWith('ru')
           ? 'Назначьте категории характеристику «Различает варианты товара» со значениями.'
           : 'Assign a variant-defining attribute with predefined values to this category.')
@@ -22,6 +22,9 @@
             ? 'Поддерживается не более четырёх характеристик вариантов.'
             : 'A maximum of four variant-defining attributes is supported.')
           : '';
+      // Reassigning textContent creates a DOM mutation even if text is
+      // identical; do not recursively wake our own MutationObserver.
+      if (warning.textContent !== message) warning.textContent = message;
     }
     document.querySelectorAll('input[type="hidden"][name*="[variants]"][name$="[selection]"]')
       .forEach((hidden) => {
@@ -83,7 +86,20 @@
       });
   };
   const root = document.querySelector('#adminForm') || document;
-  const observer = new MutationObserver(() => redraw());
+  const selectionSelector = 'input[type="hidden"][name*="[variants]"][name$="[selection]"]';
+  // Joomla inserts new subform rows dynamically. Observe only additions
+  // containing the relevant field; ignore DOM edits made by this script,
+  // Joomla toolbars, editors and the rest of the admin form.
+  const observer = new MutationObserver((records) => {
+    const hasNewVariantRow = records.some(({ addedNodes }) =>
+      Array.from(addedNodes).some((node) =>
+        node.nodeType === 1 && (
+          isSelection(node) || !!node.querySelector?.(selectionSelector)
+        )
+      )
+    );
+    if (hasNewVariantRow) redraw();
+  });
   observer.observe(root, { childList: true, subtree: true });
   category?.addEventListener('change', redraw);
   redraw();
