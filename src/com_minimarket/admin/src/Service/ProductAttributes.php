@@ -107,6 +107,19 @@ final class ProductAttributes
         foreach ((array) $db->loadAssocList() as $row) {
             $result[(int) $row['attribute_id']][] = (int) $row['value_id'];
         }
+        $q = $db->getQuery(true)
+            ->select(['attribute_id','value_text'])
+            ->from($db->quoteName('#__minimarket_product_attribute_multi_values'))
+            ->where($db->quoteName('product_id') . ' = ' . $productId)
+            ->order('attribute_id ASC, value_text ASC');
+        $db->setQuery($q);
+        foreach ((array) $db->loadAssocList() as $row) {
+            $id = (int) $row['attribute_id'];
+            if (!is_array($result[$id] ?? null)) {
+                $result[$id] = isset($result[$id]) ? [(string) $result[$id]] : [];
+            }
+            $result[$id][] = (string) $row['value_text'];
+        }
         return $result;
     }
 
@@ -122,7 +135,7 @@ final class ProductAttributes
             throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
         }
         $allowed = array_fill_keys($categoryMap[$categoryId] ?? [], true);
-        $out = ['scalars' => [], 'options' => []];
+        $out = ['scalars' => [], 'options' => [], 'multi_values' => []];
         foreach ((array) $posted as $id => $value) {
             if (!ctype_digit((string) $id) || (int) $id < 1) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
@@ -154,6 +167,24 @@ final class ProductAttributes
                 if ($selected) {
                     $out['options'][$id] = array_values($selected);
                 }
+                continue;
+            }
+            if ($type === 'text' && ($def['input_mode'] ?? 'auto') === 'presets'
+                && !empty($def['is_multiple'])) {
+                $items = is_array($value) ? $value : [$value];
+                if (count($items) > TextPresetRows::MAX_ROWS) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
+                }
+                $allowedValues = TextPresetRows::values((string) ($def['text_options'] ?? ''));
+                $selected = [];
+                foreach ($items as $item) {
+                    if (!is_string($item) || !in_array($item, $allowedValues, true)
+                        || isset($selected[$item])) {
+                        throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
+                    }
+                    $selected[$item] = $item;
+                }
+                if ($selected) $out['multi_values'][$id] = array_values($selected);
                 continue;
             }
             if (!is_scalar($value)) {
@@ -242,7 +273,7 @@ final class ProductAttributes
         if ($productId < 1) {
             throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
         }
-        foreach (['#__minimarket_product_attribute_scalars', '#__minimarket_product_attribute_options'] as $table) {
+        foreach (['#__minimarket_product_attribute_scalars', '#__minimarket_product_attribute_options', '#__minimarket_product_attribute_multi_values'] as $table) {
             $q = $db->getQuery(true)->delete($db->quoteName($table))
                 ->where($db->quoteName('product_id') . ' = ' . $productId);
             $db->setQuery($q);
@@ -261,6 +292,18 @@ final class ProductAttributes
                     $type === 'number' ? $db->quote($value) : 'NULL',
                     $type === 'boolean' ? (string) (int) $value : 'NULL',
                 ]));
+            }
+            $db->setQuery($q);
+            $db->execute();
+        }
+        if (!empty($normalized['multi_values'])) {
+            $q = $db->getQuery(true)
+                ->insert($db->quoteName('#__minimarket_product_attribute_multi_values'))
+                ->columns($db->quoteName(['product_id','attribute_id','value_text']));
+            foreach ($normalized['multi_values'] as $id => $values) {
+                foreach ($values as $value) {
+                    $q->values(implode(',', [(string) $productId,(string) (int) $id,$db->quote($value)]));
+                }
             }
             $db->setQuery($q);
             $db->execute();

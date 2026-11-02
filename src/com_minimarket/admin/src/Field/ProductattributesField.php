@@ -156,17 +156,35 @@ final class ProductattributesField extends FormField
                     $html .= '</select>';
                 }
             } elseif ($type === 'text' && $mode === 'presets') {
-                $html .= '<select class="form-select" id="' . $escape($inputId)
-                    . '" name="' . $escape($name) . '"><option value="">'
-                    . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
-                foreach (\MiniMarket\Component\Minimarket\Administrator\Service\TextPresetRows::values(
-                    (string) ($def['text_options'] ?? '')
-                ) as $preset) {
-                    $html .= '<option value="' . $escape($preset) . '"'
-                        . ($hasStored && $singleValue === $preset ? ' selected' : '') . '>'
-                        . $escape($preset) . '</option>';
+                $presets = TextPresetRows::rows((string) ($def['text_options'] ?? ''));
+                $selectedTexts = is_array($value) ? array_map('strval', $value)
+                    : ($hasStored ? [(string) $value] : []);
+                if ($def['is_multiple']) {
+                    foreach ($presets as $i => $preset) {
+                        $choice = $preset['value'];
+                        $checked = in_array($choice, $selectedTexts, true);
+                        $html .= '<div class="form-check"><input type="checkbox" class="form-check-input" id="'
+                            . $escape($inputId . '_' . $i) . '" name="' . $escape($name . '[]')
+                            . '" value="' . $escape($choice) . '"' . ($checked ? ' checked' : '') . '>'
+                            . '<label class="form-check-label" for="' . $escape($inputId . '_' . $i) . '">';
+                        if ($preset['image'] !== '') {
+                            $html .= '<img src="' . $escape(\Joomla\CMS\Uri\Uri::root() . $preset['image'])
+                                . '" alt="" loading="lazy" style="width:32px;height:32px;object-fit:cover;margin-right:.4em">';
+                        }
+                        $html .= $escape($choice) . '</label></div>';
+                    }
+                } else {
+                    $html .= '<select class="form-select" id="' . $escape($inputId)
+                        . '" name="' . $escape($name) . '"><option value="">'
+                        . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
+                    foreach ($presets as $preset) {
+                        $choice = $preset['value'];
+                        $html .= '<option value="' . $escape($choice) . '"'
+                            . (in_array($choice, $selectedTexts, true) ? ' selected' : '') . '>'
+                            . $escape($choice) . '</option>';
+                    }
+                    $html .= '</select>';
                 }
-                $html .= '</select>';
             } elseif ($type === 'editor' || $type === 'document') {
                 $class = $type === 'editor' ? EditorField::class : MediaField::class;
                 $field = new $class($this->form);
@@ -210,27 +228,6 @@ final class ProductattributesField extends FormField
                         . $escape($n) . '</option>';
                 }
                 $html .= '</select>';
-            } elseif ($type === 'text' && $mode === 'presets') {
-                $html .= '<select class="form-select" id="' . $escape($inputId)
-                    . '" name="' . $escape($name) . '"><option value="">'
-                    . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
-                $choices = TextPresetRows::values((string) ($def['text_options'] ?? ''));
-                if ($hasStored && is_scalar($value) && !in_array((string) $value, $choices, true)) {
-                    $html .= '<option selected value="' . $escape((string) $value) . '">'
-                        . $escape((string) $value) . '</option>';
-                }
-                foreach ($choices as $choice) {
-                    $html .= '<option value="' . $escape($choice) . '"'
-                        . ($hasStored && (string) $value === $choice ? ' selected' : '') . '>'
-                        . $escape($choice) . '</option>';
-                }
-                $html .= '</select>';
-            } elseif ($type === 'editor') {
-                $html .= Editor::getInstance(Factory::getApplication()->getIdentity()
-                    ->getParam('editor', 'tinymce'))->display(
-                        $name, is_scalar($value) ? (string) $value : '',
-                        '100%', '260', '55', '12', false, $inputId
-                    );
             } elseif ($type === 'textarea') {
                 $html .= '<textarea class="form-control" rows="5" maxlength="10000"'
                     . ' id="' . $escape($inputId) . '" name="' . $escape($name) . '">'
