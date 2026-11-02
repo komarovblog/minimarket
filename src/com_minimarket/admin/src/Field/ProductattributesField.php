@@ -88,7 +88,7 @@ final class ProductattributesField extends FormField
                         . '</p>';
                 }
                 $html .= '<p class="small"><a href="' . $escape(Route::_(
-                    'index.php?option=com_minimarket&view=values&attribute_id=' . $id
+                    'index.php?option=com_minimarket&view=attribute&layout=edit&id=' . $id
                 )) . '">' . $escape(Text::_('COM_MINIMARKET_EDIT_VALUES')) . '</a></p>';
             }
             $html .= '<div class="text-warning small' . ($isApplicable ? ' d-none' : '')

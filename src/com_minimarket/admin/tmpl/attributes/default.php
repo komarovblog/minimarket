@@ -15,7 +15,6 @@ use Joomla\CMS\Router\Route;
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_FILTERABLE'); ?></th>
-            <th><?php echo Text::_('COM_MINIMARKET_VALUES'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th><th>ID</th>
         </tr></thead>
         <tbody>
@@ -27,19 +26,12 @@ use Joomla\CMS\Router\Route;
                 <td><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_' . strtoupper((string) $item->input_type)); ?></td>
                 <td><?php echo (int) $item->is_variant ? Text::_('JYES') : Text::_('JNO'); ?></td>
                 <td><?php echo (int) $item->is_filterable ? Text::_('JYES') : Text::_('JNO'); ?></td>
-                <td>
-                    <?php if ($item->input_type === 'list') : ?>
-                        <a href="<?php echo Route::_('index.php?option=com_minimarket&view=values&attribute_id=' . (int) $item->id); ?>"><?php echo Text::_('COM_MINIMARKET_EDIT_VALUES'); ?></a>
-                    <?php else : ?>
-                        —
-                    <?php endif; ?>
-                </td>
                 <td><?php echo (int) $item->state === 1 ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED'); ?></td>
                 <td><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
-            <tr><td colspan="9"><?php echo Text::_('COM_MINIMARKET_NO_ATTRIBUTES'); ?></td></tr>
+            <tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_NO_ATTRIBUTES'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>
