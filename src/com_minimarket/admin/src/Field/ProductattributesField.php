@@ -101,6 +101,16 @@ final class ProductattributesField extends FormField
                     ? ($def['is_multiple'] ? 'checkboxes' : 'dropdown') : $mode;
                 if ($mode === 'checkboxes' || $mode === 'radio') {
                     $counter = 0;
+                    if ($mode === 'radio') {
+                        $html .= '<div class="form-check"><input class="form-check-input"'
+                            . ' type="radio" id="' . $escape($inputId . '_unset')
+                            . '" name="' . $escape($name) . '" value=""'
+                            . (!$hasStored ? ' checked' : '') . '>'
+                            . '<label class="form-check-label" for="'
+                            . $escape($inputId . '_unset') . '">'
+                            . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET'))
+                            . '</label></div>';
+                    }
                     foreach ($def['values'] as $optionId => $option) {
                         $multiple = $mode === 'checkboxes';
                         $checked = in_array($optionId, $values, true) && $hasStored;
