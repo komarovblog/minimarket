@@ -47,6 +47,7 @@ final class VariantMatrix
             }
             $values = [];
             $usedValues = [];
+            $usedTitles = [];
             foreach ($choices as $value) {
                 if (is_string($value)) {
                     $value = ['title' => $value];
@@ -58,10 +59,12 @@ final class VariantMatrix
                 $valueCode = self::code((string) ($value['code'] ?? ''), $valueTitle);
                 if ($valueTitle === '' || mb_strlen($valueTitle) > 255
                     || preg_match('/[\x00-\x1f<>]/u', $valueTitle)
-                    || isset($usedValues[$valueCode])) {
+                    || isset($usedValues[$valueCode])
+                    || isset($usedTitles[mb_strtolower($valueTitle)])) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
                 }
                 $usedValues[$valueCode] = true;
+                $usedTitles[mb_strtolower($valueTitle)] = true;
                 $values[] = ['code' => $valueCode, 'title' => $valueTitle];
             }
             $combinationCount *= count($values);
