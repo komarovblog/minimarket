@@ -59,7 +59,7 @@ final class AttributeModel extends AdminModel
             try {
                 $attributeId = (int) ($data['id'] ?? 0);
                 $orders = AttributeValueOrdering::normalize(
-                    $data['values_order'] ?? null,
+                    $data['values_order'] ?? [],
                     AttributeValueOrdering::ids($db, $attributeId)
                 );
             } catch (\InvalidArgumentException $error) {

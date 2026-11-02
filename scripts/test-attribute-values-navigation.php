@@ -20,9 +20,12 @@ $tests = [
     'attribute values are listed' => str_contains($edit, 'dictionaryValues as $value'),
     'attribute links to new value with id' => str_contains($edit, 'view=value&layout=edit&attribute_id='),
     'attribute links to existing value' => str_contains($edit, 'view=value&layout=edit&id='),
-    'attribute links to full dictionary' => str_contains($edit, 'view=values&attribute_id='),
+    'attribute values are a single inline list' => str_contains($edit, 'data-mm-values-table')
+        && !str_contains($edit, 'COM_MINIMARKET_EDIT_VALUES'),
     'values list only for saved List attributes' => str_contains($view, "=== 'list'") && str_contains($view, '$this->item->id ?? 0'),
     'dictionary read filtered by attribute' => str_contains($view, "'attribute_id'") && str_contains($view, 'loadObjectList()'),
+    'values list returns to owning attribute' => str_contains(file_get_contents($dir . 'tmpl/values/default.php'), 'COM_MINIMARKET_BACK_ATTRIBUTE'),
+    'value form returns to owning attribute' => str_contains(file_get_contents($dir . 'tmpl/value/edit.php'), 'name="return"'),
     'value create preselects parent' => str_contains($valueModel, "getInt('attribute_id', 0)") && str_contains($valueModel, '$item->attribute_id = $attributeId'),
     'product missing values gets help' => str_contains($productField, 'COM_MINIMARKET_PRODUCT_ATTRIBUTES_NO_VALUES'),
     'product editor links to dictionary' => str_contains($productField, 'view=values&attribute_id='),

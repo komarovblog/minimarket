@@ -4,8 +4,10 @@
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Router\Route;
 // Preserve the parent attribute in both Save & Close and Cancel.
-$parentAttributeId = (int) ($this->item->attribute_id
-    ?? \Joomla\CMS\Factory::getApplication()->input->getInt('attribute_id', 0));
+$parentAttributeId = (int) ($this->item->attribute_id ?? 0);
+if ($parentAttributeId < 1) {
+    $parentAttributeId = \Joomla\CMS\Factory::getApplication()->input->getInt('attribute_id', 0);
+}
 $returnToAttribute = $parentAttributeId > 0
     ? base64_encode('index.php?option=com_minimarket&view=attribute&layout=edit&id='
         . $parentAttributeId)
