@@ -13,6 +13,15 @@ final class VariantCatalog
     {
         $empty = ['axes' => [], 'items' => []];
         if ($productId < 1 || !$ancestors) return $empty;
+        // Most products have no variants: skip all metadata reads in this case.
+        $q = $db->getQuery(true)->select(['id','selection_json','sku','price','stock','image','image_alt'])
+            ->from($db->quoteName('#__minimarket_product_variants'))
+            ->where($db->quoteName('product_id') . ' = ' . $productId)
+            ->where($db->quoteName('state') . ' = 1')
+            ->order('sort_order ASC, id ASC');
+        $db->setQuery($q);
+        $variantRows = (array) $db->loadAssocList();
+        if (!$variantRows) return $empty;
         $q = $db->getQuery(true)->select(['category_id','attribute_id','enabled'])
             ->from($db->quoteName('#__minimarket_category_attributes'))
             ->where($db->quoteName('category_id') . ' IN (' . implode(',', $ancestors) . ')');
@@ -73,14 +82,8 @@ final class VariantCatalog
         foreach ($axes as $id => $axis) foreach ($axis['options'] as $option) {
             $valid[$id][$option['value']] = true;
         }
-        $q = $db->getQuery(true)->select(['id','selection_json','sku','price','stock','image','image_alt'])
-            ->from($db->quoteName('#__minimarket_product_variants'))
-            ->where($db->quoteName('product_id') . ' = ' . $productId)
-            ->where($db->quoteName('state') . ' = 1')
-            ->order('sort_order ASC, id ASC');
-        $db->setQuery($q);
         $items = [];
-        foreach ((array) $db->loadAssocList() as $r) {
+        foreach ($variantRows as $r) {
             $selection = json_decode((string)$r['selection_json'], true);
             if (!is_array($selection) || count($selection)!==count($axes)) continue;
             $ok = true;

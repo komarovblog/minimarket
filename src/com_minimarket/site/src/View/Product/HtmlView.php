@@ -39,6 +39,12 @@ final class HtmlView extends BaseHtmlView
         $this->videos = $repo->getProductVideos($id);
         $this->attributes = $repo->getProductAttributes($id, (int) $product->category_id);
         $this->variants = $repo->getProductVariants($id, (int) $product->category_id);
+        // Color/size selectors for actual SKUs replace static descriptive rows.
+        if ($this->variants['items']) {
+            foreach (array_keys($this->variants['axes']) as $axisId) {
+                unset($this->attributes[(int) $axisId]);
+            }
+        }
         // Gallery behavior is progressive-enhancement: images stay clickable
         // even if JS is blocked or the currently active template changes.
         $this->getDocument()->getWebAssetManager()
