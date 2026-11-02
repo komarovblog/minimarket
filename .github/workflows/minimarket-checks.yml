@@ -171,6 +171,9 @@ jobs:
       - name: Clean Media JavaScript syntax
         run: node --check src/com_minimarket/media/js/clean-media.js
 
+      - name: Nested variant gallery Media metadata cleanup
+        run: node scripts/test-clean-variant-media.js
+
       - name: Shop menu selector regression tests
         run: php scripts/test-shopmenu.php
 

@@ -49,6 +49,17 @@ namespace MiniMarket\VariantSmoke {
     ok($rows[0]['selection_json']==='{"10":"d:100","11":"t:S"}','stable typed selector JSON');
     ok(V::normalize([],[])===[],'legacy product without variants remains valid');
     ok(V::normalize('{}',[])===[],'empty native subform removes all variants');
+    try { V::normalize([$a], []); ok(false,'non-empty SKU without axes must reject'); }
+    catch (\InvalidArgumentException $e) {
+        ok($e->getMessage()==='COM_MINIMARKET_VARIANTS_NO_AXES',
+            'clear server error when selected category has no variant-defining attributes');
+    }
+    $withRichPhoto=$a;
+    $withRichPhoto['photos'][0]['path'] =
+        'images/variants/red-s-back.webp#joomlaImage://local-images/variants/red-s-back.webp?width=1140&height=600';
+    $cleaned=V::normalize([$withRichPhoto],$axes);
+    ok($cleaned[0]['photos'][0]['path']==='images/variants/red-s-back.webp',
+        'nested Joomla Media photo metadata stripped before DB write');
     foreach ([
         [[$a,$a],'duplicate combination and SKU'],
         [[$a,array_replace($b,['sku'=>'RED-S'])],'duplicate SKU'],

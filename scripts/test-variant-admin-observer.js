@@ -25,15 +25,40 @@ const warning = {
     mutations.push({ addedNodes: [warningNode] });
   }
 };
+const addButton = {
+  disabled: false,
+  attributes: {},
+  closest() { return variantForm; },
+  setAttribute(name, value) { this.attributes[name] = value; },
+  removeAttribute(name) { delete this.attributes[name]; }
+};
+const photoAdd = {
+  disabled: false,
+  closest() { return { nested: true }; },
+  setAttribute() {},
+  removeAttribute() {}
+};
+const variantForm = {
+  querySelectorAll() { return [addButton, photoAdd]; }
+};
+const setupLink = { hidden: false };
+const editor = {
+  querySelector(sel) { return sel === '.subform-repeatable' ? variantForm : null; },
+  contains() { return true; }
+};
 const info = {
-  dataset: { mmVariantConfig: JSON.stringify({
+  dataset: { mmNoAxes: 'Configure variant attributes', mmTooManyAxes: 'Too many',
+    mmVariantConfig: JSON.stringify({
     '1': {},
     '2': { '10': {
       title: 'Размер',
       options: [{ value: 't:S', title: 'S' }]
     }}
   })},
-  querySelector() { return warning; }
+  closest() { return editor; },
+  querySelector(selector) {
+    return selector === '[data-mm-variant-setup-link]' ? setupLink : warning;
+  }
 };
 const handlers = {};
 const category = {
@@ -42,6 +67,7 @@ const category = {
 };
 const document = {
   documentElement: { lang: 'ru-RU' },
+  addEventListener(name, fn) { handlers['document:' + name] = fn; },
   querySelector(selector) {
     if (selector === '[data-mm-variant-config]') return info;
     if (selector === '[name="jform[category_id]"]') return category;
@@ -61,6 +87,10 @@ vm.runInNewContext(source, { document, MutationObserver, JSON, Array, Object, Ev
   { timeout: 1000 });
 assert.equal(typeof callback, 'function', 'observer must be registered');
 assert.equal(warningChanges, 1, 'initial warning rendered once');
+assert.equal(warning.textContent, 'Configure variant attributes', 'clear missing-axis guidance');
+assert.equal(addButton.disabled, true, 'cannot add SKU without variant-defining attributes');
+assert.equal(setupLink.hidden, false, 'attribute setup link shown when no axis');
+assert.equal(photoAdd.disabled, false, 'nested photo subform remains unaffected');
 
 function flush(limit = 20) {
   let iterations = 0;
@@ -85,6 +115,9 @@ assert.equal(warningChanges, 1, 'subform refresh does not needlessly rewrite war
 category.value = '2';
 handlers.change();
 assert.equal(warning.textContent, '', 'changing to a valid category clears warning');
+assert.equal(addButton.disabled, false, 'SKU Add enabled once a variant axis exists');
+assert.equal(setupLink.hidden, true, 'attribute setup link hidden when ready');
+assert.equal(photoAdd.disabled, false, 'nested photo Add never disabled');
 flush();
 assert.equal(warningChanges, 2, 'category changes do not recursively reload UI');
 handlers.change();
