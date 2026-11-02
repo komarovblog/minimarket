@@ -283,13 +283,13 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->is_filterable = 0;
     $attribute->input_mode = 'auto';
     $attribute->filter_mode = 'none';
-    $check($attribute->check() === true, 'new Document attributes allowed');
+    $check($attribute->check() === false, 'new Document attributes disallowed by four-type policy');
     $attribute->input_type = 'color';
     $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
     $attribute->filter_mode = 'swatches';
     $attribute->is_filterable = 1;
-    $check($attribute->check() === true, 'new Color attributes allow variant swatches');
+    $check($attribute->check() === false, 'new Color attributes disallowed by four-type policy');
     $attribute->input_type = 'unknown';
     $check($attribute->check() === false, 'unsupported attribute type rejected');
 
