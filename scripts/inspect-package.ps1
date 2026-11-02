@@ -158,6 +158,20 @@ try {
         exit 1
     }
 
+    $attributeEditEntry = $archive.GetEntry('admin/tmpl/attribute/edit.php')
+    $attributeEditReader = New-Object System.IO.StreamReader($attributeEditEntry.Open())
+    try {
+        $attributeEditSource = $attributeEditReader.ReadToEnd()
+    }
+    finally {
+        $attributeEditReader.Dispose()
+    }
+    if (-not $attributeEditSource.Contains("'minimarket-attribute', 'values'") -or
+        -not $attributeEditSource.Contains('view=value&layout=edit&attribute_id=')) {
+        Write-Output 'PACKAGE_FAIL: ATTRIBUTE_VALUES_TAB_NOT_RENDERED'
+        exit 1
+    }
+
     # Inspect exactly what Joomla will install: the five editor tabs and image fields.
     $formEntry = $archive.GetEntry('admin/forms/product.xml')
     $formReader = New-Object System.IO.StreamReader($formEntry.Open())

@@ -125,6 +125,9 @@ jobs:
       - name: Attribute/value dictionaries and validation
         run: php scripts/test-attributes.php
 
+      - name: Attribute editor List values navigation
+        run: php scripts/test-attribute-values-navigation.php
+
       - name: Bulk admin actions and reverse category relation
         run: php scripts/test-admin-bulk.php
 
