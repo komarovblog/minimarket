@@ -17,6 +17,7 @@ namespace MiniMarket\ProductAttributesSmoke {
     use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
     \define('_JEXEC', 1);
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/CategoryAttributes.php';
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/ProductAttributes.php';
     $checks = 0;
     function verify(bool $yes,string $what): void {
@@ -41,15 +42,22 @@ namespace MiniMarket\ProductAttributesSmoke {
             'values'=>[170=>['title'=>'Phone','state'=>1],171=>['title'=>'Tablet','state'=>1]]],
         18=>['id'=>18,'title'=>'Single variant field','type'=>'list','is_variant'=>true,'is_multiple'=>false,'state'=>1,
             'values'=>[180=>['title'=>'Left','state'=>1],181=>['title'=>'Right','state'=>1]]],
+        19=>['id'=>19,'title'=>'Power','type'=>'number','is_variant'=>false,'is_multiple'=>false,'state'=>1,
+            'input_mode'=>'presets','number_options'=>'1000,1500,2000','number_min'=>'1000',
+            'number_max'=>'2000','number_step'=>'500','values'=>[]],
+        20=>['id'=>20,'title'=>'Release','type'=>'date','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
+        21=>['id'=>21,'title'=>'Details','type'=>'textarea','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
+        22=>['id'=>22,'title'=>'Manual','type'=>'url','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
     ];
     $hierarchy=['parents'=>[1=>0,2=>1,3=>1,4=>0],
         'rules'=>[1=>[10=>1,11=>1,12=>1,13=>1,14=>1,15=>1],
-            2=>[11=>0],3=>[13=>0],4=>[16=>1,17=>1,18=>1]]];
+            2=>[11=>0],3=>[13=>0],4=>[16=>1,17=>1,18=>1,19=>1,20=>1,21=>1,22=>1]]];
     $map = ProductAttributes::categoryMap($hierarchy,$defs);
     verify($map[1] === [10,11,12,13,14,15], 'parent category includes all published assignments');
     verify($map[2] === [10,12,13,14,15], 'child excludes inherited Size');
     verify($map[3] === [10,11,12,14,15], 'sibling excludes Width only');
-    verify($map[4] === [16,17,18], 'draft and new list attributes remain editable');
+    verify($map[4] === [16,17,18,19,20,21,22],
+        'draft, numeric, date, textarea and URL attributes remain editable');
     verify(ProductAttributes::normalize(['17'=>['170','171']],4,$defs,$map)['options'][17] === [170,171],
         'ordinary nonvariant attribute can select multiple values');
     verify(ProductAttributes::normalize(['18'=>'180'],4,$defs,$map)['options'][18] === [180],
@@ -71,6 +79,14 @@ namespace MiniMarket\ProductAttributesSmoke {
     verify(ProductAttributes::normalize(['11'=>''],2,$defs,$map)
         === ['scalars'=>[],'options'=>[]], 'cleared excluded field is ignored');
 
+    $other=ProductAttributes::normalize([
+        '19'=>'1500','20'=>'2026-11-02','21'=>"Multiline\nDetails",'22'=>'https://example.org/manual'
+    ],4,$defs,$map);
+    verify($other['scalars'][19]['value']==='1500','preset number stored as numeric scalar');
+    verify($other['scalars'][20]['value']==='2026-11-02','date stored in ISO format');
+    verify($other['scalars'][21]['value']==="Multiline\nDetails",'textarea preserves newlines');
+    verify($other['scalars'][22]['value']==='https://example.org/manual','URL stored as validated text');
+
     $invalid=[
         [2,['11'=>['110']], 'inherited excluded size'],
         [4,['10'=>['100']], 'unassigned property'],
@@ -85,6 +101,12 @@ namespace MiniMarket\ProductAttributesSmoke {
         [1,['14'=>str_repeat('a',1025)], 'oversized text'],
         [1,['15'=>'yes'], 'boolean restricted'],
         [1,['14'=>['forged']], 'array to text invalid'],
+        [4,['19'=>'1250'],'number not in preset list'],
+        [4,['19'=>'2001'],'number outside configured range'],
+        [4,['20'=>'2026-02-30'],'invalid calendar date'],
+        [4,['21'=>str_repeat('x',10001)],'textarea maximum length'],
+        [4,['22'=>'javascript:alert(1)'],'unsafe URL scheme'],
+        [4,['22'=>'not a url'],'malformed URL'],
         [1,['999'=>'something'], 'unknown property'],
     ];
     foreach($invalid as [$category,$submitted,$label]){
@@ -118,7 +140,9 @@ namespace MiniMarket\ProductAttributesSmoke {
         public function setQuery($q): void {$this->q=$q;}
         public function loadAssocList(): array {
             if ($this->q->table==='#__minimarket_attributes') {
-                return [['id'=>10,'title'=>'Color','input_type'=>'list','is_variant'=>1,'is_multiple'=>1,'state'=>1]];
+                return [['id'=>10,'title'=>'Color','input_type'=>'list','input_mode'=>'auto',
+                    'number_options'=>'','number_unit'=>'','number_min'=>null,
+                    'number_max'=>null,'number_step'=>null,'is_variant'=>1,'is_multiple'=>1,'state'=>1]];
             }
             if ($this->q->table==='#__minimarket_attribute_values') {
                 return [['id'=>100,'attribute_id'=>10,'title'=>'Red','state'=>1]];

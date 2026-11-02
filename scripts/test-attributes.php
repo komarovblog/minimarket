@@ -34,6 +34,14 @@ namespace Joomla\CMS\Table {
         public $title = '';
         public $code = '';
         public $input_type = 'list';
+        public $input_mode = 'auto';
+        public $filter_mode = 'none';
+        public $filter_multiple = 0;
+        public $number_options = '';
+        public $number_unit = '';
+        public $number_min = null;
+        public $number_max = null;
+        public $number_step = null;
         public $is_variant = 0;
         public $is_multiple = 0;
         public $is_filterable = 0;
@@ -63,6 +71,7 @@ namespace MiniMarket\AttributesSmoke {
     use MiniMarket\Component\Minimarket\Administrator\Table\ValueTable;
 
     \define('_JEXEC', 1);
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Table/AttributeTable.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Table/ValueTable.php';
 
@@ -191,6 +200,50 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->input_type = 'list';
     $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
+
+    $attribute->input_type = 'number';
+    $attribute->is_variant = 0;
+    $attribute->is_multiple = 0;
+    $attribute->input_mode = 'presets';
+    $attribute->number_options = '1000, 1500, 2000';
+    $attribute->number_min = '500';
+    $attribute->number_max = '2500';
+    $attribute->number_step = '500';
+    $attribute->number_unit = 'Вт';
+    $attribute->is_filterable = 1;
+    $attribute->filter_mode = 'slider';
+    $check($attribute->check() === true, 'numeric presets and slider metadata valid');
+    $check($attribute->number_options === '1000,1500,2000', 'numeric presets canonicalized');
+    $attribute->filter_mode = 'radio';
+    $check($attribute->check() === false, 'numeric radio filter not allowed');
+    $attribute->filter_mode = 'checkboxes';
+    $check($attribute->check() === true && $attribute->filter_multiple === 1,
+        'numeric checkboxes imply multiple filter choices');
+    $attribute->input_mode = 'radio';
+    $check($attribute->check() === false, 'numeric property cannot use list radio input');
+    $attribute->input_mode = 'auto';
+    $attribute->number_options = '1000,1000.0000';
+    $check($attribute->check() === false, 'duplicate numeric presets rejected');
+    $attribute->number_options = '1000,1500,2000';
+    $attribute->input_type = 'date';
+    $attribute->filter_mode = 'date_range';
+    $check($attribute->check() === true, 'date and date-range filter compatible');
+    $attribute->input_type = 'url';
+    $attribute->filter_mode = 'date_range';
+    $check($attribute->check() === false, 'URL cannot use a date filter');
+    $attribute->filter_mode = 'none';
+    $attribute->input_type = 'textarea';
+    $check($attribute->check() === true, 'multiline text supported without filter');
+    $attribute->input_type = 'list';
+    $attribute->is_variant = 1;
+    $attribute->is_multiple = 1;
+    $attribute->input_mode = 'checkboxes';
+    $attribute->filter_mode = 'dropdown';
+    $attribute->filter_multiple = 1;
+    $check($attribute->check() === true, 'list multi and filter multi independent');
+    $attribute->input_mode = 'radio';
+    $check($attribute->check() === false, 'radio input cannot store multiple product values');
+    $attribute->input_mode = 'auto';
 
     $attribute->code = 'color&illegal';
     $check($attribute->check() === false, 'invalid attribute code rejected');

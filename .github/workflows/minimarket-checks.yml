@@ -115,6 +115,8 @@ jobs:
 
       - name: Typed category-scoped product attributes
         run: php scripts/test-product-attributes.php
+      - name: Attribute input and filter mode JS syntax
+        run: node --check src/com_minimarket/media/js/attribute-settings.js
 
       - name: Product attributes category UI JavaScript syntax
         run: node --check src/com_minimarket/media/js/product-attributes.js

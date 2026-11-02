@@ -87,6 +87,9 @@ try {
         'admin/sql/updates/mysql/0.5.5.sql',
         'admin/sql/updates/mysql/0.5.7.sql',
         'admin/sql/updates/mysql/0.5.11.sql',
+        'admin/sql/updates/mysql/0.5.12.sql',
+        'admin/src/Service/AttributeSettings.php',
+        'media/js/attribute-settings.js',
         'admin/src/Service/ProductAttributes.php',
         'admin/src/Field/ProductattributesField.php',
         'media/js/product-attributes.js',
@@ -163,6 +166,12 @@ try {
     }
     finally {
         $attrReader.Dispose()
+    }
+    foreach ($fieldName in @('input_mode','filter_mode','filter_multiple','number_options','number_unit')) {
+        if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='" + $fieldName + "']")) {
+            Write-Output ('PACKAGE_FAIL: ATTRIBUTE_PRESENTATION_FIELD_MISSING: ' + $fieldName)
+            exit 1
+        }
     }
     if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple' and @type='list' and @showon='input_type:list']")) {
         Write-Output 'PACKAGE_FAIL: VALUE_CARDINALITY_FORM_MISSING'
