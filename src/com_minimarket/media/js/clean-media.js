@@ -9,9 +9,13 @@
 (() => {
   'use strict';
 
+  // Include the Media inputs inside both repeatable SKU rows AND their
+  // nested photo subforms. The 0.5.18 selector only covered product/gallery.
   const selector = 'joomla-field-media input[name="jform[image]"], ' +
     'joomla-field-media input[name="jform[og_image]"], ' +
-    'joomla-field-media input[name^="jform[gallery]"][name$="[path]"]';
+    'joomla-field-media input[name^="jform[gallery]"][name$="[path]"], ' +
+    'joomla-field-media input[name^="jform[variants]"][name$="[image]"], ' +
+    'joomla-field-media input[name^="jform[variants]"][name$="[path]"]';
   const marker = '#joomlaImage://';
 
   function clean(input) {

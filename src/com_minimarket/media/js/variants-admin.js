@@ -8,19 +8,32 @@
   const category = document.querySelector('[name="jform[category_id]"]');
   const warning = info.querySelector('[data-mm-variant-config-warning]');
   const isSelection = (el) => el.matches('input[type="hidden"][name*="[variants]"][name$="[selection]"]');
+  // This wrapper is created by the MiniMarket template, not Joomla core.
+  const editor = info.closest('[data-mm-variants-editor]') || info.parentElement;
+  const setupLink = info.querySelector('[data-mm-variant-setup-link]');
+  const variantForm = editor?.querySelector('.subform-repeatable');
+  const outerAddButtons = () => variantForm
+    ? Array.from(variantForm.querySelectorAll('button.group-add, a.group-add'))
+      .filter((button) => button.closest('.subform-repeatable') === variantForm)
+    : [];
   const optionsFor = () => (configs[String(category?.value || '')] || {});
   const redraw = () => {
     const axes = optionsFor();
     const axisEntries = Object.entries(axes);
+    const canAdd = axisEntries.length >= 1 && axisEntries.length <= 4;
+    for (const button of outerAddButtons()) {
+      // Do not disable the nested photo-gallery Add controls.
+      button.disabled = !canAdd;
+      button.setAttribute('aria-disabled', String(!canAdd));
+      if (!canAdd) button.setAttribute('title', info.dataset.mmNoAxes || '');
+      else button.removeAttribute('title');
+    }
+    if (setupLink) setupLink.hidden = canAdd;
     if (warning) {
       const message = axisEntries.length === 0
-        ? (document.documentElement.lang?.startsWith('ru')
-          ? 'Назначьте категории характеристику «Различает варианты товара» со значениями.'
-          : 'Assign a variant-defining attribute with predefined values to this category.')
+        ? (info.dataset.mmNoAxes || '')
         : axisEntries.length > 4
-          ? (document.documentElement.lang?.startsWith('ru')
-            ? 'Поддерживается не более четырёх характеристик вариантов.'
-            : 'A maximum of four variant-defining attributes is supported.')
+          ? (info.dataset.mmTooManyAxes || '')
           : '';
       // Reassigning textContent creates a DOM mutation even if text is
       // identical; do not recursively wake our own MutationObserver.
@@ -101,6 +114,10 @@
     if (hasNewVariantRow) redraw();
   });
   observer.observe(root, { childList: true, subtree: true });
+  // The native Joomla subform may emit its own event after injecting a row.
+  document.addEventListener('joomla:updated', (event) => {
+    if (editor?.contains(event.target)) redraw();
+  });
   category?.addEventListener('change', redraw);
   redraw();
 })();

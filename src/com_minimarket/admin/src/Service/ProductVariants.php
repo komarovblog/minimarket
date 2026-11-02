@@ -58,9 +58,14 @@ final class ProductVariants
             try { $input = json_decode($input, true, 512, JSON_THROW_ON_ERROR); }
             catch (\JsonException $e) { throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_INVALID'); }
         }
-        if (!is_array($input) || count($input) > self::MAX_VARIANTS || !$axes
-            || count($axes) > self::MAX_AXES) {
+        if (!is_array($input) || count($input) > self::MAX_VARIANTS) {
             throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_INVALID');
+        }
+        if (!$axes) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_NO_AXES');
+        }
+        if (count($axes) > self::MAX_AXES) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_TOO_MANY_AXES');
         }
         $result = [];
         $seenCombos = [];

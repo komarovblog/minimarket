@@ -19,7 +19,7 @@ use Joomla\CMS\Router\Route;
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
     ] as $section => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-product', $section, Text::_($label)); ?>
-        <div class="card card-body">
+        <div class="card card-body"<?php echo $section === 'variants' ? ' data-mm-variants-editor' : ''; ?>>
             <?php echo $this->form->renderFieldset($section); ?>
         </div>
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
