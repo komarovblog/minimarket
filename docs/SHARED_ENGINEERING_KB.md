@@ -50,6 +50,7 @@
 | KB-0014 | Детальная локальная диагностика с безопасной публикацией в GitHub | Shop | PARTIALLY_VERIFIED | Оба проекта (принцип) |
 | KB-0015 | Joomla Media: служебный `#joomlaImage://` и размеры не должны храниться как путь | MiniMarket | PARTIALLY_VERIFIED (UI smoke PASS; full acceptance pending) | Общее правило хранения, Joomla-специфичная обработка |
 | KB-0016 | Галерея: связь с медиафайлом вместо копии и атомарное сохранение | MiniMarket | CODE_UPDATED / CI_PASS / JOOMLA_SMOKE_NOT_RUN | Общий принцип, разные ORM и UI |
+| KB-0017 | Joomla: массовая публикация при нестандартном названии столбца статуса | MiniMarket | CODE_UPDATED / CI_PASS / JOOMLA_SMOKE_NOT_RUN | Только подход к проверке; не Joomla код для Symfony |
 
 ## KB-0001 — Пустой Docker MySQL dump не создаёт таблицы после импорта
 
@@ -221,6 +222,15 @@
 - **Тесты:** [MiniMarket Actions](https://github.com/komarovblog/minimarket/actions) — PHP (валидация/поля Joomla), MySQL 8 (legacy 0.5.2→0.5.3 и fresh install), Windows ZIP, синтаксис JS; к моменту публикации CI завершился успешно. **Живой Joomla Subform и просмотр в браузере ещё НЕ проверены**, приёмка [M3](https://github.com/komarovblog/minimarket/blob/development/docs/M3_PRODUCT_GALLERY_053_SMOKE.md).
 - **Для Shop Symfony:** переносится принцип «один физический файл, отношения товара и вариантов, alt/order отдельно, атомарность записи и удаление только связи». **Не переносить** Joomla Subform, MVC и SQL таблицу в Doctrine/Symfony без собственного проектирования.
 - **Внимание:** сортировка, галерея и сохранение привязок к конкретному цвету/SKU требуют реальной приёмки; эти привязки пока не реализованы.
+
+## KB-0017 — Joomla admin bulk и alias published → state
+
+- **Ситуация/дата:** 02.11.2026, MiniMarket 0.5.6, Joomla 6 / PHP 8.4–8.5 / MySQL 8. Пользователь запросил стандартный чекбокс, массовую публикацию/снятие публикации/удаление для всех существующих сущностей и обратную настройку связи характеристика ↔ категория.
+- **Корневая причина:** класс `AdminController` ожидает AdminModel для list publish/delete. При хранении статуса в БД под именем `state` Joomla `Table::publish` обращается к логическому столбцу `published`: в конструкторах таблиц необходимо `setColumnAlias('published', 'state')`. В изолированных PHP-тестах собственной заглушке Joomla Table этот метод изначально отсутствовал, поэтому CI падал с `Call to undefined method ... setColumnAlias()`, не из-за ошибок боевой Joomla.
+- **Решение:** 4 множественных list-контроллера `AdminController` + штатные `ToolbarHelper::publishList/unpublishList/deleteList`, `HTMLHelper::_('grid.id')` и `grid.checkall`, `cid[]`/CSRF и права Joomla; у таблиц `setColumnAlias('published','state')`. Delete guard групповой проверкой зависимостей не даёт осиротить категории, удалить связанные значения/назначенные атрибуты. Путь обратной связи атрибут→категория использует **ту же таблицу** `#__minimarket_category_attributes` без копирования словарей, при сохранении только одного атрибута не трогает остальных.
+- **Проверка:** PHPUnit/PHP smoke `scripts/test-admin-bulk.php`, `scripts/test-category-tree.php`, `scripts/test-product-editor.php`, `scripts/test-attributes.php`; Windows инспектор ZIP, MySQL CI. [MiniMarket Actions](https://github.com/komarovblog/minimarket/actions) — CI PASS релиза 0.5.6, реальная Joomla UI NOT RUN. Изолированные заглушки синхронизированы с Joomla API без изменения core.
+- **Граница применения:** Symfony Shop не должен использовать Joomla MVC/Toolbar/Table, но переносится принцип «один источник связи, массовые операции с подтверждением, проверкой разрешений/связей и явной схемой состояния». Не предполагать отсутствие связей по факту пустого списка в UI; database foreign keys остаются последней защитой.
+- **Риск и дальнейший тест:** права `core.edit.state`/`core.delete`, чекбоксы, сохранение с обеих сторон и отказ удаления при зависимостях должны пройти Joomla browser smoke до VERIFIED.
 
 ## 4. Шаблон новой записи
 
