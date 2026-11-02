@@ -135,6 +135,9 @@ jobs:
           node --check src/com_minimarket/media/js/variants-admin.js
           node --check src/com_minimarket/media/js/variants.js
 
+      - name: No recursive MutationObserver freeze in product editor
+        run: node scripts/test-variant-admin-observer.js
+
       - name: Relational product gallery and Joomla Subform regression
         run: php scripts/test-product-gallery.php
 
