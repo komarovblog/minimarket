@@ -11,6 +11,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
 use MiniMarket\Component\Minimarket\Administrator\Service\AttributeValueRows;
 use MiniMarket\Component\Minimarket\Administrator\Service\NumericPresetRows;
 use MiniMarket\Component\Minimarket\Administrator\Service\TextPresetRows;
+use MiniMarket\Component\Minimarket\Administrator\Service\VariantDependencies;
 
 final class AttributeModel extends AdminModel
 {
@@ -122,6 +123,22 @@ final class AttributeModel extends AdminModel
                     return false;
                 }
             }
+        }
+
+        // Never silently orphan a variant SKU when changing an axis or
+        // removing a dictionary/preset value that an existing SKU uses.
+        try {
+            VariantDependencies::assertAttributeChange(
+                $db, (int) ($data['id'] ?? 0),
+                (string) ($data['input_type'] ?? ''),
+                (string) ($data['input_mode'] ?? 'auto'),
+                (int) ($data['is_variant'] ?? 0),
+                (string) ($data['text_options'] ?? ''),
+                $newValues
+            );
+        } catch (\RuntimeException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_VARIANT_REFERENCES_IN_USE'));
+            return false;
         }
 
         unset($data['category_rules'], $data['categories_present'],

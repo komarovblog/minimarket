@@ -196,6 +196,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_variants` (
  `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
  PRIMARY KEY (`id`),
  UNIQUE KEY `idx_mm_variant_combo` (`product_id`,`signature`),
+ UNIQUE KEY `idx_mm_variant_sku` (`sku`),
  KEY `idx_mm_variant_product` (`product_id`,`state`,`sort_order`),
  CONSTRAINT `fk_mm_variant_product` FOREIGN KEY (`product_id`) REFERENCES `#__minimarket_products`(`id`)
   ON UPDATE RESTRICT ON DELETE CASCADE

@@ -92,8 +92,8 @@ final class ProductVariants
                 || count($rawSelection) !== count($axes)
                 || $sku === '' || mb_strlen($sku) > 100
                 || preg_match('/[\x00-\x1f<>]/u', $sku)
+                || str_starts_with(mb_strtolower($sku), 'mm-temporary-variant-')
                 || !preg_match('/^(?:0|[1-9]\d{0,12})(?:\.\d{1,2})?$/D', $price)
-                || (float) $price > 9999999999999.99
                 || !preg_match('/^(?:0|[1-9]\d{0,9})$/D', $stock)
                 || (float) $stock > 4294967295
                 || !in_array($state, ['0', '1'], true)
@@ -130,7 +130,10 @@ final class ProductVariants
                 'sku' => $sku,
                 'selection_json' => json_encode($selection, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
                 'signature' => $signature,
-                'price' => number_format((float) $price, 2, '.', ''),
+                'price' => (static function (string $money): string {
+                    $parts = explode('.', $money, 2);
+                    return $parts[0] . '.' . str_pad($parts[1] ?? '', 2, '0');
+                })($price),
                 'stock' => (int) $stock,
                 'image' => $image, 'image_alt' => $alt,
                 'state' => (int) $state,
