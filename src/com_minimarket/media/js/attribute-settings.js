@@ -43,6 +43,15 @@
         const t = type.value;
         updateOptions(mode, product[t] || ['auto'], 'auto');
         updateOptions(filter, filters[t] || ['none'], 'none');
+        // Long descriptive text and URLs are not faceted catalog properties.
+        if (t === 'textarea' || t === 'url') {
+          const enabledFilter = document.querySelector('[name="jform[is_filterable]"][value="1"]');
+          const disabledFilter = document.querySelector('[name="jform[is_filterable]"][value="0"]');
+          if (enabledFilter?.checked && disabledFilter) {
+            disabledFilter.checked = true;
+            disabledFilter.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
         if (t === 'list') {
           if (mode.value === 'radio' || mode.value === 'checkboxes') {
             if (multi) {
