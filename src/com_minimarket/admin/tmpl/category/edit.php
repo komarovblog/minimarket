@@ -12,6 +12,7 @@ use Joomla\CMS\Router\Route;
         'details' => 'COM_MINIMARKET_CATEGORY_TAB_DETAILS',
         'descriptions' => 'COM_MINIMARKET_CATEGORY_TAB_DESCRIPTIONS',
         'display' => 'COM_MINIMARKET_CATEGORY_TAB_DISPLAY',
+        'attributes' => 'COM_MINIMARKET_CATEGORY_TAB_ATTRIBUTES',
         'seo' => 'COM_MINIMARKET_CATEGORY_TAB_SEO',
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
     ] as $section => $label) : ?>

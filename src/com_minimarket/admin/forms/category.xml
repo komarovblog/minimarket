@@ -29,6 +29,11 @@
             <option value="0">JNO</option>
         </field>
     </fieldset>
+    <fieldset name="attributes" label="COM_MINIMARKET_CATEGORY_TAB_ATTRIBUTES">
+        <field name="attribute_rules" type="Categoryattributes" filter="raw"
+               label="COM_MINIMARKET_CATATTR_LABEL"/>
+        <field name="attributes_present" type="hidden" filter="int" default="1"/>
+    </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>
         <field name="meta_description" type="textarea" label="COM_MINIMARKET_META_DESCRIPTION"

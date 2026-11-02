@@ -5,6 +5,8 @@ namespace MiniMarket\Component\Minimarket\Administrator\Model;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\AdminModel;
+use Joomla\CMS\Language\Text;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 
 final class CategoryModel extends AdminModel
 {
@@ -15,6 +17,58 @@ final class CategoryModel extends AdminModel
             'category',
             ['control' => 'jform', 'load_data' => $loadData]
         );
+    }
+
+    public function getItem($pk = null)
+    {
+        $item = parent::getItem($pk);
+        if ($item) {
+            $item->attribute_rules = CategoryAttributes::loadDirect(
+                $this->getDatabase(), (int) ($item->id ?? 0)
+            );
+        }
+        return $item;
+    }
+
+    /**
+     * Category and its *direct* overrides save atomically. Inherited rules
+     * are resolved dynamically and never duplicated in descendants.
+     */
+    public function save($data)
+    {
+        $hasAttributes = array_key_exists('attribute_rules', $data)
+            || !empty($data['attributes_present']);
+        $db = $this->getDatabase();
+
+        try {
+            $rules = $hasAttributes
+                ? CategoryAttributes::normalizeRules(
+                    $data['attribute_rules'] ?? [],
+                    CategoryAttributes::allowedIds($db)
+                ) : [];
+        } catch (\InvalidArgumentException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_CATATTR_INVALID'));
+            return false;
+        }
+
+        unset($data['attribute_rules'], $data['attributes_present']);
+        $db->transactionStart();
+        try {
+            if (!parent::save($data)) {
+                $db->transactionRollback();
+                return false;
+            }
+            if ($hasAttributes) {
+                $categoryId = (int) $this->getState($this->getName() . '.id');
+                CategoryAttributes::replaceDirect($db, $categoryId, $rules);
+            }
+            $db->transactionCommit();
+            return true;
+        } catch (\Throwable $error) {
+            $db->transactionRollback();
+            $this->setError(Text::_('COM_MINIMARKET_CATATTR_SAVE_FAILED'));
+            return false;
+        }
     }
 
     protected function loadFormData()
