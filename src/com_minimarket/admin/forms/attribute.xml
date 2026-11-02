@@ -5,10 +5,14 @@
         <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
         <field name="code" type="text" label="COM_MINIMARKET_ATTRIBUTE_CODE" description="COM_MINIMARKET_ATTRIBUTE_CODE_DESC" required="true" filter="string" size="40"/>
         <field name="input_type" type="list" label="COM_MINIMARKET_ATTRIBUTE_TYPE" description="COM_MINIMARKET_ATTRIBUTE_TYPE_DESC" default="list" filter="cmd">
-            <option value="list">COM_MINIMARKET_ATTRIBUTE_LIST</option>
+            <!-- Existing ID-based List attributes remain editable for legacy catalog data.
+                 The editor hides this option when creating a new attribute. -->
+            <option value="list">COM_MINIMARKET_ATTRIBUTE_LEGACY_LIST</option>
             <option value="text">COM_MINIMARKET_ATTRIBUTE_TEXT</option>
             <option value="number">COM_MINIMARKET_ATTRIBUTE_NUMBER</option>
             <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
+            <option value="editor">COM_MINIMARKET_ATTRIBUTE_EDITOR</option>
+            <!-- Older records still use these types. No new records may select them. -->
             <option value="textarea">COM_MINIMARKET_ATTRIBUTE_TEXTAREA</option>
             <option value="date">COM_MINIMARKET_ATTRIBUTE_DATE</option>
             <option value="url">COM_MINIMARKET_ATTRIBUTE_URL</option>
@@ -22,6 +26,14 @@
             <option value="radio">COM_MINIMARKET_MODE_RADIO</option>
             <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
         </field>
+        <field name="text_options" type="hidden" filter="raw"/>
+        <field name="text_preset_rows" type="subform"
+               label="COM_MINIMARKET_TEXT_OPTIONS"
+               description="COM_MINIMARKET_TEXT_OPTIONS_DESC"
+               formsource="administrator/components/com_minimarket/forms/attribute_text_preset_row.xml"
+               multiple="true" min="0" max="200" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform"
+               showon="input_type:text[AND]input_mode:presets"/>
         <!-- Persist numeric values as a typed CSV for compatibility with 0.5.12.
              The editor below is the ONLY visible control. -->
         <field name="number_options" type="hidden" filter="raw"/>

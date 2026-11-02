@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_attributes` (
     `input_type` VARCHAR(16) NOT NULL DEFAULT 'list',
     `input_mode` VARCHAR(24) NOT NULL DEFAULT 'auto',
     `number_options` VARCHAR(1024) NOT NULL DEFAULT '',
+    `text_options` TEXT NULL,
     `number_unit` VARCHAR(32) NOT NULL DEFAULT '',
     `number_min` DECIMAL(18,4) NULL,
     `number_max` DECIMAL(18,4) NULL,
