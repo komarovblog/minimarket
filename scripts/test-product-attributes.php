@@ -17,6 +17,7 @@ namespace MiniMarket\ProductAttributesSmoke {
     use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
     \define('_JEXEC', 1);
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/CategoryAttributes.php';
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/TextPresetRows.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/ProductAttributes.php';
     $checks = 0;

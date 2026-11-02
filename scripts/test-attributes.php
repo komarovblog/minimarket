@@ -71,6 +71,7 @@ namespace MiniMarket\AttributesSmoke {
     use MiniMarket\Component\Minimarket\Administrator\Table\ValueTable;
 
     \define('_JEXEC', 1);
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/TextPresetRows.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Table/AttributeTable.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Table/ValueTable.php';

@@ -2,6 +2,7 @@
 /** Seven types, independent input and filter presentation, numeric presets. */
 declare(strict_types=1);
 \define('_JEXEC', 1);
+require __DIR__ . '/../src/com_minimarket/admin/src/Service/TextPresetRows.php';
 require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
 
 use MiniMarket\Component\Minimarket\Administrator\Service\AttributeSettings as S;

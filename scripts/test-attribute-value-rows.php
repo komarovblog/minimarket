@@ -100,8 +100,8 @@ namespace MiniMarket\AttributeValueRowsSmoke {
         public function setQuery($q): void {$this->q=$q;}
         public function loadAssocList(): array {
             return [
-                ['id'=>10,'title'=>'Красный','code'=>'red','state'=>1,'sort_order'=>0],
-                ['id'=>11,'title'=>'Жёлтый','code'=>'yellow','state'=>0,'sort_order'=>1],
+                ['id'=>10,'title'=>'Красный','code'=>'red','color_hex'=>'','state'=>1,'sort_order'=>0],
+                ['id'=>11,'title'=>'Жёлтый','code'=>'yellow','color_hex'=>'','state'=>0,'sort_order'=>1],
             ];
         }
         public function loadResult(): int {return $this->used;}
