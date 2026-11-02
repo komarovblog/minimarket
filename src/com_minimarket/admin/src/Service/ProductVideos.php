@@ -17,7 +17,8 @@ final class ProductVideos
     {
         $source = trim($source);
         if ($source === '' || strlen($source) > 1024
-            || preg_match('/[\x00-\x1f<>"\'\\\]/', $source)) {
+            || preg_match('/[\x00-\x1f<>"\x27]/', $source)
+            || str_contains($source, chr(92))) {
             return null;
         }
         if (preg_match('~^(images|media)/[a-zA-Z0-9_./ -]+\.(?:mp4|webm)$~iD', $source)
