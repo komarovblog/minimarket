@@ -107,6 +107,7 @@ namespace MiniMarket\AttributesSmoke {
         public bool $duplicateValue = false;
         public bool $existingValues = false;
         public bool $multipleProducts = false;
+        public bool $invalidPresetProducts = false;
         public string $parentType = 'list';
         public array $queries = [];
 
@@ -129,7 +130,7 @@ namespace MiniMarket\AttributesSmoke {
             }
 
             if ($this->query?->from === '#__minimarket_product_attribute_scalars') {
-                return 0;
+                return $this->invalidPresetProducts ? 1 : 0;
             }
 
             if ($this->query?->from === '#__minimarket_product_attribute_options') {
@@ -218,6 +219,12 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->filter_mode = 'slider';
     $check($attribute->check() === true, 'numeric presets and slider metadata valid');
     $check($attribute->number_options === '1000,1500,2000', 'numeric presets canonicalized');
+    $db->parentType = 'number';
+    $db->invalidPresetProducts = true;
+    $check($attribute->check() === false,
+        'cannot restrict numbers to presets if old product values are incompatible');
+    $db->invalidPresetProducts = false;
+    $db->parentType = 'list';
     $attribute->filter_mode = 'radio';
     $check($attribute->check() === false, 'numeric radio filter not allowed');
     $attribute->filter_mode = 'checkboxes';
