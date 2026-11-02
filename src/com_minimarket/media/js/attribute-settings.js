@@ -6,13 +6,13 @@
   const product = {
     list: ['auto','dropdown','radio','checkboxes'],
     number: ['auto','number','presets'],
-    text: ['auto'], textarea: ['auto'], date: ['auto'],
+    text: ['auto','presets'], editor: ['auto'], textarea: ['auto'], date: ['auto'],
     boolean: ['auto'], url: ['auto']
   };
   const filters = {
     list: ['none','checkboxes','radio','dropdown'],
     number: ['none','range','slider','checkboxes','dropdown'],
-    text: ['none','text','values'],
+    text: ['none','text','values','checkboxes','dropdown'], editor: ['none'],
     textarea: ['none'], date: ['none','date_range'],
     boolean: ['none','boolean'], url: ['none']
   };
@@ -23,6 +23,21 @@
     const multi = document.getElementById('jform_is_multiple');
     const variant = document.querySelector('[name="jform[is_variant]"]:checked');
     if (!type || !mode || !filter) return;
+    // Pre-existing List / URL / Date / Textarea remain editable; only NEW
+    // attributes are limited to Text, Number, HTML editor, Yes/No.
+    const isNew = document.getElementById('jform_id')?.value === '0'
+      || !document.getElementById('jform_id')?.value;
+    if (isNew) {
+      for (const option of type.options) {
+        if (!['text','number','editor','boolean'].includes(option.value)) {
+          option.hidden = true;
+          option.disabled = true;
+        }
+      }
+      if (type.selectedOptions[0]?.disabled) {
+        type.value = 'text';
+      }
+    }
 
     const updateOptions = (field, accepted, fallback) => {
       for (const option of field.options) {
@@ -44,7 +59,7 @@
         updateOptions(mode, product[t] || ['auto'], 'auto');
         updateOptions(filter, filters[t] || ['none'], 'none');
         // Long descriptive text and URLs are not faceted catalog properties.
-        if (t === 'textarea' || t === 'url') {
+        if (t === 'editor' || t === 'textarea' || t === 'url') {
           const enabledFilter = document.querySelector('[name="jform[is_filterable]"][value="1"]');
           const disabledFilter = document.querySelector('[name="jform[is_filterable]"][value="0"]');
           if (enabledFilter?.checked && disabledFilter) {
