@@ -22,9 +22,16 @@
             <option value="radio">COM_MINIMARKET_MODE_RADIO</option>
             <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
         </field>
-        <field name="number_options" type="textarea" rows="2"
-               label="COM_MINIMARKET_NUMBER_OPTIONS" description="COM_MINIMARKET_NUMBER_OPTIONS_DESC"
-               filter="string" showon="input_type:number"/>
+        <!-- Persist numeric values as a typed CSV for compatibility with 0.5.12.
+             The editor below is the ONLY visible control. -->
+        <field name="number_options" type="hidden" filter="raw"/>
+        <field name="number_preset_rows" type="subform"
+               label="COM_MINIMARKET_NUMBER_OPTIONS"
+               description="COM_MINIMARKET_NUMBER_OPTIONS_ROWS_DESC"
+               formsource="administrator/components/com_minimarket/forms/attribute_number_preset_row.xml"
+               multiple="true" min="0" max="500" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform"
+               showon="input_type:number[AND]input_mode:presets"/>
         <field name="number_unit" type="text" label="COM_MINIMARKET_NUMBER_UNIT"
                maxlength="32" filter="string" showon="input_type:number"/>
         <field name="number_min" type="number" label="COM_MINIMARKET_NUMBER_MIN"

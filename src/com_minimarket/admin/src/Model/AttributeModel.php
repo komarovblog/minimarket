@@ -9,6 +9,7 @@ use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
 use MiniMarket\Component\Minimarket\Administrator\Service\AttributeValueRows;
+use MiniMarket\Component\Minimarket\Administrator\Service\NumericPresetRows;
 
 final class AttributeModel extends AdminModel
 {
@@ -31,6 +32,9 @@ final class AttributeModel extends AdminModel
             $item->values = AttributeValueRows::formRows(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
+            $item->number_preset_rows = NumericPresetRows::formRows(
+                (string) ($item->number_options ?? '')
+            );
         }
         return $item;
     }
@@ -41,6 +45,20 @@ final class AttributeModel extends AdminModel
      */
     public function save($data)
     {
+        // The Joomla repeatable numeric values are a UI for the existing typed
+        // number_options column. No new IDs or SQL tables are introduced.
+        if (($data['input_type'] ?? '') === 'number'
+            && ($data['input_mode'] ?? 'auto') === 'presets') {
+            try {
+                $data['number_options'] = NumericPresetRows::normalize(
+                    $data['number_preset_rows'] ?? []
+                );
+            } catch (\InvalidArgumentException $error) {
+                $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID'));
+                return false;
+            }
+        }
+        unset($data['number_preset_rows']);
         $hasRules = array_key_exists('category_rules', $data)
             || !empty($data['categories_present']);
         $db = $this->getDatabase();

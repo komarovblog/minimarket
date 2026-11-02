@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <field name="number" type="number" label="COM_MINIMARKET_NUMBER_PRESET_VALUE"
+           required="true" filter="raw" step="0.0001" size="18"/>
+</form>
