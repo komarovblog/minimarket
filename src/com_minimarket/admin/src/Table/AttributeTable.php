@@ -65,7 +65,8 @@ final class AttributeTable extends Table
             $this->$field = (int) $this->$field;
         }
 
-        if ($this->is_variant === 1 && !in_array($this->input_type, ['list','color'], true)) {
+        if ($this->is_variant === 1 && !in_array($this->input_type, ['list','color'], true)
+            && !($this->input_type === 'text' && $this->input_mode === 'presets')) {
             $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT_REQUIRES_LIST'));
 
             return false;

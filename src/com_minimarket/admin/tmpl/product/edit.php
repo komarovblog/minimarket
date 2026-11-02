@@ -12,6 +12,7 @@ use Joomla\CMS\Router\Route;
         'details' => 'COM_MINIMARKET_PRODUCT_TAB_DETAILS',
         'descriptions' => 'COM_MINIMARKET_PRODUCT_TAB_DESCRIPTIONS',
         'attributes' => 'COM_MINIMARKET_PRODUCT_TAB_ATTRIBUTES',
+        'variants' => 'COM_MINIMARKET_PRODUCT_TAB_VARIANTS',
         'images' => 'COM_MINIMARKET_PRODUCT_TAB_IMAGES',
         'videos' => 'COM_MINIMARKET_PRODUCT_TAB_VIDEOS',
         'seo' => 'COM_MINIMARKET_CATEGORY_TAB_SEO',

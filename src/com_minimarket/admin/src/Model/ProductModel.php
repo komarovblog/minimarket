@@ -9,6 +9,7 @@ use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGallery;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductVideos;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductVariants;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 
 final class ProductModel extends AdminModel
@@ -29,10 +30,12 @@ final class ProductModel extends AdminModel
             $item->gallery = ProductGallery::loadFormRows($this->getDatabase(), (int) $item->id);
             $item->videos = ProductVideos::loadFormRows($this->getDatabase(), (int) $item->id);
             $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
+            $item->variants = ProductVariants::formRows($this->getDatabase(), (int) $item->id);
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
             $item->attribute_values = [];
+            $item->variants = [];
         }
 
         return $item;
@@ -51,6 +54,7 @@ final class ProductModel extends AdminModel
         $hasVideos = array_key_exists('videos', $data) || !empty($data['videos_present']);
         $hasAttributes = array_key_exists('attribute_values', $data)
             || !empty($data['attributes_present']);
+        $hasVariants = array_key_exists('variants', $data) || !empty($data['variants_present']);
         try {
             $rows = $hasGallery
                 ? ProductGallery::normalizeRows($data['gallery'] ?? [], (string) ($data['image'] ?? ''))
@@ -100,12 +104,29 @@ final class ProductModel extends AdminModel
             }
         }
 
+        $variantRows = [];
+        if ($hasVariants) {
+            try {
+                $definitions = $definitions ?? ProductAttributes::definitions($db);
+                $hierarchy = $hierarchy ?? CategoryAttributes::loadHierarchy($db);
+                $categoryMap = $categoryMap ?? ProductAttributes::categoryMap($hierarchy, $definitions);
+                $axes = ProductVariants::axes((int) ($data['category_id'] ?? 0), $definitions, $categoryMap);
+                $variantRows = ProductVariants::normalize($data['variants'] ?? [], $axes);
+            } catch (\InvalidArgumentException | \JsonException $error) {
+                $key = $error->getMessage();
+                $this->setError(Text::_(str_starts_with($key, 'COM_MINIMARKET_')
+                    ? $key : 'COM_MINIMARKET_VARIANTS_INVALID'));
+                return false;
+            }
+        }
+
         if ($hasGallery && $rows && trim((string) ($data['image'] ?? '')) === '') {
             $this->setError(Text::_('COM_MINIMARKET_GALLERY_COVER_REQUIRED'));
             return false;
         }
 
-        unset($data['videos'], $data['videos_present'],
+        unset($data['variants'], $data['variants_present'],
+            $data['videos'], $data['videos_present'],
             $data['gallery'], $data['gallery_present'],
             $data['attribute_values'], $data['attributes_present']);
         $db->transactionStart();
@@ -131,11 +152,15 @@ final class ProductModel extends AdminModel
                 $productId = (int) $this->getState($this->getName() . '.id');
                 ProductAttributes::replace($db, $productId, $normalized);
             }
+            if ($hasVariants) {
+                $productId = (int) $this->getState($this->getName() . '.id');
+                ProductVariants::replace($db, $productId, $variantRows);
+            }
             $db->transactionCommit();
             return true;
         } catch (\Throwable $error) {
             $db->transactionRollback();
-            $this->setError(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_SAVE_FAILED'));
+            $this->setError(Text::_('COM_MINIMARKET_VARIANTS_SAVE_FAILED'));
             return false;
         }
     }
