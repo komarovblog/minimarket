@@ -6,6 +6,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
@@ -76,6 +77,19 @@ final class ProductattributesField extends FormField
             if ($def['is_variant']) {
                 $html .= ' <small class="text-muted">'
                     . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_VARIANT_NOTICE')) . '</small>';
+            }
+            if ($type === 'list') {
+                // An empty dictionary is not an empty product field bug.
+                // Point the editor to the source dictionary, without copying
+                // values into each individual product.
+                if (!$def['values']) {
+                    $html .= '<p class="text-muted">'
+                        . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NO_VALUES'))
+                        . '</p>';
+                }
+                $html .= '<p class="small"><a href="' . $escape(Route::_(
+                    'index.php?option=com_minimarket&view=values&attribute_id=' . $id
+                )) . '">' . $escape(Text::_('COM_MINIMARKET_EDIT_VALUES')) . '</a></p>';
             }
             $html .= '<div class="text-warning small' . ($isApplicable ? ' d-none' : '')
                 . '" data-mm-attribute-incompatible>'
