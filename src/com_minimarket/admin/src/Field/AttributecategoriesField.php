@@ -54,7 +54,7 @@ final class AttributecategoriesField extends FormField
             $cat = $row['item'];
             $id = (int) $cat->id;
             $mode = isset($own[$id]) ? (int) $own[$id] : -1;
-            if (!in_array($mode, [-1, 0, 1], true)) {
+            if (!in_array($mode, [-1, 0, 1, 2], true)) {
                 $mode = -1;
             }
             $parentId = (int) ($cat->parent_id ?? 0);
@@ -62,8 +62,10 @@ final class AttributecategoriesField extends FormField
                 $parentId, $hierarchy['parents'], $hierarchy['rules']
             );
             $sourceId = (int) ($effective[$attributeId] ?? 0);
+            $parentModes = CategoryAttributes::resolveModes($parentId, $hierarchy['parents'], $hierarchy['rules']);
             $inherit = $sourceId
-                ? Text::sprintf('COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
+                ? Text::sprintf(($parentModes[$attributeId] ?? 1) === 2
+                    ? 'COM_MINIMARKET_CATATTR_REQUIRED_FROM_PARENT' : 'COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
                 : Text::_('COM_MINIMARKET_CATATTR_NOT_INHERITED');
             $idAttr = $escape($this->id . '_' . $id);
             $name = $escape($this->name . '[' . $id . ']');
@@ -81,6 +83,7 @@ final class AttributecategoriesField extends FormField
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',
                 1 => 'COM_MINIMARKET_CATATTR_MODE_ENABLE',
+                2 => 'COM_MINIMARKET_CATATTR_MODE_REQUIRED',
                 0 => 'COM_MINIMARKET_CATATTR_MODE_DISABLE',
             ] as $value => $key) {
                 $html .= '<option value="' . $value . '"'

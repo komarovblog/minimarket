@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_category_attributes` (
     `category_id` INT UNSIGNED NOT NULL,
     `attribute_id` INT UNSIGNED NOT NULL,
     `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    `required` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     PRIMARY KEY (`category_id`, `attribute_id`),
     KEY `idx_mm_category_attribute_reverse` (`attribute_id`, `enabled`),
     CONSTRAINT `fk_mm_catattr_category` FOREIGN KEY (`category_id`)

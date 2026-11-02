@@ -59,12 +59,14 @@ final class CategoryattributesField extends FormField
         foreach ($attributes as $attr) {
             $id = (int) $attr->id;
             $mode = isset($ownRules[$id]) ? (int) $ownRules[$id] : -1;
-            if (!in_array($mode, [-1, 0, 1], true)) {
+            if (!in_array($mode, [-1, 0, 1, 2], true)) {
                 $mode = -1;
             }
             $sourceId = (int) ($parentRules[$id] ?? 0);
+            $parentModes = CategoryAttributes::resolveModes($parentId, $hierarchy['parents'], $hierarchy['rules']);
             $inherited = $sourceId > 0
-                ? Text::sprintf('COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
+                ? Text::sprintf(($parentModes[$id] ?? 1) === 2
+                    ? 'COM_MINIMARKET_CATATTR_REQUIRED_FROM_PARENT' : 'COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
                 : Text::_('COM_MINIMARKET_CATATTR_NOT_INHERITED');
             $label = $escape((string) $attr->title) . ' <small class="text-muted">'
                 . $escape((string) $attr->code) . '</small>';
@@ -82,6 +84,7 @@ final class CategoryattributesField extends FormField
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',
                  1 => 'COM_MINIMARKET_CATATTR_MODE_ENABLE',
+                2 => 'COM_MINIMARKET_CATATTR_MODE_REQUIRED',
                  0 => 'COM_MINIMARKET_CATATTR_MODE_DISABLE',
             ] as $value => $languageKey) {
                 $html .= '<option value="' . $value . '"'

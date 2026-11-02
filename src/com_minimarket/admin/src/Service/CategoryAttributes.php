@@ -14,7 +14,7 @@ final class CategoryAttributes
     /**
      * Validates and normalizes the Joomla form's array values.
      *
-     * @param mixed $input Map of attribute IDs to -1 (inherit), 0, 1.
+     * @param mixed $input Map of attribute IDs to -1 (inherit), 0 (exclude), 1 (optional), 2 (required).
      * @param int[] $allowedIds IDs of existing attributes, published or not.
      * @return array<int,int> Explicit rules, absent entries inherit.
      */
@@ -31,7 +31,7 @@ final class CategoryAttributes
         foreach ($input as $key => $value) {
             if (!ctype_digit((string) $key) || (int) $key < 1
                 || !isset($allowed[(int) $key])
-                || !in_array((string) $value, ['-1','0','1'], true)) {
+                || !in_array((string) $value, ['-1','0','1','2'], true)) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_CATATTR_INVALID');
             }
             if ((string) $value !== '-1') {
@@ -72,7 +72,7 @@ final class CategoryAttributes
         $result = [];
         foreach (array_reverse($chain) as $nodeId) {
             foreach ($rules[$nodeId] ?? [] as $attributeId => $mode) {
-                if ((int) $mode === 1) {
+                if (in_array((int) $mode, [1,2], true)) {
                     $result[(int) $attributeId] = $nodeId;
                 } elseif ((int) $mode === 0) {
                     unset($result[(int) $attributeId]);
@@ -82,20 +82,60 @@ final class CategoryAttributes
         return $result;
     }
 
-    /** @return array<int,int> Direct category rules, 1=enabled, 0=blocked. */
+    /** @return array<int,int> attribute ID => 1 (optional) or 2 (required). */
+    public static function resolveModes(int $categoryId, array $parents, array $rules): array
+    {
+        if ($categoryId < 1) return [];
+        $chain = [];
+        $seen = [];
+        for ($id = $categoryId; $id > 0; $id = (int) ($parents[$id] ?? -1)) {
+            if (isset($seen[$id]) || !array_key_exists($id, $parents)) return [];
+            $seen[$id] = true;
+            $chain[] = $id;
+            if ((int) $parents[$id] < 0) return [];
+        }
+        $modes = [];
+        foreach (array_reverse($chain) as $nodeId) {
+            foreach ($rules[$nodeId] ?? [] as $attributeId => $mode) {
+                if ((int) $mode === 0) {
+                    unset($modes[(int) $attributeId]);
+                } elseif (in_array((int) $mode, [1, 2], true)) {
+                    $modes[(int) $attributeId] = (int) $mode;
+                }
+            }
+        }
+        return $modes;
+    }
+
+    /** @return int[] Required attributes after all parent category overrides. */
+    public static function requiredForCategory(int $categoryId, array $parents, array $rules): array
+    {
+        return array_keys(array_filter(
+            self::resolveModes($categoryId, $parents, $rules),
+            static fn (int $mode): bool => $mode === 2
+        ));
+    }
+
+    private static function rowMode(array $row): int
+    {
+        if ((int) ($row['enabled'] ?? 0) === 0) return 0;
+        return (int) ($row['required'] ?? 0) === 1 ? 2 : 1;
+    }
+
+    /** @return array<int,int> Direct category rules, 0=excluded, 1=optional, 2=required. */
     public static function loadDirect(DatabaseInterface $db, int $categoryId): array
     {
         if ($categoryId < 1) {
             return [];
         }
         $q = $db->getQuery(true)
-            ->select([$db->quoteName('attribute_id'), $db->quoteName('enabled')])
+            ->select([$db->quoteName('attribute_id'), $db->quoteName('enabled'), $db->quoteName('required')])
             ->from($db->quoteName('#__minimarket_category_attributes'))
             ->where($db->quoteName('category_id') . ' = ' . $categoryId);
         $db->setQuery($q);
         $rules = [];
         foreach ((array) $db->loadAssocList() as $row) {
-            $rules[(int) $row['attribute_id']] = (int) $row['enabled'];
+            $rules[(int) $row['attribute_id']] = self::rowMode($row);
         }
         return $rules;
     }
@@ -136,12 +176,12 @@ final class CategoryAttributes
         }
 
         $q = $db->getQuery(true)
-            ->select([$db->quoteName('category_id'), $db->quoteName('attribute_id'), $db->quoteName('enabled')])
+            ->select([$db->quoteName('category_id'), $db->quoteName('attribute_id'), $db->quoteName('enabled'), $db->quoteName('required')])
             ->from($db->quoteName('#__minimarket_category_attributes'));
         $db->setQuery($q);
         $rules = [];
         foreach ((array) $db->loadAssocList() as $row) {
-            $rules[(int) $row['category_id']][(int) $row['attribute_id']] = (int) $row['enabled'];
+            $rules[(int) $row['category_id']][(int) $row['attribute_id']] = self::rowMode($row);
         }
         return ['parents' => $parents, 'rules' => $rules];
     }
@@ -153,13 +193,13 @@ final class CategoryAttributes
             return [];
         }
         $q = $db->getQuery(true)
-            ->select([$db->quoteName('category_id'), $db->quoteName('enabled')])
+            ->select([$db->quoteName('category_id'), $db->quoteName('enabled'), $db->quoteName('required')])
             ->from($db->quoteName('#__minimarket_category_attributes'))
             ->where($db->quoteName('attribute_id') . ' = ' . $attributeId);
         $db->setQuery($q);
         $rows = [];
         foreach ((array) $db->loadAssocList() as $row) {
-            $rows[(int) $row['category_id']] = (int) $row['enabled'];
+            $rows[(int) $row['category_id']] = self::rowMode($row);
         }
         return $rows;
     }
@@ -183,9 +223,9 @@ final class CategoryAttributes
         }
         $q = $db->getQuery(true)
             ->insert($db->quoteName('#__minimarket_category_attributes'))
-            ->columns($db->quoteName(['category_id','attribute_id','enabled']));
+            ->columns($db->quoteName(['category_id','attribute_id','enabled','required']));
         foreach ($rules as $categoryId => $mode) {
-            $q->values(implode(',', [(int) $categoryId, $attributeId, (int) $mode]));
+            $q->values(implode(',', [(int) $categoryId, $attributeId, (int) $mode > 0 ? 1 : 0, (int) $mode === 2 ? 1 : 0]));
         }
         $db->setQuery($q);
         $db->execute();
@@ -211,9 +251,9 @@ final class CategoryAttributes
         }
         $q = $db->getQuery(true)
             ->insert($db->quoteName('#__minimarket_category_attributes'))
-            ->columns($db->quoteName(['category_id', 'attribute_id', 'enabled']));
+            ->columns($db->quoteName(['category_id', 'attribute_id', 'enabled', 'required']));
         foreach ($rules as $attributeId => $enabled) {
-            $q->values(implode(',', [$categoryId, (int) $attributeId, (int) $enabled]));
+            $q->values(implode(',', [$categoryId, (int) $attributeId, (int) $enabled > 0 ? 1 : 0, (int) $enabled === 2 ? 1 : 0]));
         }
         $db->setQuery($q);
         $db->execute();
