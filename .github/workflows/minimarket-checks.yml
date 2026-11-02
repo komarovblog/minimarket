@@ -136,6 +136,7 @@ jobs:
       - name: Native variant rows and storefront variant switching JavaScript
         run: |
           node --check src/com_minimarket/media/js/variants-admin.js
+          node --check src/com_minimarket/media/js/variants-local.js
           node --check src/com_minimarket/media/js/variants.js
 
       - name: No recursive MutationObserver freeze in product editor

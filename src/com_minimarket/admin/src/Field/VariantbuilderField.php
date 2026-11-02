@@ -33,7 +33,24 @@ final class VariantbuilderField extends FormField
             $value=json_encode(ProductLocalDimensions::load($db,$productId),
                 JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
         }
-        return '<div data-mm-local-builder data-mm-max="200">'
+        $labels=[];
+        foreach ([
+            'axis'=>'COM_MINIMARKET_LOCAL_AXIS',
+            'axisExample'=>'COM_MINIMARKET_LOCAL_AXIS_EXAMPLE',
+            'value'=>'COM_MINIMARKET_LOCAL_VALUE',
+            'addValue'=>'COM_MINIMARKET_LOCAL_ADD_VALUE',
+            'preview'=>'COM_MINIMARKET_LOCAL_PREVIEW',
+            'confirm'=>'COM_MINIMARKET_LOCAL_CONFIRM',
+            'created'=>'COM_MINIMARKET_LOCAL_CREATED',
+            'incomplete'=>'COM_MINIMARKET_LOCAL_INCOMPLETE',
+            'empty'=>'COM_MINIMARKET_LOCAL_EMPTY',
+            'limit'=>'COM_MINIMARKET_LOCAL_LIMIT',
+            'tooMany'=>'COM_MINIMARKET_LOCAL_TOO_MANY',
+            'addFailed'=>'COM_MINIMARKET_LOCAL_ADD_FAILED',
+            'nativeUnavailable'=>'COM_MINIMARKET_LOCAL_SUBFORM_MISSING',
+        ] as $key=>$languageKey) $labels[$key]=Text::_($languageKey);
+        return '<div data-mm-local-builder data-mm-max="200" data-mm-labels="'
+            .$esc(json_encode($labels,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG)).'">'
             . '<input type="hidden" name="'.$esc($this->name).'" id="'.$esc($this->id).'"'
             . ' value="'.$esc($value).'">'
             . '<p class="text-muted">'.$esc(Text::_('COM_MINIMARKET_LOCAL_VARIANTS_HELP')).'</p>'
