@@ -5,28 +5,14 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\CMS\Button\PublishedButton;
 ?>
-<form action="<?php echo Route::_('index.php'); ?>" method="get" class="d-flex align-items-end gap-2 mb-3">
-    <input type="hidden" name="option" value="com_minimarket">
-    <input type="hidden" name="view" value="categories">
-    <label for="mm-search"><?php echo Text::_('COM_MINIMARKET_CATEGORY_FILTER_SEARCH'); ?>
-        <input id="mm-search" type="search" class="form-control" name="mm_search" value="<?php echo $this->escape($this->search); ?>">
-    </label>
-    <label for="mm-state"><?php echo Text::_('JSTATUS'); ?>
-        <select id="mm-state" name="mm_state" class="form-select">
-            <?php foreach (['all' => 'COM_MINIMARKET_CATEGORY_ALL_STATUSES', '1' => 'JPUBLISHED', '0' => 'JUNPUBLISHED'] as $state => $key) : ?>
-                <option value="<?php echo $state; ?>"<?php echo $this->stateFilter === (string) $state ? ' selected' : ''; ?>>
-                    <?php echo Text::_($key); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </label>
-    <button type="submit" class="btn btn-primary"><?php echo Text::_('JSEARCH_FILTER_SUBMIT'); ?></button>
-    <a class="btn btn-outline-secondary" href="<?php echo Route::_('index.php?option=com_minimarket&view=categories'); ?>"><?php echo Text::_('JSEARCH_FILTER_CLEAR'); ?></a>
-</form>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=categories'); ?>" method="post"
       name="adminForm" id="adminForm">
-    <table class="table table-striped" id="mm-category-tree">
+    <div id="j-main-container" class="j-main-container">
+    <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
+    <table class="table" id="mm-category-tree">
         <thead>
         <tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
@@ -76,7 +62,10 @@ use Joomla\CMS\Uri\Uri;
                 <td><?php echo (int) $row['direct_count']; ?></td>
                 <td><?php echo (int) $row['branch_count']; ?></td>
                 <td><?php echo (int) ($item->sort_order ?? 0); ?></td>
-                <td><?php echo (int) $item->state === 1 ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED'); ?></td>
+                <td class="text-center">
+                    <?php echo (new PublishedButton())->render((int) $item->state, $i,
+                        ['task_prefix' => 'categories.', 'id' => 'mm-category-state-' . $id]); ?>
+                </td>
                 <td><?php echo $id; ?></td>
             </tr>
         <?php endforeach; ?>
@@ -85,6 +74,7 @@ use Joomla\CMS\Uri\Uri;
         <?php endif; ?>
         </tbody>
     </table>
+    </div>
     <input type="hidden" name="boxchecked" value="0">
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>

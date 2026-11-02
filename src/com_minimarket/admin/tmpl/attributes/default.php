@@ -4,18 +4,22 @@
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\CMS\Button\PublishedButton;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=attributes'); ?>"
       method="post" name="adminForm" id="adminForm">
-    <table class="table">
+    <div id="j-main-container" class="j-main-container">
+    <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
+    <table class="table" id="mm-attributes-list">
         <thead><tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
-            <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
+            <th><?php echo HTMLHelper::_('searchtools.sort', 'JGLOBAL_TITLE', 'a.title', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_CODE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_FILTERABLE'); ?></th>
-            <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th><th>ID</th>
+            <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th><th><?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ID', 'a.id', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
         </tr></thead>
         <tbody>
         <?php foreach ($this->items as $i => $item) : ?>
@@ -26,7 +30,10 @@ use Joomla\CMS\Router\Route;
                 <td><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_' . strtoupper((string) $item->input_type)); ?></td>
                 <td><?php echo (int) $item->is_variant ? Text::_('JYES') : Text::_('JNO'); ?></td>
                 <td><?php echo (int) $item->is_filterable ? Text::_('JYES') : Text::_('JNO'); ?></td>
-                <td><?php echo (int) $item->state === 1 ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED'); ?></td>
+                <td class="text-center">
+                    <?php echo (new PublishedButton())->render((int) $item->state, $i,
+                        ['task_prefix' => 'attributes.', 'id' => 'mm-attribute-state-' . (int) $item->id]); ?>
+                </td>
                 <td><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>
@@ -35,6 +42,10 @@ use Joomla\CMS\Router\Route;
         <?php endif; ?>
         </tbody>
     </table>
+    <?php if (is_object($this->pagination) && method_exists($this->pagination, 'getListFooter')) : ?>
+        <?php echo $this->pagination->getListFooter(); ?>
+    <?php endif; ?>
+    </div>
     <input type="hidden" name="boxchecked" value="0">
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
