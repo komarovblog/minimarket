@@ -45,6 +45,7 @@
     </fieldset>
     <fieldset name="variants" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS">
         <field name="variants_present" type="hidden" default="1" filter="int"/>
+        <field name="variant_config" type="Variantbuilder" label="COM_MINIMARKET_LOCAL_VARIANTS_TITLE" filter="raw"/>
         <field name="variant_info" type="Variantinfo" label="COM_MINIMARKET_VARIANT_AXES" filter="raw"/>
         <field name="variants" type="subform" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS"
                description="COM_MINIMARKET_VARIANTS_HELP"

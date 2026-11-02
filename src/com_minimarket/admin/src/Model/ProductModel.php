@@ -10,6 +10,8 @@ use MiniMarket\Component\Minimarket\Administrator\Service\ProductGallery;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductVideos;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductVariants;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions;
+use MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 
 final class ProductModel extends AdminModel
@@ -31,11 +33,13 @@ final class ProductModel extends AdminModel
             $item->videos = ProductVideos::loadFormRows($this->getDatabase(), (int) $item->id);
             $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
             $item->variants = ProductVariants::formRows($this->getDatabase(), (int) $item->id);
+            $item->variant_config = json_encode(ProductLocalDimensions::load($this->getDatabase(), (int) $item->id), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
             $item->attribute_values = [];
             $item->variants = [];
+            $item->variant_config = '[]';
         }
 
         return $item;
@@ -55,6 +59,8 @@ final class ProductModel extends AdminModel
         $hasAttributes = array_key_exists('attribute_values', $data)
             || !empty($data['attributes_present']);
         $hasVariants = array_key_exists('variants', $data) || !empty($data['variants_present']);
+        $hasLocal = array_key_exists('variant_config', $data);
+        $localDimensions = [];
         try {
             $rows = $hasGallery
                 ? ProductGallery::normalizeRows($data['gallery'] ?? [], (string) ($data['image'] ?? ''))
@@ -105,12 +111,23 @@ final class ProductModel extends AdminModel
         }
 
         $variantRows = [];
-        if ($hasVariants) {
+        if ($hasLocal || $hasVariants) {
             try {
-                $definitions = $definitions ?? ProductAttributes::definitions($db);
-                $hierarchy = $hierarchy ?? CategoryAttributes::loadHierarchy($db);
-                $categoryMap = $categoryMap ?? ProductAttributes::categoryMap($hierarchy, $definitions);
-                $axes = ProductVariants::axes((int) ($data['category_id'] ?? 0), $definitions, $categoryMap);
+                if ($hasLocal) {
+                    $raw=$data['variant_config'];
+                    if (!is_string($raw) || strlen($raw)>200000) {
+                        throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
+                    }
+                    $decoded=json_decode($raw,true,512,JSON_THROW_ON_ERROR);
+                    $localDimensions=VariantMatrix::normalize($decoded);
+                    $axes=ProductLocalDimensions::axesForVariants($localDimensions);
+                } else {
+                    $definitions = $definitions ?? ProductAttributes::definitions($db);
+                    $hierarchy = $hierarchy ?? CategoryAttributes::loadHierarchy($db);
+                    $categoryMap = $categoryMap ?? ProductAttributes::categoryMap($hierarchy, $definitions);
+                    $axes = ProductVariants::axes((int) ($data['category_id'] ?? 0), $definitions, $categoryMap);
+                }
+                // Missing dimensions are allowed only with no visible SKU rows.
                 $variantRows = ProductVariants::normalize($data['variants'] ?? [], $axes);
             } catch (\InvalidArgumentException | \JsonException $error) {
                 $key = $error->getMessage();
@@ -125,7 +142,7 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['variants'], $data['variants_present'],
+        unset($data['variant_config'], $data['variants'], $data['variants_present'],
             $data['videos'], $data['videos_present'],
             $data['gallery'], $data['gallery_present'],
             $data['attribute_values'], $data['attributes_present']);
@@ -154,7 +171,16 @@ final class ProductModel extends AdminModel
             }
             if ($hasVariants) {
                 $productId = (int) $this->getState($this->getName() . '.id');
-                ProductVariants::replace($db, $productId, $variantRows);
+                $variantIds=ProductVariants::replace($db, $productId, $variantRows);
+                if ($hasLocal) {
+                    ProductLocalDimensions::replace($db, $productId, $localDimensions,
+                        $variantRows, $variantIds);
+                }
+            } elseif ($hasLocal) {
+                // No SKU yet; allow saving local option definitions without
+                // inserting a dummy SKU or touching the existing product trade fields.
+                $productId = (int) $this->getState($this->getName() . '.id');
+                ProductLocalDimensions::replace($db, $productId, $localDimensions, [], []);
             }
             $db->transactionCommit();
             return true;

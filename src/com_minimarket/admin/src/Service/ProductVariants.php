@@ -194,7 +194,7 @@ final class ProductVariants
      * Atomically preserve existing variant IDs when edited/reordered.
      * Does not delete/copy Joomla Media files.
      */
-    public static function replace(DatabaseInterface $db, int $productId, array $rows): void
+    public static function replace(DatabaseInterface $db, int $productId, array $rows): array
     {
         if ($productId < 1) throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_INVALID');
         $q = $db->getQuery(true)->select('id')
@@ -229,6 +229,7 @@ final class ProductVariants
             $db->setQuery($q);
             $db->execute();
         }
+        $savedIds = [];
         foreach ($rows as $r) {
             $data = [
                 'sku' => $db->quote($r['sku']),
@@ -258,6 +259,7 @@ final class ProductVariants
                 $variantId = (int) $db->insertid();
                 if ($variantId < 1) throw new \RuntimeException('COM_MINIMARKET_VARIANTS_SAVE_FAILED');
             }
+            $savedIds[] = $variantId;
             $q = $db->getQuery(true)->delete($db->quoteName('#__minimarket_product_variant_images'))
                 ->where($db->quoteName('variant_id') . ' = ' . $variantId);
             $db->setQuery($q);
@@ -275,5 +277,6 @@ final class ProductVariants
                 $db->execute();
             }
         }
+        return $savedIds;
     }
 }

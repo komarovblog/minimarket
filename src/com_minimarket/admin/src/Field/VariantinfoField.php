@@ -11,6 +11,7 @@ use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductVariants;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions;
 
 final class VariantinfoField extends FormField
 {
@@ -19,6 +20,10 @@ final class VariantinfoField extends FormField
     protected function getInput(): string
     {
         $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $productId=(int)Factory::getApplication()->input->getInt('id',0);
+        if (!ProductLocalDimensions::hasLegacyVariants($db,$productId)) {
+            return '';
+        }
         $definitions = ProductAttributes::definitions($db);
         $hierarchy = CategoryAttributes::loadHierarchy($db);
         $map = ProductAttributes::categoryMap($hierarchy, $definitions);
