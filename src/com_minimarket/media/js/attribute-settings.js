@@ -61,7 +61,7 @@
         const t = type.value;
         updateOptions(mode, product[t] || ['auto'], 'auto');
         // Legacy types remain selectable only when editing the same old kind.
-        const legacy = ['list','textarea','date','url'];
+        const legacy = ['list','textarea','date','url','document','color'];
         for (const option of type.options) {
           if (legacy.includes(option.value)) {
             const allow = Number(attributeId?.value || 0) > 0 && option.value === t;

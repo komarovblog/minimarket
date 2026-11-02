@@ -8,7 +8,7 @@ final class AttributeSettings
 {
     // Legacy kinds remain supported for existing stored records only.
     public const TYPES = ['text','number','editor','boolean','document','color','list','textarea','date','url'];
-    public const NEW_TYPES = ['text','number','editor','boolean','document','color'];
+    public const NEW_TYPES = ['text','number','editor','boolean'];
     public const INPUTS = [
         'list' => ['auto','dropdown','radio','checkboxes'],
         'text' => ['auto','presets'],

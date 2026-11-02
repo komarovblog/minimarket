@@ -15,7 +15,7 @@ final class ProductAttributes
     public static function definitions(DatabaseInterface $db): array
     {
         $q = $db->getQuery(true)
-            ->select(['id','title','input_type','input_mode','text_options','number_options','text_options','number_unit','number_min','number_max','number_step','is_variant','is_multiple','state'])
+            ->select(['id','title','input_type','input_mode','text_options','number_options','number_unit','number_min','number_max','number_step','is_variant','is_multiple','state'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -31,7 +31,6 @@ final class ProductAttributes
                 'input_mode' => (string) ($row['input_mode'] ?? 'auto'),
                 'text_options' => (string) ($row['text_options'] ?? ''),
                 'number_options' => (string) ($row['number_options'] ?? ''),
-                'text_options' => (string) ($row['text_options'] ?? ''),
                 'number_unit' => (string) ($row['number_unit'] ?? ''),
                 'number_min' => isset($row['number_min']) ? (string) $row['number_min'] : null,
                 'number_max' => isset($row['number_max']) ? (string) $row['number_max'] : null,

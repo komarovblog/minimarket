@@ -12,7 +12,9 @@
             <option value="number">COM_MINIMARKET_ATTRIBUTE_NUMBER</option>
             <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
             <option value="editor">COM_MINIMARKET_ATTRIBUTE_EDITOR</option>
+            <!-- Legacy Document remains editable; not a new attribute type. -->
             <option value="document">COM_MINIMARKET_ATTRIBUTE_DOCUMENT</option>
+            <!-- Legacy Color remains editable; not a new attribute type. -->
             <option value="color">COM_MINIMARKET_ATTRIBUTE_COLOR</option>
             <!-- Older records still use these types. No new records may select them. -->
             <option value="textarea">COM_MINIMARKET_ATTRIBUTE_TEXTAREA</option>
