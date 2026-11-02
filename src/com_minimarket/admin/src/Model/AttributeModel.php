@@ -10,6 +10,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
 use MiniMarket\Component\Minimarket\Administrator\Service\AttributeValueRows;
 use MiniMarket\Component\Minimarket\Administrator\Service\NumericPresetRows;
+use MiniMarket\Component\Minimarket\Administrator\Service\TextPresetRows;
 
 final class AttributeModel extends AdminModel
 {
@@ -35,6 +36,9 @@ final class AttributeModel extends AdminModel
             $item->number_preset_rows = NumericPresetRows::formRows(
                 (string) ($item->number_options ?? '')
             );
+            $item->text_preset_rows = TextPresetRows::formRows(
+                (string) ($item->text_options ?? '')
+            );
         }
         return $item;
     }
@@ -59,6 +63,18 @@ final class AttributeModel extends AdminModel
             }
         }
         unset($data['number_preset_rows']);
+        if (($data['input_type'] ?? '') === 'text'
+            && ($data['input_mode'] ?? 'auto') === 'presets') {
+            try {
+                $data['text_options'] = TextPresetRows::encode(
+                    $data['text_preset_rows'] ?? []
+                );
+            } catch (\InvalidArgumentException | \JsonException $error) {
+                $this->setError(Text::_('COM_MINIMARKET_TEXT_PRESETS_INVALID'));
+                return false;
+            }
+        }
+        unset($data['text_preset_rows']);
         $hasRules = array_key_exists('category_rules', $data)
             || !empty($data['categories_present']);
         $db = $this->getDatabase();

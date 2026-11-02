@@ -35,6 +35,12 @@ final class AttributeTable extends Table
             return false;
         }
 
+        if ((int) ($this->id ?? 0) === 0
+            && !\in_array($this->input_type, AttributeSettings::NEW_TYPES, true)) {
+            $this->setError(Text::_('COM_MINIMARKET_LEGACY_TYPE_NEW_FORBIDDEN'));
+            return false;
+        }
+
         if (!\in_array($this->input_type, AttributeSettings::TYPES, true)) {
             $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE_INVALID'));
 
@@ -97,6 +103,25 @@ final class AttributeTable extends Table
             $db->setQuery($presetQuery);
             if ((int) $db->loadResult() > 0) {
                 $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_PRESET_IN_USE'));
+                return false;
+            }
+        }
+
+        if ((int) $this->id > 0 && $this->input_type === 'text'
+            && $this->input_mode === 'presets') {
+            $items = TextPresetRows::values((string) $this->text_options);
+            $q = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_product_attribute_scalars'))
+                ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id)
+                ->where($db->quoteName('value_text') . ' IS NOT NULL');
+            if ($items) {
+                $q->where($db->quoteName('value_text') . ' NOT IN (' .
+                    implode(',', array_map([$db,'quote'], $items)) . ')');
+            }
+            $db->setQuery($q);
+            if ((int) $db->loadResult() > 0) {
+                $this->setError(Text::_('COM_MINIMARKET_TEXT_PRESETS_IN_USE'));
                 return false;
             }
         }

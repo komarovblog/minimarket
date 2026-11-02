@@ -6,10 +6,13 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service;
 /** Shared contract for catalog attribute metadata and numeric presets. */
 final class AttributeSettings
 {
-    public const TYPES = ['list','text','number','textarea','date','boolean','url'];
+    // Legacy kinds remain supported for existing stored records only.
+    public const TYPES = ['text','number','editor','boolean','list','textarea','date','url'];
+    public const NEW_TYPES = ['text','number','editor','boolean'];
     public const INPUTS = [
         'list' => ['auto','dropdown','radio','checkboxes'],
-        'text' => ['auto'],
+        'text' => ['auto','presets'],
+        'editor' => ['auto'],
         'number' => ['auto','number','presets'],
         'textarea' => ['auto'],
         'date' => ['auto'],
@@ -18,7 +21,8 @@ final class AttributeSettings
     ];
     public const FILTERS = [
         'list' => ['none','checkboxes','radio','dropdown'],
-        'text' => ['none','text','values'],
+        'text' => ['none','text','values','checkboxes','dropdown'],
+        'editor' => ['none'],
         'number' => ['none','range','slider','checkboxes','dropdown'],
         'textarea' => ['none'],
         'date' => ['none','date_range'],
@@ -92,7 +96,7 @@ final class AttributeSettings
             }
         }
         if ((int) ($a->is_filterable ?? 0) === 1
-            && in_array($type, ['textarea', 'url'], true)) {
+            && in_array($type, ['editor','textarea','url'], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
         if ((int) ($a->is_filterable ?? 0) === 0) {
@@ -102,6 +106,23 @@ final class AttributeSettings
             $a->filter_multiple = 1;
         } elseif (!in_array($a->filter_mode, ['values','dropdown'], true)) {
             $a->filter_multiple = 0;
+        }
+
+        $a->text_options = trim((string) ($a->text_options ?? ''));
+        if ($type === 'text') {
+            try {
+                $textPresets = TextPresetRows::values($a->text_options);
+            } catch (\InvalidArgumentException $error) {
+                return 'COM_MINIMARKET_TEXT_PRESETS_INVALID';
+            }
+            if ($a->input_mode === 'presets' && !$textPresets) {
+                return 'COM_MINIMARKET_TEXT_PRESETS_INVALID';
+            }
+            $a->text_options = json_encode($textPresets, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        } else {
+            // Keep previously configured text values when changing a legacy
+            // input type back and forth, but never apply them to other types.
+            $a->text_options = $a->text_options === '' ? null : $a->text_options;
         }
 
         $a->number_unit = trim((string) ($a->number_unit ?? ''));
