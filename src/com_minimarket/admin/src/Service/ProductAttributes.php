@@ -15,7 +15,7 @@ final class ProductAttributes
     public static function definitions(DatabaseInterface $db): array
     {
         $q = $db->getQuery(true)
-            ->select(['id','title','input_type','input_mode','number_options','number_unit','number_min','number_max','number_step','is_variant','is_multiple','state'])
+            ->select(['id','title','input_type','input_mode','text_options','number_options','number_unit','number_min','number_max','number_step','is_variant','is_multiple','state'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -29,6 +29,7 @@ final class ProductAttributes
                 'is_variant' => (int) $row['is_variant'] === 1,
                 'is_multiple' => (int) $row['is_multiple'] === 1,
                 'input_mode' => (string) ($row['input_mode'] ?? 'auto'),
+                'text_options' => (string) ($row['text_options'] ?? ''),
                 'number_options' => (string) ($row['number_options'] ?? ''),
                 'number_unit' => (string) ($row['number_unit'] ?? ''),
                 'number_min' => isset($row['number_min']) ? (string) $row['number_min'] : null,
@@ -39,7 +40,7 @@ final class ProductAttributes
             ];
         }
         $q = $db->getQuery(true)
-            ->select(['id','attribute_id','title','state'])
+            ->select(['id','attribute_id','title','state','color_hex'])
             ->from($db->quoteName('#__minimarket_attribute_values'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -48,6 +49,7 @@ final class ProductAttributes
             if (isset($attributes[$attributeId])) {
                 $attributes[$attributeId]['values'][(int) $row['id']] = [
                     'title' => (string) $row['title'],
+                    'color_hex' => (string) ($row['color_hex'] ?? ''),
                     'state' => (int) $row['state'],
                 ];
             }
@@ -134,7 +136,7 @@ final class ProductAttributes
             }
             $def = $definitions[$id];
             $type = $def['type'];
-            if ($type === 'list') {
+            if ($type === 'list' || $type === 'color') {
                 $items = is_array($value) ? $value : [$value];
                 if (!$def['is_multiple'] && count($items) > 1) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
@@ -166,6 +168,23 @@ final class ProductAttributes
                 if (mb_strlen($value) > $limit
                     || preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u', $value)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
+                }
+                if ($type === 'text' && ($def['input_mode'] ?? 'auto') === 'presets'
+                    && !in_array($value, TextPresetRows::values((string) ($def['text_options'] ?? '')), true)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
+                }
+            } elseif ($type === 'editor') {
+                if (mb_strlen($value) > 10000) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_EDITOR_HTML_INVALID');
+                }
+                // Joomla InputFilter is also used when the storefront displays
+                // the value, so scripts and event handlers cannot be persisted.
+                $value = \Joomla\CMS\Filter\InputFilter::getInstance()->clean($value, 'HTML');
+            } elseif ($type === 'document') {
+                if (strlen($value) > 1024
+                    || !preg_match('~^(?:images|media)/[a-zA-Z0-9_./ -]+\.(?:pdf|doc|docx|xls|xlsx|txt|md)$~iD', $value)
+                    || str_contains($value, '..') || str_contains($value, '//')) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_DOCUMENT_INVALID');
                 }
             } elseif ($type === 'number') {
                 if (!AttributeSettings::decimal($value)) {
@@ -233,7 +252,7 @@ final class ProductAttributes
                 $value = $row['value'];
                 $q->values(implode(',',[
                     (string) $productId, (string) (int) $id,
-                    in_array($type, ['text','textarea','date','url'], true) ? $db->quote($value) : 'NULL',
+                    in_array($type, ['text','textarea','date','url','editor','document'], true) ? $db->quote($value) : 'NULL',
                     $type === 'number' ? $db->quote($value) : 'NULL',
                     $type === 'boolean' ? (string) (int) $value : 'NULL',
                 ]));

@@ -7,6 +7,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Form\Field\EditorField;
+use Joomla\CMS\Form\Field\MediaField;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
@@ -74,11 +76,11 @@ final class ProductattributesField extends FormField
                 $html .= ' <small class="badge bg-secondary">'
                     . $escape(Text::_('JUNPUBLISHED')) . '</small>';
             }
-            if ($type === 'list' && $def['is_multiple']) {
+            if (in_array($type, ['list','color'], true) && $def['is_multiple']) {
                 $html .= ' <small class="text-muted">'
                     . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_VARIANT_NOTICE')) . '</small>';
             }
-            if ($type === 'list') {
+            if (in_array($type, ['list','color'], true)) {
                 // An empty dictionary is not an empty product field bug.
                 // Point the editor to the source dictionary, without copying
                 // values into each individual product.
@@ -96,7 +98,7 @@ final class ProductattributesField extends FormField
                 . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . '</div>';
 
             $mode = (string) ($def['input_mode'] ?? 'auto');
-            if ($type === 'list') {
+            if (in_array($type, ['list','color'], true)) {
                 $mode = $mode === 'auto'
                     ? ($def['is_multiple'] ? 'checkboxes' : 'dropdown') : $mode;
                 if ($mode === 'checkboxes' || $mode === 'radio') {
@@ -121,6 +123,9 @@ final class ProductattributesField extends FormField
                             . ($checked ? ' checked' : '') . '>'
                             . '<label class="form-check-label" for="'
                             . $escape($inputId . '_' . $counter) . '">'
+                            . ($type === 'color' && preg_match('/^#[a-fA-F0-9]{6}$/D', (string) ($option['color_hex'] ?? ''))
+                                ? '<span aria-hidden="true" style="display:inline-block;width:1.25em;height:1.25em;border:1px solid currentColor;vertical-align:middle;margin-right:.4em;background:'
+                                    . $escape($option['color_hex']) . '"></span>' : '')
                             . $escape($option['title'])
                             . ($option['state'] !== 1
                                 ? ' (' . $escape(Text::_('JUNPUBLISHED')) . ')' : '')
@@ -147,6 +152,30 @@ final class ProductattributesField extends FormField
                     }
                     $html .= '</select>';
                 }
+            } elseif ($type === 'text' && $mode === 'presets') {
+                $html .= '<select class="form-select" id="' . $escape($inputId)
+                    . '" name="' . $escape($name) . '"><option value="">'
+                    . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
+                foreach (\MiniMarket\Component\Minimarket\Administrator\Service\TextPresetRows::values(
+                    (string) ($def['text_options'] ?? '')
+                ) as $preset) {
+                    $html .= '<option value="' . $escape($preset) . '"'
+                        . ($hasStored && $singleValue === $preset ? ' selected' : '') . '>'
+                        . $escape($preset) . '</option>';
+                }
+                $html .= '</select>';
+            } elseif ($type === 'editor' || $type === 'document') {
+                $class = $type === 'editor' ? EditorField::class : MediaField::class;
+                $field = new $class($this->form);
+                $fieldXml = new \SimpleXMLElement('<field name="' . (int) $id
+                    . '" type="' . ($type === 'editor' ? 'editor' : 'media')
+                    . '" label="' . $escape($def['title'])
+                    . '" ' . ($type === 'editor'
+                        ? 'filter="safehtml" buttons="true"'
+                        : 'directory="images" preview="false" filter="string"')
+                    . '/>');
+                $field->setup($fieldXml, is_scalar($value) ? (string) $value : '', 'attribute_values');
+                $html .= $field->getInput();
             } elseif ($type === 'boolean') {
                 $html .= '<select class="form-select" id="' . $escape($inputId)
                     . '" name="' . $escape($name) . '"><option value="">'
