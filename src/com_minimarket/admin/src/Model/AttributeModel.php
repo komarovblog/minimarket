@@ -8,6 +8,7 @@ use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
+use MiniMarket\Component\Minimarket\Administrator\Service\AttributeValueOrdering;
 
 final class AttributeModel extends AdminModel
 {
@@ -51,7 +52,24 @@ final class AttributeModel extends AdminModel
             return false;
         }
 
-        unset($data['category_rules'], $data['categories_present']);
+        // Values are a single sortable list within this attribute.
+        $hasOrdering = !empty($data['values_order_present']);
+        $orders = [];
+        if ($hasOrdering) {
+            try {
+                $attributeId = (int) ($data['id'] ?? 0);
+                $orders = AttributeValueOrdering::normalize(
+                    $data['values_order'] ?? null,
+                    AttributeValueOrdering::ids($db, $attributeId)
+                );
+            } catch (\InvalidArgumentException $error) {
+                $this->setError(Text::_('COM_MINIMARKET_VALUE_ORDER_INVALID'));
+                return false;
+            }
+        }
+
+        unset($data['category_rules'], $data['categories_present'],
+            $data['values_order'], $data['values_order_present']);
         $db->transactionStart();
         try {
             if (!parent::save($data)) {
@@ -61,6 +79,10 @@ final class AttributeModel extends AdminModel
             if ($hasRules) {
                 $id = (int) $this->getState($this->getName() . '.id');
                 CategoryAttributes::replaceForAttribute($db, $id, $rules);
+            }
+            if ($hasOrdering) {
+                $attributeId = (int) $this->getState($this->getName() . '.id');
+                AttributeValueOrdering::apply($db, $attributeId, $orders);
             }
             $db->transactionCommit();
             return true;

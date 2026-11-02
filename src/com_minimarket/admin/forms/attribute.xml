@@ -21,6 +21,10 @@
             <option value="0">JUNPUBLISHED</option><option value="1">JPUBLISHED</option>
         </field>
     </fieldset>
+    <!-- Controls are rendered by the Values tab; register their posted data
+         so Joomla Form::filter passes it to AttributeModel::save. -->
+    <field name="values_order" type="hidden" filter="raw"/>
+    <field name="values_order_present" type="hidden" filter="int" default="0"/>
     <fieldset name="categories" label="COM_MINIMARKET_ATTRCAT_TAB">
         <field name="category_rules" type="Attributecategories"
             label="COM_MINIMARKET_ATTRCAT_LABEL" filter="raw"/>
