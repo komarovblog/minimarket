@@ -23,6 +23,13 @@ final class HtmlView extends BaseHtmlView
         }
 
         Factory::getApplication()->getDocument()->getWebAssetManager()->useScript('form.validate');
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript(
+                'com_minimarket.attribute-settings',
+                'media/com_minimarket/js/attribute-settings.js',
+                [],
+                ['defer' => true]
+            );
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ATTRIBUTE_EDIT_TITLE'));
         ToolbarHelper::apply('attribute.apply');
         ToolbarHelper::save('attribute.save');
