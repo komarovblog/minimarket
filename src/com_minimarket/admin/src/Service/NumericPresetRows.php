@@ -39,10 +39,14 @@ final class NumericPresetRows
             if (is_object($row)) {
                 $row = (array) $row;
             }
-            if (!is_array($row) || !is_scalar($row['number'] ?? null)) {
+            if (!is_array($row) || !is_scalar($row['number'] ?? '')) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID');
             }
-            $values[] = trim((string) $row['number']);
+            $number = trim((string) $row['number']);
+            if ($number === '') {
+                continue;
+            }
+            $values[] = $number;
         }
         return implode(',', AttributeSettings::numericOptions(implode(',', $values)));
     }

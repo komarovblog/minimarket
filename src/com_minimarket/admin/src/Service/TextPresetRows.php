@@ -46,7 +46,10 @@ final class TextPresetRows
                 throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
             }
             $value = trim((string) $value);
-            if ($value === '' || mb_strlen($value) > 255
+            if ($value === '') {
+                continue;
+            }
+            if (mb_strlen($value) > 255
                 || preg_match('/[\x00-\x1f<>]/u', $value)) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
             }
