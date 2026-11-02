@@ -44,13 +44,29 @@ namespace MiniMarket\CategoryAttributeSmoke {
     verify(CategoryAttributes::resolve(404,$parents,$rules) === [], 'orphan isolated');
     verify(CategoryAttributes::resolve(6,$parents,$rules) === [], 'cycle isolated');
 
+    $requiredRules = [1=>[10=>2,11=>1],2=>[10=>1,12=>2],3=>[10=>2]];
+    verify(CategoryAttributes::resolve(2,$parents,$requiredRules) === [10=>2,11=>1,12=>2],
+        'required and optional attributes are both eligible');
+    verify(CategoryAttributes::resolveModes(1,$parents,$requiredRules) === [10=>2,11=>1],
+        'root required vs optional modes');
+    verify(CategoryAttributes::requiredForCategory(1,$parents,$requiredRules) === [10],
+        'required inherited root property');
+    verify(CategoryAttributes::requiredForCategory(2,$parents,$requiredRules) === [12],
+        'child makes inherited required optional and another required');
+    verify(CategoryAttributes::requiredForCategory(3,$parents,$requiredRules) === [10,12],
+        'grandchild overrides inherited optional back to required');
+    verify(CategoryAttributes::requiredForCategory(6,$parents,$requiredRules) === [],
+        'cycles produce no required properties');
+
     $all = [10,11,12];
     verify(CategoryAttributes::normalizeRules(['10'=>'1','11'=>'-1','12'=>'0'],$all)
         === [10=>1,12=>0], 'inherit removes direct override and explicit block persists');
+    verify(CategoryAttributes::normalizeRules(['10'=>'2','11'=>'1','12'=>'0'],$all)
+        === [10=>2,11=>1,12=>0], 'required/optional/excluded saved independently');
     verify(CategoryAttributes::normalizeRules([], $all) === [], 'clear-all reverts to inherit');
     verify(CategoryAttributes::normalizeRules(null, $all) === [], 'legacy form absent harmless');
     foreach ([
-        [99=>1], [10=>2], [10=>'invalid'], ['a'=>1],
+        [99=>1], [10=>3], [10=>'invalid'], ['a'=>1],
         [10=>['1']], [0=>1], ['10'=>'1','404'=>'0'],
     ] as $bad) {
         try {
@@ -84,8 +100,9 @@ namespace MiniMarket\CategoryAttributeSmoke {
         public function loadAssocList(): array {
             return match ($this->q->table) {
                 '#__minimarket_category_attributes' => [
-                    ['category_id'=>1,'attribute_id'=>10,'enabled'=>1],
-                    ['category_id'=>2,'attribute_id'=>11,'enabled'=>0],
+                    ['category_id'=>1,'attribute_id'=>10,'enabled'=>1,'required'=>0],
+                    ['category_id'=>2,'attribute_id'=>11,'enabled'=>0,'required'=>0],
+                    ['category_id'=>2,'attribute_id'=>12,'enabled'=>1,'required'=>1],
                 ],
                 '#__minimarket_categories' => [
                     ['id'=>1,'parent_id'=>0],
@@ -99,15 +116,17 @@ namespace MiniMarket\CategoryAttributeSmoke {
     }
     $db = new Db();
     verify(CategoryAttributes::allowedIds($db) === [10,11,12], 'all valid ids checked on server');
-    verify(CategoryAttributes::loadDirect($db,2) === [10=>1,11=>0],
+    verify(CategoryAttributes::loadDirect($db,2) === [10=>1,11=>0,12=>2],
         'explicit rules use same category-only lookup');
     $hierarchy = CategoryAttributes::loadHierarchy($db);
     verify($hierarchy['parents'] === [1=>0,2=>1], 'one all-category query');
-    verify($hierarchy['rules'] === [1=>[10=>1],2=>[11=>0]], 'one all-rules query');
-    CategoryAttributes::replaceDirect($db,2,[10=>1,11=>0]);
+    verify($hierarchy['rules'] === [1=>[10=>1],2=>[11=>0,12=>2]], 'one all-rules query');
+    CategoryAttributes::replaceDirect($db,2,[10=>1,11=>0,12=>2]);
     verify($db->writes[0][0]==='delete' && $db->writes[1][0]==='insert',
         'writes delete and replace only direct links');
-    verify(count($db->writes[1][2])===2, 'only two direct rows inserted');
+    verify(count($db->writes[1][2])===3, 'only three direct rules inserted');
+    verify(str_ends_with($db->writes[1][2][2], ',1,1'),
+        'required mode is persisted as enabled=1 required=1');
     $db->writes = [];
     CategoryAttributes::replaceDirect($db,2,[]);
     verify(count($db->writes)===1 && $db->writes[0][0]==='delete',

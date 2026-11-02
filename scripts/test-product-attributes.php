@@ -103,6 +103,36 @@ namespace MiniMarket\ProductAttributesSmoke {
         verify(true,'duplicate material choice rejected');
     }
 
+    $mandatoryDefs=[
+        50=>['id'=>50,'title'=>'Мощность','type'=>'number','is_multiple'=>false,
+             'state'=>1,'number_unit'=>'Вт','number_min'=>null,'number_max'=>null,
+             'number_step'=>null,'number_options'=>'','values'=>[]],
+        51=>['id'=>51,'title'=>'Bluetooth','type'=>'boolean','is_multiple'=>false,
+             'state'=>1,'values'=>[]],
+        52=>['id'=>52,'title'=>'Материал','type'=>'text','is_multiple'=>true,
+             'input_mode'=>'presets','text_options'=>'["Металл","Камень"]','state'=>1,'values'=>[]],
+    ];
+    $mandatoryMap=[99=>[50,51,52]];
+    $required=[50,51,52];
+    foreach ([[],['50'=>'100','51'=>'0'],['50'=>'100','51'=>'0','52'=>[]]] as $incomplete) {
+        try {
+            ProductAttributes::normalize($incomplete,99,$mandatoryDefs,$mandatoryMap,$required);
+            verify(false,'incomplete required attributes must be rejected');
+        } catch (\InvalidArgumentException $e) {
+            verify(str_starts_with($e->getMessage(),'COM_MINIMARKET_PRODUCT_ATTRIBUTES_REQUIRED:'),
+                'missing required attribute reports its ID');
+        }
+    }
+    $complete=ProductAttributes::normalize(
+        ['50'=>'0','51'=>'0','52'=>['Металл','Камень']],
+        99,$mandatoryDefs,$mandatoryMap,$required);
+    verify($complete['scalars'][50]['value']==='0'
+        && $complete['scalars'][51]['value']==='0'
+        && $complete['multi_values'][52]===['Металл','Камень'],
+        'zero numbers, No and multi materials satisfy required');
+    verify(ProductAttributes::normalize([],99,$mandatoryDefs,$mandatoryMap) !== [],
+        'legacy call without required flags stays backward compatible');
+
     $invalid=[
         [2,['11'=>['110']], 'inherited excluded size'],
         [4,['10'=>['100']], 'unassigned property'],
