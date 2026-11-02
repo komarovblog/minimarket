@@ -165,7 +165,7 @@ final class ProductAttributes
                 continue;
             }
             if (in_array($type, ['text','textarea','editor'], true)) {
-                $limit = $type === 'text' ? 1024 : 60000;
+                $limit = $type === 'text' ? 1024 : ($type === 'editor' ? 60000 : 10000);
                 if (mb_strlen($value) > $limit
                     || ($type !== 'editor' && preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u', $value))
                     || ($type === 'editor' && preg_match('/<\s*(script|iframe|object|embed|form|svg|math)\b|\bon\w+\s*=|javascript\s*:/iu', $value))) {
