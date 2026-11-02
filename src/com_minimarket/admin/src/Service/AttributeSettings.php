@@ -91,6 +91,10 @@ final class AttributeSettings
                 return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
             }
         }
+        if ((int) ($a->is_filterable ?? 0) === 1
+            && in_array($type, ['textarea', 'url'], true)) {
+            return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
+        }
         if ((int) ($a->is_filterable ?? 0) === 0) {
             $a->filter_mode = 'none';
             $a->filter_multiple = 0;
