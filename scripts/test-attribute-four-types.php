@@ -37,7 +37,7 @@ $model=file_get_contents($root.'src/Model/AttributeModel.php');
 check4(str_contains($model,'TextPresetRows::encode') && str_contains($model,'TextPresetRows::formRows'),
     'Text preset load and save through numeric-independent code');
 $field=file_get_contents($root.'src/Field/ProductattributesField.php');
-check4(str_contains($field,'Editor::getInstance'), 'product field uses native Joomla HTML editor');
+check4(str_contains($field,'EditorField::class'), 'product field uses native Joomla HTML editor');
 check4(str_contains($field,"$"."type === 'text' && $"."mode === 'presets'"),
     'typed text choices are select instead of free text');
 $products=file_get_contents($root.'src/Service/ProductAttributes.php');

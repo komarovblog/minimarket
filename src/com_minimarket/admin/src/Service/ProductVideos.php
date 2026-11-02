@@ -82,7 +82,17 @@ final class ProductVideos
                 throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
             }
             $title = trim((string) ($row['title'] ?? ''));
-            $source = self::normalizeSource((string) $row['source']);
+            $mediaPath = trim((string) ($row['media_path'] ?? ''));
+            if ($mediaPath !== '') {
+                $fragment = strpos($mediaPath, '#');
+                if ($fragment !== false) {
+                    if (!str_starts_with(substr($mediaPath, $fragment), '#joomlaImage://')) {
+                        throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
+                    }
+                    $mediaPath = substr($mediaPath, 0, $fragment);
+                }
+            }
+            $source = self::normalizeSource($mediaPath !== '' ? $mediaPath : (string) $row['source']);
             $posterInput = (string) ($row['poster'] ?? '');
             $poster = $posterInput === '' ? '' : MediaPath::normalize($posterInput);
             if ($source === null || $poster === null || isset($seen[$source]) || mb_strlen($title) > 255
@@ -108,7 +118,10 @@ final class ProductVideos
         $result = [];
         foreach ((array) $db->loadAssocList() as $row) {
             $result['row' . count($result)] = [
-                'title'=>(string)$row['title'], 'source'=>(string)$row['source'], 'poster'=>(string) ($row['poster'] ?? '')
+                'title'=>(string)$row['title'],
+                'source'=>str_starts_with((string)$row['source'], 'https://') ? (string)$row['source'] : '',
+                'media_path'=>str_starts_with((string)$row['source'], 'https://') ? '' : (string)$row['source'],
+                'poster'=>(string) ($row['poster'] ?? '')
             ];
         }
         return $result;

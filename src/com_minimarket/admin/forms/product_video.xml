@@ -3,9 +3,12 @@
     <field name="title" type="text" label="COM_MINIMARKET_VIDEO_TITLE"
            filter="string" maxlength="255" size="35" />
     <field name="source" type="text" label="COM_MINIMARKET_VIDEO_SOURCE"
-           description="COM_MINIMARKET_VIDEO_SOURCE_HELP" required="true"
+           description="COM_MINIMARKET_VIDEO_SOURCE_HELP" required="false"
            filter="string" maxlength="1024" size="70" />
     <field name="poster" type="media" label="COM_MINIMARKET_VIDEO_POSTER"
            description="COM_MINIMARKET_VIDEO_POSTER_DESC" directory="images"
            preview="true" filter="string"/>
+    <field name="media_path" type="media" label="COM_MINIMARKET_VIDEO_MEDIA_FILE"
+           description="COM_MINIMARKET_VIDEO_MEDIA_FILE_DESC"
+           types="videos" directory="images" preview="false" filter="string"/>
 </form>

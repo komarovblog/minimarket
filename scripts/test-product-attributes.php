@@ -75,7 +75,7 @@ namespace MiniMarket\ProductAttributesSmoke {
     verify($selection['scalars'][15]['value'] === '0', 'false boolean not lost');
     verify(ProductAttributes::normalize(['10'=>['102']],1,$defs,$map)['options'][10] === [102],
         'unpublished dictionary values remain editable in admin');
-    verify(ProductAttributes::normalize([], 1,$defs,$map) === ['scalars'=>[],'options'=>[]],
+    verify(ProductAttributes::normalize([], 1,$defs,$map) === ['scalars'=>[],'options'=>[],'multi_values'=>[]],
         'clear-all requires empty tables, not old data');
     verify(ProductAttributes::normalize(['11'=>''],2,$defs,$map)
         === ['scalars'=>[],'options'=>[]], 'cleared excluded field is ignored');
@@ -166,15 +166,15 @@ namespace MiniMarket\ProductAttributesSmoke {
     $loaded=ProductAttributes::load($db,12);
     verify($loaded[15]==='0' && $loaded[10]===[100],'typed values loaded with boolean false and options');
     ProductAttributes::replace($db,12,$selection);
-    verify(count($db->calls)===4,'bulk replace performs two deletes and two inserts');
+    verify(count($db->calls)===5,'bulk replace performs three deletes and two inserts');
     verify($db->calls[0][1]==='#__minimarket_product_attribute_scalars'
         && $db->calls[1][1]==='#__minimarket_product_attribute_options',
         'only product attribute relations are deleted');
-    verify(count($db->calls[2][2])===3 && count($db->calls[3][2])===5,
+    verify(count($db->calls[3][2])===3 && count($db->calls[4][2])===5,
         'three scalars and five list selections stored');
     $db->calls=[];
     ProductAttributes::replace($db,12,['scalars'=>[],'options'=>[]]);
-    verify(count($db->calls)===2,'clear-all removes only values without touching product');
+    verify(count($db->calls)===3,'clear-all removes only values without touching product');
 
     $form=simplexml_load_file(__DIR__ . '/../src/com_minimarket/admin/forms/product.xml');
     verify($form!==false,'product form valid');

@@ -196,7 +196,7 @@ final class ProductattributesField extends FormField
                     . '" label="' . $escape($def['title'])
                     . '" ' . ($type === 'editor'
                         ? 'filter="safehtml" buttons="true"'
-                        : 'directory="images" preview="false" filter="string"')
+                        : 'directory="images" types="documents" preview="false" filter="string"')
                     . '/>');
                 $field->setup($fieldXml, is_scalar($value) ? (string) $value : '', 'attribute_values');
                 $html .= $field->getInput();
