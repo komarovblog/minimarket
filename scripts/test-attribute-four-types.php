@@ -11,7 +11,8 @@ $values=TextPresetRows::encode([
 ]);
 check4(TextPresetRows::values($values)===['Джинс','Хлопок'],'text presets roundtrip');
 check4(TextPresetRows::formRows($values)['row1']['value']==='Хлопок','presets in Joomla Subform');
-foreach ([[['value'=>'A'],['value'=>'a']], [['value'=>'']], [['value'=>'<script>']]] as $invalid) {
+check4(TextPresetRows::encode([['value'=>'']])==='[]','unused blank text row ignored');
+foreach ([[['value'=>'A'],['value'=>'a']], [['value'=>'<script>']]] as $invalid) {
     try {TextPresetRows::encode($invalid);check4(false,'reject invalid text');}
     catch(InvalidArgumentException $e){check4(true,'reject invalid text');}
 }
