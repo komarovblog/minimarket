@@ -5,4 +5,7 @@
     <field name="source" type="text" label="COM_MINIMARKET_VIDEO_SOURCE"
            description="COM_MINIMARKET_VIDEO_SOURCE_HELP" required="true"
            filter="string" maxlength="1024" size="70" />
+    <field name="poster" type="media" label="COM_MINIMARKET_VIDEO_POSTER"
+           description="COM_MINIMARKET_VIDEO_POSTER_DESC" directory="images"
+           preview="true" filter="string"/>
 </form>

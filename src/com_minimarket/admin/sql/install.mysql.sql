@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_videos` (
     `product_id` INT UNSIGNED NOT NULL,
     `title` VARCHAR(255) NOT NULL DEFAULT '',
     `source` VARCHAR(1024) NOT NULL,
+    `poster` VARCHAR(1024) NOT NULL DEFAULT '',
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`),
     KEY `idx_mm_video_product_order` (`product_id`,`sort_order`,`id`),

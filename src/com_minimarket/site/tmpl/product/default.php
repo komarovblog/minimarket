@@ -73,7 +73,12 @@ $main = $images[0] ?? null;
                 $src = trim((string) ($item->source ?? ''));
                 $kind = '';
                 $player = '';
-                if (preg_match('~^(images|media)/[a-zA-Z0-9_./ -]+\\.(?:mp4|webm)$~iD', $src)
+                $poster = trim((string) ($item->poster ?? ''));
+                $posterUrl = $isSafeImage($poster) ? Uri::root() . $poster : '';
+                if (preg_match('~^https://[a-zA-Z0-9.-]+(?::443)?/[^<>"\\x00-\\x1f]+\\.(?:mp4|webm)(?:\\?[^<>"\\x00-\\x1f]*)?$~iD', $src)) {
+                    $kind = 'file';
+                    $player = $src;
+                } elseif (preg_match('~^(images|media)/[a-zA-Z0-9_./ -]+\\.(?:mp4|webm)$~iD', $src)
                     && !str_contains($src, '..') && !str_contains($src, '//')) {
                     $kind = 'file';
                     $player = Uri::root() . $src;
@@ -91,16 +96,23 @@ $main = $images[0] ?? null;
                             <h3><?php echo $this->escape((string) $item->title); ?></h3>
                         <?php endif; ?>
                         <?php if ($kind === 'file') : ?>
-                            <video controls preload="metadata" style="width:100%;max-width:720px">
+                            <video controls preload="metadata" <?php if ($posterUrl !== '') : ?>poster="<?php echo $this->escape($posterUrl); ?>"<?php endif; ?> style="width:100%;max-width:720px">
                                 <source src="<?php echo $this->escape($player); ?>">
                             </video>
                         <?php else : ?>
+                            <?php if ($posterUrl !== '') : ?>
+                                <details class="mm-video-preview">
+                                    <summary style="cursor:pointer;max-width:720px">
+                                        <img src="<?php echo $this->escape($posterUrl); ?>" alt="<?php echo $this->escape((string) ($item->title ?: Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS'))); ?>" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover">
+                                    </summary>
+                            <?php endif; ?>
                             <iframe src="<?php echo $this->escape($player); ?>" title="<?php echo $this->escape(
                                 (string) ($item->title ?: Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS'))
                             ); ?>" loading="lazy" allowfullscreen
                                 referrerpolicy="strict-origin-when-cross-origin"
                                 allow="accelerometer; encrypted-media; picture-in-picture; fullscreen"
                                 style="width:100%;max-width:720px;aspect-ratio:16/9;border:0"></iframe>
+                            <?php if ($posterUrl !== '') : ?></details><?php endif; ?>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>

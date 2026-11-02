@@ -32,6 +32,10 @@ final class ProductVideos
             return null;
         }
         $host = strtolower((string) ($parts['host'] ?? ''));
+        if (filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)
+            && preg_match('~\.(?:mp4|webm)$~iD', (string) ($parts['path'] ?? ''))) {
+            return $source;
+        }
         if (in_array($host, ['youtu.be','youtube.com','www.youtube.com','m.youtube.com'], true)) {
             $id = '';
             if ($host === 'youtu.be') {
@@ -79,12 +83,14 @@ final class ProductVideos
             }
             $title = trim((string) ($row['title'] ?? ''));
             $source = self::normalizeSource((string) $row['source']);
-            if ($source === null || isset($seen[$source]) || mb_strlen($title) > 255
+            $posterInput = (string) ($row['poster'] ?? '');
+            $poster = $posterInput === '' ? '' : MediaPath::normalize($posterInput);
+            if ($source === null || $poster === null || isset($seen[$source]) || mb_strlen($title) > 255
                 || preg_match('/[\x00-\x1f<>]/u', $title)) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
             }
             $seen[$source] = true;
-            $rows[] = ['title'=>$title,'source'=>$source,'sort_order'=>count($rows)];
+            $rows[] = ['title'=>$title,'source'=>$source,'poster'=>$poster,'sort_order'=>count($rows)];
         }
         return $rows;
     }
@@ -94,7 +100,7 @@ final class ProductVideos
     {
         if ($productId < 1) return [];
         $q = $db->getQuery(true)
-            ->select(['title','source'])
+            ->select(['title','source','poster'])
             ->from($db->quoteName('#__minimarket_product_videos'))
             ->where($db->quoteName('product_id') . ' = ' . $productId)
             ->order('sort_order ASC, id ASC');
@@ -102,7 +108,7 @@ final class ProductVideos
         $result = [];
         foreach ((array) $db->loadAssocList() as $row) {
             $result['row' . count($result)] = [
-                'title'=>(string)$row['title'], 'source'=>(string)$row['source']
+                'title'=>(string)$row['title'], 'source'=>(string)$row['source'], 'poster'=>(string) ($row['poster'] ?? '')
             ];
         }
         return $result;
@@ -121,12 +127,13 @@ final class ProductVideos
         if (!$rows) return;
         $q = $db->getQuery(true)
             ->insert($db->quoteName('#__minimarket_product_videos'))
-            ->columns($db->quoteName(['product_id','title','source','sort_order']));
+            ->columns($db->quoteName(['product_id','title','source','poster','sort_order']));
         foreach ($rows as $row) {
             $q->values(implode(',', [
                 (string) $productId,
                 $db->quote($row['title']),
                 $db->quote($row['source']),
+                $db->quote($row['poster']),
                 (string) $row['sort_order'],
             ]));
         }
@@ -147,6 +154,10 @@ final class ProductVideos
         }
         if (preg_match('~^https://rutube\.ru/video/([a-zA-Z0-9]{12,50})/$~D', $canonical, $m)) {
             return ['kind'=>'iframe','url'=>'https://rutube.ru/play/embed/' . $m[1]];
+        }
+        if (str_starts_with($canonical, 'https://')
+            && preg_match('~\.(?:mp4|webm)(?:\?.*)?$~iD', $canonical)) {
+            return ['kind'=>'file','url'=>$canonical];
         }
         return ['kind'=>'invalid','url'=>''];
     }

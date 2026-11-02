@@ -11,3 +11,5 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_attribute_multi_values` (
 
 ALTER TABLE `#__minimarket_attribute_values`
     ADD COLUMN `sample_image` VARCHAR(1024) NOT NULL DEFAULT '' AFTER `color_hex`;
+ALTER TABLE `#__minimarket_product_videos`
+    ADD COLUMN `poster` VARCHAR(1024) NOT NULL DEFAULT '' AFTER `source`;
