@@ -7,12 +7,14 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service;
 final class AttributeSettings
 {
     // Legacy kinds remain supported for existing stored records only.
-    public const TYPES = ['text','number','editor','boolean','list','textarea','date','url'];
-    public const NEW_TYPES = ['text','number','editor','boolean'];
+    public const TYPES = ['text','number','editor','boolean','document','color','list','textarea','date','url'];
+    public const NEW_TYPES = ['text','number','editor','boolean','document','color'];
     public const INPUTS = [
         'list' => ['auto','dropdown','radio','checkboxes'],
         'text' => ['auto','presets'],
         'editor' => ['auto'],
+        'document' => ['auto'],
+        'color' => ['auto','dropdown','radio','checkboxes'],
         'number' => ['auto','number','presets'],
         'textarea' => ['auto'],
         'date' => ['auto'],
@@ -23,6 +25,8 @@ final class AttributeSettings
         'list' => ['none','checkboxes','radio','dropdown'],
         'text' => ['none','text','values','checkboxes','dropdown'],
         'editor' => ['none'],
+        'document' => ['none'],
+        'color' => ['none','swatches','checkboxes','radio','dropdown'],
         'number' => ['none','range','slider','checkboxes','dropdown'],
         'textarea' => ['none'],
         'date' => ['none','date_range'],
@@ -89,20 +93,20 @@ final class AttributeSettings
             || !in_array($a->filter_multiple, [0,1], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
-        if ($type === 'list') {
+        if (in_array($type, ['list','color'], true)) {
             if (($a->input_mode === 'radio' && (int) $a->is_multiple !== 0)
                 || ($a->input_mode === 'checkboxes' && (int) $a->is_multiple !== 1)) {
                 return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
             }
         }
         if ((int) ($a->is_filterable ?? 0) === 1
-            && in_array($type, ['editor','textarea','url'], true)) {
+            && in_array($type, ['editor','document','textarea','url'], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
         if ((int) ($a->is_filterable ?? 0) === 0) {
             $a->filter_mode = 'none';
             $a->filter_multiple = 0;
-        } elseif ($a->filter_mode === 'checkboxes') {
+        } elseif (in_array($a->filter_mode, ['checkboxes','swatches'], true)) {
             $a->filter_multiple = 1;
         } elseif (!in_array($a->filter_mode, ['values','dropdown'], true)) {
             $a->filter_multiple = 0;

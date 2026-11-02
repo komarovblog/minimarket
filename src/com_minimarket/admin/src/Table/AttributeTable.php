@@ -49,7 +49,7 @@ final class AttributeTable extends Table
 
         // When switching from List to another type the hidden List-specific
         // cardinality control must not leave an invalid flag behind.
-        if ($this->input_type !== 'list') {
+        if (!in_array($this->input_type, ['list','color'], true)) {
             $this->is_multiple = 0;
         }
 
@@ -63,7 +63,7 @@ final class AttributeTable extends Table
             $this->$field = (int) $this->$field;
         }
 
-        if ($this->is_variant === 1 && $this->input_type !== 'list') {
+        if ($this->is_variant === 1 && !in_array($this->input_type, ['list','color'], true)) {
             $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT_REQUIRES_LIST'));
 
             return false;
@@ -141,7 +141,7 @@ final class AttributeTable extends Table
 
         // Do not silently discard additional product choices when an
         // administrator changes a multi-select list to single-select.
-        if ((int) $this->id > 0 && $this->input_type === 'list'
+        if ((int) $this->id > 0 && in_array($this->input_type, ['list','color'], true)
             && $this->is_multiple === 0) {
             $multipleQuery = $db->getQuery(true)
                 ->select('COUNT(*)')
@@ -158,7 +158,7 @@ final class AttributeTable extends Table
 
         // Preserve stored scalar values: a type change may reinterpret values
         // (e.g. text -> date). Require explicit cleanup before changing type.
-        if ((int) $this->id > 0 && $this->input_type !== 'list') {
+        if ((int) $this->id > 0 && !in_array($this->input_type, ['list','color'], true)) {
             $typeQuery = $db->getQuery(true)
                 ->select($db->quoteName('input_type'))
                 ->from($db->quoteName('#__minimarket_attributes'))

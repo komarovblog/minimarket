@@ -33,6 +33,8 @@ final class AttributeModel extends AdminModel
             $item->values = AttributeValueRows::formRows(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
+            $item->color_values = (string) ($item->input_type ?? '') === 'color'
+                ? $item->values : [];
             $item->number_preset_rows = NumericPresetRows::formRows(
                 (string) ($item->number_options ?? '')
             );
@@ -91,7 +93,9 @@ final class AttributeModel extends AdminModel
 
         // The native Subform provides rows in drag/drop order. Missing rows
         // with the hidden sentinel mean explicit removal of the final row.
+        $isColor = (string) ($data['input_type'] ?? '') === 'color';
         $hasValues = array_key_exists('values', $data)
+            || array_key_exists('color_values', $data)
             || !empty($data['values_present']);
         $oldValues = [];
         $newValues = [];
@@ -100,9 +104,9 @@ final class AttributeModel extends AdminModel
                 $attributeId = (int) ($data['id'] ?? 0);
                 $oldValues = AttributeValueRows::load($db, $attributeId);
                 $newValues = AttributeValueRows::normalize(
-                    $data['values'] ?? [], $oldValues
+                    ($isColor ? ($data['color_values'] ?? []) : ($data['values'] ?? [])), $oldValues
                 );
-                if ((string) ($data['input_type'] ?? '') !== 'list'
+                if (!in_array((string) ($data['input_type'] ?? ''), ['list','color'], true)
                     && $newValues !== []) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_VALUE_ROWS_INVALID');
                 }
@@ -112,8 +116,17 @@ final class AttributeModel extends AdminModel
             }
         }
 
+        if ($isColor) {
+            foreach ($newValues as $row) {
+                if ($row['color_hex'] === '') {
+                    $this->setError(Text::_('COM_MINIMARKET_COLOR_INVALID'));
+                    return false;
+                }
+            }
+        }
+
         unset($data['category_rules'], $data['categories_present'],
-            $data['values'], $data['values_present'],
+            $data['color_values'], $data['values'], $data['values_present'],
             $data['values_order'], $data['values_order_present']);
         $db->transactionStart();
         try {
@@ -125,7 +138,7 @@ final class AttributeModel extends AdminModel
                 $id = (int) $this->getState($this->getName() . '.id');
                 CategoryAttributes::replaceForAttribute($db, $id, $rules);
             }
-            if ($hasValues && (string) ($data['input_type'] ?? '') === 'list') {
+            if ($hasValues && in_array((string) ($data['input_type'] ?? ''), ['list','color'], true)) {
                 $attributeId = (int) $this->getState($this->getName() . '.id');
                 AttributeValueRows::apply($db, $attributeId, $oldValues, $newValues);
             }
