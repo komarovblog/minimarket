@@ -133,6 +133,9 @@ jobs:
         run: php scripts/test-attribute-value-rows.php
       - name: Native Joomla numeric preset repeatable input
         run: php scripts/test-numeric-preset-rows.php
+
+      - name: Four new attribute types and typed text choices
+        run: php scripts/test-attribute-four-types.php
       - name: Product videos, color swatches and document media safety
         run: php scripts/test-media-0514.php
 
