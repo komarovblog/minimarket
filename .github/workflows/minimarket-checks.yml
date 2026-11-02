@@ -126,6 +126,8 @@ jobs:
 
       - name: Attribute/value dictionaries and validation
         run: php scripts/test-attributes.php
+      - name: Seven attribute data types and independent product/filter controls
+        run: php scripts/test-attribute-presentation.php
 
       - name: Attribute values repeatable Joomla subform and data safety
         run: php scripts/test-attribute-value-rows.php
