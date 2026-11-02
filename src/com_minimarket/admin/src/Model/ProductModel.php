@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGallery;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductVideos;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 
@@ -26,9 +27,11 @@ final class ProductModel extends AdminModel
         $item = parent::getItem($pk);
         if ($item && (int) ($item->id ?? 0) > 0) {
             $item->gallery = ProductGallery::loadFormRows($this->getDatabase(), (int) $item->id);
+            $item->videos = ProductVideos::loadFormRows($this->getDatabase(), (int) $item->id);
             $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
         } elseif ($item) {
             $item->gallery = [];
+            $item->videos = [];
             $item->attribute_values = [];
         }
 
@@ -45,6 +48,7 @@ final class ProductModel extends AdminModel
         // Hidden sentinel makes an explicit empty gallery distinct from a legacy
         // form that never offered gallery editing.
         $hasGallery = array_key_exists('gallery', $data) || !empty($data['gallery_present']);
+        $hasVideos = array_key_exists('videos', $data) || !empty($data['videos_present']);
         $hasAttributes = array_key_exists('attribute_values', $data)
             || !empty($data['attributes_present']);
         try {
@@ -53,6 +57,13 @@ final class ProductModel extends AdminModel
                 : [];
         } catch (\InvalidArgumentException | \JsonException $error) {
             $this->setError(Text::_('COM_MINIMARKET_GALLERY_INVALID'));
+            return false;
+        }
+
+        try {
+            $videoRows = $hasVideos ? ProductVideos::normalize($data['videos'] ?? []) : [];
+        } catch (\InvalidArgumentException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_VIDEO_INVALID'));
             return false;
         }
 
@@ -82,7 +93,8 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['gallery'], $data['gallery_present'],
+        unset($data['videos'], $data['videos_present'],
+            $data['gallery'], $data['gallery_present'],
             $data['attribute_values'], $data['attributes_present']);
         $db->transactionStart();
 
@@ -98,6 +110,10 @@ final class ProductModel extends AdminModel
                     throw new \RuntimeException('COM_MINIMARKET_GALLERY_INVALID');
                 }
                 ProductGallery::replaceRows($db, $productId, $rows);
+            }
+            if ($hasVideos) {
+                $productId = (int) $this->getState($this->getName() . '.id');
+                ProductVideos::replace($db, $productId, $videoRows);
             }
             if ($hasAttributes) {
                 $productId = (int) $this->getState($this->getName() . '.id');
