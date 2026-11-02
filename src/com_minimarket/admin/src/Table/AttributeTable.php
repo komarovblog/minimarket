@@ -7,6 +7,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\AttributeSettings;
+use MiniMarket\Component\Minimarket\Administrator\Service\TextPresetRows;
 
 final class AttributeTable extends Table
 {
