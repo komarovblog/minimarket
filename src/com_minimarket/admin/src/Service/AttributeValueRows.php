@@ -17,7 +17,7 @@ final class AttributeValueRows
             return [];
         }
         $q = $db->getQuery(true)
-            ->select(['id', 'title', 'code', 'color_hex', 'state', 'sort_order'])
+            ->select(['id', 'title', 'code', 'color_hex', 'sample_image', 'state', 'sort_order'])
             ->from($db->quoteName('#__minimarket_attribute_values'))
             ->where($db->quoteName('attribute_id') . ' = ' . $attributeId)
             ->order($db->quoteName('sort_order') . ' ASC, ' . $db->quoteName('id') . ' ASC');
@@ -29,6 +29,7 @@ final class AttributeValueRows
                 'title' => (string) $item['title'],
                 'code' => (string) $item['code'],
                 'color_hex' => (string) ($item['color_hex'] ?? ''),
+                'sample_image' => (string) ($item['sample_image'] ?? ''),
                 'state' => (int) $item['state'],
                 'sort_order' => (int) $item['sort_order'],
             ];
@@ -46,6 +47,7 @@ final class AttributeValueRows
                 'title' => $value['title'],
                 'code' => $value['code'],
                 'color_hex' => $value['color_hex'],
+                'sample_image' => $value['sample_image'],
                 'state' => $value['state'],
             ];
         }
@@ -87,6 +89,9 @@ final class AttributeValueRows
             $title = trim((string) ($row['title'] ?? ''));
             $code = strtolower(trim((string) ($row['code'] ?? '')));
             $state = (string) ($row['state'] ?? '1');
+            $sample = MediaPath::normalize((string) ($row['sample_image'] ?? ($id > 0
+                ? ($existing[$id]['sample_image'] ?? '') : '')));
+            if ($sample === null) throw new \InvalidArgumentException('COM_MINIMARKET_VALUE_ROWS_INVALID');
             $hex = trim((string) ($row['color_hex'] ?? ($id > 0
                 ? ($existing[$id]['color_hex'] ?? '') : '')));
             if ($id > 0 && (!isset($existing[$id]) || isset($seenIds[$id]))) {
@@ -120,7 +125,7 @@ final class AttributeValueRows
             $seenCodes[$code] = true;
             $result[] = [
                 'id' => $id, 'title' => $title, 'code' => $code,
-                'state' => (int) $state, 'color_hex' => strtoupper($hex), 'sort_order' => count($result),
+                'state' => (int) $state, 'color_hex' => strtoupper($hex), 'sample_image' => $sample, 'sort_order' => count($result),
             ];
         }
         return $result;
@@ -193,6 +198,7 @@ final class AttributeValueRows
                         $db->quoteName('title') . ' = ' . $db->quote($row['title']),
                         $db->quoteName('code') . ' = ' . $db->quote($row['code']),
                         $db->quoteName('color_hex') . ' = ' . $db->quote($row['color_hex']),
+                        $db->quoteName('sample_image') . ' = ' . $db->quote($row['sample_image']),
                         $db->quoteName('state') . ' = ' . (int) $row['state'],
                         $db->quoteName('sort_order') . ' = ' . (int) $row['sort_order'],
                     ])
@@ -202,13 +208,14 @@ final class AttributeValueRows
                 $q = $db->getQuery(true)
                     ->insert($db->quoteName('#__minimarket_attribute_values'))
                     ->columns($db->quoteName([
-                        'attribute_id','title','code','color_hex','state','sort_order'
+                        'attribute_id','title','code','color_hex','sample_image','state','sort_order'
                     ]))
                     ->values(implode(',', [
                         (int) $attributeId,
                         $db->quote($row['title']),
                         $db->quote($row['code']),
                         $db->quote($row['color_hex']),
+                        $db->quote($row['sample_image']),
                         (int) $row['state'],
                         (int) $row['sort_order'],
                     ]));

@@ -126,7 +126,10 @@ final class ProductattributesField extends FormField
                             . ($checked ? ' checked' : '') . '>'
                             . '<label class="form-check-label" for="'
                             . $escape($inputId . '_' . $counter) . '">'
-                            . ($type === 'color' && preg_match('/^#[a-fA-F0-9]{6}$/D', (string) ($option['color_hex'] ?? ''))
+                            . (!empty($option['sample_image'])
+                                ? '<img src="' . $escape(\Joomla\CMS\Uri\Uri::root() . $option['sample_image'])
+                                    . '" alt="" loading="lazy" style="width:24px;height:24px;object-fit:cover;vertical-align:middle;margin-right:.4em">' : '')
+                            . ($type === 'color' && empty($option['sample_image']) && preg_match('/^#[a-fA-F0-9]{6}$/D', (string) ($option['color_hex'] ?? ''))
                                 ? '<span aria-hidden="true" style="display:inline-block;width:1.25em;height:1.25em;border:1px solid currentColor;vertical-align:middle;margin-right:.4em;background:'
                                     . $escape($option['color_hex']) . '"></span>' : '')
                             . $escape($option['title'])

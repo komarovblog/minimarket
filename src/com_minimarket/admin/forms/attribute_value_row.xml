@@ -10,4 +10,5 @@
         <option value="1">JPUBLISHED</option>
         <option value="0">JUNPUBLISHED</option>
     </field>
+    <field name="sample_image" type="media" label="COM_MINIMARKET_VALUE_SAMPLE_IMAGE" directory="images" preview="true" filter="string"/>
 </form>

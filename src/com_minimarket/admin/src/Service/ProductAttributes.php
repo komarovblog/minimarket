@@ -40,7 +40,7 @@ final class ProductAttributes
             ];
         }
         $q = $db->getQuery(true)
-            ->select(['id','attribute_id','title','state','color_hex'])
+            ->select(['id','attribute_id','title','state','color_hex','sample_image'])
             ->from($db->quoteName('#__minimarket_attribute_values'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -50,6 +50,7 @@ final class ProductAttributes
                 $attributes[$attributeId]['values'][(int) $row['id']] = [
                     'title' => (string) $row['title'],
                     'color_hex' => (string) ($row['color_hex'] ?? ''),
+                    'sample_image' => (string) ($row['sample_image'] ?? ''),
                     'state' => (int) $row['state'],
                 ];
             }

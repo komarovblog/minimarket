@@ -8,3 +8,6 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_attribute_multi_values` (
     CONSTRAINT `fk_mm_multi_product` FOREIGN KEY (`product_id`) REFERENCES `#__minimarket_products`(`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_mm_multi_attr` FOREIGN KEY (`attribute_id`) REFERENCES `#__minimarket_attributes`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `#__minimarket_attribute_values`
+    ADD COLUMN `sample_image` VARCHAR(1024) NOT NULL DEFAULT '' AFTER `color_hex`;

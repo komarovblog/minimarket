@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_attribute_values` (
     `title` VARCHAR(255) NOT NULL,
     `code` VARCHAR(100) NOT NULL,
     `color_hex` CHAR(7) NOT NULL DEFAULT '',
+    `sample_image` VARCHAR(1024) NOT NULL DEFAULT '',
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     `state` TINYINT NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`),
