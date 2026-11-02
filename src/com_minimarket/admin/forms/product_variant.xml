@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+  <field name="id" type="hidden" filter="int" default="0"/>
+  <field name="selection" type="hidden" filter="raw" default="{}"/>
+  <field name="sku" type="text" label="COM_MINIMARKET_VARIANT_SKU" maxlength="100" required="true" filter="string"/>
+  <field name="price" type="number" label="COM_MINIMARKET_VARIANT_PRICE" min="0" max="9999999999999.99" step="0.01" required="true" filter="raw"/>
+  <field name="stock" type="number" label="COM_MINIMARKET_VARIANT_STOCK" min="0" max="4294967295" step="1" required="true" filter="raw"/>
+  <field name="image" type="media" label="COM_MINIMARKET_VARIANT_IMAGE" directory="images" filter="string"/>
+  <field name="image_alt" type="text" label="COM_MINIMARKET_VARIANT_IMAGE_ALT" maxlength="255" filter="string"/>
+  <field name="photos" type="subform" label="COM_MINIMARKET_VARIANT_PHOTOS"
+         formsource="administrator/components/com_minimarket/forms/product_gallery.xml"
+         multiple="true" min="0" max="15" buttons="add,remove,move"
+         layout="joomla.form.field.subform.repeatable" validate="Subform"/>
+  <field name="state" type="list" label="JSTATUS" filter="int" default="1">
+    <option value="1">JPUBLISHED</option><option value="0">JUNPUBLISHED</option>
+  </field>
+</form>

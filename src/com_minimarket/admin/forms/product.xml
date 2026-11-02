@@ -43,6 +43,15 @@
                multiple="true" min="0" max="20" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable" validate="Subform"/>
     </fieldset>
+    <fieldset name="variants" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS">
+        <field name="variants_present" type="hidden" default="1" filter="int"/>
+        <field name="variant_info" type="Variantinfo" label="COM_MINIMARKET_VARIANT_AXES" filter="raw"/>
+        <field name="variants" type="subform" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS"
+               description="COM_MINIMARKET_VARIANTS_HELP"
+               formsource="administrator/components/com_minimarket/forms/product_variant.xml"
+               multiple="true" min="0" max="200" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform"/>
+    </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>
         <field name="meta_description" type="textarea" label="COM_MINIMARKET_META_DESCRIPTION"
