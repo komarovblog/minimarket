@@ -50,7 +50,8 @@ final class ProductAttributes
 
     /**
      * Compute eligibility for every category in one read of the hierarchy.
-     * Published attributes only; rules may still refer to unpublished attrs.
+     * All assigned attributes, including drafts, remain editable in admin.
+     * Publication state only affects public storefront/filter visibility.
      * @return array<int,int[]> category => allowed attribute IDs
      */
     public static function categoryMap(array $hierarchy, array $definitions): array
@@ -62,7 +63,7 @@ final class ProductAttributes
             );
             $map[(int) $categoryId] = [];
             foreach ($effective as $attrId => $source) {
-                if (isset($definitions[$attrId]) && $definitions[$attrId]['state'] === 1) {
+                if (isset($definitions[$attrId])) {
                     $map[(int) $categoryId][] = (int) $attrId;
                 }
             }
@@ -136,7 +137,7 @@ final class ProductAttributes
                     if (!is_scalar($candidate) || !ctype_digit((string) $candidate)
                         || (int) $candidate < 1 || isset($selected[(int) $candidate])
                         || !isset($def['values'][(int) $candidate])
-                        || $def['values'][(int) $candidate]['state'] !== 1) {
+                        ) {
                         throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                     }
                     $selected[(int) $candidate] = (int) $candidate;

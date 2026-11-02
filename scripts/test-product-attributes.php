@@ -45,7 +45,7 @@ namespace MiniMarket\ProductAttributesSmoke {
     verify($map[1] === [10,11,12,13,14,15], 'parent category includes all published assignments');
     verify($map[2] === [10,12,13,14,15], 'child excludes inherited Size');
     verify($map[3] === [10,11,12,14,15], 'sibling excludes Width only');
-    verify($map[4] === [], 'unpublished attribute excluded even with explicit enable');
+    verify($map[4] === [16], 'draft attribute remains editable in admin, hidden publicly later');
     $selection=ProductAttributes::normalize([
         '10'=>['100','101'], '11'=>['110','111'], '12'=>'120',
         '13'=>'-12.5', '14'=>'Heavy cotton', '15'=>'0'
@@ -56,6 +56,8 @@ namespace MiniMarket\ProductAttributesSmoke {
     verify($selection['scalars'][13]['value'] === '-12.5', 'decimal number saved');
     verify($selection['scalars'][14]['value'] === 'Heavy cotton', 'text property saved');
     verify($selection['scalars'][15]['value'] === '0', 'false boolean not lost');
+    verify(ProductAttributes::normalize(['10'=>['102']],1,$defs,$map)['options'][10] === [102],
+        'unpublished dictionary values remain editable in admin');
     verify(ProductAttributes::normalize([], 1,$defs,$map) === ['scalars'=>[],'options'=>[]],
         'clear-all requires empty tables, not old data');
     verify(ProductAttributes::normalize(['11'=>''],2,$defs,$map)
@@ -64,8 +66,8 @@ namespace MiniMarket\ProductAttributesSmoke {
     $invalid=[
         [2,['11'=>['110']], 'inherited excluded size'],
         [4,['10'=>['100']], 'unassigned property'],
-        [1,['16'=>'wrong'], 'unpublished property'],
-        [1,['10'=>['102']], 'unpublished dictionary value'],
+        [1,['16'=>'wrong'], 'attribute unassigned in this category'],
+        [1,['10'=>['999']], 'unknown dictionary value'],
         [1,['10'=>['120']], 'value belongs to different property'],
         [1,['12'=>['120','121']], 'single-valued list cannot accept two'],
         [1,['10'=>['100','100']], 'repeated list option'],

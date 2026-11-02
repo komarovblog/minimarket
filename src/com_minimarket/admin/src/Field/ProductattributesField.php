@@ -58,6 +58,10 @@ final class ProductattributesField extends FormField
                 . '" data-mm-attribute-row="' . $id . '">'
                 . '<label class="form-label fw-semibold" for="' . $escape($inputId) . '">'
                 . $escape($def['title']) . '</label>';
+            if ($def['state'] !== 1) {
+                $html .= ' <small class="badge bg-secondary">'
+                    . $escape(Text::_('JUNPUBLISHED')) . '</small>';
+            }
             if ($def['is_variant']) {
                 $html .= ' <small class="text-muted">'
                     . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_VARIANT_NOTICE')) . '</small>';
@@ -69,16 +73,16 @@ final class ProductattributesField extends FormField
             if ($type === 'list' && $def['is_variant']) {
                 $n = 0;
                 foreach ($def['values'] as $optionId => $option) {
-                    if ($option['state'] !== 1 && !in_array($optionId, $values, true)) {
-                        continue;
-                    }
                     $checked = in_array($optionId, $values, true) && $hasStored;
                     $html .= '<div class="form-check"><input class="form-check-input" type="checkbox"'
                         . ' id="' . $escape($inputId . '_' . $n) . '" name="' . $escape($name . '[]')
                         . '" value="' . $optionId . '"' . ($checked ? ' checked' : '')
-                        . ($option['state'] !== 1 ? ' disabled' : '') . '>'
+                        . '>'
                         . '<label class="form-check-label" for="' . $escape($inputId . '_' . $n) . '">'
-                        . $escape($option['title']) . '</label></div>';
+                        . $escape($option['title'])
+                        . ($option['state'] !== 1
+                            ? ' (' . $escape(Text::_('JUNPUBLISHED')) . ')' : '')
+                        . '</label></div>';
                     ++$n;
                 }
             } elseif ($type === 'list' || $type === 'boolean') {
@@ -89,16 +93,14 @@ final class ProductattributesField extends FormField
                     ? ['1' => Text::_('JYES'), '0' => Text::_('JNO')]
                     : $def['values'];
                 foreach ($options as $optionId => $option) {
-                    if ($type === 'list' && $option['state'] !== 1
-                        && (string) $optionId !== (string) $value) {
-                        continue;
-                    }
                     $label = $type === 'boolean' ? $option : $option['title'];
                     $selectedOption = (string) $optionId === (string) $value && $hasStored;
                     $html .= '<option value="' . $escape((string) $optionId) . '"'
                         . ($selectedOption ? ' selected' : '')
-                        . ($type === 'list' && $option['state'] !== 1 ? ' disabled' : '')
-                        . '>' . $escape((string) $label) . '</option>';
+                        . '>' . $escape((string) $label)
+                        . ($type === 'list' && $option['state'] !== 1
+                            ? ' (' . $escape(Text::_('JUNPUBLISHED')) . ')' : '')
+                        . '</option>';
                 }
                 $html .= '</select>';
             } else {
