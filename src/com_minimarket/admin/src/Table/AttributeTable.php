@@ -126,6 +126,20 @@ final class AttributeTable extends Table
                 $this->setError(Text::_('COM_MINIMARKET_TEXT_PRESETS_IN_USE'));
                 return false;
             }
+            // Removed preset values must also be checked against multi-selections.
+            $q = $db->getQuery(true)
+                ->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_product_attribute_multi_values'))
+                ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id);
+            if ($items) {
+                $q->where($db->quoteName('value_text') . ' NOT IN (' .
+                    implode(',', array_map([$db,'quote'], $items)) . ')');
+            }
+            $db->setQuery($q);
+            if ((int) $db->loadResult() > 0) {
+                $this->setError(Text::_('COM_MINIMARKET_TEXT_PRESETS_IN_USE'));
+                return false;
+            }
         }
 
         $query = $db->getQuery(true)
@@ -171,31 +185,33 @@ final class AttributeTable extends Table
             }
         }
 
-        // Preserve stored scalar values: a type change may reinterpret values
-        // (e.g. text -> date). Require explicit cleanup before changing type.
-        if ((int) $this->id > 0 && !in_array($this->input_type, ['list','color'], true)) {
-            $typeQuery = $db->getQuery(true)
-                ->select($db->quoteName('input_type'))
+        // Never reinterpret an attribute with live saved values, regardless of
+        // which source or target type is selected (scalar, list, or multi).
+        if ((int) $this->id > 0) {
+            $q = $db->getQuery(true)->select($db->quoteName('input_type'))
                 ->from($db->quoteName('#__minimarket_attributes'))
                 ->where($db->quoteName('id') . ' = ' . (int) $this->id);
-            $db->setQuery($typeQuery);
-            $previousType = (string) ($db->loadResult() ?? '');
-            if ($previousType !== '' && $previousType !== $this->input_type) {
-                $existingScalar = $db->getQuery(true)
-                    ->select('COUNT(*)')
-                    ->from($db->quoteName('#__minimarket_product_attribute_scalars'))
-                    ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id);
-                $db->setQuery($existingScalar);
-                if ((int) $db->loadResult() > 0) {
-                    $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE_HAS_VALUES'));
-                    return false;
+            $db->setQuery($q);
+            $oldType = (string) ($db->loadResult() ?? '');
+            if ($oldType !== '' && $oldType !== $this->input_type) {
+                foreach (['#__minimarket_product_attribute_scalars',
+                    '#__minimarket_product_attribute_options',
+                    '#__minimarket_product_attribute_multi_values'] as $table) {
+                    $q = $db->getQuery(true)->select('COUNT(*)')
+                        ->from($db->quoteName($table))
+                        ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id);
+                    $db->setQuery($q);
+                    if ((int) $db->loadResult() > 0) {
+                        $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE_HAS_VALUES'));
+                        return false;
+                    }
                 }
             }
         }
 
         // Existing list dictionaries must not become uneditable or orphaned
         // when an admin changes the input type to text/number/boolean.
-        if ((int) $this->id > 0 && $this->input_type !== 'list') {
+        if ((int) $this->id > 0 && !in_array($this->input_type, ['list','color'], true)) {
             $valuesQuery = $db->getQuery(true)
                 ->select('COUNT(*)')
                 ->from($db->quoteName('#__minimarket_attribute_values'))

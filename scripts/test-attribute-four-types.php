@@ -1,5 +1,5 @@
 <?php
-/** Source-level regression for 0.5.14 four visible types, old lists preserved. */
+/** Source-level regression for 0.5.15 six visible types, old lists preserved. */
 declare(strict_types=1);
 define('_JEXEC', 1);
 require __DIR__ . '/../src/com_minimarket/admin/src/Service/TextPresetRows.php';
@@ -28,8 +28,8 @@ check4(count($attr->xpath("//field[@name='text_preset_rows' and @type='subform']
 check4(count($attr->xpath("//field[@name='number_preset_rows' and @type='subform']"))===1,
     'Number presets still use standard repeatable Joomla form');
 $settings=file_get_contents($root.'src/Service/AttributeSettings.php');
-check4(str_contains($settings,"NEW_TYPES = ['text','number','editor','boolean']"),
-    'four types for newly created attributes');
+check4(str_contains($settings,"NEW_TYPES = ['text','number','editor','boolean','document','color']"),
+    'six types for newly created attributes');
 $table=file_get_contents($root.'src/Table/AttributeTable.php');
 check4(str_contains($table,'COM_MINIMARKET_LEGACY_TYPE_NEW_FORBIDDEN'),
     'old ID-based list can be edited but not newly created');

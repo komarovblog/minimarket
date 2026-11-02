@@ -89,8 +89,9 @@ final class AttributeValueRows
             $title = trim((string) ($row['title'] ?? ''));
             $code = strtolower(trim((string) ($row['code'] ?? '')));
             $state = (string) ($row['state'] ?? '1');
-            $sample = MediaPath::normalize((string) ($row['sample_image'] ?? ($id > 0
-                ? ($existing[$id]['sample_image'] ?? '') : '')));
+            $sampleInput = (string) ($row['sample_image'] ?? ($id > 0
+                ? ($existing[$id]['sample_image'] ?? '') : ''));
+            $sample = $sampleInput === '' ? '' : MediaPath::normalize($sampleInput);
             if ($sample === null) throw new \InvalidArgumentException('COM_MINIMARKET_VALUE_ROWS_INVALID');
             $hex = trim((string) ($row['color_hex'] ?? ($id > 0
                 ? ($existing[$id]['color_hex'] ?? '') : '')));
