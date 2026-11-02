@@ -11,11 +11,11 @@ use Joomla\Database\DatabaseInterface;
  */
 final class ProductAttributes
 {
-    /** @return array<int,array{id:int,title:string,type:string,is_variant:bool,is_multiple:bool,state:int,values:array<int,array{title:string,state:int}>}> */
+    /** @return array<int,array<string,mixed>> */
     public static function definitions(DatabaseInterface $db): array
     {
         $q = $db->getQuery(true)
-            ->select(['id','title','input_type','is_variant','is_multiple','state'])
+            ->select(['id','title','input_type','input_mode','number_options','number_unit','number_min','number_max','number_step','is_variant','is_multiple','state'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -28,6 +28,12 @@ final class ProductAttributes
                 'type' => (string) $row['input_type'],
                 'is_variant' => (int) $row['is_variant'] === 1,
                 'is_multiple' => (int) $row['is_multiple'] === 1,
+                'input_mode' => (string) ($row['input_mode'] ?? 'auto'),
+                'number_options' => (string) ($row['number_options'] ?? ''),
+                'number_unit' => (string) ($row['number_unit'] ?? ''),
+                'number_min' => isset($row['number_min']) ? (string) $row['number_min'] : null,
+                'number_max' => isset($row['number_max']) ? (string) $row['number_max'] : null,
+                'number_step' => isset($row['number_step']) ? (string) $row['number_step'] : null,
                 'state' => (int) $row['state'],
                 'values' => [],
             ];
@@ -155,12 +161,43 @@ final class ProductAttributes
             if ($value === '') {
                 continue;
             }
-            if ($type === 'text') {
-                if (mb_strlen($value) > 1024 || preg_match('/[\x00-\x1f<>]/', $value)) {
+            if ($type === 'text' || $type === 'textarea') {
+                $limit = $type === 'text' ? 1024 : 10000;
+                if (mb_strlen($value) > $limit
+                    || preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u', $value)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                 }
             } elseif ($type === 'number') {
-                if (!preg_match('/^-?(?:0|[1-9][0-9]{0,13})(?:\.[0-9]{1,4})?$/D', $value)) {
+                if (!AttributeSettings::decimal($value)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
+                }
+                if (!AttributeSettings::inRange(
+                    $value, $def['number_min'] ?? null, $def['number_max'] ?? null
+                )) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NUMERIC_INVALID');
+                }
+                $options = AttributeSettings::numericOptions((string) ($def['number_options'] ?? ''));
+                if (($def['input_mode'] ?? 'auto') === 'presets'
+                    && !in_array(AttributeSettings::canonicalDecimal($value), $options, true)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NUMERIC_INVALID');
+                }
+                $step = $def['number_step'] ?? null;
+                if ($step !== null && (float) $step > 0) {
+                    $origin = (float) ($def['number_min'] ?? 0);
+                    $remainder = fmod(abs((float) $value - $origin), (float) $step);
+                    if ($remainder > 0.00001 && abs($remainder - (float) $step) > 0.00001) {
+                        throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NUMERIC_INVALID');
+                    }
+                }
+            } elseif ($type === 'date') {
+                if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/D', $value, $parts)
+                    || !checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
+                }
+            } elseif ($type === 'url') {
+                if (strlen($value) > 1024 || filter_var($value, FILTER_VALIDATE_URL) === false
+                    || !in_array(strtolower((string) parse_url($value, PHP_URL_SCHEME)),
+                        ['http','https'], true)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                 }
             } elseif ($type === 'boolean') {
@@ -196,7 +233,7 @@ final class ProductAttributes
                 $value = $row['value'];
                 $q->values(implode(',',[
                     (string) $productId, (string) (int) $id,
-                    $type === 'text' ? $db->quote($value) : 'NULL',
+                    in_array($type, ['text','textarea','date','url'], true) ? $db->quote($value) : 'NULL',
                     $type === 'number' ? $db->quote($value) : 'NULL',
                     $type === 'boolean' ? (string) (int) $value : 'NULL',
                 ]));
