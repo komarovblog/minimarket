@@ -19,10 +19,12 @@ final class HtmlView extends BaseHtmlView
     public function display($tpl = null)
     {
         $this->items = $this->get('Items');
-        $input = Factory::getApplication()->input;
-        $this->search = trim($input->getString('mm_search', ''));
-        $requestedState = $input->getCmd('mm_state', 'all');
-        $this->stateFilter = in_array($requestedState, ['all', '0', '1'], true)
+        $this->filterForm = $this->get('FilterForm');
+        $this->activeFilters = $this->get('ActiveFilters');
+        $this->state = $this->get('State');
+        $this->search = trim((string) $this->state->get('filter.search', ''));
+        $requestedState = (string) $this->state->get('filter.published', '');
+        $this->stateFilter = in_array($requestedState, ['0','1'], true)
             ? $requestedState : 'all';
         $this->rows = CategoryAdminTree::flatten(
             $this->items,

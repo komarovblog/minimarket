@@ -15,6 +15,11 @@ final class HtmlView extends BaseHtmlView
     public function display($tpl = null)
     {
         $this->items = $this->get('Items');
+        $this->pagination = $this->get('Pagination');
+        $this->filterForm = $this->get('FilterForm');
+        $this->activeFilters = $this->get('ActiveFilters');
+        $this->state = $this->get('State');
+
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ATTRIBUTES'));
 
         if (Factory::getApplication()->getIdentity()->authorise('core.create', 'com_minimarket')) {

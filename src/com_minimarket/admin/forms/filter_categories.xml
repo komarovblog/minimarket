@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <fields name="filter">
+        <field name="search" type="text" inputmode="search"
+               label="COM_MINIMARKET_CATEGORY_FILTER_SEARCH" hint="JSEARCH_FILTER" />
+        <field name="published" type="list" label="JSTATUS" class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_CATEGORY_ALL_STATUSES</option>
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+    </fields>
+</form>

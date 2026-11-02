@@ -31,6 +31,11 @@ final class CategoriesModel extends ListModel
             )
             ->order($db->quoteName('c.id') . ' ASC');
     }
+    protected function populateState($ordering = 'c.sort_order', $direction = 'ASC')
+    {
+        parent::populateState($ordering, $direction);
+    }
+
     /** All categories are required to assemble the tree, not a single flat page. */
     public function getItems()
     {

@@ -3,7 +3,6 @@ namespace MiniMarket\Component\Minimarket\Administrator\Model;
 
 \defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\ListModel;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAdminTree;
 
@@ -12,8 +11,6 @@ final class ProductsModel extends ListModel
     protected function getListQuery()
     {
         $db = $this->getDatabase();
-        $input = Factory::getApplication()->input;
-
         $query = $db->getQuery(true)
             ->select([
                 $db->quoteName('p.id'),
@@ -32,17 +29,17 @@ final class ProductsModel extends ListModel
             ->join('INNER', $db->quoteName('#__minimarket_categories', 'c')
                 . ' ON ' . $db->quoteName('p.category_id') . ' = ' . $db->quoteName('c.id'));
 
-        $categoryId = $input->getInt('mm_category', 0);
+        $categoryId = (int) $this->getState('filter.category_id');
         if ($categoryId > 0) {
             $query->where($db->quoteName('p.category_id') . ' = ' . $categoryId);
         }
 
-        $state = $input->getCmd('mm_state', 'all');
+        $state = (string) $this->getState('filter.published');
         if ($state === '0' || $state === '1') {
             $query->where($db->quoteName('p.state') . ' = ' . (int) $state);
         }
 
-        $search = trim($input->getString('mm_search', ''));
+        $search = trim((string) $this->getState('filter.search'));
         if ($search !== '') {
             $like = $db->quote('%' . $db->escape($search, true) . '%', false);
             $query->where('(' . $db->quoteName('p.title') . ' LIKE ' . $like
@@ -51,17 +48,21 @@ final class ProductsModel extends ListModel
                 . ')');
         }
 
-        $sort = $input->getCmd('mm_sort', 'newest');
-        $orders = [
-            'newest' => 'p.id DESC',
-            'title' => 'p.title ASC, p.id ASC',
-            'price_asc' => 'p.price ASC, p.id ASC',
-            'price_desc' => 'p.price DESC, p.id ASC',
-            'order' => 'p.sort_order ASC, p.id ASC',
-        ];
-        $query->order($orders[$sort] ?? $orders['newest']);
+        $fullOrdering = trim(
+            (string) $this->getState('list.ordering', 'p.id') . ' '
+            . (string) $this->getState('list.direction', 'DESC')
+        );
+        $allowed = ['p.id ASC','p.id DESC','p.title ASC','p.title DESC',
+            'p.price ASC','p.price DESC','p.sort_order ASC'];
+        $query->order(in_array($fullOrdering, $allowed, true) ? $fullOrdering : 'p.id DESC')
+            ->order('p.id ASC');
 
         return $query;
+    }
+
+    protected function populateState($ordering = 'p.id', $direction = 'DESC')
+    {
+        parent::populateState($ordering, $direction);
     }
 
     /** One read for the category filter; no N+1 query for category ancestry. */
