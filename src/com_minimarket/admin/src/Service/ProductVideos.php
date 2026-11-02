@@ -78,7 +78,7 @@ final class ProductVideos
         foreach ($input as $row) {
             $row = is_object($row) ? (array) $row : $row;
             if (!is_array($row) || !is_scalar($row['title'] ?? '')
-                || !is_scalar($row['source'] ?? null)) {
+                || !is_scalar($row['source'] ?? '') || !is_scalar($row['media_path'] ?? '')) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
             }
             $title = trim((string) ($row['title'] ?? ''));

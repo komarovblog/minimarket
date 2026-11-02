@@ -18,6 +18,7 @@ namespace MiniMarket\MediaSmoke {
     \define('_JEXEC',1);
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/ProductVideos.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeValueRows.php';
+    require __DIR__ . '/../src/com_minimarket/admin/src/Service/MediaPath.php';
     $checks=0;
     function check(bool $ok,string $why):void {global $checks;++$checks;if(!$ok)throw new \RuntimeException('MEDIA_0514_FAIL: '.$why);}
     $rows=ProductVideos::normalize([
@@ -34,6 +35,13 @@ namespace MiniMarket\MediaSmoke {
     check(str_starts_with(ProductVideos::player($rows[2]['source'])['url'],
         'https://rutube.ru/play/embed/'),'RuTube embed');
     check(ProductVideos::normalize('{}')===[],'empty Joomla subform');
+    $cloud=ProductVideos::normalize([['title'=>'Cloud','source'=>'https://cdn.example.org/video/demo.mp4',
+        'poster'=>'images/covers/video.webp']]);
+    check($cloud[0]['poster']==='images/covers/video.webp','video cover saved');
+    check(ProductVideos::player($cloud[0]['source'])['kind']==='file','HTTPS cloud video');
+    $local=ProductVideos::normalize([['title'=>'Media picker','source'=>'',
+        'media_path'=>'images/video/demo.webm']]);
+    check($local[0]['source']==='images/video/demo.webm','Joomla media video selected');
     foreach([
         [['source'=>'javascript:alert(1)']],
         [['source'=>'https://evil.example/xyz']],

@@ -78,7 +78,7 @@ namespace MiniMarket\ProductAttributesSmoke {
     verify(ProductAttributes::normalize([], 1,$defs,$map) === ['scalars'=>[],'options'=>[],'multi_values'=>[]],
         'clear-all requires empty tables, not old data');
     verify(ProductAttributes::normalize(['11'=>''],2,$defs,$map)
-        === ['scalars'=>[],'options'=>[]], 'cleared excluded field is ignored');
+        === ['scalars'=>[],'options'=>[],'multi_values'=>[]], 'cleared excluded field is ignored');
 
     $other=ProductAttributes::normalize([
         '19'=>'1500','20'=>'2026-11-02','21'=>"Multiline\nDetails",'22'=>'https://example.org/manual'
@@ -87,6 +87,21 @@ namespace MiniMarket\ProductAttributesSmoke {
     verify($other['scalars'][20]['value']==='2026-11-02','date stored in ISO format');
     verify($other['scalars'][21]['value']==="Multiline\nDetails",'textarea preserves newlines');
     verify($other['scalars'][22]['value']==='https://example.org/manual','URL stored as validated text');
+
+    $materialDefs=[32=>['id'=>32,'title'=>'Material','type'=>'text','is_multiple'=>true,
+        'input_mode'=>'presets','text_options'=>'["Металл","Камень"]',
+        'is_variant'=>false,'state'=>1,'values'=>[]]];
+    $material=ProductAttributes::normalize(['32'=>['Металл','Камень']],20,
+        $materialDefs,[20=>[32]]);
+    verify($material['multi_values'][32]===['Металл','Камень'],
+        'two independent material values, without combining into one string');
+    verify($material['scalars']===[],'multiple material values are not scalar joined text');
+    try {
+        ProductAttributes::normalize(['32'=>['Металл','Металл']],20,$materialDefs,[20=>[32]]);
+        verify(false,'duplicate material choice must be rejected');
+    } catch (\InvalidArgumentException $e) {
+        verify(true,'duplicate material choice rejected');
+    }
 
     $invalid=[
         [2,['11'=>['110']], 'inherited excluded size'],

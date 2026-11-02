@@ -89,6 +89,7 @@ try {
         'admin/sql/updates/mysql/0.5.11.sql',
         'admin/sql/updates/mysql/0.5.12.sql',
         'admin/sql/updates/mysql/0.5.14.sql',
+        'admin/sql/updates/mysql/0.5.15.sql',
         'admin/src/Service/TextPresetRows.php',
         'admin/src/Service/ProductVideos.php',
         'admin/forms/attribute_text_preset_row.xml',
@@ -187,7 +188,7 @@ try {
             exit 1
         }
     }
-    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple' and @type='list' and @showon='input_type:list,color']")) {
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple' and @type='list' and @showon='input_type:list,color,text']")) {
         Write-Output 'PACKAGE_FAIL: VALUE_CARDINALITY_FORM_MISSING'
         exit 1
     }

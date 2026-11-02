@@ -12,6 +12,10 @@ $values=TextPresetRows::encode([
 check4(TextPresetRows::values($values)===['Джинс','Хлопок'],'text presets roundtrip');
 check4(TextPresetRows::formRows($values)['row1']['value']==='Хлопок','presets in Joomla Subform');
 check4(TextPresetRows::encode([['value'=>'']])==='[]','unused blank text row ignored');
+$swatch=TextPresetRows::encode([['value'=>'Мрамор','image'=>'images/materials/marble.webp']]);
+check4(TextPresetRows::values($swatch)===['Мрамор'],'legacy strings plus swatch metadata readable');
+check4(TextPresetRows::formRows($swatch)['row0']['image']==='images/materials/marble.webp',
+    'material sample image roundtrip');
 foreach ([[['value'=>'A'],['value'=>'a']], [['value'=>'<script>']]] as $invalid) {
     try {TextPresetRows::encode($invalid);check4(false,'reject invalid text');}
     catch(InvalidArgumentException $e){check4(true,'reject invalid text');}

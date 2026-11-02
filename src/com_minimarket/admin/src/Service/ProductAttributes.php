@@ -215,7 +215,7 @@ final class ProductAttributes
                 $value = \Joomla\CMS\Filter\InputFilter::getInstance()->clean($value, 'HTML');
             } elseif ($type === 'document') {
                 if (strlen($value) > 1024
-                    || !preg_match('~^(?:images|media)/[a-zA-Z0-9_./ -]+\.(?:pdf|doc|docx|xls|xlsx|txt|md)$~iD', $value)
+                    || !preg_match('~^(?:images|files|media)/[a-zA-Z0-9_./ -]+\.(?:pdf|doc|docx|xls|xlsx|txt|md)$~iD', $value)
                     || str_contains($value, '..') || str_contains($value, '//')) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_DOCUMENT_INVALID');
                 }
