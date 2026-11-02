@@ -236,12 +236,15 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->filter_mode = 'date_range';
     $check($attribute->check() === false, 'URL cannot use a date filter');
     $attribute->filter_mode = 'none';
+    $check($attribute->check() === false, 'URL cannot be configured as a catalog facet');
+    $attribute->is_filterable = 0;
     $attribute->input_type = 'textarea';
     $check($attribute->check() === true, 'multiline text supported without filter');
     $attribute->input_type = 'list';
     $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
     $attribute->input_mode = 'checkboxes';
+    $attribute->is_filterable = 1;
     $attribute->filter_mode = 'dropdown';
     $attribute->filter_multiple = 1;
     $check($attribute->check() === true, 'list multi and filter multi independent');
