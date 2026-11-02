@@ -7,6 +7,8 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGallery;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 
 final class ProductModel extends AdminModel
 {
@@ -24,8 +26,10 @@ final class ProductModel extends AdminModel
         $item = parent::getItem($pk);
         if ($item && (int) ($item->id ?? 0) > 0) {
             $item->gallery = ProductGallery::loadFormRows($this->getDatabase(), (int) $item->id);
+            $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
         } elseif ($item) {
             $item->gallery = [];
+            $item->attribute_values = [];
         }
 
         return $item;
@@ -41,13 +45,36 @@ final class ProductModel extends AdminModel
         // Hidden sentinel makes an explicit empty gallery distinct from a legacy
         // form that never offered gallery editing.
         $hasGallery = array_key_exists('gallery', $data) || !empty($data['gallery_present']);
+        $hasAttributes = array_key_exists('attribute_values', $data)
+            || !empty($data['attributes_present']);
         try {
             $rows = $hasGallery
-                ? ProductGallery::normalizeRows($data['gallery'], (string) ($data['image'] ?? ''))
+                ? ProductGallery::normalizeRows($data['gallery'] ?? [], (string) ($data['image'] ?? ''))
                 : [];
         } catch (\InvalidArgumentException | \JsonException $error) {
             $this->setError(Text::_('COM_MINIMARKET_GALLERY_INVALID'));
             return false;
+        }
+
+        $db = $this->getDatabase();
+        $normalized = ['scalars' => [], 'options' => []];
+        if ($hasAttributes) {
+            try {
+                $definitions = ProductAttributes::definitions($db);
+                $hierarchy = CategoryAttributes::loadHierarchy($db);
+                $categoryMap = ProductAttributes::categoryMap($hierarchy, $definitions);
+                $normalized = ProductAttributes::normalize(
+                    $data['attribute_values'] ?? [],
+                    (int) ($data['category_id'] ?? 0),
+                    $definitions,
+                    $categoryMap
+                );
+            } catch (\InvalidArgumentException $error) {
+                $message = $error->getMessage();
+                $this->setError(Text::_(str_starts_with($message, 'COM_MINIMARKET_')
+                    ? $message : 'COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID'));
+                return false;
+            }
         }
 
         if ($hasGallery && $rows && trim((string) ($data['image'] ?? '')) === '') {
@@ -55,8 +82,8 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['gallery'], $data['gallery_present']);
-        $db = $this->getDatabase();
+        unset($data['gallery'], $data['gallery_present'],
+            $data['attribute_values'], $data['attributes_present']);
         $db->transactionStart();
 
         try {
@@ -72,11 +99,15 @@ final class ProductModel extends AdminModel
                 }
                 ProductGallery::replaceRows($db, $productId, $rows);
             }
+            if ($hasAttributes) {
+                $productId = (int) $this->getState($this->getName() . '.id');
+                ProductAttributes::replace($db, $productId, $normalized);
+            }
             $db->transactionCommit();
             return true;
         } catch (\Throwable $error) {
             $db->transactionRollback();
-            $this->setError(Text::_('COM_MINIMARKET_GALLERY_SAVE_FAILED'));
+            $this->setError(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_SAVE_FAILED'));
             return false;
         }
     }
