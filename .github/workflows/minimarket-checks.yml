@@ -127,6 +127,10 @@ jobs:
 
       - name: Attribute editor List values navigation
         run: php scripts/test-attribute-values-navigation.php
+      - name: Attribute values ordering, safety and return navigation
+        run: php scripts/test-attribute-value-ordering.php
+      - name: Attribute values sorting JS syntax
+        run: node --check src/com_minimarket/media/js/attribute-values-sort.js
 
       - name: Bulk admin actions and reverse category relation
         run: php scripts/test-admin-bulk.php

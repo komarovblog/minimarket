@@ -98,6 +98,8 @@ try {
         'admin/src/Controller/AttributesController.php',
         'admin/src/Controller/ValuesController.php',
         'admin/forms/attribute.xml',
+        'admin/src/Service/AttributeValueOrdering.php',
+        'media/js/attribute-values-sort.js',
         'admin/forms/value.xml',
         'admin/src/Table/AttributeTable.php',
         'admin/src/Table/ValueTable.php',
@@ -153,6 +155,12 @@ try {
     finally {
         $attrReader.Dispose()
     }
+    if ($null -eq $attrXml.SelectSingleNode("/form/field[@name='values_order' and @filter='raw']") -or
+        $null -eq $attrXml.SelectSingleNode("/form/field[@name='values_order_present']")) {
+        Write-Output 'PACKAGE_FAIL: VALUES_ORDER_FORM_FIELDS_MISSING'
+        exit 1
+    }
+
     if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='categories']/field[@name='category_rules' and @type='Attributecategories']")) {
         Write-Output 'PACKAGE_FAIL: REVERSE_CATEGORY_FIELD_MISSING'
         exit 1
@@ -167,7 +175,9 @@ try {
         $attributeEditReader.Dispose()
     }
     if (-not $attributeEditSource.Contains("'minimarket-attribute', 'values'") -or
-        -not $attributeEditSource.Contains('view=value&layout=edit&attribute_id=')) {
+        -not $attributeEditSource.Contains('view=value&layout=edit&attribute_id=') -or
+        -not $attributeEditSource.Contains('data-mm-values-sort') -or
+        $attributeEditSource.Contains('COM_MINIMARKET_EDIT_VALUES')) {
         Write-Output 'PACKAGE_FAIL: ATTRIBUTE_VALUES_TAB_NOT_RENDERED'
         exit 1
     }
