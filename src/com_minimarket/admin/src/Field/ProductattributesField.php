@@ -34,6 +34,14 @@ final class ProductattributesField extends FormField
                 $used[(int) $id] = true;
             }
         }
+        // Even when the last category assignment is removed, preserve visible
+        // access to previously stored values: do not silently erase them.
+        foreach ($selected as $id => $value) {
+            if (ctype_digit((string) $id) && isset($definitions[(int) $id])
+                && $value !== '' && $value !== null && $value !== []) {
+                $used[(int) $id] = true;
+            }
+        }
 
         $html = '<div data-mm-product-attributes data-mm-category-map="'
             . $escape((string) json_encode($map, JSON_THROW_ON_ERROR))
