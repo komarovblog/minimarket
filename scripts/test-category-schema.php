@@ -277,7 +277,7 @@ verify($beforePresentationSelections === (int) $pdo->query(
 )->fetchColumn(), '0.5.12 preserves selected dictionary option IDs');
 verify((int) $pdo->query(
     'SELECT filter_multiple FROM catci_minimarket_attributes WHERE id=1'
-)->fetchColumn() === 0, '0.5.12 initial filter selection defaults off for unpublished settings');
+)->fetchColumn() === 1, '0.5.12 preserves existing list filter intent as multi-checkboxes');
 $pdo->exec("UPDATE catci_minimarket_attributes
     SET input_type='number',input_mode='presets',number_options='1000,1500,2000',
         number_unit='Вт',number_min=1000,number_max=2000,number_step=500,
