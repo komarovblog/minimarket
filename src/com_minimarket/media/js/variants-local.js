@@ -14,6 +14,17 @@
   const generate=root.querySelector('[data-mm-generate]');
   const variantsEditor=root.closest('[data-mm-variants-editor]');
   const form=variantsEditor?.querySelector('.subform-repeatable');
+  const nativeAdd=()=>Array.from(form?.querySelectorAll('button.group-add, a.group-add') || [])
+    .find(button=>button.closest('.subform-repeatable')===form);
+  // New local SKU rows are generated from combinations. The raw "+" would
+  // create an unusable empty-selection SKU, so keep it for our generator only.
+  const hideNativeAdd=()=> {
+    const action=nativeAdd();
+    if(action){
+      action.hidden=true;
+      action.setAttribute('aria-hidden','true');
+    }
+  };
   const labels=JSON.parse(root.dataset.mmLabels || '{}');
   const t=(key,fallback)=>labels[key] || fallback;
   const selectionSelector='input[type="hidden"][name^="jform[variants]"][name$="[selection]"]';
@@ -169,7 +180,7 @@
       panel.appendChild(button(t('confirm','Add selected SKU rows'),async()=>{
         const selected=new Set(Array.from(panel.querySelectorAll('input[data-mm-combo]:checked')).map(x=>x.dataset.mmCombo));
         const pending=missing.filter(x=>selected.has(canon(x.selection)));
-        const action=by('button.group-add, a.group-add',form||document);
+        const action=nativeAdd();
         if(!form || !action){show(t('nativeUnavailable','Cannot locate Joomla SKU editor.'),true);return;}
         try{
           for(const row of pending) await appendSku(action,row);
@@ -237,4 +248,5 @@
     observer.observe(form,{childList:true,subtree:true});
   }
   draw();
+  hideNativeAdd();
 })();
