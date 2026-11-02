@@ -66,6 +66,19 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_images` (
         ON UPDATE RESTRICT ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `#__minimarket_product_videos` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `product_id` INT UNSIGNED NOT NULL,
+    `title` VARCHAR(255) NOT NULL DEFAULT '',
+    `source` VARCHAR(1024) NOT NULL,
+    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_mm_video_product_order` (`product_id`,`sort_order`,`id`),
+    CONSTRAINT `fk_mm_video_product` FOREIGN KEY (`product_id`)
+        REFERENCES `#__minimarket_products`(`id`)
+        ON UPDATE RESTRICT ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `#__minimarket_attributes` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
@@ -95,6 +108,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_attribute_values` (
     `attribute_id` INT UNSIGNED NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `code` VARCHAR(100) NOT NULL,
+    `color_hex` CHAR(7) NOT NULL DEFAULT '',
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     `state` TINYINT NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`),

@@ -4,7 +4,7 @@
         <field name="id" type="hidden" default="0" filter="int"/>
         <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
         <field name="code" type="text" label="COM_MINIMARKET_ATTRIBUTE_CODE" description="COM_MINIMARKET_ATTRIBUTE_CODE_DESC" required="true" filter="string" size="40"/>
-        <field name="input_type" type="list" label="COM_MINIMARKET_ATTRIBUTE_TYPE" description="COM_MINIMARKET_ATTRIBUTE_TYPE_DESC" default="list" filter="cmd">
+        <field name="input_type" type="list" label="COM_MINIMARKET_ATTRIBUTE_TYPE" description="COM_MINIMARKET_ATTRIBUTE_TYPE_DESC" default="text" filter="cmd">
             <!-- Existing ID-based List attributes remain editable for legacy catalog data.
                  The editor hides this option when creating a new attribute. -->
             <option value="list">COM_MINIMARKET_ATTRIBUTE_LEGACY_LIST</option>
@@ -12,6 +12,8 @@
             <option value="number">COM_MINIMARKET_ATTRIBUTE_NUMBER</option>
             <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
             <option value="editor">COM_MINIMARKET_ATTRIBUTE_EDITOR</option>
+            <option value="document">COM_MINIMARKET_ATTRIBUTE_DOCUMENT</option>
+            <option value="color">COM_MINIMARKET_ATTRIBUTE_COLOR</option>
             <!-- Older records still use these types. No new records may select them. -->
             <option value="textarea">COM_MINIMARKET_ATTRIBUTE_TEXTAREA</option>
             <option value="date">COM_MINIMARKET_ATTRIBUTE_DATE</option>
@@ -54,7 +56,7 @@
                min="0.0001" step="0.0001" filter="raw" showon="input_type:number"/>
         <field name="is_multiple" type="list" label="COM_MINIMARKET_ATTRIBUTE_MULTIPLE"
                description="COM_MINIMARKET_ATTRIBUTE_MULTIPLE_DESC"
-               default="0" filter="int" showon="input_type:list">
+               default="0" filter="int" showon="input_type:list,color">
             <option value="0">COM_MINIMARKET_ATTRIBUTE_SINGLE</option>
             <option value="1">COM_MINIMARKET_ATTRIBUTE_MULTI</option>
         </field>
@@ -88,6 +90,13 @@
         <field name="state" type="list" label="JSTATUS" default="0" filter="int">
             <option value="0">JUNPUBLISHED</option><option value="1">JPUBLISHED</option>
         </field>
+        <field name="color_values" type="subform"
+               label="COM_MINIMARKET_COLOR_OPTIONS"
+               description="COM_MINIMARKET_COLOR_OPTIONS_DESC"
+               formsource="administrator/components/com_minimarket/forms/attribute_color_row.xml"
+               multiple="true" min="0" max="1000" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform"
+               showon="input_type:color"/>
         <field name="values" type="subform"
                label="COM_MINIMARKET_ATTR_VALUES_TAB"
                description="COM_MINIMARKET_VALUE_INLINE_HELP"

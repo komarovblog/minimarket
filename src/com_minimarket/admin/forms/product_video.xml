@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <field name="title" type="text" label="COM_MINIMARKET_VIDEO_TITLE"
+           filter="string" maxlength="255" size="35" />
+    <field name="source" type="text" label="COM_MINIMARKET_VIDEO_SOURCE"
+           description="COM_MINIMARKET_VIDEO_SOURCE_HELP" required="true"
+           filter="string" maxlength="1024" size="70" />
+</form>

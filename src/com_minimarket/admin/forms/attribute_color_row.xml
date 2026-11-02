@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <field name="id" type="hidden" default="0" filter="int"/>
+    <field name="title" type="text" label="JGLOBAL_TITLE" required="true"
+           filter="string" maxlength="255" size="30"/>
+    <field name="code" type="text" label="COM_MINIMARKET_VALUE_CODE" required="false"
+           description="COM_MINIMARKET_VALUE_CODE_AUTO" filter="string" maxlength="100"/>
+    <field name="color_hex" type="color" label="COM_MINIMARKET_COLOR_HEX"
+           required="true" default="#000000"/>
+    <field name="state" type="list" label="JSTATUS" default="1" filter="int">
+      <option value="1">JPUBLISHED</option><option value="0">JUNPUBLISHED</option>
+    </field>
+</form>
