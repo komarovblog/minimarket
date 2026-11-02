@@ -8,6 +8,8 @@
   try { baseImages = JSON.parse(root.dataset.mmGalleryBase || '[]'); } catch (_) {}
   if (!Array.isArray(variants) || !variants.length) return;
   const selects = Array.from(root.querySelectorAll('[data-mm-variant-axis]'));
+  const startId = Number(root.dataset.mmSelected || 0);
+  let lastSelected = variants.find(v => v.id === startId) || variants[0];
   const details = {
     sku: document.querySelector('[data-mm-variant-sku]'),
     price: document.querySelector('[data-mm-variant-price]'),
@@ -63,10 +65,11 @@
     let selected = variants.find(v => selects.every(s =>
       v.selection[s.dataset.mmVariantAxis] === values[s.dataset.mmVariantAxis]));
     if (!selected && changed) {
-      const choices = variants.filter(v => v.selection[changed.dataset.mmVariantAxis] === changed.value);
-      selected = choices.find(v => v.stock > 0) || choices[0] || variants[0];
+      // Never silently substitute an unavailable combination.
+      selected = lastSelected;
     }
-    if (!selected) selected = variants.find(v => v.stock > 0) || variants[0];
+    if (!selected) selected = lastSelected;
+    lastSelected = selected;
     selects.forEach(s => { s.value = selected.selection[s.dataset.mmVariantAxis] || ''; });
     if (details.sku) details.sku.textContent = selected.sku;
     if (details.price) details.price.textContent = selected.price;

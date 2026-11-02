@@ -32,6 +32,15 @@ foreach ($this->gallery as $photo) {
 $images = array_values($images);
 $baseImages = $images;
 $defaultVariant = $this->variants['items'][0] ?? null;
+$requestedVariant = (int) \Joomla\CMS\Factory::getApplication()->input->getInt('variant', 0);
+if ($requestedVariant > 0) {
+    foreach ($this->variants['items'] as $availableVariant) {
+        if ((int) $availableVariant['id'] === $requestedVariant) {
+            $defaultVariant = $availableVariant;
+            break;
+        }
+    }
+}
 if ($defaultVariant) {
     $variantImages = [];
     $variantCover = (string) $defaultVariant['image'];
@@ -141,6 +150,7 @@ $main = $images[0] ?? null;
     <?php endif; ?>
     <?php if (!empty($this->variants['items'])) : ?>
         <section class="mm-variants" data-mm-variants
+             data-mm-selected="<?php echo (int) ($defaultVariant['id'] ?? 0); ?>"
              data-mm-variants-data="<?php echo $this->escape(json_encode(
                  $this->variants['items'],
                  JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR

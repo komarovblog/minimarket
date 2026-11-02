@@ -22,6 +22,8 @@ final class VariantCatalog
         $db->setQuery($q);
         $variantRows = (array) $db->loadAssocList();
         if (!$variantRows) return $empty;
+        $local=self::loadLocal($db,$productId,$variantRows);
+        if ($local !== null) return $local;
         $q = $db->getQuery(true)->select(['category_id','attribute_id','enabled'])
             ->from($db->quoteName('#__minimarket_category_attributes'))
             ->where($db->quoteName('category_id') . ' IN (' . implode(',', $ancestors) . ')');
@@ -123,6 +125,95 @@ final class VariantCatalog
         usort($items, static fn(array $a,array $b): int =>
             (($b['stock'] > 0) <=> ($a['stock'] > 0)) ?: 0);
         return ['axes'=>$axes, 'items'=>$items];
+    }
+
+    /**
+     * Local option values take priority; they require no global category
+     * attributes, and only real matching value assignments are public.
+     * Returns null when an old-format product has no local options.
+     */
+    private static function loadLocal(DatabaseInterface $db,int $productId,array $variantRows): ?array
+    {
+        $empty=['axes'=>[],'items'=>[]];
+        $q=$db->getQuery(true)->select(['id','code','title'])
+            ->from($db->quoteName('#__minimarket_variant_dimensions'))
+            ->where($db->quoteName('product_id').' = '.$productId)
+            ->order('sort_order ASC,id ASC');
+        $db->setQuery($q);
+        $dimensions=(array)$db->loadAssocList();
+        if (!$dimensions) return null;
+        if (count($dimensions)>4) return $empty;
+        $axes=[];$axisIds=[];$valueMap=[];
+        foreach ($dimensions as $d) {
+            $code=(string)$d['code'];$id=(int)$d['id'];
+            $axes[$code]=['title'=>(string)$d['title'],'options'=>[]];
+            $axisIds[$id]=$code;
+        }
+        $q=$db->getQuery(true)->select(['id','dimension_id','code','title'])
+            ->from($db->quoteName('#__minimarket_variant_dimension_values'))
+            ->where($db->quoteName('dimension_id').' IN ('.implode(',',array_keys($axisIds)).')')
+            ->order('sort_order ASC,id ASC');
+        $db->setQuery($q);
+        foreach ((array)$db->loadAssocList() as $value) {
+            $axisCode=$axisIds[(int)$value['dimension_id']]??null;
+            if ($axisCode===null)continue;
+            $vcode=(string)$value['code'];$id=(int)$value['id'];
+            $axes[$axisCode]['options'][]=['value'=>'v:'.$vcode,'title'=>(string)$value['title']];
+            $valueMap[$id]=[$axisCode,'v:'.$vcode];
+        }
+        foreach ($axes as $axis) if (!$axis['options'])return $empty;
+        $ids=array_map('intval',array_column($variantRows,'id'));
+        $q=$db->getQuery(true)->select(['variant_id','dimension_id','value_id'])
+            ->from($db->quoteName('#__minimarket_variant_value_assignments'))
+            ->where($db->quoteName('variant_id').' IN ('.implode(',',$ids).')');
+        $db->setQuery($q);
+        $assigned=[];
+        foreach ((array)$db->loadAssocList() as $row) {
+            $variantId=(int)$row['variant_id'];
+            $dimId=(int)$row['dimension_id'];$valueId=(int)$row['value_id'];
+            if (isset($axisIds[$dimId],$valueMap[$valueId])
+                && $valueMap[$valueId][0]===$axisIds[$dimId]) {
+                $assigned[$variantId][$axisIds[$dimId]]=$valueMap[$valueId][1];
+            }
+        }
+        $items=[];
+        foreach ($variantRows as $r) {
+            $id=(int)$r['id'];
+            $selection=$assigned[$id]??[];
+            if (count($selection)!==count($axes))continue;
+            $json=json_decode((string)$r['selection_json'],true);
+            if (!is_array($json)||$json!=$selection)continue;
+            $items[]=[
+                'id'=>$id,'selection'=>$selection,'sku'=>(string)$r['sku'],
+                'price'=>(string)$r['price'],'stock'=>(int)$r['stock'],
+                'image'=>self::safeImage((string)($r['image']??'')),
+                'image_alt'=>(string)($r['image_alt']??''),'photos'=>[]
+            ];
+        }
+        if (!$items) return $empty;
+        return ['axes'=>$axes,'items'=>self::withPhotos($db,$items)];
+    }
+
+    /** Add all photos with one query; no per-SKU gallery round trips. */
+    private static function withPhotos(DatabaseInterface $db,array $items): array
+    {
+        $ids=array_column($items,'id');
+        $index=array_flip($ids);
+        $q=$db->getQuery(true)->select(['variant_id','path','alt'])
+            ->from($db->quoteName('#__minimarket_product_variant_images'))
+            ->where($db->quoteName('variant_id').' IN ('.implode(',',$ids).')')
+            ->order('variant_id ASC, sort_order ASC, id ASC');
+        $db->setQuery($q);
+        foreach ((array)$db->loadAssocList() as $r) {
+            $path=self::safeImage((string)$r['path']);
+            $i=$index[(int)$r['variant_id']]??null;
+            if ($i!==null && $path!=='') {
+                $items[$i]['photos'][]=['path'=>$path,'alt'=>(string)$r['alt']];
+            }
+        }
+        usort($items,static fn(array $a,array $b):int=>
+            (($b['stock']>0)<=>(($a['stock']>0)))?:0);
+        return $items;
     }
 
     private static function safeImage(string $path): string
