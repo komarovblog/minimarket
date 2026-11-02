@@ -290,6 +290,29 @@ verify((string) $pdo->query(
 )->fetchColumn() === 'slider', '0.5.12 stores filter presentation independently');
 verify($beforePresentationProduct === row($pdo, 'catci_minimarket_products'),
     '0.5.12 attribute metadata update never changes commercial values');
+// 0.5.14: no impact on existing catalog or option selections.
+$oldProduct = row($pdo, 'catci_minimarket_products');
+$oldOptionsCount = (int) $pdo->query(
+    'SELECT COUNT(*) FROM catci_minimarket_product_attribute_options'
+)->fetchColumn();
+runSql($pdo, $dir . 'updates/mysql/0.5.14.sql', 'catci_');
+verify($oldProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.14 preserves product SKU, price, stock, image, URL and ID');
+verify($oldOptionsCount === (int) $pdo->query(
+    'SELECT COUNT(*) FROM catci_minimarket_product_attribute_options'
+)->fetchColumn(), '0.5.14 preserves selected color option IDs');
+$pdo->exec("UPDATE catci_minimarket_attribute_values
+    SET color_hex='#FF0000' WHERE attribute_id=1");
+verify((string) $pdo->query(
+    'SELECT color_hex FROM catci_minimarket_attribute_values WHERE attribute_id=1 LIMIT 1'
+)->fetchColumn() === '#FF0000', '0.5.14 swatches use original dictionary value IDs');
+$pdo->exec("INSERT INTO catci_minimarket_product_videos
+    (product_id, title, source, sort_order)
+    VALUES (1,'Demo','https://www.youtube.com/watch?v=dQw4w9WgXcQ',0)");
+verify((int) $pdo->query(
+    'SELECT COUNT(*) FROM catci_minimarket_product_videos WHERE product_id=1'
+)->fetchColumn() === 1,'0.5.14 videos linked without editing product fields');
+$pdo->exec('DROP TABLE catci_minimarket_product_videos');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_options');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_scalars');
 
@@ -319,20 +342,25 @@ foreach (['id','product_id','path','alt','sort_order'] as $col) {
 }
 $freshAttrColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','title','code','input_type','input_mode','number_options','number_unit',
+foreach (['id','title','code','input_type','input_mode','number_options','text_options','number_unit',
     'number_min','number_max','number_step','is_variant','is_multiple','is_filterable',
     'filter_mode','filter_multiple','sort_order','state'] as $col) {
     verify(in_array($col, $freshAttrColumns, true), 'fresh 0.5.4 attribute column ' . $col);
 }
 $freshValueColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attribute_values')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','attribute_id','title','code','sort_order','state'] as $col) {
+foreach (['id','attribute_id','title','code','color_hex','sort_order','state'] as $col) {
     verify(in_array($col, $freshValueColumns, true), 'fresh 0.5.4 value column ' . $col);
 }
 $freshAssignmentColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_category_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['category_id','attribute_id','enabled'] as $col) {
     verify(in_array($col, $freshAssignmentColumns, true), 'fresh 0.5.5 assignment column ' . $col);
+}
+$freshVideos = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_videos')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','product_id','title','source','sort_order'] as $col) {
+    verify(in_array($col,$freshVideos,true),'fresh video relation column '.$col);
 }
 $freshScalars = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_attribute_scalars')
     ->fetchAll(PDO::FETCH_COLUMN);
