@@ -158,6 +158,8 @@ namespace MiniMarket\AttributesSmoke {
     $attribute = new AttributeTable($db);
     $attribute->title = ' Цвет ';
     $attribute->code = 'COLOR';
+    // Legacy List can still be edited; new attributes no longer expose List.
+    $attribute->id = 10;
     $attribute->input_type = 'list';
     $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
@@ -273,6 +275,21 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->state = 7;
     $check($attribute->check() === false, 'bad state rejected');
     $attribute->state = 1;
+    $attribute->id = 0;
+    $attribute->input_type = 'list';
+    $check($attribute->check() === false, 'new legacy List attributes disallowed');
+    $attribute->input_type = 'document';
+    $attribute->is_variant = 0;
+    $attribute->is_filterable = 0;
+    $attribute->input_mode = 'auto';
+    $attribute->filter_mode = 'none';
+    $check($attribute->check() === true, 'new Document attributes allowed');
+    $attribute->input_type = 'color';
+    $attribute->is_variant = 1;
+    $attribute->is_multiple = 1;
+    $attribute->filter_mode = 'swatches';
+    $attribute->is_filterable = 1;
+    $check($attribute->check() === true, 'new Color attributes allow variant swatches');
     $attribute->input_type = 'unknown';
     $check($attribute->check() === false, 'unsupported attribute type rejected');
 
