@@ -264,6 +264,32 @@ verify((int) $pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_attribut
 $pdo->exec('UPDATE catci_minimarket_attributes SET is_variant=0 WHERE id=1');
 verify((int) $pdo->query('SELECT is_multiple FROM catci_minimarket_attributes WHERE id=1')->fetchColumn() === 1,
     '0.5.11 allows normal multi-select without SKU flag');
+// 0.5.12: metadata changes and scalar TEXT widening must not rewrite products or values.
+$beforePresentationProduct = row($pdo, 'catci_minimarket_products');
+$beforePresentationSelections = (int) $pdo->query(
+    'SELECT COUNT(*) FROM catci_minimarket_product_attribute_options'
+)->fetchColumn();
+runSql($pdo, $dir . 'updates/mysql/0.5.12.sql', 'catci_');
+verify($beforePresentationProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.12 preserves product SKU, price, stock, URL and category');
+verify($beforePresentationSelections === (int) $pdo->query(
+    'SELECT COUNT(*) FROM catci_minimarket_product_attribute_options'
+)->fetchColumn(), '0.5.12 preserves selected dictionary option IDs');
+verify((int) $pdo->query(
+    'SELECT filter_multiple FROM catci_minimarket_attributes WHERE id=1'
+)->fetchColumn() === 0, '0.5.12 initial filter selection defaults off for unpublished settings');
+$pdo->exec("UPDATE catci_minimarket_attributes
+    SET input_type='number',input_mode='presets',number_options='1000,1500,2000',
+        number_unit='Вт',number_min=1000,number_max=2000,number_step=500,
+        filter_mode='slider',filter_multiple=0 WHERE id=3");
+verify((string) $pdo->query(
+    "SELECT input_mode FROM catci_minimarket_attributes WHERE id=3"
+)->fetchColumn() === 'presets', '0.5.12 stores numeric input independently');
+verify((string) $pdo->query(
+    "SELECT filter_mode FROM catci_minimarket_attributes WHERE id=3"
+)->fetchColumn() === 'slider', '0.5.12 stores filter presentation independently');
+verify($beforePresentationProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.12 attribute metadata update never changes commercial values');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_options');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_scalars');
 
@@ -293,7 +319,9 @@ foreach (['id','product_id','path','alt','sort_order'] as $col) {
 }
 $freshAttrColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','title','code','input_type','is_variant','is_multiple','is_filterable','sort_order','state'] as $col) {
+foreach (['id','title','code','input_type','input_mode','number_options','number_unit',
+    'number_min','number_max','number_step','is_variant','is_multiple','is_filterable',
+    'filter_mode','filter_multiple','sort_order','state'] as $col) {
     verify(in_array($col, $freshAttrColumns, true), 'fresh 0.5.4 attribute column ' . $col);
 }
 $freshValueColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attribute_values')
