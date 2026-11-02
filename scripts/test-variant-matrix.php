@@ -46,6 +46,7 @@ namespace MiniMarket\MatrixSmoke {
         [[['title' => 'Цвет', 'values' => []]], 'empty choices'],
         [[['title' => '', 'values' => ['S']]], 'empty axis'],
         [[['title' => 'Размер', 'values' => ['S', 'S']]], 'duplicate choices'],
+        [[['title' => 'Размер', 'values' => [['title'=>'S','code'=>'v1'],['title'=>'S','code'=>'v2']]]], 'duplicate labels with distinct codes'],
         [[['title' => 'Размер', 'values' => [['title'=>'S','code'=>'s'], ['title'=>'Small','code'=>'s']]]], 'duplicate choice code'],
         [[['title' => 'Размер', 'values' => ['S']], ['title' => 'Размер', 'values' => ['M']]], 'duplicate axes'],
         [[['title' => 'Размер', 'values' => ['S'], 'code' => '../evil']], 'unsafe axis code'],
