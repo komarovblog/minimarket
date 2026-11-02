@@ -114,6 +114,35 @@ namespace MiniMarket\VariantSmoke {
         }
     }
 
+    require __DIR__.'/../src/com_minimarket/admin/src/Service/ProductLocalDimensions.php';
+    require __DIR__.'/../src/com_minimarket/admin/src/Service/VariantMatrix.php';
+    $local=\MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix::normalize([
+        ['code'=>'color','title'=>'Цвет','values'=>[
+           ['code'=>'red','title'=>'Красный'],['code'=>'blue','title'=>'Синий']]],
+        ['code'=>'size','title'=>'Размер','values'=>['S','M','L']],
+    ]);
+    $localAxes=\MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions::axesForVariants($local);
+    ok(array_keys($localAxes)===['color','size'],'product-local axes do not need a category or global attribute');
+    $newLocal=$a;
+    $newLocal['selection']='{"color":"v:red","size":"v:s"}';
+    $newLocal['sku']='LOCAL-RED-S';
+    $savedLocal=V::normalize([$newLocal],$localAxes);
+    ok($savedLocal[0]['sku']==='LOCAL-RED-S','new local SKU is validated');
+    ok($savedLocal[0]['selection_json']==='{"color":"v:red","size":"v:s"}',
+       'stable local selectors retained for import');
+    try {
+        $newLocal['selection']='{"color":"v:fake","size":"v:s"}';
+        V::normalize([$newLocal],$localAxes);
+        ok(false,'invalid local choice accepted');
+    } catch (\InvalidArgumentException $e) {
+        ok(true,'invalid local choice rejected');
+    }
+    $productForm=file_get_contents(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
+    ok(str_contains($productForm,'name="variant_config" type="Variantbuilder"'),
+       'local options editor is on product form');
+    ok(str_contains(file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php'),
+       'ProductLocalDimensions::replace'),'local options saved in product transaction');
+
     $form=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_variant.xml');
     $parent=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
     ok($form!==false && $parent!==false,'XML forms valid');
