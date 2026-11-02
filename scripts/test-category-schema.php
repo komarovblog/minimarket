@@ -312,6 +312,32 @@ $pdo->exec("INSERT INTO catci_minimarket_product_videos
 verify((int) $pdo->query(
     'SELECT COUNT(*) FROM catci_minimarket_product_videos WHERE product_id=1'
 )->fetchColumn() === 1,'0.5.14 videos linked without editing product fields');
+// 0.5.15 and 0.5.16: additive attribute media and mandatory category rules.
+$beforeMandatoryProduct = row($pdo, 'catci_minimarket_products');
+$previousLink = $pdo->query(
+    'SELECT category_id,attribute_id,enabled FROM catci_minimarket_category_attributes ORDER BY attribute_id'
+)->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo, $dir . 'updates/mysql/0.5.15.sql', 'catci_');
+runSql($pdo, $dir . 'updates/mysql/0.5.16.sql', 'catci_');
+$links = $pdo->query(
+    'SELECT category_id,attribute_id,enabled,required FROM catci_minimarket_category_attributes ORDER BY attribute_id'
+)->fetchAll(PDO::FETCH_ASSOC);
+verify(count($links) === count($previousLink), 'required migration preserves every category assignment');
+foreach ($previousLink as $i => $row) {
+    verify($row['category_id'] === $links[$i]['category_id']
+        && $row['attribute_id'] === $links[$i]['attribute_id']
+        && $row['enabled'] === $links[$i]['enabled']
+        && (int) $links[$i]['required'] === 0,
+        'existing category relation remains unchanged and optional');
+}
+$pdo->exec("UPDATE catci_minimarket_category_attributes SET required=1
+    WHERE category_id=1 AND attribute_id=1");
+verify((int) $pdo->query("SELECT required FROM catci_minimarket_category_attributes
+    WHERE category_id=1 AND attribute_id=1")->fetchColumn() === 1,
+    'required flag can be saved');
+verify($beforeMandatoryProduct === row($pdo, 'catci_minimarket_products'),
+    '0.5.16 does not modify product data or URL');
+$pdo->exec('DROP TABLE catci_minimarket_product_attribute_multi_values');
 $pdo->exec('DROP TABLE catci_minimarket_product_videos');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_options');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_scalars');
@@ -349,17 +375,17 @@ foreach (['id','title','code','input_type','input_mode','number_options','text_o
 }
 $freshValueColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attribute_values')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','attribute_id','title','code','color_hex','sort_order','state'] as $col) {
+foreach (['id','attribute_id','title','code','color_hex','sample_image','sort_order','state'] as $col) {
     verify(in_array($col, $freshValueColumns, true), 'fresh 0.5.4 value column ' . $col);
 }
 $freshAssignmentColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_category_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['category_id','attribute_id','enabled'] as $col) {
+foreach (['category_id','attribute_id','enabled','required'] as $col) {
     verify(in_array($col, $freshAssignmentColumns, true), 'fresh 0.5.5 assignment column ' . $col);
 }
 $freshVideos = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_videos')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','product_id','title','source','sort_order'] as $col) {
+foreach (['id','product_id','title','source','poster','sort_order'] as $col) {
     verify(in_array($col,$freshVideos,true),'fresh video relation column '.$col);
 }
 $freshScalars = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_attribute_scalars')
