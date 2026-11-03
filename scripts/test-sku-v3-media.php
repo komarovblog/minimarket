@@ -91,6 +91,17 @@ namespace MiniMarket\SkuV3Smoke {
         'historical SKU inherits description by default');
     check($inherited['video_mode']===0 && $inherited['videos']===[],
         'historical SKU inherits model videos by default');
+    $dormant=$own;
+    $dormant['description_mode']='0';
+    $dormant['video_mode']='0';
+    $cached=S::normalize([$dormant],$axes)[0];
+    check($cached['description_mode']===0 &&
+        $cached['introtext_override']==='<p>SKU intro</p>',
+        'inherited mode keeps dormant own description for later editing');
+    check($cached['video_mode']===0 &&
+        str_contains(file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Service/ProductVariants.php'),
+            "if (\$r['video_mode'] === 1)"),
+        'inherited video mode preserves existing own video references');
     $without=$base;
     $without['video_mode']='2';
     check(S::normalize([$without],$axes)[0]['video_mode']===2,
