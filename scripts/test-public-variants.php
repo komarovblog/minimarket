@@ -2,6 +2,14 @@
 /** Public SKU variant retrieval: no database/network required. */
 declare(strict_types=1);
 namespace Joomla\Database { interface DatabaseInterface {} }
+namespace Joomla\CMS\Filter {
+    final class InputFilter {
+        public static function getInstance(): self { return new self(); }
+        public function clean(string $html,string $format): string {
+            return preg_replace('~<script[^>]*>.*?</script>~is','',$html)??'';
+        }
+    }
+}
 namespace MiniMarket\PublicVariantsSmoke {
     \define('_JEXEC',1);
     require __DIR__.'/../src/com_minimarket/site/src/Service/VariantCatalog.php';
@@ -27,10 +35,13 @@ namespace MiniMarket\PublicVariantsSmoke {
                 '#__minimarket_product_variants' => $this->empty ? [] : ($this->local ? [
                     ['id'=>20,'selection_json'=>'{"axis1":"v:value1","axis2":"v:value2"}',
                         'sku'=>'BLUE-M','price'=>'1790.00','stock'=>'7',
-                        'image'=>'images/blue-m.webp','image_alt'=>'Blue M'],
+                        'image'=>'images/blue-m.webp','image_alt'=>'Blue M',
+                        'description_mode'=>1,'introtext_override'=>'<p>Blue edition</p>',
+                        'description_override'=>'<p>Blue M details</p>',
+                        'video_mode'=>1],
                     ['id'=>21,'selection_json'=>'{"axis1":"v:value1","axis2":"v:value1"}',
                         'sku'=>'BLUE-S','price'=>'1690.00','stock'=>'0',
-                        'image'=>'images/blue-s.webp','image_alt'=>'Blue S'],
+                        'image'=>'','image_alt'=>'','video_mode'=>2],
                 ] : [
                     ['id'=>1,'selection_json'=>'{"10":"d:100","11":"t:S"}',
                         'sku'=>'RED-S','price'=>'1590.00','stock'=>'5',
@@ -49,6 +60,15 @@ namespace MiniMarket\PublicVariantsSmoke {
                     ['id'=>100,'dimension_id'=>10,'code'=>'value1','title'=>'Синий'],
                     ['id'=>200,'dimension_id'=>11,'code'=>'value1','title'=>'S'],
                     ['id'=>201,'dimension_id'=>11,'code'=>'value2','title'=>'M'],
+                ] : [],
+                '#__minimarket_variant_value_images' => $this->local ? [
+                    ['value_id'=>100,'path'=>'images/blue-color.webp','alt'=>'Blue group'],
+                    ['value_id'=>100,'path'=>'images/blue-back.webp','alt'=>'Blue back'],
+                    ['value_id'=>200,'path'=>'images/../../evil.webp','alt'=>'Unsafe'],
+                ] : [],
+                '#__minimarket_product_variant_videos' => $this->local ? [
+                    ['variant_id'=>20,'title'=>'Video','source'=>'https://www.youtube.com/watch?v=dQw4w9WgXcQ','poster'=>'images/blue-color.webp'],
+                    ['variant_id'=>20,'title'=>'Malicious','source'=>'javascript:alert(1)','poster'=>''],
                 ] : [],
                 '#__minimarket_variant_value_assignments' => $this->local ? [
                     ['variant_id'=>20,'dimension_id'=>10,'value_id'=>100],
@@ -112,7 +132,20 @@ namespace MiniMarket\PublicVariantsSmoke {
         'localized color selection remains keyed by product-local dimension');
     check($localResult['items'][0]['photos'][0]['path']==='images/blue-m-back.webp',
         'product-local variant photos');
-    check(count($local->queries)===5,'local SKU reads are batched');
+    check(count($local->queries)===7,'local SKU, color photos and video reads are batched');
+    check($localResult['items'][1]['image']==='images/blue-color.webp',
+        'SKU without own photo inherits reusable color gallery cover');
+    check($localResult['items'][1]['photos'][0]['path']==='images/blue-back.webp',
+        'color gallery photos inherited without copying media files');
+    check($localResult['items'][0]['image']==='images/blue-m.webp',
+        'SKU-specific image wins over shared color gallery');
+    check($localResult['items'][0]['description_override']==='<p>Blue M details</p>',
+        'SKU description override safely delivered');
+    check(count($localResult['items'][0]['videos'])===1
+        && $localResult['items'][0]['videos'][0]['kind']==='embed',
+        'only approved SKU video player URLs passed to browser');
+    check($localResult['items'][1]['video_mode']===2,
+        'SKU can explicitly hide inherited videos');
     check(!in_array('#__minimarket_category_attributes',
         array_map(static fn($q): string => $q->from,$local->queries),true),
         'local SKU does not require global attribute-category assignment');
