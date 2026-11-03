@@ -39,6 +39,7 @@ final class CategoryattributesField extends FormField
         $parentId = (int) ($this->form->getValue('parent_id') ?? 0);
         $hierarchy = CategoryAttributes::loadHierarchy($db);
         $parentRules = CategoryAttributes::resolve($parentId, $hierarchy['parents'], $hierarchy['rules']);
+        $parentModes = CategoryAttributes::resolveModes($parentId, $hierarchy['parents'], $hierarchy['rules']);
 
         // On validation failure, honor posted form values instead of silently
         // restoring the last persisted rule selection.
@@ -52,8 +53,7 @@ final class CategoryattributesField extends FormField
         $html = '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_CATATTR_HELP')) . '</p>'
             . '<div class="table-responsive"><table class="table table-striped align-middle">'
             . '<thead><tr><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_ATTRIBUTE'))
-            . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_INHERITED'))
-            . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
+            . '</th><th scope="col" class="w-25">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
             . '</th></tr></thead><tbody>';
 
         foreach ($attributes as $attr) {
@@ -63,7 +63,6 @@ final class CategoryattributesField extends FormField
                 $mode = -1;
             }
             $sourceId = (int) ($parentRules[$id] ?? 0);
-            $parentModes = CategoryAttributes::resolveModes($parentId, $hierarchy['parents'], $hierarchy['rules']);
             $inherited = $sourceId > 0
                 ? Text::sprintf(($parentModes[$id] ?? 1) === 2
                     ? 'COM_MINIMARKET_CATATTR_REQUIRED_FROM_PARENT' : 'COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
@@ -79,8 +78,8 @@ final class CategoryattributesField extends FormField
             $inputId = $escape($this->id . '_' . $id);
             $inputName = $escape($this->name . '[' . $id . ']');
             $html .= '<tr><th scope="row"><label for="' . $inputId . '">' . $label
-                . '</label></th><td>' . $escape($inherited)
-                . '</td><td><select class="form-select form-select-sm w-auto" id="' . $inputId
+                . '</label><small class="d-block text-muted">' . $escape($inherited)
+                . '</small></th><td><select class="form-select form-select-sm" id="' . $inputId
                 . '" name="' . $inputName . '">';
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',
