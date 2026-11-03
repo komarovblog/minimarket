@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `price` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `stock` INT UNSIGNED NOT NULL DEFAULT 0,
     `option_stock_mode` TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    `introtext` TEXT NULL;
+    `introtext` TEXT NULL,
     `description` TEXT NULL,
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     `image` VARCHAR(1024) NOT NULL DEFAULT '',
