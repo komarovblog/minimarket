@@ -66,4 +66,15 @@ foreach (['categories','products','attributes','values'] as $entity) {
         && $check<$state && $state<$title,
         $entity.': columns ordered checkbox, publication, title');
 }
+$skuBuilder=file_get_contents($base.'admin/src/Field/VariantbuilderField.php');
+checkUi(str_contains($skuBuilder,'data-mm-add-sku')
+    && str_contains($skuBuilder,'data-mm-sku-apply'),
+    'manual SKU positions and bulk edit use existing Joomla-native SKU form');
+checkUi(str_contains($client,'refreshSkuEditors(axes)')
+    && str_contains($client,'data-mm-sku-select'),
+    'each native SKU row exposes local option selection and explicit bulk checkbox');
+checkUi(str_contains($client, "appendRow({ title: '', selection: {} }, axes, true)"),
+    'manual SKU position has no invented selection or SKU code');
+checkUi(str_contains($client,"['price', 'stock', 'state']"),
+    'copying SKU position excludes identity and personal media by default');
 echo 'NATIVE_UI_OK: '.$n." cases\n";
