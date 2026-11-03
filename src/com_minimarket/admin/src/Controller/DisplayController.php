@@ -13,13 +13,13 @@ final class DisplayController extends BaseController
     {
         $viewName = $this->input->getCmd('view', 'dashboard');
 
-        if (!\in_array($viewName, ['dashboard', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption'], true)) {
+        if (!\in_array($viewName, ['dashboard', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);
         }
 
         // Keep the proven M0 dashboard without introducing a dummy Model.
-        if ($viewName === 'dashboard') {
-            $view = $this->getView('dashboard', 'html');
+        if ($viewName === 'dashboard' || $viewName === 'import') {
+            $view = $this->getView($viewName, 'html');
             $view->display();
 
             return $this;

@@ -8,6 +8,7 @@ use Joomla\CMS\Uri\Uri;
     <p><a class="btn btn-primary" href="index.php?option=com_minimarket&amp;view=categories"><?php echo Text::_('COM_MINIMARKET_CATEGORIES'); ?></a>
     <a class="btn btn-outline-secondary" href="index.php?option=com_minimarket&amp;view=products"><?php echo Text::_('COM_MINIMARKET_PRODUCTS'); ?></a>
     <a class="btn btn-outline-secondary" href="index.php?option=com_minimarket&amp;view=attributes"><?php echo Text::_('COM_MINIMARKET_ATTRIBUTES'); ?></a></p>
+    <p><a class="btn btn-outline-secondary" href="index.php?option=com_minimarket&amp;view=import"><?php echo Text::_('COM_MINIMARKET_IMPORT_TITLE'); ?></a></p>
     <h2><?php echo Text::_('COM_MINIMARKET_DASHBOARD_HEADING'); ?></h2>
     <p><?php echo Text::_('COM_MINIMARKET_DASHBOARD_DESCRIPTION'); ?></p>
     <p>

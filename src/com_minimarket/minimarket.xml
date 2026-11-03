@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.5.34</version>
+    <version>0.5.35</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -38,6 +38,7 @@
             <menu link="option=com_minimarket&amp;view=groups">COM_MINIMARKET_GROUPS</menu>
             <menu link="option=com_minimarket&amp;view=attributes">COM_MINIMARKET_ATTRIBUTES</menu>
             <menu link="option=com_minimarket&amp;view=orderoptions">COM_MINIMARKET_ORDER_OPTIONS</menu>
+            <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
         </submenu>
     </administration>
     <install>

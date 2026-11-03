@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "source": "minimarket-demo",
+  "categories": [
+    {
+      "key": "stoves",
+      "title": "Топки",
+      "alias": "topki",
+      "parent": null,
+      "state": 1
+    },
+    {
+      "key": "fireplace-parts",
+      "title": "Аксессуары для каминов",
+      "alias": "aksessuary-dlya-kaminov",
+      "parent": null,
+      "state": 1
+    },
+    {
+      "key": "steel-stoves",
+      "title": "Стальные топки",
+      "alias": "stalnye-topki",
+      "parent": "stoves",
+      "state": 1
+    }
+  ],
+  "attributes": [
+    {
+      "key": "power",
+      "title": "Мощность, кВт",
+      "code": "power",
+      "type": "number",
+      "state": 1
+    },
+    {
+      "key": "fuel",
+      "title": "Вид топлива",
+      "code": "fuel",
+      "type": "text",
+      "state": 1
+    },
+    {
+      "key": "finish",
+      "title": "Отделка",
+      "code": "finish",
+      "type": "color",
+      "state": 1,
+      "values": [
+        {
+          "code": "black",
+          "title": "Чёрный",
+          "color_hex": "#000000",
+          "state": 1
+        },
+        {
+          "code": "white",
+          "title": "Белый",
+          "color_hex": "#FFFFFF",
+          "state": 1
+        }
+      ]
+    }
+  ],
+  "options": [
+    {
+      "key": "size",
+      "title": "Размер",
+      "code": "size",
+      "state": 1,
+      "values": [
+        {
+          "code": "s",
+          "title": "S",
+          "state": 1
+        },
+        {
+          "code": "m",
+          "title": "M",
+          "state": 1
+        },
+        {
+          "code": "l",
+          "title": "L",
+          "state": 1
+        }
+      ]
+    },
+    {
+      "key": "door",
+      "title": "Тип дверцы",
+      "code": "door",
+      "state": 1,
+      "values": [
+        {
+          "code": "left",
+          "title": "Левая",
+          "state": 1
+        },
+        {
+          "code": "right",
+          "title": "Правая",
+          "state": 1
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "key": "stove-10",
+      "title": "Топка 10 кВт",
+      "alias": "topka-10kw",
+      "sku": "TOPKA-10",
+      "price": "64990.00",
+      "stock": 5,
+      "stock_mode": 0,
+      "category": "steel-stoves",
+      "state": 1
+    },
+    {
+      "key": "stove-12",
+      "title": "Топка 12 кВт",
+      "alias": "topka-12kw",
+      "sku": "TOPKA-12",
+      "price": "74990.00",
+      "stock": 3,
+      "stock_mode": 0,
+      "category": "steel-stoves",
+      "state": 1
+    },
+    {
+      "key": "grate",
+      "title": "Колосник",
+      "alias": "kolosnik",
+      "sku": "KOLOS-1",
+      "price": "2990.00",
+      "stock": 15,
+      "stock_mode": 0,
+      "category": "fireplace-parts",
+      "state": 1
+    }
+  ],
+  "links": [
+    {
+      "key": "stoves-similar",
+      "title": "Серия топок",
+      "state": 1,
+      "members": [
+        "stove-10",
+        "stove-12"
+      ]
+    }
+  ],
+  "category_attributes": [
+    {
+      "key": "power-stoves",
+      "category": "stoves",
+      "attribute": "power",
+      "mode": "optional"
+    },
+    {
+      "key": "fuel-stoves",
+      "category": "stoves",
+      "attribute": "fuel",
+      "mode": "optional"
+    }
+  ],
+  "category_options": [
+    {
+      "key": "door-stoves",
+      "category": "stoves",
+      "option": "door",
+      "mode": "required"
+    },
+    {
+      "key": "size-parts",
+      "category": "fireplace-parts",
+      "option": "size",
+      "mode": "optional"
+    }
+  ]
+}

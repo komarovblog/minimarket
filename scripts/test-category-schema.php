@@ -582,6 +582,29 @@ $pdo->exec('DROP TABLE catci_minimarket_category_order_options');
 $pdo->exec('DROP TABLE catci_minimarket_order_option_values');
 $pdo->exec('DROP TABLE catci_minimarket_order_options');
 
+// 0.5.35: a stable source-qualified external mapping for all catalog entities.
+$beforeImportProduct=row($pdo,'catci_minimarket_products');
+$beforeImportSkus=$pdo->query('SELECT id,product_id,sku,price,stock FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo,$dir.'updates/mysql/0.5.35.sql','catci_');
+$pdo->exec("INSERT INTO catci_minimarket_import_entity_keys
+    (source_key,entity_kind,external_key,local_id) VALUES
+    ('feed','categories','topki',1),('feed','products','stove',1),
+    ('supplier-b','categories','topki',1)");
+verify((int)$pdo->query("SELECT COUNT(*) FROM catci_minimarket_import_entity_keys
+    WHERE external_key='topki'")->fetchColumn()===2,
+    'two sources can map the same external key without collisions');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_import_entity_keys
+        (source_key,entity_kind,external_key,local_id)
+        VALUES ('feed','categories','topki',2)");
+    verify(false,'duplicate external mapping accepted');
+} catch (PDOException $error) { verify(true,'source+kind+external key unique'); }
+verify($beforeImportProduct===row($pdo,'catci_minimarket_products'),
+    '0.5.35 migration preserves existing products');
+verify($beforeImportSkus===$pdo->query('SELECT id,product_id,sku,price,stock FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.35 migration preserves all SKU identity, prices and stocks');
+$pdo->exec('DROP TABLE catci_minimarket_import_entity_keys');
+
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
@@ -627,6 +650,9 @@ foreach ([
 }
 $freshGroupColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_groups')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','title','type','state','sort_order'] as $column) verify(in_array($column,$freshGroupColumns,true),'fresh 0.5.32 group '.$column);
+$freshImportEntities=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_import_entity_keys')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['source_key','entity_kind','external_key','local_id'] as $column)
+    verify(in_array($column,$freshImportEntities,true),'fresh 0.5.35 import mapping '.$column);
 $freshOrderOptions=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_order_options')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','code','title','state','sort_order'] as $column)
     verify(in_array($column,$freshOrderOptions,true),'fresh 0.5.34 global option '.$column);
