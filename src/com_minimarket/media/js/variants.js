@@ -128,30 +128,67 @@
     }
     skuVideos.hidden=skuVideoList.children.length===0;
   };
-  const current = () => Object.fromEntries(selects.map(s => [s.dataset.mmVariantAxis, s.value]));
+  // Options are ordered: earlier choices constrain later ones. For example,
+  // Color -> Size -> Material. A color remains selectable when it has any
+  // available combination, even if the previously chosen size is invalid.
+  // Once color is chosen, unavailable sizes are disabled immediately.
+  const stockFor = (variant) => sharedStock ? baseStock : Number(variant.stock);
+  const canOrder = (variant) => stockFor(variant) > 0;
+  const available = variants.filter(canOrder);
+  const current = () => Object.fromEntries(
+    selects.map(select => [select.dataset.mmVariantAxis, select.value])
+  );
+  const compatible = (variant, axisIndex, values, choice) =>
+    selects.slice(0, axisIndex).every(select =>
+      variant.selection[select.dataset.mmVariantAxis] === values[select.dataset.mmVariantAxis]
+    ) && variant.selection[selects[axisIndex].dataset.mmVariantAxis] === choice;
+
+  const refreshOptions = (selected) => {
+    const selectedValues = selected.selection;
+    selects.forEach((select, index) => {
+      for (const option of select.options) {
+        // Published but out-of-stock combinations are kept in the payload to
+        // show availability when directly linked, not offered for new orders.
+        option.disabled = !available.some(variant =>
+          compatible(variant, index, selectedValues, option.value)
+        );
+      }
+    });
+  };
+
   const choose = (changed) => {
-    const values = current();
-    let selected = variants.find(v => selects.every(s =>
-      v.selection[s.dataset.mmVariantAxis] === values[s.dataset.mmVariantAxis]));
-    if (!selected && changed) {
-      // Never silently substitute an unavailable combination.
-      selected = lastSelected;
+    let selected = lastSelected;
+    if (changed) {
+      const index = selects.indexOf(changed);
+      if (index >= 0) {
+        const values = current();
+        const candidates = available.filter(variant =>
+          compatible(variant, index, values, changed.value)
+        );
+        if (candidates.length) {
+          // Preserve as many of the remaining choices as possible. When the
+          // new color has only size S, selecting it automatically chooses S.
+          const tail = selects.slice(index + 1);
+          const score = variant => tail.reduce((sum, select) =>
+            sum + Number(variant.selection[select.dataset.mmVariantAxis] ===
+              values[select.dataset.mmVariantAxis]), 0);
+          selected = candidates.reduce((best, candidate) =>
+            score(candidate) > score(best) ? candidate : best
+          );
+        }
+      }
     }
-    if (!selected) selected = lastSelected;
     lastSelected = selected;
-    selects.forEach(s => { s.value = selected.selection[s.dataset.mmVariantAxis] || ''; });
+    selects.forEach(select => {
+      select.value = selected.selection[select.dataset.mmVariantAxis] || '';
+    });
     if (details.sku) details.sku.textContent = selected.sku;
     if (details.price) details.price.textContent = selected.price;
-    const stock = sharedStock ? baseStock : Number(selected.stock);
+    const stock = stockFor(selected);
     if (details.stock) details.stock.textContent = String(stock);
     if (details.availability) details.availability.textContent =
       stock > 0 ? availableText : unavailableText;
-    selects.forEach(s => {
-      for (const option of s.options) {
-        option.disabled = !variants.some(v =>
-          v.selection[s.dataset.mmVariantAxis] === option.value);
-      }
-    });
+    refreshOptions(selected);
     updateGallery(selected);
     updateDescriptions(selected);
     updateVideos(selected);
