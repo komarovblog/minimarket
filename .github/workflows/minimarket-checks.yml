@@ -113,6 +113,9 @@ jobs:
       - name: Native Joomla UI consistency across categories and variants
         run: php scripts/test-native-ui-consistency.php
 
+      - name: Attribute list query and schema regression
+        run: php scripts/test-attribute-list-query.php
+
       - name: Product editor and clean media validation
         run: php scripts/test-product-editor.php
 
