@@ -34,7 +34,15 @@ $assert($rootIndex !== false && array_slice($ids, $rootIndex, 3) === [1, 2, 3], 
 $assert($tree[$rootIndex + 2]['depth'] === 2, 'real nesting depth');
 $assert($tree[$rootIndex]['direct_count'] === 2 && $tree[$rootIndex]['branch_count'] === 10, 'grouped direct/subtree counts');
 $assert($tree[$rootIndex + 1]['branch_count'] === 8, 'subtree rollup');
-$assert($tree[$rootIndex]['has_children'] && !$tree[$rootIndex + 2]['has_children'], 'collapse controls only for parents');
+$assert($tree[$rootIndex]['has_children'] && !$tree[$rootIndex + 2]['has_children'], 'tree records descendants without UI toggle');
+$categoryTemplate=file_get_contents(__DIR__ . '/../src/com_minimarket/admin/tmpl/categories/default.php');
+$assert(str_contains($categoryTemplate,'class="table table-striped"'),
+    'categories use native Joomla striped table');
+$assert(!str_contains($categoryTemplate,'mm-tree-toggle')
+    && !str_contains($categoryTemplate,'aria-expanded'),
+    'no collapse button or collapsing JavaScript in category list');
+$assert(str_contains($categoryTemplate,'$depth > 0'),
+    'category hierarchy is indicated by indentation and dash');
 $assert($tree[array_search(5, $ids, true)]['broken_parent'], 'orphan visible with warning');
 $assert(count(array_filter($tree, static fn ($r) => $r['broken_parent'])) >= 2, 'cycle rescued');
 $hits = CategoryAdminTree::flatten($nodes, [], 'Grandchild');

@@ -94,6 +94,8 @@ try {
         'admin/sql/updates/mysql/0.5.17.sql',
         'admin/sql/updates/mysql/0.5.20.sql',
         'admin/forms/product_variant.xml',
+        'admin/forms/product_variant_dimension.xml',
+        'admin/forms/product_variant_value.xml',
         'admin/src/Service/ProductVariants.php',
         'admin/src/Service/ProductLocalDimensions.php',
         'admin/src/Field/VariantbuilderField.php',

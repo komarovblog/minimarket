@@ -138,8 +138,36 @@ namespace MiniMarket\VariantSmoke {
         ok(true,'invalid local choice rejected');
     }
     $productForm=file_get_contents(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
-    ok(str_contains($productForm,'name="variant_config" type="Variantbuilder"'),
-       'local options editor is on product form');
+    ok(str_contains($productForm,'name="variant_dimensions" type="subform"'),
+       'local parameters use the same native plus/removable rows as gallery');
+    ok(str_contains($productForm,'name="variant_matrix" type="Variantbuilder"'),
+       'separate matrix preview action is present');
+    $dimensionXml=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_variant_dimension.xml');
+    $valueXml=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_variant_value.xml');
+    ok($dimensionXml !== false && $valueXml !== false,'native nested option subform XML valid');
+    ok(count($dimensionXml->xpath("//field[@name='values' and @type='subform']"))===1,
+       'each option uses repeatable values with Joomla + / remove / move');
+    ok(count($valueXml->xpath("//field[@name='title' and @type='text']"))===1,
+       'value is an ordinary Joomla text field');
+    $submittedRows=[
+       'row0'=>['code'=>'axis1','title'=>'Цвет',
+          'values'=>['row0'=>['code'=>'value1','title'=>'Красный'],
+                     'row1'=>['code'=>'value2','title'=>'Синий']]],
+       'row1'=>['code'=>'axis2','title'=>'Размер',
+          'values'=>['row0'=>['code'=>'value1','title'=>'S'],
+                     'row1'=>['code'=>'value2','title'=>'M']]],
+    ];
+    $parsed=\MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix::normalize(
+        array_values($submittedRows)
+    );
+    ok(count($parsed)===2 && count($parsed[0]['values'])===2,
+       'server accepts native nested row-keyed Joomla submission');
+    ok($parsed[0]['values'][1]['code']==='value2',
+       'stable option code retained from nested native Subform');
+    $productModel=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php');
+    ok(str_contains($productModel,"array_values((array) (" .
+        '$data[\'variant_dimensions\']' . " ?? []))"),
+        'normalization reads native Subform rows, not custom hidden JSON');
     ok(str_contains(file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php'),
        'ProductLocalDimensions::replace'),'local options saved in product transaction');
 
@@ -152,6 +180,8 @@ namespace MiniMarket\VariantSmoke {
         'nested Joomla photo subform');
     ok(count($form->xpath("//field[@name='image' and @type='media']"))===1,
         'native Joomla Media for variant cover');
+    ok(count($parent->xpath("//fieldset[@name='variants']/field[@name='variants' and @layout='joomla.form.field.subform.repeatable-table']"))===1,
+        'SKU rows use Joomla standard table layout instead of oversized cards');
     ok(str_contains(file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php'),
         'ProductVariants::replace'),'product save uses transaction-backed real SKU rows');
     $client=file_get_contents(__DIR__.'/../src/com_minimarket/media/js/variants.js');
