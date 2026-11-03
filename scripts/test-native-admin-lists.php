@@ -36,8 +36,9 @@ foreach(['products','attributes'] as $name){
     ok(str_contains($model,"getState('list.ordering'"),'model uses sort allow-list: '.$name);
 }
 $tree=file_get_contents($root.'tmpl/categories/default.php');
-ok(str_contains($tree,'mm-category-tree') && str_contains($tree,'data-mm-depth'),
-    'category parent/child hierarchy and collapse kept');
+ok(str_contains($tree,'mm-category-tree') && !str_contains($tree,'mm-tree-toggle')
+    && !str_contains($tree,'data-mm-depth') && str_contains($tree,'$depth > 0'),
+    'native category table keeps visible hierarchy without collapsing controls');
 ok(str_contains($tree,"COM_MINIMARKET_CATEGORY_COUNT_BRANCH"),
     'category subtree counts retained');
 echo 'NATIVE_ADMIN_LIST_OK: '.$count." cases\n";
