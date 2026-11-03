@@ -99,6 +99,7 @@ try {
         'admin/forms/product_variant_value.xml',
         'admin/src/Service/ProductVariants.php',
         'admin/src/Service/ProductLocalDimensions.php',
+        'admin/src/Service/VariantValueGallery.php',
         'admin/src/Field/VariantbuilderField.php',
         'media/js/variants-local.js',
         'admin/src/Service/VariantDependencies.php',
