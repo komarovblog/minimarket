@@ -44,7 +44,7 @@ namespace MiniMarket\VariantSmoke {
         'selection'=>'{"color":"v:red","size":"v:s"}','state'=>'1',
         'image'=>'images/red.webp#joomlaImage://local-images/red.webp?width=600',
         'image_alt'=>'Red front','photos'=>[
-            ['path'=>'images/red-back.webp','alt'=>'Red back']]],
+            ['path'=>'images/red-back.webp','alt'=>'Red back']],
     ];
     $redM=array_replace($redS,[
         'sku'=>'CLASSIC-RED-M','stock'=>'0','price'=>'1690',
