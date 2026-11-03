@@ -124,8 +124,8 @@ final class AttributeModel extends AdminModel
             }
         }
 
-        // Informational attributes are independent from order options.
-        $data['is_variant'] = 0;
+        // Informational attributes cannot define order options.
+        unset($data['is_variant']);
 
         unset($data['category_rules'], $data['categories_present'],
             $data['color_values'], $data['values'], $data['values_present'],

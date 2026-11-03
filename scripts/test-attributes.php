@@ -165,29 +165,24 @@ namespace MiniMarket\AttributesSmoke {
     // Legacy List can still be edited; new attributes no longer expose List.
     $attribute->id = 10;
     $attribute->input_type = 'list';
-    $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
     $attribute->is_filterable = 1;
     $attribute->state = 1;
-    $check($attribute->check() === true, 'color is a valid variant attribute');
+    $check($attribute->check() === true, 'color is a valid descriptive attribute');
     $check($attribute->columnAliases['published'] === 'state', 'attribute bulk publishing targets state');
     $check($attribute->code === 'color' && $attribute->title === 'Цвет', 'name and code normalized');
-    // SKU flag and number of selectable values are independent settings.
-    $attribute->is_variant = 0;
+    // Descriptive attributes have independent single/multiple value settings.
     $attribute->is_multiple = 1;
     $check($attribute->check() === true, 'ordinary attribute can offer multiple values');
-    $attribute->is_variant = 1;
     $attribute->is_multiple = 0;
-    $check($attribute->check() === true, 'variant-defining attribute can allow only one value');
+    $check($attribute->check() === true, 'descriptive attribute can allow only one value');
     $attribute->is_multiple = 1;
 
     $attribute->input_type = 'text';
-    $check($attribute->check() === false, 'text cannot define a variant');
+    $check($attribute->check() === true, 'text is a descriptive attribute independent from SKU options');
     $attribute->input_type = 'number';
-    $attribute->is_variant = 0;
     $check($attribute->check() === true, 'number allowed for shared properties');
     $attribute->input_type = 'list';
-    $attribute->is_variant = 1;
     $attribute->id = 10;
     $attribute->is_multiple = 0;
     $db->multipleProducts = true;
@@ -195,26 +190,21 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->is_multiple = 1;
     $db->multipleProducts = false;
     $attribute->input_type = 'number';
-    $attribute->is_variant = 0;
     $db->existingValues = true;
     $check($attribute->check() === false, 'cannot change list type with saved dictionary values');
     $db->existingValues = false;
     $attribute->input_type = 'list';
-    $attribute->is_variant = 1;
 
     $attribute->is_multiple = 5;
     $check($attribute->check() === false, 'invalid multiple flag rejected');
     $attribute->is_multiple = 1;
-    $attribute->is_variant = 0;
     $attribute->input_type = 'text';
     $check($attribute->check() === true && $attribute->is_multiple === 0,
         'non-list attribute clears hidden cardinality');
     $attribute->input_type = 'list';
-    $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
 
     $attribute->input_type = 'number';
-    $attribute->is_variant = 0;
     $attribute->is_multiple = 0;
     $attribute->input_mode = 'presets';
     $attribute->number_options = '1000, 1500, 2000';
@@ -255,7 +245,6 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->input_type = 'textarea';
     $check($attribute->check() === true, 'multiline text supported without filter');
     $attribute->input_type = 'list';
-    $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
     $attribute->input_mode = 'checkboxes';
     $attribute->is_filterable = 1;
@@ -283,13 +272,11 @@ namespace MiniMarket\AttributesSmoke {
     $attribute->input_type = 'list';
     $check($attribute->check() === false, 'new legacy List attributes disallowed');
     $attribute->input_type = 'document';
-    $attribute->is_variant = 0;
     $attribute->is_filterable = 0;
     $attribute->input_mode = 'auto';
     $attribute->filter_mode = 'none';
     $check($attribute->check() === true, 'new File attributes allowed in six-type policy');
     $attribute->input_type = 'color';
-    $attribute->is_variant = 1;
     $attribute->is_multiple = 1;
     $attribute->filter_mode = 'swatches';
     $attribute->is_filterable = 1;

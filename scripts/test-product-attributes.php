@@ -28,27 +28,27 @@ namespace MiniMarket\ProductAttributesSmoke {
     }
 
     $defs = [
-        10=>['id'=>10,'title'=>'Color','type'=>'list','is_variant'=>true,'is_multiple'=>true,'state'=>1,
+        10=>['id'=>10,'title'=>'Color','type'=>'list','is_multiple'=>true,'state'=>1,
             'values'=>[100=>['title'=>'Red','state'=>1],101=>['title'=>'Yellow','state'=>1],
                 102=>['title'=>'Black','state'=>0]]],
-        11=>['id'=>11,'title'=>'Size','type'=>'list','is_variant'=>true,'is_multiple'=>true,'state'=>1,
+        11=>['id'=>11,'title'=>'Size','type'=>'list','is_multiple'=>true,'state'=>1,
             'values'=>[110=>['title'=>'S','state'=>1],111=>['title'=>'M','state'=>1]]],
-        12=>['id'=>12,'title'=>'Material','type'=>'list','is_variant'=>false,'is_multiple'=>false,'state'=>1,
+        12=>['id'=>12,'title'=>'Material','type'=>'list','is_multiple'=>false,'state'=>1,
             'values'=>[120=>['title'=>'Denim','state'=>1],121=>['title'=>'Cotton','state'=>1]]],
-        13=>['id'=>13,'title'=>'Width','type'=>'number','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
-        14=>['id'=>14,'title'=>'Summary','type'=>'text','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
-        15=>['id'=>15,'title'=>'Eco','type'=>'boolean','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
-        16=>['id'=>16,'title'=>'Hidden','type'=>'text','is_variant'=>false,'is_multiple'=>false,'state'=>0,'values'=>[]],
-        17=>['id'=>17,'title'=>'Compatible devices','type'=>'list','is_variant'=>false,'is_multiple'=>true,'state'=>1,
+        13=>['id'=>13,'title'=>'Width','type'=>'number','is_multiple'=>false,'state'=>1,'values'=>[]],
+        14=>['id'=>14,'title'=>'Summary','type'=>'text','is_multiple'=>false,'state'=>1,'values'=>[]],
+        15=>['id'=>15,'title'=>'Eco','type'=>'boolean','is_multiple'=>false,'state'=>1,'values'=>[]],
+        16=>['id'=>16,'title'=>'Hidden','type'=>'text','is_multiple'=>false,'state'=>0,'values'=>[]],
+        17=>['id'=>17,'title'=>'Compatible devices','type'=>'list','is_multiple'=>true,'state'=>1,
             'values'=>[170=>['title'=>'Phone','state'=>1],171=>['title'=>'Tablet','state'=>1]]],
-        18=>['id'=>18,'title'=>'Single variant field','type'=>'list','is_variant'=>true,'is_multiple'=>false,'state'=>1,
+        18=>['id'=>18,'title'=>'Single variant field','type'=>'list','is_multiple'=>false,'state'=>1,
             'values'=>[180=>['title'=>'Left','state'=>1],181=>['title'=>'Right','state'=>1]]],
-        19=>['id'=>19,'title'=>'Power','type'=>'number','is_variant'=>false,'is_multiple'=>false,'state'=>1,
+        19=>['id'=>19,'title'=>'Power','type'=>'number','is_multiple'=>false,'state'=>1,
             'input_mode'=>'presets','number_options'=>'1000,1500,2000','number_min'=>'1000',
             'number_max'=>'2000','number_step'=>'500','values'=>[]],
-        20=>['id'=>20,'title'=>'Release','type'=>'date','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
-        21=>['id'=>21,'title'=>'Details','type'=>'textarea','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
-        22=>['id'=>22,'title'=>'Manual','type'=>'url','is_variant'=>false,'is_multiple'=>false,'state'=>1,'values'=>[]],
+        20=>['id'=>20,'title'=>'Release','type'=>'date','is_multiple'=>false,'state'=>1,'values'=>[]],
+        21=>['id'=>21,'title'=>'Details','type'=>'textarea','is_multiple'=>false,'state'=>1,'values'=>[]],
+        22=>['id'=>22,'title'=>'Manual','type'=>'url','is_multiple'=>false,'state'=>1,'values'=>[]],
     ];
     $hierarchy=['parents'=>[1=>0,2=>1,3=>1,4=>0],
         'rules'=>[1=>[10=>1,11=>1,12=>1,13=>1,14=>1,15=>1],
@@ -90,7 +90,7 @@ namespace MiniMarket\ProductAttributesSmoke {
 
     $materialDefs=[32=>['id'=>32,'title'=>'Material','type'=>'text','is_multiple'=>true,
         'input_mode'=>'presets','text_options'=>'["Металл","Камень"]',
-        'is_variant'=>false,'state'=>1,'values'=>[]]];
+        'state'=>1,'values'=>[]]];
     $material=ProductAttributes::normalize(['32'=>['Металл','Камень']],20,
         $materialDefs,[20=>[32]]);
     verify($material['multi_values'][32]===['Металл','Камень'],
@@ -188,7 +188,7 @@ namespace MiniMarket\ProductAttributesSmoke {
             if ($this->q->table==='#__minimarket_attributes') {
                 return [['id'=>10,'title'=>'Color','input_type'=>'list','input_mode'=>'auto',
                     'number_options'=>'','number_unit'=>'','number_min'=>null,
-                    'number_max'=>null,'number_step'=>null,'is_variant'=>1,'is_multiple'=>1,'state'=>1]];
+                    'number_max'=>null,'number_step'=>null,'is_multiple'=>1,'state'=>1]];
             }
             if ($this->q->table==='#__minimarket_attribute_values') {
                 return [['id'=>100,'attribute_id'=>10,'title'=>'Red','state'=>1]];

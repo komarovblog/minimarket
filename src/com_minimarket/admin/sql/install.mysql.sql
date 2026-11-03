@@ -93,7 +93,6 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_attributes` (
     `number_min` DECIMAL(18,4) NULL,
     `number_max` DECIMAL(18,4) NULL,
     `number_step` DECIMAL(18,4) NULL,
-    `is_variant` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `is_multiple` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `is_filterable` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `filter_mode` VARCHAR(24) NOT NULL DEFAULT 'none',

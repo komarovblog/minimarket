@@ -96,6 +96,7 @@ try {
         'admin/sql/updates/mysql/0.5.25.sql',
         'admin/sql/updates/mysql/0.5.26.sql',
         'admin/sql/updates/mysql/0.5.28.sql',
+        'admin/sql/updates/mysql/0.5.29.sql',
         'admin/forms/product_variant.xml',
         'admin/forms/product_variant_dimension.xml',
         'admin/forms/product_variant_value.xml',
@@ -106,10 +107,7 @@ try {
         'admin/src/Service/VariantValueGallery.php',
         'admin/src/Field/VariantbuilderField.php',
         'media/js/variants-local.js',
-        'admin/src/Service/VariantDependencies.php',
-        'admin/src/Field/VariantinfoField.php',
         'site/src/Service/VariantCatalog.php',
-        'media/js/variants-admin.js',
         'media/js/variants.js',
         'media/css/variants.css',
         'site/src/Service/ProductAttributeCatalog.php',
@@ -291,7 +289,7 @@ try {
         }
     }
     if ($null -eq $productForm.SelectSingleNode("/form/fieldset[@name='variants']/field[@name='variants' and @type='subform']") -or
-        $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='variants']/field[@name='variant_info' and @type='Variantinfo']")) {
+        $null -eq $productForm.SelectSingleNode("/form/fieldset[@name='variants']/field[@name='variant_dimensions' and @type='subform']")) {
         Write-Output 'PACKAGE_FAIL: VARIANT_SKU_FIELDS_MISSING'
         exit 1
     }

@@ -65,9 +65,6 @@ final class AttributeTable extends Table
             $this->$field = (int) $this->$field;
         }
 
-        // Historic flag is no longer a selectable attribute property.
-        $this->is_variant = 0;
-
         $settingError = AttributeSettings::normalize($this);
         if ($settingError !== null) {
             $this->setError(Text::_($settingError));

@@ -513,6 +513,13 @@ $pdo->exec("INSERT INTO catci_minimarket_products
 verify((int)$pdo->query('SELECT option_stock_mode FROM catci_minimarket_products WHERE id=3')->fetchColumn()===1,
     '0.5.28 new product created without explicit stock mode defaults to per-SKU');
 $pdo->exec('DELETE FROM catci_minimarket_products WHERE id=3');
+// 0.5.29 removes the obsolete attribute-as-SKU column permanently.
+$beforeCleanSkus=$pdo->query('SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo,$dir.'updates/mysql/0.5.29.sql','catci_');
+$cleanAttrs=$pdo->query('SHOW COLUMNS FROM catci_minimarket_attributes')->fetchAll(PDO::FETCH_COLUMN);
+verify(!in_array('is_variant',$cleanAttrs,true),'0.5.29 eliminates attribute-is-SKU flag');
+verify($beforeCleanSkus===$pdo->query('SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.29 does not change actual trade SKU IDs, prices or quantities');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
 $pdo->exec('DELETE FROM catci_minimarket_products WHERE id=2');
@@ -575,8 +582,9 @@ foreach (['id','product_id','path','alt','sort_order'] as $col) {
 }
 $freshAttrColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
+verify(!in_array('is_variant',$freshAttrColumns,true),'fresh 0.5.29 contains no obsolete SKU attribute flag');
 foreach (['id','title','code','input_type','input_mode','number_options','text_options','number_unit',
-    'number_min','number_max','number_step','is_variant','is_multiple','is_filterable',
+    'number_min','number_max','number_step','is_multiple','is_filterable',
     'filter_mode','filter_multiple','sort_order','state'] as $col) {
     verify(in_array($col, $freshAttrColumns, true), 'fresh 0.5.4 attribute column ' . $col);
 }
