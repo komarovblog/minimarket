@@ -3,4 +3,8 @@
     <field name="code" type="hidden" filter="string" default=""/>
     <field name="title" type="text" label="COM_MINIMARKET_LOCAL_VALUE" required="true"
            filter="string" maxlength="255" size="24"/>
+    <field name="photos" type="subform" label="COM_MINIMARKET_VARIANT_VALUE_GALLERY"
+           formsource="administrator/components/com_minimarket/forms/product_gallery.xml"
+           multiple="true" min="0" max="20" buttons="add,remove,move"
+           layout="joomla.form.field.subform.repeatable" validate="Subform"/>
 </form>

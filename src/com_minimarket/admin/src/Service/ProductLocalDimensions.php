@@ -27,9 +27,13 @@ final class ProductLocalDimensions
             ->where($db->quoteName('dimension_id').' IN ('.implode(',',$ids).')')
             ->order('sort_order ASC,id ASC');
         $db->setQuery($q);
+        $valueRows=(array)$db->loadAssocList();
+        $photos=VariantValueGallery::load($db,array_column($valueRows,'id'));
         $values=[];
-        foreach ((array)$db->loadAssocList() as $r) {
-            $values[(int)$r['dimension_id']][]=['code'=>(string)$r['code'],'title'=>(string)$r['title']];
+        foreach ($valueRows as $r) {
+            $entry=['code'=>(string)$r['code'],'title'=>(string)$r['title']];
+            $entry['photos']=$photos[(int)$r['id']]??[];
+            $values[(int)$r['dimension_id']][]=$entry;
         }
         $result=[];
         foreach ($rows as $row) {
@@ -50,7 +54,12 @@ final class ProductLocalDimensions
         foreach ($axes as $i=>$axis) {
             $valueRows=[];
             foreach ($axis['values'] as $j=>$value) {
-                $valueRows['row'.$j]=$value;
+                $entry=$value;
+                $entry['photos']=[];
+                foreach ($value['photos']??[] as $photoIndex=>$photo) {
+                    $entry['photos']['row'.$photoIndex]=$photo;
+                }
+                $valueRows['row'.$j]=$entry;
             }
             $rows['row'.$i]=[
                 'code'=>$axis['code'], 'title'=>$axis['title'], 'values'=>$valueRows
@@ -151,6 +160,11 @@ final class ProductLocalDimensions
                 if (!isset($oldValues[$vcode])) $valueId=(int)$db->insertid();
                 if ($valueId<1) throw new \RuntimeException('COM_MINIMARKET_VARIANTS_SAVE_FAILED');
                 $valueIds[$code][$vcode]=$valueId;
+                // Explicit photo rows (including an empty subform) replace the
+                // gallery; missing photos leaves any existing links untouched.
+                if (array_key_exists('photos',$value)) {
+                    VariantValueGallery::replace($db,$valueId,$value['photos']);
+                }
             }
             foreach ($oldValues as $vcode=>$valueId) {
                 if (isset($keepValues[$vcode])) continue;

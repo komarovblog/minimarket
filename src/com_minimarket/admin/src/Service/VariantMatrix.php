@@ -65,7 +65,11 @@ final class VariantMatrix
                 }
                 $usedValues[$valueCode] = true;
                 $usedTitles[mb_strtolower($valueTitle)] = true;
-                $values[] = ['code' => $valueCode, 'title' => $valueTitle];
+                $entry = ['code' => $valueCode, 'title' => $valueTitle];
+                if (array_key_exists('photos', $value)) {
+                    $entry['photos'] = VariantValueGallery::normalize($value['photos']);
+                }
+                $values[] = $entry;
             }
             $combinationCount *= count($values);
             if ($combinationCount > self::MAX_COMBINATIONS) {
