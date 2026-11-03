@@ -122,6 +122,9 @@ jobs:
       - name: Real variant SKU combinations and per-variant photo validation
         run: php scripts/test-product-variants.php
 
+      - name: SKU-v3 full position media and content overrides
+        run: php scripts/test-sku-v3-media.php
+
       - name: New product-local SKU matrix planner
         run: php scripts/test-variant-matrix.php
 
