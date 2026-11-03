@@ -428,6 +428,37 @@ $pdo->exec("INSERT INTO catci_minimarket_import_sku_keys
 verify((int) $pdo->query("SELECT COUNT(*) FROM catci_minimarket_import_sku_keys
     WHERE external_sku_key='line-a'")->fetchColumn() === 2,
     'external source keys are case-sensitive');
+// 0.5.25: add descriptions, SKU videos and shared execution photos without
+// changing any historical product or SKU record.
+$beforeSkuV3=$pdo->query('SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$beforeProductV3=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.25.sql','catci_');
+verify($beforeSkuV3===$pdo->query('SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.25 upgrade retains SKU IDs, selections, prices, stocks');
+verify($beforeProductV3===row($pdo,'catci_minimarket_products'),
+    '0.5.25 upgrade preserves existing product/SEO data');
+$pdo->exec("UPDATE catci_minimarket_product_variants SET
+    description_mode=1,introtext_override='<p>Blue</p>',description_override='Description',video_mode=1 WHERE id=1");
+$pdo->exec("INSERT INTO catci_minimarket_product_variant_videos
+    (variant_id,title,source,sort_order) VALUES
+    (1,'YouTube','https://www.youtube.com/watch?v=dQw4w9WgXcQ',0)");
+$pdo->exec("INSERT INTO catci_minimarket_variant_value_images
+    (value_id,path,alt,sort_order) VALUES
+    (1,'images/red.webp','Red',0),(1,'images/red-back.webp','Red rear',1)");
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_variant_value_images WHERE value_id=1')->fetchColumn()===2,
+    'one color option owns reusable multi-photo gallery');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_variant_videos WHERE variant_id=1')->fetchColumn()===1,
+    'video belongs to one concrete SKU');
+verify((int)$pdo->query("SELECT description_mode FROM catci_minimarket_product_variants WHERE id=2")->fetchColumn()===0,
+    'historical SKU descriptions inherit by default');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_product_variant_videos
+       (variant_id,title,source,sort_order) VALUES
+       (1,'Duplicate','https://www.youtube.com/watch?v=dQw4w9WgXcQ',1)");
+    verify(false,'duplicate SKU video source should be rejected');
+} catch(PDOException $e) { verify(true,'duplicate SKU video source rejected'); }
+$pdo->exec('DROP TABLE catci_minimarket_product_variant_videos');
+$pdo->exec('DROP TABLE catci_minimarket_variant_value_images');
 $pdo->exec('DROP TABLE catci_minimarket_import_sku_keys');
 $pdo->exec('DROP TABLE catci_minimarket_import_product_keys');
 $pdo->exec('DROP TABLE catci_minimarket_variant_value_assignments');
@@ -453,6 +484,17 @@ $columns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_categories')
 foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description', 'meta_robots',
     'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(in_array($col, $columns, true), 'fresh-install column ' . $col);
+}
+$freshSkus=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_variants')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['description_mode','introtext_override','description_override','video_mode'] as $column) {
+    verify(in_array($column,$freshSkus,true),'fresh 0.5.25 SKU override '.$column);
+}
+foreach ([
+  'product_variant_videos'=>['id','variant_id','title','source','poster','sort_order'],
+  'variant_value_images'=>['id','value_id','path','alt','sort_order'],
+] as $table=>$required) {
+    $columns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_'.$table)->fetchAll(PDO::FETCH_COLUMN);
+    foreach ($required as $col) verify(in_array($col,$columns,true),'fresh 0.5.25 '.$table.' '.$col);
 }
 $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
