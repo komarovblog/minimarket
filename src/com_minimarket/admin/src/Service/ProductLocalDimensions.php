@@ -22,7 +22,7 @@ final class ProductLocalDimensions
         $rows=(array)$db->loadAssocList();
         if (!$rows) return [];
         $ids=array_map('intval',array_column($rows,'id'));
-        $q=$db->getQuery(true)->select(['dimension_id','code','title'])
+        $q=$db->getQuery(true)->select(['id','dimension_id','code','title'])
             ->from($db->quoteName('#__minimarket_variant_dimension_values'))
             ->where($db->quoteName('dimension_id').' IN ('.implode(',',$ids).')')
             ->order('sort_order ASC,id ASC');
