@@ -68,8 +68,9 @@ final class CategoryattributesField extends FormField
                 ? Text::sprintf(($parentModes[$id] ?? 1) === 2
                     ? 'COM_MINIMARKET_CATATTR_REQUIRED_FROM_PARENT' : 'COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
                 : Text::_('COM_MINIMARKET_CATATTR_NOT_INHERITED');
-            $label = $escape((string) $attr->title) . ' <small class="text-muted">'
-                . $escape((string) $attr->code) . '</small>';
+            $url = \Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=attribute.edit&id=' . $id);
+            $label = '<a href="' . $escape($url) . '">' . $escape((string) $attr->title) . '</a>'
+                . ' <small class="text-muted">' . $escape((string) $attr->code) . '</small>';
             if ((int) $attr->state !== 1) {
                 $label .= ' <span class="badge bg-secondary">'
                     . $escape(Text::_('JUNPUBLISHED')) . '</span>';
@@ -79,7 +80,7 @@ final class CategoryattributesField extends FormField
             $inputName = $escape($this->name . '[' . $id . ']');
             $html .= '<tr><th scope="row"><label for="' . $inputId . '">' . $label
                 . '</label></th><td>' . $escape($inherited)
-                . '</td><td><select class="form-select" id="' . $inputId
+                . '</td><td><select class="form-select form-select-sm w-auto" id="' . $inputId
                 . '" name="' . $inputName . '">';
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',

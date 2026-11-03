@@ -44,7 +44,7 @@ final class AttributecategoriesField extends FormField
             htmlspecialchars($v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         $html = '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_ATTRCAT_HELP')) . '</p>'
-            . '<div class="table-responsive"><table class="table table-striped">'
+            . '<div class="table-responsive"><table class="table table-striped align-middle">'
             . '<thead><tr><th>' . $escape(Text::_('COM_MINIMARKET_CATEGORIES'))
             . '</th><th>' . $escape(Text::_('COM_MINIMARKET_CATATTR_INHERITED'))
             . '</th><th>' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
@@ -78,7 +78,7 @@ final class AttributecategoriesField extends FormField
             $html .= '<tr><th scope="row" style="padding-inline-start:' . $indent
                 . 'px"><label for="' . $idAttr . '">' . $label
                 . '</label></th><td>' . $escape($inherit)
-                . '</td><td><select class="form-select" id="' . $idAttr
+                . '</td><td><select class="form-select form-select-sm w-auto" id="' . $idAttr
                 . '" name="' . $name . '">';
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',

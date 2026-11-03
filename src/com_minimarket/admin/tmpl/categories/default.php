@@ -12,7 +12,7 @@ use Joomla\CMS\Button\PublishedButton;
       name="adminForm" id="adminForm">
     <div id="j-main-container" class="j-main-container">
     <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
-    <table class="table" id="mm-category-tree">
+    <table class="table table-striped" id="mm-category-tree">
         <thead>
         <tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
@@ -46,14 +46,16 @@ use Joomla\CMS\Button\PublishedButton;
                     <?php endif; ?>
                 </td>
                 <td>
-                    <span style="display:inline-block;padding-inline-start:<?php echo min(20, $depth) * 18; ?>px">
-                        <?php if ($row['has_children']) : ?>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mm-tree-toggle"
-                                    aria-expanded="true" aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_TOGGLE')); ?>">▾</button>
-                        <?php else : ?><span style="display:inline-block;width:2rem"></span><?php endif; ?>
+                    <span style="display:inline-block;padding-inline-start:<?php echo min(20, $depth) * 16; ?>px">
+                        <?php if ($depth > 0) : ?>
+                            <span class="text-muted" aria-hidden="true">— </span>
+                        <?php endif; ?>
                         <a href="<?php echo Route::_('index.php?option=com_minimarket&task=category.edit&id=' . $id); ?>">
                             <?php echo $this->escape($item->title); ?>
                         </a>
+                        <small class="d-block text-muted" style="margin-inline-start:<?php echo $depth > 0 ? 1.2 : 0; ?>em">
+                            <?php echo $this->escape((string) ($item->alias ?? '')); ?>
+                        </small>
                         <?php if ($row['broken_parent']) : ?>
                             <span class="text-warning" title="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_BROKEN_PARENT')); ?>">⚠</span>
                         <?php endif; ?>
@@ -79,19 +81,3 @@ use Joomla\CMS\Button\PublishedButton;
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
-<script>
-document.querySelectorAll('#mm-category-tree .mm-tree-toggle').forEach(function (button) {
-    button.addEventListener('click', function () {
-        button.setAttribute('aria-expanded', button.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
-        const rows = Array.from(document.querySelectorAll('#mm-category-tree tbody tr[data-mm-depth]'));
-        const collapsed = [];
-        rows.forEach(function (row) {
-            const depth = Number(row.dataset.mmDepth);
-            collapsed.length = depth;
-            row.hidden = collapsed.some(Boolean);
-            const toggle = row.querySelector('.mm-tree-toggle');
-            collapsed[depth] = !!toggle && toggle.getAttribute('aria-expanded') === 'false';
-        });
-    });
-});
-</script>
