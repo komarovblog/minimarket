@@ -66,6 +66,17 @@ foreach (['categories','products','attributes','values'] as $entity) {
         && $check<$state && $state<$title,
         $entity.': columns ordered checkbox, publication, title');
 }
+$attrForm=simplexml_load_file($base.'admin/forms/attribute.xml');
+checkUi(count($attrForm->xpath('//field[@name="is_variant"]'))===0,
+    'descriptive attributes have no SKU flag');
+checkUi(count($form->xpath('//field[@name="variant_info"]'))===0,
+    'product editor has no historical category-attribute SKU controls');
+checkUi(!str_contains($editor,'$legacySku') &&
+    !str_contains($editor,"renderField('variant_info')"),
+    'only one order-option editor in product card');
+checkUi(!is_file($base.'media/js/variants-admin.js') &&
+    !is_file($base.'admin/src/Field/VariantinfoField.php'),
+    'historical SKU editor files removed');
 $skuBuilder=file_get_contents($base.'admin/src/Field/VariantbuilderField.php');
 checkUi(str_contains($skuBuilder,'data-mm-add-sku')
     && str_contains($skuBuilder,'data-mm-sku-apply'),

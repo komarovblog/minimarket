@@ -23,7 +23,6 @@
     const mode = document.getElementById('jform_input_mode');
     const filter = document.getElementById('jform_filter_mode');
     const multi = document.getElementById('jform_is_multiple');
-    // The variant flag supports List, Color and Text with predefined choices.
     const multiGroup = multi?.closest('.control-group, .mb-3');
     if (!type || !mode || !filter) return;
     // Pre-existing List / URL / Date / Textarea remain editable; only NEW
@@ -94,12 +93,6 @@
           if (multi) {
             multi.value = '0';
             multi.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-          const enabledVariant = document.querySelector('[name="jform[is_variant]"][value="1"]');
-          const disabledVariant = document.querySelector('[name="jform[is_variant]"][value="0"]');
-          if (enabledVariant?.checked && disabledVariant) {
-            disabledVariant.checked = true;
-            disabledVariant.dispatchEvent(new Event('change', { bubbles: true }));
           }
         }
         const filterMulti = document.querySelector('[name="jform[filter_multiple]"][value="1"]');
