@@ -520,6 +520,39 @@ $cleanAttrs=$pdo->query('SHOW COLUMNS FROM catci_minimarket_attributes')->fetchA
 verify(!in_array('is_variant',$cleanAttrs,true),'0.5.29 eliminates attribute-is-SKU flag');
 verify($beforeCleanSkus===$pdo->query('SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
     '0.5.29 does not change actual trade SKU IDs, prices or quantities');
+// 0.5.32: preserve old group rows, enable many-to-many and stable external group keys.
+$beforeGroupProducts=$pdo->query('SELECT product_id,group_id,sort_order FROM catci_minimarket_product_group_members ORDER BY product_id')->fetchAll(PDO::FETCH_ASSOC);
+$beforeGroupSkuData=$pdo->query('SELECT id,product_id,sku,price,stock FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$beforeGroupProduct=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.32.sql','catci_');
+verify($beforeGroupProducts===$pdo->query('SELECT product_id,group_id,sort_order FROM catci_minimarket_product_group_members ORDER BY product_id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.32 preserves old memberships including order');
+verify($beforeGroupProduct===row($pdo,'catci_minimarket_products'),
+    '0.5.32 does not change product data or SEO');
+verify($beforeGroupSkuData===$pdo->query('SELECT id,product_id,sku,price,stock FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.32 SKU identity, price and stock unchanged');
+verify((string)$pdo->query('SELECT type FROM catci_minimarket_product_groups WHERE id=7')->fetchColumn()==='similar',
+    '0.5.32 existing group assigned safe default type');
+$pdo->exec("INSERT INTO catci_minimarket_product_groups (id,title,type,state)
+    VALUES (8,'Summer collection','collection',1)");
+$pdo->exec('INSERT INTO catci_minimarket_product_group_members (product_id,group_id) VALUES (1,8)');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_group_members WHERE product_id=1')->fetchColumn()===2,
+    'same independent product belongs to two groups');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_group_members WHERE group_id=7')->fetchColumn()===2,
+    'old group members remain after adding overlapping membership');
+try {
+    $pdo->exec('INSERT INTO catci_minimarket_product_group_members (product_id,group_id) VALUES (1,8)');
+    verify(false,'duplicate product-group pair allowed');
+} catch(PDOException $e) { verify(true,'duplicate membership pair rejected'); }
+$pdo->exec("INSERT INTO catci_minimarket_import_group_keys (source_key, external_group_key, group_id)
+    VALUES ('erp','summer-2026',8)");
+verify((int)$pdo->query("SELECT group_id FROM catci_minimarket_import_group_keys
+    WHERE source_key='erp' AND external_group_key='summer-2026'")->fetchColumn()===8,
+    'external import group identifier maps to exact group ID');
+$memberIndexes=$pdo->query('SHOW INDEX FROM catci_minimarket_product_group_members')->fetchAll(PDO::FETCH_ASSOC);
+verify(count(array_filter($memberIndexes,static fn($x)=>$x['Key_name']==='PRIMARY'))===2,
+    'composite group-product primary key installed');
+$pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
 $pdo->exec('DELETE FROM catci_minimarket_products WHERE id=2');
@@ -563,10 +596,16 @@ foreach ([
     foreach ($required as $col) verify(in_array($col,$columns,true),'fresh 0.5.25 '.$table.' '.$col);
 }
 $freshGroupColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_groups')->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','title'] as $column) verify(in_array($column,$freshGroupColumns,true),'fresh 0.5.26 group '.$column);
+foreach (['id','title','type','state','sort_order'] as $column) verify(in_array($column,$freshGroupColumns,true),'fresh 0.5.32 group '.$column);
 $freshMemberColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_group_members')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['product_id','group_id','sort_order'] as $column)
     verify(in_array($column,$freshMemberColumns,true),'fresh 0.5.26 member '.$column);
+$freshGroupImport=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_import_group_keys')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['source_key','external_group_key','group_id'] as $column)
+    verify(in_array($column,$freshGroupImport,true),'fresh 0.5.32 import group '.$column);
+$freshMemberPrimary=$pdo->query("SHOW INDEX FROM freshcatci_minimarket_product_group_members WHERE Key_name = 'PRIMARY'")->fetchAll(PDO::FETCH_ASSOC);
+verify(count($freshMemberPrimary)===2,'fresh 0.5.32 composite group/product primary key');
+
 $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
 verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');

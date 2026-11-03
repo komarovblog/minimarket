@@ -64,7 +64,7 @@ checkUi(!str_contains($client,"input[name=\"jform[variant_config]\"]"),
     'no old hidden JSON is the source of truth for option values');
 checkUi(str_contains($client,'table table-striped table-sm') &&
     str_contains($client,'querySelectorAll'), 'native table for combination preview');
-foreach (['categories','products','attributes','values'] as $entity) {
+foreach (['categories','products','attributes','values','groups'] as $entity) {
     $list=file_get_contents($base.'admin/tmpl/'.$entity.'/default.php');
     checkUi(str_contains($list,'table table-striped'),
         $entity.': ordinary Joomla striped table');
@@ -102,3 +102,4 @@ checkUi(str_contains($client, "appendRow({ title: '', selection: {} }, axes, tru
 checkUi(str_contains($client,"['price', 'stock', 'state']"),
     'copying SKU position excludes identity and personal media by default');
 echo 'NATIVE_UI_OK: '.$n." cases\n";
+

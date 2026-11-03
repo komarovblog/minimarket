@@ -24,6 +24,10 @@ final class ProductsModel extends ListModel
                 $db->quoteName('p.image_alt'),
                 $db->quoteName('p.category_id'),
                 $db->quoteName('c.title', 'category_title'),
+                '(SELECT GROUP_CONCAT(g.title ORDER BY g.title SEPARATOR 0x2C20) FROM '
+                    . $db->quoteName('#__minimarket_product_group_members', 'mg')
+                    . ' INNER JOIN ' . $db->quoteName('#__minimarket_product_groups', 'g')
+                    . ' ON g.id = mg.group_id WHERE mg.product_id = p.id) AS group_titles',
             ])
             ->from($db->quoteName('#__minimarket_products', 'p'))
             ->join('INNER', $db->quoteName('#__minimarket_categories', 'c')

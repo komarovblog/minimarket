@@ -19,7 +19,11 @@ final class ProductgroupField extends ListField
         $options=parent::getOptions();
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         foreach (ProductGroups::options($db) as $group) {
-            $options[]=HTMLHelper::_('select.option',(int)$group['id'],(string)$group['title']);
+            $label = (string) $group['title'];
+            if ((int) $group['state'] !== 1) {
+                $label .= ' — ' . \Joomla\CMS\Language\Text::_('JUNPUBLISHED');
+            }
+            $options[] = HTMLHelper::_('select.option', (int) $group['id'], $label);
         }
         return $options;
     }

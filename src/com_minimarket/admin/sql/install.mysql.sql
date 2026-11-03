@@ -313,6 +313,9 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_variant_value_images` (
 CREATE TABLE IF NOT EXISTS `#__minimarket_product_groups` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(255) NOT NULL,
+  `type` VARCHAR(32) NOT NULL DEFAULT 'similar',
+  `state` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_mm_product_group_title` (`title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -321,10 +324,22 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_group_members` (
   `product_id` INT UNSIGNED NOT NULL,
   `group_id` INT UNSIGNED NOT NULL,
   `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
-  PRIMARY KEY (`product_id`),
+  PRIMARY KEY (`group_id`,`product_id`),
+  KEY `idx_mm_group_member_product` (`product_id`),
   KEY `idx_mm_group_member_order` (`group_id`,`sort_order`,`product_id`),
   CONSTRAINT `fk_mm_group_member_product` FOREIGN KEY (`product_id`)
     REFERENCES `#__minimarket_products`(`id`) ON UPDATE RESTRICT ON DELETE CASCADE,
   CONSTRAINT `fk_mm_group_member_group` FOREIGN KEY (`group_id`)
+    REFERENCES `#__minimarket_product_groups`(`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Stable external group identity for a future importer (no importer in this release).
+CREATE TABLE IF NOT EXISTS `#__minimarket_import_group_keys` (
+  `source_key` VARCHAR(64) COLLATE utf8mb4_bin NOT NULL,
+  `external_group_key` VARCHAR(191) COLLATE utf8mb4_bin NOT NULL,
+  `group_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`source_key`,`external_group_key`),
+  KEY `idx_mm_import_group` (`group_id`),
+  CONSTRAINT `fk_mm_import_group` FOREIGN KEY (`group_id`)
     REFERENCES `#__minimarket_product_groups`(`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -35,14 +35,14 @@ final class ProductModel extends AdminModel
             $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
             $item->variants = ProductVariants::formRows($this->getDatabase(), (int) $item->id);
             $item->variant_dimensions = ProductLocalDimensions::formRows($this->getDatabase(), (int) $item->id);
-            $item->group_id = ProductGroups::currentId($this->getDatabase(), (int)$item->id);
+            $item->group_ids = ProductGroups::currentIds($this->getDatabase(), (int) $item->id);
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
             $item->attribute_values = [];
             $item->variants = [];
             $item->variant_dimensions = [];
-            $item->group_id = 0;
+            $item->group_ids = [];
         }
 
         return $item;
@@ -65,14 +65,13 @@ final class ProductModel extends AdminModel
         $hasLocal = array_key_exists('variant_dimensions', $data)
             || !empty($data['variant_dimensions_present']);
         $localDimensions = [];
-        $hasGroup = array_key_exists('group_id',$data) || !empty($data['product_group_present']);
-        $groupId = 0;
+        $hasGroup = array_key_exists('group_ids', $data) || !empty($data['product_group_present']);
+        $groupIds = [];
         $newGroupTitle = '';
         if ($hasGroup) {
             try {
-                [$groupId,$newGroupTitle]=ProductGroups::normalize(
-                    $data['group_id']??0,$data['new_group_title']??''
-                );
+                $groupIds = ProductGroups::normalizeIds($data['group_ids'] ?? []);
+                $newGroupTitle = ProductGroups::normalizeNewTitle($data['new_group_title'] ?? '');
             } catch (\InvalidArgumentException $error) {
                 $this->setError(Text::_('COM_MINIMARKET_PRODUCT_GROUP_INVALID'));
                 return false;
@@ -151,7 +150,7 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['group_id'],$data['new_group_title'],$data['product_group_present']);
+        unset($data['group_ids'], $data['new_group_title'], $data['product_group_present'], $data['group_contents']);
         unset($data['variant_dimensions'], $data['variant_dimensions_present'],
             $data['variant_matrix'], $data['variants'], $data['variants_present'],
             $data['videos'], $data['videos_present'],
@@ -195,7 +194,7 @@ final class ProductModel extends AdminModel
             }
             if ($hasGroup) {
                 $productId = (int) $this->getState($this->getName() . '.id');
-                ProductGroups::assign($db,$productId,$groupId,$newGroupTitle);
+                ProductGroups::replaceForProduct($db, $productId, $groupIds, $newGroupTitle);
             }
             $db->transactionCommit();
             return true;

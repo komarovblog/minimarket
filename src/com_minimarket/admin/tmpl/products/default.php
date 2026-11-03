@@ -23,6 +23,7 @@ use Joomla\CMS\Button\PublishedButton;
             <th><?php echo HTMLHelper::_('searchtools.sort', 'COM_MINIMARKET_PRODUCT_PRICE', 'p.price', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_CATEGORIES'); ?></th>
+            <th><?php echo Text::_('COM_MINIMARKET_GROUPS'); ?></th>
             <th><?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ID', 'p.id', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
         </tr>
         </thead>
@@ -52,11 +53,12 @@ use Joomla\CMS\Button\PublishedButton;
                 <td><?php echo $this->escape((string) $item->price); ?></td>
                 <td><?php echo (int) $item->stock; ?></td>
                 <td><?php echo $this->escape($item->category_title); ?></td>
+                <td><?php echo $this->escape((string) ($item->group_titles ?? '')); ?></td>
                 <td><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
-            <tr><td colspan="9"><?php echo Text::_('COM_MINIMARKET_NO_PRODUCTS'); ?></td></tr>
+            <tr><td colspan="10"><?php echo Text::_('COM_MINIMARKET_NO_PRODUCTS'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>

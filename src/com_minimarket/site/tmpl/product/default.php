@@ -291,25 +291,31 @@ $initialDescription=$hasCustomDescription
          <?php echo trim($initialDescription)==='' ? 'hidden' : ''; ?>>
         <?php echo InputFilter::getInstance()->clean($initialDescription, 'HTML'); ?>
     </div>
-    <?php if ($this->relatedProducts) : ?>
+    <?php if ($this->relatedGroups) : ?>
         <section class="mm-related-products" aria-labelledby="mm-related-products-title">
             <h2 id="mm-related-products-title"><?php echo Text::_('COM_MINIMARKET_RELATED_PRODUCTS'); ?></h2>
-            <div class="d-flex flex-wrap gap-3">
-                <?php foreach ($this->relatedProducts as $linked) :
-                    $relatedImage = explode('#',(string)($linked->image??''),2)[0];
-                    $showRelatedImage = $isSafeImage($relatedImage);
-                ?>
-                    <a class="d-flex align-items-center gap-2 border rounded p-2 text-decoration-none"
-                       href="<?php echo $this->escape(RouteHelper::product((int)$linked->id)); ?>">
-                        <?php if ($showRelatedImage) : ?>
-                            <img src="<?php echo $this->escape(Uri::root().$relatedImage); ?>"
-                                 alt="" loading="lazy" width="64" height="64"
-                                 style="object-fit:contain"/>
-                        <?php endif; ?>
-                        <span><?php echo $this->escape((string)$linked->title); ?></span>
-                    </a>
-                <?php endforeach; ?>
-            </div>
+            <?php foreach ($this->relatedGroups as $group) : ?>
+                <section class="mb-3" aria-labelledby="mm-related-group-<?php echo (int) $group['id']; ?>">
+                    <h3 id="mm-related-group-<?php echo (int) $group['id']; ?>" class="h5">
+                        <?php echo $this->escape((string) $group['title']); ?>
+                    </h3>
+                    <div class="d-flex flex-wrap gap-3">
+                    <?php foreach ($group['products'] as $linked) :
+                        $relatedImage = explode('#', (string) ($linked->image ?? ''), 2)[0];
+                        $showRelatedImage = $isSafeImage($relatedImage);
+                    ?>
+                        <a class="d-flex align-items-center gap-2 border rounded p-2 text-decoration-none"
+                           href="<?php echo $this->escape(RouteHelper::product((int) $linked->id)); ?>">
+                            <?php if ($showRelatedImage) : ?>
+                                <img src="<?php echo $this->escape(Uri::root() . $relatedImage); ?>"
+                                     alt="" loading="lazy" width="64" height="64" style="object-fit:contain">
+                            <?php endif; ?>
+                            <span><?php echo $this->escape((string) $linked->title); ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                    </div>
+                </section>
+            <?php endforeach; ?>
         </section>
     <?php endif; ?>
     <p><?php echo Text::_('COM_MINIMARKET_CART_NOT_READY'); ?></p>

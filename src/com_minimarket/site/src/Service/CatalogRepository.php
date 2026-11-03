@@ -241,28 +241,47 @@ final class CatalogRepository
             $this->categoryTree()->ancestorIds($categoryId));
     }
 
-    /** Other published, SEO-independent products in this exact group. */
-    public function getRelatedProducts(int $productId): array
+    /** Each published group is shown with its own set of published member products. */
+    public function getRelatedGroups(int $productId): array
     {
         if ($productId < 1) return [];
-        $q=$this->db->getQuery(true)->select([
-                'p.id','p.title','p.category_id','p.image','p.image_alt'
-            ])
-            ->from($this->db->quoteName('#__minimarket_product_group_members','m'))
-            ->join('INNER',$this->db->quoteName('#__minimarket_product_group_members','other')
-                .' ON other.group_id = m.group_id')
-            ->join('INNER',$this->db->quoteName('#__minimarket_products','p')
-                .' ON p.id = other.product_id')
-            ->where('m.product_id = '.$productId)
-            ->where('p.id != '.$productId)
-            ->where('p.state = 1')
-            ->order('other.sort_order ASC,p.id ASC');
+        $q = $this->db->getQuery(true)->select(['g.id','g.title','g.type'])
+            ->from($this->db->quoteName('#__minimarket_product_group_members', 'm'))
+            ->join('INNER', $this->db->quoteName('#__minimarket_product_groups', 'g')
+                . ' ON g.id = m.group_id')
+            ->where('m.product_id = ' . $productId)
+            ->where('g.state = 1')
+            ->order('g.sort_order ASC, g.title ASC, g.id ASC');
         $this->db->setQuery($q);
-        $result=[];
-        foreach ((array)$this->db->loadObjectList() as $item) {
-            if ($this->categoryTree()->isVisible((int)$item->category_id)) $result[]=$item;
+        $groups = (array) $this->db->loadAssocList();
+        if (!$groups) return [];
+        $ids = array_map('intval', array_column($groups, 'id'));
+        $q = $this->db->getQuery(true)->select([
+                'm.group_id','p.id','p.title','p.category_id','p.image','p.image_alt'
+            ])
+            ->from($this->db->quoteName('#__minimarket_product_group_members', 'm'))
+            ->join('INNER', $this->db->quoteName('#__minimarket_products', 'p')
+                . ' ON p.id = m.product_id')
+            ->where('m.group_id IN (' . implode(',', $ids) . ')')
+            ->where('p.id <> ' . $productId)
+            ->where('p.state = 1')
+            ->order('m.sort_order ASC, p.id ASC');
+        $this->db->setQuery($q);
+        $members = [];
+        foreach ((array) $this->db->loadObjectList() as $product) {
+            if ($this->categoryTree()->isVisible((int) $product->category_id)) {
+                $members[(int) $product->group_id][] = $product;
+            }
         }
-        return $result;
+        $out = [];
+        foreach ($groups as $group) {
+            $groupId = (int) $group['id'];
+            if (!empty($members[$groupId])) {
+                $out[] = ['id' => $groupId, 'title' => $group['title'],
+                    'type' => $group['type'], 'products' => $members[$groupId]];
+            }
+        }
+        return $out;
     }
 
     public function getProduct(int $id): ?object
