@@ -12,7 +12,14 @@
         <field name="price" type="number" label="COM_MINIMARKET_PRODUCT_PRICE" default="0.00"
                min="0" max="9999999999999.99" step="0.01" required="true" filter="string"/>
         <field name="stock" type="number" label="COM_MINIMARKET_PRODUCT_STOCK" default="0"
+               description="COM_MINIMARKET_OPTION_STOCK_MAIN_HELP"
                min="0" max="4294967295" step="1" required="true" filter="string"/>
+        <field name="option_stock_mode" type="radio" label="COM_MINIMARKET_OPTION_STOCK_MODE"
+               description="COM_MINIMARKET_OPTION_STOCK_HELP"
+               default="0" filter="int">
+            <option value="0">COM_MINIMARKET_OPTION_STOCK_SHARED</option>
+            <option value="1">COM_MINIMARKET_OPTION_STOCK_PER_COMBINATION</option>
+        </field>
         <field name="sort_order" type="number" label="COM_MINIMARKET_CATEGORY_ORDER"
                filter="uint" default="0" min="0" max="4294967295"/>
     </fieldset>
@@ -57,6 +64,16 @@
                formsource="administrator/components/com_minimarket/forms/product_variant.xml"
                multiple="true" min="0" max="200" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable-table" validate="Subform"/>
+    </fieldset>
+    <fieldset name="groups" label="COM_MINIMARKET_PRODUCT_TAB_GROUPS">
+        <field name="product_group_present" type="hidden" default="1" filter="int"/>
+        <field name="group_id" type="Productgroup" label="COM_MINIMARKET_PRODUCT_GROUP"
+               description="COM_MINIMARKET_PRODUCT_GROUP_HELP" default="0" filter="uint">
+            <option value="0">COM_MINIMARKET_PRODUCT_GROUP_NONE</option>
+        </field>
+        <field name="new_group_title" type="text" label="COM_MINIMARKET_NEW_PRODUCT_GROUP"
+               description="COM_MINIMARKET_NEW_PRODUCT_GROUP_HELP" maxlength="255"
+               filter="string" size="50"/>
     </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>

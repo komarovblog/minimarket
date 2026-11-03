@@ -13,6 +13,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\ProductVariants;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions;
 use MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
 
 final class ProductModel extends AdminModel
 {
@@ -34,12 +35,14 @@ final class ProductModel extends AdminModel
             $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
             $item->variants = ProductVariants::formRows($this->getDatabase(), (int) $item->id);
             $item->variant_dimensions = ProductLocalDimensions::formRows($this->getDatabase(), (int) $item->id);
+            $item->group_id = ProductGroups::currentId($this->getDatabase(), (int)$item->id);
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
             $item->attribute_values = [];
             $item->variants = [];
             $item->variant_dimensions = [];
+            $item->group_id = 0;
         }
 
         return $item;
@@ -62,6 +65,19 @@ final class ProductModel extends AdminModel
         $hasLocal = array_key_exists('variant_dimensions', $data)
             || !empty($data['variant_dimensions_present']);
         $localDimensions = [];
+        $hasGroup = array_key_exists('group_id',$data) || !empty($data['product_group_present']);
+        $groupId = 0;
+        $newGroupTitle = '';
+        if ($hasGroup) {
+            try {
+                [$groupId,$newGroupTitle]=ProductGroups::normalize(
+                    $data['group_id']??0,$data['new_group_title']??''
+                );
+            } catch (\InvalidArgumentException $error) {
+                $this->setError(Text::_('COM_MINIMARKET_PRODUCT_GROUP_INVALID'));
+                return false;
+            }
+        }
         try {
             $rows = $hasGallery
                 ? ProductGallery::normalizeRows($data['gallery'] ?? [], (string) ($data['image'] ?? ''))
@@ -146,6 +162,7 @@ final class ProductModel extends AdminModel
             return false;
         }
 
+        unset($data['group_id'],$data['new_group_title'],$data['product_group_present']);
         unset($data['variant_dimensions'], $data['variant_dimensions_present'],
             $data['variant_matrix'], $data['variants'], $data['variants_present'],
             $data['videos'], $data['videos_present'],
@@ -186,6 +203,10 @@ final class ProductModel extends AdminModel
                 // inserting a dummy SKU or touching the existing product trade fields.
                 $productId = (int) $this->getState($this->getName() . '.id');
                 ProductLocalDimensions::replace($db, $productId, $localDimensions, [], []);
+            }
+            if ($hasGroup) {
+                $productId = (int) $this->getState($this->getName() . '.id');
+                ProductGroups::assign($db,$productId,$groupId,$newGroupTitle);
             }
             $db->transactionCommit();
             return true;

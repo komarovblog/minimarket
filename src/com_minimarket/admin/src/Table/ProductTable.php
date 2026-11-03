@@ -66,6 +66,12 @@ final class ProductTable extends Table
 
         $this->price = $price;
         $this->stock = (int) $stock;
+        $stockMode = (string) ($this->option_stock_mode ?? '0');
+        if (!in_array($stockMode,['0','1'],true)) {
+            $this->setError(Text::_('COM_MINIMARKET_OPTION_STOCK_INVALID'));
+            return false;
+        }
+        $this->option_stock_mode = (int)$stockMode;
         $this->category_id = (int) $this->category_id;
 
         if ($this->category_id < 1) {
