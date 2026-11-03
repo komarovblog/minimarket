@@ -32,6 +32,11 @@ $attributeSettingsJs=file_get_contents($base.'media/js/attribute-settings.js');
 checkUi(str_contains($attributeSettingsJs,'optionCatalog')
     && str_contains($attributeSettingsJs,'field.replaceChildren(...rendered)'),
     'input-mode dropdown contains only valid options for the characteristic type');
+$ruUi=file_get_contents($base.'admin/language/ru-RU/com_minimarket.ini');
+$enUi=file_get_contents($base.'admin/language/en-GB/com_minimarket.ini');
+checkUi(str_contains($ruUi, 'COM_MINIMARKET_MODE_PRESETS="Выбор из заданных значений"')
+    && str_contains($enUi, 'COM_MINIMARKET_MODE_PRESETS="Choose preset values"'),
+    'text and number share a neutral preset-choice translation');
 $form=simplexml_load_file($base.'admin/forms/product.xml');
 $axes=$form->xpath("//fieldset[@name='variants']/field[@name='variant_dimensions' and @type='subform']");
 checkUi(count($axes)===1,'axes use native Joomla subform');
