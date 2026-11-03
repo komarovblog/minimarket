@@ -34,6 +34,11 @@
                label="COM_MINIMARKET_CATATTR_LABEL"/>
         <field name="attributes_present" type="hidden" filter="int" default="1"/>
     </fieldset>
+    <fieldset name="order_options" label="COM_MINIMARKET_ORDER_OPTIONS">
+        <field name="order_options_present" type="hidden" default="1" filter="int"/>
+        <field name="order_option_rules" type="Categoryorderoptions" filter="raw"
+               label="COM_MINIMARKET_ORDER_OPTIONS"/>
+    </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>
         <field name="meta_description" type="textarea" label="COM_MINIMARKET_META_DESCRIPTION"

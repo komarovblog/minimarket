@@ -25,6 +25,13 @@ final class ProductgroupField extends CheckboxesField
             }
             $options[] = HTMLHelper::_('select.option', (int) $group['id'], $label);
         }
+        // Joomla 6.2 checkboxes layout expects every option to expose
+        // ->checked, including options added outside the XML definition.
+        // Compare against the current persisted or posted values.
+        $selected = array_map('strval', (array) ($this->value ?? []));
+        foreach ($options as $option) {
+            $option->checked = in_array((string) $option->value, $selected, true);
+        }
         return $options;
     }
 }

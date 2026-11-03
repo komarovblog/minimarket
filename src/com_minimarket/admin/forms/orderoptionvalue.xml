@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+  <field name="id" type="hidden" default="0" filter="int"/>
+  <field name="title" type="text" label="COM_MINIMARKET_ORDER_OPTION_VALUE_TITLE"
+         required="true" maxlength="255" filter="string"/>
+  <field name="code" type="text" label="COM_MINIMARKET_ORDER_OPTION_VALUE_CODE"
+         description="COM_MINIMARKET_ORDER_OPTION_VALUE_CODE_DESC"
+         maxlength="100" filter="string"/>
+  <field name="color_hex" type="text" label="COM_MINIMARKET_ORDER_OPTION_HEX"
+         description="COM_MINIMARKET_ORDER_OPTION_HEX_DESC" maxlength="7" filter="string"/>
+  <field name="state" type="list" label="JSTATUS" default="1" filter="int">
+    <option value="1">JPUBLISHED</option>
+    <option value="0">JUNPUBLISHED</option>
+  </field>
+</form>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
+  <fieldset name="details" label="COM_MINIMARKET_ORDER_OPTION_EDIT">
+    <field name="id" type="hidden" default="0" filter="int"/>
+    <field name="title" type="text" label="JGLOBAL_TITLE" required="true"
+           maxlength="255" filter="string" size="48"/>
+    <field name="code" type="text" label="COM_MINIMARKET_ORDER_OPTION_CODE"
+           description="COM_MINIMARKET_ORDER_OPTION_CODE_DESC" maxlength="100"
+           filter="string" size="32"/>
+    <field name="state" type="list" label="JSTATUS" filter="int" default="1">
+      <option value="1">JPUBLISHED</option>
+      <option value="0">JUNPUBLISHED</option>
+    </field>
+    <field name="sort_order" type="number" label="JGRID_HEADING_ORDERING"
+           min="0" max="4294967295" default="0" filter="uint"/>
+  </fieldset>
+  <fieldset name="values" label="COM_MINIMARKET_ORDER_OPTION_VALUES">
+    <field name="values_present" type="hidden" default="1" filter="int"/>
+    <field name="option_values" type="subform" label="COM_MINIMARKET_ORDER_OPTION_VALUES"
+           description="COM_MINIMARKET_ORDER_OPTION_VALUES_DESC"
+           formsource="administrator/components/com_minimarket/forms/orderoptionvalue.xml"
+           multiple="true" min="0" max="250" buttons="add,remove,move"
+           layout="joomla.form.field.subform.repeatable-table" validate="Subform"/>
+  </fieldset>
+</form>

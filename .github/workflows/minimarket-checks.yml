@@ -122,6 +122,9 @@ jobs:
       - name: Options, stock modes and independent linked products
         run: php scripts/test-option-architecture.php
 
+      - name: Global order-option dictionary, category inheritance and checkbox regression
+        run: php scripts/test-order-options.php
+
       - name: Typed category-scoped product attributes
         run: php scripts/test-product-attributes.php
 

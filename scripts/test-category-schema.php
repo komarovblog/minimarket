@@ -552,6 +552,36 @@ verify((int)$pdo->query("SELECT group_id FROM catci_minimarket_import_group_keys
 $memberIndexes=$pdo->query('SHOW INDEX FROM catci_minimarket_product_group_members')->fetchAll(PDO::FETCH_ASSOC);
 verify(count(array_filter($memberIndexes,static fn($x)=>$x['Key_name']==='PRIMARY'))===2,
     'composite group-product primary key installed');
+
+/** Global order-option dictionaries are additive and category overrides are independent. */
+$beforeOrderProduct=row($pdo,'catci_minimarket_products');
+$beforeOrderSkus=$pdo->query('SELECT id,product_id,sku,price,stock FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo,$dir.'updates/mysql/0.5.34.sql','catci_');
+verify($beforeOrderProduct===row($pdo,'catci_minimarket_products'),
+    '0.5.34 preserves existing product, price, stock, SEO');
+verify($beforeOrderSkus===$pdo->query('SELECT id,product_id,sku,price,stock FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.34 preserves every existing SKU');
+$pdo->exec("INSERT INTO catci_minimarket_order_options
+    (id,title,code,state) VALUES (11,'Size','size',1)");
+$pdo->exec("INSERT INTO catci_minimarket_order_option_values
+    (id,option_id,title,code,sort_order,state) VALUES
+    (21,11,'S','s',0,1),(22,11,'M','m',1,1),(23,11,'L','l',2,1)");
+$pdo->exec("INSERT INTO catci_minimarket_category_order_options
+    (category_id,option_id,mode) VALUES (1,11,2)");
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_order_option_values
+    WHERE option_id=11')->fetchColumn()===3,'one global option has three reusable values');
+verify((int)$pdo->query('SELECT mode FROM catci_minimarket_category_order_options
+    WHERE option_id=11 AND category_id=1')->fetchColumn()===2,
+    'order option required by category without product SKU changes');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_order_option_values
+        (option_id,title,code) VALUES (11,'Duplicate','m')");
+    verify(false,'duplicate global option value code accepted');
+} catch (PDOException $error) { verify(true,'unique global option value code enforced'); }
+$pdo->exec('DROP TABLE catci_minimarket_category_order_options');
+$pdo->exec('DROP TABLE catci_minimarket_order_option_values');
+$pdo->exec('DROP TABLE catci_minimarket_order_options');
+
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
@@ -597,6 +627,16 @@ foreach ([
 }
 $freshGroupColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_groups')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','title','type','state','sort_order'] as $column) verify(in_array($column,$freshGroupColumns,true),'fresh 0.5.32 group '.$column);
+$freshOrderOptions=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_order_options')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','code','title','state','sort_order'] as $column)
+    verify(in_array($column,$freshOrderOptions,true),'fresh 0.5.34 global option '.$column);
+$freshOrderValues=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_order_option_values')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','option_id','title','code','color_hex','state','sort_order'] as $column)
+    verify(in_array($column,$freshOrderValues,true),'fresh 0.5.34 order option value '.$column);
+$freshOrderRules=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_category_order_options')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['category_id','option_id','mode'] as $column)
+    verify(in_array($column,$freshOrderRules,true),'fresh 0.5.34 category order option '.$column);
+
 $freshMemberColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_group_members')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['product_id','group_id','sort_order'] as $column)
     verify(in_array($column,$freshMemberColumns,true),'fresh 0.5.26 member '.$column);

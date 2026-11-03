@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
 
 final class CategoryModel extends AdminModel
@@ -27,6 +28,9 @@ final class CategoryModel extends AdminModel
             $item->attribute_rules = CategoryAttributes::loadDirect(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
+            $item->order_option_rules = CategoryOrderOptions::direct(
+                $this->getDatabase(), (int) ($item->id ?? 0)
+            );
         }
         return $item;
     }
@@ -39,6 +43,8 @@ final class CategoryModel extends AdminModel
     {
         $hasAttributes = array_key_exists('attribute_rules', $data)
             || !empty($data['attributes_present']);
+        $hasOrderOptions = array_key_exists('order_option_rules', $data)
+            || !empty($data['order_options_present']);
         $db = $this->getDatabase();
 
         try {
@@ -52,16 +58,31 @@ final class CategoryModel extends AdminModel
             return false;
         }
 
-        unset($data['attribute_rules'], $data['attributes_present']);
+        try {
+            $orderOptionRules = $hasOrderOptions
+                ? CategoryOrderOptions::normalize(
+                    $data['order_option_rules'] ?? [],
+                    CategoryOrderOptions::allowedIds($db)
+                ) : [];
+        } catch (\InvalidArgumentException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_INVALID'));
+            return false;
+        }
+
+        unset($data['attribute_rules'], $data['attributes_present'],
+            $data['order_option_rules'], $data['order_options_present']);
         $db->transactionStart();
         try {
             if (!parent::save($data)) {
                 $db->transactionRollback();
                 return false;
             }
+            $categoryId = (int) $this->getState($this->getName() . '.id');
             if ($hasAttributes) {
-                $categoryId = (int) $this->getState($this->getName() . '.id');
                 CategoryAttributes::replaceDirect($db, $categoryId, $rules);
+            }
+            if ($hasOrderOptions) {
+                CategoryOrderOptions::replace($db, $categoryId, $orderOptionRules);
             }
             $db->transactionCommit();
             return true;
