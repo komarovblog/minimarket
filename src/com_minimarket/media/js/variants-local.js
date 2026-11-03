@@ -17,6 +17,30 @@
   const selectAllSku = root.querySelector('[data-mm-sku-all]');
   const bulkPrice = root.querySelector('[data-mm-sku-price]');
   const bulkStock = root.querySelector('[data-mm-sku-stock]');
+  // Each option combination still has a unique SKU. Only the inventory
+  // source changes: product stock vs per-SKU stock. Hidden inputs stay posted.
+  const stockModeInputs = Array.from(
+    document.querySelectorAll('input[name="jform[option_stock_mode]"]')
+  );
+  const sharedInventory = () => {
+    const selected = stockModeInputs.find(input => input.checked);
+    return !selected || selected.value === '0';
+  };
+  const refreshInventory = () => {
+    const shared = sharedInventory();
+    const bulkStockLabel = bulkStock?.closest('label');
+    if (bulkStockLabel) bulkStockLabel.hidden = shared;
+    for (const selection of selectionInputs()) {
+      const stockInput = findSkuField(selection, 'stock');
+      if (!stockInput) continue;
+      // Hide only presentation, never disable/unset stock: the editor might
+      // switch back to per-combination tracking at any time.
+      const cell = stockInput.closest('td');
+      if (cell) cell.hidden = shared;
+      else stockInput.hidden = shared;
+    }
+  };
+  stockModeInputs.forEach(input => input.addEventListener('change', refreshInventory));
   let labels = {};
   try { labels = JSON.parse(root.dataset.mmLabels || '{}'); } catch (_) {}
   const t = (key, fallback) => labels[key] || fallback;
@@ -326,6 +350,7 @@
     concealRawAdd();
     updateLabels(axes);
     refreshSkuEditors(axes);
+    refreshInventory();
     return selection;
   };
   const showPreview = () => {
@@ -409,7 +434,7 @@
   });
   applyBulk?.addEventListener('click', () => {
     const price = (bulkPrice?.value || '').trim();
-    const stock = (bulkStock?.value || '').trim();
+    const stock = sharedInventory() ? '' : (bulkStock?.value || '').trim();
     if (!price && !stock) {
       report(t('bulkRequired', 'Enter price or stock.'), true);
       return;
@@ -466,6 +491,7 @@
         const axes = getDimensions();
         refreshSkuEditors(axes);
         updateLabels(axes);
+        refreshInventory();
       } catch (_) {}
     });
     observer.observe(repeater, { childList: true, subtree: true });
@@ -476,4 +502,5 @@
     refreshSkuEditors(axes);
     updateLabels(axes);
   } catch (_) { /* empty option editor is allowed */ }
+  refreshInventory();
 })();
