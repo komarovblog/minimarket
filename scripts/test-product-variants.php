@@ -1,191 +1,116 @@
 <?php
-/** Pure PHP regression for real variants and media: no Joomla or test DB required. */
+/** One SKU engine: order options defined on a product, never category attributes. */
 declare(strict_types=1);
+
 namespace Joomla\Database { interface DatabaseInterface {} }
+namespace Joomla\CMS\Filter {
+    final class InputFilter {
+        public static function getInstance(): self { return new self(); }
+        public function clean(string $value, string $kind): string {
+            return preg_replace('~<script\b[^>]*>.*?</script>~is','',$value)??'';
+        }
+    }
+}
 namespace MiniMarket\VariantSmoke {
     \define('_JEXEC',1);
-    require __DIR__.'/../src/com_minimarket/admin/src/Service/TextPresetRows.php';
-    require __DIR__.'/../src/com_minimarket/admin/src/Service/MediaPath.php';
-    require __DIR__.'/../src/com_minimarket/admin/src/Service/ProductGallery.php';
-    require __DIR__.'/../src/com_minimarket/admin/src/Service/ProductVariants.php';
-    use MiniMarket\Component\Minimarket\Administrator\Service\ProductVariants as V;
+    $services=__DIR__.'/../src/com_minimarket/admin/src/Service/';
+    foreach (['MediaPath','TextPresetRows','ProductGallery','ProductVideos',
+              'VariantValueGallery','VariantMatrix','ProductLocalDimensions','ProductVariants'] as $file) {
+        require $services.$file.'.php';
+    }
+    use MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix as Matrix;
+    use MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions as Local;
+    use MiniMarket\Component\Minimarket\Administrator\Service\ProductVariants as Sku;
+
     $count=0;
-    function ok(bool $good,string $description):void{
-        global $count;++$count;
-        if(!$good)throw new \RuntimeException('VARIANTS_FAIL: '.$description);
-    }
-    $definitions=[
-        10=>['id'=>10,'title'=>'Цвет','type'=>'color','input_mode'=>'auto','is_variant'=>true,
-            'state'=>1,'values'=>[100=>['title'=>'Красный','state'=>1,'color_hex'=>'#FF0000'],
-                101=>['title'=>'Синий','state'=>1,'color_hex'=>'#0000FF']]],
-        11=>['id'=>11,'title'=>'Размер','type'=>'text','input_mode'=>'presets','is_variant'=>true,
-            'text_options'=>'["S","M","L"]','state'=>1,'values'=>[]],
-        12=>['id'=>12,'title'=>'Материал','type'=>'text','input_mode'=>'presets','is_variant'=>false,
-            'text_options'=>'["Металл","Камень"]','state'=>1,'values'=>[]],
-        13=>['id'=>13,'title'=>'Hidden','type'=>'color','is_variant'=>true,'state'=>0,'values'=>[]],
-    ];
-    $axes=V::axes(2,$definitions,[2=>[10,11,12,13]]);
-    ok(count($axes)===2,'only published SKU-defining attributes become axes');
-    ok($axes[10]['options'][0]['value']==='d:100','color dictionary ID used, not title');
-    ok($axes[11]['options'][1]['value']==='t:M','text presets support size SKU');
-    $a=[
-      'id'=>'0','sku'=>'RED-S','price'=>'1590.00','stock'=>'5',
-      'selection'=>json_encode(['10'=>'d:100','11'=>'t:S']),
-      'image'=>'images/variants/red-s.webp#joomlaImage://local-images/variants/red-s.webp?width=200&height=100',
-      'image_alt'=>'Красная S','state'=>'1',
-      'photos'=>[['path'=>'images/variants/red-s-back.webp','alt'=>'Сзади']],
-    ];
-    $b=$a;
-    $b['sku']='RED-M';$b['stock']='0';$b['price']='1790';$b['image']='images/variants/red-m.webp';
-    $b['selection']=json_encode(['10'=>'d:100','11'=>'t:M']);
-    $b['photos']=[];
-    $rows=V::normalize([$a,$b],$axes);
-    ok(count($rows)===2,'two real combinations');
-    ok($rows[0]['price']==='1590.00','exact monetary format');
-    ok($rows[0]['stock']===5 && $rows[1]['stock']===0,'stock tracks each size; zero is valid');
-    ok($rows[0]['image']==='images/variants/red-s.webp','Joomla media metadata stripped');
-    ok($rows[0]['photos'][0]['path']==='images/variants/red-s-back.webp','variant multi-photo gallery');
-    ok($rows[0]['signature']!==$rows[1]['signature'],'distinct combination signature');
-    ok($rows[0]['selection_json']==='{"10":"d:100","11":"t:S"}','stable typed selector JSON');
-    ok(V::normalize([],[])===[],'legacy product without variants remains valid');
-    ok(V::normalize('{}',[])===[],'empty native subform removes all variants');
-    try { V::normalize([$a], []); ok(false,'non-empty SKU without axes must reject'); }
-    catch (\InvalidArgumentException $e) {
-        ok($e->getMessage()==='COM_MINIMARKET_VARIANTS_NO_AXES',
-            'clear server error when selected category has no variant-defining attributes');
-    }
-    $withRichPhoto=$a;
-    $withRichPhoto['photos'][0]['path'] =
-        'images/variants/red-s-back.webp#joomlaImage://local-images/variants/red-s-back.webp?width=1140&height=600';
-    $cleaned=V::normalize([$withRichPhoto],$axes);
-    ok($cleaned[0]['photos'][0]['path']==='images/variants/red-s-back.webp',
-        'nested Joomla Media photo metadata stripped before DB write');
-    foreach ([
-        [[$a,$a],'duplicate combination and SKU'],
-        [[$a,array_replace($b,['sku'=>'RED-S'])],'duplicate SKU'],
-        [[$a,array_replace($b,['selection'=>$a['selection']])],'duplicate combination'],
-        [[array_replace($a,['selection'=>'{"10":"d:100"}'])],'missing size'],
-        [[array_replace($a,['selection'=>'{"10":"d:999","11":"t:S"}'])],'foreign option ID'],
-        [[array_replace($a,['selection'=>'{"10":"d:100","11":"t:Fake"}'])],'foreign text preset'],
-        [[array_replace($a,['selection'=>'{"10":"d:100","11":"t:S","99":"x"}'])],'extra forged property'],
-        [[array_replace($a,['stock'=>'-1'])],'negative stock'],
-        [[array_replace($a,['stock'=>'4294967296'])],'overlimit stock'],
-        [[array_replace($a,['price'=>'1e9'])],'scientific price'],
-        [[array_replace($a,['price'=>'1.234'])],'price >2 decimals'],
-        [[array_replace($a,['image'=>'images/../../configuration.php'])],'path traversal'],
-        [[array_replace($a,['photos'=>[['path'=>'images/../../evil.webp']]])],'photo traversal'],
-        [[array_replace($a,['id'=>'123abc'])],'invalid variant id'],
-        [[array_replace($a,['sku'=>'<script>'])],'unsafe SKU'],
-        [[array_replace($a,['state'=>'7'])],'unsafe publish state'],
-    ] as [$bad,$label]) {
-        try {V::normalize($bad,$axes);ok(false,$label);}
-        catch (\InvalidArgumentException $e) {ok(true,$label);}
-    }
-    require __DIR__.'/../src/com_minimarket/admin/src/Service/VariantDependencies.php';
-    $deps = new class implements \Joomla\Database\DatabaseInterface {
-        public array $values=['{"10":"d:100","11":"t:M"}'];
-        public function getQuery($new=true):object {
-            return new class {
-                public function select($v):self{return $this;}
-                public function from($v):self{return $this;}
-                public function where($v):self{return $this;}
-            };
-        }
-        public function quoteName($value):string{return (string)$value;}
-        public function quote($value):string{return "'".str_replace("'","''",(string)$value)."'";}
-        public function setQuery($q):void{}
-        public function loadColumn():array{return $this->values;}
-    };
-    $guard=\MiniMarket\Component\Minimarket\Administrator\Service\VariantDependencies::class;
-    $guard::assertAttributeChange($deps,10,'color','auto',1,'',
-        [['id'=>100],['id'=>101]]);
-    ok(true,'used color option can be updated without deletion');
-    foreach ([
-        [10,'color','auto',0,'',[['id'=>100]]],
-        [10,'color','auto',1,'',[['id'=>101]]],
-        [11,'text','presets',1,'["S","L"]',[]],
-    ] as [$id,$type,$mode,$flag,$text,$dict]) {
-        try {
-            $guard::assertAttributeChange($deps,$id,$type,$mode,$flag,$text,$dict);
-            ok(false,'referenced variant axis cannot be invalidated');
-        } catch (\RuntimeException $error) {
-            ok($error->getMessage()==='COM_MINIMARKET_VARIANT_REFERENCES_IN_USE',
-                'referenced SKU value protected');
-        }
+    function ok(bool $condition,string $why): void {
+        global $count;
+        $count++;
+        if (!$condition) throw new \RuntimeException('SKU_LOCAL_ONLY_FAIL: '.$why);
     }
 
-    require __DIR__.'/../src/com_minimarket/admin/src/Service/ProductLocalDimensions.php';
-    require __DIR__.'/../src/com_minimarket/admin/src/Service/VariantMatrix.php';
-    $local=\MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix::normalize([
+    $dimensions=Matrix::normalize([
         ['code'=>'color','title'=>'Цвет','values'=>[
-           ['code'=>'red','title'=>'Красный'],['code'=>'blue','title'=>'Синий']]],
-        ['code'=>'size','title'=>'Размер','values'=>['S','M','L']],
+            ['code'=>'red','title'=>'Красный'],['code'=>'blue','title'=>'Синий']]],
+        ['code'=>'size','title'=>'Размер','values'=>[
+            ['code'=>'s','title'=>'S'],['code'=>'m','title'=>'M'],['code'=>'l','title'=>'L']]],
     ]);
-    $localAxes=\MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions::axesForVariants($local);
-    ok(array_keys($localAxes)===['color','size'],'product-local axes do not need a category or global attribute');
-    $newLocal=$a;
-    $newLocal['selection']='{"color":"v:red","size":"v:s"}';
-    $newLocal['sku']='LOCAL-RED-S';
-    $savedLocal=V::normalize([$newLocal],$localAxes);
-    ok($savedLocal[0]['sku']==='LOCAL-RED-S','new local SKU is validated');
-    ok($savedLocal[0]['selection_json']==='{"color":"v:red","size":"v:s"}',
-       'stable local selectors retained for import');
-    try {
-        $newLocal['selection']='{"color":"v:fake","size":"v:s"}';
-        V::normalize([$newLocal],$localAxes);
-        ok(false,'invalid local choice accepted');
-    } catch (\InvalidArgumentException $e) {
-        ok(true,'invalid local choice rejected');
-    }
-    $productForm=file_get_contents(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
-    ok(str_contains($productForm,'name="variant_dimensions" type="subform"'),
-       'local parameters use the same native plus/removable rows as gallery');
-    ok(str_contains($productForm,'name="variant_matrix" type="Variantbuilder"'),
-       'separate matrix preview action is present');
-    $dimensionXml=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_variant_dimension.xml');
-    $valueXml=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_variant_value.xml');
-    ok($dimensionXml !== false && $valueXml !== false,'native nested option subform XML valid');
-    ok(count($dimensionXml->xpath("//field[@name='values' and @type='subform']"))===1,
-       'each option uses repeatable values with Joomla + / remove / move');
-    ok(count($valueXml->xpath("//field[@name='title' and @type='text']"))===1,
-       'value is an ordinary Joomla text field');
-    $submittedRows=[
-       'row0'=>['code'=>'axis1','title'=>'Цвет',
-          'values'=>['row0'=>['code'=>'value1','title'=>'Красный'],
-                     'row1'=>['code'=>'value2','title'=>'Синий']]],
-       'row1'=>['code'=>'axis2','title'=>'Размер',
-          'values'=>['row0'=>['code'=>'value1','title'=>'S'],
-                     'row1'=>['code'=>'value2','title'=>'M']]],
-    ];
-    $parsed=\MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix::normalize(
-        array_values($submittedRows)
-    );
-    ok(count($parsed)===2 && count($parsed[0]['values'])===2,
-       'server accepts native nested row-keyed Joomla submission');
-    ok($parsed[0]['values'][1]['code']==='value2',
-       'stable option code retained from nested native Subform');
-    $productModel=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php');
-    ok(str_contains($productModel,"array_values((array) (" .
-        '$data[\'variant_dimensions\']' . " ?? []))"),
-        'normalization reads native Subform rows, not custom hidden JSON');
-    ok(str_contains(file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php'),
-       'ProductLocalDimensions::replace'),'local options saved in product transaction');
+    $axes=Local::axesForVariants($dimensions);
+    ok(array_keys($axes)===['color','size'],'only local order options define SKU axes');
+    ok(count(Matrix::preview($dimensions))===6,'two colors and three sizes have six possible SKUs');
 
-    $form=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_variant.xml');
-    $parent=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
-    ok($form!==false && $parent!==false,'XML forms valid');
-    ok(count($parent->xpath("//fieldset[@name='variants']/field[@name='variants' and @type='subform']"))===1,
-        'native Joomla subform for SKU rows');
-    ok(count($form->xpath("//field[@name='photos' and @type='subform']"))===1,
-        'nested Joomla photo subform');
-    ok(count($form->xpath("//field[@name='image' and @type='media']"))===1,
-        'native Joomla Media for variant cover');
-    ok(count($parent->xpath("//fieldset[@name='variants']/field[@name='variants' and @layout='joomla.form.field.subform.repeatable-table']"))===1,
-        'SKU rows use Joomla standard table layout instead of oversized cards');
-    ok(str_contains(file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php'),
-        'ProductVariants::replace'),'product save uses transaction-backed real SKU rows');
-    $client=file_get_contents(__DIR__.'/../src/com_minimarket/media/js/variants.js');
-    ok(str_contains($client,'data-mm-variant-axis') && str_contains($client,'details.stock'),
-        'site controls respond to chosen SKU and stock');
-    echo 'PRODUCT_VARIANTS_OK: '.$count." cases\n";
+    $redS=[
+        'id'=>'0','sku'=>'CLASSIC-RED-S','price'=>'1590.00','stock'=>'5',
+        'selection'=>'{"color":"v:red","size":"v:s"}','state'=>'1',
+        'image'=>'images/red.webp#joomlaImage://local-images/red.webp?width=600',
+        'image_alt'=>'Red front','photos'=>[
+            ['path'=>'images/red-back.webp','alt'=>'Red back']]],
+    ];
+    $redM=array_replace($redS,[
+        'sku'=>'CLASSIC-RED-M','stock'=>'0','price'=>'1690',
+        'selection'=>'{"color":"v:red","size":"v:m"}',
+        'image'=>'images/red.webp','photos'=>[]
+    ]);
+    $blueS=array_replace($redS,[
+        'sku'=>'CLASSIC-BLUE-S','stock'=>'7','selection'=>'{"color":"v:blue","size":"v:s"}',
+        'image'=>'images/blue.webp','photos'=>[]
+    ]);
+    $result=Sku::normalize([$redS,$redM,$blueS],$axes);
+    ok(count($result)===3,'three independently identifiable size/color SKUs');
+    ok($result[0]['sku']!=$result[1]['sku'],'different sizes use different article numbers');
+    ok($result[0]['stock']===5 && $result[1]['stock']===0
+        && $result[2]['stock']===7,'each SKU has its own physical stock');
+    ok($result[0]['image']==='images/red.webp','Joomla Media metadata removed');
+    ok($result[0]['photos'][0]['path']==='images/red-back.webp','SKU gallery preserved');
+    ok($result[1]['price']==='1690.00','price normalized to exact money format');
+    ok($result[0]['signature']!==$result[1]['signature'],'combination signatures unique');
+    ok($result[0]['selection_json']==='{"color":"v:red","size":"v:s"}',
+        'SKU selection only uses product option identities');
+
+    ok(Sku::normalize([],[])===[],'simple product may have no order options');
+    ok(Sku::normalize('{}',[])===[],'last SKU row may be deleted');
+    foreach ([
+        [[$redS,$redS],'duplicate combination'],
+        [[$redS,array_replace($redM,['sku'=>'CLASSIC-RED-S'])],'duplicate SKU'],
+        [[$redS,array_replace($redM,['selection'=>$redS['selection']])],'duplicate combination across SKUs'],
+        [[array_replace($redS,['selection'=>'{"color":"v:red"}'])],'missing selected size'],
+        [[array_replace($redS,['selection'=>'{"color":"v:red","size":"v:xl"}'])],'unknown option'],
+        [[array_replace($redS,['selection'=>'{"10":"d:100","11":"t:S"}'])],'old category-attribute format cannot define a SKU'],
+        [[array_replace($redS,['selection'=>'{"color":"v:red","size":"v:s","other":"x"}'])],'forged third option'],
+        [[array_replace($redS,['stock'=>'-1'])],'negative stock'],
+        [[array_replace($redS,['stock'=>'4294967296'])],'stock out of range'],
+        [[array_replace($redS,['price'=>'1.234'])],'invalid money'],
+        [[array_replace($redS,['image'=>'images/../../configuration.php'])],'unsafe media'],
+        [[array_replace($redS,['photos'=>[['path'=>'images/../../bad.webp']]])],'unsafe gallery'],
+        [[array_replace($redS,['id'=>'9abc'])],'unsafe SKU ID'],
+        [[array_replace($redS,['sku'=>'<script>'])],'unsafe article'],
+        [[array_replace($redS,['state'=>'9'])],'invalid publication'],
+    ] as [$bad,$name]) {
+        try {
+            Sku::normalize($bad,$axes);
+            ok(false,$name);
+        } catch (\InvalidArgumentException $error) {
+            ok(true,$name);
+        }
+    }
+    try {
+        Sku::normalize([$redS],[]);
+        ok(false,'SKU without configured options rejected');
+    } catch (\InvalidArgumentException $error) {
+        ok($error->getMessage()==='COM_MINIMARKET_VARIANTS_NO_AXES',
+            'SKU requires product order options');
+    }
+    $productForm=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
+    $attributeForm=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/attribute.xml');
+    ok(count($productForm->xpath('//field[@name="variant_dimensions"]'))===1,
+        'product defines order options');
+    ok(count($productForm->xpath('//field[@name="variant_info"]'))===0,
+        'no category-wide SKU compatibility editor');
+    ok(count($attributeForm->xpath('//field[@name="is_variant"]'))===0,
+        'informational attributes cannot be marked as SKU options');
+    $model=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Model/ProductModel.php');
+    ok(!str_contains($model,'hasLegacyVariants')
+        && !str_contains($model,'ProductVariants::axes'),
+        'product editor never invokes old SKU mode');
+    echo 'SKU_LOCAL_ONLY_PASS: '.$count." cases\n";
 }
