@@ -55,7 +55,7 @@ skuUiCheck(str_contains($editor, "selectionInput.value = JSON.stringify(selected
     str_contains($editor, "new Event('change', { bubbles: true })"),
     'local option choice updates the native hidden input before Joomla save');
 skuUiCheck(str_contains($server, 'COM_MINIMARKET_VARIANTS_DUPLICATE') &&
-    str_contains($server, "count(\$rawSelection) !== count(\$axes)"),
+    str_contains($server, 'count($rawSelection) !== count($selection)'),
     'server still rejects duplicate or incomplete combinations');
 skuUiCheck(str_contains($productModel, '$db->transactionStart();') &&
     str_contains($productModel, '$db->transactionRollback();'),
