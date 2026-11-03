@@ -296,7 +296,7 @@ final class VariantCatalog
         }
         $parts=parse_url($source);
         if (is_array($parts) && ($parts['scheme']??'')==='https'
-            && !isset($parts['user'],$parts['pass']) && !isset($parts['fragment'])
+            && !isset($parts['user']) && !isset($parts['pass']) && !isset($parts['fragment'])
             && !isset($parts['port']) && filter_var($parts['host']??'',FILTER_VALIDATE_DOMAIN,FILTER_FLAG_HOSTNAME)
             && preg_match('~\.(?:mp4|webm)$~iD',(string)($parts['path']??''))) {
             return ['kind'=>'file','url'=>$source];
