@@ -4,6 +4,7 @@
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Button\PublishedButton;
 ?>
 <?php if ($this->attributeId > 0) : ?>
 <p><a href="<?php echo Route::_(
@@ -12,9 +13,10 @@ use Joomla\CMS\Router\Route;
 <?php endif; ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=values&attribute_id=' . (int) $this->attributeId); ?>"
       method="post" name="adminForm" id="adminForm">
-    <table class="table">
+    <table class="table table-striped">
         <thead><tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
+            <th class="w-1 text-center"><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
             <th><a href="<?php echo Route::_(
                 'index.php?option=com_minimarket&view=values&attribute_id=' . (int) $this->attributeId
                 . '&sort=title&direction=' . ($this->sort === 'title' && $this->direction === 'asc' ? 'desc' : 'asc')
@@ -25,18 +27,20 @@ use Joomla\CMS\Router\Route;
                 'index.php?option=com_minimarket&view=values&attribute_id=' . (int) $this->attributeId
                 . '&sort=order&direction=' . ($this->sort === 'order' && $this->direction === 'asc' ? 'desc' : 'asc')
             ); ?>"><?php echo Text::_('JGRID_HEADING_ORDERING'); ?></a></th>
-            <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
             <th>ID</th>
         </tr></thead>
         <tbody>
         <?php foreach ($this->items as $i => $item) : ?>
             <tr>
                 <td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, (int) $item->id); ?></td>
+                <td class="text-center">
+                    <?php echo (new PublishedButton())->render((int) $item->state, $i,
+                        ['task_prefix' => 'values.', 'id' => 'mm-value-state-' . (int) $item->id]); ?>
+                </td>
                 <td><a href="<?php echo Route::_('index.php?option=com_minimarket&task=value.edit&id=' . (int) $item->id); ?>"><?php echo $this->escape($item->title); ?></a></td>
                 <td><?php echo $this->escape($item->attribute_title); ?></td>
                 <td><?php echo $this->escape($item->code); ?></td>
                 <td><?php echo (int) $item->sort_order; ?></td>
-                <td><?php echo (int) $item->state === 1 ? Text::_('JPUBLISHED') : Text::_('JUNPUBLISHED'); ?></td>
                 <td><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>

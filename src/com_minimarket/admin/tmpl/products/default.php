@@ -12,17 +12,17 @@ use Joomla\CMS\Button\PublishedButton;
       name="adminForm" id="adminForm">
     <div id="j-main-container" class="j-main-container">
     <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
-    <table class="table" id="mm-products-list">
+    <table class="table table-striped" id="mm-products-list">
         <thead>
         <tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
+            <th class="w-1 text-center"><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_IMAGE'); ?></th>
             <th><?php echo HTMLHelper::_('searchtools.sort', 'JGLOBAL_TITLE', 'p.title', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
             <th><?php echo HTMLHelper::_('searchtools.sort', 'COM_MINIMARKET_PRODUCT_PRICE', 'p.price', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_CATEGORIES'); ?></th>
-            <th><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
             <th><?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ID', 'p.id', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
         </tr>
         </thead>
@@ -34,6 +34,10 @@ use Joomla\CMS\Button\PublishedButton;
         ?>
             <tr>
                 <td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, (int) $item->id); ?></td>
+                <td class="text-center">
+                    <?php echo (new PublishedButton())->render((int) $item->state, $i,
+                        ['task_prefix' => 'products.', 'id' => 'mm-product-state-' . (int) $item->id]); ?>
+                </td>
                 <td>
                     <?php if ($safeImage) : ?>
                         <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
@@ -48,10 +52,6 @@ use Joomla\CMS\Button\PublishedButton;
                 <td><?php echo $this->escape((string) $item->price); ?></td>
                 <td><?php echo (int) $item->stock; ?></td>
                 <td><?php echo $this->escape($item->category_title); ?></td>
-                <td class="text-center">
-                    <?php echo (new PublishedButton())->render((int) $item->state, $i,
-                        ['task_prefix' => 'products.', 'id' => 'mm-product-state-' . (int) $item->id]); ?>
-                </td>
                 <td><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>
