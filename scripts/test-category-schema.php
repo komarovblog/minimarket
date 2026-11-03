@@ -490,6 +490,29 @@ try {
     $pdo->exec('DELETE FROM catci_minimarket_product_groups WHERE id=7');
     verify(false,'deleting an occupied linked group was allowed');
 } catch(PDOException $e) { verify(true,'linked group cannot be deleted while referenced'); }
+// 0.5.28: per-SKU stock is default for NEW records, preserving each old choice.
+$beforeDefaultUpgradeProductOne=row($pdo,'catci_minimarket_products');
+$beforeDefaultUpgradeSkus=$pdo->query(
+    'SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id'
+)->fetchAll(PDO::FETCH_ASSOC);
+$beforeSharedProduct=$pdo->query('SELECT option_stock_mode FROM catci_minimarket_products WHERE id=2')->fetchColumn();
+verify((int)$beforeSharedProduct===0,'0.5.26 simple product explicitly remains shared before new default');
+runSql($pdo,$dir.'updates/mysql/0.5.28.sql','catci_');
+verify($beforeDefaultUpgradeProductOne===row($pdo,'catci_minimarket_products'),
+    '0.5.28 default migration does not alter any existing product fields');
+verify((int)$pdo->query('SELECT option_stock_mode FROM catci_minimarket_products WHERE id=2')->fetchColumn()===0,
+    '0.5.28 preserves existing shared-stock setting');
+verify($beforeDefaultUpgradeSkus===$pdo->query(
+    'SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id'
+)->fetchAll(PDO::FETCH_ASSOC),'0.5.28 preserves all existing size/color SKU trade data');
+$modeColumn=$pdo->query("SHOW COLUMNS FROM catci_minimarket_products LIKE 'option_stock_mode'")->fetch(PDO::FETCH_ASSOC);
+verify((int)$modeColumn['Default']===1,'0.5.28 SQL default is per-SKU inventory');
+$pdo->exec("INSERT INTO catci_minimarket_products
+    (id,category_id,title,alias,sku,price,stock,state)
+    VALUES (3,1,'New size-based T-shirt','size-based-shirt','SIZE-BASE',990,0,0)");
+verify((int)$pdo->query('SELECT option_stock_mode FROM catci_minimarket_products WHERE id=3')->fetchColumn()===1,
+    '0.5.28 new product created without explicit stock mode defaults to per-SKU');
+$pdo->exec('DELETE FROM catci_minimarket_products WHERE id=3');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
 $pdo->exec('DELETE FROM catci_minimarket_products WHERE id=2');
@@ -540,6 +563,8 @@ foreach (['product_id','group_id','sort_order'] as $column)
 $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
 verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
+$freshMode=$pdo->query("SHOW COLUMNS FROM freshcatci_minimarket_products LIKE 'option_stock_mode'")->fetch(PDO::FETCH_ASSOC);
+verify((int)$freshMode['Default']===1,'fresh 0.5.28 products default to per-SKU inventory');
 foreach ($productEditorColumns as $col) {
     verify(in_array($col, $freshProducts, true), 'fresh 0.5.0 product column ' . $col);
 }

@@ -16,7 +16,7 @@
                min="0" max="4294967295" step="1" required="true" filter="string"/>
         <field name="option_stock_mode" type="radio" label="COM_MINIMARKET_OPTION_STOCK_MODE"
                description="COM_MINIMARKET_OPTION_STOCK_HELP"
-               default="0" filter="int">
+               default="1" filter="int">
             <option value="0">COM_MINIMARKET_OPTION_STOCK_SHARED</option>
             <option value="1">COM_MINIMARKET_OPTION_STOCK_PER_COMBINATION</option>
         </field>

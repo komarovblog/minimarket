@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `sku` VARCHAR(100) NOT NULL DEFAULT '',
     `price` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `stock` INT UNSIGNED NOT NULL DEFAULT 0,
-    `option_stock_mode` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `option_stock_mode` TINYINT UNSIGNED NOT NULL DEFAULT 1,
     `introtext` TEXT NULL,
     `description` TEXT NULL,
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,

@@ -36,8 +36,21 @@ namespace MiniMarket\OptionArchitecture {
     }
     $form=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
     verify($form !== false,'valid Joomla form');
-    verify(count($form->xpath("//fieldset[@name='details']/field[@name='option_stock_mode' and @type='radio']"))===1,
-        'product has native shared vs per-combination stock switch');
+    $modeField=$form->xpath("//fieldset[@name='details']/field[@name='option_stock_mode' and @type='radio']");
+    verify(count($modeField)===1,'product has native shared vs per-combination stock switch');
+    verify((string)$modeField[0]['default']==='1','new product defaults to physical SKU-level inventory');
+    verify(count($modeField[0]->xpath("./option[@value='0']"))===1 &&
+        count($modeField[0]->xpath("./option[@value='1']"))===1,
+        'optional shared stock mode remains available explicitly');
+    $skuDatabaseSchema=file_get_contents(__DIR__.'/../src/com_minimarket/admin/sql/updates/mysql/0.5.17.sql');
+    verify(str_contains($skuDatabaseSchema,'UNIQUE KEY `idx_mm_variant_sku` (`sku`)') &&
+        str_contains($skuDatabaseSchema,'UNIQUE KEY `idx_mm_variant_combo`'),
+        'each physical color/size combination must have its own unique SKU');
+    $defaultMigration=file_get_contents(__DIR__.'/../src/com_minimarket/admin/sql/updates/mysql/0.5.28.sql');
+    verify(str_contains($defaultMigration,'ALTER COLUMN `option_stock_mode` SET DEFAULT 1')
+        && !str_contains($defaultMigration,'UPDATE `#__minimarket_products`')
+        && !str_contains($defaultMigration,'DELETE FROM'),
+        'default changes without rewriting existing shared stock products or SKU rows');
     verify(count($form->xpath("//fieldset[@name='groups']/field[@name='group_id' and @type='Productgroup']"))===1,
         'independent URLs are linked by a Joomla group selector');
     verify(count($form->xpath("//fieldset[@name='groups']/field[@name='new_group_title']"))===1,
