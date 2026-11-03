@@ -490,8 +490,8 @@ try {
     $pdo->exec('DELETE FROM catci_minimarket_product_groups WHERE id=7');
     verify(false,'deleting an occupied linked group was allowed');
 } catch(PDOException $e) { verify(true,'linked group cannot be deleted while referenced'); }
-$pdo->exec('DELETE FROM catci_minimarket_product_group_members');
-$pdo->exec('DELETE FROM catci_minimarket_product_groups');
+$pdo->exec('DROP TABLE catci_minimarket_product_group_members');
+$pdo->exec('DROP TABLE catci_minimarket_product_groups');
 $pdo->exec('DELETE FROM catci_minimarket_products WHERE id=2');
 $pdo->exec('DROP TABLE catci_minimarket_product_variant_videos');
 $pdo->exec('DROP TABLE catci_minimarket_variant_value_images');
