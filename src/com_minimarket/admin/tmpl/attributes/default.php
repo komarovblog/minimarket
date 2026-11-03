@@ -18,7 +18,6 @@ use Joomla\CMS\Button\PublishedButton;
             <th><?php echo HTMLHelper::_('searchtools.sort', 'JGLOBAL_TITLE', 'a.title', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_CODE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_TYPE'); ?></th>
-            <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_FILTERABLE'); ?></th>
             <th><?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ID', 'a.id', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
         </tr></thead>
@@ -33,13 +32,12 @@ use Joomla\CMS\Button\PublishedButton;
                 <td><a href="<?php echo Route::_('index.php?option=com_minimarket&task=attribute.edit&id=' . (int) $item->id); ?>"><?php echo $this->escape($item->title); ?></a></td>
                 <td><?php echo $this->escape($item->code); ?></td>
                 <td><?php echo Text::_('COM_MINIMARKET_ATTRIBUTE_' . strtoupper((string) $item->input_type)); ?></td>
-                <td><?php echo (int) $item->is_variant ? Text::_('JYES') : Text::_('JNO'); ?></td>
                 <td><?php echo (int) $item->is_filterable ? Text::_('JYES') : Text::_('JNO'); ?></td>
                 <td><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
-            <tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_NO_ATTRIBUTES'); ?></td></tr>
+            <tr><td colspan="7"><?php echo Text::_('COM_MINIMARKET_NO_ATTRIBUTES'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>

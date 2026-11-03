@@ -17,7 +17,6 @@ final class AttributesModel extends ListModel
                 $db->quoteName('a.title'),
                 $db->quoteName('a.code'),
                 $db->quoteName('a.input_type'),
-                $db->quoteName('a.is_variant'),
                 $db->quoteName('a.is_filterable'),
                 $db->quoteName('a.state'),
                 $db->quoteName('a.sort_order'),
