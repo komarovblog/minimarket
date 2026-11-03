@@ -12,6 +12,11 @@
   const preview = root.querySelector('[data-mm-matrix-preview]');
   const feedback = root.querySelector('[data-mm-local-feedback]');
   const generate = root.querySelector('[data-mm-generate]');
+  const addSku = root.querySelector('[data-mm-add-sku]');
+  const applyBulk = root.querySelector('[data-mm-sku-apply]');
+  const selectAllSku = root.querySelector('[data-mm-sku-all]');
+  const bulkPrice = root.querySelector('[data-mm-sku-price]');
+  const bulkStock = root.querySelector('[data-mm-sku-stock]');
   let labels = {};
   try { labels = JSON.parse(root.dataset.mmLabels || '{}'); } catch (_) {}
   const t = (key, fallback) => labels[key] || fallback;
@@ -123,11 +128,12 @@
     try { return canonical(JSON.parse(input.value || '{}')); }
     catch (_) { return ''; }
   }));
-  const findSkuInput = (selectionInput, name) => {
+  const findSkuField = (selectionInput, name) => {
     const targetName = selectionInput.name.replace('[selection]', '[' + name + ']');
-    return Array.from(skuPanel?.querySelectorAll('input[name]') || [])
-      .find(input => input.name === targetName);
+    return Array.from(skuPanel?.querySelectorAll('input[name],select[name],textarea[name]') || [])
+      .find(field => field.name === targetName);
   };
+  const findSkuInput = findSkuField;
   const updateLabels = (axes) => {
     for (const input of selectionInputs()) {
       let selection = {};
@@ -185,7 +191,7 @@
     return normalized.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
       .toUpperCase() || fallback;
   };
-  const appendRow = async (row, axes) => {
+  const appendRow = async (row, axes, manual = false) => {
     const add = nativeAdd();
     if (!add) throw new Error(t('nativeUnavailable', 'SKU table unavailable.'));
     const before = new Set(selectionInputs());
@@ -200,7 +206,7 @@
       skuPart(name, Object.values(row.selection)[i]?.slice(2).toUpperCase() || 'VAR')
     ).join('-');
     const sku = findSkuInput(selection, 'sku');
-    if (sku && !sku.value) sku.value = base + '-' + suffix;
+    if (sku && !sku.value && !manual) sku.value = base + '-' + suffix;
     const price = findSkuInput(selection, 'price');
     if (price && !price.value) price.value =
       document.querySelector('[name="jform[price]"]')?.value || '0.00';
@@ -208,6 +214,8 @@
     if (stock && !stock.value) stock.value = '0';
     concealRawAdd();
     updateLabels(axes);
+    refreshSkuEditors(axes);
+    return selection;
   };
   const showPreview = () => {
     try {
