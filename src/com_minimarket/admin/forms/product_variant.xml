@@ -2,6 +2,7 @@
 <form>
   <field name="id" type="hidden" filter="int" default="0"/>
   <field name="selection" type="hidden" filter="raw" default="{}"/>
+  <field name="variant_label" type="text" label="COM_MINIMARKET_VARIANT_COMBINATION" readonly="true" filter="string" size="25"/>
   <field name="sku" type="text" label="COM_MINIMARKET_VARIANT_SKU" maxlength="100" required="true" filter="string"/>
   <field name="price" type="number" label="COM_MINIMARKET_VARIANT_PRICE" min="0" max="9999999999999.99" step="0.01" required="true" filter="raw"/>
   <field name="stock" type="number" label="COM_MINIMARKET_VARIANT_STOCK" min="0" max="4294967295" step="1" required="true" filter="raw"/>

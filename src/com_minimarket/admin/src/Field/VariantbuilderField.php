@@ -3,64 +3,48 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 
 \defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
-use Joomla\Database\DatabaseInterface;
-use MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions;
 
 /**
- * Native-looking local SKU option builder. Uses the normal Joomla product form
- * and a single validated JSON form value; no global attributes prerequisite.
+ * Matrix preview/actions for native Joomla options and SKU subforms.
+ * All edited values live in the two repeatable Subforms, not in a second
+ * hidden JSON model that might silently overwrite user edits.
  */
 final class VariantbuilderField extends FormField
 {
-    protected $type='Variantbuilder';
+    protected $type = 'Variantbuilder';
 
     protected function getInput(): string
     {
-        $db=Factory::getContainer()->get(DatabaseInterface::class);
-        $productId=(int)Factory::getApplication()->input->getInt('id',0);
-        if ($productId > 0 && ProductLocalDimensions::hasLegacyVariants($db,$productId)) {
-            return '<p class="alert alert-info">'
-                . htmlspecialchars(Text::_('COM_MINIMARKET_LOCAL_VARIANTS_LEGACY'), ENT_QUOTES, 'UTF-8')
-                . '</p>';
-        }
-        $esc=static fn(string $v):string=>htmlspecialchars($v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
-        $value=$this->value;
-        if (is_array($value)) $value=json_encode($value,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
-        if (!is_string($value) || $value==='') {
-            $value=json_encode(ProductLocalDimensions::load($db,$productId),
-                JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
-        }
-        $labels=[];
+        $escape = static fn(string $value): string =>
+            htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+        $labels = [];
         foreach ([
-            'axis'=>'COM_MINIMARKET_LOCAL_AXIS',
-            'axisExample'=>'COM_MINIMARKET_LOCAL_AXIS_EXAMPLE',
-            'value'=>'COM_MINIMARKET_LOCAL_VALUE',
-            'addValue'=>'COM_MINIMARKET_LOCAL_ADD_VALUE',
-            'preview'=>'COM_MINIMARKET_LOCAL_PREVIEW',
-            'confirm'=>'COM_MINIMARKET_LOCAL_CONFIRM',
-            'created'=>'COM_MINIMARKET_LOCAL_CREATED',
-            'incomplete'=>'COM_MINIMARKET_LOCAL_INCOMPLETE',
-            'empty'=>'COM_MINIMARKET_LOCAL_EMPTY',
-            'limit'=>'COM_MINIMARKET_LOCAL_LIMIT',
-            'tooMany'=>'COM_MINIMARKET_LOCAL_TOO_MANY',
-            'addFailed'=>'COM_MINIMARKET_LOCAL_ADD_FAILED',
-            'nativeUnavailable'=>'COM_MINIMARKET_LOCAL_SUBFORM_MISSING',
-        ] as $key=>$languageKey) $labels[$key]=Text::_($languageKey);
+            'preview' => 'COM_MINIMARKET_LOCAL_PREVIEW',
+            'confirm' => 'COM_MINIMARKET_LOCAL_CONFIRM',
+            'created' => 'COM_MINIMARKET_LOCAL_CREATED',
+            'incomplete' => 'COM_MINIMARKET_LOCAL_INCOMPLETE',
+            'empty' => 'COM_MINIMARKET_LOCAL_EMPTY',
+            'limit' => 'COM_MINIMARKET_LOCAL_LIMIT',
+            'tooMany' => 'COM_MINIMARKET_LOCAL_TOO_MANY',
+            'addFailed' => 'COM_MINIMARKET_LOCAL_ADD_FAILED',
+            'nativeUnavailable' => 'COM_MINIMARKET_LOCAL_SUBFORM_MISSING',
+            'combination' => 'COM_MINIMARKET_VARIANT_COMBINATION',
+            'selectAll' => 'JGLOBAL_CHECK_ALL',
+        ] as $key => $languageKey) {
+            $labels[$key] = Text::_($languageKey);
+        }
+
         return '<div data-mm-local-builder data-mm-max="200" data-mm-labels="'
-            .$esc(json_encode($labels,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG)).'">'
-            . '<input type="hidden" name="'.$esc($this->name).'" id="'.$esc($this->id).'"'
-            . ' value="'.$esc($value).'">'
-            . '<p class="text-muted">'.$esc(Text::_('COM_MINIMARKET_LOCAL_VARIANTS_HELP')).'</p>'
-            . '<div data-mm-axes></div>'
-            . '<div class="d-flex gap-2 flex-wrap mb-2">'
-            . '<button type="button" class="btn btn-outline-primary" data-mm-add-axis>'
-            . $esc(Text::_('COM_MINIMARKET_LOCAL_ADD_AXIS')).'</button>'
-            . '<button type="button" class="btn btn-primary" data-mm-generate>'
-            . $esc(Text::_('COM_MINIMARKET_LOCAL_GENERATE')).'</button></div>'
-            . '<div data-mm-matrix-preview class="mb-2" aria-live="polite"></div>'
-            . '<p data-mm-local-feedback role="status" class="text-muted small"></p></div>';
+            . $escape(json_encode($labels, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG))
+            . '">'
+            . '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_LOCAL_VARIANTS_HELP')) . '</p>'
+            . '<button type="button" class="btn btn-primary mb-3" data-mm-generate>'
+            . $escape(Text::_('COM_MINIMARKET_LOCAL_GENERATE')) . '</button>'
+            . '<div data-mm-matrix-preview class="mb-3" aria-live="polite"></div>'
+            . '<p data-mm-local-feedback role="status" class="small text-muted"></p>'
+            . '</div>';
     }
 }
