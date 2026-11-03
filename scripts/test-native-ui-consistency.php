@@ -51,4 +51,19 @@ checkUi(!str_contains($client,"input[name=\"jform[variant_config]\"]"),
     'no old hidden JSON is the source of truth for option values');
 checkUi(str_contains($client,'table table-striped table-sm') &&
     str_contains($client,'querySelectorAll'), 'native table for combination preview');
+foreach (['categories','products','attributes','values'] as $entity) {
+    $list=file_get_contents($base.'admin/tmpl/'.$entity.'/default.php');
+    checkUi(str_contains($list,'table table-striped'),
+        $entity.': ordinary Joomla striped table');
+    checkUi(str_contains($list,'PublishedButton')
+        && str_contains($list,"'task_prefix' => '".$entity.".'"),
+        $entity.': native publication action wired to bulk controller');
+    $head=explode('</thead>',explode('<thead>',$list,2)[1]??'',2)[0];
+    $check=strpos($head,'grid.checkall');
+    $state=strpos($head,'COM_MINIMARKET_BULK_PUBLISHED');
+    $title=strpos($head,'JGLOBAL_TITLE');
+    checkUi($check!==false && $state!==false && $title!==false
+        && $check<$state && $state<$title,
+        $entity.': columns ordered checkbox, publication, title');
+}
 echo 'NATIVE_UI_OK: '.$n." cases\n";
