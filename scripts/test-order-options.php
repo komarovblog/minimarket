@@ -88,9 +88,10 @@ namespace MiniMarket\OrderOptionsTest {
     verify(count($categoryForm->xpath("//fieldset[@name='order_options']/field[@name='order_option_rules']")) === 1,
         'category has order-option inheritance tab');
     $manifest = file_get_contents(__DIR__ . '/../src/com_minimarket/minimarket.xml');
+    preg_match('/<version>([^<]+)<\/version>/', $manifest, $versionMatches);
     verify(str_contains($manifest, 'view=orderoptions')
-        && str_contains($manifest, '<version>0.5.34</version>'),
-        'real global option admin menu and version');
+        && version_compare($versionMatches[1] ?? '0', '0.5.34', '>='),
+        'global option menu persists through future component versions');
     foreach (['ProductgroupField.php', 'GroupmembersField.php'] as $field) {
         $code = file_get_contents($base . 'src/Field/' . $field);
         verify(str_contains($code, '$option->checked = in_array(')

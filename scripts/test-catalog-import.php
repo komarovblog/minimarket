@@ -59,8 +59,9 @@ namespace MiniMarket\ImportTest {
 
     $base = __DIR__ . '/../src/com_minimarket/';
     $manifest = file_get_contents($base . 'minimarket.xml');
-    verify(str_contains($manifest, '<version>0.5.35</version>')
-        && str_contains($manifest, 'view=import'), 'import menu present in component manifest');
+    preg_match('/<version>([^<]+)<\/version>/', $manifest, $versionMatches);
+    verify(version_compare($versionMatches[1] ?? '0', '0.5.35', '>=')
+        && str_contains($manifest, 'view=import'), 'import menu remains available on later component versions');
     $controller = file_get_contents($base . 'admin/src/Controller/ImportController.php');
     verify(str_contains($controller, "Session::checkToken('post')")
         && str_contains($controller, "authorise('core.create'")
