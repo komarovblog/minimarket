@@ -78,8 +78,11 @@ final class CategoryattributesField extends FormField
             $inputId = $escape($this->id . '_' . $id);
             $inputName = $escape($this->name . '[' . $id . ']');
             $html .= '<tr><th scope="row"><label for="' . $inputId . '">' . $label
-                . '</label><small class="d-block text-muted">' . $escape($inherited)
-                . '</small></th><td><select class="form-select form-select-sm" id="' . $inputId
+                . '</label>'
+                . ($sourceId > 0
+                    ? '<small class="d-block text-muted">' . $escape($inherited) . '</small>'
+                    : '')
+                . '</th><td><select class="form-select form-select-sm" id="' . $inputId
                 . '" name="' . $inputName . '">';
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',

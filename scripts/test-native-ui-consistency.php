@@ -24,6 +24,14 @@ foreach ([$categoryField,$reverseField] as $source) {
     checkUi(str_contains($source,'form-select form-select-sm'),'compact native rule select');
     checkUi(str_contains($source,'d-block text-muted'),'inheritance appears as quiet row metadata');
 }
+checkUi(!str_contains($reverseField, 'padding-inline-start:'),
+    'reverse category table uses standard Joomla row padding');
+checkUi(str_contains($reverseField, "str_repeat('— '"),
+    'category hierarchy uses a text prefix rather than custom table padding');
+$attributeSettingsJs=file_get_contents($base.'media/js/attribute-settings.js');
+checkUi(str_contains($attributeSettingsJs,'optionCatalog')
+    && str_contains($attributeSettingsJs,'field.replaceChildren(...rendered)'),
+    'input-mode dropdown contains only valid options for the characteristic type');
 $form=simplexml_load_file($base.'admin/forms/product.xml');
 $axes=$form->xpath("//fieldset[@name='variants']/field[@name='variant_dimensions' and @type='subform']");
 checkUi(count($axes)===1,'axes use native Joomla subform');

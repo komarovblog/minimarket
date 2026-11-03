@@ -42,14 +42,20 @@
     }
 
     const attributeId = document.getElementById('jform_id');
+    // Native selects show hidden <option> entries inconsistently across browsers.
+    // Rebuild from one original catalog instead of disabling invalid entries.
+    const optionCatalog = new Map([
+      [mode, Array.from(mode.options, option => option.cloneNode(true))],
+      [filter, Array.from(filter.options, option => option.cloneNode(true))]
+    ]);
     const updateOptions = (field, accepted, fallback) => {
-      for (const option of field.options) {
-        const allowed = accepted.includes(option.value);
-        option.hidden = !allowed;
-        option.disabled = !allowed;
-      }
-      if (!accepted.includes(field.value)) {
-        field.value = fallback;
+      const previous = field.value;
+      const rendered = (optionCatalog.get(field) || [])
+        .filter(option => accepted.includes(option.value))
+        .map(option => option.cloneNode(true));
+      field.replaceChildren(...rendered);
+      field.value = accepted.includes(previous) ? previous : fallback;
+      if (field.value !== previous) {
         field.dispatchEvent(new Event('change', { bubbles: true }));
       }
     };

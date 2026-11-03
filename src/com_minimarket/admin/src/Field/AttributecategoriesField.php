@@ -73,11 +73,14 @@ final class AttributecategoriesField extends FormField
                 $label .= ' <span class="badge bg-secondary">'
                     . $escape(Text::_('JUNPUBLISHED')) . '</span>';
             }
-            $indent = min(16, (int) $row['depth']) * 16;
-            $html .= '<tr><th scope="row" style="padding-inline-start:' . $indent
-                . 'px"><label for="' . $idAttr . '">' . $label
-                . '</label><small class="d-block text-muted">' . $escape($inherit)
-                . '</small></th><td><select class="form-select form-select-sm" id="' . $idAttr
+            // Keep normal Joomla table padding; show hierarchy inside the label.
+            $prefix = str_repeat('— ', min(16, (int) $row['depth']));
+            $html .= '<tr><th scope="row"><label for="' . $idAttr . '">'
+                . $escape($prefix) . $label . '</label>'
+                . ($sourceId > 0
+                    ? '<small class="d-block text-muted">' . $escape($inherit) . '</small>'
+                    : '')
+                . '</th><td><select class="form-select form-select-sm" id="' . $idAttr
                 . '" name="' . $name . '">';
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',
