@@ -55,7 +55,7 @@ final class AttributeTable extends Table
             $this->is_multiple = 0;
         }
 
-        foreach (['is_variant', 'is_multiple', 'is_filterable', 'state'] as $field) {
+        foreach (['is_multiple', 'is_filterable', 'state'] as $field) {
             if (!\in_array((int) $this->$field, [0, 1], true)) {
                 $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_FLAGS_INVALID'));
 
@@ -65,12 +65,8 @@ final class AttributeTable extends Table
             $this->$field = (int) $this->$field;
         }
 
-        if ($this->is_variant === 1 && !in_array($this->input_type, ['list','color'], true)
-            && !($this->input_type === 'text' && $this->input_mode === 'presets')) {
-            $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_VARIANT_REQUIRES_LIST'));
-
-            return false;
-        }
+        // Historic flag is no longer a selectable attribute property.
+        $this->is_variant = 0;
 
         $settingError = AttributeSettings::normalize($this);
         if ($settingError !== null) {

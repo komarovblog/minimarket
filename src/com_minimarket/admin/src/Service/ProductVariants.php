@@ -14,42 +14,6 @@ final class ProductVariants
     public const MAX_VARIANTS = 200;
     public const MAX_AXES = 4;
 
-    /** @return array<int,array{title:string,options:array<int,array{value:string,title:string,image:string,hex:string}>}> */
-    public static function axes(int $categoryId, array $definitions, array $categoryMap): array
-    {
-        $allowed = array_fill_keys($categoryMap[$categoryId] ?? [], true);
-        $axes = [];
-        foreach ($definitions as $id => $definition) {
-            if (!isset($allowed[$id]) || !$definition['is_variant'] || (int) $definition['state'] !== 1) continue;
-            $type = $definition['type'];
-            $options = [];
-            if (in_array($type, ['list', 'color'], true)) {
-                foreach ($definition['values'] as $valueId => $value) {
-                    if ((int) $value['state'] !== 1) continue;
-                    $options[] = [
-                        'value' => 'd:' . (int) $valueId,
-                        'title' => (string) $value['title'],
-                        'image' => (string) ($value['sample_image'] ?? ''),
-                        'hex' => (string) ($value['color_hex'] ?? ''),
-                    ];
-                }
-            } elseif ($type === 'text' && ($definition['input_mode'] ?? '') === 'presets') {
-                foreach (TextPresetRows::rows((string) ($definition['text_options'] ?? '')) as $preset) {
-                    $options[] = [
-                        'value' => 't:' . $preset['value'],
-                        'title' => $preset['value'],
-                        'image' => $preset['image'],
-                        'hex' => '',
-                    ];
-                }
-            }
-            if ($options) {
-                $axes[(int) $id] = ['title' => (string) $definition['title'], 'options' => $options];
-            }
-        }
-        return $axes;
-    }
-
     /** @return array<int,array<string,mixed>> */
     public static function normalize(mixed $input, array $axes): array
     {

@@ -58,7 +58,6 @@
                multiple="true" min="0" max="4" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable" validate="Subform"/>
         <field name="variant_matrix" type="Variantbuilder" label="COM_MINIMARKET_LOCAL_PREVIEW" filter="raw"/>
-        <field name="variant_info" type="Variantinfo" label="COM_MINIMARKET_VARIANT_AXES" filter="raw"/>
         <field name="variants" type="subform" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS"
                description="COM_MINIMARKET_VARIANTS_HELP"
                formsource="administrator/components/com_minimarket/forms/product_variant.xml"

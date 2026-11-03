@@ -23,103 +23,14 @@ final class VariantCatalog
         $db->setQuery($q);
         $variantRows = (array) $db->loadAssocList();
         if (!$variantRows) return $empty;
-        $local=self::loadLocal($db,$productId,$variantRows);
-        if ($local !== null) return $local;
-        $q = $db->getQuery(true)->select(['category_id','attribute_id','enabled'])
-            ->from($db->quoteName('#__minimarket_category_attributes'))
-            ->where($db->quoteName('category_id') . ' IN (' . implode(',', $ancestors) . ')');
-        $db->setQuery($q);
-        $byCategory = [];
-        foreach ((array) $db->loadAssocList() as $r) {
-            $byCategory[(int)$r['category_id']][(int)$r['attribute_id']] =
-                (int) $r['enabled'] === 1;
-        }
-        $allowed = [];
-        foreach ($ancestors as $catId) {
-            foreach ($byCategory[$catId] ?? [] as $id => $active) $allowed[$id] = $active;
-        }
-        $allowed = array_keys(array_filter($allowed));
-        if (!$allowed) return $empty;
-
-        $q = $db->getQuery(true)->select(['id','title','input_type','input_mode','text_options'])
-            ->from($db->quoteName('#__minimarket_attributes'))
-            ->where($db->quoteName('id') . ' IN (' . implode(',', $allowed) . ')')
-            ->where($db->quoteName('is_variant') . ' = 1')
-            ->where($db->quoteName('state') . ' = 1')
-            ->order('sort_order ASC, id ASC');
-        $db->setQuery($q);
-        $axes = [];
-        foreach ((array) $db->loadAssocList() as $r) {
-            $id = (int) $r['id']; $type = (string)$r['input_type'];
-            if (!in_array($type, ['list','color','text'], true)) continue;
-            if ($type === 'text' && $r['input_mode'] !== 'presets') continue;
-            $axes[$id] = ['title'=>(string)$r['title'], 'options'=>[]];
-            if ($type === 'text') {
-                $presets = json_decode((string)($r['text_options'] ?? ''), true);
-                foreach (is_array($presets) ? $presets : [] as $preset) {
-                    $title = is_array($preset) ? ($preset['value'] ?? null) : $preset;
-                    if (!is_string($title) || $title==='') continue;
-                    $axes[$id]['options'][] = ['value'=>'t:'.$title,'title'=>$title];
-                }
-            }
-        }
-        if (!$axes || count($axes) > 4) return $empty;
-        $dictIds = [];
-        foreach ($axes as $id => $axis) {
-            if (!$axis['options']) $dictIds[] = $id;
-        }
-        if ($dictIds) {
-            $q = $db->getQuery(true)->select(['attribute_id','id','title'])
-                ->from($db->quoteName('#__minimarket_attribute_values'))
-                ->where($db->quoteName('attribute_id') . ' IN (' . implode(',', $dictIds) . ')')
-                ->where($db->quoteName('state') . ' = 1')
-                ->order('sort_order ASC, id ASC');
-            $db->setQuery($q);
-            foreach ((array) $db->loadAssocList() as $r) {
-                $id = (int) $r['attribute_id'];
-                $axes[$id]['options'][] = ['value'=>'d:' . (int) $r['id'], 'title'=>(string)$r['title']];
-            }
-        }
-        foreach ($axes as $axis) if (!$axis['options']) return $empty;
-        $valid = [];
-        foreach ($axes as $id => $axis) foreach ($axis['options'] as $option) {
-            $valid[$id][$option['value']] = true;
-        }
-        $items = [];
-        foreach ($variantRows as $r) {
-            $selection = json_decode((string)$r['selection_json'], true);
-            if (!is_array($selection) || count($selection)!==count($axes)) continue;
-            $ok = true;
-            foreach ($axes as $id => $axis) {
-                $choice = $selection[$id] ?? null;
-                if (!is_string($choice) || !isset($valid[$id][$choice])) { $ok=false; break; }
-            }
-            if (!$ok) continue;
-            $image = (string)($r['image'] ?? '');
-            $image = self::safeImage($image);
-            $items[] = [
-                'id' => (int)$r['id'], 'selection'=>$selection,
-                'sku'=>(string)$r['sku'], 'price'=>(string)$r['price'],
-                'stock'=>(int)$r['stock'], 'image'=>$image,
-                'image_alt'=>(string)($r['image_alt'] ?? ''),
-                'photos'=>[],
-                'description_mode'=>(int)($r['description_mode']??0),
-                'introtext_override'=>self::safeHtml($r['introtext_override']??null),
-                'description_override'=>self::safeHtml($r['description_override']??null),
-                'video_mode'=>(int)($r['video_mode']??0),
-                'videos'=>[],
-            ];
-        }
-        if (!$items) return $empty;
-        return ['axes'=>$axes,'items'=>self::withPhotos($db,$items)];
+        return self::loadLocal($db,$productId,$variantRows);
     }
 
     /**
-     * Local option values take priority; they require no global category
-     * attributes, and only real matching value assignments are public.
-     * Returns null when an old-format product has no local options.
+     * SKU selections use only the product's own order options.
+     * No category-wide descriptive attributes can define a SKU.
      */
-    private static function loadLocal(DatabaseInterface $db,int $productId,array $variantRows): ?array
+    private static function loadLocal(DatabaseInterface $db,int $productId,array $variantRows): array
     {
         $empty=['axes'=>[],'items'=>[]];
         $q=$db->getQuery(true)->select(['id','code','title'])
@@ -128,7 +39,7 @@ final class VariantCatalog
             ->order('sort_order ASC,id ASC');
         $db->setQuery($q);
         $dimensions=(array)$db->loadAssocList();
-        if (!$dimensions) return null;
+        if (!$dimensions) return $empty;
         if (count($dimensions)>4) return $empty;
         $axes=[];$axisIds=[];$valueMap=[];
         foreach ($dimensions as $d) {

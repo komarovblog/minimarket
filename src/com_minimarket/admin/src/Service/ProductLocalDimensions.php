@@ -68,16 +68,6 @@ final class ProductLocalDimensions
         return $rows;
     }
 
-    public static function hasLegacyVariants(DatabaseInterface $db,int $productId): bool
-    {
-        if ($productId < 1) return false;
-        $q=$db->getQuery(true)->select('COUNT(*)')
-            ->from($db->quoteName('#__minimarket_product_variants'))
-            ->where($db->quoteName('product_id').' = '.$productId);
-        $db->setQuery($q);
-        return (int)$db->loadResult()>0 && self::load($db,$productId)===[];
-    }
-
     public static function axesForVariants(array $dimensions): array
     {
         $axes=[];

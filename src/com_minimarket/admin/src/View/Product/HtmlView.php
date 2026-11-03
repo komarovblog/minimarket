@@ -41,8 +41,6 @@ final class HtmlView extends BaseHtmlView
                 ['defer' => true]
             );
         Factory::getApplication()->getDocument()->getWebAssetManager()
-            ->registerAndUseScript('com_minimarket.variants-admin',
-                'media/com_minimarket/js/variants-admin.js', [], ['defer' => true])
             ->registerAndUseScript('com_minimarket.variants-local',
                 'media/com_minimarket/js/variants-local.js', [], ['defer' => true]);
 

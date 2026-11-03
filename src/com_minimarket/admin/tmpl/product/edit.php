@@ -21,16 +21,17 @@ use Joomla\CMS\Router\Route;
     ] as $section => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-product', $section, Text::_($label)); ?>
         <div class="card card-body"<?php echo $section === 'variants' ? ' data-mm-variants-editor' : ''; ?>>
-            <?php if ($section === 'variants') :
-                $legacySku = (int) ($this->item->id ?? 0) > 0
-                    && !empty($this->item->variants)
-                    && empty($this->item->variant_dimensions);
-            ?>
+            <?php if ($section === 'variants') : ?>
                 <?php echo $this->form->renderField('variants_present'); ?>
-                <?php if ($legacySku) : ?>
-                    <?php echo $this->form->renderField('variant_info'); ?>
+                <?php echo $this->form->renderField('variant_dimensions_present'); ?>
+                <div data-mm-variant-options>
+                    <?php echo $this->form->renderField('variant_dimensions'); ?>
+                </div>
+                <?php echo $this->form->renderField('variant_matrix'); ?>
+                <div data-mm-variant-skus>
                     <?php echo $this->form->renderField('variants'); ?>
-                <?php else : ?>
+                </div>
+            <?php else : ?>
                     <?php echo $this->form->renderField('variant_dimensions_present'); ?>
                     <div data-mm-variant-options>
                         <?php echo $this->form->renderField('variant_dimensions'); ?>

@@ -130,24 +130,13 @@ final class ProductModel extends AdminModel
         $variantRows = [];
         if ($hasLocal || $hasVariants) {
             try {
-                $productIdForLegacy = (int) ($data['id'] ?? 0);
-                if ($hasLocal && ProductLocalDimensions::hasLegacyVariants($db, $productIdForLegacy)) {
-                    // Legacy SKU rows must keep their original dictionary IDs.
-                    // The new native fields are not an implicit migration.
-                    $hasLocal = false;
-                }
-                if ($hasLocal) {
-                    $localDimensions=VariantMatrix::normalize(
-                        array_values((array) ($data['variant_dimensions'] ?? []))
-                    );
-                    $axes=ProductLocalDimensions::axesForVariants($localDimensions);
-                } else {
-                    $definitions = $definitions ?? ProductAttributes::definitions($db);
-                    $hierarchy = $hierarchy ?? CategoryAttributes::loadHierarchy($db);
-                    $categoryMap = $categoryMap ?? ProductAttributes::categoryMap($hierarchy, $definitions);
-                    $axes = ProductVariants::axes((int) ($data['category_id'] ?? 0), $definitions, $categoryMap);
-                }
-                // Missing dimensions are allowed only with no visible SKU rows.
+                // SKU axes come only from explicit order options on this product.
+                // Informational attributes and category assignments never generate SKU.
+                $localDimensions=VariantMatrix::normalize(
+                    array_values((array) ($data['variant_dimensions'] ?? []))
+                );
+                $axes=ProductLocalDimensions::axesForVariants($localDimensions);
+                // A physical SKU is valid only for a full, explicit combination.
                 $variantRows = ProductVariants::normalize($data['variants'] ?? [], $axes);
             } catch (\InvalidArgumentException | \JsonException $error) {
                 $key = $error->getMessage();
