@@ -192,6 +192,10 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_variants` (
  `stock` INT UNSIGNED NOT NULL DEFAULT 0,
  `image` VARCHAR(1024) NOT NULL DEFAULT '',
  `image_alt` VARCHAR(255) NOT NULL DEFAULT '',
+ `description_mode` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+ `introtext_override` TEXT NULL,
+ `description_override` TEXT NULL,
+ `video_mode` TINYINT UNSIGNED NOT NULL DEFAULT 0,
  `state` TINYINT NOT NULL DEFAULT 1,
  `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
  PRIMARY KEY (`id`),
@@ -278,4 +282,30 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_import_sku_keys` (
   KEY `idx_mm_import_variant` (`variant_id`),
   CONSTRAINT `fk_mm_import_variant` FOREIGN KEY (`variant_id`)
     REFERENCES `#__minimarket_product_variants` (`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__minimarket_product_variant_videos` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `variant_id` INT UNSIGNED NOT NULL,
+  `title` VARCHAR(255) NOT NULL DEFAULT '',
+  `source` VARCHAR(1024) NOT NULL,
+  `poster` VARCHAR(1024) NOT NULL DEFAULT '',
+  `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_mm_sku_video_unique` (`variant_id`,`source`(191)),
+  KEY `idx_mm_sku_video_sort` (`variant_id`,`sort_order`,`id`),
+  CONSTRAINT `fk_mm_sku_video_variant` FOREIGN KEY (`variant_id`)
+    REFERENCES `#__minimarket_product_variants`(`id`) ON UPDATE RESTRICT ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS `#__minimarket_variant_value_images` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `value_id` INT UNSIGNED NOT NULL,
+  `path` VARCHAR(1024) NOT NULL,
+  `alt` VARCHAR(255) NOT NULL DEFAULT '',
+  `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_mm_value_photo_unique` (`value_id`,`path`(191)),
+  KEY `idx_mm_value_photo_sort` (`value_id`,`sort_order`,`id`),
+  CONSTRAINT `fk_mm_value_photo_value` FOREIGN KEY (`value_id`)
+    REFERENCES `#__minimarket_variant_dimension_values`(`id`) ON UPDATE RESTRICT ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

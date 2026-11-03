@@ -93,6 +93,7 @@ try {
         'admin/sql/updates/mysql/0.5.16.sql',
         'admin/sql/updates/mysql/0.5.17.sql',
         'admin/sql/updates/mysql/0.5.20.sql',
+        'admin/sql/updates/mysql/0.5.25.sql',
         'admin/forms/product_variant.xml',
         'admin/forms/product_variant_dimension.xml',
         'admin/forms/product_variant_value.xml',
