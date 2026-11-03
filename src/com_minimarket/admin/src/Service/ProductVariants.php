@@ -93,12 +93,14 @@ final class ProductVariants
                 || !in_array($videoMode,['0','1','2'],true)) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_INVALID');
             }
-            $introtext = null;
-            $description = null;
-            if ($descriptionMode === '1') {
-                $introtext = self::cleanSkuHtml($item['introtext_override']??'');
-                $description = self::cleanSkuHtml($item['description_override']??'');
-            }
+            // Mode 0 inherits product copy but keeps previously entered text
+            // dormant, so switching back to Own does not silently erase work.
+            $rawIntro=$item['introtext_override']??'';
+            $rawDescription=$item['description_override']??'';
+            $introtext = ($descriptionMode === '1' || $rawIntro !== '')
+                ? self::cleanSkuHtml($rawIntro) : null;
+            $description = ($descriptionMode === '1' || $rawDescription !== '')
+                ? self::cleanSkuHtml($rawDescription) : null;
             $videoRows=$videoMode==='1' ? ProductVideos::normalize($item['videos']??[]) : [];
             $rawSelection = $item['selection'] ?? null;
             if (is_string($rawSelection)) {
@@ -348,9 +350,14 @@ final class ProductVariants
                 $db->setQuery($q);
                 $db->execute();
             }
-            $q=$db->getQuery(true)->delete($db->quoteName('#__minimarket_product_variant_videos'))
-                ->where($db->quoteName('variant_id').' = '.$variantId);
-            $db->setQuery($q);$db->execute();
+            // Keep dormant own videos on Inherit/None; only explicit Own
+            // editing replaces video links. This prevents accidental data loss
+            // when an editor toggles the display mode.
+            if ($r['video_mode'] === 1) {
+                $q=$db->getQuery(true)->delete($db->quoteName('#__minimarket_product_variant_videos'))
+                    ->where($db->quoteName('variant_id').' = '.$variantId);
+                $db->setQuery($q);$db->execute();
+            }
             if ($r['video_mode'] === 1 && $r['videos']) {
                 $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_product_variant_videos'))
                     ->columns($db->quoteName(['variant_id','title','source','poster','sort_order']));
