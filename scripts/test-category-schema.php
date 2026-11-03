@@ -539,6 +539,7 @@ foreach (['product_id','group_id','sort_order'] as $column)
     verify(in_array($column,$freshMemberColumns,true),'fresh 0.5.26 member '.$column);
 $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
+verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
 foreach ($productEditorColumns as $col) {
     verify(in_array($col, $freshProducts, true), 'fresh 0.5.0 product column ' . $col);
 }
