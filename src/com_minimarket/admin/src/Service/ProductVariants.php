@@ -87,6 +87,19 @@ final class ProductVariants
             $state = (string) ($item['state'] ?? '1');
             $alt = trim((string) ($item['image_alt'] ?? ''));
             $image = MediaPath::normalize((string) ($item['image'] ?? ''));
+            $descriptionMode=(string)($item['description_mode']??'0');
+            $videoMode=(string)($item['video_mode']??'0');
+            if (!in_array($descriptionMode,['0','1'],true)
+                || !in_array($videoMode,['0','1','2'],true)) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_INVALID');
+            }
+            $introtext = null;
+            $description = null;
+            if ($descriptionMode === '1') {
+                $introtext = self::cleanSkuHtml($item['introtext_override']??'');
+                $description = self::cleanSkuHtml($item['description_override']??'');
+            }
+            $videoRows=$videoMode==='1' ? ProductVideos::normalize($item['videos']??[]) : [];
             $rawSelection = $item['selection'] ?? null;
             if (is_string($rawSelection)) {
                 if (strlen($rawSelection) > 4096) throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_INVALID');
@@ -140,6 +153,11 @@ final class ProductVariants
                     return $parts[0] . '.' . str_pad($parts[1] ?? '', 2, '0');
                 })($price),
                 'stock' => (int) $stock,
+                'description_mode' => (int) $descriptionMode,
+                'introtext_override' => $introtext,
+                'description_override' => $description,
+                'video_mode' => (int) $videoMode,
+                'videos' => $videoRows,
                 'image' => $image, 'image_alt' => $alt,
                 'state' => (int) $state,
                 'photos' => $photos,
@@ -149,11 +167,21 @@ final class ProductVariants
         return $result;
     }
 
+    /** Store only HTML approved by Joomla's own HTML input filter. */
+    private static function cleanSkuHtml(mixed $raw): string
+    {
+        if (!is_string($raw) || strlen($raw)>60000) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_SKU_DESCRIPTION_INVALID');
+        }
+        return \Joomla\CMS\Filter\InputFilter::getInstance()->clean($raw,'HTML');
+    }
+
     /** @return array<string,array<string,mixed>> */
     public static function formRows(DatabaseInterface $db, int $productId): array
     {
         if ($productId < 1) return [];
-        $q = $db->getQuery(true)->select(['id','sku','selection_json','price','stock','image','image_alt','state'])
+        $q = $db->getQuery(true)->select(['id','sku','selection_json','price','stock','image','image_alt',
+                'description_mode','introtext_override','description_override','video_mode','state'])
             ->from($db->quoteName('#__minimarket_product_variants'))
             ->where($db->quoteName('product_id') . ' = ' . $productId)
             ->order('sort_order ASC, id ASC');
@@ -170,6 +198,23 @@ final class ProductVariants
         foreach ((array) $db->loadAssocList() as $r) {
             $photos[(int) $r['variant_id']][] = [
                 'path' => (string) $r['path'], 'alt' => (string) $r['alt'],
+            ];
+        }
+        $videoRows=[];
+        $q = $db->getQuery(true)->select(['variant_id','title','source','poster'])
+            ->from($db->quoteName('#__minimarket_product_variant_videos'))
+            ->where($db->quoteName('variant_id') . ' IN (' .
+                implode(',', array_map('intval',array_column($variants,'id'))) . ')')
+            ->order('variant_id ASC,sort_order ASC,id ASC');
+        $db->setQuery($q);
+        foreach ((array)$db->loadAssocList() as $video) {
+            $id=(int)$video['variant_id'];
+            $source=(string)$video['source'];
+            $videoRows[$id]['row'.count($videoRows[$id]??[])]=[
+                'title'=>(string)$video['title'],
+                'source'=>str_starts_with($source,'https://')?$source:'',
+                'media_path'=>str_starts_with($source,'https://')?'':$source,
+                'poster'=>(string)$video['poster']
             ];
         }
         $rows = [];
@@ -198,6 +243,11 @@ final class ProductVariants
                 'selection' => (string) $r['selection_json'],
                 'price' => (string) $r['price'], 'stock' => (string) $r['stock'],
                 'image' => (string) $r['image'], 'image_alt' => (string) $r['image_alt'],
+                'description_mode' => (int)$r['description_mode'],
+                'introtext_override' => (string)($r['introtext_override']??''),
+                'description_override' => (string)($r['description_override']??''),
+                'video_mode' => (int)$r['video_mode'],
+                'videos' => $videoRows[$id]??[],
                 'state' => (int) $r['state'],
                 'photos' => [],
             ];
@@ -255,6 +305,10 @@ final class ProductVariants
                 'signature' => $db->quote($r['signature']),
                 'price' => $db->quote($r['price']),
                 'stock' => (string) $r['stock'],
+                'description_mode' => (string) $r['description_mode'],
+                'introtext_override' => $r['introtext_override'] === null ? 'NULL' : $db->quote($r['introtext_override']),
+                'description_override' => $r['description_override'] === null ? 'NULL' : $db->quote($r['description_override']),
+                'video_mode' => (string) $r['video_mode'],
                 'image' => $db->quote($r['image']),
                 'image_alt' => $db->quote($r['image_alt']),
                 'state' => (string) $r['state'],
@@ -293,6 +347,20 @@ final class ProductVariants
                 }
                 $db->setQuery($q);
                 $db->execute();
+            }
+            $q=$db->getQuery(true)->delete($db->quoteName('#__minimarket_product_variant_videos'))
+                ->where($db->quoteName('variant_id').' = '.$variantId);
+            $db->setQuery($q);$db->execute();
+            if ($r['video_mode'] === 1 && $r['videos']) {
+                $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_product_variant_videos'))
+                    ->columns($db->quoteName(['variant_id','title','source','poster','sort_order']));
+                foreach ($r['videos'] as $i=>$video) {
+                    $q->values(implode(',', [
+                        $variantId,$db->quote($video['title']),$db->quote($video['source']),
+                        $db->quote($video['poster']), (int)$i,
+                    ]));
+                }
+                $db->setQuery($q);$db->execute();
             }
         }
         return $savedIds;
