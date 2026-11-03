@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `sku` VARCHAR(100) NOT NULL DEFAULT '',
     `price` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `stock` INT UNSIGNED NOT NULL DEFAULT 0,
-    `introtext` TEXT NULL,
+    `option_stock_mode` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `introtext` TEXT NULL;
     `description` TEXT NULL,
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     `image` VARCHAR(1024) NOT NULL DEFAULT '',
@@ -308,4 +309,23 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_variant_value_images` (
   KEY `idx_mm_value_photo_sort` (`value_id`,`sort_order`,`id`),
   CONSTRAINT `fk_mm_value_photo_value` FOREIGN KEY (`value_id`)
     REFERENCES `#__minimarket_variant_dimension_values`(`id`) ON UPDATE RESTRICT ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__minimarket_product_groups` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_mm_product_group_title` (`title`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `#__minimarket_product_group_members` (
+  `product_id` INT UNSIGNED NOT NULL,
+  `group_id` INT UNSIGNED NOT NULL,
+  `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`product_id`),
+  KEY `idx_mm_group_member_order` (`group_id`,`sort_order`,`product_id`),
+  CONSTRAINT `fk_mm_group_member_product` FOREIGN KEY (`product_id`)
+    REFERENCES `#__minimarket_products`(`id`) ON UPDATE RESTRICT ON DELETE CASCADE,
+  CONSTRAINT `fk_mm_group_member_group` FOREIGN KEY (`group_id`)
+    REFERENCES `#__minimarket_product_groups`(`id`) ON UPDATE RESTRICT ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
