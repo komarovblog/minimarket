@@ -30,8 +30,14 @@ final class ProductGroups
         return (array)$db->loadAssocList();
     }
 
-    public static function normalize(int|string|null $id,mixed $newTitle): array
+    public static function normalize(mixed $id,mixed $newTitle): array
     {
+        if (!is_int($id) && !is_string($id) && $id !== null) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
+        }
+        if (!is_string($newTitle) && $newTitle !== null) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
+        }
         $selected=trim((string)($id??'0'));
         $title=trim((string)($newTitle??''));
         if (!preg_match('/^(0|[1-9][0-9]{0,9})$/D',$selected)
