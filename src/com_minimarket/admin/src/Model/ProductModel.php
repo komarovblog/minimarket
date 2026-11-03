@@ -33,13 +33,13 @@ final class ProductModel extends AdminModel
             $item->videos = ProductVideos::loadFormRows($this->getDatabase(), (int) $item->id);
             $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
             $item->variants = ProductVariants::formRows($this->getDatabase(), (int) $item->id);
-            $item->variant_config = json_encode(ProductLocalDimensions::load($this->getDatabase(), (int) $item->id), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            $item->variant_dimensions = ProductLocalDimensions::formRows($this->getDatabase(), (int) $item->id);
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
             $item->attribute_values = [];
             $item->variants = [];
-            $item->variant_config = '[]';
+            $item->variant_dimensions = [];
         }
 
         return $item;
@@ -59,7 +59,8 @@ final class ProductModel extends AdminModel
         $hasAttributes = array_key_exists('attribute_values', $data)
             || !empty($data['attributes_present']);
         $hasVariants = array_key_exists('variants', $data) || !empty($data['variants_present']);
-        $hasLocal = array_key_exists('variant_config', $data);
+        $hasLocal = array_key_exists('variant_dimensions', $data)
+            || !empty($data['variant_dimensions_present']);
         $localDimensions = [];
         try {
             $rows = $hasGallery
@@ -113,13 +114,16 @@ final class ProductModel extends AdminModel
         $variantRows = [];
         if ($hasLocal || $hasVariants) {
             try {
+                $productIdForLegacy = (int) ($data['id'] ?? 0);
+                if ($hasLocal && ProductLocalDimensions::hasLegacyVariants($db, $productIdForLegacy)) {
+                    // Legacy SKU rows must keep their original dictionary IDs.
+                    // The new native fields are not an implicit migration.
+                    $hasLocal = false;
+                }
                 if ($hasLocal) {
-                    $raw=$data['variant_config'];
-                    if (!is_string($raw) || strlen($raw)>200000) {
-                        throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
-                    }
-                    $decoded=json_decode($raw,true,512,JSON_THROW_ON_ERROR);
-                    $localDimensions=VariantMatrix::normalize($decoded);
+                    $localDimensions=VariantMatrix::normalize(
+                        array_values((array) ($data['variant_dimensions'] ?? []))
+                    );
                     $axes=ProductLocalDimensions::axesForVariants($localDimensions);
                 } else {
                     $definitions = $definitions ?? ProductAttributes::definitions($db);
@@ -142,7 +146,8 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['variant_config'], $data['variants'], $data['variants_present'],
+        unset($data['variant_dimensions'], $data['variant_dimensions_present'],
+            $data['variant_matrix'], $data['variants'], $data['variants_present'],
             $data['videos'], $data['videos_present'],
             $data['gallery'], $data['gallery_present'],
             $data['attribute_values'], $data['attributes_present']);

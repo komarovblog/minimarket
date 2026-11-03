@@ -39,6 +39,26 @@ final class ProductLocalDimensions
         return $result;
     }
 
+    /**
+     * Native Joomla nested Subform data. Return row-keyed arrays so + / remove /
+     * move works exactly as in the existing gallery.
+     */
+    public static function formRows(DatabaseInterface $db,int $productId): array
+    {
+        $axes=self::load($db,$productId);
+        $rows=[];
+        foreach ($axes as $i=>$axis) {
+            $valueRows=[];
+            foreach ($axis['values'] as $j=>$value) {
+                $valueRows['row'.$j]=$value;
+            }
+            $rows['row'.$i]=[
+                'code'=>$axis['code'], 'title'=>$axis['title'], 'values'=>$valueRows
+            ];
+        }
+        return $rows;
+    }
+
     public static function hasLegacyVariants(DatabaseInterface $db,int $productId): bool
     {
         if ($productId < 1) return false;

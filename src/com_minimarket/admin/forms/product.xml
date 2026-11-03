@@ -45,13 +45,18 @@
     </fieldset>
     <fieldset name="variants" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS">
         <field name="variants_present" type="hidden" default="1" filter="int"/>
-        <field name="variant_config" type="Variantbuilder" label="COM_MINIMARKET_LOCAL_VARIANTS_TITLE" filter="raw"/>
+        <field name="variant_dimensions_present" type="hidden" filter="int" default="1"/>
+        <field name="variant_dimensions" type="subform" label="COM_MINIMARKET_LOCAL_VARIANTS_TITLE"
+               formsource="administrator/components/com_minimarket/forms/product_variant_dimension.xml"
+               multiple="true" min="0" max="4" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform"/>
+        <field name="variant_matrix" type="Variantbuilder" label="COM_MINIMARKET_LOCAL_PREVIEW" filter="raw"/>
         <field name="variant_info" type="Variantinfo" label="COM_MINIMARKET_VARIANT_AXES" filter="raw"/>
         <field name="variants" type="subform" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS"
                description="COM_MINIMARKET_VARIANTS_HELP"
                formsource="administrator/components/com_minimarket/forms/product_variant.xml"
                multiple="true" min="0" max="200" buttons="add,remove,move"
-               layout="joomla.form.field.subform.repeatable" validate="Subform"/>
+               layout="joomla.form.field.subform.repeatable-table" validate="Subform"/>
     </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>

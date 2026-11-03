@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <field name="code" type="hidden" filter="string" default=""/>
+    <field name="title" type="text" label="COM_MINIMARKET_LOCAL_VALUE" required="true"
+           filter="string" maxlength="255" size="24"/>
+</form>
