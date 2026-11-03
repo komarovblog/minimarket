@@ -114,6 +114,7 @@ final class CatalogRepository
                 $this->db->quoteName('p.sku'),
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.option_stock_mode'),
                 $this->db->quoteName('p.image'),
                 $this->db->quoteName('p.image_alt'),
             ])
@@ -238,6 +239,30 @@ final class CatalogRepository
     {
         return VariantCatalog::load($this->db, $productId,
             $this->categoryTree()->ancestorIds($categoryId));
+    }
+
+    /** Other published, SEO-independent products in this exact group. */
+    public function getRelatedProducts(int $productId): array
+    {
+        if ($productId < 1) return [];
+        $q=$this->db->getQuery(true)->select([
+                'p.id','p.title','p.category_id','p.image','p.image_alt'
+            ])
+            ->from($this->db->quoteName('#__minimarket_product_group_members','m'))
+            ->join('INNER',$this->db->quoteName('#__minimarket_product_group_members','other')
+                .' ON other.group_id = m.group_id')
+            ->join('INNER',$this->db->quoteName('#__minimarket_products','p')
+                .' ON p.id = other.product_id')
+            ->where('m.product_id = '.$productId)
+            ->where('p.id != '.$productId)
+            ->where('p.state = 1')
+            ->order('other.sort_order ASC,p.id ASC');
+        $this->db->setQuery($q);
+        $result=[];
+        foreach ((array)$this->db->loadObjectList() as $item) {
+            if ($this->categoryTree()->isVisible((int)$item->category_id)) $result[]=$item;
+        }
+        return $result;
     }
 
     public function getProduct(int $id): ?object

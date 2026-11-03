@@ -175,6 +175,8 @@ $initialDescription=$hasCustomDescription
                  (string)($this->product->introtext??''),'HTML')); ?>"
              data-mm-description-base="<?php echo $this->escape(InputFilter::getInstance()->clean(
                  (string)($this->product->description??''),'HTML')); ?>"
+             data-mm-stock-mode="<?php echo (int)($this->product->option_stock_mode??0); ?>"
+             data-mm-stock-base="<?php echo (int)$this->product->stock; ?>"
              data-mm-gallery-base="<?php echo $this->escape(json_encode(
                  $baseImages,
                  JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
@@ -210,7 +212,11 @@ $initialDescription=$hasCustomDescription
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_PRICE'); ?></dt>
         <dd data-mm-variant-price><?php echo $this->escape((string) ($defaultVariant['price'] ?? $this->product->price)); ?></dd>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
-        <dd data-mm-variant-stock><?php echo (int) ($defaultVariant['stock'] ?? $this->product->stock); ?></dd>
+        <dd data-mm-variant-stock><?php echo (int) (
+            ((int)($this->product->option_stock_mode??0)===0)
+                ? $this->product->stock
+                : ($defaultVariant['stock'] ?? $this->product->stock)
+        ); ?></dd>
     </dl>
     <?php if (!empty($this->attributes)) : ?>
         <section class="mm-product-attributes" aria-labelledby="mm-product-attributes-heading">
@@ -285,5 +291,26 @@ $initialDescription=$hasCustomDescription
          <?php echo trim($initialDescription)==='' ? 'hidden' : ''; ?>>
         <?php echo InputFilter::getInstance()->clean($initialDescription, 'HTML'); ?>
     </div>
+    <?php if ($this->relatedProducts) : ?>
+        <section class="mm-related-products" aria-labelledby="mm-related-products-title">
+            <h2 id="mm-related-products-title"><?php echo Text::_('COM_MINIMARKET_RELATED_PRODUCTS'); ?></h2>
+            <div class="d-flex flex-wrap gap-3">
+                <?php foreach ($this->relatedProducts as $linked) :
+                    $relatedImage = explode('#',(string)($linked->image??''),2)[0];
+                    $showRelatedImage = $isSafeImage($relatedImage);
+                ?>
+                    <a class="d-flex align-items-center gap-2 border rounded p-2 text-decoration-none"
+                       href="<?php echo $this->escape(RouteHelper::product((int)$linked->id)); ?>">
+                        <?php if ($showRelatedImage) : ?>
+                            <img src="<?php echo $this->escape(Uri::root().$relatedImage); ?>"
+                                 alt="" loading="lazy" width="64" height="64"
+                                 style="object-fit:contain"/>
+                        <?php endif; ?>
+                        <span><?php echo $this->escape((string)$linked->title); ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
     <p><?php echo Text::_('COM_MINIMARKET_CART_NOT_READY'); ?></p>
 </article>

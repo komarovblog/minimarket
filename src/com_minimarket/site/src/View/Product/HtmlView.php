@@ -18,6 +18,7 @@ final class HtmlView extends BaseHtmlView
     public array $videos = [];
     public array $attributes = [];
     public array $variants = ['axes'=>[], 'items'=>[]];
+    public array $relatedProducts = [];
 
     public function display($tpl = null)
     {
@@ -39,6 +40,7 @@ final class HtmlView extends BaseHtmlView
         $this->videos = $repo->getProductVideos($id);
         $this->attributes = $repo->getProductAttributes($id, (int) $product->category_id);
         $this->variants = $repo->getProductVariants($id, (int) $product->category_id);
+        $this->relatedProducts = $repo->getRelatedProducts($id);
         // Color/size selectors for actual SKUs replace static descriptive rows.
         if ($this->variants['items']) {
             foreach (array_keys($this->variants['axes']) as $axisId) {

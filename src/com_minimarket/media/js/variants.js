@@ -16,6 +16,8 @@
     stock: document.querySelector('[data-mm-variant-stock]'),
     availability: root.querySelector('[data-mm-variant-availability]'),
   };
+  const sharedStock = root.dataset.mmStockMode === '0';
+  const baseStock = Number(root.dataset.mmStockBase || 0);
   const availableText = root.dataset.mmInStock || 'In stock';
   const unavailableText = root.dataset.mmOutOfStock || 'Out of stock';
   const gallery = document.querySelector('[data-mm-product-gallery]');
@@ -140,9 +142,10 @@
     selects.forEach(s => { s.value = selected.selection[s.dataset.mmVariantAxis] || ''; });
     if (details.sku) details.sku.textContent = selected.sku;
     if (details.price) details.price.textContent = selected.price;
-    if (details.stock) details.stock.textContent = String(selected.stock);
+    const stock = sharedStock ? baseStock : Number(selected.stock);
+    if (details.stock) details.stock.textContent = String(stock);
     if (details.availability) details.availability.textContent =
-      selected.stock > 0 ? availableText : unavailableText;
+      stock > 0 ? availableText : unavailableText;
     selects.forEach(s => {
       for (const option of s.options) {
         option.disabled = !variants.some(v =>
