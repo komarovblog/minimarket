@@ -61,6 +61,13 @@ if ($defaultVariant) {
     if ($variantImages) $images = $variantImages;
 }
 $main = $images[0] ?? null;
+$hasCustomDescription=$defaultVariant && (int)($defaultVariant['description_mode']??0)===1;
+$initialIntro=$hasCustomDescription
+    ? (string)($defaultVariant['introtext_override']??'')
+    : (string)($this->product->introtext??'');
+$initialDescription=$hasCustomDescription
+    ? (string)($defaultVariant['description_override']??'')
+    : (string)($this->product->description??'');
 ?>
 <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BREADCRUMB')); ?>">
     <a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CATALOG_MENU_TITLE'); ?></a>
@@ -94,7 +101,8 @@ $main = $images[0] ?? null;
         </div>
     <?php endif; ?>
     <?php if (!empty($this->videos)) : ?>
-        <section class="mm-product-videos" aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS')); ?>">
+        <section class="mm-product-videos" data-mm-model-videos
+                 <?php echo $defaultVariant && (int)($defaultVariant['video_mode']??0)!==0 ? 'hidden' : ''; ?> aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS')); ?>">
             <h2><?php echo Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS'); ?></h2>
             <?php foreach ($this->videos as $item) : ?>
                 <?php
@@ -149,6 +157,11 @@ $main = $images[0] ?? null;
         </section>
     <?php endif; ?>
     <?php if (!empty($this->variants['items'])) : ?>
+        <section class="mm-product-videos" data-mm-sku-videos
+            <?php echo !$defaultVariant || (int)($defaultVariant['video_mode']??0)!==1 ? 'hidden' : ''; ?>>
+            <h2><?php echo Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS'); ?></h2>
+            <div data-mm-sku-video-list></div>
+        </section>
         <section class="mm-variants" data-mm-variants
              data-mm-selected="<?php echo (int) ($defaultVariant['id'] ?? 0); ?>"
              data-mm-variants-data="<?php echo $this->escape(json_encode(
@@ -158,6 +171,10 @@ $main = $images[0] ?? null;
              data-mm-root="<?php echo $this->escape(Uri::root()); ?>"
              data-mm-in-stock="<?php echo $this->escape(Text::_('COM_MINIMARKET_VARIANT_IN_STOCK')); ?>"
              data-mm-out-of-stock="<?php echo $this->escape(Text::_('COM_MINIMARKET_VARIANT_OUT_OF_STOCK')); ?>"
+             data-mm-intro-base="<?php echo $this->escape(InputFilter::getInstance()->clean(
+                 (string)($this->product->introtext??''),'HTML')); ?>"
+             data-mm-description-base="<?php echo $this->escape(InputFilter::getInstance()->clean(
+                 (string)($this->product->description??''),'HTML')); ?>"
              data-mm-gallery-base="<?php echo $this->escape(json_encode(
                  $baseImages,
                  JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
@@ -167,7 +184,7 @@ $main = $images[0] ?? null;
                 <?php foreach ($this->variants['axes'] as $axisId => $axis) : ?>
                     <label class="mm-variants__axis">
                         <span><?php echo $this->escape($axis['title']); ?></span>
-                        <select class="form-select" data-mm-variant-axis="<?php echo (int) $axisId; ?>">
+                        <select class="form-select" data-mm-variant-axis="<?php echo $this->escape((string)$axisId); ?>">
                             <?php foreach ($axis['options'] as $option) : ?>
                                 <option value="<?php echo $this->escape($option['value']); ?>"
                                     <?php echo (($defaultVariant['selection'][$axisId] ?? '') === $option['value']) ? 'selected' : ''; ?>>
@@ -183,11 +200,10 @@ $main = $images[0] ?? null;
             </p>
         </section>
     <?php endif; ?>
-    <?php if (trim((string) ($this->product->introtext ?? '')) !== '') : ?>
-        <div class="com-minimarket-product__intro">
-            <?php echo InputFilter::getInstance()->clean((string) $this->product->introtext, 'HTML'); ?>
-        </div>
-    <?php endif; ?>
+    <div class="com-minimarket-product__intro" data-mm-variant-intro
+         <?php echo trim($initialIntro)==='' ? 'hidden' : ''; ?>>
+        <?php echo InputFilter::getInstance()->clean($initialIntro, 'HTML'); ?>
+    </div>
     <dl>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></dt>
         <dd data-mm-variant-sku><?php echo $this->escape((string) ($defaultVariant['sku'] ?? $this->product->sku)); ?></dd>
@@ -265,10 +281,9 @@ $main = $images[0] ?? null;
             </dl>
         </section>
     <?php endif; ?>
-    <?php if (trim((string) ($this->product->description ?? '')) !== '') : ?>
-        <div class="com-minimarket-product__description">
-            <?php echo InputFilter::getInstance()->clean((string) $this->product->description, 'HTML'); ?>
-        </div>
-    <?php endif; ?>
+    <div class="com-minimarket-product__description" data-mm-variant-description
+         <?php echo trim($initialDescription)==='' ? 'hidden' : ''; ?>>
+        <?php echo InputFilter::getInstance()->clean($initialDescription, 'HTML'); ?>
+    </div>
     <p><?php echo Text::_('COM_MINIMARKET_CART_NOT_READY'); ?></p>
 </article>
