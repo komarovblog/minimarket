@@ -18,7 +18,11 @@ $sourceSha = ((& git -C $root rev-parse HEAD) | Out-String).Trim()
 $manifestPath = Join-Path $root 'src\com_minimarket\minimarket.xml'
 [xml]$manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
 $releaseVersion = [string]$manifest.extension.version
-if ($releaseVersion -notmatch '^\d+\.\d+\.\d+
+try { $parsedVersion = [version]::Parse($releaseVersion) }
+catch { throw 'MINIMARKET_VALIDATION_INVALID_RELEASE' }
+if ($parsedVersion -lt [version]'0.5.24') {
+    throw 'MINIMARKET_VALIDATION_UNSUPPORTED_RELEASE'
+}
 $checks = [ordered]@{
     sku_position_source = 'NOT_RUN'
     existing_sku_regressions = 'NOT_RUN'
