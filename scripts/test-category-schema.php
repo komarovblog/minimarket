@@ -80,6 +80,7 @@ $productEditorColumns = [
     'meta_title', 'meta_description', 'meta_robots',
     'og_title', 'og_description', 'og_image', 'og_image_alt',
 ];
+verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
 foreach ($productEditorColumns as $col) {
     verify(array_key_exists($col, $afterProduct), '0.5.0 product column ' . $col);
 }
@@ -457,6 +458,42 @@ try {
        (1,'Duplicate','https://www.youtube.com/watch?v=dQw4w9WgXcQ',1)");
     verify(false,'duplicate SKU video source should be rejected');
 } catch(PDOException $e) { verify(true,'duplicate SKU video source rejected'); }
+// 0.5.26: independent products may be related without joining their URLs.
+$beforeOptionSkus=$pdo->query('SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$beforeOptionProduct=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.26.sql','catci_');
+foreach ($beforeOptionProduct as $column=>$value) {
+    verify(row($pdo,'catci_minimarket_products')[$column]===$value,
+        '0.5.26 keeps existing product column '.$column);
+}
+verify($beforeOptionSkus===$pdo->query('SELECT id,product_id,sku,price,stock,selection_json FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.26 retains historical SKU/stock/price/selection unchanged');
+verify((int)$pdo->query('SELECT option_stock_mode FROM catci_minimarket_products WHERE id=1')->fetchColumn()===1,
+    'existing variants retain per-combination stock mode');
+$pdo->exec("INSERT INTO catci_minimarket_products
+    (id,category_id,title,alias,sku,price,stock,state)
+    VALUES (2,1,'Blue shirt','blue-shirt','BLUE-BASE',1990,15,1)");
+verify((int)$pdo->query('SELECT option_stock_mode FROM catci_minimarket_products WHERE id=2')->fetchColumn()===0,
+    'new product defaults to shared stock');
+$pdo->exec("INSERT INTO catci_minimarket_product_groups (id,title)
+    VALUES (7,'Shirts Classic')");
+$pdo->exec("INSERT INTO catci_minimarket_product_group_members (product_id,group_id)
+    VALUES (1,7),(2,7)");
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_group_members WHERE group_id=7')->fetchColumn()===2,
+    'two independent products belong to one non-selling group');
+verify((string)$pdo->query('SELECT alias FROM catci_minimarket_products WHERE id=2')->fetchColumn()==='blue-shirt',
+    'linked product preserves its own unique URL alias');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_product_group_members (product_id,group_id) VALUES (1,7)");
+    verify(false,'duplicate group membership was allowed');
+} catch(PDOException $e) { verify(true,'each product belongs to at most one group'); }
+try {
+    $pdo->exec('DELETE FROM catci_minimarket_product_groups WHERE id=7');
+    verify(false,'deleting an occupied linked group was allowed');
+} catch(PDOException $e) { verify(true,'linked group cannot be deleted while referenced'); }
+$pdo->exec('DELETE FROM catci_minimarket_product_group_members');
+$pdo->exec('DELETE FROM catci_minimarket_product_groups');
+$pdo->exec('DELETE FROM catci_minimarket_products WHERE id=2');
 $pdo->exec('DROP TABLE catci_minimarket_product_variant_videos');
 $pdo->exec('DROP TABLE catci_minimarket_variant_value_images');
 $pdo->exec('DROP TABLE catci_minimarket_import_sku_keys');
@@ -496,6 +533,11 @@ foreach ([
     $columns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_'.$table)->fetchAll(PDO::FETCH_COLUMN);
     foreach ($required as $col) verify(in_array($col,$columns,true),'fresh 0.5.25 '.$table.' '.$col);
 }
+$freshGroupColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_groups')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','title'] as $column) verify(in_array($column,$freshGroupColumns,true),'fresh 0.5.26 group '.$column);
+$freshMemberColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_group_members')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['product_id','group_id','sort_order'] as $column)
+    verify(in_array($column,$freshMemberColumns,true),'fresh 0.5.26 member '.$column);
 $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach ($productEditorColumns as $col) {
