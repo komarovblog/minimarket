@@ -36,8 +36,14 @@
       // Hide only presentation, never disable/unset stock: the editor might
       // switch back to per-combination tracking at any time.
       const cell = stockInput.closest('td');
-      if (cell) cell.hidden = shared;
-      else stockInput.hidden = shared;
+      if (cell) {
+        cell.hidden = shared;
+        const table = cell.closest('table');
+        const header = table?.tHead?.rows[0]?.cells[cell.cellIndex];
+        if (header) header.hidden = shared;
+      } else {
+        stockInput.hidden = shared;
+      }
     }
   };
   stockModeInputs.forEach(input => input.addEventListener('change', refreshInventory));
