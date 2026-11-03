@@ -46,6 +46,9 @@ $sku=$form->xpath("//fieldset[@name='variants']/field[@name='variants' and @type
 checkUi(count($sku)===1,'SKU uses native Joomla subform');
 checkUi((string)$sku[0]['layout']==='joomla.form.field.subform.repeatable-table',
     'SKU rows use Joomla table layout, not oversized cards');
+checkUi(count($form->xpath("//fieldset[@name='variants']/field[@name='variants_workflow' and @type='note']"))===1,
+    'SKU editor has an explicit step-by-step configuration guide');
+
 $dimension=simplexml_load_file($base.'admin/forms/product_variant_dimension.xml');
 $values=$dimension->xpath("//field[@name='values' and @type='subform']");
 checkUi(count($values)===1,'option values use nested native Subform');

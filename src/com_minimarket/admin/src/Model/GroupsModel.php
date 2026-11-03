@@ -11,7 +11,7 @@ final class GroupsModel extends ListModel
     {
         $db = $this->getDatabase();
         $query = $db->getQuery(true)
-            ->select(['g.id', 'g.title', 'g.type', 'g.state', 'g.sort_order',
+            ->select(['g.id', 'g.title', 'g.state', 'g.sort_order',
                 '(SELECT COUNT(*) FROM ' . $db->quoteName('#__minimarket_product_group_members')
                   . ' AS m WHERE m.group_id = g.id) AS member_count'])
             ->from($db->quoteName('#__minimarket_product_groups', 'g'));

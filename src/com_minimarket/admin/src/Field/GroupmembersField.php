@@ -4,13 +4,13 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Form\Field\ListField;
+use Joomla\CMS\Form\Field\CheckboxesField;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 
-/** Native multi-select of independently editable products. */
-final class GroupmembersField extends ListField
+/** Native checkbox selection of independently editable products. */
+final class GroupmembersField extends CheckboxesField
 {
     protected $type = 'Groupmembers';
 

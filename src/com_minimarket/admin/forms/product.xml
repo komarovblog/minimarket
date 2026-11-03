@@ -51,6 +51,7 @@
                layout="joomla.form.field.subform.repeatable" validate="Subform"/>
     </fieldset>
     <fieldset name="variants" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS">
+        <field name="variants_workflow" type="note" label="COM_MINIMARKET_VARIANTS_WORKFLOW" description="COM_MINIMARKET_VARIANTS_WORKFLOW_DESC"/>
         <field name="variants_present" type="hidden" default="1" filter="int"/>
         <field name="variant_dimensions_present" type="hidden" filter="int" default="1"/>
         <field name="variant_dimensions" type="subform" label="COM_MINIMARKET_LOCAL_VARIANTS_TITLE"
@@ -67,7 +68,7 @@
     <fieldset name="groups" label="COM_MINIMARKET_PRODUCT_TAB_GROUPS">
         <field name="product_group_present" type="hidden" default="1" filter="int"/>
         <field name="group_ids" type="Productgroup" label="COM_MINIMARKET_PRODUCT_GROUP"
-               description="COM_MINIMARKET_PRODUCT_GROUP_HELP" multiple="true" size="7" filter="array"/>
+               description="COM_MINIMARKET_PRODUCT_GROUP_HELP" multiple="true" filter="array"/>
         <field name="new_group_title" type="text" label="COM_MINIMARKET_NEW_PRODUCT_GROUP"
                description="COM_MINIMARKET_NEW_PRODUCT_GROUP_HELP" maxlength="255"
                filter="string" size="50"/>

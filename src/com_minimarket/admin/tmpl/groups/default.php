@@ -16,7 +16,6 @@ use Joomla\CMS\Button\PublishedButton;
                 <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
                 <th class="w-1 text-center"><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
                 <th><?php echo HTMLHelper::_('searchtools.sort', 'JGLOBAL_TITLE', 'g.title', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
-                <th><?php echo Text::_('COM_MINIMARKET_GROUP_TYPE'); ?></th>
                 <th><?php echo Text::_('COM_MINIMARKET_GROUP_MEMBERS'); ?></th>
                 <th><?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ID', 'g.id', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             </tr></thead>
@@ -29,13 +28,12 @@ use Joomla\CMS\Button\PublishedButton;
                             ['task_prefix' => 'groups.', 'id' => 'mm-group-state-' . (int) $item->id]); ?>
                     </td>
                     <td><a href="<?php echo Route::_('index.php?option=com_minimarket&task=group.edit&id=' . (int) $item->id); ?>"><?php echo $this->escape((string) $item->title); ?></a></td>
-                    <td><?php echo Text::_('COM_MINIMARKET_GROUP_TYPE_' . strtoupper((string) $item->type)); ?></td>
                     <td><?php echo (int) $item->member_count; ?></td>
                     <td><?php echo (int) $item->id; ?></td>
                 </tr>
             <?php endforeach; ?>
             <?php if (!$this->items) : ?>
-                <tr><td colspan="6"><?php echo Text::_('COM_MINIMARKET_GROUPS_EMPTY'); ?></td></tr>
+                <tr><td colspan="5"><?php echo Text::_('COM_MINIMARKET_GROUPS_EMPTY'); ?></td></tr>
             <?php endif; ?>
             </tbody>
         </table>

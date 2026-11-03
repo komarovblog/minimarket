@@ -3,12 +3,6 @@
     <fieldset name="details" label="COM_MINIMARKET_GROUP_DETAILS">
         <field name="id" type="hidden" default="0" filter="int"/>
         <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60" maxlength="255"/>
-        <field name="type" type="list" label="COM_MINIMARKET_GROUP_TYPE" default="similar" filter="cmd">
-            <option value="model">COM_MINIMARKET_GROUP_TYPE_MODEL</option>
-            <option value="similar">COM_MINIMARKET_GROUP_TYPE_SIMILAR</option>
-            <option value="collection">COM_MINIMARKET_GROUP_TYPE_COLLECTION</option>
-            <option value="accessory">COM_MINIMARKET_GROUP_TYPE_ACCESSORY</option>
-        </field>
         <field name="state" type="list" label="JSTATUS" default="1" filter="int">
             <option value="1">JPUBLISHED</option>
             <option value="0">JUNPUBLISHED</option>
@@ -17,7 +11,7 @@
     </fieldset>
     <fieldset name="members" label="COM_MINIMARKET_GROUP_MEMBERS">
         <field name="members_present" type="hidden" default="1" filter="int"/>
-        <field name="member_ids" type="Groupmembers" multiple="true" size="12"
+        <field name="member_ids" type="Groupmembers" multiple="true"
                label="COM_MINIMARKET_GROUP_MEMBERS"
                description="COM_MINIMARKET_GROUP_MEMBERS_DESC" filter="array"/>
     </fieldset>

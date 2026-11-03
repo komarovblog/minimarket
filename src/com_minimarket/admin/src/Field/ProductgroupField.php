@@ -4,13 +4,13 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Form\Field\ListField;
+use Joomla\CMS\Form\Field\CheckboxesField;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
 
-/** Native Joomla dropdown for independently linked, SEO-addressable products. */
-final class ProductgroupField extends ListField
+/** Native Joomla checkboxes for optional many-to-many product links. */
+final class ProductgroupField extends CheckboxesField
 {
     protected $type = 'Productgroup';
 

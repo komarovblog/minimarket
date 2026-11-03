@@ -96,6 +96,20 @@ namespace MiniMarket\OptionArchitecture {
     $groupForm=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/group.xml');
     verify(count($groupForm->xpath("//field[@name='member_ids' and @type='Groupmembers']"))===1,
         'group editor can assign multiple existing products directly');
+    verify(count($groupForm->xpath("//field[@name='type']"))===0,
+        'generic product links do not expose recommendation, brand or collection types');
+    $productLinkField=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Field/ProductgroupField.php');
+    $groupMemberField=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Field/GroupmembersField.php');
+    verify(str_contains($productLinkField,'extends CheckboxesField')
+        && str_contains($groupMemberField,'extends CheckboxesField'),
+        'group and product edit forms use checkboxes instead of oversized blue multiple-select lists');
+    $groupList=file_get_contents(__DIR__.'/../src/com_minimarket/admin/tmpl/groups/default.php');
+    verify(!str_contains($groupList,'COM_MINIMARKET_GROUP_TYPE'),
+        'product link list no longer mixes in recommendation types');
+    $uiRu=file_get_contents(__DIR__.'/../src/com_minimarket/admin/language/ru-RU/com_minimarket.ini');
+    verify(str_contains($uiRu,'COM_MINIMARKET_GROUPS="Связи товаров"'),
+        'product links have their own clear menu name');
+
     $siteRepo=file_get_contents(__DIR__.'/../src/com_minimarket/site/src/Service/CatalogRepository.php');
     verify(str_contains($siteRepo,'g.state = 1') &&
         str_contains($siteRepo,'p.state = 1') &&
