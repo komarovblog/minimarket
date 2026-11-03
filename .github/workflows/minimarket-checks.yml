@@ -110,6 +110,9 @@ jobs:
       - name: Administrator category hierarchy and counts
         run: php scripts/test-admin-category-tree.php
 
+      - name: Native Joomla UI consistency across categories and variants
+        run: php scripts/test-native-ui-consistency.php
+
       - name: Product editor and clean media validation
         run: php scripts/test-product-editor.php
 
