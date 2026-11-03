@@ -116,6 +116,9 @@ jobs:
       - name: Product editor and clean media validation
         run: php scripts/test-product-editor.php
 
+      - name: Options, stock modes and independent linked products
+        run: php scripts/test-option-architecture.php
+
       - name: Typed category-scoped product attributes
         run: php scripts/test-product-attributes.php
 
