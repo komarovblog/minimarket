@@ -103,29 +103,15 @@ final class VariantCatalog
                 'stock'=>(int)$r['stock'], 'image'=>$image,
                 'image_alt'=>(string)($r['image_alt'] ?? ''),
                 'photos'=>[],
+                'description_mode'=>(int)($r['description_mode']??0),
+                'introtext_override'=>self::safeHtml($r['introtext_override']??null),
+                'description_override'=>self::safeHtml($r['description_override']??null),
+                'video_mode'=>(int)($r['video_mode']??0),
+                'videos'=>[],
             ];
         }
         if (!$items) return $empty;
-        $ids = array_column($items, 'id');
-        $index = array_flip($ids);
-        $q = $db->getQuery(true)->select(['variant_id','path','alt'])
-            ->from($db->quoteName('#__minimarket_product_variant_images'))
-            ->where($db->quoteName('variant_id') . ' IN (' . implode(',', $ids) . ')')
-            ->order('variant_id ASC, sort_order ASC, id ASC');
-        $db->setQuery($q);
-        foreach ((array) $db->loadAssocList() as $r) {
-            $id = (int)$r['variant_id'];
-            $path = self::safeImage((string)$r['path']);
-            if ($path !== '' && isset($index[$id])) {
-                $items[$index[$id]]['photos'][] = [
-                    'path'=>$path, 'alt'=>(string)$r['alt'],
-                ];
-            }
-        }
-        // First available variant by default; show out-of-stock choices too.
-        usort($items, static fn(array $a,array $b): int =>
-            (($b['stock'] > 0) <=> ($a['stock'] > 0)) ?: 0);
-        return ['axes'=>$axes, 'items'=>$items];
+        return ['axes'=>$axes,'items'=>self::withPhotos($db,$items)];
     }
 
     /**
