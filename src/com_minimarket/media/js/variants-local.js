@@ -191,6 +191,117 @@
     return normalized.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
       .toUpperCase() || fallback;
   };
+  // One position is one existing native Joomla Subform row. Do not maintain
+  // a second JSON model or replace Joomla's save/validation mechanics.
+  const refreshSkuEditors = (axes) => {
+    const configKey = JSON.stringify(axes.map(axis => [
+      axis.code, axis.title, axis.values.map(value => [value.code, value.title])
+    ]));
+    for (const selectionInput of selectionInputs()) {
+      const labelField = findSkuField(selectionInput, 'variant_label');
+      const mount = labelField?.parentElement;
+      if (!mount) continue;
+      let controls = mount.querySelector('[data-mm-sku-row-tools]');
+      if (!controls) {
+        controls = document.createElement('div');
+        controls.dataset.mmSkuRowTools = '1';
+        controls.className = 'mt-2 d-flex flex-column gap-2';
+        const actions = document.createElement('div');
+        actions.className = 'd-flex flex-wrap align-items-center gap-2';
+
+        const checkLabel = document.createElement('label');
+        checkLabel.className = 'form-check mb-0';
+        const check = document.createElement('input');
+        check.type = 'checkbox';
+        check.className = 'form-check-input';
+        check.dataset.mmSkuSelect = '1';
+        check.setAttribute('aria-label', t('chooseSku', 'Select position'));
+        const text = document.createElement('span');
+        text.className = 'form-check-label small';
+        text.textContent = t('chooseSku', 'Select position');
+        checkLabel.append(check, text);
+        actions.appendChild(checkLabel);
+
+        const copy = button(t('copySku', 'Copy'), async () => {
+          copy.disabled = true;
+          try {
+            const localAxes = getDimensions();
+            const newSelection = await appendRow({ title: '', selection: {} }, localAxes, true);
+            // Copy only non-identity trade fields. SKU, variant ID and option
+            // selection must be chosen for the new position. Media stays blank.
+            for (const field of ['price', 'stock', 'state']) {
+              const original = findSkuField(selectionInput, field);
+              const target = findSkuField(newSelection, field);
+              if (!original || !target) continue;
+              target.value = original.value;
+              target.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            report(t('copyDone', 'Position copied. Select options, enter SKU and save.'));
+          } catch (error) {
+            report(error.message, true);
+          } finally {
+            copy.disabled = false;
+          }
+        }, 'btn btn-outline-secondary btn-sm');
+        copy.dataset.mmSkuCopy = '1';
+        actions.appendChild(copy);
+
+        const choices = document.createElement('div');
+        choices.dataset.mmSkuChoices = '1';
+        choices.className = 'd-flex flex-wrap gap-2';
+        controls.append(actions, choices);
+        mount.appendChild(controls);
+      }
+      const choices = controls.querySelector('[data-mm-sku-choices]');
+      if (!choices || choices.dataset.mmAxesKey === configKey) continue;
+      choices.dataset.mmAxesKey = configKey;
+      choices.replaceChildren();
+      let current = {};
+      try { current = JSON.parse(selectionInput.value || '{}') || {}; } catch (_) {}
+      for (const axis of axes) {
+        const label = document.createElement('label');
+        label.className = 'form-label mb-0 small';
+        label.textContent = axis.title;
+        const select = document.createElement('select');
+        select.className = 'form-select form-select-sm';
+        select.dataset.mmSkuAxis = axis.code;
+        select.setAttribute('aria-label', axis.title);
+        const blank = document.createElement('option');
+        blank.value = '';
+        blank.textContent = '—';
+        select.appendChild(blank);
+        for (const value of axis.values) {
+          const option = document.createElement('option');
+          option.value = 'v:' + value.code;
+          option.textContent = value.title;
+          select.appendChild(option);
+        }
+        const saved = current[axis.code] || '';
+        if (saved && !axis.values.some(value => 'v:' + value.code === saved)) {
+          // Invalid historical value stays visible and cannot be silently
+          // switched to another sellable position.
+          const missing = document.createElement('option');
+          missing.value = saved;
+          missing.textContent = saved;
+          missing.disabled = true;
+          select.appendChild(missing);
+        }
+        select.value = saved;
+        select.addEventListener('change', () => {
+          const selected = {};
+          choices.querySelectorAll('select[data-mm-sku-axis]').forEach(field => {
+            if (field.value) selected[field.dataset.mmSkuAxis] = field.value;
+          });
+          selectionInput.value = JSON.stringify(selected);
+          selectionInput.dispatchEvent(new Event('change', { bubbles: true }));
+          updateLabels(axes);
+        });
+        label.appendChild(select);
+        choices.appendChild(label);
+      }
+    }
+  };
+
   const appendRow = async (row, axes, manual = false) => {
     const add = nativeAdd();
     if (!add) throw new Error(t('nativeUnavailable', 'SKU table unavailable.'));
