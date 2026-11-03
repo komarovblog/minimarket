@@ -173,9 +173,27 @@ final class ProductVariants
             ];
         }
         $rows = [];
+        $localDimensions = ProductLocalDimensions::load($db, $productId);
         foreach ($variants as $i => $r) {
             $id = (int) $r['id'];
+            $selection = json_decode((string) $r['selection_json'], true) ?: [];
+            $parts = [];
+            foreach ($localDimensions as $dimension) {
+                $valueCode = (string) ($selection[$dimension['code']] ?? '');
+                if (str_starts_with($valueCode, 'v:')) {
+                    $valueCode = substr($valueCode, 2);
+                }
+                foreach ($dimension['values'] as $value) {
+                    if ($value['code'] === $valueCode) {
+                        $parts[] = $value['title'];
+                        break;
+                    }
+                }
+            }
+            // The name is display-only: variant identity uses stable IDs.
+            $label = $parts ? implode(' / ', $parts) : (string) $r['sku'];
             $rows['row' . $i] = [
+                'variant_label' => $label,
                 'id' => $id, 'sku' => (string) $r['sku'],
                 'selection' => (string) $r['selection_json'],
                 'price' => (string) $r['price'], 'stock' => (string) $r['stock'],
