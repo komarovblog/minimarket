@@ -32,16 +32,6 @@ use Joomla\CMS\Router\Route;
                     <?php echo $this->form->renderField('variants'); ?>
                 </div>
             <?php else : ?>
-                    <?php echo $this->form->renderField('variant_dimensions_present'); ?>
-                    <div data-mm-variant-options>
-                        <?php echo $this->form->renderField('variant_dimensions'); ?>
-                    </div>
-                    <?php echo $this->form->renderField('variant_matrix'); ?>
-                    <div data-mm-variant-skus>
-                        <?php echo $this->form->renderField('variants'); ?>
-                    </div>
-                <?php endif; ?>
-            <?php else : ?>
                 <?php echo $this->form->renderFieldset($section); ?>
             <?php endif; ?>
         </div>
