@@ -390,6 +390,67 @@
       report(error.message, true);
     }
   };
+  addSku?.addEventListener('click', async () => {
+    addSku.disabled = true;
+    try {
+      const axes = getDimensions();
+      await appendRow({ title: '', selection: {} }, axes, true);
+      report(t('manualDone', 'Select option values, enter SKU and save.'));
+    } catch (error) {
+      report(error.message, true);
+    } finally {
+      addSku.disabled = false;
+    }
+  });
+  selectAllSku?.addEventListener('change', () => {
+    skuPanel?.querySelectorAll('[data-mm-sku-select]').forEach(field => {
+      field.checked = selectAllSku.checked;
+    });
+  });
+  applyBulk?.addEventListener('click', () => {
+    const price = (bulkPrice?.value || '').trim();
+    const stock = (bulkStock?.value || '').trim();
+    if (!price && !stock) {
+      report(t('bulkRequired', 'Enter price or stock.'), true);
+      return;
+    }
+    if ((price && !/^(?:0|[1-9]\d{0,12})(?:\.\d{1,2})?$/.test(price)) ||
+        (stock && (!/^(?:0|[1-9]\d{0,9})$/.test(stock) || Number(stock) > 4294967295))) {
+      report(t('bulkInvalid', 'Invalid price or stock.'), true);
+      return;
+    }
+    const chosen = selectionInputs().filter(input => {
+      const mount = findSkuField(input, 'variant_label')?.parentElement;
+      return Boolean(mount?.querySelector('[data-mm-sku-select]:checked'));
+    });
+    if (!chosen.length) {
+      report(t('bulkSelection', 'Select at least one SKU.'), true);
+      return;
+    }
+    for (const selection of chosen) {
+      for (const [key, value] of [['price', price], ['stock', stock]]) {
+        if (value === '') continue;
+        const field = findSkuField(selection, key);
+        if (field) {
+          field.value = value;
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+      const mount = findSkuField(selection, 'variant_label')?.parentElement;
+      const checkbox = mount?.querySelector('[data-mm-sku-select]');
+      if (checkbox) checkbox.checked = false;
+    }
+    if (selectAllSku) selectAllSku.checked = false;
+    report(t('bulkDone', 'Selected SKU fields updated. Save the product.'));
+  });
+  optionsPanel?.addEventListener('change', () => {
+    try {
+      const axes = getDimensions();
+      refreshSkuEditors(axes);
+      updateLabels(axes);
+    } catch (_) { /* incomplete rows are validated on generation/save */ }
+  });
+
   generate?.addEventListener('click', showPreview);
 
   // Only additions of SKU row inputs count; do not observe the entire Joomla
@@ -401,10 +462,18 @@
         node.nodeType === 1 && (node.matches?.(skuSelection)
           || node.querySelector?.(skuSelection))))) return;
       concealRawAdd();
-      try { updateLabels(getDimensions()); } catch (_) {}
+      try {
+        const axes = getDimensions();
+        refreshSkuEditors(axes);
+        updateLabels(axes);
+      } catch (_) {}
     });
     observer.observe(repeater, { childList: true, subtree: true });
   }
   concealRawAdd();
-  try { updateLabels(getDimensions()); } catch (_) {}
+  try {
+    const axes = getDimensions();
+    refreshSkuEditors(axes);
+    updateLabels(axes);
+  } catch (_) { /* empty option editor is allowed */ }
 })();
