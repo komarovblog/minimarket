@@ -58,7 +58,7 @@ namespace MiniMarket\OptionArchitecture {
         str_contains($template,'data-mm-stock-mode'),
         'linked products retain individual URLs while options select stock mode');
     $siteJs=file_get_contents(__DIR__.'/../src/com_minimarket/media/js/variants.js');
-    verify(str_contains($siteJs,'sharedStock ? baseStock : Number(selected.stock)'),
+    verify(str_contains($siteJs,'sharedStock ? baseStock : Number(variant.stock)'),
         'public stock respects shared-vs-combination mode');
     $adminJs=file_get_contents(__DIR__.'/../src/com_minimarket/media/js/variants-local.js');
     verify(str_contains($adminJs,'sharedInventory()') && str_contains($adminJs,'refreshInventory()'),
