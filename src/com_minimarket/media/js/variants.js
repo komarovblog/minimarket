@@ -23,6 +23,13 @@
   const mainLink = gallery?.querySelector('[data-mm-gallery-main-link]');
   const thumbs = gallery?.querySelector('[data-mm-gallery-thumb]')?.parentElement;
   const fallback = main ? { url: main.src, alt: main.alt } : null;
+  const intro=document.querySelector('[data-mm-variant-intro]');
+  const description=document.querySelector('[data-mm-variant-description]');
+  const modelVideos=document.querySelector('[data-mm-model-videos]');
+  const skuVideos=document.querySelector('[data-mm-sku-videos]');
+  const skuVideoList=skuVideos?.querySelector('[data-mm-sku-video-list]');
+  const baseIntro=root.dataset.mmIntroBase||'';
+  const baseDescription=root.dataset.mmDescriptionBase||'';
   const rootUrl = root.dataset.mmRoot || document.baseURI;
   const makeUrl = (path) => {
     if (!path || path.includes('..') || !path.startsWith('images/')) return '';
@@ -59,6 +66,66 @@
       thumbs.hidden = thumbs.children.length < 2;
     }
   };
+  const updateDescriptions=(variant)=>{
+    const own=Number(variant.description_mode)===1;
+    const updates=[
+      [intro,own?(variant.introtext_override??''):baseIntro],
+      [description,own?(variant.description_override??''):baseDescription]
+    ];
+    for(const [node,html] of updates){
+      if(!node)continue;
+      // HTML is already passed through Joomla InputFilter on the PHP side.
+      if(node.innerHTML!==html)node.innerHTML=html;
+      node.hidden=String(html).trim()==='';
+    }
+  };
+  const updateVideos=(variant)=>{
+    const mode=Number(variant.video_mode||0);
+    if(modelVideos)modelVideos.hidden=mode!==0;
+    if(!skuVideos || !skuVideoList)return;
+    skuVideoList.replaceChildren();
+    if(mode!==1){skuVideos.hidden=true;return;}
+    for(const item of variant.videos||[]){
+      if(!['file','embed'].includes(item.kind)||typeof item.url!=='string')continue;
+      let uri;
+      try{
+        uri=item.url.startsWith('images/')||item.url.startsWith('media/')
+          ?new URL(item.url,rootUrl):new URL(item.url);
+      }catch(_){continue;}
+      const isHttps=uri.protocol==='https:';
+      const local=uri.href.startsWith(rootUrl) &&
+        ['images/','media/'].some(start=>item.url.startsWith(start));
+      if(item.kind==='file' && !local && !isHttps)continue;
+      if(item.kind==='embed' && !(isHttps &&
+        ['www.youtube-nocookie.com','rutube.ru'].includes(uri.hostname)))continue;
+      const row=document.createElement('div');
+      row.className='mm-product-videos__item';
+      if(item.title){
+        const heading=document.createElement('h3');heading.textContent=item.title;
+        row.appendChild(heading);
+      }
+      const media=document.createElement(item.kind==='embed'?'iframe':'video');
+      if(item.kind==='embed'){
+        media.title=item.title||'Video';
+        media.loading='lazy';
+        media.setAttribute('allowfullscreen','');
+        media.referrerPolicy='strict-origin-when-cross-origin';
+      }else{
+        media.controls=true;media.preload='metadata';
+        if(item.poster){
+          const poster=makeUrl(item.poster);
+          if(poster)media.poster=poster;
+        }
+      }
+      media.src=uri.href;
+      media.style.width='100%';
+      media.style.maxWidth='720px';
+      if(item.kind==='embed')media.style.aspectRatio='16 / 9';
+      row.appendChild(media);
+      skuVideoList.appendChild(row);
+    }
+    skuVideos.hidden=skuVideoList.children.length===0;
+  };
   const current = () => Object.fromEntries(selects.map(s => [s.dataset.mmVariantAxis, s.value]));
   const choose = (changed) => {
     const values = current();
@@ -83,6 +150,8 @@
       }
     });
     updateGallery(selected);
+    updateDescriptions(selected);
+    updateVideos(selected);
   };
   selects.forEach(s => s.addEventListener('change', () => choose(s)));
   choose(null);
