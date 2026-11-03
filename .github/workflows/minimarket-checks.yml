@@ -148,6 +148,9 @@ jobs:
           node --check src/com_minimarket/media/js/variants-local.js
           node --check src/com_minimarket/media/js/variants.js
 
+      - name: Dependent color size and multi-option SKU availability
+        run: node scripts/test-storefront-option-dependencies.js
+
       - name: No recursive MutationObserver freeze in product editor
         run: node scripts/test-variant-admin-observer.js
 
