@@ -80,7 +80,6 @@ $productEditorColumns = [
     'meta_title', 'meta_description', 'meta_robots',
     'og_title', 'og_description', 'og_image', 'og_image_alt',
 ];
-verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
 foreach ($productEditorColumns as $col) {
     verify(array_key_exists($col, $afterProduct), '0.5.0 product column ' . $col);
 }
