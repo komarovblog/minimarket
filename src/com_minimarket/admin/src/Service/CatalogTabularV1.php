@@ -36,6 +36,22 @@ final class CatalogTabularV1
         return $value === null ? '' : (string) $value;
     }
 
+    /**
+     * CSV opens in spreadsheet software as active formula cells unless we
+     * prepend an apostrophe. Undo only our own sentinel on re-import.
+     */
+    private static function csvSafe(string $value): string
+    {
+        return preg_match('/^[\s]*[=+@-]/u', $value) ? "'" . $value : $value;
+    }
+
+    private static function csvUnprotect(string $value): string
+    {
+        return str_starts_with($value,"'")
+            && preg_match('/^[\s]*[=+@-]/u',substr($value,1))
+            ? substr($value,1) : $value;
+    }
+
     private static function decodeField(string $section, string $name, string $value): mixed
     {
         if (in_array($name, ['values','members'], true)) {
@@ -96,7 +112,7 @@ final class CatalogTabularV1
             foreach ($doc[$section] ?? [] as $row) {
                 $data = ['section'=>$section];
                 foreach ($row as $key=>$value) $data[$key] = self::displayCell($value);
-                fputcsv($stream, array_map(static fn($name) => $data[$name] ?? '', $columns), ',', '"', '');
+                fputcsv($stream, array_map(static fn($name) => self::csvSafe((string)($data[$name] ?? '')), $columns), ',', '"', '');
             }
         }
         rewind($stream);
@@ -125,7 +141,7 @@ final class CatalogTabularV1
         $count = 0;
         while (($values = fgetcsv($stream, 0, ',', '"', '')) !== false) {
             if (++$count > 2501 || count($values) !== count($header)) self::fail();
-            $row = array_combine($header, $values);
+            $row = array_combine($header, array_map(self::csvUnprotect(...), $values));
             if (!is_array($row)) self::fail();
             $section = trim((string)($row['section'] ?? ''));
             if ($section === 'meta') {
@@ -167,14 +183,16 @@ final class CatalogTabularV1
     private static function sheetXml(array $rows): string
     {
         $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-            . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+            . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+            . '<cols><col min="1" max="20" width="22" customWidth="1" style="1"/></cols>'
+            . '<sheetData>';
         foreach ($rows as $i=>$row) {
             $xml .= '<row r="' . ($i+1) . '">';
             foreach ($row as $j=>$cell) {
                 $value = self::displayCell($cell);
                 if ($value === '') continue;
                 if (mb_strlen($value) > 32767 || !mb_check_encoding($value,'UTF-8')) self::fail();
-                $xml .= '<c r="'.self::col($j).($i+1).'" t="inlineStr"><is><t xml:space="preserve">'
+                $xml .= '<c r="'.self::col($j).($i+1).'" t="inlineStr" s="1"><is><t xml:space="preserve">'
                     . self::xml($value) . '</t></is></c>';
             }
             $xml .= '</row>';
@@ -208,7 +226,8 @@ final class CatalogTabularV1
                 . '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
                 . '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
                 . '<Default Extension="xml" ContentType="application/xml"/>'
-                . '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>';
+                . '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+                . '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>';
             $book = '<?xml version="1.0" encoding="UTF-8"?>'
                 . '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
                 . ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>';
@@ -225,6 +244,19 @@ final class CatalogTabularV1
                     .' Target="worksheets/sheet'.$index.'.xml"/>';
                 $zip->addFromString('xl/worksheets/sheet'.$index.'.xml',self::sheetXml($rows));
             }
+            $rels .= '<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>';
+            $zip->addFromString('xl/styles.xml',
+                '<?xml version="1.0" encoding="UTF-8"?>'
+                . '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+                . '<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>'
+                . '<fills count="2"><fill><patternFill patternType="none"/></fill>'
+                . '<fill><patternFill patternType="gray125"/></fill></fills>'
+                . '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+                . '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+                . '<cellXfs count="2">'
+                . '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+                . '<xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+                . '</cellXfs></styleSheet>');
             $zip->addFromString('[Content_Types].xml',$types.'</Types>');
             $zip->addFromString('xl/workbook.xml',$book.'</sheets></workbook>');
             $zip->addFromString('xl/_rels/workbook.xml.rels',$rels.'</Relationships>');

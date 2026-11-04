@@ -32,8 +32,25 @@ namespace MiniMarket\TabularV1Smoke {
     ok($decoded['source']==='minimarket-demo','CSV source identity');
     ok(!empty($decoded['options'][0]['values']),'CSV values JSON array survives');
 
+    $formulaSafe=$doc;
+    $formulaSafe['categories'][0]['title']='=HYPERLINK("https://example.invalid")';
+    $guardedCsv=T::csv($formulaSafe);
+    ok(str_contains($guardedCsv,"'=HYPERLINK("),
+        'CSV escapes potentially executable spreadsheet formulas');
+    ok(T::parseCsv($guardedCsv)['categories'][0]['title']===
+        $formulaSafe['categories'][0]['title'],
+        'CSV formula escaping is reversible without altering the catalog');
     $xlsx=T::xlsx($doc);
     ok(str_starts_with($xlsx,'PK'),'XLSX real OOXML zip');
+    $temp=tempnam(sys_get_temp_dir(),'mm-smoke-');
+    file_put_contents($temp,$xlsx);
+    $archive=new \ZipArchive();
+    ok($archive->open($temp)===true,'XLSX ZIP opens');
+    ok($archive->getFromName('xl/styles.xml')!==false &&
+        str_contains((string)$archive->getFromName('xl/styles.xml'),'numFmtId="49"'),
+        'Excel columns have text formatting to preserve leading-zero SKUs');
+    $archive->close();
+    unlink($temp);
     $round=CatalogImport::decode(json_encode(T::parseXlsx($xlsx),JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE));
     foreach (T::FIELDS as $section=>$fields) {
         ok(($round[$section]??[])==($doc[$section]??[]),

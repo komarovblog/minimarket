@@ -29,7 +29,7 @@ use Joomla\CMS\Session\Session;
                         <?php foreach (['xlsx','csv','json'] as $format) : ?>
                         <td><a class="btn btn-secondary btn-sm"
                                href="<?php echo Route::_('index.php?option=com_minimarket&task=import.example&template='
-                                   . $template . '&format=' . $format . '&' . Session::getFormToken() . '=1'); ?>">
+                                   . $template . '&filetype=' . $format . '&' . Session::getFormToken() . '=1'); ?>">
                             <?php echo strtoupper($format); ?></a></td>
                         <?php endforeach; ?>
                     </tr>

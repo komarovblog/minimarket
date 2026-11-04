@@ -67,7 +67,7 @@ final class ImportController extends BaseController
         Session::checkToken('get') or die(Text::_('JINVALID_TOKEN'));
         $this->assertCanImport();
         $name = $this->input->getCmd('template', '');
-        $format = $this->input->getCmd('format', 'json');
+        $format = $this->input->getCmd('filetype', 'json');
         $examples = ['catalog'=>'import-catalog-v1.json',
             'empty'=>'import-empty-v1.json'];
         if (!isset($examples[$name]) || !in_array($format,['json','csv','xlsx'],true)) {
@@ -88,7 +88,7 @@ final class ImportController extends BaseController
     {
         Session::checkToken('get') or die(Text::_('JINVALID_TOKEN'));
         $this->assertCanImport();
-        $format = $this->input->getCmd('format', 'json');
+        $format = $this->input->getCmd('filetype', 'json');
         if (!in_array($format,['json','csv','xlsx'],true)) {
             throw new \RuntimeException('Invalid export format', 400);
         }
