@@ -148,9 +148,9 @@ final class GroupEditor
             }
             $members=self::memberIds($row['members'],$productId);
             if ($id===0) {
-                if (!in_array($productId,$members,true)) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
-                }
+                // A new group can survive removal of its founding product.
+                // It remains independently visible in the Groups section, even
+                // when no members remain. Only explicit group deletion removes it.
                 $q=$db->getQuery(true)
                     ->insert($db->quoteName('#__minimarket_product_groups'))
                     ->columns($db->quoteName(['title','type','state']))

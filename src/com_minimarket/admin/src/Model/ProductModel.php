@@ -74,6 +74,16 @@ final class ProductModel extends AdminModel
         if ($hasGroupEditor) {
             try {
                 $groupEditorRows = GroupEditor::normalize($data['group_editor'], 'product');
+                // Deleting a relationship affects other products too. It
+                // requires explicit component deletion permission, not merely
+                // the right to edit the current product.
+                foreach ($groupEditorRows as $groupRow) {
+                    if ($groupRow['delete'] &&
+                        !Factory::getApplication()->getIdentity()
+                            ->authorise('core.delete', 'com_minimarket')) {
+                        throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
+                    }
+                }
             } catch (\InvalidArgumentException $error) {
                 $this->setError(Text::_('COM_MINIMARKET_PRODUCT_GROUP_INVALID'));
                 return false;

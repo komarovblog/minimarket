@@ -12,6 +12,11 @@
       labels = JSON.parse(root.dataset.mmLabels || '{}');
       groups = JSON.parse(output.value || '[]');
       if (!Array.isArray(groups)) throw new Error('Invalid group data');
+      // Older drafts may still carry disabled checkbox entries. Members that
+      // were unchecked are already removed logically and not displayed again.
+      groups = groups.map(g => ({ ...g,
+        members: (g.members || []).filter(m => m.enabled !== false),
+      }));
     } catch (_) {
       status.textContent = 'Invalid relationship data';
       continue;
@@ -49,6 +54,30 @@
       return response.json();
     };
     const memberKey = item => String(item.id);
+    const productHref = member => {
+      const id = member.id === 'current' ? Number(config.currentId) : Number(member.id);
+      return Number.isSafeInteger(id) && id > 0 ?
+        'index.php?option=com_minimarket&task=product.edit&id=' + id : '';
+    };
+    const openLink = (href, name, className) => {
+      const link = el('a', className || '', name);
+      link.href = href;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.addEventListener('click', event => event.stopPropagation());
+      return link;
+    };
+    const submitGroupDeletion = () => {
+      const form = root.closest('form');
+      if (!form) return;
+      if (window.Joomla?.submitform) {
+        window.Joomla.submitform('group.deleteRelationship', form);
+      } else {
+        const task = form.querySelector('[name="task"]');
+        if (task) task.value = 'group.deleteRelationship';
+        form.requestSubmit();
+      }
+    };
     const update = (callback) => {
       callback();
       save();
@@ -60,9 +89,7 @@
       if (!Number.isSafeInteger(id) || id < 1) return;
       const key = (config.mode === 'product' && id === config.currentId)
         ? 'current' : id;
-      if (group.members.some(p => memberKey(p) === String(key))) {
-        group.members.find(p => memberKey(p) === String(key)).enabled = true;
-      } else {
+      if (!group.members.some(p => memberKey(p) === String(key))) {
         group.members.push({ id: key, title: String(product.title),
           state: Number(product.state), enabled: true });
       }
@@ -102,8 +129,7 @@
           });
           if (number !== serial) return;
           results.replaceChildren();
-          const selected = new Set(group.members
-            .filter(p => p.enabled).map(memberKey));
+          const selected = new Set(group.members.map(memberKey));
           const items = Array.isArray(data.items) ? data.items : [];
           if (!items.length) {
             results.appendChild(el('p', 'small text-muted',
@@ -111,8 +137,11 @@
           }
           for (const product of items) {
             const row = el('div', 'mm-group-finder__result');
-            const caption = el('span', '', String(product.title) +
-              ' (#' + product.id + ') — ' + product.category);
+            const caption = el('span', '');
+            caption.appendChild(openLink(productHref(product),
+              String(product.title) + ' (#' + product.id + ')', ''));
+            caption.appendChild(el('span', 'text-muted ms-1',
+              '— ' + product.category));
             if (product.state !== 1) caption.appendChild(
               el('small', 'text-muted ms-1', t('unpublished', 'Unpublished')));
             const isCurrent = config.mode === 'product' &&
@@ -147,10 +176,15 @@
       });
       if (g.delete) details.classList.add('mm-group-item--deleted');
       const summary = el('summary', 'mm-group-item__heading');
-      const count = g.members.filter(m => m.enabled).length;
-      summary.appendChild(el('span', 'fw-semibold',
-        (g.title || t('newGroup', 'New relationship')) +
-          (g.id ? ' (#' + g.id + ')' : '')));
+      const count = g.members.length;
+      const groupName = (g.title || t('newGroup', 'New relationship')) +
+        (g.id ? ' (#' + g.id + ')' : '');
+      const groupTitle = config.mode === 'product' && Number(g.id) > 0
+        ? openLink('index.php?option=com_minimarket&task=group.edit&id=' +
+            Number(g.id), groupName, 'fw-semibold')
+        : el('span', 'fw-semibold', groupName);
+      groupTitle.dataset.mmGroupTitle = '1';
+      summary.appendChild(groupTitle);
       summary.appendChild(el('small', 'text-muted',
         count + ' · ' + t('members', 'Products')));
       if (g.delete) summary.appendChild(
@@ -167,8 +201,9 @@
         input.disabled = Boolean(g.delete);
         input.addEventListener('input', () => {
           g.title = input.value;
-          summary.querySelector('span').textContent = input.value ||
-            t('newGroup', 'New relationship');
+          groupTitle.textContent = (input.value ||
+            t('newGroup', 'New relationship')) +
+            (g.id ? ' (#' + g.id + ')' : '');
           save();
         });
         titleLabel.appendChild(input);
@@ -177,33 +212,28 @@
       const members = el('div', 'mm-group-members');
       for (const member of g.members) {
         const item = el('div', 'mm-group-member');
-        const label = el('label', 'mm-group-member__label');
-        const checkbox = el('input', 'form-check-input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = member.enabled !== false;
-        checkbox.disabled = Boolean(g.delete);
-        checkbox.addEventListener('change', () => {
-          member.enabled = checkbox.checked;
-          if (member.id === 'current') g.leave = !checkbox.checked;
-          save();
-        });
-        label.appendChild(checkbox);
         const name = String(member.title || '') +
           (member.id === 'current'
-            ? ' — ' + t('current', 'Current product')
+            ? ' (#' + config.currentId + ')'
             : ' (#' + member.id + ')');
-        label.appendChild(el('span', '', name));
-        if (member.state === 0) label.appendChild(
+        const href = productHref(member);
+        const memberLink = href
+          ? openLink(href, name, 'mm-group-member__link')
+          : el('span', 'mm-group-member__link', name);
+        const caption = el('span', 'mm-group-member__label');
+        caption.appendChild(memberLink);
+        if (member.id === 'current') caption.appendChild(
+          el('small', 'text-muted', t('current', 'Current product')));
+        if (member.state === 0) caption.appendChild(
           el('small', 'text-muted', t('unpublished', 'Unpublished')));
-        const remove = button(t('removeMember', 'Remove'),
-          'btn-outline-danger', () => {
-            update(() => {
-              if (member.id === 'current') g.leave = true;
-              g.members = g.members.filter(x => x !== member);
-            });
-          });
+        const remove = button(t('removeMember', 'Remove product'),
+          'btn-outline-danger', () => update(() => {
+            // Removing an entry only unlinks THIS product from THIS group.
+            // The relationship and all other group members stay intact.
+            g.members = g.members.filter(x => x !== member);
+          }));
         remove.disabled = Boolean(g.delete);
-        item.append(label, remove);
+        item.append(caption, remove);
         members.appendChild(item);
       }
       content.appendChild(members);
@@ -218,30 +248,28 @@
           });
         content.appendChild(pick);
       }
-      if (config.mode === 'product') {
-        const actions = el('div', 'mm-group-item__actions');
-        if (g.id > 0) {
-          actions.appendChild(button(t('leave', 'Remove current product'),
-            'btn-outline-secondary', () => update(() => {
-              const current = g.members.find(m => m.id === 'current');
-              if (current) current.enabled = false;
-              g.leave = true;
-            })));
-          actions.appendChild(button(
-            g.delete ? t('active', 'Restore') :
-              t('deleteGroup', 'Delete entire relationship'),
-            'btn-outline-danger', () => {
-              if (!g.delete && !window.confirm(t('deleteConfirm',
-                'Delete this relationship for all linked products?'))) return;
+      const actions = el('div', 'mm-group-item__actions');
+      if (Number(g.id) > 0) {
+        actions.appendChild(button(
+          g.delete ? t('restore', 'Undo deletion') :
+            t('deleteGroup', 'Delete relationship'),
+          'btn-outline-danger', () => {
+            if (!g.delete && !window.confirm(t('deleteConfirm',
+              'Delete this relationship for all linked products?'))) return;
+            if (config.mode === 'group') {
+              // Same action as the product editor, but on the standalone
+              // screen use an explicit Joomla POST task then redirect to list.
+              submitGroupDeletion();
+            } else {
               update(() => { g.delete = !g.delete; });
-            }));
-        } else {
-          actions.appendChild(button(t('deleteGroup', 'Discard'),
-            'btn-outline-danger', () =>
-              update(() => { groups.splice(index, 1); })));
-        }
-        content.appendChild(actions);
+            }
+          }));
+      } else if (config.mode === 'product') {
+        actions.appendChild(button(t('discard', 'Discard new relationship'),
+          'btn-outline-danger', () =>
+            update(() => { groups.splice(index, 1); })));
       }
+      if (actions.children.length) content.appendChild(actions);
       details.appendChild(content);
       return details;
     };

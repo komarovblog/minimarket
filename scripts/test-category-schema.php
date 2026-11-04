@@ -552,6 +552,34 @@ verify((int)$pdo->query("SELECT group_id FROM catci_minimarket_import_group_keys
 $memberIndexes=$pdo->query('SHOW INDEX FROM catci_minimarket_product_group_members')->fetchAll(PDO::FETCH_ASSOC);
 verify(count(array_filter($memberIndexes,static fn($x)=>$x['Key_name']==='PRIMARY'))===2,
     'composite group-product primary key installed');
+// Removing a product from a relationship must not delete the relationship or
+// remove any of its other participants. A newly created group can remain empty.
+$beforeUnlinkSkus=$pdo->query('SELECT id,product_id,sku,price,stock
+    FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$pdo->exec('DELETE FROM catci_minimarket_product_group_members
+    WHERE group_id=7 AND product_id=1');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_groups
+    WHERE id=7')->fetchColumn()===1,
+    'group still exists after founding product is removed');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_group_members
+    WHERE group_id=7')->fetchColumn()===1,
+    'other product remains in group after founder leaves');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_group_members
+    WHERE group_id=8 AND product_id=1')->fetchColumn()===1,
+    'removing membership in one group does not touch other groups');
+$pdo->exec("INSERT INTO catci_minimarket_product_groups (id,title,type,state)
+    VALUES (9,'Group independent of original product','similar',1)");
+$pdo->exec('INSERT INTO catci_minimarket_product_group_members
+    (product_id,group_id) VALUES (1,9)');
+$pdo->exec('DELETE FROM catci_minimarket_product_group_members
+    WHERE group_id=9 AND product_id=1');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_groups
+    WHERE id=9')->fetchColumn()===1,
+    'new group remains in group list even with no members');
+verify($beforeUnlinkSkus===$pdo->query('SELECT id,product_id,sku,price,stock
+    FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    'unlinked member retains its own product SKU, price and stock');
+
 
 /** Global order-option dictionaries are additive and category overrides are independent. */
 $beforeOrderProduct=row($pdo,'catci_minimarket_products');

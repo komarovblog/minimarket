@@ -97,6 +97,8 @@ final class GroupeditorField extends FormField
             'removeMember'=>Text::_('COM_MINIMARKET_GROUP_UI_REMOVE_MEMBER'),
             'leave'=>Text::_('COM_MINIMARKET_GROUP_UI_LEAVE'),
             'deleteGroup'=>Text::_('COM_MINIMARKET_GROUP_UI_DELETE'),
+            'restore'=>Text::_('COM_MINIMARKET_GROUP_UI_RESTORE'),
+            'discard'=>Text::_('COM_MINIMARKET_GROUP_UI_DISCARD'),
             'deleteConfirm'=>Text::_('COM_MINIMARKET_GROUP_UI_DELETE_CONFIRM'),
             'newGroup'=>Text::_('COM_MINIMARKET_GROUP_UI_NEW'),
             'existing'=>Text::_('COM_MINIMARKET_GROUP_UI_EXISTING'),

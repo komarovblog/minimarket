@@ -26,7 +26,7 @@ namespace MiniMarket\GroupEditorSmoke {
     check(count($normalized)===2 && $normalized[0]['members'][0]['id']==='current',
         'saved group and new group include current product');
     check($normalized[0]['members'][2]['enabled']===false,
-        'member checkboxes control relationship, not product publication');
+        'legacy disabled members remain understandable to the server');
     check(GroupEditor::normalize('[{"id":0,"title":"","members":[]}]','group')[0]['id']===0,
         'new standalone group can be saved before adding members');
     foreach ([
@@ -63,9 +63,30 @@ namespace MiniMarket\GroupEditorSmoke {
         str_contains($js,'searchUrl') &&
         str_contains($js,'groupUrl'),
         'product chooser searches by name/SKU or filters by category');
-    check(!str_contains($js,'CheckboxesField') &&
-        !str_contains($js,'document.querySelectorAll("input[type=checkbox]")'),
-        'no global catalog list of checkboxes');
+    check(!str_contains($js,"checkbox.type = 'checkbox'") &&
+        !str_contains($js,"checkbox.checked =") &&
+        !str_contains($js,"type = 'checkbox'"),
+        'no redundant member checkboxes anywhere in either group editor');
+    check(str_contains($js,"link.target = '_blank'") &&
+        str_contains($js,"link.rel = 'noopener noreferrer'") &&
+        str_contains($js,'task=product.edit&id=') &&
+        str_contains($js,"openLink(href, name, 'mm-group-member__link')"),
+        'member titles open the matching product editor in a new tab');
+    check(str_contains($js,'const renderGroup = (g, index) =>') &&
+        str_contains($js,'for (const [i, group] of groups.entries())'),
+        'product editor shows any number of independently expandable groups');
+    check(str_contains($js,'g.members = g.members.filter(x => x !== member);') &&
+        !str_contains($js,"g.leave = true"),
+        'Remove product unlinks exactly one member rather than deleting a group');
+    check(str_contains($js,"group.deleteRelationship") &&
+        str_contains($js,'submitGroupDeletion()'),
+        'standalone and product editors both expose explicit group deletion');
+    $groupController=file_get_contents($base.'admin/src/Controller/GroupController.php');
+    check(str_contains($groupController,'function deleteRelationship(): void') &&
+        str_contains($groupController,"Session::checkToken('post')") &&
+        str_contains($groupController,"authorise('core.delete', 'com_minimarket')") &&
+        str_contains($groupController,'$model->delete($ids)'),
+        'standalone delete checks post token, ACL and calls group-only deletion');
     $controller=file_get_contents($base.'admin/src/Controller/ProductpickerController.php');
     check(str_contains($controller,"authorise('core.manage', 'com_minimarket')") &&
         str_contains($controller,"Session::checkToken('get')") &&
@@ -87,6 +108,13 @@ namespace MiniMarket\GroupEditorSmoke {
     check(str_contains($service,'foreach ($original as $gid)') &&
         str_contains($service,'if (!in_array($gid,$present,true))'),
         'missing saved groups are not accidentally detached');
+    check(str_contains($service,'A new group can survive removal of its founding product.') &&
+        !str_contains($service,'if (!in_array($productId,$members,true))'),
+        'new group can remain in Groups even after founding product leaves');
+    check(str_contains($service,'ProductGroups::replaceForGroup($db,$id,$members);') &&
+        str_contains($service,'$q=$db->getQuery(true)') &&
+        str_contains($service,'if ($row[\'delete\'])'),
+        'member removal preserves group record unless explicitly deleted');
     $productModel=file_get_contents($base.'admin/src/Model/ProductModel.php');
     $groupModel=file_get_contents($base.'admin/src/Model/GroupModel.php');
     check(str_contains($productModel,'GroupEditor::saveProduct(') &&
@@ -94,6 +122,8 @@ namespace MiniMarket\GroupEditorSmoke {
         str_contains($productModel,'$db->transactionRollback();') &&
         str_contains($groupModel,'$db->transactionRollback();'),
         'all changes guarded by one Joomla transaction');
+    check(str_contains($productModel,"authorise('core.delete', 'com_minimarket')"),
+        'global deletion from product also requires component delete permission');
     $css=file_get_contents($base.'media/css/admin-ui.css');
     check(str_contains($css,'grid-template-columns: repeat(2, minmax(0, 1fr));') &&
         str_contains($css,'.mm-group-item > summary'),
@@ -103,7 +133,7 @@ namespace MiniMarket\GroupEditorSmoke {
         !str_contains($migration,'MODIFY COLUMN '.chr(96).'value_text'.chr(96)),
         'Joomla DB schema checker no longer misreads COLUMN as column name');
     $manifest=file_get_contents($base.'minimarket.xml');
-    check(str_contains($manifest,'<version>0.5.40</version>'),
-        'component metadata matches 0.5.40');
+    check(str_contains($manifest,'<version>0.5.41</version>'),
+        'component metadata matches 0.5.41');
     echo 'GROUP_EDITOR_OK: '.$checks." cases\n";
 }
