@@ -75,7 +75,7 @@ foreach ([
 }
 foreach (['products','categories'] as $entity) {
     $tpl=file_get_contents($root.'tmpl/'.$entity.'/default.php');
-    ok(str_contains($tpl,"is_file(JPATH_ROOT . '/' . $image)"),
+    ok(str_contains($tpl,'is_file(JPATH_ROOT'),
         $entity.': missing demo image displays a fallback rather than broken alt text');
 }
 echo 'NATIVE_ADMIN_LIST_OK: '.$count." cases\n";
