@@ -98,7 +98,7 @@ namespace MiniMarket\SkuMatrixSmoke {
         str_contains($javascript,'owners.get(choice.key) !== group'),
         'SKU photo lists use checkboxes and block a second primary image for any SKU');
     check(str_contains($javascript,'data-mm-matrix-payload') &&
-        str_contains($javascript,'data-mm-photo-select') &&
+        str_contains($javascript,'mm-photo-sku-checklist') &&
         str_contains($javascript, 'a < b ? -1 : a > b ? 1 : 0') &&
         !str_contains($javascript,'group-add') &&
         !str_contains($javascript,'data-mm-sku-price'),

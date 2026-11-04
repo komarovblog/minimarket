@@ -110,7 +110,7 @@ checkUi(str_contains($client,'isShared()') &&
     !str_contains($client,'group-add'),
     'shared stock hides stock column and no SKU price or Joomla add-row control');
 checkUi(str_contains($client,'refreshGallery()') &&
-    str_contains($client,'data-mm-photo-select'),
+    str_contains($client,'mm-photo-sku-checklist'),
     'gallery photo permissions and SKU covers are edited alongside matrix');
 foreach (['attribute','category','group','orderoption','product','value'] as $name) {
     $template = file_get_contents($base.'admin/tmpl/'.$name.'/edit.php');
