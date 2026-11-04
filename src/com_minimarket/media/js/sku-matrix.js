@@ -26,7 +26,7 @@
     return node;
   };
   const canonical = selection => JSON.stringify(Object.fromEntries(
-    Object.entries(selection).sort(([a], [b]) => a.localeCompare(b, 'en'))
+    Object.entries(selection).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
   ));
   const isShared = () => stockModes.find(x => x.checked)?.value === '0';
   const existing = new Map();

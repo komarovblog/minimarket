@@ -91,6 +91,7 @@ namespace MiniMarket\SkuMatrixSmoke {
     $javascript=file_get_contents($base.'media/js/sku-matrix.js');
     check(str_contains($javascript,'data-mm-matrix-payload') &&
         str_contains($javascript,'data-mm-photo-select') &&
+        str_contains($javascript, 'a < b ? -1 : a > b ? 1 : 0') &&
         !str_contains($javascript,'group-add') &&
         !str_contains($javascript,'data-mm-sku-price'),
         'direct option columns and SKU photo lists without hidden Joomla add button');
