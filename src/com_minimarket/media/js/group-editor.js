@@ -194,6 +194,12 @@
       details.open = Boolean(g._open);
       details.addEventListener('toggle', () => {
         g._open = details.open;
+        const expander = details.querySelector('[data-mm-group-toggle]');
+        if (expander) {
+          expander.textContent = details.open
+            ? t('collapse', 'Collapse') : t('expand', 'Expand');
+          expander.setAttribute('aria-expanded', String(details.open));
+        }
       });
       if (g.delete) details.classList.add('mm-group-item--deleted');
       const summary = el('summary', 'mm-group-item__heading');
@@ -208,6 +214,23 @@
       summary.appendChild(groupTitle);
       summary.appendChild(el('small', 'text-muted',
         count + ' · ' + t('members', 'Products')));
+      const expander = button(
+        details.open ? t('collapse', 'Collapse') : t('expand', 'Expand'),
+        'btn-secondary mm-group-item__toggle', () => {
+          details.open = !details.open;
+          g._open = details.open;
+          expander.textContent = details.open
+            ? t('collapse', 'Collapse') : t('expand', 'Expand');
+          expander.setAttribute('aria-expanded', String(details.open));
+        });
+      expander.dataset.mmGroupToggle = '1';
+      expander.setAttribute('aria-expanded', String(details.open));
+      expander.setAttribute('aria-label', t('toggleHelp', 'Expand or collapse relationship'));
+      expander.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      summary.appendChild(expander);
       if (g.delete) summary.appendChild(
         el('small', 'text-danger', t('deleteGroup', 'Delete relationship')));
       details.appendChild(summary);

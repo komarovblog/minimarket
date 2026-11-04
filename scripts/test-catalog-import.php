@@ -57,12 +57,29 @@ namespace MiniMarket\ImportTest {
         }
     }
 
+    $bundled = __DIR__ . '/../src/com_minimarket/admin/examples/';
+    $sample = (string) file_get_contents($bundled . 'import-catalog-v1.json');
+    $blank = (string) file_get_contents($bundled . 'import-empty-v1.json');
+    verify(CatalogImport::decode($sample)['source'] === 'minimarket-demo',
+        'filled example installed inside Joomla, no GitHub required');
+    verify(CatalogImport::decode($blank)['source'] === 'my-catalog',
+        'empty template installed and valid');
     $base = __DIR__ . '/../src/com_minimarket/';
     $manifest = file_get_contents($base . 'minimarket.xml');
     preg_match('/<version>([^<]+)<\/version>/', $manifest, $versionMatches);
     verify(version_compare($versionMatches[1] ?? '0', '0.5.35', '>=')
         && str_contains($manifest, 'view=import'), 'import menu remains available on later component versions');
+    $ui = file_get_contents($base . 'admin/tmpl/import/default.php');
+    verify(!str_contains($ui, 'github.com') &&
+        str_contains($ui, 'task=import.example') &&
+        str_contains($ui, 'COM_MINIMARKET_IMPORT_STEPS_TITLE'),
+        'all examples are local downloads and instructions inside administrator');
     $controller = file_get_contents($base . 'admin/src/Controller/ImportController.php');
+    verify(str_contains($controller, "Session::checkToken('get')") &&
+        str_contains($controller, "function example(): void") &&
+        str_contains($controller, "assertCanImport()") &&
+        str_contains($controller, "Content-Disposition"),
+        'local example download checks administrator permissions and token');
     verify(str_contains($controller, "Session::checkToken('post')")
         && str_contains($controller, "authorise('core.create'")
         && str_contains($controller, "authorise('core.edit'"),

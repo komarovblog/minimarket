@@ -340,6 +340,15 @@
   padding: .8rem 1rem;
   cursor: pointer;
 }
+#adminForm .mm-group-item > summary .mm-group-item__toggle {
+  margin-inline-start: auto;
+  flex: 0 0 auto;
+  min-width: 7rem;
+  white-space: nowrap;
+}
+#adminForm .mm-group-item > summary > a {
+  overflow-wrap: anywhere;
+}
 #adminForm .mm-group-item > summary::marker { color: var(--body-color, currentColor); }
 #adminForm .mm-group-item--deleted { opacity: .72; }
 #adminForm .mm-group-item__body {

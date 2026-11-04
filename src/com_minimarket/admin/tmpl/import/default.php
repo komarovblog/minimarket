@@ -4,11 +4,30 @@
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Session\Session;
 ?>
 <div class="com-minimarket-import">
     <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_IMPORT_HELP'); ?></p>
-    <p><a href="https://github.com/komarovblog/minimarket/blob/development/examples/import-catalog-v1.json"
-          target="_blank" rel="noopener noreferrer"><?php echo Text::_('COM_MINIMARKET_IMPORT_EXAMPLE'); ?></a></p>
+    <div class="card card-body mb-3">
+        <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_IMPORT_STEPS_TITLE'); ?></h2>
+        <ol class="mb-3">
+            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_DOWNLOAD'); ?></li>
+            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_EDIT'); ?></li>
+            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_PREVIEW'); ?></li>
+            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_APPLY'); ?></li>
+        </ol>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-secondary"
+               href="<?php echo Route::_('index.php?option=com_minimarket&task=import.example&template=catalog&' . Session::getFormToken() . '=1'); ?>">
+                <?php echo Text::_('COM_MINIMARKET_IMPORT_DOWNLOAD_SAMPLE'); ?>
+            </a>
+            <a class="btn btn-secondary"
+               href="<?php echo Route::_('index.php?option=com_minimarket&task=import.example&template=empty&' . Session::getFormToken() . '=1'); ?>">
+                <?php echo Text::_('COM_MINIMARKET_IMPORT_DOWNLOAD_EMPTY'); ?>
+            </a>
+        </div>
+        <p class="small text-muted mt-3 mb-0"><?php echo Text::_('COM_MINIMARKET_IMPORT_SCOPE_NOTE'); ?></p>
+    </div>
     <form action="<?php echo Route::_('index.php?option=com_minimarket&task=import.preview'); ?>"
           method="post" enctype="multipart/form-data" class="mb-4">
         <div class="mb-3">

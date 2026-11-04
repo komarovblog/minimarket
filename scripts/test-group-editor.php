@@ -55,6 +55,12 @@ namespace MiniMarket\GroupEditorSmoke {
         && count($group->xpath("//field[@name='member_ids']"))===0,
         'no old checkbox walls in visible Joomla forms');
     $js=file_get_contents($base.'media/js/group-editor.js');
+    check(str_contains($js,"t('expand'") &&
+        str_contains($js,"t('collapse'") &&
+        str_contains($js,'data-mm-group-toggle') &&
+        str_contains($js,"setAttribute('aria-expanded'") &&
+        str_contains($js,'event.stopPropagation()'),
+        'independent, keyboard-accessible expand/collapse button with no link conflict');
     check(str_contains($js,'renderGroup(') && str_contains($js,'details') &&
         str_contains($js,'summary'),'one group row expands its member list');
     check(str_contains($js,"'current'") && str_contains($js,'enabled:true'),
@@ -154,7 +160,7 @@ namespace MiniMarket\GroupEditorSmoke {
         !str_contains($migration,'MODIFY COLUMN '.chr(96).'value_text'.chr(96)),
         'Joomla DB schema checker no longer misreads COLUMN as column name');
     $manifest=file_get_contents($base.'minimarket.xml');
-    check(str_contains($manifest,'<version>0.5.46</version>'),
-        'component metadata matches 0.5.46');
+    check(str_contains($manifest,'<version>0.5.47</version>'),
+        'component metadata matches 0.5.47');
     echo 'GROUP_EDITOR_OK: '.$checks." cases\n";
 }

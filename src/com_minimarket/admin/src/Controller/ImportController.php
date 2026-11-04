@@ -26,6 +26,37 @@ final class ImportController extends BaseController
         }
     }
 
+    /**
+     * Download shipped examples without requiring GitHub or public file URLs.
+     * This is a GET-only read guarded by the Joomla admin ACL and CSRF token.
+     */
+    public function example(): void
+    {
+        Session::checkToken('get') or die(Text::_('JINVALID_TOKEN'));
+        $this->assertCanImport();
+        $name = $this->input->getCmd('template', '');
+        $examples = [
+            'catalog' => 'import-catalog-v1.json',
+            'empty' => 'import-empty-v1.json',
+        ];
+        if (!isset($examples[$name])) {
+            throw new \RuntimeException('Unknown MiniMarket example', 404);
+        }
+        $path = dirname(__DIR__, 2) . '/examples/' . $examples[$name];
+        if (!is_file($path)) {
+            throw new \RuntimeException('Missing MiniMarket example file', 404);
+        }
+        $app = Factory::getApplication();
+        $app->setHeader('Content-Type', 'application/json; charset=utf-8', true);
+        $app->setHeader('Content-Disposition',
+            'attachment; filename="' . $examples[$name] . '"', true);
+        $app->setHeader('X-Content-Type-Options', 'nosniff', true);
+        $app->setHeader('Cache-Control', 'private, no-store, max-age=0', true);
+        $app->sendHeaders();
+        readfile($path);
+        $app->close();
+    }
+
     public function preview(): void
     {
         Session::checkToken('post') or die(Text::_('JINVALID_TOKEN'));

@@ -108,6 +108,9 @@ final class GroupeditorField extends FormField
             'saveFirst'=>Text::_('COM_MINIMARKET_GROUP_UI_SAVE_FIRST'),
             'error'=>Text::_('COM_MINIMARKET_GROUP_UI_SEARCH_ERROR'),
             'unpublished'=>Text::_('JUNPUBLISHED'),
+            'expand'=>Text::_('COM_MINIMARKET_GROUP_UI_EXPAND'),
+            'collapse'=>Text::_('COM_MINIMARKET_GROUP_UI_COLLAPSE'),
+            'toggleHelp'=>Text::_('COM_MINIMARKET_GROUP_UI_TOGGLE'),
             'groupSearch'=>Text::_('COM_MINIMARKET_GROUP_UI_SEARCH_GROUP')
         ];
         $labelJson = json_encode($labels, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE
