@@ -124,5 +124,23 @@ checkUi(str_contains($cssFrame,'#adminForm .mm-admin-panel') &&
 checkUi(str_contains($cssFrame,'.mm-group-toolbar--footer') &&
     str_contains($cssFrame,'.mm-group-finder__search--groups'),
     'group search uses the same framed finder and footer buttons');
+$categoryRules=file_get_contents($base.'admin/src/Field/CategoryattributesField.php');
+$optionRules=file_get_contents($base.'admin/src/Field/CategoryorderoptionsField.php');
+checkUi(str_contains($categoryRules,'mm-rules-table--state') &&
+    str_contains($optionRules,'mm-rules-table--state') &&
+    str_contains($categoryRules,'d-block text-muted') &&
+    str_contains($optionRules,"Text::_('JSTATUS')"),
+    'category attributes and options have stacked code and separate publication status');
+checkUi(str_contains($categoryRules,'view=attribute&layout=edit&id=') &&
+    str_contains($optionRules,'view=orderoption&layout=edit&id='),
+    'entity links open the actual edit view instead of the dashboard');
+$dashboard=file_get_contents($base.'admin/tmpl/dashboard/default.php');
+checkUi(str_contains($dashboard,'mm-dashboard__sections') &&
+    str_contains($dashboard,'class="btn btn-primary"'),
+    'dashboard shows text, a vertical section list and a solid catalog button');
+checkUi(str_contains($editor,'sku_matrix_payload') &&
+    str_contains($cssFrame,'.mm-sku-viewport') &&
+    str_contains($cssFrame,'[data-mm-pinned="sku"]'),
+    'compact SKU matrix is the only component area with scrolling option axes');
 echo 'NATIVE_UI_OK: '.$n." cases\n";
 

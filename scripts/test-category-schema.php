@@ -715,6 +715,23 @@ try {
     verify(true,'gallery SKU FK rejects unknown variant ID');
 }
 
+// 0.5.43: option values now have optional images; old IDs/colors remain.
+$beforeOptionImage=$pdo->query("SELECT id,option_id,title,code,color_hex,state
+  FROM catci_minimarket_order_option_values ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo,$dir.'updates/mysql/0.5.43.sql','catci_');
+$optionImageField=$pdo->query("SHOW COLUMNS FROM catci_minimarket_order_option_values
+  LIKE 'sample_image'")->fetch(PDO::FETCH_ASSOC);
+verify($optionImageField && $optionImageField['Default']==='',
+  '0.5.43 gives existing option values an empty optional sample image');
+verify($beforeOptionImage===$pdo->query("SELECT id,option_id,title,code,color_hex,state
+  FROM catci_minimarket_order_option_values ORDER BY id")->fetchAll(PDO::FETCH_ASSOC),
+  '0.5.43 retains every old option title, ID, HEX, code and status');
+$pdo->exec("UPDATE catci_minimarket_order_option_values
+  SET sample_image='images/minimarket/sample.png' ORDER BY id LIMIT 1");
+verify((int)$pdo->query("SELECT COUNT(*) FROM catci_minimarket_order_option_values
+  WHERE sample_image='images/minimarket/sample.png'")->fetchColumn()===1,
+  'a reusable option value stores its sample image');
+
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
@@ -785,6 +802,8 @@ $freshOrderOptions=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_order_op
 foreach (['id','code','title','state','sort_order'] as $column)
     verify(in_array($column,$freshOrderOptions,true),'fresh 0.5.34 global option '.$column);
 $freshOrderValues=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_order_option_values')->fetchAll(PDO::FETCH_COLUMN);
+verify(in_array('sample_image',$freshOrderValues,true),
+  'fresh 0.5.43 installation supports option value images');
 foreach (['id','option_id','title','code','color_hex','state','sort_order'] as $column)
     verify(in_array($column,$freshOrderValues,true),'fresh 0.5.34 order option value '.$column);
 $freshOrderRules=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_category_order_options')->fetchAll(PDO::FETCH_COLUMN);

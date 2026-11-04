@@ -362,6 +362,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_order_option_values` (
   `title` VARCHAR(255) NOT NULL,
   `code` VARCHAR(100) NOT NULL,
   `color_hex` VARCHAR(7) NOT NULL DEFAULT '',
+  `sample_image` VARCHAR(1024) NOT NULL DEFAULT '',
   `state` TINYINT UNSIGNED NOT NULL DEFAULT 1,
   `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),

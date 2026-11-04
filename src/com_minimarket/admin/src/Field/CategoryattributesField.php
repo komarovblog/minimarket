@@ -51,9 +51,10 @@ final class CategoryattributesField extends FormField
             htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         $html = '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_CATATTR_HELP')) . '</p>'
-            . '<table class="table table-striped table-sm align-middle mm-rules-table">'
+            . '<table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state">'
             . '<thead><tr><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_ATTRIBUTE'))
-            . '</th><th scope="col" class="w-25">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
+            . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
+            . '</th><th scope="col">' . $escape(Text::_('JSTATUS'))
             . '</th></tr></thead><tbody>';
 
         foreach ($attributes as $attr) {
@@ -67,18 +68,15 @@ final class CategoryattributesField extends FormField
                 ? Text::sprintf(($parentModes[$id] ?? 1) === 2
                     ? 'COM_MINIMARKET_CATATTR_REQUIRED_FROM_PARENT' : 'COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
                 : Text::_('COM_MINIMARKET_CATATTR_NOT_INHERITED');
-            $url = \Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=attribute.edit&id=' . $id);
-            $label = '<a href="' . $escape($url) . '">' . $escape((string) $attr->title) . '</a>'
-                . ' <small class="text-muted">' . $escape((string) $attr->code) . '</small>';
-            if ((int) $attr->state !== 1) {
-                $label .= ' <span class="badge bg-secondary">'
-                    . $escape(Text::_('JUNPUBLISHED')) . '</span>';
-            }
+            $url = \Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&view=attribute&layout=edit&id=' . $id);
+            $label = '<a class="d-inline-block" href="' . $escape($url) . '">'
+                . $escape((string) $attr->title) . '</a>'
+                . '<small class="d-block text-muted">' . $escape((string) $attr->code) . '</small>';
+            $published = (int) $attr->state === 1;
 
             $inputId = $escape($this->id . '_' . $id);
             $inputName = $escape($this->name . '[' . $id . ']');
-            $html .= '<tr><th scope="row"><label for="' . $inputId . '">' . $label
-                . '</label>'
+            $html .= '<tr><th scope="row">' . $label
                 . ($sourceId > 0
                     ? '<small class="d-block text-muted">' . $escape($inherited) . '</small>'
                     : '')
@@ -94,7 +92,10 @@ final class CategoryattributesField extends FormField
                     . ($mode === (int) $value ? ' selected' : '')
                     . '>' . $escape(Text::_($languageKey)) . '</option>';
             }
-            $html .= '</select></td></tr>';
+            $html .= '</select></td><td class="mm-rules-state"><span class="'
+                . ($published ? 'text-success' : 'text-muted') . '">'
+                . $escape(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))
+                . '</span></td></tr>';
         }
 
         $html .= '</tbody></table>';

@@ -78,6 +78,21 @@
         form.requestSubmit();
       }
     };
+    const submitGroupChanges = () => {
+      const form = root.closest('form');
+      if (!form) return;
+      save();
+      const task = config.mode === 'group' ? 'group.apply' : 'product.apply';
+      if (window.Joomla?.submitbutton) {
+        window.Joomla.submitbutton(task);
+      } else if (window.Joomla?.submitform) {
+        window.Joomla.submitform(task, form);
+      } else {
+        const control = form.querySelector('[name="task"]');
+        if (control) control.value = task;
+        form.requestSubmit();
+      }
+    };
     const update = (callback) => {
       callback();
       save();
@@ -261,6 +276,17 @@
           });
         content.appendChild(pick);
       }
+      // Explicit save/cancel actions are visually separate from Add product.
+      const saveActions = el('div', 'mm-group-item__save-actions');
+      saveActions.appendChild(button(t('save', 'Save'), 'btn-success',
+        submitGroupChanges));
+      if (config.mode === 'product' && Number(g.id) === 0) {
+        saveActions.appendChild(button(t('discard', 'Cancel creation'),
+          'btn-primary', () => update(() => {
+            groups.splice(index, 1);
+          })));
+      }
+      content.appendChild(saveActions);
       const actions = el('div', 'mm-group-item__actions');
       if (Number(g.id) > 0) {
         actions.appendChild(button(
@@ -270,17 +296,11 @@
             if (!g.delete && !window.confirm(t('deleteConfirm',
               'Delete this relationship for all linked products?'))) return;
             if (config.mode === 'group') {
-              // Same action as the product editor, but on the standalone
-              // screen use an explicit Joomla POST task then redirect to list.
               submitGroupDeletion();
             } else {
               update(() => { g.delete = !g.delete; });
             }
           }));
-      } else if (config.mode === 'product') {
-        actions.appendChild(button(t('discard', 'Discard new relationship'),
-          'btn-danger', () =>
-            update(() => { groups.splice(index, 1); })));
       }
       if (actions.children.length) content.appendChild(actions);
       details.appendChild(content);

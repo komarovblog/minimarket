@@ -310,45 +310,6 @@
   min-width: 0;
   max-width: 100%;
 }
-@container (max-width: 890px) {
-  #adminForm .mm-sku-matrix,
-  #adminForm .mm-sku-matrix tbody { display: block; width: 100%; }
-  #adminForm .mm-sku-matrix thead { display: none; }
-  #adminForm .mm-sku-matrix tbody tr {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0,1fr));
-    gap: .4rem .7rem;
-    padding: .6rem;
-    border: 1px solid var(--border-color, rgba(128,128,128,.3));
-    border-radius: .4rem;
-    margin-bottom: .5rem;
-  }
-  #adminForm .mm-sku-matrix tbody td {
-    display: block;
-    min-width: 0;
-    border: none;
-    padding: .2rem;
-    grid-column: span 2;
-    text-align: start !important;
-  }
-  #adminForm .mm-sku-matrix tbody td:nth-last-child(3) {
-    grid-column: span 2;
-  }
-  #adminForm .mm-sku-matrix tbody td:last-child {
-    grid-column: span 1;
-    text-align: center !important;
-  }
-  #adminForm .mm-sku-matrix tbody td::before {
-    content: attr(data-label);
-    display: block;
-    font-size: .75rem;
-    font-weight: 600;
-    opacity: .75;
-    margin-bottom: .15rem;
-  }
-}
-
-
 /* 0.5.40: compact, expandable relationships shared by Product and Group. */
 #adminForm .mm-group-editor {
   width: 100%;
@@ -521,4 +482,193 @@
   border-collapse: separate;
   border-spacing: 0;
   overflow: hidden;
+}
+
+
+/* 0.5.43 — category rules: title/code stack and separate status column. */
+#adminForm .mm-rules-table--state { table-layout: fixed; }
+#adminForm .mm-rules-table--state th:first-child { width: 48%; }
+#adminForm .mm-rules-table--state th:nth-child(2) { width: 32%; }
+#adminForm .mm-rules-table--state th:last-child { width: 20%; }
+#adminForm .mm-rules-table--state td.mm-rules-state {
+  text-align: start;
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: normal;
+}
+#adminForm .mm-rules-table--state small { margin-top: .2rem; }
+
+/* One real SKU matrix. The OPTION columns alone scroll while SKU / stock /
+   active controls stay fixed at the right edge, including at small widths. */
+#adminForm .mm-sku-viewport {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border-color, rgba(128,128,128,.35));
+  border-radius: .4rem;
+}
+#adminForm .mm-admin-panel .mm-sku-matrix,
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix {
+  table-layout: fixed;
+  border: none;
+  border-spacing: 0;
+  width: max-content;
+  max-width: none;
+  min-width: 100%;
+  margin: 0;
+}
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix thead { display: table-header-group; }
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix tbody { display: table-row-group; }
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix tr { display: table-row; }
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix th,
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix td {
+  display: table-cell;
+  min-width: 0;
+  vertical-align: middle;
+  padding: .4rem .5rem;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  border-bottom: 1px solid var(--border-color, rgba(128,128,128,.20));
+  box-sizing: border-box;
+}
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix tbody td::before { content: none; }
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix th:not([data-mm-pinned]),
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix td:not([data-mm-pinned]) {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+#adminForm [data-mm-sku-matrix] {
+  --mm-pin-active: 78px;
+  --mm-pin-stock: 100px;
+  --mm-pin-sku: 185px;
+}
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix [data-mm-pinned] {
+  position: sticky;
+  z-index: 2;
+  background: var(--body-bg, #141922);
+}
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix th[data-mm-pinned] { z-index: 4; }
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix [data-mm-pinned="active"] {
+  right: 0;
+  width: var(--mm-pin-active);
+  min-width: var(--mm-pin-active);
+  max-width: var(--mm-pin-active);
+  text-align: center;
+}
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix [data-mm-pinned="stock"] {
+  right: var(--mm-pin-active);
+  width: var(--mm-pin-stock);
+  min-width: var(--mm-pin-stock);
+  max-width: var(--mm-pin-stock);
+}
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix [data-mm-pinned="sku"] {
+  right: calc(var(--mm-pin-active) + var(--mm-pin-stock));
+  width: var(--mm-pin-sku);
+  min-width: var(--mm-pin-sku);
+  max-width: var(--mm-pin-sku);
+  box-shadow: -2px 0 3px rgba(0,0,0,.2);
+}
+#adminForm [data-mm-sku-matrix][data-mm-shared-stock="1"] .mm-sku-matrix
+  [data-mm-pinned="sku"] {
+  right: var(--mm-pin-active);
+}
+#adminForm [data-mm-sku-matrix] .mm-sku-matrix td input.form-control {
+  width: 100%;
+  min-width: 0;
+  padding: .25rem .35rem;
+}
+#adminForm .mm-product-option-summary { display: grid; gap: .35rem; }
+#adminForm .mm-product-option-summary__row {
+  display: flex;
+  gap: .35rem 1rem;
+  flex-wrap: wrap;
+  padding: .4rem 0;
+  border-bottom: 1px solid var(--border-color, rgba(128,128,128,.22));
+}
+#adminForm .mm-product-option-summary__row strong { min-width: 9rem; }
+
+/* SKU photo options: clear, two-column checkbox panels under each photo,
+   the second panel owns exclusive per-SKU cover assignments. */
+#adminForm .mm-gallery-sku-assignments {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  margin-top: .8rem;
+  padding: .75rem 0 0;
+  border-top: 1px solid var(--border-color, rgba(128,128,128,.25));
+}
+#adminForm .mm-photo-sku-block {
+  min-width: 0;
+  border: 1px solid var(--border-color, rgba(128,128,128,.35));
+  border-radius: .4rem;
+  padding: .7rem .8rem;
+}
+#adminForm .mm-photo-sku-radios { display: grid; gap: .4rem; margin-bottom: .5rem; }
+#adminForm .mm-photo-sku-checklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: .25rem .7rem;
+  max-height: 13rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#adminForm .mm-photo-sku-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+  padding: .25rem 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+#adminForm .mm-photo-sku-choice input { flex: 0 0 auto; margin-top: .25rem; }
+#adminForm .mm-photo-sku-choice span { min-width: 0; }
+@media (max-width: 860px) {
+  #adminForm .mm-gallery-sku-assignments {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 540px) {
+  #adminForm [data-mm-sku-matrix] {
+    --mm-pin-active: 64px;
+    --mm-pin-stock: 80px;
+    --mm-pin-sku: 150px;
+  }
+  #adminForm .mm-rules-table--state th,
+  #adminForm .mm-rules-table--state td {
+    width: 100% !important;
+  }
+}
+
+.mm-dashboard { max-width: 58rem; padding: .5rem 0; }
+.mm-dashboard__sections { border-radius: .45rem; overflow: hidden; }
+.mm-dashboard__sections .list-group-item { padding: .75rem 1rem; }
+
+#adminForm .mm-group-item__save-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+  padding: .75rem 0 .55rem;
+  margin-top: .8rem;
+  border-top: 1px solid var(--border-color, rgba(128,128,128,.30));
+}
+#adminForm .mm-group-item__actions { margin-top: .45rem; }
+#adminForm .mm-color-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  flex-wrap: nowrap;
+  margin: .4rem 0 .2rem;
+}
+#adminForm .mm-color-tools .form-control-color {
+  width: 3.25rem;
+  min-width: 3.25rem;
+  height: 2.25rem;
+  cursor: pointer;
 }

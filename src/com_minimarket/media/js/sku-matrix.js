@@ -94,11 +94,14 @@
   const usableRows = () => rows.filter(row =>
     row.id > 0 || row.active || row.sku.trim() !== ''
   );
-  const getChoices = () => usableRows().map(row => ({
-    key: canonical(row.selection),
-    label: (row.sku.trim() ? row.sku.trim() + ' — ' : '') +
-      row.values.join(' / '),
-  }));
+  const getChoices = () => rows.filter(row => row.active || row.id > 0)
+    .map(row => ({
+      key: canonical(row.selection),
+      label: (row.sku.trim() ? row.sku.trim() + ' — ' : '') +
+        row.values.join(' / ') +
+        (!row.active ? ' (' + t('inactive', 'Inactive SKU') + ')' : ''),
+      active: row.active,
+    }));
 
   // Each gallery row contains one visibility mode and two sets of combination
   // keys. They are resolved to stable physical variant_id on the PHP side.
@@ -114,16 +117,9 @@
       return Array.isArray(value) ? value.filter(x => typeof x === 'string') : [];
     } catch (_) { return []; }
   };
-  const createMulti = (key, label) => {
-    const wrap = el('label', 'mm-photo-sku-list');
-    wrap.appendChild(el('span', 'form-label small fw-semibold', label));
-    const select = el('select', 'form-select form-select-sm');
-    select.multiple = true;
-    select.size = 4;
-    select.dataset.mmPhotoSelect = key;
-    wrap.appendChild(select);
-    return wrap;
-  };
+  // Gallery photo controls: two clear sections under each additional image.
+  // Lists use checkboxes, not a tall multi-select that requires Ctrl+click.
+  let photoNumber = 0;
   const decoratePhoto = group => {
     if (group.dataset.mmSkuPhotoReady) return;
     const mode = photoInput(group, 'visibility_mode');
@@ -131,51 +127,120 @@
     const covers = photoInput(group, 'cover_keys');
     if (!mode || !targets || !covers) return;
     group.dataset.mmSkuPhotoReady = '1';
-    const wrap = el('div', 'mm-gallery-sku-assignments');
-    const show = createMulti('show', t('photoShow', 'Show for SKUs'));
-    const main = createMulti('cover', t('photoCover', 'Make primary for SKUs'));
-    wrap.append(show, main);
-    group.appendChild(wrap);
-    const saveSelect = (selector, field) => {
-      field.value = JSON.stringify(Array.from(selector.selectedOptions).map(x => x.value));
-      field.dispatchEvent(new Event('change', { bubbles: true }));
-    };
-    show.querySelector('select').addEventListener('change', event => {
-      saveSelect(event.currentTarget, targets);
-    });
-    main.querySelector('select').addEventListener('change', event => {
-      saveSelect(event.currentTarget, covers);
-    });
-    mode.addEventListener('change', () => {
-      show.hidden = mode.value !== '1';
-    });
+    const id = ++photoNumber;
+    group.dataset.mmPhotoId = String(id);
+    const panels = el('div', 'mm-gallery-sku-assignments');
+    const visibility = el('section', 'mm-photo-sku-block');
+    visibility.dataset.mmPhotoVisibility = '1';
+    const cover = el('section', 'mm-photo-sku-block');
+    cover.dataset.mmPhotoCover = '1';
+    panels.append(visibility, cover);
+    group.appendChild(panels);
   };
   const refreshGallery = () => {
     const choices = getChoices();
-    for (const group of photoRows()) {
-      decoratePhoto(group);
-      const mode = photoInput(group, 'visibility_mode');
-      const values = [
-        ['show', photoInput(group, 'show_keys')],
-        ['cover', photoInput(group, 'cover_keys')],
-      ];
-      const controls = group.querySelector('[data-mm-sku-photo-ready]');
-      // Data marker is on group; controls are always inside it.
-      if (!group.dataset.mmSkuPhotoReady) continue;
-      for (const [name, field] of values) {
-        const select = group.querySelector('[data-mm-photo-select="' + name + '"]');
-        if (!select || !field) continue;
-        const selected = new Set(parseKeys(field));
-        select.replaceChildren();
-        for (const item of choices) {
-          const option = el('option', '', item.label);
-          option.value = item.key;
-          option.selected = selected.has(item.key);
-          select.appendChild(option);
-        }
+    const groups = photoRows();
+    groups.forEach(decoratePhoto);
+    const owners = new Map();
+    for (const group of groups) {
+      const field = photoInput(group, 'cover_keys');
+      for (const key of parseKeys(field)) {
+        if (!owners.has(key)) owners.set(key, group);
       }
-      const show = group.querySelector('.mm-photo-sku-list');
-      if (show && mode) show.hidden = mode.value !== '1';
+    }
+    const persist = (field, set) => {
+      field.value = JSON.stringify([...set]);
+      field.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    const choiceGrid = (group, field, kind, canCheck) => {
+      const grid = el('div', 'mm-photo-sku-checklist');
+      grid.dataset.mmPhotoSelect = kind;
+      const selected = new Set(parseKeys(field));
+      if (!choices.length) {
+        grid.appendChild(el('p', 'small text-muted',
+          t('noActive', 'Enable SKU combinations in Options first.')));
+      }
+      for (const choice of choices) {
+        const checked = selected.has(choice.key);
+        if (!choice.active && !checked) continue;
+        const label = el('label', 'mm-photo-sku-choice');
+        const checkbox = el('input', 'form-check-input');
+        checkbox.type = 'checkbox';
+        checkbox.value = choice.key;
+        checkbox.checked = checked;
+        const blocked = kind === 'cover' && owners.has(choice.key) &&
+          owners.get(choice.key) !== group;
+        checkbox.disabled = blocked || (!choice.active && !checked);
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) selected.add(choice.key);
+          else selected.delete(choice.key);
+          persist(field, selected);
+          // A photo marked as primary must also be visible for that SKU.
+          if (kind === 'cover' && checkbox.checked &&
+              photoInput(group, 'visibility_mode')?.value === '1') {
+            const shownField = photoInput(group, 'show_keys');
+            const shown = new Set(parseKeys(shownField));
+            shown.add(choice.key);
+            persist(shownField, shown);
+          }
+          if (kind === 'show' && !checkbox.checked) {
+            const primaryField = photoInput(group, 'cover_keys');
+            const primary = new Set(parseKeys(primaryField));
+            primary.delete(choice.key);
+            persist(primaryField, primary);
+          }
+          refreshGallery();
+        });
+        const description = el('span', '', choice.label);
+        label.append(checkbox, description);
+        grid.appendChild(label);
+      }
+      return grid;
+    };
+    for (const group of groups) {
+      if (!group.dataset.mmSkuPhotoReady) continue;
+      const mode = photoInput(group, 'visibility_mode');
+      const showField = photoInput(group, 'show_keys');
+      const coverField = photoInput(group, 'cover_keys');
+      const visibility = group.querySelector('[data-mm-photo-visibility]');
+      const cover = group.querySelector('[data-mm-photo-cover]');
+      if (!mode || !showField || !coverField || !visibility || !cover) continue;
+      visibility.replaceChildren();
+      visibility.appendChild(el('strong', 'd-block mb-2',
+        t('photoVisibility', 'Show photo')));
+      const radios = el('div', 'mm-photo-sku-radios');
+      for (const [value, title] of [
+        ['0', t('everywhere', 'For every SKU')],
+        ['1', t('selected', 'Only selected SKUs')],
+      ]) {
+        const label = el('label', 'mm-photo-sku-choice');
+        const radio = el('input', 'form-check-input');
+        radio.type = 'radio';
+        radio.name = 'mm-gallery-visibility-' + group.dataset.mmPhotoId;
+        radio.value = value;
+        radio.checked = mode.value === value;
+        radio.addEventListener('change', () => {
+          mode.value = value;
+          if (value === '1') {
+            const selected = new Set(parseKeys(showField));
+            for (const key of parseKeys(coverField)) selected.add(key);
+            persist(showField, selected);
+          }
+          refreshGallery();
+        });
+        label.append(radio, el('span', '', title));
+        radios.appendChild(label);
+      }
+      visibility.appendChild(radios);
+      if (mode.value === '1') {
+        visibility.appendChild(choiceGrid(group, showField, 'show'));
+      }
+      cover.replaceChildren();
+      cover.appendChild(el('strong', 'd-block mb-2',
+        t('photoCover', 'Make main photo for SKUs')));
+      cover.appendChild(el('p', 'small text-muted',
+        t('coverHelp', 'Each SKU can have only one main photo.')));
+      cover.appendChild(choiceGrid(group, coverField, 'cover'));
     }
   };
   const paint = () => {
@@ -214,7 +279,11 @@
     ]) {
       const th = el('th', '', name);
       th.scope = 'col';
-      if (name === t('stock', 'Stock')) th.dataset.mmStockColumn = '1';
+      if (name === t('stock', 'Stock')) {
+        th.dataset.mmStockColumn = '1';
+        th.dataset.mmPinned = 'stock';
+      } else if (name === t('sku', 'SKU')) th.dataset.mmPinned = 'sku';
+      else th.dataset.mmPinned = 'active';
       head.appendChild(th);
     }
     const body = table.createTBody();
@@ -239,7 +308,7 @@
         store();
         refreshGallery();
       });
-      labelCell(tr, t('sku', 'SKU'), sku);
+      labelCell(tr, t('sku', 'SKU'), sku).dataset.mmPinned = 'sku';
       const stock = input('number', model.stock, 'form-control form-control-sm');
       stock.min = '0'; stock.max = '4294967295'; stock.step = '1';
       stock.setAttribute('aria-label', t('stock', 'Stock') + ': ' + item.values.join(' / '));
@@ -250,6 +319,7 @@
       });
       const stockCell = labelCell(tr, t('stock', 'Stock'), stock);
       stockCell.dataset.mmStockColumn = '1';
+      stockCell.dataset.mmPinned = 'stock';
       const enabled = input('checkbox', model.active, 'form-check-input');
       enabled.setAttribute('aria-label', t('active', 'Active') + ': ' + item.values.join(' / '));
       enabled.addEventListener('change', () => {
@@ -257,9 +327,14 @@
         store();
         refreshGallery();
       });
-      labelCell(tr, t('active', 'Active'), enabled);
+      labelCell(tr, t('active', 'Active'), enabled).dataset.mmPinned = 'active';
     }
-    mount.appendChild(table);
+    const viewport = el('div', 'mm-sku-viewport');
+    viewport.setAttribute('role', 'region');
+    viewport.setAttribute('aria-label', t('matrix', 'SKU combinations'));
+    viewport.tabIndex = 0;
+    viewport.appendChild(table);
+    mount.appendChild(viewport);
     const note = el('p', 'small text-muted', t('noVariants',
       'Only activated rows, saved rows or rows with an SKU are stored.'));
     mount.appendChild(note);
@@ -268,12 +343,48 @@
     refreshGallery();
   };
   const setStockMode = () => {
+    root.dataset.mmSharedStock = isShared() ? '1' : '0';
     for (const field of mount.querySelectorAll('[data-mm-stock-column]')) {
       field.hidden = isShared();
     }
   };
+  // Category assignment is the only source of new option definitions.
+  // Preview those definitions before the compact physical-SKU grid.
+  const displayCategoryOptions = () => {
+    const cat = String(category?.value || '');
+    const display = document.querySelector('[data-mm-category-option-list]');
+    const link = document.querySelector('[data-mm-add-category-option]');
+    if (link) {
+      const id = Number(cat);
+      link.href = Number.isSafeInteger(id) && id > 0
+        ? 'index.php?option=com_minimarket&view=category&layout=edit&id=' + id
+        : 'index.php?option=com_minimarket&view=categories';
+    }
+    if (!display) return;
+    display.replaceChildren();
+    const rule = config.catalog?.[cat];
+    const axes = rule?.axes || [];
+    const notice = el('p', 'small text-muted mb-2',
+      t('categoryIntro', 'The selected category uses the following options:'));
+    display.appendChild(notice);
+    if (!axes.length) {
+      display.appendChild(el('p', 'text-muted',
+        t('categoryEmpty', 'No options assigned to this category.')));
+      return;
+    }
+    const list = el('div', 'mm-product-option-summary');
+    for (const axis of axes) {
+      const row = el('div', 'mm-product-option-summary__row');
+      row.appendChild(el('strong', '', axis.title));
+      row.appendChild(el('span', 'text-muted',
+        (axis.values || []).map(value => value.title).join(', ')));
+      list.appendChild(row);
+    }
+    display.appendChild(list);
+  };
   const reload = () => {
     const cat = category?.value || '';
+    displayCategoryOptions();
     if (currentCategory === cat && currentAxes.length) return;
     currentCategory = cat;
     currentAxes = axesForCategory() || [];

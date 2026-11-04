@@ -89,6 +89,14 @@ namespace MiniMarket\SkuMatrixSmoke {
         !str_contains($view,'media/com_minimarket/js/variants-local.js'),
         'no old native row-add dependency registered in product');
     $javascript=file_get_contents($base.'media/js/sku-matrix.js');
+    check(str_contains($javascript,"el('div', 'mm-sku-viewport')") &&
+        str_contains($javascript,"th.dataset.mmPinned = 'sku'") &&
+        str_contains($javascript,"th.dataset.mmPinned = 'active'"),
+        'SKU stock, article and active columns stay sticky in one compact scrollable matrix');
+    check(str_contains($javascript,'mm-photo-sku-checklist') &&
+        str_contains($javascript,"checkbox.type = 'checkbox'") &&
+        str_contains($javascript,'owners.get(choice.key) !== group'),
+        'SKU photo lists use checkboxes and block a second primary image for any SKU');
     check(str_contains($javascript,'data-mm-matrix-payload') &&
         str_contains($javascript,'data-mm-photo-select') &&
         str_contains($javascript, 'a < b ? -1 : a > b ? 1 : 0') &&

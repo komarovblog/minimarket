@@ -25,7 +25,7 @@ final class ProductCatalogAxes
         $db->setQuery($q);
         $options = (array) $db->loadAssocList();
 
-        $q = $db->getQuery(true)->select(['id','option_id','code','title','state'])
+        $q = $db->getQuery(true)->select(['id','option_id','code','title','sample_image','state'])
             ->from($db->quoteName('#__minimarket_order_option_values'))
             ->order('sort_order ASC,id ASC');
         $db->setQuery($q);
@@ -36,6 +36,7 @@ final class ProductCatalogAxes
                 'source_value_id' => (int) $value['id'],
                 'code' => (string) $value['code'],
                 'title' => (string) $value['title'],
+                'sample_image' => (string)($value['sample_image'] ?? ''),
             ];
         }
 

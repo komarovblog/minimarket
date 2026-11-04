@@ -6,6 +6,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductCatalogAxes;
 
@@ -43,6 +44,10 @@ final class ProductcategoryoptionsField extends FormField
             '<p class="small text-muted">' .
             $esc(Text::_('COM_MINIMARKET_PRODUCT_OPTIONS_CATEGORY_HELP')) . '</p>' .
             '<div class="mm-option-list" data-mm-category-option-list aria-live="polite"></div>' .
+            '<a class="btn btn-success btn-sm mt-2" data-mm-add-category-option ' .
+            'href="' . $esc(Route::_('index.php?option=com_minimarket&view=categories')) . '" ' .
+            'target="_blank" rel="noopener noreferrer">' .
+            $esc(Text::_('COM_MINIMARKET_PRODUCT_OPTIONS_ADD')) . '</a>' .
             '<p class="small text-muted mt-2">' .
             $esc(Text::_('COM_MINIMARKET_PRODUCT_OPTIONS_AUTOMATIC')) .
             '</p></div>';

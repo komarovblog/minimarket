@@ -36,6 +36,14 @@ namespace MiniMarket\OrderOptionsTest {
     verify($renamed[0]['code'] === 'red' && $renamed[0]['id'] === 17,
         'title rename keeps stable value ID and existing code');
     verify($renamed[0]['color_hex'] === '#FF0000', 'HEX accepts normalized color');
+    $media=Catalog::normalize([[
+        'title'=>'Синий','code'=>'blue','color_hex'=>'#0011FF',
+        'sample_image'=>'images/minimarket/blue.png#joomlaImage://local-images/blue.png'
+    ]]);
+    verify($media[0]['sample_image']==='images/minimarket/blue.png',
+        'optional order-option image is a safe relative Joomla image, without editor metadata');
+    verify(Catalog::normalize([['title'=>'M','code'=>'m']])[0]['sample_image']==='',
+        'order options may have a HEX, photo, both or neither');
     $fallback = Catalog::normalize([['title' => 'Большой', 'code' => '']]);
     verify(str_starts_with($fallback[0]['code'], 'value-'), 'non-Latin name gets stable code');
 
@@ -45,6 +53,8 @@ namespace MiniMarket\OrderOptionsTest {
         [['title' => 'M', 'code' => 'bad*']],
         [['id' => 999, 'title' => 'S', 'code' => 's']],
         [['title' => 'S', 'code' => 's', 'color_hex' => '#ABC']],
+        [['title'=>'Broken','code'=>'broken','sample_image'=>'https://other.test/x.png']],
+        [['title'=>'Broken','code'=>'broken','sample_image'=>'images/../secrets.png']],
     ] as $bad) {
         try {
             Catalog::normalize($bad, $old);
@@ -104,6 +114,12 @@ namespace MiniMarket\OrderOptionsTest {
     verify(str_contains($optionTemplate, "'categories' => 'COM_MINIMARKET_ORDER_OPTION_CATEGORIES'") &&
         str_contains($optionTemplate, "renderFieldset(\$tab)"),
         'option category assignment tab is actually rendered and saved, not hidden');
+    $optionValueForm=simplexml_load_file($base.'forms/orderoptionvalue.xml');
+    verify(count($optionValueForm->xpath("//field[@name='sample_image' and @type='media']"))===1,
+        'option values can have a real image as well as an optional HEX color');
+    $optionValueService=file_get_contents($base.'src/Service/OrderOptionCatalog.php');
+    verify(str_contains($optionValueService,"'sample_image' => ".'$image'),
+        'option-value images are validated and preserved in the global dictionary');
     $reverseService = file_get_contents($base . 'src/Service/CategoryOrderOptions.php');
     verify(str_contains($reverseService, 'function replaceForOption(')
         && str_contains($reverseService, 'function directForOption('),

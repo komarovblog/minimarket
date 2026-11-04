@@ -167,6 +167,7 @@ jobs:
         run: |
           node --check src/com_minimarket/media/js/sku-matrix.js
           node --check src/com_minimarket/media/js/group-editor.js
+          node --check src/com_minimarket/media/js/option-value-color.js
           node --check src/com_minimarket/media/js/variants.js
 
       - name: Dependent color size and multi-option SKU availability

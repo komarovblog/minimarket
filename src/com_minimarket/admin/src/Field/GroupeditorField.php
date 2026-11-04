@@ -85,6 +85,7 @@ final class GroupeditorField extends FormField
         }
         $labels = [
             'addGroup'=>Text::_('COM_MINIMARKET_GROUP_UI_ADD'),
+            'save'=>Text::_('JSAVE'),
             'name'=>Text::_('JGLOBAL_TITLE'),
             'members'=>Text::_('COM_MINIMARKET_GROUP_MEMBERS'),
             'addProduct'=>Text::_('COM_MINIMARKET_GROUP_UI_ADD_PRODUCT'),

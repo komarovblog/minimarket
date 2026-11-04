@@ -18,7 +18,11 @@ final class HtmlView extends BaseHtmlView
         $this->form = $this->get('Form');
         $this->item = $this->get('Item');
         if (!$this->form) throw new \RuntimeException('MiniMarket order option form unavailable');
-        Factory::getApplication()->getDocument()->getWebAssetManager()->useScript('form.validate');
+        Text::script('COM_MINIMARKET_HEX_CLEAR');
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->useScript('form.validate')
+            ->registerAndUseScript('com_minimarket.option-value-color',
+                'media/com_minimarket/js/option-value-color.js', [], ['defer' => true]);
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ORDER_OPTION_EDIT'));
         ToolbarHelper::apply('orderoption.apply');
         ToolbarHelper::save('orderoption.save');

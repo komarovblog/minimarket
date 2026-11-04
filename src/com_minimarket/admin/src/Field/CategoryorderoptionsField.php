@@ -24,7 +24,7 @@ final class CategoryorderoptionsField extends FormField
         $db->setQuery($q);
         $options = (array) $db->loadAssocList();
         if (!$options) {
-            $url = Route::_('index.php?option=com_minimarket&task=orderoption.add');
+            $url = Route::_('index.php?option=com_minimarket&view=orderoption&layout=edit');
             return '<p class="text-muted">' . htmlspecialchars(
                 Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_EMPTY'), ENT_QUOTES, 'UTF-8'
             ) . ' <a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">' .
@@ -41,9 +41,10 @@ final class CategoryorderoptionsField extends FormField
         $esc = static fn(string $s): string =>
             htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $html = '<p class="text-muted">' . $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_HELP')) .
-            '</p><table class="table table-striped table-sm align-middle mm-rules-table"><thead><tr><th>' .
-            $esc(Text::_('COM_MINIMARKET_ORDER_OPTIONS')) . '</th><th class="w-25">' .
+            '</p><table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state"><thead><tr><th>' .
+            $esc(Text::_('COM_MINIMARKET_ORDER_OPTIONS')) . '</th><th>' .
             $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTION_RULE')) .
+            '</th><th>' . $esc(Text::_('JSTATUS')) .
             '</th></tr></thead><tbody>';
         foreach ($options as $option) {
             $id = (int) $option['id'];
@@ -51,18 +52,17 @@ final class CategoryorderoptionsField extends FormField
             if (!in_array($mode, [-1,0,1,2], true)) $mode = -1;
             $name = $esc($this->name . '[' . $id . ']');
             $fieldId = $esc($this->id . '_' . $id);
-            $url = Route::_('index.php?option=com_minimarket&task=orderoption.edit&id=' . $id);
-            $html .= '<tr><th scope="row"><label for="' . $fieldId . '"><a href="' . $esc($url)
-                . '">' . $esc((string) $option['title']) . '</a></label>';
+            $url = Route::_('index.php?option=com_minimarket&view=orderoption&layout=edit&id=' . $id);
+            $html .= '<tr><th scope="row"><a class="d-inline-block" href="' . $esc($url)
+                . '">' . $esc((string) $option['title']) . '</a>'
+                . '<small class="d-block text-muted">' . $esc((string) $option['code']) . '</small>';
             if (isset($inherited[$id]) && $mode === -1) {
                 $html .= '<small class="d-block text-muted">' .
                     $esc(Text::_((int)$inherited[$id] === 2
                         ? 'COM_MINIMARKET_CATEGORY_ORDER_OPTION_INHERITED_REQUIRED'
                         : 'COM_MINIMARKET_CATEGORY_ORDER_OPTION_INHERITED_OPTIONAL')) . '</small>';
             }
-            if ((int) $option['state'] !== 1) {
-                $html .= '<small class="d-block text-muted">' . $esc(Text::_('JUNPUBLISHED')) . '</small>';
-            }
+            $published = (int) $option['state'] === 1;
             $html .= '</th><td><select class="form-select form-select-sm" name="' . $name
                 . '" id="' . $fieldId . '">';
             foreach ([
@@ -74,7 +74,10 @@ final class CategoryorderoptionsField extends FormField
                 $html .= '<option value="' . $value . '"' . ($mode === $value ? ' selected' : '')
                     . '>' . $esc(Text::_($key)) . '</option>';
             }
-            $html .= '</select></td></tr>';
+            $html .= '</select></td><td class="mm-rules-state"><span class="'
+                . ($published ? 'text-success' : 'text-muted') . '">'
+                . $esc(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))
+                . '</span></td></tr>';
         }
         return $html . '</tbody></table>';
     }

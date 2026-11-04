@@ -13,7 +13,7 @@ final class OrderOptionCatalog
     public static function values(DatabaseInterface $db, int $optionId): array
     {
         if ($optionId < 1) return [];
-        $q = $db->getQuery(true)->select(['id','title','code','color_hex','state','sort_order'])
+        $q = $db->getQuery(true)->select(['id','title','code','color_hex','sample_image','state','sort_order'])
             ->from($db->quoteName('#__minimarket_order_option_values'))
             ->where('option_id = ' . $optionId)->order('sort_order ASC,id ASC');
         $db->setQuery($q);
@@ -31,6 +31,7 @@ final class OrderOptionCatalog
             $result['row' . count($result)] = [
                 'id' => (int) $row['id'], 'title' => (string) $row['title'],
                 'code' => (string) $row['code'], 'color_hex' => (string) $row['color_hex'],
+                'sample_image' => (string)($row['sample_image'] ?? ''),
                 'state' => (int) $row['state'],
             ];
         }
@@ -50,7 +51,7 @@ final class OrderOptionCatalog
         foreach ($input as $raw) {
             if (is_object($raw)) $raw = (array) $raw;
             if (!is_array($raw)) throw new \InvalidArgumentException('COM_MINIMARKET_ORDER_OPTION_VALUES_INVALID');
-            foreach (['id','title','code','color_hex','state'] as $key) {
+            foreach (['id','title','code','color_hex','sample_image','state'] as $key) {
                 if (isset($raw[$key]) && !is_scalar($raw[$key])) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_ORDER_OPTION_VALUES_INVALID');
                 }
@@ -59,13 +60,21 @@ final class OrderOptionCatalog
             $title = trim((string) ($raw['title'] ?? ''));
             $code = strtolower(trim((string) ($raw['code'] ?? '')));
             $hex = strtoupper(trim((string) ($raw['color_hex'] ?? '')));
+            $image = trim((string) ($raw['sample_image'] ?? ''));
+            // Joomla MediaField can append an image-editor fragment, but we
+            // persist only the safe relative image path.
+            $image = explode('#', $image, 2)[0];
             $state = (string) ($raw['state'] ?? '1');
             if (!ctype_digit($idText) || strlen($idText) > 10
                 || (float) $idText > 4294967295
                 || $title === '' || mb_strlen($title) > 255
                 || preg_match('/[\x00-\x1f<>]/u', $title)
                 || !in_array($state, ['0','1'], true)
-                || ($hex !== '' && !preg_match('/^#[0-9A-F]{6}$/D', $hex))) {
+                || ($hex !== '' && !preg_match('/^#[0-9A-F]{6}$/D', $hex))
+                || ($image !== '' &&
+                    (strlen($image) > 1024 ||
+                     !preg_match('~^images/[a-zA-Z0-9_./ -]+\\.(?:jpg|jpeg|png|gif|webp|avif)$~iD', $image) ||
+                     str_contains($image, '..') || str_contains($image, '//')))) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_ORDER_OPTION_VALUES_INVALID');
             }
             $id = (int) $idText;
@@ -87,7 +96,7 @@ final class OrderOptionCatalog
             if ($id > 0) $seenIds[$id] = true;
             $result[] = [
                 'id' => $id, 'title' => $title, 'code' => $code,
-                'color_hex' => $hex, 'state' => (int) $state,
+                'color_hex' => $hex, 'sample_image' => $image, 'state' => (int) $state,
                 'sort_order' => count($result),
             ];
         }
@@ -122,6 +131,7 @@ final class OrderOptionCatalog
                 'title' => $db->quote($row['title']),
                 'code' => $db->quote($row['code']),
                 'color_hex' => $db->quote($row['color_hex']),
+                'sample_image' => $db->quote($row['sample_image']),
                 'state' => (string) $row['state'],
                 'sort_order' => (string) $row['sort_order'],
             ];

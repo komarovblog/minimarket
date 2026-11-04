@@ -3,19 +3,32 @@
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Router\Route;
+
+$sections = [
+    ['categories', 'COM_MINIMARKET_CATEGORIES'],
+    ['products', 'COM_MINIMARKET_PRODUCTS'],
+    ['groups', 'COM_MINIMARKET_PRODUCT_TAB_GROUPS'],
+    ['attributes', 'COM_MINIMARKET_ATTRIBUTES'],
+    ['orderoptions', 'COM_MINIMARKET_ORDER_OPTIONS'],
+    ['import', 'COM_MINIMARKET_IMPORT_TITLE'],
+];
 ?>
-<div class="com-minimarket-dashboard">
-    <p><a class="btn btn-primary" href="index.php?option=com_minimarket&amp;view=categories"><?php echo Text::_('COM_MINIMARKET_CATEGORIES'); ?></a>
-    <a class="btn btn-outline-secondary" href="index.php?option=com_minimarket&amp;view=products"><?php echo Text::_('COM_MINIMARKET_PRODUCTS'); ?></a>
-    <a class="btn btn-outline-secondary" href="index.php?option=com_minimarket&amp;view=attributes"><?php echo Text::_('COM_MINIMARKET_ATTRIBUTES'); ?></a></p>
-    <p><a class="btn btn-outline-secondary" href="index.php?option=com_minimarket&amp;view=import"><?php echo Text::_('COM_MINIMARKET_IMPORT_TITLE'); ?></a></p>
-    <h2><?php echo Text::_('COM_MINIMARKET_DASHBOARD_HEADING'); ?></h2>
-    <p><?php echo Text::_('COM_MINIMARKET_DASHBOARD_DESCRIPTION'); ?></p>
-    <p>
-        <a class="btn btn-outline-primary"
-           href="<?php echo htmlspecialchars(Uri::root() . 'index.php?option=com_minimarket', ENT_QUOTES, 'UTF-8'); ?>"
-           target="_blank" rel="noopener noreferrer">
-            <?php echo Text::_('COM_MINIMARKET_OPEN_SITE'); ?>
-        </a>
-    </p>
+<div class="com-minimarket-dashboard mm-dashboard">
+    <h2 class="h4 mb-3"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_HEADING'); ?></h2>
+    <p class="text-muted mb-4"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_DESCRIPTION'); ?></p>
+    <h3 class="h5 mb-3"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_SECTIONS'); ?></h3>
+    <div class="list-group mm-dashboard__sections mb-4">
+        <?php foreach ($sections as [$view, $label]) : ?>
+            <a class="list-group-item list-group-item-action"
+               href="<?php echo htmlspecialchars(Route::_('index.php?option=com_minimarket&view=' . $view), ENT_QUOTES, 'UTF-8'); ?>">
+                <?php echo htmlspecialchars(Text::_($label), ENT_QUOTES, 'UTF-8'); ?>
+            </a>
+        <?php endforeach; ?>
+    </div>
+    <a class="btn btn-primary"
+       href="<?php echo htmlspecialchars(Uri::root() . 'index.php?option=com_minimarket', ENT_QUOTES, 'UTF-8'); ?>"
+       target="_blank" rel="noopener noreferrer">
+        <?php echo Text::_('COM_MINIMARKET_OPEN_SITE'); ?>
+    </a>
 </div>

@@ -81,6 +81,11 @@ namespace MiniMarket\GroupEditorSmoke {
     check(str_contains($js,"group.deleteRelationship") &&
         str_contains($js,'submitGroupDeletion()'),
         'standalone and product editors both expose explicit group deletion');
+    check(str_contains($js,'submitGroupChanges()') &&
+        str_contains($js,'mm-group-item__save-actions') &&
+        str_contains($js,"'btn-success'") &&
+        str_contains($js,'submitGroupChanges'),
+        'group Save and Cancel Creation are separated from Add product');
     $groupController=file_get_contents($base.'admin/src/Controller/GroupController.php');
     check(str_contains($groupController,'function deleteRelationship(): void') &&
         str_contains($groupController,"Session::checkToken('post')") &&
@@ -149,7 +154,7 @@ namespace MiniMarket\GroupEditorSmoke {
         !str_contains($migration,'MODIFY COLUMN '.chr(96).'value_text'.chr(96)),
         'Joomla DB schema checker no longer misreads COLUMN as column name');
     $manifest=file_get_contents($base.'minimarket.xml');
-    check(str_contains($manifest,'<version>0.5.42</version>'),
-        'component metadata matches 0.5.42');
+    check(str_contains($manifest,'<version>0.5.43</version>'),
+        'component metadata matches 0.5.43');
     echo 'GROUP_EDITOR_OK: '.$checks." cases\n";
 }
