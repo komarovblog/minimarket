@@ -131,12 +131,12 @@ checkUi(str_contains($categoryRules,'mm-rules-table--state') &&
     str_contains($categoryRules,'d-block text-muted') &&
     str_contains($optionRules,"Text::_('JSTATUS')"),
     'category attributes and options have stacked code and separate publication status');
-checkUi(str_contains($categoryRules,'view=attribute&layout=edit&id=') &&
-    str_contains($optionRules,'view=orderoption&layout=edit&id='),
-    'entity links open the actual edit view instead of the dashboard');
+checkUi(str_contains($categoryRules,'task=attribute.edit&id=') &&
+    str_contains($optionRules,'task=orderoption.edit&id='),
+    'entity links open the actual Joomla edit task instead of the dashboard');
 $dashboard=file_get_contents($base.'admin/tmpl/dashboard/default.php');
 checkUi(str_contains($dashboard,'mm-dashboard__sections') &&
-    str_contains($dashboard,'class="btn btn-primary"'),
+    str_contains($dashboard,'btn btn-primary mm-dashboard__open'),
     'dashboard shows text, a vertical section list and a solid catalog button');
 checkUi(str_contains($editor,'sku_matrix_payload') &&
     str_contains($cssFrame,'.mm-sku-viewport') &&
