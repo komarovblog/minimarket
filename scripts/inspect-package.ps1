@@ -210,8 +210,18 @@ try {
             exit 1
         }
     }
-    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple' and @type='list' and @showon='input_type:list,color,text']")) {
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple' and @type='list' and @showon='input_type!:boolean']")) {
         Write-Output 'PACKAGE_FAIL: VALUE_CARDINALITY_FORM_MISSING'
+        exit 1
+    }
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='value_source' and @type='list']") -or
+        $null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='unified_values' and @type='subform' and @multiple='true']")) {
+        Write-Output 'PACKAGE_FAIL: UNIFIED_ATTRIBUTE_FIELDS_MISSING'
+        exit 1
+    }
+    if ($null -eq $archive.GetEntry('admin/sql/updates/mysql/0.5.45.sql') -or
+        $null -eq $archive.GetEntry('admin/forms/attribute_unified_value_row.xml')) {
+        Write-Output 'PACKAGE_FAIL: UNIFIED_ATTRIBUTE_ASSETS_MISSING'
         exit 1
     }
     if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='values' and @type='subform' and @multiple='true' and @buttons='add,remove,move']") -or

@@ -167,7 +167,7 @@ checkUi(str_contains($categoryAttrs,'d-block text-muted') &&
 $matrixScript=file_get_contents($base.'media/js/sku-matrix.js');
 $adminCss=file_get_contents($base.'media/css/admin-ui.css');
 checkUi(str_contains($matrixScript,'mm-sku-viewport') &&
-    str_contains($matrixScript,'data-mm-pinned') &&
+    str_contains($matrixScript,'dataset.mmPinned') &&
     str_contains($matrixScript,'displayCategoryOptions()') &&
     str_contains($adminCss,'position: sticky') &&
     str_contains($adminCss,'overflow-x: auto'),
