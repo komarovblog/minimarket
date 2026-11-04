@@ -160,7 +160,7 @@ namespace MiniMarket\GroupEditorSmoke {
         !str_contains($migration,'MODIFY COLUMN '.chr(96).'value_text'.chr(96)),
         'Joomla DB schema checker no longer misreads COLUMN as column name');
     $manifest=file_get_contents($base.'minimarket.xml');
-    check(str_contains($manifest,'<version>0.5.47</version>'),
-        'component metadata matches 0.5.47');
+    check(str_contains($manifest,'<version>0.5.48</version>'),
+        'component metadata matches 0.5.48');
     echo 'GROUP_EDITOR_OK: '.$checks." cases\n";
 }

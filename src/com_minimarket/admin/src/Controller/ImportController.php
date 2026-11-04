@@ -10,6 +10,8 @@ use Joomla\CMS\Session\Session;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CatalogImport;
+use MiniMarket\Component\Minimarket\Administrator\Service\CatalogTabularV1;
+use MiniMarket\Component\Minimarket\Administrator\Service\CatalogExportV1;
 
 /** Two-step upload → preview → apply, bound to the current administrator session. */
 final class ImportController extends BaseController
@@ -30,31 +32,77 @@ final class ImportController extends BaseController
      * Download shipped examples without requiring GitHub or public file URLs.
      * This is a GET-only read guarded by the Joomla admin ACL and CSRF token.
      */
+    private function sendDownload(string $content, string $filename, string $type): void
+    {
+        $app = Factory::getApplication();
+        $app->setHeader('Content-Type', $type, true);
+        $app->setHeader('Content-Disposition',
+            'attachment; filename="' . $filename . '"', true);
+        $app->setHeader('X-Content-Type-Options', 'nosniff', true);
+        $app->setHeader('Cache-Control', 'private, no-store, max-age=0', true);
+        $app->sendHeaders();
+        echo $content;
+        $app->close();
+    }
+
+    private static function renderFormat(array $doc, string $format): array
+    {
+        return match ($format) {
+            'json'=>[json_encode($doc, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE
+                | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n",
+                'application/json; charset=utf-8'],
+            'csv'=>[CatalogTabularV1::csv($doc), 'text/csv; charset=utf-8'],
+            'xlsx'=>[CatalogTabularV1::xlsx($doc),
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+            default=>throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_FILE_INVALID'),
+        };
+    }
+
+    /**
+     * Download bundled empty or filled template in JSON, CSV or XLSX.
+     * Never fetch template files from GitHub or external network locations.
+     */
     public function example(): void
     {
         Session::checkToken('get') or die(Text::_('JINVALID_TOKEN'));
         $this->assertCanImport();
         $name = $this->input->getCmd('template', '');
-        $examples = [
-            'catalog' => 'import-catalog-v1.json',
-            'empty' => 'import-empty-v1.json',
-        ];
-        if (!isset($examples[$name])) {
+        $format = $this->input->getCmd('format', 'json');
+        $examples = ['catalog'=>'import-catalog-v1.json',
+            'empty'=>'import-empty-v1.json'];
+        if (!isset($examples[$name]) || !in_array($format,['json','csv','xlsx'],true)) {
             throw new \RuntimeException('Unknown MiniMarket example', 404);
         }
         $path = dirname(__DIR__, 2) . '/examples/' . $examples[$name];
-        if (!is_file($path)) {
-            throw new \RuntimeException('Missing MiniMarket example file', 404);
+        if (!is_file($path)) throw new \RuntimeException('Missing MiniMarket example file', 404);
+        $doc = CatalogImport::decode((string)file_get_contents($path));
+        [$bytes,$mime] = self::renderFormat($doc,$format);
+        $this->sendDownload($bytes, 'minimarket-'. $name .'-template.'.$format, $mime);
+    }
+
+    /**
+     * Export ONLY data described by CatalogImport v1. Data unsupported by v1
+     * (modern SKU combinations, media, SEO) is not asserted to be backed up.
+     */
+    public function export(): void
+    {
+        Session::checkToken('get') or die(Text::_('JINVALID_TOKEN'));
+        $this->assertCanImport();
+        $format = $this->input->getCmd('format', 'json');
+        if (!in_array($format,['json','csv','xlsx'],true)) {
+            throw new \RuntimeException('Invalid export format', 400);
         }
-        $app = Factory::getApplication();
-        $app->setHeader('Content-Type', 'application/json; charset=utf-8', true);
-        $app->setHeader('Content-Disposition',
-            'attachment; filename="' . $examples[$name] . '"', true);
-        $app->setHeader('X-Content-Type-Options', 'nosniff', true);
-        $app->setHeader('Cache-Control', 'private, no-store, max-age=0', true);
-        $app->sendHeaders();
-        readfile($path);
-        $app->close();
+        try {
+            $db = Factory::getContainer()->get(DatabaseInterface::class);
+            $doc = CatalogExportV1::document($db);
+            [$bytes,$mime]=self::renderFormat($doc,$format);
+            $this->sendDownload($bytes, 'minimarket-basic-catalog.'.$format, $mime);
+        } catch (\Throwable $error) {
+            $app = Factory::getApplication();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_EXPORT_FAILED') . ': ' .
+                self::friendlyError($error), 'error');
+            $this->setRedirect(Route::_('index.php?option=com_minimarket&view=import', false));
+        }
     }
 
     public function preview(): void
@@ -71,15 +119,28 @@ final class ImportController extends BaseController
                 || !is_uploaded_file($file['tmp_name'])
                 || !is_int($file['size'] ?? null)
                 || $file['size'] < 1 || $file['size'] > self::MAX_UPLOAD
-                || !str_ends_with(strtolower((string) ($file['name'] ?? '')), '.json')) {
+                || !in_array(strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION)),
+                    ['json','csv','xlsx'], true)) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_FILE_INVALID');
             }
             $raw = file_get_contents($file['tmp_name']);
             if (!is_string($raw)) throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_FILE_INVALID');
-            $doc = CatalogImport::decode($raw);
+            $format = strtolower(pathinfo((string)$file['name'], PATHINFO_EXTENSION));
+            $doc = match ($format) {
+                'json' => CatalogImport::decode($raw),
+                'csv' => CatalogImport::decode(json_encode(
+                    CatalogTabularV1::parseCsv($raw),
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)),
+                'xlsx' => CatalogImport::decode(json_encode(
+                    CatalogTabularV1::parseXlsx($raw),
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)),
+            };
+            // Session contains one canonical, validated package independently
+            // of the originally uploaded transport format.
+            $canonical = json_encode($doc, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
             $db = Factory::getContainer()->get(DatabaseInterface::class);
             $report = CatalogImport::run($db, $doc, false);
-            $app->setUserState(self::SESSION_KEY, ['raw' => $raw, 'report' => $report]);
+            $app->setUserState(self::SESSION_KEY, ['raw' => $canonical, 'report' => $report]);
             $app->enqueueMessage(Text::_('COM_MINIMARKET_IMPORT_PREVIEW_OK'), 'success');
         } catch (\Throwable $error) {
             $app->enqueueMessage(Text::_('COM_MINIMARKET_IMPORT_PREVIEW_FAILED') . ': ' .
@@ -128,8 +189,11 @@ final class ImportController extends BaseController
     private static function friendlyError(\Throwable $error): string
     {
         // Do not leak SQL queries, schema names or filesystem paths to web UI.
-        if ($error instanceof \InvalidArgumentException
-            && str_starts_with($error->getMessage(), 'COM_MINIMARKET_IMPORT_')) {
+        if (($error instanceof \InvalidArgumentException
+                || $error instanceof \RuntimeException)
+            && (str_starts_with($error->getMessage(), 'COM_MINIMARKET_IMPORT_')
+                || str_starts_with($error->getMessage(), 'COM_MINIMARKET_EXPORT_')
+                || str_starts_with($error->getMessage(), 'COM_MINIMARKET_EXCHANGE_'))) {
             $parts = explode(': ', $error->getMessage(), 2);
             return Text::_($parts[0]) .
                 (isset($parts[1]) ? ' (' . htmlspecialchars($parts[1], ENT_QUOTES, 'UTF-8') . ')' : '');

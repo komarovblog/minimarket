@@ -91,6 +91,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
+          extensions: zip, dom, mbstring, simplexml
 
       - name: Lint extension and regression scripts
         shell: bash
@@ -135,6 +136,9 @@ jobs:
 
       - name: Stable global option IDs and automatic category options in products
         run: php scripts/test-global-option-links.php
+
+      - name: Excel XLSX and CSV catalog exchange regression
+        run: php scripts/test-catalog-tabular-v1.php
 
       - name: Catalog import v1 strict package and security checks
         run: php scripts/test-catalog-import.php
