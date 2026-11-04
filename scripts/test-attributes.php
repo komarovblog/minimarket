@@ -138,6 +138,10 @@ namespace MiniMarket\AttributesSmoke {
                 return 0;
             }
 
+            if ($this->query?->from === '#__minimarket_product_attribute_free_values') {
+                return 0;
+            }
+
             if ($this->query?->from === '#__minimarket_product_attribute_options') {
                 return $this->multipleProducts ? 2 : 0;
             }
