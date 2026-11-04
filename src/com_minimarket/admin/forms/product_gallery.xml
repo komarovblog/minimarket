@@ -4,4 +4,11 @@
            directory="images" filter="string" required="true"/>
     <field name="alt" type="text" label="COM_MINIMARKET_GALLERY_ALT"
            filter="string" maxlength="255" size="45"/>
+    <field name="visibility_mode" type="list" label="COM_MINIMARKET_PHOTO_VISIBILITY"
+           filter="int" default="0">
+        <option value="0">COM_MINIMARKET_PHOTO_EVERYWHERE</option>
+        <option value="1">COM_MINIMARKET_PHOTO_SELECTED_SKUS</option>
+    </field>
+    <field name="show_keys" type="hidden" filter="raw" default="[]"/>
+    <field name="cover_keys" type="hidden" filter="raw" default="[]"/>
 </form>

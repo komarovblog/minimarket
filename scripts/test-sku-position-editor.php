@@ -1,80 +1,47 @@
 <?php
-/**
- * Source-level regression for the 0.5.24 SKU position UI.
- * Does not require Joomla, a browser or a database.
- * A successful result does not replace manual Joomla browser verification.
- */
+/** 0.5.39 direct SKU matrix replaces old multi-step position editor. */
 declare(strict_types=1);
-$root = dirname(__DIR__) . '/src/com_minimarket';
-$n = 0;
-function skuUiCheck(bool $condition, string $description): void
-{
-    global $n;
-    ++$n;
-    if (!$condition) {
-        throw new RuntimeException('SKU_POSITION_UI_FAIL: ' . $description);
-    }
+$root=dirname(__DIR__).'/src/com_minimarket';
+$checks=0;
+function checkSku(bool $ok,string $why):void {
+    global $checks;
+    $checks++;
+    if (!$ok) throw new RuntimeException('SKU_POSITION_UI_FAIL: '.$why);
 }
-$builder = (string) file_get_contents($root . '/admin/src/Field/VariantbuilderField.php');
-$editor = (string) file_get_contents($root . '/media/js/variants-local.js');
-$form = (string) file_get_contents($root . '/admin/forms/product.xml');
-$variant = (string) file_get_contents($root . '/admin/forms/product_variant.xml');
-$productModel = (string) file_get_contents($root . '/admin/src/Model/ProductModel.php');
-$server = (string) file_get_contents($root . '/admin/src/Service/ProductVariants.php');
-
-foreach ([
-    'data-mm-add-sku', 'data-mm-sku-all', 'data-mm-sku-price',
-    'data-mm-sku-stock', 'data-mm-sku-apply',
-] as $field) {
-    skuUiCheck(str_contains($builder, $field), 'Joomla toolbar has ' . $field);
-}
-skuUiCheck(str_contains($builder, 'btn btn-outline-primary btn-sm') &&
-    str_contains($builder, 'form-control form-control-sm'),
-    'SKU actions use Joomla/Bootstrap native controls');
-skuUiCheck(str_contains($form, 'joomla.form.field.subform.repeatable-table'),
-    'SKU positions still use native Joomla repeatable table');
-foreach (['id', 'sku', 'price', 'stock', 'image', 'photos', 'state'] as $field) {
-    skuUiCheck(str_contains($variant, 'name="' . $field . '"'),
-        'position keeps separate native field ' . $field);
-}
-skuUiCheck(str_contains($editor, 'refreshSkuEditors(axes)'),
-    'option selectors operate within actual native SKU positions');
-skuUiCheck(str_contains($editor, "addSku?.addEventListener('click'") &&
-    str_contains($editor, "appendRow({ title: '', selection: {} }, axes, true)"),
-    'manual position begins without fake SKU identity or combination');
-skuUiCheck(str_contains($editor, "copy.dataset.mmSkuCopy = '1'") &&
-    str_contains($editor, "['price', 'stock', 'state']"),
-    'copy carries trade fields but resets unique SKU and combination');
-skuUiCheck(str_contains($editor, 'data-mm-sku-select') &&
-    str_contains($editor, "selectAllSku?.addEventListener('change'"),
-    'mass updates target chosen rows, not all products');
-skuUiCheck(str_contains($editor, 'Number(stock) > 4294967295') &&
-    str_contains($editor, "if (value === '') continue;"),
-    'browser checks quantity bounds and skips untouched columns');
-skuUiCheck(str_contains($editor, "selectionInput.value = JSON.stringify(selected)") &&
-    str_contains($editor, "new Event('change', { bubbles: true })"),
-    'local option choice updates the native hidden input before Joomla save');
-skuUiCheck(str_contains($server, 'COM_MINIMARKET_VARIANTS_DUPLICATE') &&
-    str_contains($server, 'count($rawSelection) !== count($selection)'),
-    'server still rejects duplicate or incomplete combinations');
-skuUiCheck(str_contains($productModel, '$db->transactionStart();') &&
-    str_contains($productModel, '$db->transactionRollback();'),
-    'positions still save through server transaction');
-skuUiCheck(!str_contains($editor, 'window.fetch(') &&
-    !str_contains($editor, 'localStorage'),
-    'no competing browser trade data store or undocumented endpoint');
-
-foreach (['ru-RU', 'en-GB'] as $lang) {
-    $ini = (string) file_get_contents($root . '/admin/language/' . $lang . '/com_minimarket.ini');
-    foreach ([
-        'COM_MINIMARKET_SKU_ADD_POSITION',
-        'COM_MINIMARKET_SKU_COPY_POSITION',
-        'COM_MINIMARKET_SKU_BULK_PRICE',
-        'COM_MINIMARKET_SKU_BULK_STOCK',
-        'COM_MINIMARKET_SKU_BULK_APPLY',
-    ] as $key) {
-        skuUiCheck((bool) preg_match('/^' . $key . '="/m', $ini),
-            $lang . ' has ' . $key);
-    }
-}
-echo 'SKU_POSITION_UI_SOURCE_PASS: ' . $n . " checks\n";
+$ui=file_get_contents($root.'/media/js/sku-matrix.js');
+$form=simplexml_load_file($root.'/admin/forms/product.xml');
+$tpl=file_get_contents($root.'/admin/tmpl/product/edit.php');
+$service=file_get_contents($root.'/admin/src/Service/ProductSkuMatrix.php');
+$model=file_get_contents($root.'/admin/src/Model/ProductModel.php');
+checkSku(count($form->xpath("//fieldset[@name='variants']/field[@name='sku_matrix_payload' and @type='Skumatrix']"))===1,
+    'one SKU matrix field is used');
+checkSku(str_contains($tpl,"renderField('sku_matrix_payload')") &&
+    !str_contains($tpl,"renderField('variant_matrix')"),
+    'no separate combination generation step');
+checkSku(str_contains($ui,'const combinations = axes =>') &&
+    str_contains($ui,'for (const axis of currentAxes)'),
+    'the number of option columns matches the category');
+checkSku(str_contains($ui,'mm-sku-matrix') &&
+    str_contains($ui,'data-mm-matrix-payload'),
+    'compact direct SKU matrix is submitted in one payload');
+checkSku(!str_contains($ui,'group-add') &&
+    !str_contains($ui,'data-mm-sku-price'),
+    'old native Joomla subform row-add and per-SKU prices are removed');
+checkSku(str_contains($ui,'isShared()') &&
+    str_contains($ui,'setStockMode()'),
+    'shared product stock hides per-combination quantity');
+checkSku(str_contains($service,"'price' => ".'$productPrice') &&
+    str_contains($model,'ProductSkuMatrix::normalize('),
+    'variant price strictly inherits product price on server');
+checkSku(str_contains($service,'ProductVariants::formRows(') &&
+    str_contains($service,'!isset($used[$id])'),
+    'existing variant IDs/media are reused and missing saved rows rejected');
+checkSku(str_contains($model,'$db->transactionStart();') &&
+    str_contains($model,'$db->transactionRollback();'),
+    'SKU and gallery save transaction remains atomic');
+checkSku(str_contains($ui,'refreshGallery()') &&
+    str_contains($ui,'data-mm-photo-select'),
+    'one product gallery supports per-variant visibility and primary photo');
+checkSku(!str_contains($ui,'localStorage') && !str_contains($ui,'window.fetch('),
+    'no competing local trade store or undocumented network endpoint');
+echo 'SKU_POSITION_UI_SOURCE_PASS: '.$checks." cases\n";

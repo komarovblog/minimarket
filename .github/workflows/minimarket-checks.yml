@@ -144,6 +144,10 @@ jobs:
 
       - name: New product-local SKU matrix planner
         run: php scripts/test-variant-matrix.php
+      - name: Direct SKU matrix, one price and per-SKU gallery assignments
+        run: |
+          php scripts/test-sku-matrix-gallery.php
+          php scripts/test-sku-position-editor.php
 
       - name: Public variant SKU, image and stock reads
         run: php scripts/test-public-variants.php
@@ -158,7 +162,7 @@ jobs:
 
       - name: Native variant rows and storefront variant switching JavaScript
         run: |
-          node --check src/com_minimarket/media/js/variants-local.js
+          node --check src/com_minimarket/media/js/sku-matrix.js
           node --check src/com_minimarket/media/js/variants.js
 
       - name: Dependent color size and multi-option SKU availability

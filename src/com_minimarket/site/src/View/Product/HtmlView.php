@@ -40,6 +40,11 @@ final class HtmlView extends BaseHtmlView
         $this->videos = $repo->getProductVideos($id);
         $this->attributes = $repo->getProductAttributes($id, (int) $product->category_id);
         $this->variants = $repo->getProductVariants($id, (int) $product->category_id);
+        // All sellable combinations share the product's single price.
+        foreach ($this->variants['items'] as &$variant) {
+            $variant['price'] = (string) $product->price;
+        }
+        unset($variant);
         $this->relatedGroups = $repo->getRelatedGroups($id);
         // Color/size selectors for actual SKUs replace static descriptive rows.
         if ($this->variants['items']) {

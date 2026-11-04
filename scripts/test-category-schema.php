@@ -142,7 +142,7 @@ verify((int) $pdo->query("SELECT COUNT(*) FROM catci_minimarket_product_images")
     'removing gallery link does not delete product');
 verify(row($pdo, 'catci_minimarket_products')['sku'] === 'TEST-001',
     '0.5.3 keeps SKU, stock and legacy item');
-$pdo->exec('DROP TABLE catci_minimarket_product_images');
+// Preserve the gallery table so 0.5.39 can add SKU visibility.
 
 // 0.5.4: characteristics dictionaries are additive; existing product/gallery untouched.
 $preAttributesProduct = row($pdo, 'catci_minimarket_products');
@@ -646,6 +646,47 @@ verify($beforeSourceAssignments===$pdo->query('SELECT * FROM catci_minimarket_va
     ORDER BY variant_id,dimension_id')->fetchAll(PDO::FETCH_ASSOC),
     'global option linkage does not rewrite old variant assignments');
 
+// 0.5.39: gallery per physical SKU and nullable article number, additive.
+$before39Skus=$pdo->query('SELECT id,product_id,sku,price,stock,selection_json
+    FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$before39Images=$pdo->query('SELECT id,product_id,path,alt,sort_order
+    FROM catci_minimarket_product_images ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo,$dir.'updates/mysql/0.5.39.sql','catci_');
+verify($before39Skus===$pdo->query('SELECT id,product_id,sku,price,stock,selection_json
+    FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.39 retains existing SKU identity, price, stock and selections');
+verify($before39Images===$pdo->query('SELECT id,product_id,path,alt,sort_order
+    FROM catci_minimarket_product_images ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.39 keeps old product images, order and alt');
+$skuColumn=$pdo->query("SHOW COLUMNS FROM catci_minimarket_product_variants LIKE 'sku'")
+    ->fetch(PDO::FETCH_ASSOC);
+verify(strtoupper((string)$skuColumn['Null'])==='YES',
+    '0.5.39 allows NULL SKU labels with unique nonempty names');
+$imgColumn=$pdo->query("SHOW COLUMNS FROM catci_minimarket_product_images LIKE 'visibility_mode'")
+    ->fetch(PDO::FETCH_ASSOC);
+verify((int)$imgColumn['Default']===0,'old photos remain visible everywhere');
+$pdo->exec("INSERT INTO catci_minimarket_product_variants
+    (product_id,sku,selection_json,signature,price,stock) VALUES
+    (1,NULL,'{}','" . hash('sha256','no-label-1') . "',123,0),
+    (1,NULL,'{}','" . hash('sha256','no-label-2') . "',123,0)");
+verify((int)$pdo->query("SELECT COUNT(*) FROM catci_minimarket_product_variants
+    WHERE sku IS NULL")->fetchColumn()===2,
+    'different combinations may both have empty SKU labels');
+$imgId=(int)$pdo->query("SELECT id FROM catci_minimarket_product_images LIMIT 1")->fetchColumn();
+$pdo->exec("UPDATE catci_minimarket_product_images SET visibility_mode=1 WHERE id=".$imgId);
+$pdo->exec("INSERT INTO catci_minimarket_product_image_variants
+    (image_id,variant_id,is_cover) VALUES (".$imgId.",1,1)");
+verify((int)$pdo->query("SELECT is_cover FROM catci_minimarket_product_image_variants
+    WHERE image_id=".$imgId." AND variant_id=1")->fetchColumn()===1,
+    'gallery image can be main for one stable variant ID');
+try {
+    $pdo->exec("INSERT INTO catci_minimarket_product_image_variants
+        (image_id,variant_id,is_cover) VALUES (".$imgId.",999999,0)");
+    verify(false,'gallery accepted unknown physical SKU');
+} catch(PDOException $e) {
+    verify(true,'gallery SKU FK rejects unknown variant ID');
+}
+
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
@@ -660,6 +701,8 @@ $pdo->exec('DROP TABLE catci_minimarket_variant_dimensions');
 $pdo->exec('DROP TABLE catci_minimarket_category_order_options');
 $pdo->exec('DROP TABLE catci_minimarket_order_option_values');
 $pdo->exec('DROP TABLE catci_minimarket_order_options');
+$pdo->exec('DROP TABLE catci_minimarket_product_image_variants');
+$pdo->exec('DROP TABLE catci_minimarket_product_images');
 $pdo->exec('DROP TABLE catci_minimarket_product_variant_images');
 $pdo->exec('DROP TABLE catci_minimarket_product_variants');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_multi_values');
@@ -681,6 +724,15 @@ foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'sho
     'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(in_array($col, $columns, true), 'fresh-install column ' . $col);
 }
+$freshSkuNullable=$pdo->query("SHOW COLUMNS FROM freshcatci_minimarket_product_variants LIKE 'sku'")->fetch(PDO::FETCH_ASSOC);
+verify(strtoupper((string)$freshSkuNullable['Null'])==='YES',
+    'fresh 0.5.39 variants accept blank SKU');
+$freshImageScope=$pdo->query("SHOW COLUMNS FROM freshcatci_minimarket_product_images LIKE 'visibility_mode'")->fetch(PDO::FETCH_ASSOC);
+verify((int)$freshImageScope['Default']===0,
+    'fresh 0.5.39 old photos visible to every SKU');
+$freshPhotoLinks=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_image_variants')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['image_id','variant_id','is_cover'] as $column)
+    verify(in_array($column,$freshPhotoLinks,true),'fresh 0.5.39 photo link '.$column);
 $freshSkus=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_variants')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['description_mode','introtext_override','description_override','video_mode'] as $column) {
     verify(in_array($column,$freshSkus,true),'fresh 0.5.25 SKU override '.$column);

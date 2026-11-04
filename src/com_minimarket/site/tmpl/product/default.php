@@ -7,59 +7,68 @@ use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 use MiniMarket\Component\Minimarket\Site\Service\ProductAttributeCatalog;
 
-// Primary cover remains products.image, so old products retain their image.
-$images = [];
+// One product URL and one product price; gallery is filtered by the selected
+// physical SKU's stable variant_id. Restricted images are not in HTML/JSON for
+// unrelated SKUs.
 $cover = explode('#', (string) ($this->product->image ?? ''), 2)[0];
 $isSafeImage = static function (string $path): bool {
     return str_starts_with($path, 'images/') && !str_contains($path, '..')
         && !preg_match('/[\x00-\x1f<>?#\\\\]/', $path);
 };
-if ($isSafeImage($cover)) {
-    $images[$cover] = [
-        'url' => Uri::root() . $cover,
-        'alt' => (string) ($this->product->image_alt ?: $this->product->title),
-    ];
-}
-foreach ($this->gallery as $photo) {
-    $path = explode('#', (string) ($photo->path ?? ''), 2)[0];
-    if ($isSafeImage($path) && !isset($images[$path])) {
-        $images[$path] = [
-            'url' => Uri::root() . $path,
-            'alt' => (string) ($photo->alt ?: $this->product->title),
-        ];
-    }
-}
-$images = array_values($images);
-$baseImages = $images;
+$productCover = $isSafeImage($cover)
+    ? ['url'=>Uri::root().$cover, 'alt'=>(string)(
+        $this->product->image_alt ?: $this->product->title)]
+    : null;
 $defaultVariant = $this->variants['items'][0] ?? null;
-$requestedVariant = (int) \Joomla\CMS\Factory::getApplication()->input->getInt('variant', 0);
+$requestedVariant = (int)\Joomla\CMS\Factory::getApplication()->input->getInt('variant', 0);
 if ($requestedVariant > 0) {
     foreach ($this->variants['items'] as $availableVariant) {
-        if ((int) $availableVariant['id'] === $requestedVariant) {
+        if ((int)$availableVariant['id'] === $requestedVariant) {
             $defaultVariant = $availableVariant;
             break;
         }
     }
 }
+$images = [];
 if ($defaultVariant) {
-    $variantImages = [];
-    $variantCover = (string) $defaultVariant['image'];
-    if ($variantCover !== '' && $isSafeImage($variantCover)) {
-        $variantImages[] = [
-            'url' => Uri::root() . $variantCover,
-            'alt' => (string) ($defaultVariant['image_alt'] ?: $this->product->title),
-        ];
-    }
-    foreach ($defaultVariant['photos'] as $photo) {
-        if ($isSafeImage($photo['path'])) {
-            $variantImages[] = [
-                'url' => Uri::root() . $photo['path'],
-                'alt' => (string) ($photo['alt'] ?: $this->product->title),
-            ];
+    $add = static function (string $path, string $alt) use (&$images, $isSafeImage): void {
+        if ($isSafeImage($path) && !isset($images[$path])) {
+            $images[$path] = ['url'=>Uri::root().$path, 'alt'=>$alt];
+        }
+    };
+    $specialCover = false;
+    foreach ($defaultVariant['gallery'] ?? [] as $photo) {
+        if (!empty($photo['cover'])) {
+            $add((string)$photo['path'], (string)($photo['alt'] ?: $this->product->title));
+            $specialCover = true;
         }
     }
-    if ($variantImages) $images = $variantImages;
+    // Existing v3 per-SKU cover remains a fallback when no gallery cover is
+    // assigned. The product cover is the global default for every SKU.
+    if (!$specialCover && !empty($defaultVariant['image'])) {
+        $add((string)$defaultVariant['image'],
+             (string)($defaultVariant['image_alt'] ?: $this->product->title));
+    }
+    if ($productCover) $add($cover, $productCover['alt']);
+    foreach ($defaultVariant['gallery'] ?? [] as $photo) {
+        $add((string)$photo['path'], (string)($photo['alt'] ?: $this->product->title));
+    }
+    foreach ($defaultVariant['photos'] ?? [] as $photo) {
+        $add((string)$photo['path'], (string)($photo['alt'] ?: $this->product->title));
+    }
+    $baseImages = $productCover ? [$productCover] : [];
+} else {
+    if ($productCover) $images[$cover] = $productCover;
+    foreach ($this->gallery as $photo) {
+        $path = explode('#', (string)($photo->path ?? ''), 2)[0];
+        if ($isSafeImage($path) && !isset($images[$path])) {
+            $images[$path] = ['url'=>Uri::root().$path,
+                'alt'=>(string)($photo->alt ?: $this->product->title)];
+        }
+    }
+    $baseImages = array_values($images);
 }
+$images = array_values($images);
 $main = $images[0] ?? null;
 $hasCustomDescription=$defaultVariant && (int)($defaultVariant['description_mode']??0)===1;
 $initialIntro=$hasCustomDescription
@@ -210,7 +219,7 @@ $initialDescription=$hasCustomDescription
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></dt>
         <dd data-mm-variant-sku><?php echo $this->escape((string) ($defaultVariant['sku'] ?? $this->product->sku)); ?></dd>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_PRICE'); ?></dt>
-        <dd data-mm-variant-price><?php echo $this->escape((string) ($defaultVariant['price'] ?? $this->product->price)); ?></dd>
+        <dd data-mm-variant-price><?php echo $this->escape((string) $this->product->price); ?></dd>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
         <dd data-mm-variant-stock><?php echo (int) (
             ((int)($this->product->option_stock_mode??0)===0)

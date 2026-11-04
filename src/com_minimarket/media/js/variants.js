@@ -40,11 +40,26 @@
   const updateGallery = (variant) => {
     if (!main || !mainLink) return;
     const imgs = [];
-    if (variant.image) imgs.push({ url: makeUrl(variant.image), alt: variant.image_alt || '' });
-    for (const photo of variant.photos || []) {
-      if (photo.path) imgs.push({ url: makeUrl(photo.path), alt: photo.alt || '' });
+    const seen = new Set();
+    const add = (path, alt) => {
+      const url = makeUrl(path);
+      if (!url || seen.has(url)) return;
+      seen.add(url);
+      imgs.push({ url, alt: alt || '' });
+    };
+    const selectedGallery = variant.gallery || [];
+    const hasCover = selectedGallery.some(photo => photo.cover && photo.path);
+    for (const photo of selectedGallery) {
+      if (photo.cover) add(photo.path, photo.alt);
     }
-    if (!imgs.length) imgs.push(...baseImages);
+    if (!hasCover && variant.image) add(variant.image, variant.image_alt);
+    for (const img of baseImages) {
+      if (!img?.url || seen.has(img.url)) continue;
+      seen.add(img.url);
+      imgs.push(img);
+    }
+    for (const photo of selectedGallery) add(photo.path, photo.alt);
+    for (const photo of variant.photos || []) add(photo.path, photo.alt);
     if (!imgs.length && fallback) imgs.push(fallback);
     const first = imgs[0];
     if (!first || !first.url) return;
@@ -183,7 +198,7 @@
       select.value = selected.selection[select.dataset.mmVariantAxis] || '';
     });
     if (details.sku) details.sku.textContent = selected.sku;
-    if (details.price) details.price.textContent = selected.price;
+    // Price belongs to the product, never to the selected combination.
     const stock = stockFor(selected);
     if (details.stock) details.stock.textContent = String(stock);
     if (details.availability) details.availability.textContent =

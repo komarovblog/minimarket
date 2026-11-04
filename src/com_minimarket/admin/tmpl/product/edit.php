@@ -25,13 +25,7 @@ use Joomla\CMS\Router\Route;
                 <?php echo $this->form->renderField('variants_present'); ?>
                 <?php echo $this->form->renderField('variant_dimensions_present'); ?>
                 <?php echo $this->form->renderField('category_option_preview'); ?>
-                <div data-mm-variant-options>
-                    <?php echo $this->form->renderField('variant_dimensions'); ?>
-                </div>
-                <?php echo $this->form->renderField('variant_matrix'); ?>
-                <div data-mm-variant-skus>
-                    <?php echo $this->form->renderField('variants'); ?>
-                </div>
+                <?php echo $this->form->renderField('sku_matrix_payload'); ?>
             <?php else : ?>
                 <?php echo $this->form->renderFieldset($section); ?>
             <?php endif; ?>

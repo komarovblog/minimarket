@@ -41,8 +41,8 @@ final class HtmlView extends BaseHtmlView
                 ['defer' => true]
             );
         Factory::getApplication()->getDocument()->getWebAssetManager()
-            ->registerAndUseScript('com_minimarket.variants-local',
-                'media/com_minimarket/js/variants-local.js', [], ['defer' => true]);
+            ->registerAndUseScript('com_minimarket.sku-matrix',
+                'media/com_minimarket/js/sku-matrix.js', [], ['defer' => true]);
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PRODUCT_EDIT_TITLE'));
         ToolbarHelper::apply('product.apply');

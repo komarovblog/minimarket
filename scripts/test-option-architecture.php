@@ -80,9 +80,9 @@ namespace MiniMarket\OptionArchitecture {
     $siteJs=file_get_contents(__DIR__.'/../src/com_minimarket/media/js/variants.js');
     verify(str_contains($siteJs,'sharedStock ? baseStock : Number(variant.stock)'),
         'public stock respects shared-vs-combination mode');
-    $adminJs=file_get_contents(__DIR__.'/../src/com_minimarket/media/js/variants-local.js');
-    verify(str_contains($adminJs,'sharedInventory()') && str_contains($adminJs,'refreshInventory()'),
-        'SKU stock matrix hidden in shared-stock mode');
+    $adminJs=file_get_contents(__DIR__.'/../src/com_minimarket/media/js/sku-matrix.js');
+    verify(str_contains($adminJs,'isShared()') && str_contains($adminJs,'setStockMode()'),
+        'SKU quantity column hidden for shared inventory mode');
     $sql=file_get_contents(__DIR__.'/../src/com_minimarket/admin/sql/updates/mysql/0.5.26.sql');
     verify(str_contains($sql,'WHERE EXISTS') && str_contains($sql,'option_stock_mode'),
         'upgrade retains old SKU inventory mode');

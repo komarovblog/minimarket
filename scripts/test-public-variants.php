@@ -79,6 +79,15 @@ namespace MiniMarket\PublicVariantsSmoke {
                     ['variant_id'=>22,'path'=>'images/blue-back.webp','alt'=>'Blue back'],
                     ['variant_id'=>20,'path'=>'images/../../evil.webp','alt'=>'Unsafe']
                 ],
+                '#__minimarket_product_images' => [
+                    ['id'=>81,'path'=>'images/global.webp','alt'=>'All',
+                        'visibility_mode'=>0],
+                    ['id'=>82,'path'=>'images/blue-only.webp','alt'=>'Blue only',
+                        'visibility_mode'=>1],
+                ],
+                '#__minimarket_product_image_variants' => [
+                    ['image_id'=>82,'variant_id'=>22,'is_cover'=>1],
+                ],
                 '#__minimarket_product_variant_videos' => [
                     ['variant_id'=>22,'title'=>'Blue video',
                         'source'=>'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
@@ -117,7 +126,8 @@ namespace MiniMarket\PublicVariantsSmoke {
     check(count($result['items'])===3,'only genuine option combinations are public');
     check(!in_array('INVALID-OLD',array_column($result['items'],'sku'),true),
         'old attribute-based SKU selections are ignored');
-    check(count($db->queries)===7,'batched local SKU, color gallery and video queries');
+    check(count($db->queries)===9,
+        'batched local SKU, gallery permissions and video queries');
     check(!in_array('#__minimarket_category_attributes',
         array_map(static fn($q)=>$q->from,$db->queries),true),
         'informational category attributes never consulted by SKU engine');
@@ -135,6 +145,12 @@ namespace MiniMarket\PublicVariantsSmoke {
         'individual SKU gallery overrides color gallery');
     check($bySku['BLUE-M']['photos'][0]['path']==='images/blue-back.webp',
         'individual SKU gallery preserved');
+    check(count($bySku['RED-S']['gallery'])===1 &&
+        $bySku['RED-S']['gallery'][0]['path']==='images/global.webp',
+        'red SKU never exposes images restricted to blue');
+    check(count($bySku['BLUE-M']['gallery'])===2 &&
+        $bySku['BLUE-M']['gallery'][1]['cover']===true,
+        'blue SKU gets shared plus unique primary image');
     check($bySku['BLUE-M']['description_override']==='<p>Blue description</p>',
         'individual SKU text can override product text');
     check(count($bySku['BLUE-M']['videos'])===1 &&
@@ -147,6 +163,6 @@ namespace MiniMarket\PublicVariantsSmoke {
     $template=file_get_contents(__DIR__.'/../src/com_minimarket/site/tmpl/product/default.php');
     check(str_contains($template,'data-mm-variant-price') &&
         str_contains($template,'data-mm-variant-stock'),
-        'public SKU switching updates price and stock');
+        'public product retains one price and selected SKU stock');
     echo 'PUBLIC_SKU_LOCAL_PASS: '.$n." cases\n";
 }

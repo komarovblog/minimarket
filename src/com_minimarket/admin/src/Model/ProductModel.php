@@ -14,6 +14,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions
 use MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductCatalogAxes;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductSkuMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
 
 final class ProductModel extends AdminModel
@@ -58,6 +59,7 @@ final class ProductModel extends AdminModel
         // Joomla repeatable subform posts no rows when the last row is removed.
         // Hidden sentinel makes an explicit empty gallery distinct from a legacy
         // form that never offered gallery editing.
+        $hasMatrix = array_key_exists('sku_matrix_payload', $data);
         $hasGallery = array_key_exists('gallery', $data) || !empty($data['gallery_present']);
         $hasVideos = array_key_exists('videos', $data) || !empty($data['videos_present']);
         $hasAttributes = array_key_exists('attribute_values', $data)
@@ -128,19 +130,30 @@ final class ProductModel extends AdminModel
         }
 
         $variantRows = [];
-        if ($hasLocal || $hasVariants) {
+        if ($hasLocal || $hasVariants || $hasMatrix) {
             try {
-                // SKU axes come only from explicit order options on this product.
-                // Informational attributes and category assignments never generate SKU.
-                $localDimensions=VariantMatrix::normalize(
-                    array_values((array) ($data['variant_dimensions'] ?? []))
-                );
-                ProductCatalogAxes::validate($db,
-                    (int) ($data['category_id'] ?? 0),
-                    (int) ($data['id'] ?? 0), $localDimensions);
-                $axes=ProductLocalDimensions::axesForVariants($localDimensions);
-                // A physical SKU is valid only for a full, explicit combination.
-                $variantRows = ProductVariants::normalize($data['variants'] ?? [], $axes);
+                if ($hasMatrix) {
+                    $matrix = ProductSkuMatrix::normalize(
+                        $db, (int) ($data['id'] ?? 0),
+                        (int) ($data['category_id'] ?? 0),
+                        $data['sku_matrix_payload'], (string) ($data['price'] ?? '0')
+                    );
+                    $localDimensions = $matrix['dimensions'];
+                    $variantRows = $matrix['variants'];
+                    $hasLocal = true;
+                    $hasVariants = true;
+                } else {
+                    // Compatibility with installed versions that still post
+                    // the previous native subform payload.
+                    $localDimensions = VariantMatrix::normalize(
+                        array_values((array) ($data['variant_dimensions'] ?? []))
+                    );
+                    ProductCatalogAxes::validate($db,
+                        (int) ($data['category_id'] ?? 0),
+                        (int) ($data['id'] ?? 0), $localDimensions);
+                    $axes = ProductLocalDimensions::axesForVariants($localDimensions);
+                    $variantRows = ProductVariants::normalize($data['variants'] ?? [], $axes);
+                }
             } catch (\InvalidArgumentException | \JsonException $error) {
                 $key = $error->getMessage();
                 $this->setError(Text::_(str_starts_with($key, 'COM_MINIMARKET_')
@@ -155,7 +168,7 @@ final class ProductModel extends AdminModel
         }
 
         unset($data['group_ids'], $data['new_group_title'], $data['product_group_present'], $data['group_contents']);
-        unset($data['category_option_preview']);
+        unset($data['category_option_preview'], $data['sku_matrix_payload']);
         unset($data['variant_dimensions'], $data['variant_dimensions_present'],
             $data['variant_matrix'], $data['variants'], $data['variants_present'],
             $data['videos'], $data['videos_present'],
@@ -169,13 +182,6 @@ final class ProductModel extends AdminModel
                 return false;
             }
 
-            if ($hasGallery) {
-                $productId = (int) $this->getState($this->getName() . '.id');
-                if ($productId < 1) {
-                    throw new \RuntimeException('COM_MINIMARKET_GALLERY_INVALID');
-                }
-                ProductGallery::replaceRows($db, $productId, $rows);
-            }
             if ($hasVideos) {
                 $productId = (int) $this->getState($this->getName() . '.id');
                 ProductVideos::replace($db, $productId, $videoRows);
@@ -196,6 +202,12 @@ final class ProductModel extends AdminModel
                 // inserting a dummy SKU or touching the existing product trade fields.
                 $productId = (int) $this->getState($this->getName() . '.id');
                 ProductLocalDimensions::replace($db, $productId, $localDimensions, [], []);
+            }
+            if ($hasGallery) {
+                $productId = (int) $this->getState($this->getName() . '.id');
+                ProductGallery::replaceRows($db, $productId, $rows,
+                    $hasVariants ? $variantRows : [],
+                    $hasVariants ? ($variantIds ?? []) : []);
             }
             if ($hasGroup) {
                 $productId = (int) $this->getState($this->getName() . '.id');

@@ -124,7 +124,57 @@ final class VariantCatalog
             }
         }
         unset($item);
+        $items = self::withProductGallery($db, $productId, $items);
         return ['axes'=>$axes,'items'=>$items];
+    }
+
+    /**
+     * Product gallery remains one set of files. This adds SKU visibility and
+     * primary-image choices by physical variant_id, without duplicating files.
+     * Only currently published variant IDs are sent to the public storefront.
+     */
+    private static function withProductGallery(
+        DatabaseInterface $db, int $productId, array $items
+    ): array {
+        if (!$items) return $items;
+        $q = $db->getQuery(true)
+            ->select(['id','path','alt','visibility_mode'])
+            ->from($db->quoteName('#__minimarket_product_images'))
+            ->where('product_id = ' . $productId)
+            ->order('sort_order ASC, id ASC');
+        $db->setQuery($q);
+        $photos = (array)$db->loadAssocList();
+        if (!$photos) return $items;
+        $imageIds = array_map('intval',array_column($photos,'id'));
+        $q = $db->getQuery(true)
+            ->select(['image_id','variant_id','is_cover'])
+            ->from($db->quoteName('#__minimarket_product_image_variants'))
+            ->where('image_id IN (' . implode(',',$imageIds) . ')');
+        $db->setQuery($q);
+        $links = [];
+        foreach ((array)$db->loadAssocList() as $link) {
+            $links[(int)$link['image_id']][(int)$link['variant_id']] =
+                (int)$link['is_cover'] === 1;
+        }
+        foreach ($items as &$item) {
+            $variantId = (int)$item['id'];
+            $item['gallery'] = [];
+            foreach ($photos as $photo) {
+                $path = self::safeImage((string)$photo['path']);
+                if ($path === '') continue;
+                $imageId = (int)$photo['id'];
+                $chosen = $links[$imageId][$variantId] ?? null;
+                if ((int)$photo['visibility_mode'] === 1 && $chosen === null) {
+                    continue; // Restricted photo is never emitted for this SKU.
+                }
+                $item['gallery'][] = [
+                    'path'=>$path, 'alt'=>(string)$photo['alt'],
+                    'cover'=>$chosen === true,
+                ];
+            }
+        }
+        unset($item);
+        return $items;
     }
 
     /** Add all photos with one query; no per-SKU gallery round trips. */

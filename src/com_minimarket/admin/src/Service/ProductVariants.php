@@ -74,7 +74,7 @@ final class ProductVariants
             }
             if (!ctype_digit($idText) || (int) $idText < 0 || !is_array($rawSelection)
                 || count($rawSelection) !== count($axes)
-                || $sku === '' || mb_strlen($sku) > 100
+                || mb_strlen($sku) > 100
                 || preg_match('/[\x00-\x1f<>]/u', $sku)
                 || str_starts_with(mb_strtolower($sku), 'mm-temporary-variant-')
                 || !preg_match('/^(?:0|[1-9]\d{0,12})(?:\.\d{1,2})?$/D', $price)
@@ -102,11 +102,11 @@ final class ProductVariants
             }
             $signature = hash('sha256', json_encode($selection, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
             $skuKey = mb_strtolower($sku);
-            if (isset($seenCombos[$signature]) || isset($seenSkus[$skuKey])) {
+            if (isset($seenCombos[$signature]) || ($sku !== '' && isset($seenSkus[$skuKey]))) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_DUPLICATE');
             }
             $seenCombos[$signature] = true;
-            $seenSkus[$skuKey] = true;
+            if ($sku !== '') $seenSkus[$skuKey] = true;
             $photos = ProductGallery::normalizeRows($item['photos'] ?? [], $image);
             if ($photos && $image === '') throw new \InvalidArgumentException('COM_MINIMARKET_GALLERY_COVER_REQUIRED');
             $result[] = [
@@ -266,7 +266,7 @@ final class ProductVariants
         $savedIds = [];
         foreach ($rows as $r) {
             $data = [
-                'sku' => $db->quote($r['sku']),
+                'sku' => $r['sku'] === '' ? 'NULL' : $db->quote($r['sku']),
                 'selection_json' => $db->quote($r['selection_json']),
                 'signature' => $db->quote($r['signature']),
                 'price' => $db->quote($r['price']),

@@ -219,3 +219,98 @@
     height: auto;
   }
 }
+
+
+/* 0.5.39: one direct SKU combination matrix. No table row add/subform,
+   horizontal scrollbar, or row-level price editor. */
+#adminForm [data-mm-sku-matrix],
+#adminForm [data-mm-matrix-table] {
+  min-width: 0;
+  max-width: 100%;
+  container-type: inline-size;
+}
+#adminForm .mm-sku-matrix {
+  width: 100%;
+  max-width: 100%;
+  table-layout: auto;
+}
+#adminForm .mm-sku-matrix th,
+#adminForm .mm-sku-matrix td {
+  min-width: 0;
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+#adminForm .mm-sku-matrix th {
+  font-weight: 600;
+  word-break: normal;
+  hyphens: none;
+}
+#adminForm .mm-sku-matrix th:nth-last-child(3) { width: 24%; }
+#adminForm .mm-sku-matrix th:nth-last-child(2) { width: 12%; }
+#adminForm .mm-sku-matrix th:last-child { width: 10%; }
+#adminForm .mm-sku-matrix td .form-control {
+  width: 100%;
+  min-width: 0;
+}
+#adminForm .mm-sku-matrix td:last-child,
+#adminForm .mm-sku-matrix th:last-child { text-align: center; }
+#adminForm .mm-sku-matrix [data-mm-stock-column][hidden] {
+  display: none !important;
+}
+#adminForm .mm-gallery-sku-assignments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: .8rem;
+  padding: .65rem 0;
+  width: 100%;
+}
+#adminForm .mm-gallery-sku-assignments > label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: .3rem;
+}
+#adminForm .mm-gallery-sku-assignments > label[hidden] { display: none; }
+#adminForm .mm-gallery-sku-assignments select[multiple] {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+@container (max-width: 890px) {
+  #adminForm .mm-sku-matrix,
+  #adminForm .mm-sku-matrix tbody { display: block; width: 100%; }
+  #adminForm .mm-sku-matrix thead { display: none; }
+  #adminForm .mm-sku-matrix tbody tr {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: .4rem .7rem;
+    padding: .6rem;
+    border: 1px solid var(--border-color, rgba(128,128,128,.3));
+    border-radius: .4rem;
+    margin-bottom: .5rem;
+  }
+  #adminForm .mm-sku-matrix tbody td {
+    display: block;
+    min-width: 0;
+    border: none;
+    padding: .2rem;
+    grid-column: span 2;
+    text-align: start !important;
+  }
+  #adminForm .mm-sku-matrix tbody td:nth-last-child(3) {
+    grid-column: span 2;
+  }
+  #adminForm .mm-sku-matrix tbody td:last-child {
+    grid-column: span 1;
+    text-align: center !important;
+  }
+  #adminForm .mm-sku-matrix tbody td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: .75rem;
+    font-weight: 600;
+    opacity: .75;
+    margin-bottom: .15rem;
+  }
+}

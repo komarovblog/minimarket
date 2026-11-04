@@ -63,13 +63,15 @@ $skuForm=simplexml_load_file($base.'admin/forms/product_variant.xml');
 checkUi(count($skuForm->xpath("//field[@name='variant_label']"))===1,
     'SKU variant combination clearly named in table');
 $editor=file_get_contents($base.'admin/tmpl/product/edit.php');
-checkUi(str_contains($editor,"renderField('variant_dimensions')") &&
-    str_contains($editor,"renderField('variants')"),'both native forms rendered');
-$client=file_get_contents($base.'media/js/variants-local.js');
-checkUi(!str_contains($client,"input[name=\"jform[variant_config]\"]"),
-    'no old hidden JSON is the source of truth for option values');
-checkUi(str_contains($client,'table table-striped table-sm') &&
-    str_contains($client,'querySelectorAll'), 'native table for combination preview');
+checkUi(str_contains($editor, "renderField('sku_matrix_payload')"),
+    'one visible SKU matrix is rendered in product editor');
+checkUi(!str_contains($editor, "renderField('variants')") &&
+    !str_contains($editor, "renderField('variant_dimensions')"),
+    'old nested SKU forms no longer occupy the product UI');
+$client=file_get_contents($base.'media/js/sku-matrix.js');
+checkUi(str_contains($client,'data-mm-matrix-payload') &&
+    str_contains($client,'table table-striped table-sm'),
+    'matrix has one payload and a native readable Joomla table');
 foreach (['categories','products','attributes','values','groups'] as $entity) {
     $list=file_get_contents($base.'admin/tmpl/'.$entity.'/default.php');
     checkUi(str_contains($list,'table table-striped'),
@@ -96,19 +98,19 @@ checkUi(!str_contains($editor,'$legacySku') &&
 checkUi(!is_file($base.'media/js/variants-admin.js') &&
     !is_file($base.'admin/src/Field/VariantinfoField.php'),
     'historical SKU editor files removed');
-$skuBuilder=file_get_contents($base.'admin/src/Field/VariantbuilderField.php');
-checkUi(str_contains($skuBuilder,'data-mm-add-sku')
-    && str_contains($skuBuilder,'data-mm-sku-apply'),
-    'manual SKU positions and bulk edit use existing Joomla-native SKU form');
-checkUi(str_contains($client,'decorateSkuCards()')
-    && str_contains($client,'hydrateFromCategory()'),
-    'SKU master/detail and automatic global category options use native Joomla subforms');
-checkUi(str_contains($client,'refreshSkuEditors(axes)')
-    && str_contains($client,'data-mm-sku-select'),
-    'each native SKU row exposes local option selection and explicit bulk checkbox');
-checkUi(str_contains($client, "appendRow({ title: '', selection: {} }, axes, true)"),
-    'manual SKU position has no invented selection or SKU code');
-checkUi(str_contains($client,"['price', 'stock', 'state']"),
-    'copying SKU position excludes identity and personal media by default');
+$matrixField=file_get_contents($base.'admin/src/Field/SkumatrixField.php');
+checkUi(str_contains($matrixField,'ProductCatalogAxes::forAllCategories(') &&
+    str_contains($matrixField,'ProductVariants::formRows('),
+    'category options and saved physical SKUs are sources of truth');
+checkUi(str_contains($client,'const combinations = axes =>') &&
+    str_contains($client,'for (const axis of currentAxes)'),
+    'each option generates one visible matrix column');
+checkUi(str_contains($client,'isShared()') &&
+    !str_contains($client,'data-mm-sku-price') &&
+    !str_contains($client,'group-add'),
+    'shared stock hides stock column and no SKU price or Joomla add-row control');
+checkUi(str_contains($client,'refreshGallery()') &&
+    str_contains($client,'data-mm-photo-select'),
+    'gallery photo permissions and SKU covers are edited alongside matrix');
 echo 'NATIVE_UI_OK: '.$n." cases\n";
 
