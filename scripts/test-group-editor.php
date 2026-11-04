@@ -81,7 +81,7 @@ namespace MiniMarket\GroupEditorSmoke {
     check(str_contains($js,"group.deleteRelationship") &&
         str_contains($js,'submitGroupDeletion()'),
         'standalone and product editors both expose explicit group deletion');
-    check(str_contains($js,'submitGroupChanges()') &&
+    check(str_contains($js,'const submitGroupChanges = () => {') &&
         str_contains($js,'mm-group-item__save-actions') &&
         str_contains($js,"'btn-success'") &&
         str_contains($js,'submitGroupChanges'),
