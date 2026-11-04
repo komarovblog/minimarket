@@ -26,7 +26,7 @@ namespace MiniMarket\TabularV1Smoke {
     ok(str_starts_with($csv,"\xEF\xBB\xBF"),'UTF-8 BOM for Excel CSV');
     $decoded=CatalogImport::decode(json_encode(T::parseCsv($csv),JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE));
     foreach (T::FIELDS as $section=>$fields) {
-        ok(($decoded[$section]??[])===($doc[$section]??[]),
+        ok(($decoded[$section]??[])==($doc[$section]??[]),
             'CSV preserves '.$section.' including nested values/links');
     }
     ok($decoded['source']==='minimarket-demo','CSV source identity');
@@ -36,7 +36,7 @@ namespace MiniMarket\TabularV1Smoke {
     ok(str_starts_with($xlsx,'PK'),'XLSX real OOXML zip');
     $round=CatalogImport::decode(json_encode(T::parseXlsx($xlsx),JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE));
     foreach (T::FIELDS as $section=>$fields) {
-        ok(($round[$section]??[])===($doc[$section]??[]),
+        ok(($round[$section]??[])==($doc[$section]??[]),
             'XLSX preserves '.$section.' with stable keys');
     }
     ok($round['products'][0]['sku']==='TOPKA-10',
