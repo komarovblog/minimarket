@@ -1,0 +1,117 @@
+/* MiniMarket admin: native Joomla controls, responsive editing, no horizontal form scrolling. */
+#adminForm,
+#adminForm .card,
+#adminForm .control-group,
+#adminForm .controls,
+#adminForm .subform-repeatable,
+#adminForm .subform-repeatable-group {
+  min-width: 0;
+  max-width: 100%;
+}
+#adminForm .table {
+  width: 100%;
+  table-layout: fixed;
+  max-width: 100%;
+}
+#adminForm .table th,
+#adminForm .table td {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+#adminForm input:not([type="checkbox"]):not([type="radio"]),
+#adminForm select,
+#adminForm textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+#adminForm .mm-rules-table th:first-child { width: 65%; }
+#adminForm .mm-rules-table th:last-child { width: 35%; }
+#adminForm .mm-rules-table select { width: 100%; }
+#adminForm .mm-category-option-picker .mm-option-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: .5rem;
+}
+#adminForm .mm-category-option-picker .mm-option-list__item {
+  border: 1px solid var(--border-color, rgba(128,128,128,.30));
+  border-radius: .35rem;
+  padding: .6rem .8rem;
+  overflow-wrap: anywhere;
+}
+#adminForm .mm-order-option-values .subform-repeatable-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem .85rem;
+  align-items: flex-end;
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--border-color, rgba(128,128,128,.25));
+}
+#adminForm .mm-order-option-values .subform-repeatable-group > .control-group {
+  flex: 1 1 9rem;
+  min-width: 0;
+  margin: 0;
+}
+#adminForm .mm-order-option-values .subform-repeatable-group > .control-group:has(input[name$="[title]"]) { flex: 2 1 12rem; }
+#adminForm [data-mm-variant-options] .subform-repeatable-group {
+  min-width: 0;
+  max-width: 100%;
+}
+#adminForm [data-mm-variant-skus] .subform-repeatable-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: .5rem 1rem;
+  border: 1px solid var(--border-color, rgba(128,128,128,.3));
+  border-radius: .375rem;
+  padding: .75rem;
+  margin-bottom: .75rem;
+  max-width: 100%;
+}
+#adminForm [data-mm-variant-skus] .subform-repeatable-group > .control-group {
+  flex: 1 1 9rem;
+  min-width: 0;
+  margin: 0;
+}
+#adminForm [data-mm-variant-skus] .subform-repeatable-group > .control-group:has(input[name$="[variant_label]"]) {
+  flex: 2 1 15rem;
+}
+#adminForm [data-mm-variant-skus] .subform-repeatable-group > .control-group:has(input[name$="[price]"]),
+#adminForm [data-mm-variant-skus] .subform-repeatable-group > .control-group:has(input[name$="[stock]"]) {
+  flex: 0 1 10rem;
+}
+#adminForm [data-mm-variant-skus] .subform-repeatable-group .mm-sku-extra {
+  display: none;
+}
+#adminForm [data-mm-variant-skus] .subform-repeatable-group.mm-sku-expanded .mm-sku-extra {
+  display: block;
+  flex-basis: 100%;
+}
+#adminForm [data-mm-variant-skus] .mm-sku-expand {
+  align-self: flex-end;
+  max-width: 100%;
+}
+#adminForm [data-mm-variant-skus] .subform-repeatable-group > .btn-group,
+#adminForm [data-mm-variant-skus] .subform-repeatable-group > .group-remove {
+  flex: none;
+}
+@media (max-width: 767px) {
+  #adminForm .mm-rules-table,
+  #adminForm .mm-rules-table tbody,
+  #adminForm .mm-rules-table tr,
+  #adminForm .mm-rules-table th,
+  #adminForm .mm-rules-table td {
+    display: block;
+    width: 100%;
+  }
+  #adminForm .mm-rules-table thead { display: none; }
+  #adminForm .mm-rules-table tr { border-bottom: 1px solid rgba(128,128,128,.25); padding: .5rem 0; }
+  #adminForm .mm-rules-table th,
+  #adminForm .mm-rules-table td { padding: .25rem .5rem; }
+  #adminForm [data-mm-variant-skus] .subform-repeatable-group > .control-group {
+    flex-basis: 100%;
+  }
+}
+
+#adminForm [data-mm-variant-skus] [hidden], #adminForm .mm-order-option-values [hidden] { display: none !important; }

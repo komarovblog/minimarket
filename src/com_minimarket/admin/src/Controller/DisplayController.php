@@ -12,6 +12,13 @@ final class DisplayController extends BaseController
     public function display($cachable = false, $urlparams = [])
     {
         $viewName = $this->input->getCmd('view', 'dashboard');
+        // One responsive admin stylesheet for every MiniMarket entity, no
+        // global Joomla changes and no horizontal form-table scrolling.
+        \Joomla\CMS\Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseStyle(
+                'com_minimarket.admin-ui',
+                'media/com_minimarket/css/admin-ui.css'
+            );
 
         if (!\in_array($viewName, ['dashboard', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);

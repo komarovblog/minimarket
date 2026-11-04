@@ -8,6 +8,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\AdminModel;
 use MiniMarket\Component\Minimarket\Administrator\Service\OrderOptionCatalog;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
 
 final class OrderoptionModel extends AdminModel
 {
@@ -21,6 +22,9 @@ final class OrderoptionModel extends AdminModel
     {
         $item = parent::getItem($pk);
         if ($item) {
+            $item->category_rules = CategoryOrderOptions::directForOption(
+                $this->getDatabase(), (int) ($item->id ?? 0)
+            );
             $item->option_values = OrderOptionCatalog::formRows(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
@@ -32,6 +36,8 @@ final class OrderoptionModel extends AdminModel
     {
         $hasValues = array_key_exists('option_values', $data)
             || !empty($data['values_present']);
+        $hasCategories = array_key_exists('category_rules', $data)
+            || !empty($data['categories_present']);
         $db = $this->getDatabase();
         $old = [];
         $rows = [];
@@ -44,16 +50,30 @@ final class OrderoptionModel extends AdminModel
                 return false;
             }
         }
-        unset($data['option_values'], $data['values_present']);
+        try {
+            $categoryRules = $hasCategories
+                ? CategoryOrderOptions::normalize(
+                    $data['category_rules'] ?? [],
+                    CategoryOrderOptions::categoryIds($db)
+                ) : [];
+        } catch (\InvalidArgumentException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_INVALID'));
+            return false;
+        }
+        unset($data['option_values'], $data['values_present'],
+            $data['category_rules'], $data['categories_present']);
         $db->transactionStart();
         try {
             if (!parent::save($data)) {
                 $db->transactionRollback();
                 return false;
             }
+            $id = (int) $this->getState($this->getName() . '.id');
             if ($hasValues) {
-                $id = (int) $this->getState($this->getName() . '.id');
                 OrderOptionCatalog::replace($db, $id, $old, $rows);
+            }
+            if ($hasCategories) {
+                CategoryOrderOptions::replaceForOption($db, $id, $categoryRules);
             }
             $db->transactionCommit();
             return true;

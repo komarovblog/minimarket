@@ -49,6 +49,49 @@ final class CategoryOrderOptions
         return $result;
     }
 
+    /** Direct mode per category for one reusable order option. */
+    public static function directForOption(DatabaseInterface $db, int $optionId): array
+    {
+        if ($optionId < 1) return [];
+        $q = $db->getQuery(true)->select(['category_id', 'mode'])
+            ->from($db->quoteName('#__minimarket_category_order_options'))
+            ->where('option_id = ' . $optionId);
+        $db->setQuery($q);
+        $result = [];
+        foreach ((array) $db->loadAssocList() as $row) {
+            $result[(int) $row['category_id']] = (int) $row['mode'];
+        }
+        return $result;
+    }
+
+    public static function categoryIds(DatabaseInterface $db): array
+    {
+        $q = $db->getQuery(true)->select('id')
+            ->from($db->quoteName('#__minimarket_categories'));
+        $db->setQuery($q);
+        return array_map('intval', (array) $db->loadColumn());
+    }
+
+    /** Replace only the selected option's assignments, never other options' assignments. */
+    public static function replaceForOption(DatabaseInterface $db, int $optionId, array $rules): void
+    {
+        if ($optionId < 1) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_INVALID');
+        }
+        $q = $db->getQuery(true)->delete($db->quoteName('#__minimarket_category_order_options'))
+            ->where('option_id = ' . $optionId);
+        $db->setQuery($q);
+        $db->execute();
+        if (!$rules) return;
+        $q = $db->getQuery(true)->insert($db->quoteName('#__minimarket_category_order_options'))
+            ->columns($db->quoteName(['category_id', 'option_id', 'mode']));
+        foreach ($rules as $categoryId => $mode) {
+            $q->values((int) $categoryId . ',' . $optionId . ',' . (int) $mode);
+        }
+        $db->setQuery($q);
+        $db->execute();
+    }
+
     /** Read the tree and all direct category rules in two bounded queries. */
     public static function hierarchy(DatabaseInterface $db): array
     {

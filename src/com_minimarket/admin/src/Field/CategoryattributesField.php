@@ -51,7 +51,7 @@ final class CategoryattributesField extends FormField
             htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         $html = '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_CATATTR_HELP')) . '</p>'
-            . '<div class="table-responsive"><table class="table table-striped align-middle">'
+            . '<table class="table table-striped table-sm align-middle mm-rules-table">'
             . '<thead><tr><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_ATTRIBUTE'))
             . '</th><th scope="col" class="w-25">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
             . '</th></tr></thead><tbody>';
@@ -97,7 +97,7 @@ final class CategoryattributesField extends FormField
             $html .= '</select></td></tr>';
         }
 
-        $html .= '</tbody></table></div>';
+        $html .= '</tbody></table>';
         $html .= '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_CATATTR_PARENT_CHANGE')) . '</p>';
 
         return $html;

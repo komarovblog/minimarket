@@ -151,6 +151,7 @@ final class ProductModel extends AdminModel
         }
 
         unset($data['group_ids'], $data['new_group_title'], $data['product_group_present'], $data['group_contents']);
+        unset($data['category_option_preview']);
         unset($data['variant_dimensions'], $data['variant_dimensions_present'],
             $data['variant_matrix'], $data['variants'], $data['variants_present'],
             $data['videos'], $data['videos_present'],

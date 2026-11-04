@@ -52,6 +52,8 @@
     </fieldset>
     <fieldset name="variants" label="COM_MINIMARKET_PRODUCT_TAB_VARIANTS">
         <field name="variants_workflow" type="note" label="COM_MINIMARKET_VARIANTS_WORKFLOW" description="COM_MINIMARKET_VARIANTS_WORKFLOW_DESC"/>
+        <field name="category_option_preview" type="Productcategoryoptions" filter="raw"
+               label="COM_MINIMARKET_PRODUCT_OPTIONS_FROM_CATEGORY"/>
         <field name="variants_present" type="hidden" default="1" filter="int"/>
         <field name="variant_dimensions_present" type="hidden" filter="int" default="1"/>
         <field name="variant_dimensions" type="subform" label="COM_MINIMARKET_LOCAL_VARIANTS_TITLE"
@@ -63,7 +65,7 @@
                description="COM_MINIMARKET_VARIANTS_HELP"
                formsource="administrator/components/com_minimarket/forms/product_variant.xml"
                multiple="true" min="0" max="200" buttons="add,remove,move"
-               layout="joomla.form.field.subform.repeatable-table" validate="Subform"/>
+               layout="joomla.form.field.subform.repeatable" validate="Subform"/>
     </fieldset>
     <fieldset name="groups" label="COM_MINIMARKET_PRODUCT_TAB_GROUPS">
         <field name="product_group_present" type="hidden" default="1" filter="int"/>

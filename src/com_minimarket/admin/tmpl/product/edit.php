@@ -24,6 +24,7 @@ use Joomla\CMS\Router\Route;
             <?php if ($section === 'variants') : ?>
                 <?php echo $this->form->renderField('variants_present'); ?>
                 <?php echo $this->form->renderField('variant_dimensions_present'); ?>
+                <?php echo $this->form->renderField('category_option_preview'); ?>
                 <div data-mm-variant-options>
                     <?php echo $this->form->renderField('variant_dimensions'); ?>
                 </div>

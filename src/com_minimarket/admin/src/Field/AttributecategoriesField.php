@@ -44,7 +44,7 @@ final class AttributecategoriesField extends FormField
             htmlspecialchars($v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         $html = '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_ATTRCAT_HELP')) . '</p>'
-            . '<div class="table-responsive"><table class="table table-striped align-middle">'
+            . '<table class="table table-striped table-sm align-middle mm-rules-table">'
             . '<thead><tr><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATEGORIES'))
             . '</th><th scope="col" class="w-25">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
             . '</th></tr></thead><tbody>';
@@ -94,6 +94,6 @@ final class AttributecategoriesField extends FormField
             }
             $html .= '</select></td></tr>';
         }
-        return $html . '</tbody></table></div>';
+        return $html . '</tbody></table>';
     }
 }

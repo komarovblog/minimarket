@@ -92,6 +92,22 @@ namespace MiniMarket\OrderOptionsTest {
     verify(str_contains($manifest, 'view=orderoptions')
         && version_compare($versionMatches[1] ?? '0', '0.5.34', '>='),
         'global option menu persists through future component versions');
+
+    $optionForm = simplexml_load_file($base . 'forms/orderoption.xml');
+    verify(count($optionForm->xpath("//fieldset[@name='categories']/field[@name='category_rules' and @type='Optioncategories']")) === 1,
+        'option editor has same reverse category assignments as attributes');
+    $optionEditor = file_get_contents($base . 'src/Model/OrderoptionModel.php');
+    verify(str_contains($optionEditor, 'CategoryOrderOptions::replaceForOption')
+        && str_contains($optionEditor, 'CategoryOrderOptions::directForOption'),
+        'reverse category assignments saved transactionally with the option');
+    $reverseService = file_get_contents($base . 'src/Service/CategoryOrderOptions.php');
+    verify(str_contains($reverseService, 'function replaceForOption(')
+        && str_contains($reverseService, 'function directForOption('),
+        'one relationship table is edited from category and option');
+    verify((string)$optionForm->xpath("//fieldset[@name='values']/field[@name='option_values']")[0]['layout'] ===
+        'joomla.form.field.subform.repeatable',
+        'option values render compact native rows without horizontal scroll');
+
     foreach (['ProductgroupField.php', 'GroupmembersField.php'] as $field) {
         $code = file_get_contents($base . 'src/Field/' . $field);
         verify(str_contains($code, '$option->checked = in_array(')

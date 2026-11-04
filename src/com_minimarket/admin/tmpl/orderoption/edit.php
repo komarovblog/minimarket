@@ -13,7 +13,7 @@ use Joomla\CMS\Language\Text;
         'values' => 'COM_MINIMARKET_ORDER_OPTION_VALUES'
     ] as $tab => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-orderoption', $tab, Text::_($label)); ?>
-        <div class="card card-body"><?php echo $this->form->renderFieldset($tab); ?></div>
+        <div class="card card-body<?php echo $tab === 'values' ? ' mm-order-option-values' : ''; ?>"><?php echo $this->form->renderFieldset($tab); ?></div>
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
     <?php endforeach; ?>
     <?php echo HTMLHelper::_('uitab.endTabSet'); ?>

@@ -41,7 +41,7 @@ final class CategoryorderoptionsField extends FormField
         $esc = static fn(string $s): string =>
             htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $html = '<p class="text-muted">' . $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_HELP')) .
-            '</p><table class="table table-striped align-middle"><thead><tr><th>' .
+            '</p><table class="table table-striped table-sm align-middle mm-rules-table"><thead><tr><th>' .
             $esc(Text::_('COM_MINIMARKET_ORDER_OPTIONS')) . '</th><th class="w-25">' .
             $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTION_RULE')) .
             '</th></tr></thead><tbody>';

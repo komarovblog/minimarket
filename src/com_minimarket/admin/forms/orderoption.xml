@@ -20,6 +20,11 @@
            description="COM_MINIMARKET_ORDER_OPTION_VALUES_DESC"
            formsource="administrator/components/com_minimarket/forms/orderoptionvalue.xml"
            multiple="true" min="0" max="250" buttons="add,remove,move"
-           layout="joomla.form.field.subform.repeatable-table" validate="Subform"/>
+           layout="joomla.form.field.subform.repeatable" validate="Subform"/>
+  </fieldset>
+  <fieldset name="categories" label="COM_MINIMARKET_ORDER_OPTION_CATEGORIES">
+    <field name="categories_present" type="hidden" default="1" filter="int"/>
+    <field name="category_rules" type="Optioncategories" filter="raw"
+           label="COM_MINIMARKET_ORDER_OPTION_CATEGORIES"/>
   </fieldset>
 </form>

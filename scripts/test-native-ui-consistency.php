@@ -44,8 +44,10 @@ checkUi((string)$axes[0]['max']==='4','four option axes supported');
 checkUi((string)$axes[0]['buttons']==='add,remove,move','axis add/remove/move matches gallery');
 $sku=$form->xpath("//fieldset[@name='variants']/field[@name='variants' and @type='subform']");
 checkUi(count($sku)===1,'SKU uses native Joomla subform');
-checkUi((string)$sku[0]['layout']==='joomla.form.field.subform.repeatable-table',
-    'SKU rows use Joomla table layout, not oversized cards');
+checkUi((string)$sku[0]['layout']==='joomla.form.field.subform.repeatable',
+    'SKU rows use responsive Joomla cards rather than a horizontally scrolling table');
+checkUi(count($form->xpath("//fieldset[@name='variants']/field[@name='category_option_preview' and @type='Productcategoryoptions']"))===1,
+    'product sees category option catalog without duplicate option data');
 checkUi(count($form->xpath("//fieldset[@name='variants']/field[@name='variants_workflow' and @type='note']"))===1,
     'SKU editor has an explicit step-by-step configuration guide');
 
@@ -54,8 +56,8 @@ $values=$dimension->xpath("//field[@name='values' and @type='subform']");
 checkUi(count($values)===1,'option values use nested native Subform');
 checkUi((string)$values[0]['buttons']==='add,remove,move',
     'values have same plus/remove/move buttons as gallery');
-checkUi((string)$values[0]['layout']==='joomla.form.field.subform.repeatable-table',
-    'option values use native table');
+checkUi((string)$values[0]['layout']==='joomla.form.field.subform.repeatable',
+    'nested option values use responsive repeatable cards');
 $skuForm=simplexml_load_file($base.'admin/forms/product_variant.xml');
 checkUi(count($skuForm->xpath("//field[@name='variant_label']"))===1,
     'SKU variant combination clearly named in table');
@@ -97,6 +99,9 @@ $skuBuilder=file_get_contents($base.'admin/src/Field/VariantbuilderField.php');
 checkUi(str_contains($skuBuilder,'data-mm-add-sku')
     && str_contains($skuBuilder,'data-mm-sku-apply'),
     'manual SKU positions and bulk edit use existing Joomla-native SKU form');
+checkUi(str_contains($client,'decorateSkuCards()')
+    && str_contains($client,'copyCategoryOptions()'),
+    'SKU master/detail and category option copying use existing Joomla subforms');
 checkUi(str_contains($client,'refreshSkuEditors(axes)')
     && str_contains($client,'data-mm-sku-select'),
     'each native SKU row exposes local option selection and explicit bulk checkbox');
