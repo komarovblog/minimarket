@@ -732,6 +732,32 @@ verify((int)$pdo->query("SELECT COUNT(*) FROM catci_minimarket_order_option_valu
   WHERE sample_image='images/minimarket/sample.png'")->fetchColumn()===1,
   'a reusable option value stores its sample image');
 
+// 0.5.45: the additive migration must preserve old values and SKU associations.
+$before45Scalar=$pdo->query('SELECT * FROM catci_minimarket_product_attribute_scalars
+    ORDER BY product_id,attribute_id')->fetchAll(PDO::FETCH_ASSOC);
+$before45Options=$pdo->query('SELECT * FROM catci_minimarket_product_attribute_options
+    ORDER BY product_id,attribute_id,value_id')->fetchAll(PDO::FETCH_ASSOC);
+$before45Values=$pdo->query('SELECT id,attribute_id,title,code,color_hex,sample_image,state
+    FROM catci_minimarket_attribute_values ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo,$dir.'updates/mysql/0.5.45.sql','catci_');
+verify($before45Scalar===$pdo->query('SELECT * FROM catci_minimarket_product_attribute_scalars
+    ORDER BY product_id,attribute_id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.45 preserves existing numeric and text scalars');
+verify($before45Options===$pdo->query('SELECT * FROM catci_minimarket_product_attribute_options
+    ORDER BY product_id,attribute_id,value_id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.45 preserves old dictionary value IDs');
+verify($before45Values===$pdo->query('SELECT id,attribute_id,title,code,color_hex,sample_image,state
+    FROM catci_minimarket_attribute_values ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.45 preserves value metadata');
+verify((int)$pdo->query("SELECT COUNT(*) FROM catci_minimarket_attributes
+    WHERE value_source='legacy'")->fetchColumn()>0,
+    'legacy records stay in legacy mode');
+$pdo->exec("INSERT INTO catci_minimarket_product_attribute_free_values
+    (product_id,attribute_id,value_text,sort_order) VALUES (1,3,'5',0),(1,3,'10',1)");
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_attribute_free_values
+    WHERE product_id=1 AND attribute_id=3')->fetchColumn()===2,
+    'manual numeric field saves multiple separate rows');
+
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
@@ -750,6 +776,7 @@ $pdo->exec('DROP TABLE catci_minimarket_product_image_variants');
 $pdo->exec('DROP TABLE catci_minimarket_product_images');
 $pdo->exec('DROP TABLE catci_minimarket_product_variant_images');
 $pdo->exec('DROP TABLE catci_minimarket_product_variants');
+$pdo->exec('DROP TABLE catci_minimarket_product_attribute_free_values');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_multi_values');
 $pdo->exec('DROP TABLE catci_minimarket_product_videos');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_options');
@@ -835,6 +862,9 @@ foreach (['id','product_id','path','alt','sort_order'] as $col) {
 $freshAttrColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
 verify(!in_array('is_variant',$freshAttrColumns,true),'fresh 0.5.29 contains no obsolete SKU attribute flag');
+foreach (['value_source','color_display'] as $col) {
+    verify(in_array($col,$freshAttrColumns,true),'fresh 0.5.45 attribute '.$col);
+}
 foreach (['id','title','code','input_type','input_mode','number_options','text_options','number_unit',
     'number_min','number_max','number_step','is_multiple','is_filterable',
     'filter_mode','filter_multiple','sort_order','state'] as $col) {
@@ -842,7 +872,7 @@ foreach (['id','title','code','input_type','input_mode','number_options','text_o
 }
 $freshValueColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_attribute_values')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['id','attribute_id','title','code','color_hex','sample_image','sort_order','state'] as $col) {
+foreach (['id','attribute_id','title','code','color_hex','sample_image','value_payload','sort_order','state'] as $col) {
     verify(in_array($col, $freshValueColumns, true), 'fresh 0.5.4 value column ' . $col);
 }
 $freshAssignmentColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_category_attributes')
@@ -854,6 +884,11 @@ $freshVideos = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_vide
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','product_id','title','source','poster','sort_order'] as $col) {
     verify(in_array($col,$freshVideos,true),'fresh video relation column '.$col);
+}
+$freshFree = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_attribute_free_values')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','product_id','attribute_id','value_text','sort_order'] as $col) {
+    verify(in_array($col,$freshFree,true),'fresh 0.5.45 manual multi-value '.$col);
 }
 $freshScalars = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_attribute_scalars')
     ->fetchAll(PDO::FETCH_COLUMN);

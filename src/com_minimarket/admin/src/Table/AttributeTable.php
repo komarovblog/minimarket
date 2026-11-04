@@ -50,7 +50,8 @@ final class AttributeTable extends Table
 
         // When switching from List to another type the hidden List-specific
         // cardinality control must not leave an invalid flag behind.
-        if (!in_array($this->input_type, ['list','color'], true)
+        if (($this->value_source ?? 'legacy') === 'legacy'
+            && !in_array($this->input_type, ['list','color'], true)
             && !($this->input_type === 'text' && $this->input_mode === 'presets')) {
             $this->is_multiple = 0;
         }
@@ -87,8 +88,8 @@ final class AttributeTable extends Table
         $db = $this->getDbo();
         // Switching an existing free-number attribute to preset-only input
         // must not strand saved values outside the newly allowed set.
-        if ((int) $this->id > 0 && $this->input_type === 'number'
-            && $this->input_mode === 'presets') {
+        if ((int) $this->id > 0 && ($this->value_source ?? 'legacy') === 'legacy'
+            && $this->input_type === 'number' && $this->input_mode === 'presets') {
             $numbers = AttributeSettings::numericOptions($this->number_options);
             $presetQuery = $db->getQuery(true)
                 ->select('COUNT(*)')
@@ -103,8 +104,8 @@ final class AttributeTable extends Table
             }
         }
 
-        if ((int) $this->id > 0 && $this->input_type === 'text'
-            && $this->input_mode === 'presets') {
+        if ((int) $this->id > 0 && ($this->value_source ?? 'legacy') === 'legacy'
+            && $this->input_type === 'text' && $this->input_mode === 'presets') {
             $items = TextPresetRows::values((string) $this->text_options);
             $q = $db->getQuery(true)
                 ->select('COUNT(*)')
@@ -151,7 +152,7 @@ final class AttributeTable extends Table
 
         // Do not silently discard additional product choices when an
         // administrator changes a multi-select list to single-select.
-        if ((int) $this->id > 0 && in_array($this->input_type, ['list','color'], true)
+        if ((int) $this->id > 0 && (($this->value_source ?? 'legacy') !== 'manual')
             && $this->is_multiple === 0) {
             $multipleQuery = $db->getQuery(true)
                 ->select('COUNT(*)')
@@ -167,9 +168,60 @@ final class AttributeTable extends Table
         }
 
         // Changing Text presets to single or manual must not erase multiple selections.
-        if ((int) $this->id > 0 && $this->input_type === 'text' && $this->is_multiple === 0) {
+        if ((int) $this->id > 0 && $this->is_multiple === 0) {
             $q = $db->getQuery(true)->select('COUNT(*)')
                 ->from($db->quoteName('#__minimarket_product_attribute_multi_values'))
+                ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id)
+                ->group($db->quoteName('product_id'))->having('COUNT(*) > 1');
+            $db->setQuery($q);
+            if ((int) $db->loadResult() > 0) {
+                $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_MULTIPLE_IN_USE'));
+                return false;
+            }
+        }
+
+        // A source change is not an implicit migration of product values.
+        // Legacy List/Color => preset is safe because both use the same value IDs.
+        if ((int) $this->id > 0) {
+            $q = $db->getQuery(true)->select('value_source')
+                ->from($db->quoteName('#__minimarket_attributes'))
+                ->where($db->quoteName('id') . ' = ' . (int) $this->id);
+            $db->setQuery($q);
+            $oldSource = (string) ($db->loadResult() ?? 'legacy');
+            if (!in_array($oldSource, ['legacy','manual','preset'], true)) {
+                $oldSource = 'legacy';
+            }
+            $q = $db->getQuery(true)->select('input_type')
+                ->from($db->quoteName('#__minimarket_attributes'))
+                ->where($db->quoteName('id') . ' = ' . (int) $this->id);
+            $db->setQuery($q);
+            $oldType = (string) ($db->loadResult() ?? '');
+            $newSource = (string) ($this->value_source ?? 'legacy');
+            if ($oldSource !== $newSource) {
+                $safe = $oldSource === 'legacy' && $newSource === 'preset'
+                    && in_array($oldType, ['list','color'], true)
+                    && $oldType === $this->input_type;
+                if (!$safe) {
+                    foreach (['#__minimarket_product_attribute_scalars',
+                        '#__minimarket_product_attribute_options',
+                        '#__minimarket_product_attribute_multi_values',
+                        '#__minimarket_product_attribute_free_values'] as $table) {
+                        $q = $db->getQuery(true)->select('COUNT(*)')
+                            ->from($db->quoteName($table))
+                            ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id);
+                        $db->setQuery($q);
+                        if ((int) $db->loadResult() > 0) {
+                            $this->setError(Text::_('COM_MINIMARKET_UNIFIED_SOURCE_IN_USE'));
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ((int) $this->id > 0 && (int) $this->is_multiple === 0) {
+            $q = $db->getQuery(true)->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_product_attribute_free_values'))
                 ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id)
                 ->group($db->quoteName('product_id'))->having('COUNT(*) > 1');
             $db->setQuery($q);
@@ -190,7 +242,8 @@ final class AttributeTable extends Table
             if ($oldType !== '' && $oldType !== $this->input_type) {
                 foreach (['#__minimarket_product_attribute_scalars',
                     '#__minimarket_product_attribute_options',
-                    '#__minimarket_product_attribute_multi_values'] as $table) {
+                    '#__minimarket_product_attribute_multi_values',
+                    '#__minimarket_product_attribute_free_values'] as $table) {
                     $q = $db->getQuery(true)->select('COUNT(*)')
                         ->from($db->quoteName($table))
                         ->where($db->quoteName('attribute_id') . ' = ' . (int) $this->id);
@@ -205,7 +258,8 @@ final class AttributeTable extends Table
 
         // Existing list dictionaries must not become uneditable or orphaned
         // when an admin changes the input type to text/number/boolean.
-        if ((int) $this->id > 0 && !in_array($this->input_type, ['list','color'], true)) {
+        if ((int) $this->id > 0 && ($this->value_source ?? 'legacy') === 'legacy'
+            && !in_array($this->input_type, ['list','color'], true)) {
             $valuesQuery = $db->getQuery(true)
                 ->select('COUNT(*)')
                 ->from($db->quoteName('#__minimarket_attribute_values'))

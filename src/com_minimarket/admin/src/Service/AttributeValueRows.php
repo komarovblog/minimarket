@@ -17,7 +17,7 @@ final class AttributeValueRows
             return [];
         }
         $q = $db->getQuery(true)
-            ->select(['id', 'title', 'code', 'color_hex', 'sample_image', 'state', 'sort_order'])
+            ->select(['id', 'title', 'code', 'color_hex', 'sample_image', 'value_payload', 'state', 'sort_order'])
             ->from($db->quoteName('#__minimarket_attribute_values'))
             ->where($db->quoteName('attribute_id') . ' = ' . $attributeId)
             ->order($db->quoteName('sort_order') . ' ASC, ' . $db->quoteName('id') . ' ASC');
@@ -30,6 +30,7 @@ final class AttributeValueRows
                 'code' => (string) $item['code'],
                 'color_hex' => (string) ($item['color_hex'] ?? ''),
                 'sample_image' => (string) ($item['sample_image'] ?? ''),
+                'value_payload' => (string) ($item['value_payload'] ?? ''),
                 'state' => (int) $item['state'],
                 'sort_order' => (int) $item['sort_order'],
             ];
@@ -38,7 +39,7 @@ final class AttributeValueRows
     }
 
     /** @return array<string,array{id:int,title:string,code:string,state:int}> */
-    public static function formRows(DatabaseInterface $db, int $attributeId): array
+    public static function formRows(DatabaseInterface $db, int $attributeId, ?string $type = null): array
     {
         $rows = [];
         foreach (self::load($db, $attributeId) as $value) {
@@ -48,6 +49,8 @@ final class AttributeValueRows
                 'code' => $value['code'],
                 'color_hex' => $value['color_hex'],
                 'sample_image' => $value['sample_image'],
+                'value_payload' => $value['value_payload'],
+                'document_file' => $type === 'document' ? $value['value_payload'] : '',
                 'state' => $value['state'],
             ];
         }
@@ -59,7 +62,7 @@ final class AttributeValueRows
      * @param array<int,array{id:int,title:string,code:string,state:int,sort_order:int}> $existing
      * @return array<int,array{id:int,title:string,code:string,state:int,sort_order:int}>
      */
-    public static function normalize(mixed $input, array $existing): array
+    public static function normalize(mixed $input, array $existing, ?string $type = null): array
     {
         if ($input === null || $input === '') {
             return [];
@@ -95,6 +98,34 @@ final class AttributeValueRows
             if ($sample === null) throw new \InvalidArgumentException('COM_MINIMARKET_VALUE_ROWS_INVALID');
             $hex = trim((string) ($row['color_hex'] ?? ($id > 0
                 ? ($existing[$id]['color_hex'] ?? '') : '')));
+            $payload = trim((string) ($row['value_payload'] ?? ($id > 0
+                ? ($existing[$id]['value_payload'] ?? '') : '')));
+            if ($type === 'document') {
+                $media = trim((string) ($row['document_file'] ?? ''));
+                if ($media !== '') $payload = $media;
+                if (strlen($payload) > 1024 || !preg_match(
+                    '~^(?:images|files|media)/[a-zA-Z0-9_./ -]+\\.(?:pdf|doc|docx|xls|xlsx|txt|md|csv|zip|jpg|jpeg|png|webp)$~iD', $payload
+                ) || str_contains($payload, '..') || str_contains($payload, '//')) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_DOCUMENT_INVALID');
+                }
+            } elseif ($type === 'number') {
+                if ($payload === '') $payload = $title;
+                if (!AttributeSettings::decimal($payload)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID');
+                }
+                $payload = AttributeSettings::canonicalDecimal($payload);
+            } elseif ($type === 'editor') {
+                if (mb_strlen($payload) > 60000
+                    || preg_match('/<\\s*(script|iframe|object|embed|form|svg|math)\\b|\\bon\\w+\\s*=|javascript\\s*:/iu', $payload)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_EDITOR_HTML_INVALID');
+                }
+                $payload = \Joomla\CMS\Filter\InputFilter::getInstance()->clean($payload, 'HTML');
+            } elseif ($type !== null && $type !== 'text' && $type !== 'color' && $type !== 'list') {
+                throw new \InvalidArgumentException('COM_MINIMARKET_VALUE_ROWS_INVALID');
+            }
+            if ($type === 'color' && $hex === '' && $sample === '') {
+                throw new \InvalidArgumentException('COM_MINIMARKET_COLOR_INVALID');
+            }
             if ($id > 0 && (!isset($existing[$id]) || isset($seenIds[$id]))) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_VALUE_ROWS_INVALID');
             }
@@ -126,7 +157,8 @@ final class AttributeValueRows
             $seenCodes[$code] = true;
             $result[] = [
                 'id' => $id, 'title' => $title, 'code' => $code,
-                'state' => (int) $state, 'color_hex' => strtoupper($hex), 'sample_image' => $sample, 'sort_order' => count($result),
+                'state' => (int) $state, 'color_hex' => strtoupper($hex), 'sample_image' => $sample,
+                'value_payload' => $payload, 'sort_order' => count($result),
             ];
         }
         return $result;
@@ -200,6 +232,7 @@ final class AttributeValueRows
                         $db->quoteName('code') . ' = ' . $db->quote($row['code']),
                         $db->quoteName('color_hex') . ' = ' . $db->quote($row['color_hex']),
                         $db->quoteName('sample_image') . ' = ' . $db->quote($row['sample_image']),
+                        $db->quoteName('value_payload') . ' = ' . $db->quote($row['value_payload'] ?? ''),
                         $db->quoteName('state') . ' = ' . (int) $row['state'],
                         $db->quoteName('sort_order') . ' = ' . (int) $row['sort_order'],
                     ])
@@ -209,7 +242,7 @@ final class AttributeValueRows
                 $q = $db->getQuery(true)
                     ->insert($db->quoteName('#__minimarket_attribute_values'))
                     ->columns($db->quoteName([
-                        'attribute_id','title','code','color_hex','sample_image','state','sort_order'
+                        'attribute_id','title','code','color_hex','sample_image','value_payload','state','sort_order'
                     ]))
                     ->values(implode(',', [
                         (int) $attributeId,
@@ -217,6 +250,7 @@ final class AttributeValueRows
                         $db->quote($row['code']),
                         $db->quote($row['color_hex']),
                         $db->quote($row['sample_image']),
+                        $db->quote($row['value_payload'] ?? ''),
                         (int) $row['state'],
                         (int) $row['sort_order'],
                     ]));

@@ -21,8 +21,32 @@
             <option value="date">COM_MINIMARKET_ATTRIBUTE_DATE</option>
             <option value="url">COM_MINIMARKET_ATTRIBUTE_URL</option>
         </field>
+        <field name="value_source" type="list" label="COM_MINIMARKET_VALUE_SOURCE"
+               description="COM_MINIMARKET_VALUE_SOURCE_DESC" default="manual" filter="cmd"
+               showon="input_type!:boolean">
+            <option value="legacy">COM_MINIMARKET_VALUE_SOURCE_LEGACY</option>
+            <option value="manual">COM_MINIMARKET_VALUE_SOURCE_MANUAL</option>
+            <option value="preset">COM_MINIMARKET_VALUE_SOURCE_PRESET</option>
+        </field>
+        <field name="is_multiple" type="list" label="COM_MINIMARKET_ATTRIBUTE_MULTIPLE"
+               description="COM_MINIMARKET_UNIFIED_MULTIPLE_DESC"
+               default="0" filter="int" showon="input_type!:boolean">
+            <option value="0">COM_MINIMARKET_ATTRIBUTE_SINGLE</option>
+            <option value="1">COM_MINIMARKET_ATTRIBUTE_MULTI</option>
+        </field>
+        <field name="unified_values" type="subform" label="COM_MINIMARKET_UNIFIED_VALUES"
+               description="COM_MINIMARKET_UNIFIED_VALUES_DESC"
+               formsource="administrator/components/com_minimarket/forms/attribute_unified_value_row.xml"
+               multiple="true" min="0" max="1000" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform"
+               showon="value_source:preset"/>
+        <field name="color_display" type="list" label="COM_MINIMARKET_COLOR_DISPLAY"
+               default="both" filter="cmd" showon="input_type:color">
+            <option value="both">COM_MINIMARKET_COLOR_DISPLAY_BOTH</option>
+            <option value="swatch">COM_MINIMARKET_COLOR_DISPLAY_SWATCH</option>
+        </field>
         <field name="input_mode" type="list" label="COM_MINIMARKET_INPUT_MODE"
-               description="COM_MINIMARKET_INPUT_MODE_DESC" default="auto" filter="cmd">
+               description="COM_MINIMARKET_INPUT_MODE_DESC" default="auto" filter="cmd" showon="value_source:legacy">
             <option value="auto">COM_MINIMARKET_MODE_AUTO</option>
             <option value="number">COM_MINIMARKET_MODE_NUMBER</option>
             <option value="presets">COM_MINIMARKET_MODE_PRESETS</option>
@@ -37,7 +61,7 @@
                formsource="administrator/components/com_minimarket/forms/attribute_text_preset_row.xml"
                multiple="true" min="0" max="200" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable" validate="Subform"
-               showon="input_type:text[AND]input_mode:presets"/>
+               showon="value_source:legacy[AND]input_type:text[AND]input_mode:presets"/>
         <!-- Persist numeric values as a typed CSV for compatibility with 0.5.12.
              The editor below is the ONLY visible control. -->
         <field name="number_options" type="hidden" filter="raw"/>
@@ -47,7 +71,7 @@
                formsource="administrator/components/com_minimarket/forms/attribute_number_preset_row.xml"
                multiple="true" min="0" max="500" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable" validate="Subform"
-               showon="input_type:number[AND]input_mode:presets"/>
+               showon="value_source:legacy[AND]input_type:number[AND]input_mode:presets"/>
         <field name="number_unit" type="text" label="COM_MINIMARKET_NUMBER_UNIT"
                maxlength="32" filter="string" showon="input_type:number"/>
         <field name="number_min" type="number" label="COM_MINIMARKET_NUMBER_MIN"
@@ -56,12 +80,6 @@
                step="0.0001" filter="raw" showon="input_type:number"/>
         <field name="number_step" type="number" label="COM_MINIMARKET_NUMBER_STEP"
                min="0.0001" step="0.0001" filter="raw" showon="input_type:number"/>
-        <field name="is_multiple" type="list" label="COM_MINIMARKET_ATTRIBUTE_MULTIPLE"
-               description="COM_MINIMARKET_ATTRIBUTE_MULTIPLE_DESC"
-               default="0" filter="int" showon="input_type:list,color,text">
-            <option value="0">COM_MINIMARKET_ATTRIBUTE_SINGLE</option>
-            <option value="1">COM_MINIMARKET_ATTRIBUTE_MULTI</option>
-        </field>
         <field name="is_filterable" type="radio" label="COM_MINIMARKET_ATTRIBUTE_FILTERABLE" description="COM_MINIMARKET_ATTRIBUTE_FILTERABLE_DESC" default="0" filter="integer">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
@@ -96,14 +114,14 @@
                formsource="administrator/components/com_minimarket/forms/attribute_color_row.xml"
                multiple="true" min="0" max="1000" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable" validate="Subform"
-               showon="input_type:color"/>
+               showon="value_source:legacy[AND]input_type:color"/>
         <field name="values" type="subform"
                label="COM_MINIMARKET_ATTR_VALUES_TAB"
                description="COM_MINIMARKET_VALUE_INLINE_HELP"
                formsource="administrator/components/com_minimarket/forms/attribute_value_row.xml"
                multiple="true" min="0" max="1000" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable" validate="Subform"
-               showon="input_type:list"/>
+               showon="value_source:legacy[AND]input_type:list"/>
 
     </fieldset>
     <!-- The repeatable value rows use exactly the same Joomla Subform UI

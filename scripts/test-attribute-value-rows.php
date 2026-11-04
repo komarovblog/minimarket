@@ -148,7 +148,8 @@ namespace MiniMarket\AttributeValueRowsSmoke {
     ok(count($field)===1 && (string)$field[0]['type']==='subform'
         && (string)$field[0]['multiple']==='true','one native repeatable field in Attribute details');
     ok((string)$field[0]['buttons']==='add,remove,move','native Joomla add/remove/move handles');
-    ok((string)$field[0]['showon']==='input_type:list','only List has values');
+    ok((string)$field[0]['showon']==='value_source:legacy[AND]input_type:list',
+        'legacy List values remain isolated from unified dictionary');
     ok(count($form->xpath("//field[@name='values_present']"))===1,'empty field sentinel');
     ok(count($sub->xpath("//field[@name='id' and @type='hidden']"))===1,'stable ID hidden in each row');
     ok(count($sub->xpath("//field[@name='title']"))===1,'simple title entry');

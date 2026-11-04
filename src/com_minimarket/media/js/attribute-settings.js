@@ -21,6 +21,7 @@
   const setup = () => {
     const type = document.getElementById('jform_input_type');
     const mode = document.getElementById('jform_input_mode');
+    const source = document.getElementById('jform_value_source');
     const filter = document.getElementById('jform_filter_mode');
     const multi = document.getElementById('jform_is_multiple');
     const multiGroup = multi?.closest('.control-group, .mb-3');
@@ -65,8 +66,10 @@
       busy = true;
       try {
         const t = type.value;
+        const unified = source?.value === 'manual' || source?.value === 'preset';
         if (multiGroup) {
-          multiGroup.hidden = t === 'text' && mode.value !== 'presets';
+          multiGroup.hidden = t === 'boolean'
+            || (!unified && t === 'text' && mode.value !== 'presets');
         }
         updateOptions(mode, product[t] || ['auto'], 'auto');
         // Legacy types remain selectable only when editing the same old kind.
@@ -88,14 +91,14 @@
             disabledFilter.dispatchEvent(new Event('change', { bubbles: true }));
           }
         }
-        if (t === 'list' || t === 'color' || (t === 'text' && mode.value === 'presets')) {
+        if (!unified && (t === 'list' || t === 'color' || (t === 'text' && mode.value === 'presets'))) {
           if (mode.value === 'radio' || mode.value === 'checkboxes') {
             if (multi) {
               multi.value = mode.value === 'checkboxes' ? '1' : '0';
               multi.dispatchEvent(new Event('change', { bubbles: true }));
             }
           }
-        } else {
+        } else if (!unified || t === 'boolean') {
           if (multi) {
             multi.value = '0';
             multi.dispatchEvent(new Event('change', { bubbles: true }));
@@ -118,6 +121,7 @@
     };
     type.addEventListener('change', refresh);
     mode.addEventListener('change', refresh);
+    source?.addEventListener('change', refresh);
     filter.addEventListener('change', refresh);
     refresh();
   };

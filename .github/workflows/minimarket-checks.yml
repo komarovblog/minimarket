@@ -139,6 +139,9 @@ jobs:
       - name: Typed category-scoped product attributes
         run: php scripts/test-product-attributes.php
 
+      - name: Unified attributes and multiple numeric values
+        run: php scripts/test-unified-attributes.php
+
       - name: Real variant SKU combinations and per-variant photo validation
         run: php scripts/test-product-variants.php
 

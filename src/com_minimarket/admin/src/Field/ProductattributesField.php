@@ -116,7 +116,101 @@ final class ProductattributesField extends FormField
                 . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . '</div>';
 
             $mode = (string) ($def['input_mode'] ?? 'auto');
-            if (in_array($type, ['list','color'], true)) {
+            $source = (string) ($def['value_source'] ?? 'legacy');
+            if ($source === 'preset') {
+                // Modern dictionaries always store stable value IDs.
+                // Single choices are dropdowns, multiple choices checkboxes.
+                if (!$def['values']) {
+                    $html .= '<p class="text-muted">'
+                        . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NO_VALUES')) . '</p>';
+                }
+                if ($def['is_multiple']) {
+                    foreach ($def['values'] as $optionId => $option) {
+                        $checked = in_array((int) $optionId, $values, true) && $hasStored;
+                        $optionInputId = $inputId . '_' . $optionId;
+                        $html .= '<div class="form-check mb-1"><input type="checkbox" class="form-check-input"'
+                            . ' id="' . $escape($optionInputId) . '" name="' . $escape($name . '[]')
+                            . '" value="' . (int) $optionId . '"' . ($checked ? ' checked' : '') . '>'
+                            . '<label for="' . $escape($optionInputId) . '" class="form-check-label">';
+                        if (!empty($option['sample_image'])) {
+                            $html .= '<img src="' . $escape(\Joomla\CMS\Uri\Uri::root() . $option['sample_image'])
+                                . '" alt="" loading="lazy" style="width:28px;height:28px;object-fit:cover;margin-right:.4em">';
+                        }
+                        if (preg_match('/^#[A-Fa-f0-9]{6}$/D', (string) ($option['color_hex'] ?? ''))) {
+                            $html .= '<span aria-hidden="true" style="display:inline-block;width:1.2em;height:1.2em;'
+                                . 'border:1px solid currentColor;vertical-align:middle;margin-right:.4em;background:'
+                                . $escape((string) $option['color_hex']) . '"></span>';
+                        }
+                        if ($type !== 'color' || ($def['color_display'] ?? 'both') !== 'swatch') {
+                            $html .= $escape((string) $option['title']);
+                        }
+                        $html .= '</label></div>';
+                    }
+                } else {
+                    $html .= '<select class="form-select" id="' . $escape($inputId)
+                        . '" name="' . $escape($name) . '"><option value="">'
+                        . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_UNSET')) . '</option>';
+                    foreach ($def['values'] as $optionId => $option) {
+                        $checked = (string) $singleValue === (string) $optionId && $hasStored;
+                        $label = (string) $option['title'];
+                        if ($type === 'color' && ($def['color_display'] ?? 'both') === 'swatch') {
+                            $label = (string) ($option['color_hex'] ?: $option['title']);
+                        }
+                        $html .= '<option value="' . (int) $optionId . '"'
+                            . ($checked ? ' selected' : '') . '>' . $escape($label) . '</option>';
+                    }
+                    $html .= '</select>';
+                    // Native select options cannot render images: a preview is
+                    // shown next to multiple choices; single choices keep labels.
+                }
+            } elseif ($source === 'manual' && !empty($def['is_multiple'])) {
+                $existingValues = is_array($value) ? array_map('strval', $value)
+                    : ($hasStored ? [(string) $value] : []);
+                $html .= '<div data-mm-free-list data-mm-free-type="' . $escape($type)
+                    . '" data-mm-free-name="' . $escape($name . '[]')
+                    . '" data-mm-free-min="' . $escape((string) ($def['number_min'] ?? ''))
+                    . '" data-mm-free-max="' . $escape((string) ($def['number_max'] ?? ''))
+                    . '" data-mm-free-step="' . $escape((string) ($def['number_step'] ?? '0.0001'))
+                    . '">';
+                foreach ($existingValues as $freeValue) {
+                    $html .= '<div class="d-flex gap-2 align-items-start mb-2" data-mm-free-entry>';
+                    if ($type === 'editor') {
+                        $html .= '<textarea class="form-control" rows="3" name="' . $escape($name . '[]')
+                            . '">' . $escape($freeValue) . '</textarea>';
+                    } else {
+                        $inputType = $type === 'number' ? 'number'
+                            : ($type === 'color' ? 'color' : 'text');
+                        $extra = '';
+                        if ($type === 'number') {
+                            $extra = ' step="' . $escape((string) ($def['number_step'] ?? '0.0001')) . '"';
+                            if (($def['number_min'] ?? null) !== null) {
+                                $extra .= ' min="' . $escape((string) $def['number_min']) . '"';
+                            }
+                            if (($def['number_max'] ?? null) !== null) {
+                                $extra .= ' max="' . $escape((string) $def['number_max']) . '"';
+                            }
+                        }
+                        $html .= '<input class="form-control" type="' . $inputType
+                            . '" name="' . $escape($name . '[]') . '" value="' . $escape($freeValue)
+                            . '"' . $extra . '>';
+                    }
+                    $html .= '<button type="button" class="btn btn-danger" data-mm-free-remove>'
+                        . $escape(Text::_('COM_MINIMARKET_UNIFIED_REMOVE_MANUAL')) . '</button></div>';
+                }
+                $html .= '<button type="button" class="btn btn-success btn-sm" data-mm-free-add'
+                    . ' data-mm-remove-label="' . $escape(Text::_('COM_MINIMARKET_UNIFIED_REMOVE_MANUAL')) . '">'
+                    . $escape(Text::_('COM_MINIMARKET_UNIFIED_ADD_MANUAL')) . '</button></div>';
+            } elseif ($source === 'manual' && $type === 'color') {
+                $color = preg_match('/^#[A-Fa-f0-9]{6}$/D', $singleValue)
+                    ? strtoupper($singleValue) : '';
+                $html .= '<div class="d-flex gap-2 align-items-center" data-mm-color-pair>'
+                    . '<input type="color" class="form-control form-control-color"'
+                    . ' value="' . $escape($color === '' ? '#000000' : $color)
+                    . '" aria-label="' . $escape($def['title']) . '" data-mm-color-picker>'
+                    . '<input type="text" class="form-control" name="' . $escape($name) . '"'
+                    . ' value="' . $escape($color) . '" placeholder="#RRGGBB"'
+                    . ' pattern="#[a-fA-F0-9]{6}" data-mm-color-text></div>';
+            } elseif (in_array($type, ['list','color'], true)) {
                 $mode = $mode === 'auto'
                     ? ($def['is_multiple'] ? 'checkboxes' : 'dropdown') : $mode;
                 if ($mode === 'checkboxes' || $mode === 'radio') {

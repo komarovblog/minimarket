@@ -277,7 +277,9 @@ $initialDescription=$hasCustomDescription
                                             </a>
                                         <?php elseif ($type === 'boolean') : ?>
                                             <?php echo Text::_($value === '1' ? 'JYES' : 'JNO'); ?>
-                                        <?php else : ?>
+                                        <?php elseif ($type !== 'color'
+                                            || ($attribute['color_display'] ?? 'both') !== 'swatch'
+                                            || ($hex === '' && $image === '')) : ?>
                                             <?php
                                             $displayValue = $type === 'number' && str_contains($value, '.')
                                                 ? rtrim(rtrim($value, '0'), '.') : $value;

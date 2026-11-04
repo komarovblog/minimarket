@@ -44,7 +44,7 @@ final class ProductAttributeCatalog
         }
         $allowSql = implode(',', array_map('intval', $allowed));
         $q = $db->getQuery(true)
-            ->select(['id', 'title', 'input_type', 'number_unit', 'text_options'])
+            ->select(['id', 'title', 'input_type', 'number_unit', 'text_options', 'value_source', 'color_display'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->where($db->quoteName('id') . ' IN (' . $allowSql . ')')
             ->where($db->quoteName('state') . ' = 1')
@@ -62,6 +62,8 @@ final class ProductAttributeCatalog
                 'title' => (string) $row->title,
                 'type' => $type,
                 'unit' => (string) ($row->number_unit ?? ''),
+                'source' => (string) ($row->value_source ?? 'legacy'),
+                'color_display' => (string) ($row->color_display ?? 'both'),
                 'values' => [],
             ];
             if ($type === 'text') {
@@ -95,7 +97,9 @@ final class ProductAttributeCatalog
             $value = $scalar->value_text ?? $scalar->value_number ?? $scalar->value_boolean ?? null;
             if ($value === null || (string) $value === '') continue;
             $attributes[$id]['values'][] = [
-                'text' => (string) $value, 'hex' => '',
+                'text' => (string) $value,
+                'hex' => $type === 'color' && preg_match('/^#[a-fA-F0-9]{6}$/D', (string) $value)
+                    ? (string) $value : '',
                 'image' => $imagesByPreset[$id][(string) $value] ?? '',
             ];
         }
@@ -103,7 +107,7 @@ final class ProductAttributeCatalog
         // Dictionary values are joined to the product's chosen IDs; no
         // accidental display of other products' values or unpublished choices.
         $q = $db->getQuery(true)
-            ->select(['o.attribute_id', 'v.title', 'v.color_hex', 'v.sample_image'])
+            ->select(['o.attribute_id', 'v.title', 'v.color_hex', 'v.sample_image', 'v.value_payload'])
             ->from($db->quoteName('#__minimarket_product_attribute_options', 'o'))
             ->join('INNER', $db->quoteName('#__minimarket_attribute_values', 'v')
                 . ' ON ' . $db->quoteName('v.id') . ' = ' . $db->quoteName('o.value_id')
@@ -115,11 +119,17 @@ final class ProductAttributeCatalog
         $db->setQuery($q);
         foreach ((array) $db->loadObjectList() as $option) {
             $id = (int) $option->attribute_id;
-            if (!isset($attributes[$id])
-                || !in_array($attributes[$id]['type'], ['color', 'list'], true)) continue;
+            if (!isset($attributes[$id])) continue;
+            $type = $attributes[$id]['type'];
+            $modern = $attributes[$id]['source'] === 'preset';
+            if (!$modern && !in_array($type, ['color', 'list'], true)) continue;
             $hex = (string) ($option->color_hex ?? '');
+            $payload = (string) ($option->value_payload ?? '');
+            $displayText = $modern && in_array($type, ['number','document','editor'], true)
+                ? ($payload !== '' ? $payload : (string) $option->title)
+                : (string) $option->title;
             $attributes[$id]['values'][] = [
-                'text' => (string) $option->title,
+                'text' => $displayText,
                 'hex' => preg_match('/^#[0-9a-fA-F]{6}$/D', $hex) ? $hex : '',
                 'image' => self::safeImage((string) ($option->sample_image ?? '')),
             ];
@@ -143,6 +153,29 @@ final class ProductAttributeCatalog
             ];
         }
 
+        // Ordered, manually entered multiple values (including numeric data).
+        if (array_filter($attributes, static fn(array $attr): bool =>
+            $attr['source'] === 'manual')) {
+        $q = $db->getQuery(true)
+            ->select(['attribute_id', 'value_text'])
+            ->from($db->quoteName('#__minimarket_product_attribute_free_values'))
+            ->where($db->quoteName('product_id') . ' = ' . $productId)
+            ->where($db->quoteName('attribute_id') . ' IN (' . $attrSql . ')')
+            ->order('attribute_id ASC, sort_order ASC, id ASC');
+        $db->setQuery($q);
+        foreach ((array) $db->loadObjectList() as $choice) {
+            $id = (int) $choice->attribute_id;
+            if (!isset($attributes[$id]) || $attributes[$id]['source'] !== 'manual') continue;
+            $text = (string) $choice->value_text;
+            if ($text === '') continue;
+            $attributes[$id]['values'][] = [
+                'text' => $text,
+                'hex' => $attributes[$id]['type'] === 'color'
+                    && preg_match('/^#[a-fA-F0-9]{6}$/D', $text) ? $text : '',
+                'image' => '',
+            ];
+        }
+        }
         // Saved scalar "0" means No and must not be discarded by empty().
         return array_filter($attributes, static fn (array $item): bool => $item['values'] !== []);
     }

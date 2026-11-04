@@ -87,6 +87,8 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_attributes` (
     `code` VARCHAR(100) NOT NULL,
     `input_type` VARCHAR(16) NOT NULL DEFAULT 'list',
     `input_mode` VARCHAR(24) NOT NULL DEFAULT 'auto',
+    `value_source` VARCHAR(12) NOT NULL DEFAULT 'legacy',
+    `color_display` VARCHAR(12) NOT NULL DEFAULT 'both',
     `number_options` VARCHAR(1024) NOT NULL DEFAULT '',
     `text_options` TEXT NULL,
     `number_unit` VARCHAR(32) NOT NULL DEFAULT '',
@@ -111,6 +113,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_attribute_values` (
     `code` VARCHAR(100) NOT NULL,
     `color_hex` CHAR(7) NOT NULL DEFAULT '',
     `sample_image` VARCHAR(1024) NOT NULL DEFAULT '',
+    `value_payload` MEDIUMTEXT NULL,
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     `state` TINYINT NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`),
@@ -179,6 +182,22 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_attribute_multi_values` (
     KEY `idx_mm_multi_facet` (`attribute_id`,`value_text`,`product_id`),
     CONSTRAINT `fk_mm_multi_product` FOREIGN KEY (`product_id`) REFERENCES `#__minimarket_products`(`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_mm_multi_attr` FOREIGN KEY (`attribute_id`) REFERENCES `#__minimarket_attributes`(`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 0.5.45: independent ordered manual multi-values; old text preset storage stays intact.
+CREATE TABLE IF NOT EXISTS `#__minimarket_product_attribute_free_values` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `product_id` INT UNSIGNED NOT NULL,
+    `attribute_id` INT UNSIGNED NOT NULL,
+    `value_text` MEDIUMTEXT NOT NULL,
+    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_mm_free_product_attr` (`product_id`, `attribute_id`, `sort_order`),
+    KEY `idx_mm_free_attr` (`attribute_id`),
+    CONSTRAINT `fk_mm_free_product` FOREIGN KEY (`product_id`)
+      REFERENCES `#__minimarket_products` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_mm_free_attribute` FOREIGN KEY (`attribute_id`)
+      REFERENCES `#__minimarket_attributes` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 0.5.17: real variant SKUs under ONE product URL; additive, no product records rewritten.

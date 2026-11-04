@@ -85,6 +85,17 @@ final class AttributeSettings
         if (!isset(self::INPUTS[$type])) {
             return 'COM_MINIMARKET_ATTRIBUTE_TYPE_INVALID';
         }
+        $a->value_source = (string) ($a->value_source ?? 'legacy');
+        $a->color_display = (string) ($a->color_display ?? 'both');
+        if (!in_array($a->value_source, ['legacy','manual','preset'], true)
+            || !in_array($a->color_display, ['both','swatch'], true)) {
+            return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
+        }
+        // New uniform modes never inherit legacy radio/dropdown/CSV rules.
+        if ($a->value_source !== 'legacy') {
+            $a->input_mode = 'auto';
+            if ($type === 'boolean') $a->is_multiple = 0;
+        }
         $a->input_mode = (string) ($a->input_mode ?? 'auto');
         $a->filter_mode = (string) ($a->filter_mode ?? 'none');
         $a->filter_multiple = (int) ($a->filter_multiple ?? 0);
@@ -93,7 +104,7 @@ final class AttributeSettings
             || !in_array($a->filter_multiple, [0,1], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
-        if (in_array($type, ['list','color','text'], true)) {
+        if ($a->value_source === 'legacy' && in_array($type, ['list','color','text'], true)) {
             if ($type === 'text' && $a->input_mode !== 'presets') $a->is_multiple = 0;
             if (($a->input_mode === 'radio' && (int) $a->is_multiple !== 0)
                 || ($a->input_mode === 'checkboxes' && (int) $a->is_multiple !== 1)) {
@@ -120,7 +131,7 @@ final class AttributeSettings
             } catch (\InvalidArgumentException $error) {
                 return 'COM_MINIMARKET_TEXT_PRESETS_INVALID';
             }
-            if ($a->input_mode === 'presets' && !$textPresets) {
+            if ($a->value_source === 'legacy' && $a->input_mode === 'presets' && !$textPresets) {
                 return 'COM_MINIMARKET_TEXT_PRESETS_INVALID';
             }
             $a->text_options = TextPresetRows::encode(TextPresetRows::rows($a->text_options));
@@ -163,7 +174,7 @@ final class AttributeSettings
         } catch (\InvalidArgumentException $e) {
             return $e->getMessage();
         }
-        if ($a->input_mode === 'presets' && $numbers === []) {
+        if ($a->value_source === 'legacy' && $a->input_mode === 'presets' && $numbers === []) {
             return 'COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID';
         }
         foreach ($numbers as $n) {

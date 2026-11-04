@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <field name="id" type="hidden" default="0" filter="int"/>
+    <field name="title" type="text" label="JGLOBAL_TITLE" required="true"
+           filter="string" maxlength="255" size="35"/>
+    <field name="code" type="text" label="COM_MINIMARKET_VALUE_CODE"
+           description="COM_MINIMARKET_VALUE_CODE_AUTO" maxlength="100" filter="string"/>
+    <field name="value_payload" type="textarea" label="COM_MINIMARKET_UNIFIED_VALUE_PAYLOAD"
+           description="COM_MINIMARKET_UNIFIED_VALUE_PAYLOAD_DESC"
+           filter="raw" rows="3"/>
+    <field name="document_file" type="media" label="COM_MINIMARKET_UNIFIED_FILE"
+           description="COM_MINIMARKET_UNIFIED_FILE_DESC"
+           directory="files" preview="false" filter="string"/>
+    <field name="color_hex" type="text" label="COM_MINIMARKET_COLOR_HEX"
+           description="COM_MINIMARKET_UNIFIED_HEX_DESC" filter="string" size="12"/>
+    <field name="sample_image" type="media" label="COM_MINIMARKET_VALUE_SAMPLE_IMAGE"
+           directory="images" preview="true" filter="string"/>
+    <field name="state" type="list" label="JSTATUS" default="1" filter="int">
+        <option value="1">JPUBLISHED</option>
+        <option value="0">JUNPUBLISHED</option>
+    </field>
+</form>
