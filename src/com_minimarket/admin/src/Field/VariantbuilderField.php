@@ -47,6 +47,7 @@ final class VariantbuilderField extends FormField
             'copyDone' => 'COM_MINIMARKET_SKU_COPY_DONE',
             'manualDone' => 'COM_MINIMARKET_SKU_MANUAL_DONE',
             'skuDetails' => 'COM_MINIMARKET_SKU_DETAILS',
+            'catalogHydrated' => 'COM_MINIMARKET_PRODUCT_OPTIONS_HYDRATED',
             'skuCloseDetails' => 'COM_MINIMARKET_SKU_CLOSE_DETAILS',
             'categoryChanged' => 'COM_MINIMARKET_PRODUCT_OPTIONS_CATEGORY_CHANGED',
             'presetHasAxes' => 'COM_MINIMARKET_PRODUCT_OPTIONS_ALREADY_USED',

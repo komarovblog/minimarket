@@ -13,6 +13,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\ProductVariants;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductLocalDimensions;
 use MiniMarket\Component\Minimarket\Administrator\Service\VariantMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductCatalogAxes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
 
 final class ProductModel extends AdminModel
@@ -134,6 +135,9 @@ final class ProductModel extends AdminModel
                 $localDimensions=VariantMatrix::normalize(
                     array_values((array) ($data['variant_dimensions'] ?? []))
                 );
+                ProductCatalogAxes::validate($db,
+                    (int) ($data['category_id'] ?? 0),
+                    (int) ($data['id'] ?? 0), $localDimensions);
                 $axes=ProductLocalDimensions::axesForVariants($localDimensions);
                 // A physical SKU is valid only for a full, explicit combination.
                 $variantRows = ProductVariants::normalize($data['variants'] ?? [], $axes);

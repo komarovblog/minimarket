@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form>
     <field name="code" type="hidden" filter="string" default=""/>
+    <field name="source_option_id" type="hidden" filter="int" default="0"/>
     <field name="title" type="text" label="COM_MINIMARKET_LOCAL_AXIS" required="true"
            filter="string" maxlength="255" size="32" hint="COM_MINIMARKET_LOCAL_AXIS_EXAMPLE"/>
     <field name="values" type="subform" label="COM_MINIMARKET_LOCAL_VALUES"

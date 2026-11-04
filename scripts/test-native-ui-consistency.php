@@ -100,8 +100,8 @@ checkUi(str_contains($skuBuilder,'data-mm-add-sku')
     && str_contains($skuBuilder,'data-mm-sku-apply'),
     'manual SKU positions and bulk edit use existing Joomla-native SKU form');
 checkUi(str_contains($client,'decorateSkuCards()')
-    && str_contains($client,'copyCategoryOptions()'),
-    'SKU master/detail and category option copying use existing Joomla subforms');
+    && str_contains($client,'hydrateFromCategory()'),
+    'SKU master/detail and automatic global category options use native Joomla subforms');
 checkUi(str_contains($client,'refreshSkuEditors(axes)')
     && str_contains($client,'data-mm-sku-select'),
     'each native SKU row exposes local option selection and explicit bulk checkbox');

@@ -526,15 +526,54 @@
     }
   };
 
-  // The catalog owns the option vocabulary. Copying is an explicit one-time
-  // action into the EXISTING native SKU axes, never an automatic overwrite.
-  const catalogPreset = editor?.querySelector('[data-mm-copy-category-options]');
+  // Catalog-linked options are hydrated automatically into native Joomla
+  // subforms. A historical product with its own SKU axes is never overwritten.
+  const catalogRoot = editor?.querySelector('[data-mm-category-catalog]');
+  const categoryInput = document.querySelector('[name="jform[category_id]"]');
+  let catalog = {};
+  let catalogLabels = {};
+  try {
+    catalog = JSON.parse(catalogRoot?.dataset.mmCatalog || '{}');
+    catalogLabels = JSON.parse(catalogRoot?.dataset.mmCatalogLabels || '{}');
+  } catch (_) {}
+  const catalogList = catalogRoot?.querySelector('[data-mm-category-option-list]');
+  const categoryRecord = () => catalog[String(categoryInput?.value || '')] || null;
+  const renderCategoryOptions = () => {
+    if (!catalogList) return;
+    catalogList.replaceChildren();
+    const record = categoryRecord();
+    const showNote = (message) => catalogList.appendChild(
+      asText(message, 'small text-muted')
+    );
+    if (!categoryInput?.value || categoryInput.value === '0') {
+      showNote(catalogLabels.saveCategory || 'Choose a category.');
+      return;
+    }
+    if (record?.too_many) {
+      showNote(catalogLabels.tooMany || 'Too many combinations.');
+      return;
+    }
+    if (!record?.axes?.length) {
+      showNote(catalogLabels.empty || 'No category options.');
+      return;
+    }
+    for (const axis of record.axes) {
+      const item = document.createElement('div');
+      item.className = 'mm-option-list__item';
+      item.appendChild(asText(axis.title, 'fw-semibold'));
+      item.appendChild(asText(' (' + (axis.required
+        ? (catalogLabels.required || 'Required')
+        : (catalogLabels.optional || 'Optional')) + ')', 'small text-muted'));
+      item.appendChild(asText(axis.values.map(value => value.title).join(' · '),
+        'd-block small text-muted'));
+      catalogList.appendChild(item);
+    }
+  };
   const nativeGroupAdd = (form) => form && Array.from(
     form.querySelectorAll('button.group-add, a.group-add')
   ).find(el => el.closest('.subform-repeatable') === form);
-  const waitForNew = (scope, selector, before) => new Promise((resolve, reject) => {
-    const find = () => Array.from(scope.querySelectorAll(selector))
-      .find(el => !before.has(el));
+  const waitForNew = (scope, select, before) => new Promise((resolve, reject) => {
+    const find = () => select(scope).find(el => !before.has(el));
     const present = find();
     if (present) return resolve(present);
     const observer = new MutationObserver(() => {
@@ -550,77 +589,99 @@
       reject(new Error(t('nativeUnavailable', 'Joomla option editor unavailable.')));
     }, 3500);
   });
+  const selectAxisTitles = (scope) => Array.from(scope.querySelectorAll('input[name]'))
+    .filter(input => Boolean(input.name.match(axisField)) && input.name.endsWith('[title]'));
+  const selectValueTitles = (scope) => Array.from(scope.querySelectorAll('input[name]'))
+    .filter(input => Boolean(input.name.match(valueField)) && input.name.endsWith('[title]'));
   const setInput = (field, value) => {
     if (!field) throw new Error(t('nativeUnavailable', 'Option input unavailable.'));
     field.value = value;
     field.dispatchEvent(new Event('input', { bubbles: true }));
     field.dispatchEvent(new Event('change', { bubbles: true }));
   };
-  const copyCategoryOptions = async () => {
-    if (!catalogPreset || !optionsPanel) return;
-    const currentCategory = document.querySelector('[name="jform[category_id]"]')?.value;
-    if (currentCategory !== catalogPreset.dataset.mmCategory) {
-      throw new Error(t('categoryChanged', 'Save the selected category first.'));
-    }
-    if (Array.from(optionsPanel.querySelectorAll('input[name]'))
-      .some(input => axisField.test(input.name))) {
-      throw new Error(t('presetHasAxes', 'This product already contains options. They were not overwritten.'));
-    }
-    let axes = [];
-    try { axes = JSON.parse(catalogPreset.dataset.mmAxes || '[]'); }
-    catch (_) { throw new Error(t('incomplete', 'Invalid catalog options.')); }
-    if (!Array.isArray(axes) || !axes.length || axes.length > 4) {
-      throw new Error(t('incomplete', 'Invalid catalog options.'));
-    }
-    const axisForm = optionsPanel.querySelector('.subform-repeatable');
-    for (const axis of axes) {
-      const before = new Set(Array.from(optionsPanel.querySelectorAll('input[name]'))
-        .filter(input => input.name.match(axisField) && input.name.endsWith('[title]')));
-      const add = nativeGroupAdd(axisForm);
-      if (!add) throw new Error(t('nativeUnavailable', 'The native options form is unavailable.'));
-      add.click();
-      const axisInput = await waitForNew(optionsPanel,
-        'input[name^="jform[variant_dimensions]"][name$="[title]"]', before);
-      const found = axisInput.name.match(axisField);
-      if (!found) throw new Error(t('nativeUnavailable', 'The new option is invalid.'));
-      const axisKey = found[1];
-      const axisGroup = axisInput.closest('.subform-repeatable-group');
-      const findByName = (name) => Array.from(axisGroup.querySelectorAll('input[name]'))
-        .find(input => input.name === name);
-      setInput(axisInput, axis.title);
-      setInput(findByName('jform[variant_dimensions][' + axisKey + '][code]'), axis.code);
-      const valuesForm = axisGroup?.querySelector('.subform-repeatable');
-      if (!valuesForm) throw new Error(t('nativeUnavailable', 'The option values form is missing.'));
-      for (const choice of axis.values) {
-        const valueBefore = new Set(Array.from(valuesForm.querySelectorAll('input[name]'))
-          .filter(input => input.name.match(valueField) && input.name.endsWith('[title]')));
-        const valueAdd = nativeGroupAdd(valuesForm);
-        if (!valueAdd) throw new Error(t('nativeUnavailable', 'The add-value button is missing.'));
-        valueAdd.click();
-        const choiceInput = await waitForNew(valuesForm,
-          'input[name^="jform[variant_dimensions]"][name*="[values]"][name$="[title]"]',
-          valueBefore);
-        const choiceMatch = choiceInput.name.match(valueField);
-        if (!choiceMatch) throw new Error(t('nativeUnavailable', 'The value row is invalid.'));
-        setInput(choiceInput, choice.title);
-        const choiceCode = Array.from(valuesForm.querySelectorAll('input[name]'))
-          .find(input => input.name ===
-            'jform[variant_dimensions][' + choiceMatch[1] + '][values]['
-            + choiceMatch[2] + '][code]');
-        setInput(choiceCode, choice.code);
+  const lockCatalogNames = () => {
+    for (const title of selectAxisTitles(optionsPanel)) {
+      const found = title.name.match(axisField);
+      const sourceName = 'jform[variant_dimensions][' + found[1] + '][source_option_id]';
+      const source = optionsPanel.querySelector('input[name="' + sourceName + '"]');
+      if (!source || Number(source.value) < 1) continue;
+      title.readOnly = true;
+      for (const valueTitle of selectValueTitles(title.closest('.subform-repeatable-group'))) {
+        const row = valueTitle.name.match(valueField);
+        const valueName = 'jform[variant_dimensions][' + row[1] + '][values]['
+          + row[2] + '][source_value_id]';
+        const sourceValue = optionsPanel.querySelector('input[name="' + valueName + '"]');
+        if (sourceValue && Number(sourceValue.value) > 0) valueTitle.readOnly = true;
       }
     }
-    const localAxes = getDimensions();
-    refreshSkuEditors(localAxes);
-    updateLabels(localAxes);
-    showPreview();
-    report(t('presetDone', 'Category options copied. Select real combinations and save.'));
   };
-  catalogPreset?.addEventListener('click', async () => {
-    catalogPreset.disabled = true;
-    try { await copyCategoryOptions(); }
-    catch (error) { report(error.message, true); }
-    finally { catalogPreset.disabled = false; }
+  let hydrating = false;
+  const hydrateFromCategory = async () => {
+    renderCategoryOptions();
+    if (hydrating || !optionsPanel) return;
+    const record = categoryRecord();
+    if (!record?.axes?.length || record.too_many) return;
+    // Existing variants, including old product-local configurations, are
+    // important user data; a category change cannot replace them implicitly.
+    if (selectAxisTitles(optionsPanel).length || selectionInputs().length) {
+      lockCatalogNames();
+      return;
+    }
+    hydrating = true;
+    try {
+      const axisForm = optionsPanel.querySelector('.subform-repeatable');
+      if (!axisForm) throw new Error(t('nativeUnavailable', 'The options form is unavailable.'));
+      for (const axis of record.axes) {
+        const before = new Set(selectAxisTitles(optionsPanel));
+        const add = nativeGroupAdd(axisForm);
+        if (!add) throw new Error(t('nativeUnavailable', 'The add-option button is unavailable.'));
+        add.click();
+        const axisInput = await waitForNew(optionsPanel, selectAxisTitles, before);
+        const found = axisInput.name.match(axisField);
+        if (!found) throw new Error(t('nativeUnavailable', 'Bad option row.'));
+        const axisKey = found[1];
+        setInput(axisInput, axis.title);
+        for (const [name, value] of [
+          ['code', axis.code], ['source_option_id', String(axis.source_option_id)]
+        ]) {
+          const input = optionsPanel.querySelector('input[name="jform[variant_dimensions]['
+            + axisKey + '][' + name + ']"]');
+          setInput(input, value);
+        }
+        const group = axisInput.closest('.subform-repeatable-group');
+        const valuesForm = group?.querySelector('.subform-repeatable');
+        if (!valuesForm) throw new Error(t('nativeUnavailable', 'The values form is unavailable.'));
+        for (const choice of axis.values) {
+          const valueBefore = new Set(selectValueTitles(valuesForm));
+          const addValue = nativeGroupAdd(valuesForm);
+          if (!addValue) throw new Error(t('nativeUnavailable', 'The add-value button is unavailable.'));
+          addValue.click();
+          const choiceInput = await waitForNew(valuesForm, selectValueTitles, valueBefore);
+          const valueMatch = choiceInput.name.match(valueField);
+          if (!valueMatch) throw new Error(t('nativeUnavailable', 'Bad option value row.'));
+          setInput(choiceInput, choice.title);
+          for (const [name, value] of [
+            ['code', choice.code], ['source_value_id', String(choice.source_value_id)]
+          ]) {
+            const input = optionsPanel.querySelector('input[name="jform[variant_dimensions]['
+              + valueMatch[1] + '][values][' + valueMatch[2] + '][' + name + ']"]');
+            setInput(input, value);
+          }
+        }
+      }
+      lockCatalogNames();
+      showPreview();
+      report(t('catalogHydrated', 'Options loaded from category. Choose sellable combinations.'));
+    } catch (error) {
+      report(error.message, true);
+    } finally {
+      hydrating = false;
+    }
+  };
+  categoryInput?.addEventListener('change', () => {
+    // A product with established options retains those axes when its category
+    // changes. New products get the new category's options immediately.
+    void hydrateFromCategory();
   });
 
   // Only additions of SKU row inputs count; do not observe the entire Joomla
@@ -644,6 +705,11 @@
   }
   concealRawAdd();
   decorateSkuCards();
+  renderCategoryOptions();
+  lockCatalogNames();
+  // Joomla subforms can be initialized after the deferred component script.
+  // Queue hydration, but never touch a form already holding existing options.
+  queueMicrotask(() => { void hydrateFromCategory(); });
   try {
     const axes = getDimensions();
     refreshSkuEditors(axes);

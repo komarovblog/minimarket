@@ -578,9 +578,8 @@ try {
         (option_id,title,code) VALUES (11,'Duplicate','m')");
     verify(false,'duplicate global option value code accepted');
 } catch (PDOException $error) { verify(true,'unique global option value code enforced'); }
-$pdo->exec('DROP TABLE catci_minimarket_category_order_options');
-$pdo->exec('DROP TABLE catci_minimarket_order_option_values');
-$pdo->exec('DROP TABLE catci_minimarket_order_options');
+// The global option tables stay alive for the 0.5.37 foreign-key upgrade test.
+// They are dropped only after the local dimension/value tables are removed.
 
 // 0.5.35: a stable source-qualified external mapping for all catalog entities.
 $beforeImportProduct=row($pdo,'catci_minimarket_products');
@@ -605,6 +604,48 @@ verify($beforeImportSkus===$pdo->query('SELECT id,product_id,sku,price,stock FRO
     '0.5.35 migration preserves all SKU identity, prices and stocks');
 $pdo->exec('DROP TABLE catci_minimarket_import_entity_keys');
 
+// 0.5.37: link existing option axes to the global dictionary by stable IDs;
+// preserve every historical SKU and every unrelated local dimension.
+$beforeSourceSkus=$pdo->query('SELECT id,product_id,sku,price,stock,selection_json
+    FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$beforeSourceProducts=$pdo->query('SELECT * FROM catci_minimarket_products ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+$beforeSourceAssignments=$pdo->query('SELECT * FROM catci_minimarket_variant_value_assignments
+    ORDER BY variant_id,dimension_id')->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo,$dir.'updates/mysql/0.5.37.sql','catci_');
+verify($beforeSourceSkus===$pdo->query('SELECT id,product_id,sku,price,stock,selection_json
+    FROM catci_minimarket_product_variants ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.37 preserves every SKU, price, stock and selection JSON');
+verify($beforeSourceProducts===$pdo->query('SELECT * FROM catci_minimarket_products ORDER BY id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.37 preserves all product data');
+verify($beforeSourceAssignments===$pdo->query('SELECT * FROM catci_minimarket_variant_value_assignments
+    ORDER BY variant_id,dimension_id')->fetchAll(PDO::FETCH_ASSOC),
+    '0.5.37 preserves relational variant identity and existing assignments');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_variant_dimensions
+    WHERE source_option_id IS NOT NULL')->fetchColumn()===0,
+    'no implicit adoption or rewriting of historic local SKU axes');
+$pdo->exec('UPDATE catci_minimarket_variant_dimensions
+    SET source_option_id=11 WHERE id=2');
+$pdo->exec('UPDATE catci_minimarket_variant_dimension_values
+    SET source_value_id=21 WHERE id=3');
+$pdo->exec('UPDATE catci_minimarket_variant_dimension_values
+    SET source_value_id=22 WHERE id=4');
+verify((int)$pdo->query('SELECT source_option_id FROM catci_minimarket_variant_dimensions
+    WHERE id=2')->fetchColumn()===11,
+    'linked dimension retains stable global source option ID');
+verify((int)$pdo->query('SELECT source_value_id FROM catci_minimarket_variant_dimension_values
+    WHERE id=3')->fetchColumn()===21,
+    'linked value retains stable global source value ID');
+try {
+    $pdo->exec('UPDATE catci_minimarket_variant_dimension_values
+        SET source_value_id=999999 WHERE id=3');
+    verify(false,'invalid global source value ID accepted');
+} catch (PDOException $error) {
+    verify(true,'global value FK rejects an unknown ID');
+}
+verify($beforeSourceAssignments===$pdo->query('SELECT * FROM catci_minimarket_variant_value_assignments
+    ORDER BY variant_id,dimension_id')->fetchAll(PDO::FETCH_ASSOC),
+    'global option linkage does not rewrite old variant assignments');
+
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
@@ -616,6 +657,9 @@ $pdo->exec('DROP TABLE catci_minimarket_import_product_keys');
 $pdo->exec('DROP TABLE catci_minimarket_variant_value_assignments');
 $pdo->exec('DROP TABLE catci_minimarket_variant_dimension_values');
 $pdo->exec('DROP TABLE catci_minimarket_variant_dimensions');
+$pdo->exec('DROP TABLE catci_minimarket_category_order_options');
+$pdo->exec('DROP TABLE catci_minimarket_order_option_values');
+$pdo->exec('DROP TABLE catci_minimarket_order_options');
 $pdo->exec('DROP TABLE catci_minimarket_product_variant_images');
 $pdo->exec('DROP TABLE catci_minimarket_product_variants');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_multi_values');
@@ -653,6 +697,10 @@ foreach (['id','title','type','state','sort_order'] as $column) verify(in_array(
 $freshImportEntities=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_import_entity_keys')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['source_key','entity_kind','external_key','local_id'] as $column)
     verify(in_array($column,$freshImportEntities,true),'fresh 0.5.35 import mapping '.$column);
+$freshAxisColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_variant_dimensions')->fetchAll(PDO::FETCH_COLUMN);
+verify(in_array('source_option_id',$freshAxisColumns,true),'fresh 0.5.37 global option FK column');
+$freshValueColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_variant_dimension_values')->fetchAll(PDO::FETCH_COLUMN);
+verify(in_array('source_value_id',$freshValueColumns,true),'fresh 0.5.37 global value FK column');
 $freshOrderOptions=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_order_options')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','code','title','state','sort_order'] as $column)
     verify(in_array($column,$freshOrderOptions,true),'fresh 0.5.34 global option '.$column);

@@ -41,6 +41,7 @@ final class VariantMatrix
                 throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
             }
             $usedCodes[$code] = true;
+            $sourceOptionId = self::sourceId($row['source_option_id'] ?? 0);
             $choices = $row['values'] ?? null;
             if (!is_array($choices) || $choices === [] || count($choices) > self::MAX_COMBINATIONS) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
@@ -65,7 +66,12 @@ final class VariantMatrix
                 }
                 $usedValues[$valueCode] = true;
                 $usedTitles[mb_strtolower($valueTitle)] = true;
-                $entry = ['code' => $valueCode, 'title' => $valueTitle];
+                $sourceValueId = self::sourceId($value['source_value_id'] ?? 0);
+                if (($sourceOptionId === 0) !== ($sourceValueId === 0)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
+                }
+                $entry = ['code' => $valueCode, 'title' => $valueTitle,
+                    'source_value_id' => $sourceValueId];
                 if (array_key_exists('photos', $value)) {
                     $entry['photos'] = VariantValueGallery::normalize($value['photos']);
                 }
@@ -75,7 +81,8 @@ final class VariantMatrix
             if ($combinationCount > self::MAX_COMBINATIONS) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_LIMIT');
             }
-            $axes[] = ['code' => $code, 'title' => $title, 'values' => $values];
+            $axes[] = ['code' => $code, 'title' => $title,
+                'source_option_id' => $sourceOptionId, 'values' => $values];
         }
         return $axes;
     }
@@ -117,6 +124,18 @@ final class VariantMatrix
         }
         unset($row);
         return $rows;
+    }
+
+    /** A source ID is zero for a historical/local axis and a positive safe INT for linked global options. */
+    private static function sourceId(mixed $id): int
+    {
+        if (!is_int($id) && (!is_string($id) || !ctype_digit($id))) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
+        }
+        if ((float) $id > 4294967295 || (int) $id < 0) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_VARIANT_MATRIX_INVALID');
+        }
+        return (int) $id;
     }
 
     /** A signature is independent of ordering of characteristics on screen. */

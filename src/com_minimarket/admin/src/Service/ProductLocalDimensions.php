@@ -14,7 +14,7 @@ final class ProductLocalDimensions
     public static function load(DatabaseInterface $db, int $productId): array
     {
         if ($productId < 1) return [];
-        $q=$db->getQuery(true)->select(['id','code','title'])
+        $q=$db->getQuery(true)->select(['id','code','title','source_option_id'])
             ->from($db->quoteName('#__minimarket_variant_dimensions'))
             ->where($db->quoteName('product_id').' = '.$productId)
             ->order('sort_order ASC,id ASC');
@@ -22,22 +22,54 @@ final class ProductLocalDimensions
         $rows=(array)$db->loadAssocList();
         if (!$rows) return [];
         $ids=array_map('intval',array_column($rows,'id'));
-        $q=$db->getQuery(true)->select(['id','dimension_id','code','title'])
+        $q=$db->getQuery(true)->select(['id','dimension_id','code','title','source_value_id'])
             ->from($db->quoteName('#__minimarket_variant_dimension_values'))
             ->where($db->quoteName('dimension_id').' IN ('.implode(',',$ids).')')
             ->order('sort_order ASC,id ASC');
         $db->setQuery($q);
         $valueRows=(array)$db->loadAssocList();
         $photos=VariantValueGallery::load($db,array_column($valueRows,'id'));
+        $sourceOptions = [];
+        $optionIds = array_values(array_unique(array_filter(
+            array_map('intval', array_column($rows, 'source_option_id'))
+        )));
+        if ($optionIds) {
+            $q = $db->getQuery(true)->select(['id','title'])
+                ->from($db->quoteName('#__minimarket_order_options'))
+                ->where('id IN (' . implode(',', $optionIds) . ')');
+            $db->setQuery($q);
+            foreach ((array) $db->loadAssocList() as $source) {
+                $sourceOptions[(int) $source['id']] = (string) $source['title'];
+            }
+        }
+        $sourceValues = [];
+        $valueIds = array_values(array_unique(array_filter(
+            array_map('intval', array_column($valueRows, 'source_value_id'))
+        )));
+        if ($valueIds) {
+            $q = $db->getQuery(true)->select(['id','title'])
+                ->from($db->quoteName('#__minimarket_order_option_values'))
+                ->where('id IN (' . implode(',', $valueIds) . ')');
+            $db->setQuery($q);
+            foreach ((array) $db->loadAssocList() as $source) {
+                $sourceValues[(int) $source['id']] = (string) $source['title'];
+            }
+        }
         $values=[];
         foreach ($valueRows as $r) {
-            $entry=['code'=>(string)$r['code'],'title'=>(string)$r['title']];
+            $sourceValueId = (int) ($r['source_value_id'] ?? 0);
+            $entry=['code'=>(string)$r['code'],
+                'title'=>$sourceValues[$sourceValueId] ?? (string)$r['title'],
+                'source_value_id'=>$sourceValueId];
             $entry['photos']=$photos[(int)$r['id']]??[];
             $values[(int)$r['dimension_id']][]=$entry;
         }
         $result=[];
         foreach ($rows as $row) {
-            $result[]=['code'=>(string)$row['code'],'title'=>(string)$row['title'],
+            $sourceOptionId = (int) ($row['source_option_id'] ?? 0);
+            $result[]=['code'=>(string)$row['code'],
+                'title'=>$sourceOptions[$sourceOptionId] ?? (string)$row['title'],
+                'source_option_id'=>$sourceOptionId,
                 'values'=>$values[(int)$row['id']]??[]];
         }
         return $result;
@@ -62,7 +94,9 @@ final class ProductLocalDimensions
                 $valueRows['row'.$j]=$entry;
             }
             $rows['row'.$i]=[
-                'code'=>$axis['code'], 'title'=>$axis['title'], 'values'=>$valueRows
+                'code'=>$axis['code'], 'title'=>$axis['title'],
+                'source_option_id'=>$axis['source_option_id'] ?? 0,
+                'values'=>$valueRows
             ];
         }
         return $rows;
@@ -98,53 +132,77 @@ final class ProductLocalDimensions
                 $db->quoteName('#__minimarket_product_variants').' WHERE product_id = '.$productId.')');
         $db->setQuery($q);$db->execute();
 
-        $q=$db->getQuery(true)->select(['id','code'])
+        $q=$db->getQuery(true)->select(['id','code','source_option_id'])
             ->from($db->quoteName('#__minimarket_variant_dimensions'))
             ->where($db->quoteName('product_id').' = '.$productId);
         $db->setQuery($q);
         $existing=[];
-        foreach ((array)$db->loadAssocList() as $r) $existing[$r['code']]=(int)$r['id'];
+        foreach ((array)$db->loadAssocList() as $r) {
+            $existing[$r['code']] = [
+                'id' => (int) $r['id'],
+                'source_option_id' => (int) ($r['source_option_id'] ?? 0),
+            ];
+        }
         $wanted=[];
         $axisIds=[];
         $valueIds=[];
         foreach ($dimensions as $i=>$axis) {
             $code=$axis['code'];$wanted[$code]=true;
             if (isset($existing[$code])) {
-                $id=$existing[$code];
+                $id=$existing[$code]['id'];
+                if ($existing[$code]['source_option_id'] > 0 &&
+                    (int) ($axis['source_option_id'] ?? 0) !== $existing[$code]['source_option_id']) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_INVALID');
+                }
                 $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_variant_dimensions'))
+                    ->set($db->quoteName('source_option_id') . ' = ' .
+                        ((int) ($axis['source_option_id'] ?? 0) ?: 'NULL'))
                     ->set($db->quoteName('title').' = '.$db->quote($axis['title']))
                     ->set($db->quoteName('sort_order').' = '.(int)$i)
                     ->where($db->quoteName('id').' = '.$id)
                     ->where($db->quoteName('product_id').' = '.$productId);
             } else {
                 $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_variant_dimensions'))
-                    ->columns($db->quoteName(['product_id','code','title','sort_order']))
-                    ->values(implode(',',[$productId,$db->quote($code),$db->quote($axis['title']),(int)$i]));
+                    ->columns($db->quoteName(['product_id','code','title','sort_order','source_option_id']))
+                    ->values(implode(',',[$productId,$db->quote($code),$db->quote($axis['title']),
+                        (int)$i, ((int) ($axis['source_option_id'] ?? 0) ?: 'NULL')]));
             }
             $db->setQuery($q);$db->execute();
             if (!isset($existing[$code])) $id=(int)$db->insertid();
             if ($id<1) throw new \RuntimeException('COM_MINIMARKET_VARIANTS_SAVE_FAILED');
             $axisIds[$code]=$id;
-            $q=$db->getQuery(true)->select(['id','code'])
+            $q=$db->getQuery(true)->select(['id','code','source_value_id'])
                 ->from($db->quoteName('#__minimarket_variant_dimension_values'))
                 ->where($db->quoteName('dimension_id').' = '.$id);
             $db->setQuery($q);
             $oldValues=[];
-            foreach ((array)$db->loadAssocList() as $row) $oldValues[$row['code']]=(int)$row['id'];
+            foreach ((array)$db->loadAssocList() as $row) {
+                $oldValues[$row['code']] = [
+                    'id' => (int) $row['id'],
+                    'source_value_id' => (int) ($row['source_value_id'] ?? 0),
+                ];
+            }
             $keepValues=[];
             foreach ($axis['values'] as $j=>$value) {
                 $vcode=$value['code'];$keepValues[$vcode]=true;
                 if (isset($oldValues[$vcode])) {
-                    $valueId=$oldValues[$vcode];
+                    $valueId=$oldValues[$vcode]['id'];
+                    if ($oldValues[$vcode]['source_value_id'] > 0 &&
+                        (int) ($value['source_value_id'] ?? 0) !== $oldValues[$vcode]['source_value_id']) {
+                        throw new \InvalidArgumentException('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_INVALID');
+                    }
                     $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_variant_dimension_values'))
+                        ->set($db->quoteName('source_value_id') . ' = ' .
+                            ((int) ($value['source_value_id'] ?? 0) ?: 'NULL'))
                         ->set($db->quoteName('title').' = '.$db->quote($value['title']))
                         ->set($db->quoteName('sort_order').' = '.(int)$j)
                         ->where($db->quoteName('id').' = '.$valueId)
                         ->where($db->quoteName('dimension_id').' = '.$id);
                 } else {
                     $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_variant_dimension_values'))
-                        ->columns($db->quoteName(['dimension_id','code','title','sort_order']))
-                        ->values(implode(',',[$id,$db->quote($vcode),$db->quote($value['title']),(int)$j]));
+                        ->columns($db->quoteName(['dimension_id','code','title','sort_order','source_value_id']))
+                        ->values(implode(',',[$id,$db->quote($vcode),$db->quote($value['title']),
+                            (int)$j, ((int) ($value['source_value_id'] ?? 0) ?: 'NULL')]));
                 }
                 $db->setQuery($q);$db->execute();
                 if (!isset($oldValues[$vcode])) $valueId=(int)$db->insertid();
@@ -156,16 +214,18 @@ final class ProductLocalDimensions
                     VariantValueGallery::replace($db,$valueId,$value['photos']);
                 }
             }
-            foreach ($oldValues as $vcode=>$valueId) {
+            foreach ($oldValues as $vcode=>$valueRecord) {
                 if (isset($keepValues[$vcode])) continue;
+                $valueId = $valueRecord['id'];
                 $q=$db->getQuery(true)->delete($db->quoteName('#__minimarket_variant_dimension_values'))
                     ->where($db->quoteName('id').' = '.$valueId)
                     ->where($db->quoteName('dimension_id').' = '.$id);
                 $db->setQuery($q);$db->execute();
             }
         }
-        foreach ($existing as $code=>$id) {
+        foreach ($existing as $code=>$record) {
             if (isset($wanted[$code])) continue;
+            $id = $record['id'];
             // Remaining values must be removed before the dimension.
             $q=$db->getQuery(true)->delete($db->quoteName('#__minimarket_variant_dimension_values'))
                 ->where($db->quoteName('dimension_id').' = '.$id);
