@@ -36,7 +36,7 @@ $assert($tree[$rootIndex]['direct_count'] === 2 && $tree[$rootIndex]['branch_cou
 $assert($tree[$rootIndex + 1]['branch_count'] === 8, 'subtree rollup');
 $assert($tree[$rootIndex]['has_children'] && !$tree[$rootIndex + 2]['has_children'], 'tree records descendants without UI toggle');
 $categoryTemplate=file_get_contents(__DIR__ . '/../src/com_minimarket/admin/tmpl/categories/default.php');
-$assert(str_contains($categoryTemplate,'class="table table-striped"'),
+$assert(str_contains($categoryTemplate,'class="table table-striped mm-admin-list"'),
     'categories use native Joomla striped table');
 $assert(!str_contains($categoryTemplate,'mm-tree-toggle')
     && !str_contains($categoryTemplate,'aria-expanded'),
