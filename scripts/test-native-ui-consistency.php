@@ -46,7 +46,7 @@ checkUi((string)$axes[0]['buttons']==='add,remove,move','axis add/remove/move ma
 $sku=$form->xpath("//fieldset[@name='variants']/field[@name='variants' and @type='subform']");
 checkUi(count($sku)===1,'SKU uses native Joomla subform');
 checkUi((string)$sku[0]['layout']==='joomla.form.field.subform.repeatable',
-    'SKU rows use responsive Joomla cards rather than a horizontally scrolling table');
+    'SKU combination grid uses native Joomla controls with a compact option scroll area');
 checkUi(count($form->xpath("//fieldset[@name='variants']/field[@name='category_option_preview' and @type='Productcategoryoptions']"))===1,
     'product sees category option catalog without duplicate option data');
 checkUi(count($form->xpath("//fieldset[@name='variants']/field[@name='variants_workflow' and @type='note']"))===1,

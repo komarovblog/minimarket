@@ -40,7 +40,7 @@ checkSku(str_contains($model,'$db->transactionStart();') &&
     str_contains($model,'$db->transactionRollback();'),
     'SKU and gallery save transaction remains atomic');
 checkSku(str_contains($ui,'refreshGallery()') &&
-    str_contains($ui,'data-mm-photo-select'),
+    str_contains($ui,'mm-photo-sku-checklist'),
     'one product gallery supports per-variant visibility and primary photo');
 checkSku(!str_contains($ui,'localStorage') && !str_contains($ui,'window.fetch('),
     'no competing local trade store or undocumented network endpoint');
