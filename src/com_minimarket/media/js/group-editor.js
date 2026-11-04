@@ -90,7 +90,7 @@
       const key = (config.mode === 'product' && id === config.currentId)
         ? 'current' : id;
       if (!group.members.some(p => memberKey(p) === String(key))) {
-        group.members.push({ id: key, title: String(product.title),
+        group.members.unshift({ id: key, title: String(product.title),
           state: Number(product.state), enabled: true });
       }
       save();
@@ -103,6 +103,7 @@
       const query = el('input', 'form-control form-control-sm');
       query.type = 'search';
       query.placeholder = t('searchPlaceholder', 'Search product by name or SKU');
+      query.value = group._findQuery || '';
       query.setAttribute('aria-label', query.placeholder);
       const category = el('select', 'form-select form-select-sm');
       category.setAttribute('aria-label', t('category', 'Category'));
@@ -114,9 +115,10 @@
         category.appendChild(option);
       }
       const results = el('div', 'mm-group-finder__results');
-      const search = button(t('search', 'Search'), 'btn-outline-primary', () => look());
+      const search = button(t('search', 'Search'), 'btn-primary', () => look());
       toolbar.append(query, category, search);
       box.append(toolbar, results);
+      category.value = group._findCategory || '0';
       let loading = false, debounce = null, serial = 0;
       const look = async () => {
         const number = ++serial;
@@ -148,7 +150,7 @@
               product.id === config.currentId;
             const key = isCurrent ? 'current' : String(product.id);
             const add = button('+ ' + t('addProduct', 'Add'),
-              'btn-outline-success', () => addMember(group, product));
+              'btn-success', () => addMember(group, product));
             add.disabled = selected.has(key);
             row.append(caption, add);
             results.appendChild(row);
@@ -160,10 +162,14 @@
         }
       };
       query.addEventListener('input', () => {
+        group._findQuery = query.value;
         clearTimeout(debounce);
         debounce = setTimeout(look, 300);
       });
-      category.addEventListener('change', look);
+      category.addEventListener('change', () => {
+        group._findCategory = category.value;
+        void look();
+      });
       search.addEventListener('click', event => event.stopPropagation());
       return box;
     };
@@ -227,7 +233,7 @@
         if (member.state === 0) caption.appendChild(
           el('small', 'text-muted', t('unpublished', 'Unpublished')));
         const remove = button(t('removeMember', 'Remove product'),
-          'btn-outline-danger', () => update(() => {
+          'btn-danger', () => update(() => {
             // Removing an entry only unlinks THIS product from THIS group.
             // The relationship and all other group members stay intact.
             g.members = g.members.filter(x => x !== member);
@@ -236,15 +242,22 @@
         item.append(caption, remove);
         members.appendChild(item);
       }
+      // A search opens BEFORE the existing members, never below a long list.
+      if (g._finderOpen && !g.delete) {
+        content.appendChild(finder(g));
+      }
       content.appendChild(members);
       if (!g.delete) {
         const pick = button('+ ' + t('addProduct', 'Add product'),
-          'btn-outline-primary', () => {
-            const finderBox = content.querySelector('.mm-group-finder');
-            if (finderBox) { finderBox.remove(); return; }
-            const created = finder(g);
-            content.appendChild(created);
-            created.querySelector('input[type="search"]').focus();
+          'btn-success', () => {
+            update(() => {
+              g._open = true;
+              g._finderOpen = !g._finderOpen;
+            });
+            if (g._finderOpen) {
+              mount.querySelectorAll('.mm-group-item')[index]
+                ?.querySelector('.mm-group-finder input[type="search"]')?.focus();
+            }
           });
         content.appendChild(pick);
       }
@@ -253,7 +266,7 @@
         actions.appendChild(button(
           g.delete ? t('restore', 'Undo deletion') :
             t('deleteGroup', 'Delete relationship'),
-          'btn-outline-danger', () => {
+          g.delete ? 'btn-primary' : 'btn-danger', () => {
             if (!g.delete && !window.confirm(t('deleteConfirm',
               'Delete this relationship for all linked products?'))) return;
             if (config.mode === 'group') {
@@ -266,7 +279,7 @@
           }));
       } else if (config.mode === 'product') {
         actions.appendChild(button(t('discard', 'Discard new relationship'),
-          'btn-outline-danger', () =>
+          'btn-danger', () =>
             update(() => { groups.splice(index, 1); })));
       }
       if (actions.children.length) content.appendChild(actions);
@@ -274,76 +287,115 @@
       return details;
     };
 
-    const addExisting = container => {
-      const chooser = el('div', 'mm-group-existing');
+    // Match the product picker: search field, Search button, result rows,
+    // green Add buttons. The query searches only GROUP NAMES, never a wall
+    // of checkboxes or every product in the catalog.
+    const addExisting = () => {
+      const chooser = el('div', 'mm-group-finder mm-group-existing');
+      const toolbar = el('div', 'mm-group-finder__search mm-group-finder__search--groups');
       const input = el('input', 'form-control form-control-sm');
       input.type = 'search';
       input.placeholder = t('groupSearch', 'Search existing relationships');
-      const hits = el('div', 'mm-group-existing__results');
+      input.setAttribute('aria-label', input.placeholder);
+      const hits = el('div', 'mm-group-finder__results mm-group-existing__results');
+      const search = button(t('search', 'Search'), 'btn-primary', () => filter());
+      toolbar.append(input, search);
+      chooser.append(toolbar, hits);
       const filter = () => {
         hits.replaceChildren();
         const term = input.value.trim().toLocaleLowerCase();
         if (!term) return;
         const used = new Set(groups.map(group => Number(group.id)));
-        const matches = (config.otherGroups || [])
-          .filter(g => !used.has(Number(g.id)) &&
-            String(g.title).toLocaleLowerCase().includes(term)).slice(0,10);
+        const matches = (config.otherGroups || []).filter(g =>
+          !used.has(Number(g.id)) &&
+          (String(g.title).toLocaleLowerCase().includes(term) ||
+           String(g.id) === term)
+        ).slice(0, 25);
         if (!matches.length) hits.appendChild(
-          el('p', 'text-muted small', t('noMatches', 'No results')));
+          el('p', 'small text-muted', t('noMatches', 'No results')));
         for (const group of matches) {
-          hits.appendChild(button(group.title + ' (#' + group.id + ')',
-            'btn-outline-secondary', async () => {
+          const row = el('div', 'mm-group-finder__result');
+          const title = el('span', '', group.title + ' (#' + group.id + ')');
+          const add = button('+ ' + t('addGroup', 'Add relationship'),
+            'btn-success', async () => {
+              add.disabled = true;
               try {
                 const found = await api(config.groupUrl, { id: group.id });
                 const data = found.group;
-                if (!data || Number(data.id) !== Number(group.id)) throw Error();
+                if (!data || Number(data.id) !== Number(group.id) ||
+                    groups.some(g => Number(g.id) === Number(data.id))) return;
                 const members = (data.members || []).map(p => ({
-                  id: config.currentId > 0 && p.id === config.currentId ?
-                    'current' : p.id,
+                  id: config.currentId > 0 && p.id === config.currentId
+                    ? 'current' : p.id,
                   title: p.title, state: p.state, enabled: true,
                 }));
                 if (!members.some(m => m.id === 'current')) {
-                  members.unshift({ id:'current',
-                    title: config.currentTitle, state: 1, enabled: true });
+                  members.unshift({ id: 'current', title: config.currentTitle,
+                    state: 1, enabled: true });
                 }
                 update(() => {
-                  groups.push({ id:data.id, title:data.title, state:data.state,
-                    members, leave:false, delete:false, _open:true });
+                  groups.unshift({ id: data.id, title: data.title, state: data.state,
+                    members, leave:false, delete:false, _open: true });
+                  existingPickerOpen = false;
                 });
-              } catch (_) { report(t('error', 'Search failed'), true); }
-            }));
+                // Bring the newly added relationship into view at the top.
+                mount.querySelector('.mm-group-item')?.scrollIntoView({
+                  behavior: 'auto', block: 'nearest'
+                });
+              } catch (_) {
+                report(t('error', 'Search failed'), true);
+                add.disabled = false;
+              }
+            });
+          row.append(title, add);
+          hits.appendChild(row);
         }
       };
-      input.addEventListener('input', filter);
-      chooser.append(input, hits);
+      let debounce;
+      input.addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(filter, 250);
+      });
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); filter(); }
+      });
       return chooser;
     };
 
+    let existingPickerOpen = false;
     const render = () => {
       mount.replaceChildren();
+      if (!groups.length) mount.appendChild(el('p', 'text-muted',
+        t('none', 'No relationships yet')));
+      // Existing and newly created groups stay at the TOP; actions at bottom.
+      for (const [i, group] of groups.entries()) {
+        mount.appendChild(renderGroup(group, i));
+      }
       if (config.mode === 'product') {
-        const toolbar = el('div', 'mm-group-toolbar');
+        const toolbar = el('div', 'mm-group-toolbar mm-group-toolbar--footer');
         toolbar.appendChild(button('+ ' + t('addGroup', 'Add relationship'),
-          'btn-primary', () => {
+          'btn-success', () => {
             update(() => {
-              groups.push({
+              groups.unshift({
                 id:0,title:'',state:1,delete:false,leave:false,_open:true,
                 members:[{id:'current',title:config.currentTitle ||
                   t('current','Current product'),state:1,enabled:true}]
               });
+              existingPickerOpen = false;
             });
+            mount.querySelector('.mm-group-item input[type="text"]')?.focus();
           }));
-        const existing = el('details', 'mm-group-existing-picker');
-        existing.appendChild(el('summary', 'btn btn-sm btn-outline-secondary',
-          '+ ' + t('existing','Attach existing relationship')));
-        existing.appendChild(addExisting(existing));
-        toolbar.appendChild(existing);
+        toolbar.appendChild(button('+ ' + t('existing',
+          'Attach existing relationship'), 'btn-success', () => {
+          existingPickerOpen = !existingPickerOpen;
+          render();
+          mount.querySelector('.mm-group-existing input[type="search"]')?.focus();
+        }));
         mount.appendChild(toolbar);
-      }
-      if (!groups.length) mount.appendChild(el('p', 'text-muted',
-        t('none', 'No relationships yet')));
-      for (const [i, group] of groups.entries()) {
-        mount.appendChild(renderGroup(group, i));
+        if (existingPickerOpen) {
+          // Search at the FIRST visible position; footer buttons stay below.
+          mount.prepend(addExisting());
+        }
       }
       save();
     };

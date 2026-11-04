@@ -431,3 +431,94 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* 0.5.42 — identical framed tab panels and tables in every entity editor.
+   Scoped to MiniMarket forms: unrelated Joomla administrator tables retain
+   their original styling and no horizontal overflow is introduced. */
+#adminForm .mm-admin-panel {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--border-color, rgba(128, 128, 128, .35));
+  border-radius: .45rem;
+  padding: clamp(.8rem, 1.8vw, 1.5rem);
+  box-shadow: none;
+  /* Keep native Joomla card background in light and dark themes. */
+}
+#adminForm .mm-admin-panel .mm-rules-table,
+#adminForm .mm-admin-panel .mm-sku-matrix {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--border-color, rgba(128,128,128,.35));
+  border-radius: .4rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+#adminForm .mm-admin-panel .mm-rules-table th,
+#adminForm .mm-admin-panel .mm-rules-table td {
+  padding: .55rem .8rem;
+}
+#adminForm .mm-admin-panel .mm-order-option-values .subform-repeatable-group,
+#adminForm .mm-admin-panel .mm-group-item {
+  border-color: var(--border-color, rgba(128,128,128,.35));
+}
+#adminForm .mm-group-toolbar--footer {
+  margin: .9rem 0 0;
+  padding-top: .65rem;
+  border-top: 1px solid var(--border-color, rgba(128,128,128,.2));
+}
+#adminForm .mm-group-finder {
+  width: 100%;
+  min-width: 0;
+  padding: .65rem 0 .35rem;
+  border-bottom: 1px solid var(--border-color, rgba(128,128,128,.2));
+}
+#adminForm .mm-group-finder__search--groups {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+#adminForm .mm-group-existing {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 .9rem;
+}
+#adminForm .mm-group-existing__results {
+  display: block;
+  margin-top: .2rem;
+  width: 100%;
+}
+#adminForm .mm-group-existing__results .mm-group-finder__result {
+  width: 100%;
+  min-width: 0;
+}
+#adminForm .mm-group-existing__results .mm-group-finder__result .btn {
+  white-space: nowrap;
+}
+#adminForm .mm-group-item__body > .mm-group-finder {
+  margin: 0 0 .75rem;
+}
+#adminForm .mm-group-editor .btn {
+  max-width: 100%;
+  white-space: normal;
+}
+#adminForm .mm-group-editor .btn-success {
+  color: #fff;
+}
+#adminForm .mm-group-editor .btn-danger {
+  color: #fff;
+}
+@container (max-width: 640px) {
+  #adminForm .mm-group-finder__search--groups {
+    grid-template-columns: minmax(0,1fr);
+  }
+}
+
+/* Lists share the same understated border as edit-tab rule tables. */
+#adminForm .mm-admin-list {
+  border: 1px solid var(--border-color, rgba(128,128,128,.35));
+  border-radius: .4rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}

@@ -13,7 +13,7 @@ use Joomla\CMS\Language\Text;
         'categories' => 'COM_MINIMARKET_ATTRCAT_TAB',
     ] as $section => $title) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-attribute', $section, Text::_($title)); ?>
-        <div class="card card-body"><?php echo $this->form->renderFieldset($section); ?></div>
+        <div class="card card-body mm-admin-panel"><?php echo $this->form->renderFieldset($section); ?></div>
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
     <?php endforeach; ?>
     <?php echo HTMLHelper::_('uitab.endTabSet'); ?>

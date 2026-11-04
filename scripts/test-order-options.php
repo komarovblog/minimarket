@@ -100,6 +100,10 @@ namespace MiniMarket\OrderOptionsTest {
     verify(str_contains($optionEditor, 'CategoryOrderOptions::replaceForOption')
         && str_contains($optionEditor, 'CategoryOrderOptions::directForOption'),
         'reverse category assignments saved transactionally with the option');
+    $optionTemplate = file_get_contents($base . 'tmpl/orderoption/edit.php');
+    verify(str_contains($optionTemplate, "'categories' => 'COM_MINIMARKET_ORDER_OPTION_CATEGORIES'") &&
+        str_contains($optionTemplate, "renderFieldset(\$tab)"),
+        'option category assignment tab is actually rendered and saved, not hidden');
     $reverseService = file_get_contents($base . 'src/Service/CategoryOrderOptions.php');
     verify(str_contains($reverseService, 'function replaceForOption(')
         && str_contains($reverseService, 'function directForOption('),

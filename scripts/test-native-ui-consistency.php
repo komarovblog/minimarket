@@ -112,5 +112,17 @@ checkUi(str_contains($client,'isShared()') &&
 checkUi(str_contains($client,'refreshGallery()') &&
     str_contains($client,'data-mm-photo-select'),
     'gallery photo permissions and SKU covers are edited alongside matrix');
+foreach (['attribute','category','group','orderoption','product','value'] as $name) {
+    $template = file_get_contents($base.'admin/tmpl/'.$name.'/edit.php');
+    checkUi(str_contains($template,'card card-body mm-admin-panel'),
+        $name.' renders a matching framed editable tab panel');
+}
+$cssFrame=file_get_contents($base.'media/css/admin-ui.css');
+checkUi(str_contains($cssFrame,'#adminForm .mm-admin-panel') &&
+    str_contains($cssFrame,'#adminForm .mm-admin-panel .mm-rules-table'),
+    'all category/option/attribute tables use matching bordered styling');
+checkUi(str_contains($cssFrame,'.mm-group-toolbar--footer') &&
+    str_contains($cssFrame,'.mm-group-finder__search--groups'),
+    'group search uses the same framed finder and footer buttons');
 echo 'NATIVE_UI_OK: '.$n." cases\n";
 

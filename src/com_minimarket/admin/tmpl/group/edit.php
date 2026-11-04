@@ -11,7 +11,7 @@ use Joomla\CMS\Router\Route;
     <?php foreach (['details' => 'COM_MINIMARKET_GROUP_DETAILS',
                     'members' => 'COM_MINIMARKET_GROUP_MEMBERS'] as $section => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-group', $section, Text::_($label)); ?>
-        <div class="card card-body"><?php echo $this->form->renderFieldset($section); ?></div>
+        <div class="card card-body mm-admin-panel"><?php echo $this->form->renderFieldset($section); ?></div>
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
     <?php endforeach; ?>
     <?php echo HTMLHelper::_('uitab.endTabSet'); ?>

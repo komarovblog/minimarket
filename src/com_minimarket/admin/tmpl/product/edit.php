@@ -20,7 +20,7 @@ use Joomla\CMS\Router\Route;
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
     ] as $section => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-product', $section, Text::_($label)); ?>
-        <div class="card card-body"<?php echo $section === 'variants' ? ' data-mm-variants-editor' : ''; ?>>
+        <div class="card card-body mm-admin-panel"<?php echo $section === 'variants' ? ' data-mm-variants-editor' : ''; ?>>
             <?php if ($section === 'variants') : ?>
                 <?php echo $this->form->renderField('variants_present'); ?>
                 <?php echo $this->form->renderField('variant_dimensions_present'); ?>

@@ -15,7 +15,7 @@ $returnToAttribute = $parentAttributeId > 0
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=value&layout=edit&id=' . (int) $this->item->id); ?>"
       method="post" name="adminForm" id="adminForm" class="form-validate">
-    <div class="card card-body">
+    <div class="card card-body mm-admin-panel">
         <?php echo $this->form->renderFieldset('details'); ?>
     </div>
     <?php if ($returnToAttribute !== '') : ?>

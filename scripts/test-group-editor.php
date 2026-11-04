@@ -87,6 +87,22 @@ namespace MiniMarket\GroupEditorSmoke {
         str_contains($groupController,"authorise('core.delete', 'com_minimarket')") &&
         str_contains($groupController,'$model->delete($ids)'),
         'standalone delete checks post token, ACL and calls group-only deletion');
+    check(str_contains($js, "groups.unshift({") &&
+        str_contains($js, "group.members.unshift({") &&
+        str_contains($js, "mount.prepend(addExisting())"),
+        'new relationships, attached groups, search and new members appear first');
+    check(str_contains($js,'mm-group-toolbar--footer') &&
+        str_contains($js,'mount.appendChild(toolbar)') &&
+        str_contains($js,'for (const [i, group] of groups.entries())'),
+        'relationship creation buttons are below the existing relationship list');
+    check(str_contains($js,"mm-group-finder__search--groups") &&
+        str_contains($js,"mm-group-existing__results") &&
+        str_contains($js,"'btn-success'") &&
+        !str_contains($js,'btn-outline-'),
+        'existing-group search mirrors product search, solid native buttons only');
+    check(str_contains($js,'content.appendChild(finder(g))') &&
+        str_contains($js,"g._finderOpen = !g._finderOpen"),
+        'adding a product opens category/name search at the start of its group');
     $controller=file_get_contents($base.'admin/src/Controller/ProductpickerController.php');
     check(str_contains($controller,"authorise('core.manage', 'com_minimarket')") &&
         str_contains($controller,"Session::checkToken('get')") &&
@@ -133,7 +149,7 @@ namespace MiniMarket\GroupEditorSmoke {
         !str_contains($migration,'MODIFY COLUMN '.chr(96).'value_text'.chr(96)),
         'Joomla DB schema checker no longer misreads COLUMN as column name');
     $manifest=file_get_contents($base.'minimarket.xml');
-    check(str_contains($manifest,'<version>0.5.41</version>'),
-        'component metadata matches 0.5.41');
+    check(str_contains($manifest,'<version>0.5.42</version>'),
+        'component metadata matches 0.5.42');
     echo 'GROUP_EDITOR_OK: '.$checks." cases\n";
 }
