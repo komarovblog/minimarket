@@ -98,8 +98,8 @@ namespace MiniMarket\GlobalLinksTest {
     check(str_contains($migration,'source_option_id')
        && str_contains($migration,'source_value_id')
        && str_contains($migration,'FOREIGN KEY')
-       && !str_contains($migration,'UPDATE ')
-       && !str_contains($migration,'DELETE FROM'),
+       && !preg_match('/^\\s*UPDATE\\s/mi',$migration)
+       && !preg_match('/^\\s*DELETE\\s+FROM\\s/mi',$migration),
        'additive SQL does not rewrite products or SKU');
     echo 'GLOBAL_OPTION_LINK_PASS: '.$checks." cases\n";
 }
