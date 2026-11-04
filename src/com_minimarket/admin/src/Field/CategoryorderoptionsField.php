@@ -6,7 +6,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Router\Route;
+use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
 
@@ -24,10 +24,10 @@ final class CategoryorderoptionsField extends FormField
         $db->setQuery($q);
         $options = (array) $db->loadAssocList();
         if (!$options) {
-            $url = Route::_('index.php?option=com_minimarket&view=orderoption&layout=edit');
+            $url = AdminEntityLinks::add('orderoption');
             return '<p class="text-muted">' . htmlspecialchars(
                 Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_EMPTY'), ENT_QUOTES, 'UTF-8'
-            ) . ' <a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">' .
+            ) . ' <a href="' . $url . '">' .
                 htmlspecialchars(Text::_('COM_MINIMARKET_ORDER_OPTION_CREATE'), ENT_QUOTES, 'UTF-8') .
                 '</a></p>';
         }
@@ -52,8 +52,8 @@ final class CategoryorderoptionsField extends FormField
             if (!in_array($mode, [-1,0,1,2], true)) $mode = -1;
             $name = $esc($this->name . '[' . $id . ']');
             $fieldId = $esc($this->id . '_' . $id);
-            $url = Route::_('index.php?option=com_minimarket&task=orderoption.edit&id=' . $id);
-            $html .= '<tr><th scope="row"><a class="d-inline-block" href="' . $esc($url)
+            $url = AdminEntityLinks::edit('orderoption', $id);
+            $html .= '<tr><th scope="row"><a class="d-inline-block" href="' . $url
                 . '">' . $esc((string) $option['title']) . '</a>'
                 . '<small class="d-block text-muted">' . $esc((string) $option['code']) . '</small>';
             if (isset($inherited[$id]) && $mode === -1) {

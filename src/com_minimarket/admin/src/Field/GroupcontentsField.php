@@ -6,7 +6,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Router\Route;
+use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
 
@@ -29,13 +29,13 @@ final class GroupcontentsField extends FormField
             $escape(Text::_('COM_MINIMARKET_PRODUCT_GROUP')) . '</th><th>' .
             $escape(Text::_('COM_MINIMARKET_GROUP_MEMBERS')) . '</th></tr></thead><tbody>';
         foreach ($groups as $group) {
-            $url = Route::_('index.php?option=com_minimarket&task=group.edit&id=' . (int) $group['id']);
-            $html .= '<tr><th scope="row"><a href="' . $escape($url) . '">' .
+            $url = AdminEntityLinks::edit('group', (int) $group['id']);
+            $html .= '<tr><th scope="row"><a href="' . $url . '">' .
                 $escape((string) $group['title']) . '</a></th><td>';
             $links = [];
             foreach ($group['members'] as $member) {
-                $memberUrl = Route::_('index.php?option=com_minimarket&task=product.edit&id=' . (int) $member['id']);
-                $links[] = '<a href="' . $escape($memberUrl) . '">' .
+                $memberUrl = AdminEntityLinks::edit('product', (int) $member['id']);
+                $links[] = '<a href="' . $memberUrl . '">' .
                     $escape((string) $member['title']) . '</a>';
             }
             $html .= implode(', ', $links) . '</td></tr>';

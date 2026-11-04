@@ -112,6 +112,9 @@ jobs:
       - name: Administrator category hierarchy and counts
         run: php scripts/test-admin-category-tree.php
 
+      - name: Joomla administrator entity links resolve to edit controllers
+        run: php scripts/test-admin-entity-links.php
+
       - name: Native Joomla UI consistency across categories and variants
         run: php scripts/test-native-ui-consistency.php
 

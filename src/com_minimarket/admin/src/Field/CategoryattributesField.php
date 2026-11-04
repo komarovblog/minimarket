@@ -8,6 +8,7 @@ use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 
 /**
  * One three-state control per global attribute, without copying dictionaries.
@@ -68,8 +69,8 @@ final class CategoryattributesField extends FormField
                 ? Text::sprintf(($parentModes[$id] ?? 1) === 2
                     ? 'COM_MINIMARKET_CATATTR_REQUIRED_FROM_PARENT' : 'COM_MINIMARKET_CATATTR_FROM_PARENT', $sourceId)
                 : Text::_('COM_MINIMARKET_CATATTR_NOT_INHERITED');
-            $url = \Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=attribute.edit&id=' . $id);
-            $label = '<a class="d-inline-block" href="' . $escape($url) . '">'
+            $url = AdminEntityLinks::edit('attribute', $id);
+            $label = '<a class="d-inline-block" href="' . $url . '">'
                 . $escape((string) $attr->title) . '</a>'
                 . '<small class="d-block text-muted">' . $escape((string) $attr->code) . '</small>';
             $published = (int) $attr->state === 1;

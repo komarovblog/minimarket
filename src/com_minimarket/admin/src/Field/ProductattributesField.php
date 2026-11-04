@@ -6,7 +6,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Field;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Router\Route;
+use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 use Joomla\CMS\Form\Field\EditorField;
 use Joomla\CMS\Form\Field\MediaField;
 use Joomla\Database\DatabaseInterface;
@@ -107,9 +107,7 @@ final class ProductattributesField extends FormField
                         . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NO_VALUES'))
                         . '</p>';
                 }
-                $html .= '<p class="small"><a href="' . $escape(Route::_(
-                    'index.php?option=com_minimarket&task=attribute.edit&id=' . $id
-                )) . '">' . $escape(Text::_('COM_MINIMARKET_EDIT_VALUES')) . '</a></p>';
+                $html .= '<p class="small"><a href="' . AdminEntityLinks::edit('attribute', $id) . '">' . $escape(Text::_('COM_MINIMARKET_EDIT_VALUES')) . '</a></p>';
             }
             $html .= '<div class="text-warning small' . ($isApplicable ? ' d-none' : '')
                 . '" data-mm-attribute-incompatible>'

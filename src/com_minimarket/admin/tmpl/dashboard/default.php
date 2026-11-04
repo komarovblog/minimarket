@@ -3,7 +3,7 @@
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
-use Joomla\CMS\Router\Route;
+use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 
 $sections = [
     ['categories', 'COM_MINIMARKET_CATEGORIES'],
@@ -21,7 +21,7 @@ $sections = [
     <div class="list-group mm-dashboard__sections mb-4">
         <?php foreach ($sections as [$view, $label]) : ?>
             <a class="list-group-item list-group-item-action"
-               href="<?php echo htmlspecialchars(Route::_('index.php?option=com_minimarket&view=' . $view), ENT_QUOTES, 'UTF-8'); ?>">
+               href="<?php echo AdminEntityLinks::view($view); ?>">
                 <?php echo htmlspecialchars(Text::_($label), ENT_QUOTES, 'UTF-8'); ?>
             </a>
         <?php endforeach; ?>

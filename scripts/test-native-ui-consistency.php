@@ -131,8 +131,8 @@ checkUi(str_contains($categoryRules,'mm-rules-table--state') &&
     str_contains($categoryRules,'d-block text-muted') &&
     str_contains($optionRules,"Text::_('JSTATUS')"),
     'category attributes and options have stacked code and separate publication status');
-checkUi(str_contains($categoryRules,'task=attribute.edit&id=') &&
-    str_contains($optionRules,'task=orderoption.edit&id='),
+checkUi(str_contains($categoryRules,"AdminEntityLinks::edit('attribute',") &&
+    str_contains($optionRules,"AdminEntityLinks::edit('orderoption',"),
     'entity links open the actual Joomla edit task instead of the dashboard');
 $dashboard=file_get_contents($base.'admin/tmpl/dashboard/default.php');
 checkUi(str_contains($dashboard,'mm-dashboard__sections') &&
@@ -144,9 +144,9 @@ checkUi(str_contains($editor,'sku_matrix_payload') &&
     'compact SKU matrix is the only component area with scrolling option axes');
 // 0.5.44: links to an edit task, not the MiniMarket component home.
 foreach ([
-    'admin/src/Field/CategoryattributesField.php' => 'task=attribute.edit&id=',
-    'admin/src/Field/CategoryorderoptionsField.php' => 'task=orderoption.edit&id=',
-    'admin/src/Field/ProductattributesField.php' => 'task=attribute.edit&id=',
+    'admin/src/Field/CategoryattributesField.php' => "AdminEntityLinks::edit('attribute',",
+    'admin/src/Field/CategoryorderoptionsField.php' => "AdminEntityLinks::edit('orderoption',",
+    'admin/src/Field/ProductattributesField.php' => "AdminEntityLinks::edit('attribute',",
     'media/js/sku-matrix.js' => 'task=category.edit&id=',
 ] as $file => $expected) {
     checkUi(str_contains(file_get_contents($base.$file), $expected),
