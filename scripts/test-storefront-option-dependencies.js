@@ -27,7 +27,7 @@ const mock = (variants, startId, stockMode, productStock, optionValues) => {
   });
   const nodes = {
     '[data-mm-variant-sku]': { textContent: '' },
-    '[data-mm-variant-price]': { textContent: '' },
+    '[data-mm-variant-price]': { textContent: '199.00' },
     '[data-mm-variant-stock]': { textContent: '' }
   };
   const status = { textContent: '' };
@@ -78,7 +78,7 @@ test(options.color.value==='blue', 'switching to Blue is allowed with previously
 test(options.size.value==='M', 'size automatically corrected to existing Blue M');
 test(options.size.disabled('S'), 'Blue S disabled when no such SKU exists');
 test(!options.size.disabled('L'), 'Blue L enabled');
-test(nodes['[data-mm-variant-price]'].textContent==='300.00', 'price changes with corrected SKU');
+test(nodes['[data-mm-variant-price]'].textContent==='199.00', 'product price never changes with SKU selection');
 options.size.change('L');
 test(nodes['[data-mm-variant-sku]'].textContent==='BLUE-L', 'choosing available size changes SKU');
 test(nodes['[data-mm-variant-stock]'].textContent==='2', 'per-SKU stock displayed');
