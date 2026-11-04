@@ -52,7 +52,7 @@ final class CategoryorderoptionsField extends FormField
             if (!in_array($mode, [-1,0,1,2], true)) $mode = -1;
             $name = $esc($this->name . '[' . $id . ']');
             $fieldId = $esc($this->id . '_' . $id);
-            $url = Route::_('index.php?option=com_minimarket&view=orderoption&layout=edit&id=' . $id);
+            $url = Route::_('index.php?option=com_minimarket&task=orderoption.edit&id=' . $id);
             $html .= '<tr><th scope="row"><a class="d-inline-block" href="' . $esc($url)
                 . '">' . $esc((string) $option['title']) . '</a>'
                 . '<small class="d-block text-muted">' . $esc((string) $option['code']) . '</small>';

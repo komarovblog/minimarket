@@ -142,5 +142,47 @@ checkUi(str_contains($editor,'sku_matrix_payload') &&
     str_contains($cssFrame,'.mm-sku-viewport') &&
     str_contains($cssFrame,'[data-mm-pinned="sku"]'),
     'compact SKU matrix is the only component area with scrolling option axes');
+// 0.5.44: links to an edit task, not the MiniMarket component home.
+foreach ([
+    'admin/src/Field/CategoryattributesField.php' => 'task=attribute.edit&id=',
+    'admin/src/Field/CategoryorderoptionsField.php' => 'task=orderoption.edit&id=',
+    'admin/src/Field/ProductattributesField.php' => 'task=attribute.edit&id=',
+    'media/js/sku-matrix.js' => 'task=category.edit&id=',
+] as $file => $expected) {
+    checkUi(str_contains(file_get_contents($base.$file), $expected),
+        'entity link opens actual Joomla editor: '.$file);
+}
+$landing=file_get_contents($base.'admin/tmpl/dashboard/default.php');
+checkUi(str_contains($landing,'mm-dashboard__sections') &&
+    str_contains($landing,'mm-dashboard__open') &&
+    str_contains($landing,'view=catalog'),
+    'MiniMarket home shows intro, a section list and solid catalog button');
+$categoryAttrs=file_get_contents($base.'admin/src/Field/CategoryattributesField.php');
+$categoryOpts=file_get_contents($base.'admin/src/Field/CategoryorderoptionsField.php');
+checkUi(str_contains($categoryAttrs,'d-block text-muted') &&
+    str_contains($categoryOpts,'d-block text-muted') &&
+    str_contains($categoryAttrs,'mm-rules-state') &&
+    str_contains($categoryOpts,'mm-rules-state'),
+    'attribute/option codes are below names; publication has separate column');
+$matrixScript=file_get_contents($base.'media/js/sku-matrix.js');
+$adminCss=file_get_contents($base.'media/css/admin-ui.css');
+checkUi(str_contains($matrixScript,'mm-sku-viewport') &&
+    str_contains($matrixScript,'data-mm-pinned') &&
+    str_contains($matrixScript,'displayCategoryOptions()') &&
+    str_contains($adminCss,'position: sticky') &&
+    str_contains($adminCss,'overflow-x: auto'),
+    'matrix has its own horizontal viewport and pinned SKU, stock, active columns');
+checkUi(str_contains($matrixScript,'mm-photo-sku-checklist') &&
+    str_contains($matrixScript,'const owners = new Map()'),
+    'photo assignments use active SKU checkboxes with a single-main-photo guard');
+$optionValues=file_get_contents($base.'admin/forms/orderoptionvalue.xml');
+checkUi(str_contains($optionValues,'name="color_hex"') &&
+    str_contains($optionValues,'name="sample_image"'),
+    'each order option value can have a color and an image');
+$groupScript=file_get_contents($base.'media/js/group-editor.js');
+checkUi(str_contains($groupScript,'mm-group-item__save-actions') &&
+    str_contains($groupScript,'submitGroupChanges'),
+    'relationship Save is visibly separated from Add product');
+
 echo 'NATIVE_UI_OK: '.$n." cases\n";
 

@@ -672,3 +672,31 @@
   height: 2.25rem;
   cursor: pointer;
 }
+
+/* 0.5.44 — dashboard call to action must be visible in Joomla dark mode.
+   The content order is description, stacked section links, then this button. */
+.mm-dashboard .mm-dashboard__open.btn {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  background-color: #087fad;
+  border: 1px solid #087fad;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.mm-dashboard .mm-dashboard__open.btn:hover,
+.mm-dashboard .mm-dashboard__open.btn:focus-visible {
+  background-color: #06688d;
+  border-color: #06688d;
+  color: #fff;
+}
+.mm-dashboard .mm-dashboard__sections {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mm-dashboard .mm-dashboard__sections .list-group-item {
+  overflow-wrap: break-word;
+}

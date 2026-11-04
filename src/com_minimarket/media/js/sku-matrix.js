@@ -357,7 +357,7 @@
     if (link) {
       const id = Number(cat);
       link.href = Number.isSafeInteger(id) && id > 0
-        ? 'index.php?option=com_minimarket&view=category&layout=edit&id=' + id
+        ? 'index.php?option=com_minimarket&task=category.edit&id=' + id
         : 'index.php?option=com_minimarket&view=categories';
     }
     if (!display) return;
