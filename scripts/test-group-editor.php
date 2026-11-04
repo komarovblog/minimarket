@@ -71,6 +71,14 @@ namespace MiniMarket\GroupEditorSmoke {
         str_contains($controller,"Session::checkToken('get')") &&
         str_contains($controller,'$db->setQuery($q, 0, 25);'),
         'search API requires admin permission and CSRF token, limits results');
+    check(str_contains($controller,'count($found) > 1000') &&
+        str_contains($controller,'Group too large for inline editing'),
+        'large existing groups refuse truncated membership data');
+    $groupModelDelete=file_get_contents($base.'admin/src/Model/GroupModel.php');
+    check(str_contains($groupModelDelete,'parent::delete($pks)') &&
+        str_contains($groupModelDelete,'$db->transactionStart();') &&
+        str_contains($groupModelDelete,"->delete(\$db->quoteName('#__minimarket_product_group_members'))"),
+        'explicit group deletion unlinks members in a transaction without deleting products');
     $service=file_get_contents($base.'admin/src/Service/GroupEditor.php');
     check(str_contains($service,'ProductGroups::replaceForGroup') &&
         str_contains($service,'saveProduct(') &&

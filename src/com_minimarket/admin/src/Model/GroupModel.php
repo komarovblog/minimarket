@@ -64,22 +64,44 @@ final class GroupModel extends AdminModel
         }
     }
 
-    /** Refuse deletion while a group has members: no silent unlinking. */
+    /**
+     * Explicit Joomla bulk deletion unlinks members first, then deletes only
+     * relationship records. Products, URLs, SKU and stock remain untouched.
+     * A failing FK or permission check rolls back the entire operation.
+     */
     public function delete(&$pks)
     {
         try {
             $ids = ProductGroups::normalizeIds($pks);
-            foreach ($ids as $id) {
-                if (ProductGroups::memberIds($this->getDatabase(), $id)) {
-                    $this->setError(Text::_('COM_MINIMARKET_GROUP_IN_USE'));
-                    return false;
-                }
+            if (!$ids) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
             }
-        } catch (\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException $error) {
             $this->setError(Text::_('COM_MINIMARKET_PRODUCT_GROUP_INVALID'));
             return false;
         }
-        return parent::delete($pks);
+
+        $db = $this->getDatabase();
+        $db->transactionStart();
+        try {
+            foreach ($ids as $id) {
+                $query = $db->getQuery(true)
+                    ->delete($db->quoteName('#__minimarket_product_group_members'))
+                    ->where('group_id = ' . $id);
+                $db->setQuery($query);
+                $db->execute();
+            }
+            if (!parent::delete($pks)) {
+                $db->transactionRollback();
+                return false;
+            }
+            $db->transactionCommit();
+            return true;
+        } catch (\Throwable $error) {
+            $db->transactionRollback();
+            $this->setError(Text::_('COM_MINIMARKET_PRODUCT_GROUP_INVALID'));
+            return false;
+        }
     }
 
     protected function loadFormData()

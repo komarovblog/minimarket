@@ -81,9 +81,15 @@ final class ProductpickerController extends BaseController
             ->join('INNER', $db->quoteName('#__minimarket_products', 'p')
                 . ' ON p.id = gm.product_id')
             ->where('gm.group_id = '.$id)->order('gm.sort_order ASC,p.id ASC');
-        $db->setQuery($q,0,1000);
+        // Never return a truncated group: saving a partial member list would
+        // wrongly unlink the omitted members.
+        $db->setQuery($q,0,1001);
+        $found = (array) $db->loadAssocList();
+        if (count($found) > 1000) {
+            throw new \RuntimeException('Group too large for inline editing', 409);
+        }
         $members = [];
-        foreach ((array)$db->loadAssocList() as $p) {
+        foreach ($found as $p) {
             $members[] = ['id'=>(int)$p['id'],'title'=>(string)$p['title'],
                 'state'=>(int)$p['state']];
         }
