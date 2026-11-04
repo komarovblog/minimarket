@@ -9,10 +9,10 @@ use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Button\PublishedButton;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=categories'); ?>"
-      method="post" name="adminForm" id="adminForm">
+      method="post" name="adminForm" id="adminForm" class="mm-list-form">
     <div id="j-main-container" class="j-main-container">
         <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
-        <table class="table table-striped" id="mm-category-tree">
+        <table class="table table-striped mm-admin-list" id="mm-category-tree">
             <thead>
             <tr>
                 <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
@@ -34,15 +34,16 @@ use Joomla\CMS\Button\PublishedButton;
                 $image = explode('#', (string) ($item->image ?? ''), 2)[0];
                 $safeImage = str_starts_with($image, 'images/')
                     && !str_contains($image, '..')
-                    && !preg_match('/[\x00-\x1f<>]/', $image);
+                    && !preg_match('/[\x00-\x1f<>]/', $image)
+                && is_file(JPATH_ROOT . '/' . $image);
             ?>
                 <tr>
-                    <td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, $id); ?></td>
-                    <td class="text-center">
+                    <td class="text-center" data-label="<?php echo $this->escape(Text::_('JSELECT')); ?>"><?php echo HTMLHelper::_('grid.id', $i, $id); ?></td>
+                    <td class="text-center" data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BULK_PUBLISHED')); ?>">
                         <?php echo (new PublishedButton())->render((int) $item->state, $i,
                             ['task_prefix' => 'categories.', 'id' => 'mm-category-state-' . $id]); ?>
                     </td>
-                    <td>
+                    <td data-label="<?php echo $this->escape(Text::_('JGLOBAL_TITLE')); ?>">
                         <span style="display:inline-block;padding-inline-start:<?php echo $depth * 16; ?>px">
                             <?php if ($depth > 0) : ?>
                                 <span class="text-muted" aria-hidden="true">— </span>
@@ -57,7 +58,7 @@ use Joomla\CMS\Button\PublishedButton;
                             </small>
                         </span>
                     </td>
-                    <td>
+                    <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_THUMB')); ?>">
                         <?php if ($safeImage) : ?>
                             <a href="<?php echo $editUrl; ?>">
                                 <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
@@ -69,10 +70,10 @@ use Joomla\CMS\Button\PublishedButton;
                                   aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_NO_IMAGE')); ?>">—</span>
                         <?php endif; ?>
                     </td>
-                    <td><?php echo (int) $row['direct_count']; ?></td>
-                    <td><?php echo (int) $row['branch_count']; ?></td>
-                    <td><?php echo (int) ($item->sort_order ?? 0); ?></td>
-                    <td><?php echo $id; ?></td>
+                    <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_COUNT_DIRECT')); ?>"><?php echo (int) $row['direct_count']; ?></td>
+                    <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_COUNT_BRANCH')); ?>"><?php echo (int) $row['branch_count']; ?></td>
+                    <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_ORDER')); ?>"><?php echo (int) ($item->sort_order ?? 0); ?></td>
+                    <td data-label="<?php echo $this->escape(Text::_('JGRID_HEADING_ID')); ?>"><?php echo $id; ?></td>
                 </tr>
             <?php endforeach; ?>
             <?php if (!$this->rows) : ?>

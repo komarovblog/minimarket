@@ -9,7 +9,8 @@ function checkUi(bool $condition,string $description):void {
 }
 $category=file_get_contents($base.'admin/tmpl/categories/default.php');
 checkUi(str_contains($category,"joomla.searchtools.default"),'categories share core Joomla SearchTools');
-checkUi(str_contains($category,'class="table table-striped"'),'categories use striped table');
+checkUi(str_contains($category,'class="table table-striped mm-admin-list"'),
+    'categories use native striped list with responsive presentation');
 checkUi(str_contains($category,'PublishedButton'),'native category publication control');
 checkUi(!str_contains($category,'mm-tree-toggle')&&!str_contains($category,'aria-expanded'),
     'all category levels visible, no custom collapse');

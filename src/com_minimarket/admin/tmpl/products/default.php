@@ -9,10 +9,10 @@ use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Button\PublishedButton;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=products'); ?>" method="post"
-      name="adminForm" id="adminForm">
+      name="adminForm" id="adminForm" class="mm-list-form">
     <div id="j-main-container" class="j-main-container">
     <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
-    <table class="table table-striped" id="mm-products-list">
+    <table class="table table-striped mm-admin-list" id="mm-products-list">
         <thead>
         <tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
@@ -31,15 +31,16 @@ use Joomla\CMS\Button\PublishedButton;
         <?php foreach ($this->items as $i => $item) :
             $image = explode('#', (string) ($item->image ?? ''), 2)[0];
             $safeImage = str_starts_with($image, 'images/') && !str_contains($image, '..')
-                && !preg_match('/[\x00-\x1f<>]/', $image);
+                && !preg_match('/[\x00-\x1f<>]/', $image)
+                && is_file(JPATH_ROOT . '/' . $image);
         ?>
             <tr>
-                <td class="text-center"><?php echo HTMLHelper::_('grid.id', $i, (int) $item->id); ?></td>
-                <td class="text-center">
+                <td class="text-center" data-label="<?php echo $this->escape(Text::_('JSELECT')); ?>"><?php echo HTMLHelper::_('grid.id', $i, (int) $item->id); ?></td>
+                <td class="text-center" data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BULK_PUBLISHED')); ?>">
                     <?php echo (new PublishedButton())->render((int) $item->state, $i,
                         ['task_prefix' => 'products.', 'id' => 'mm-product-state-' . (int) $item->id]); ?>
                 </td>
-                <td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_IMAGE')); ?>">
                     <?php if ($safeImage) : ?>
                         <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
                              alt="<?php echo $this->escape((string) ($item->image_alt ?: $item->title)); ?>"
@@ -48,13 +49,13 @@ use Joomla\CMS\Button\PublishedButton;
                         <span aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_NO_IMAGE')); ?>">—</span>
                     <?php endif; ?>
                 </td>
-                <td><a href="<?php echo Route::_('index.php?option=com_minimarket&task=product.edit&id=' . (int) $item->id); ?>"><?php echo $this->escape($item->title); ?></a></td>
-                <td><?php echo $this->escape($item->sku); ?></td>
-                <td><?php echo $this->escape((string) $item->price); ?></td>
-                <td><?php echo (int) $item->stock; ?></td>
-                <td><?php echo $this->escape($item->category_title); ?></td>
-                <td><?php echo $this->escape((string) ($item->group_titles ?? '')); ?></td>
-                <td><?php echo (int) $item->id; ?></td>
+                <td data-label="<?php echo $this->escape(Text::_('JGLOBAL_TITLE')); ?>"><a href="<?php echo Route::_('index.php?option=com_minimarket&task=product.edit&id=' . (int) $item->id); ?>"><?php echo $this->escape($item->title); ?></a></td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_SKU')); ?>"><?php echo $this->escape($item->sku); ?></td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_PRICE')); ?>"><?php echo $this->escape((string) $item->price); ?></td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_STOCK')); ?>"><?php echo (int) $item->stock; ?></td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORIES')); ?>"><?php echo $this->escape($item->category_title); ?></td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_GROUPS')); ?>"><?php echo $this->escape((string) ($item->group_titles ?? '')); ?></td>
+                <td data-label="<?php echo $this->escape(Text::_('JGRID_HEADING_ID')); ?>"><?php echo (int) $item->id; ?></td>
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
