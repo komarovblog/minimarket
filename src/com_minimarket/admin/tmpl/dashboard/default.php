@@ -8,6 +8,8 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 $sections = [
     ['categories', 'COM_MINIMARKET_CATEGORIES'],
     ['products', 'COM_MINIMARKET_PRODUCTS'],
+    ['brands', 'COM_MINIMARKET_BRANDS'],
+    ['collections', 'COM_MINIMARKET_COLLECTIONS'],
     ['groups', 'COM_MINIMARKET_PRODUCT_TAB_GROUPS'],
     ['attributes', 'COM_MINIMARKET_ATTRIBUTES'],
     ['orderoptions', 'COM_MINIMARKET_ORDER_OPTIONS'],

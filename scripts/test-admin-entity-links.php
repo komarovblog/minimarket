@@ -49,7 +49,7 @@ namespace MiniMarket\EntityLinksSmoke {
     }
 
     foreach (['attribute' => 12, 'orderoption' => 14,
-        'category' => 9, 'group' => 8, 'product' => 22, 'value' => 3] as $entity => $id) {
+        'category' => 9, 'group' => 8, 'product' => 22, 'value' => 3, 'brand' => 4, 'collection' => 15] as $entity => $id) {
         $href = Links::edit($entity, $id);
         verify(str_contains($href, '&amp;task='), 'escaped task separator for ' . $entity);
         $query = decodeLink($href);
@@ -63,7 +63,7 @@ namespace MiniMarket\EntityLinksSmoke {
     verify(($create['task'] ?? null) === 'orderoption.add',
         'empty category options creates an option through FormController');
 
-    foreach (['categories', 'attributes', 'orderoptions', 'products', 'groups', 'dashboard', 'import'] as $view) {
+    foreach (['categories', 'attributes', 'orderoptions', 'products', 'groups', 'dashboard', 'import', 'brands', 'collections'] as $view) {
         $href = Links::view($view);
         $query = decodeLink($href);
         verify(($query['view'] ?? null) === $view, 'dashboard navigation reaches ' . $view);

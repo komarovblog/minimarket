@@ -85,6 +85,15 @@ $initialDescription=$hasCustomDescription
 </nav>
 <article class="com-minimarket-product">
     <h1><?php echo $this->escape($this->product->title); ?></h1>
+    <?php if ((string)($this->product->brand_title ?? '') !== '') : ?>
+        <p><strong><?php echo Text::_('COM_MINIMARKET_BRAND'); ?>:</strong>
+            <?php echo $this->escape((string)$this->product->brand_title); ?></p>
+    <?php endif; ?>
+    <?php if (!empty($this->collections)) : ?>
+        <p><strong><?php echo Text::_('COM_MINIMARKET_COLLECTIONS'); ?>:</strong>
+            <?php echo $this->escape(implode(', ',array_map(
+                static fn($row)=>(string)$row->title,$this->collections))); ?></p>
+    <?php endif; ?>
     <?php if ($main !== null) : ?>
         <div class="mm-product-gallery" data-mm-product-gallery>
             <a class="mm-product-gallery__main-link" data-mm-gallery-main-link

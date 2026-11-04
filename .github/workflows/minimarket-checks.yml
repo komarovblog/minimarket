@@ -128,6 +128,9 @@ jobs:
       - name: Options, stock modes and independent linked products
         run: php scripts/test-option-architecture.php
 
+      - name: Brands, collections, product relationships and admin SEO
+        run: php scripts/test-brands-collections.php
+
       - name: Global order-option dictionary, category inheritance and checkbox regression
         run: php scripts/test-order-options.php
 

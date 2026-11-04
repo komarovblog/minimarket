@@ -73,6 +73,12 @@ final class ProductTable extends Table
         }
         $this->option_stock_mode = (int)$stockMode;
         $this->category_id = (int) $this->category_id;
+        $brandId = (int)($this->brand_id ?? 0);
+        if ($brandId < 0) {
+            $this->setError(Text::_('COM_MINIMARKET_PRODUCT_BRAND_INVALID'));
+            return false;
+        }
+        $this->brand_id = $brandId > 0 ? $brandId : null;
 
         if ($this->category_id < 1) {
             $this->setError(Text::_('COM_MINIMARKET_ERROR_CATEGORY_INVALID'));
@@ -131,6 +137,17 @@ final class ProductTable extends Table
             $this->setError(Text::_('COM_MINIMARKET_ERROR_CATEGORY_INVALID'));
 
             return false;
+        }
+
+        if ($brandId > 0) {
+            $brandQuery = $db->getQuery(true)->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_brands'))
+                ->where($db->quoteName('id') . ' = ' . $brandId);
+            $db->setQuery($brandQuery);
+            if ((int)$db->loadResult() !== 1) {
+                $this->setError(Text::_('COM_MINIMARKET_PRODUCT_BRAND_INVALID'));
+                return false;
+            }
         }
 
         $aliasQuery = $db->getQuery(true)

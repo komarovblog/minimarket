@@ -8,6 +8,16 @@
             <option value="1">JPUBLISHED</option>
             <option value="0">JUNPUBLISHED</option>
         </field>
+        <field name="brand_id" type="Brandlist"
+               label="COM_MINIMARKET_PRODUCT_BRAND"
+               class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_PRODUCT_ALL_BRANDS</option>
+        </field>
+        <field name="collection_id" type="Collectionfilter"
+               label="COM_MINIMARKET_PRODUCT_COLLECTIONS"
+               class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_PRODUCT_ALL_COLLECTIONS</option>
+        </field>
         <field name="category_id" type="Productcategory"
                label="COM_MINIMARKET_PRODUCT_CATEGORY"
                class="js-select-submit-on-change">

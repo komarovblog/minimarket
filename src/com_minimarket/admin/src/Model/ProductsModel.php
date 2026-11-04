@@ -23,7 +23,13 @@ final class ProductsModel extends ListModel
                 $db->quoteName('p.image'),
                 $db->quoteName('p.image_alt'),
                 $db->quoteName('p.category_id'),
+                $db->quoteName('p.brand_id'),
+                $db->quoteName('b.title', 'brand_title'),
                 $db->quoteName('c.title', 'category_title'),
+                '(SELECT GROUP_CONCAT(co.title ORDER BY co.title SEPARATOR 0x2C20) FROM '
+                    . $db->quoteName('#__minimarket_product_collections', 'pc')
+                    . ' INNER JOIN ' . $db->quoteName('#__minimarket_collections', 'co')
+                    . ' ON co.id = pc.collection_id WHERE pc.product_id = p.id) AS collection_titles',
                 '(SELECT GROUP_CONCAT(g.title ORDER BY g.title SEPARATOR 0x2C20) FROM '
                     . $db->quoteName('#__minimarket_product_group_members', 'mg')
                     . ' INNER JOIN ' . $db->quoteName('#__minimarket_product_groups', 'g')
@@ -31,11 +37,22 @@ final class ProductsModel extends ListModel
             ])
             ->from($db->quoteName('#__minimarket_products', 'p'))
             ->join('INNER', $db->quoteName('#__minimarket_categories', 'c')
-                . ' ON ' . $db->quoteName('p.category_id') . ' = ' . $db->quoteName('c.id'));
+                . ' ON ' . $db->quoteName('p.category_id') . ' = ' . $db->quoteName('c.id'))
+            ->join('LEFT', $db->quoteName('#__minimarket_brands', 'b')
+                . ' ON ' . $db->quoteName('p.brand_id') . ' = ' . $db->quoteName('b.id'));
 
         $categoryId = (int) $this->getState('filter.category_id');
         if ($categoryId > 0) {
             $query->where($db->quoteName('p.category_id') . ' = ' . $categoryId);
+        }
+
+        $brandId = (int)$this->getState('filter.brand_id');
+        if ($brandId > 0) $query->where('p.brand_id = ' . $brandId);
+        $collectionId = (int)$this->getState('filter.collection_id');
+        if ($collectionId > 0) {
+            $query->where('EXISTS (SELECT 1 FROM ' .
+                $db->quoteName('#__minimarket_product_collections', 'pcs') .
+                ' WHERE pcs.product_id=p.id AND pcs.collection_id=' . $collectionId . ')');
         }
 
         $state = (string) $this->getState('filter.published');

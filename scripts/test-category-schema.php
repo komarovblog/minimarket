@@ -758,6 +758,42 @@ verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_product_attribute
     WHERE product_id=1 AND attribute_id=3')->fetchColumn()===2,
     'manual numeric field saves multiple separate rows');
 
+// 0.5.49: non-destructive brand + collections upgrade, preserved old product.
+$before49=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.49.sql','catci_');
+$after49=row($pdo,'catci_minimarket_products');
+foreach ($before49 as $col=>$value) {
+    verify(array_key_exists($col,$after49) && $value===$after49[$col],
+        '0.5.49 preserves product field '.$col);
+}
+verify(array_key_exists('brand_id',$after49) && $after49['brand_id']===null,
+    'legacy product has no brand by default');
+$pdo->exec("INSERT INTO catci_minimarket_brands (id,title,alias,state)
+    VALUES (1,'Northstar','northstar',1)");
+$pdo->exec("INSERT INTO catci_minimarket_collections (id,title,alias,state)
+    VALUES (1,'Summer','summer',1),(2,'Wood','wood',1)");
+$pdo->exec("UPDATE catci_minimarket_products SET brand_id=1 WHERE id=1");
+$pdo->exec("INSERT INTO catci_minimarket_product_collections
+    (product_id,collection_id,sort_order) VALUES (1,1,0),(1,2,1)");
+verify((int)$pdo->query("SELECT COUNT(*) FROM catci_minimarket_product_collections
+    WHERE product_id=1")->fetchColumn()===2,
+    'product belongs to multiple collections');
+verify((int)$pdo->query("SELECT brand_id FROM catci_minimarket_products WHERE id=1")
+    ->fetchColumn()===1,'one brand linked without touching stock');
+try {
+    $pdo->exec('DELETE FROM catci_minimarket_brands WHERE id=1');
+    verify(false,'in-use brand deletion rejected');
+} catch (PDOException $e) {
+    verify(true,'in-use brand deletion rejected by FK');
+}
+try {
+    $pdo->exec('DELETE FROM catci_minimarket_collections WHERE id=2');
+    verify(false,'in-use collection deletion rejected');
+} catch (PDOException $e) {
+    verify(true,'in-use collection deletion rejected by FK');
+}
+
+$pdo->exec('DROP TABLE catci_minimarket_product_collections');
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
 $pdo->exec('DROP TABLE catci_minimarket_product_groups');
@@ -788,6 +824,8 @@ $pdo->exec('DROP TABLE catci_minimarket_attributes');
 
 // MySQL FK constraint identifiers are database-wide: clean only CI test tables.
 $pdo->exec('DROP TABLE catci_minimarket_products');
+$pdo->exec('DROP TABLE catci_minimarket_brands');
+$pdo->exec('DROP TABLE catci_minimarket_collections');
 $pdo->exec('DROP TABLE catci_minimarket_categories');
 runSql($pdo, $dir . 'install.mysql.sql', 'freshcatci_');
 $columns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_categories')
@@ -849,6 +887,19 @@ verify(count($freshMemberPrimary)===2,'fresh 0.5.32 composite group/product prim
 $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
 verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
+verify(in_array('brand_id',$freshProducts,true),'fresh 0.5.49 optional brand ID');
+$brandColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_brands')->fetchAll(PDO::FETCH_COLUMN);
+$collectionColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_collections')->fetchAll(PDO::FETCH_COLUMN);
+foreach (['id','title','alias','description','image','meta_title','state','sort_order'] as $col) {
+    verify(in_array($col,$brandColumns,true),'fresh brand column '.$col);
+    verify(in_array($col,$collectionColumns,true),'fresh collection column '.$col);
+}
+verify(in_array('website_url',$brandColumns,true),'brand HTTPS website');
+$pivotColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_collections')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['product_id','collection_id','sort_order'] as $col) {
+    verify(in_array($col,$pivotColumns,true),'fresh product collection '.$col);
+}
 $freshMode=$pdo->query("SHOW COLUMNS FROM freshcatci_minimarket_products LIKE 'option_stock_mode'")->fetch(PDO::FETCH_ASSOC);
 verify((int)$freshMode['Default']===1,'fresh 0.5.28 products default to per-SKU inventory');
 foreach ($productEditorColumns as $col) {

@@ -284,6 +284,20 @@ final class CatalogRepository
         return $out;
     }
 
+    /** Only published collections are visible publicly; unpublished values remain saved. */
+    public function getProductCollections(int $productId): array
+    {
+        $q=$this->db->getQuery(true)->select(['c.id','c.title'])
+            ->from($this->db->quoteName('#__minimarket_product_collections','pc'))
+            ->join('INNER', $this->db->quoteName('#__minimarket_collections','c')
+                . ' ON c.id=pc.collection_id')
+            ->where('pc.product_id=' . $productId)
+            ->where('c.state=1')
+            ->order('pc.sort_order ASC,c.id ASC');
+        $this->db->setQuery($q);
+        return (array)$this->db->loadObjectList();
+    }
+
     public function getProduct(int $id): ?object
     {
         $q = $this->db->getQuery(true)
@@ -307,6 +321,7 @@ final class CatalogRepository
                 $this->db->quoteName('p.image_alt'),
                 $this->db->quoteName('p.category_id'),
                 $this->db->quoteName('c.title', 'category_title'),
+                $this->db->quoteName('b.title', 'brand_title'),
             ])
             ->from($this->db->quoteName('#__minimarket_products', 'p'))
             ->join(
@@ -314,6 +329,8 @@ final class CatalogRepository
                 $this->db->quoteName('#__minimarket_categories', 'c')
                 . ' ON ' . $this->db->quoteName('c.id') . ' = ' . $this->db->quoteName('p.category_id')
             )
+            ->join('LEFT', $this->db->quoteName('#__minimarket_brands','b')
+                . ' ON b.id=p.brand_id AND b.state=1')
             ->where($this->db->quoteName('p.id') . ' = ' . $id)
             ->where($this->db->quoteName('p.state') . ' = 1')
             ->where($this->db->quoteName('c.state') . ' = 1');

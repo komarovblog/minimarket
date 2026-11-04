@@ -11,9 +11,9 @@ use Joomla\CMS\Router\Route;
  */
 final class AdminEntityLinks
 {
-    private const ENTITIES = ['attribute', 'orderoption', 'category', 'product', 'group', 'value'];
+    private const ENTITIES = ['attribute', 'orderoption', 'category', 'product', 'group', 'value', 'brand', 'collection'];
     private const VIEWS = ['dashboard', 'categories', 'products', 'groups', 'attributes',
-        'orderoptions', 'import'];
+        'orderoptions', 'import', 'brands', 'collections'];
 
     public static function edit(string $entity, int $id): string
     {

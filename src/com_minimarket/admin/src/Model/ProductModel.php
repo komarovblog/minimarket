@@ -17,6 +17,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\ProductCatalogAxes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductSkuMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
 use MiniMarket\Component\Minimarket\Administrator\Service\GroupEditor;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductCollections;
 
 final class ProductModel extends AdminModel
 {
@@ -39,6 +40,7 @@ final class ProductModel extends AdminModel
             $item->variants = ProductVariants::formRows($this->getDatabase(), (int) $item->id);
             $item->variant_dimensions = ProductLocalDimensions::formRows($this->getDatabase(), (int) $item->id);
             $item->group_ids = ProductGroups::currentIds($this->getDatabase(), (int) $item->id);
+            $item->collection_ids = ProductCollections::selected($this->getDatabase(), (int) $item->id);
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
@@ -46,6 +48,7 @@ final class ProductModel extends AdminModel
             $item->variants = [];
             $item->variant_dimensions = [];
             $item->group_ids = [];
+            $item->collection_ids = [];
         }
 
         return $item;
@@ -69,6 +72,9 @@ final class ProductModel extends AdminModel
         $hasLocal = array_key_exists('variant_dimensions', $data)
             || !empty($data['variant_dimensions_present']);
         $localDimensions = [];
+        $hasCollections = array_key_exists('collection_ids', $data)
+            || !empty($data['collections_present']);
+        $collectionIds = [];
         $hasGroupEditor = array_key_exists('group_editor', $data);
         $groupEditorRows = [];
         if ($hasGroupEditor) {
@@ -119,6 +125,16 @@ final class ProductModel extends AdminModel
         }
 
         $db = $this->getDatabase();
+        if ($hasCollections) {
+            try {
+                $collectionIds = ProductCollections::normalize(
+                    $data['collection_ids'] ?? [], ProductCollections::allowed($db)
+                );
+            } catch (\InvalidArgumentException $error) {
+                $this->setError(Text::_('COM_MINIMARKET_COLLECTION_ASSIGNMENT_INVALID'));
+                return false;
+            }
+        }
         $normalized = ['scalars' => [], 'options' => []];
         if ($hasAttributes) {
             try {
@@ -189,6 +205,7 @@ final class ProductModel extends AdminModel
             return false;
         }
 
+        unset($data['collection_ids'], $data['collections_present']);
         unset($data['group_ids'], $data['new_group_title'], $data['product_group_present'],
             $data['group_contents'], $data['group_editor']);
         unset($data['category_option_preview'], $data['sku_matrix_payload']);
@@ -231,6 +248,10 @@ final class ProductModel extends AdminModel
                 ProductGallery::replaceRows($db, $productId, $rows,
                     $hasVariants ? $variantRows : [],
                     $hasVariants ? ($variantIds ?? []) : []);
+            }
+            if ($hasCollections) {
+                $productId = (int) $this->getState($this->getName() . '.id');
+                ProductCollections::replace($db, $productId, $collectionIds);
             }
             if ($hasGroupEditor) {
                 $productId = (int) $this->getState($this->getName() . '.id');
