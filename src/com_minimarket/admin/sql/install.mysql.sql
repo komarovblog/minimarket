@@ -415,7 +415,7 @@ ALTER TABLE `#__minimarket_variant_dimension_values`
 -- 0.5.39: one product price, optional SKU label, and gallery visibility/cover by physical variant ID.
 -- Additive; no saved variant/image IDs, product prices, stocks or files are rewritten.
 ALTER TABLE `#__minimarket_product_variants`
-  MODIFY COLUMN `sku` VARCHAR(100) NULL DEFAULT NULL;
+  MODIFY `sku` VARCHAR(100) NULL DEFAULT NULL;
 
 ALTER TABLE `#__minimarket_product_images`
   ADD COLUMN `visibility_mode` TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER `alt`;

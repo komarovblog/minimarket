@@ -16,6 +16,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductCatalogAxes;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductSkuMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
+use MiniMarket\Component\Minimarket\Administrator\Service\GroupEditor;
 
 final class ProductModel extends AdminModel
 {
@@ -68,7 +69,18 @@ final class ProductModel extends AdminModel
         $hasLocal = array_key_exists('variant_dimensions', $data)
             || !empty($data['variant_dimensions_present']);
         $localDimensions = [];
-        $hasGroup = array_key_exists('group_ids', $data) || !empty($data['product_group_present']);
+        $hasGroupEditor = array_key_exists('group_editor', $data);
+        $groupEditorRows = [];
+        if ($hasGroupEditor) {
+            try {
+                $groupEditorRows = GroupEditor::normalize($data['group_editor'], 'product');
+            } catch (\InvalidArgumentException $error) {
+                $this->setError(Text::_('COM_MINIMARKET_PRODUCT_GROUP_INVALID'));
+                return false;
+            }
+        }
+        $hasGroup = !$hasGroupEditor &&
+            (array_key_exists('group_ids', $data) || !empty($data['product_group_present']));
         $groupIds = [];
         $newGroupTitle = '';
         if ($hasGroup) {
@@ -167,7 +179,8 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['group_ids'], $data['new_group_title'], $data['product_group_present'], $data['group_contents']);
+        unset($data['group_ids'], $data['new_group_title'], $data['product_group_present'],
+            $data['group_contents'], $data['group_editor']);
         unset($data['category_option_preview'], $data['sku_matrix_payload']);
         unset($data['variant_dimensions'], $data['variant_dimensions_present'],
             $data['variant_matrix'], $data['variants'], $data['variants_present'],
@@ -209,7 +222,10 @@ final class ProductModel extends AdminModel
                     $hasVariants ? $variantRows : [],
                     $hasVariants ? ($variantIds ?? []) : []);
             }
-            if ($hasGroup) {
+            if ($hasGroupEditor) {
+                $productId = (int) $this->getState($this->getName() . '.id');
+                GroupEditor::saveProduct($db, $productId, $groupEditorRows);
+            } elseif ($hasGroup) {
                 $productId = (int) $this->getState($this->getName() . '.id');
                 ProductGroups::replaceForProduct($db, $productId, $groupIds, $newGroupTitle);
             }

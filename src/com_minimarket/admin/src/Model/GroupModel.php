@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\AdminModel;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
+use MiniMarket\Component\Minimarket\Administrator\Service\GroupEditor;
 
 final class GroupModel extends AdminModel
 {
@@ -28,13 +29,19 @@ final class GroupModel extends AdminModel
     /** Group metadata and members are saved in one DB transaction. */
     public function save($data)
     {
+        $isEditor = array_key_exists('member_editor', $data);
+        $editorRows = [];
         try {
-            $ids = ProductGroups::normalizeIds($data['member_ids'] ?? []);
+            $ids = $isEditor ? [] :
+                ProductGroups::normalizeIds($data['member_ids'] ?? []);
+            if ($isEditor) {
+                $editorRows = GroupEditor::normalize($data['member_editor'], 'group');
+            }
         } catch (\InvalidArgumentException $e) {
             $this->setError(Text::_('COM_MINIMARKET_GROUP_MEMBERS_INVALID'));
             return false;
         }
-        unset($data['member_ids'], $data['members_present']);
+        unset($data['member_ids'], $data['members_present'], $data['member_editor']);
         $db = $this->getDatabase();
         $db->transactionStart();
         try {
@@ -43,7 +50,11 @@ final class GroupModel extends AdminModel
                 return false;
             }
             $id = (int) $this->getState($this->getName() . '.id');
-            ProductGroups::replaceForGroup($db, $id, $ids);
+            if ($isEditor) {
+                GroupEditor::saveGroup($db, $id, $editorRows);
+            } else {
+                ProductGroups::replaceForGroup($db, $id, $ids);
+            }
             $db->transactionCommit();
             return true;
         } catch (\Throwable $error) {

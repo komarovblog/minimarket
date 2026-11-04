@@ -42,7 +42,9 @@ final class HtmlView extends BaseHtmlView
             );
         Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseScript('com_minimarket.sku-matrix',
-                'media/com_minimarket/js/sku-matrix.js', [], ['defer' => true]);
+                'media/com_minimarket/js/sku-matrix.js', [], ['defer' => true])
+            ->registerAndUseScript('com_minimarket.group-editor',
+                'media/com_minimarket/js/group-editor.js', [], ['defer' => true]);
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PRODUCT_EDIT_TITLE'));
         ToolbarHelper::apply('product.apply');

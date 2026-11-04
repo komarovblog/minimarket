@@ -70,14 +70,8 @@
                layout="joomla.form.field.subform.repeatable" validate="Subform"/>
     </fieldset>
     <fieldset name="groups" label="COM_MINIMARKET_PRODUCT_TAB_GROUPS">
-        <field name="product_group_present" type="hidden" default="1" filter="int"/>
-        <field name="group_ids" type="Productgroup" label="COM_MINIMARKET_PRODUCT_GROUP"
-               description="COM_MINIMARKET_PRODUCT_GROUP_HELP" multiple="true" filter="array"/>
-        <field name="new_group_title" type="text" label="COM_MINIMARKET_NEW_PRODUCT_GROUP"
-               description="COM_MINIMARKET_NEW_PRODUCT_GROUP_HELP" maxlength="255"
-               filter="string" size="50"/>
-        <field name="group_contents" type="Groupcontents" label="COM_MINIMARKET_GROUP_CONTENTS"
-               filter="raw"/>
+        <field name="group_editor" type="Groupeditor" mode="product" filter="raw"
+               label="COM_MINIMARKET_PRODUCT_TAB_GROUPS"/>
     </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>

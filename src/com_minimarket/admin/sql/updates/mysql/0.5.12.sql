@@ -21,4 +21,4 @@ SET `filter_mode` = CASE
 WHERE `is_filterable` = 1;
 
 ALTER TABLE `#__minimarket_product_attribute_scalars`
-  MODIFY COLUMN `value_text` TEXT NULL;
+  MODIFY `value_text` TEXT NULL;

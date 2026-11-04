@@ -127,6 +127,9 @@ jobs:
       - name: Global order-option dictionary, category inheritance and checkbox regression
         run: php scripts/test-order-options.php
 
+      - name: Expandable relationship editor, paged product finder and Joomla schema compatibility
+        run: php scripts/test-group-editor.php
+
       - name: Stable global option IDs and automatic category options in products
         run: php scripts/test-global-option-links.php
 
@@ -163,6 +166,7 @@ jobs:
       - name: Native variant rows and storefront variant switching JavaScript
         run: |
           node --check src/com_minimarket/media/js/sku-matrix.js
+          node --check src/com_minimarket/media/js/group-editor.js
           node --check src/com_minimarket/media/js/variants.js
 
       - name: Dependent color size and multi-option SKU availability

@@ -55,13 +55,11 @@ namespace MiniMarket\OptionArchitecture {
         && !str_contains($defaultMigration,'UPDATE `#__minimarket_products`')
         && !str_contains($defaultMigration,'DELETE FROM'),
         'default changes without rewriting existing shared stock products or SKU rows');
-    $groupFields=$form->xpath("//fieldset[@name='groups']/field[@name='group_ids' and @type='Productgroup']");
-    verify(count($groupFields)===1 && (string)$groupFields[0]['multiple']==='true',
-        'independent products may be linked to multiple groups');
-    verify(count($form->xpath("//fieldset[@name='groups']/field[@name='group_contents' and @type='Groupcontents']"))===1,
-        'product shows all of its group memberships and each member list');
-    verify(count($form->xpath("//fieldset[@name='groups']/field[@name='new_group_title']"))===1,
-        'can create group directly from product card');
+    $groupFields=$form->xpath("//fieldset[@name='groups']/field[@name='group_editor' and @type='Groupeditor']");
+    verify(count($groupFields)===1 && (string)$groupFields[0]['mode']==='product',
+        'product uses one shared expandable group editor');
+    verify(count($form->xpath("//fieldset[@name='groups']/field[@name='group_ids']"))===0,
+        'no full-catalog group checkbox wall in product form');
     verify(count($form->xpath("//fieldset[@name='variants']/field[@name='variant_dimensions']"))===1,
         'order options are distinct from informational attributes');
     verify(count($form->xpath("//fieldset[@name='attributes']/field[@name='attribute_values']"))===1,
@@ -94,15 +92,15 @@ namespace MiniMarket\OptionArchitecture {
         && !str_contains($upgrade,'DELETE FROM'),
         'upgrade changes group membership primary key without deleting product links');
     $groupForm=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/group.xml');
-    verify(count($groupForm->xpath("//field[@name='member_ids' and @type='Groupmembers']"))===1,
-        'group editor can assign multiple existing products directly');
+    verify(count($groupForm->xpath("//field[@name='member_editor' and @type='Groupeditor']"))===1,
+        'standalone group uses the same filtered relationship editor');
     verify(count($groupForm->xpath("//field[@name='type']"))===0,
         'generic product links do not expose recommendation, brand or collection types');
-    $productLinkField=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Field/ProductgroupField.php');
-    $groupMemberField=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Field/GroupmembersField.php');
-    verify(str_contains($productLinkField,'extends CheckboxesField')
-        && str_contains($groupMemberField,'extends CheckboxesField'),
-        'group and product edit forms use checkboxes instead of oversized blue multiple-select lists');
+    $groupEditorField=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Field/GroupeditorField.php');
+    verify(str_contains($groupEditorField,'ProductGroups::forProduct(') &&
+        str_contains($groupEditorField,'ProductGroups::members(') &&
+        !str_contains($groupEditorField,'CheckboxesField'),
+        'one expandable relationship editor shows saved groups without product checkbox walls');
     $groupList=file_get_contents(__DIR__.'/../src/com_minimarket/admin/tmpl/groups/default.php');
     verify(!str_contains($groupList,'COM_MINIMARKET_GROUP_TYPE'),
         'product link list no longer mixes in recommendation types');

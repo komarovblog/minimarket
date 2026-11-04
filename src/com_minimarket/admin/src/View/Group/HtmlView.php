@@ -20,7 +20,10 @@ final class HtmlView extends BaseHtmlView
         if (!$this->form) {
             throw new \RuntimeException('MiniMarket group form unavailable');
         }
-        Factory::getApplication()->getDocument()->getWebAssetManager()->useScript('form.validate');
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->useScript('form.validate')
+            ->registerAndUseScript('com_minimarket.group-editor',
+                'media/com_minimarket/js/group-editor.js', [], ['defer' => true]);
         ToolbarHelper::title(Text::_('COM_MINIMARKET_GROUP_EDIT'));
         ToolbarHelper::apply('group.apply');
         ToolbarHelper::save('group.save');

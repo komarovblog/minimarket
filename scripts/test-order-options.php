@@ -108,11 +108,11 @@ namespace MiniMarket\OrderOptionsTest {
         'joomla.form.field.subform.repeatable',
         'option values render compact native rows without horizontal scroll');
 
-    foreach (['ProductgroupField.php', 'GroupmembersField.php'] as $field) {
-        $code = file_get_contents($base . 'src/Field/' . $field);
-        verify(str_contains($code, '$option->checked = in_array(')
-            && str_contains($code, '$this->value'),
-            'checkbox field sets checked property for native Joomla layout: ' . $field);
-    }
+    $groupForm=simplexml_load_file($base.'forms/group.xml');
+    $productForm=simplexml_load_file($base.'forms/product.xml');
+    verify(count($groupForm->xpath("//field[@name='member_editor' and @type='Groupeditor']"))===1,
+        'standalone group uses paged searchable product chooser');
+    verify(count($productForm->xpath("//field[@name='group_editor' and @type='Groupeditor']"))===1,
+        'product links use the same editor instead of hundreds of checkboxes');
     echo 'ORDER_OPTIONS_OK: ' . $n . " cases\n";
 }
