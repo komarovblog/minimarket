@@ -5,7 +5,7 @@ define('_JEXEC', 1);
 $count=0;
 function ok(bool $yes,string $name):void {global $count;++$count;if(!$yes)throw new RuntimeException('NATIVE_ADMIN_LIST_FAIL: '.$name);}
 $root=__DIR__.'/../src/com_minimarket/admin/';
-foreach(['products','attributes','categories'] as $name){
+foreach(['products','attributes','categories','brands','collections'] as $name){
     $xml=simplexml_load_file($root.'forms/filter_'.$name.'.xml');
     ok($xml!==false,'filter XML valid: '.$name);
     ok(count($xml->xpath("//fields[@name='filter']/field[@name='search']"))===1,'native SearchTools search: '.$name);
@@ -22,7 +22,7 @@ foreach(['products','attributes','categories'] as $name){
     ok(str_contains($tpl,'name="boxchecked"') && str_contains($tpl,'form.token'),
         'CSRF protection and bulk selection: '.$name);
 }
-foreach(['products','attributes'] as $name){
+foreach(['products','attributes','brands','collections'] as $name){
     $xml=simplexml_load_file($root.'forms/filter_'.$name.'.xml');
     ok(count($xml->xpath("//fields[@name='list']/field[@name='fullordering']"))===1,
         'sort dropdown: '.$name);
@@ -60,7 +60,8 @@ ok(str_contains($css,'#adminForm .mm-rules-table')
 ok(str_contains($css,'@container (max-width: 900px)'),
    'small container rows become cards instead of scrolling horizontally');
 foreach ([
- 'products'=>10, 'categories'=>8, 'attributes'=>7,
+ 'products'=>11, 'categories'=>8, 'attributes'=>7,
+ 'brands'=>6, 'collections'=>6,
  'values'=>7, 'groups'=>5, 'orderoptions'=>6,
 ] as $entity=>$cells) {
     $tpl=file_get_contents($root.'tmpl/'.$entity.'/default.php');
@@ -73,7 +74,7 @@ foreach ([
     ok(str_contains($tpl,'PublishedButton') && str_contains($tpl,'grid.id'),
        $entity.': native publication and checkbox controls kept');
 }
-foreach (['products','categories'] as $entity) {
+foreach (['products','categories','brands','collections'] as $entity) {
     $tpl=file_get_contents($root.'tmpl/'.$entity.'/default.php');
     ok(str_contains($tpl,'is_file(JPATH_ROOT'),
         $entity.': missing demo image displays a fallback rather than broken alt text');
