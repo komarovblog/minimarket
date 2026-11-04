@@ -66,11 +66,13 @@ jobs:
         run: |
           [xml]$manifest = Get-Content .\src\com_minimarket\minimarket.xml -Raw -Encoding UTF8
           "value=$($manifest.extension.version)" >> $env:GITHUB_OUTPUT
-      - name: Upload numbered component ZIP
+      - name: Upload component ZIP and separate demo SQL
         uses: actions/upload-artifact@v4
         with:
           name: com_minimarket-${{ steps.component_version.outputs.value }}
-          path: dist/com_minimarket-${{ steps.component_version.outputs.value }}.zip
+          path: |
+            dist/com_minimarket-${{ steps.component_version.outputs.value }}.zip
+            dist/minimarket_toys_rich_import.sql
           if-no-files-found: error
           retention-days: 14
 

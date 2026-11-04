@@ -324,6 +324,27 @@ try {
         exit 1
     }
 
+    # Two side-by-side distribution files; the demo SQL is never installed
+    # automatically by Joomla or embedded into the component ZIP.
+    $demoSqlName = 'minimarket_toys_rich_import.sql'
+    if ($null -ne $archive.GetEntry($demoSqlName)) {
+        Write-Output 'PACKAGE_FAIL: DEMO_SQL_INSIDE_COMPONENT'
+        exit 1
+    }
+    $demoSqlPath = Join-Path (Split-Path -Parent $ZipPath) $demoSqlName
+    $demoSqlSource = Join-Path $root ('sample-data\' + $demoSqlName)
+    if (-not (Test-Path -LiteralPath $demoSqlPath -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $demoSqlSource -PathType Leaf)) {
+        Write-Output 'PACKAGE_FAIL: DEMO_SQL_MISSING'
+        exit 1
+    }
+    $expectedHash = (Get-FileHash -LiteralPath $demoSqlSource -Algorithm SHA256).Hash
+    $actualHash = (Get-FileHash -LiteralPath $demoSqlPath -Algorithm SHA256).Hash
+    if ($expectedHash -ne $actualHash) {
+        Write-Output 'PACKAGE_FAIL: DEMO_SQL_MISMATCH'
+        exit 1
+    }
+
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

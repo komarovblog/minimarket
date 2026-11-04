@@ -9,6 +9,11 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $componentRoot = Join-Path $projectRoot 'src\com_minimarket'
 $distribution = Join-Path $projectRoot 'dist'
+# Public, sanitized demo SQL is distributed NEXT TO, never INSIDE the Joomla ZIP.
+$demoSqlSource = Join-Path $projectRoot 'sample-data\minimarket_toys_rich_import.sql'
+if (-not (Test-Path -LiteralPath $demoSqlSource -PathType Leaf)) {
+    throw 'Missing MiniMarket demo SQL: sample-data/minimarket_toys_rich_import.sql'
+}
 
 $manifestPath = Join-Path $componentRoot 'minimarket.xml'
 [xml]$manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
@@ -201,7 +206,17 @@ try {
     }
 
     Move-Item -LiteralPath $temporaryZip -Destination $OutputPath -Force
+
+    # Second, separate output file for manual phpMyAdmin import.
+    $demoSqlOutput = Join-Path $zipDirectory 'minimarket_toys_rich_import.sql'
+    Copy-Item -LiteralPath $demoSqlSource -Destination $demoSqlOutput -Force
+    $sourceHash = (Get-FileHash -LiteralPath $demoSqlSource -Algorithm SHA256).Hash
+    $outputHash = (Get-FileHash -LiteralPath $demoSqlOutput -Algorithm SHA256).Hash
+    if ($sourceHash -ne $outputHash) {
+        throw 'DEMO_SQL_HASH_MISMATCH'
+    }
     Write-Output "MiniMarket ZIP $version : $OutputPath"
+    Write-Output "MiniMarket SQL : $demoSqlOutput"
 }
 finally {
     if (Test-Path -LiteralPath $stage) {
