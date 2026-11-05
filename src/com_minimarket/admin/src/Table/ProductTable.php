@@ -67,6 +67,47 @@ final class ProductTable extends Table
             return false;
         }
 
+        // Comparison price is optional and never changes the actual selling price.
+        $oldPrice=trim((string)($this->old_price??''));
+        if($oldPrice==='') {
+            $this->old_price=null;
+        } elseif(!preg_match('/^(0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?$/D',$oldPrice)
+            || (float)$oldPrice<=0) {
+            $this->setError(Text::_('COM_MINIMARKET_BADGE_OLD_PRICE_INVALID'));
+            return false;
+        } else {
+            $this->old_price=$oldPrice;
+        }
+
+        foreach(['badge_sale','badge_new','badge_popular'] as $flag) {
+            $value=(string)($this->$flag??0);
+            if(!in_array($value,['0','1'],true)) {
+                $this->setError(Text::_('COM_MINIMARKET_BADGE_INVALID'));
+                return false;
+            }
+            $this->$flag=(int)$value;
+        }
+        foreach(['badge_new_days','badge_popular_days'] as $duration) {
+            $days=trim((string)($this->$duration??''));
+            if($days==='') {
+                $this->$duration=null;
+            } elseif(!preg_match('/^[1-9][0-9]{0,4}$/D',$days)
+                || (int)$days>36500) {
+                $this->setError(Text::_('COM_MINIMARKET_BADGE_DAYS_INVALID'));
+                return false;
+            } else {
+                $this->$duration=(int)$days;
+            }
+        }
+        // Dynamic bundle prices may change when components are edited;
+        // storefront recomputes comparison against the derived price.
+        if($this->badge_sale===1 && ($this->old_price===null
+            || ($this->product_type!=='bundle' || $this->bundle_price_mode==='fixed')
+                && (float)$this->old_price<=(float)$price)) {
+            $this->setError(Text::_('COM_MINIMARKET_BADGE_SALE_INVALID'));
+            return false;
+        }
+
         $stock = trim((string) $this->stock);
 
         if (!preg_match('/^(0|[1-9][0-9]*)$/D', $stock)

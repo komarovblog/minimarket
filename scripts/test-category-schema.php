@@ -833,6 +833,29 @@ verify($afterPricing['bundle_price_mode']==='fixed' &&
     (float)$afterPricing['bundle_discount_pct']===0.0,
     'upgrade leaves existing products and bundles with fixed prices');
 
+// 0.5.53: new promotional flags and activation dates preserve all old data.
+$beforeBadges=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.53.sql','catci_');
+$afterBadges=row($pdo,'catci_minimarket_products');
+foreach($beforeBadges as $field=>$value) {
+    verify(array_key_exists($field,$afterBadges) && $afterBadges[$field]===$value,
+        '0.5.53 preserves product field '.$field);
+}
+foreach(['old_price','badge_new_days','badge_new_since',
+    'badge_popular_days','badge_popular_since'] as $field) {
+    verify($afterBadges[$field]===null,'0.5.53 optional field defaults to NULL: '.$field);
+}
+foreach(['badge_sale','badge_new','badge_popular'] as $field) {
+    verify((int)$afterBadges[$field]===0,'0.5.53 all flags start disabled: '.$field);
+}
+$pdo->exec("UPDATE catci_minimarket_products
+ SET old_price=250.00,badge_sale=1,badge_new=1,
+     badge_new_days=7,badge_new_since='2026-11-01 12:00:00' WHERE id=1");
+$afterSetBadges=row($pdo,'catci_minimarket_products');
+verify((float)$afterSetBadges['old_price']===250.0
+    && (int)$afterSetBadges['badge_sale']===1
+    && (int)$afterSetBadges['badge_new_days']===7,
+    '0.5.53 stores old price, toggle, timed badge and timestamp');
 $pdo->exec('DROP TABLE catci_minimarket_product_collections');
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
@@ -933,6 +956,10 @@ verify(in_array('product_type',$freshProducts,true),'fresh 0.5.51 bundle type');
 verify(in_array('bundle_price_mode',$freshProducts,true) &&
     in_array('bundle_discount_pct',$freshProducts,true),
     'fresh 0.5.52 pricing columns');
+foreach(['old_price','badge_sale','badge_new','badge_new_days',
+    'badge_new_since','badge_popular','badge_popular_days','badge_popular_since'] as $field) {
+    verify(in_array($field,$freshProducts,true),'fresh 0.5.53 badge column '.$field);
+}
 $freshBundleColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_bundle_items')
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['bundle_product_id','component_product_id','component_variant_id','quantity','sort_order'] as $col) {

@@ -49,6 +49,9 @@ final class HtmlView extends BaseHtmlView
         Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseScript('com_minimarket.entity-picker',
                 'media/com_minimarket/js/entity-picker.js',[],['defer'=>true]);
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript('com_minimarket.product-badges',
+                'media/com_minimarket/js/product-badges.js',[],['defer'=>true]);
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PRODUCT_EDIT_TITLE'));
         ToolbarHelper::apply('product.apply');
         ToolbarHelper::save('product.save');

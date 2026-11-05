@@ -79,6 +79,10 @@ final class HtmlView extends BaseHtmlView
             $this->showProducts ? $this->productPage : 1
         );
 
+        $this->getDocument()->getWebAssetManager()
+            ->registerAndUseStyle('com_minimarket.badges',
+                'media/com_minimarket/css/badges.css');
+
         parent::display($tpl);
     }
 }

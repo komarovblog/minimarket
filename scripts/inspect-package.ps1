@@ -422,6 +422,20 @@ try {
         Write-Output 'PACKAGE_FAIL: BUNDLE_PRICE_DEMO_MISSING_OR_MISMATCH'
         exit 1
     }
+    $badgesSql = 'minimarket_product_badges_demo_0_5_53.sql'
+    if ($null -ne $archive.GetEntry($badgesSql)) {
+        Write-Output 'PACKAGE_FAIL: BADGES_DEMO_INSIDE_COMPONENT'
+        exit 1
+    }
+    $badgesSource = Join-Path $root ('sample-data\' + $badgesSql)
+    $badgesOutput = Join-Path (Split-Path -Parent $ZipPath) $badgesSql
+    if (-not (Test-Path -LiteralPath $badgesOutput -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $badgesSource -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $badgesOutput -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $badgesSource -Algorithm SHA256).Hash) {
+        Write-Output 'PACKAGE_FAIL: PRODUCT_BADGES_SQL_MISSING_OR_MISMATCH'
+        exit 1
+    }
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

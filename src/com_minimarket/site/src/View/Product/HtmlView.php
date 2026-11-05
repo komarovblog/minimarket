@@ -102,6 +102,10 @@ final class HtmlView extends BaseHtmlView
         }
         SeoHelper::setCanonical($document, 'product', $id);
 
+        $this->getDocument()->getWebAssetManager()
+            ->registerAndUseStyle('com_minimarket.badges',
+                'media/com_minimarket/css/badges.css');
+
         parent::display($tpl);
     }
 }

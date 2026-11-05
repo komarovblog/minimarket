@@ -270,6 +270,17 @@ try {
         (Get-FileHash -LiteralPath $priceOutput -Algorithm SHA256).Hash) {
         throw 'BUNDLE_PRICE_SQL_HASH_MISMATCH'
     }
+    # Optional, additive 0.5.53 example flags for existing MySQL 8.4 demo catalog.
+    $badgesSqlSource = Join-Path $projectRoot 'sample-data\minimarket_product_badges_demo_0_5_53.sql'
+    $badgesSqlOutput = Join-Path $zipDirectory 'minimarket_product_badges_demo_0_5_53.sql'
+    if (-not (Test-Path -LiteralPath $badgesSqlSource -PathType Leaf)) {
+        throw 'Missing badge example SQL'
+    }
+    Copy-Item -LiteralPath $badgesSqlSource -Destination $badgesSqlOutput -Force
+    if ((Get-FileHash -LiteralPath $badgesSqlSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $badgesSqlOutput -Algorithm SHA256).Hash) {
+        throw 'PRODUCT_BADGES_SQL_HASH_MISMATCH'
+    }
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

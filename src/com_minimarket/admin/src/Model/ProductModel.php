@@ -20,6 +20,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\GroupEditor;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductCollections;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleItems;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductBadges;
 
 final class ProductModel extends AdminModel
 {
@@ -251,9 +252,35 @@ final class ProductModel extends AdminModel
             $data['videos'], $data['videos_present'],
             $data['gallery'], $data['gallery_present'],
             $data['attribute_values'], $data['attributes_present']);
+        // Since timestamps are controlled by the server. Ignore any submitted
+        // badge_*_since to prevent arbitrary extensions of promotion lifetime.
+        unset($data['badge_new_since'],$data['badge_popular_since']);
+        foreach (['badge_sale','badge_new','badge_popular'] as $flag) {
+            $data[$flag]=isset($data[$flag]) && (string)$data[$flag]==='1' ? 1 : 0;
+        }
         $db->transactionStart();
 
         try {
+            $previous=[];
+            $existingId=(int)($data['id']??0);
+            if($existingId>0) {
+                $q=$db->getQuery(true)->select([
+                    'badge_new','badge_new_since','badge_popular','badge_popular_since'
+                ])->from($db->quoteName('#__minimarket_products'))
+                  ->where('id='.$existingId);
+                $db->setQuery($q);
+                $previous=(array)($db->loadAssoc()?:[]);
+            }
+            $now=gmdate('Y-m-d H:i:s');
+            foreach (['new','popular'] as $name) {
+                $enabled=(int)$data['badge_'.$name]===1;
+                $data['badge_'.$name.'_since']=ProductBadges::activationSince(
+                    $enabled,
+                    (int)($previous['badge_'.$name]??0)===1,
+                    $previous['badge_'.$name.'_since']??null,
+                    $now
+                );
+            }
             if (!parent::save($data)) {
                 $db->transactionRollback();
                 return false;

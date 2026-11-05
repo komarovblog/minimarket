@@ -4,6 +4,7 @@
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
+use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
 ?>
 <section class="com-minimarket-catalog">
     <h1><?php echo $this->escape($this->catalogTitle); ?></h1>
@@ -46,7 +47,9 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
                             <a href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
                                 <?php echo $this->escape($product->title); ?>
                             </a>
-                            <span><?php echo $this->escape((string) $product->price); ?></span>
+                            <?php echo BadgeHelper::render($product); ?>
+                <span><?php echo $this->escape((string) $product->price); ?></span>
+                <?php echo BadgeHelper::oldPrice($product); ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>

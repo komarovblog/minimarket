@@ -10,6 +10,7 @@ use Joomla\CMS\Router\Route;
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-product', ['active' => 'details']); ?>
     <?php foreach ([
         'details' => 'COM_MINIMARKET_PRODUCT_TAB_DETAILS',
+        'badges' => 'COM_MINIMARKET_BADGES_TAB',
         'descriptions' => 'COM_MINIMARKET_PRODUCT_TAB_DESCRIPTIONS',
         'merchandising' => 'COM_MINIMARKET_PRODUCT_TAB_MERCHANDISING',
         'attributes' => 'COM_MINIMARKET_PRODUCT_TAB_ATTRIBUTES',

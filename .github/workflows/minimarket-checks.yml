@@ -113,6 +113,7 @@ jobs:
             dist/minimarket_mysql84_nnop3_full_demo.sql
             dist/minimarket_bundles_demo_0_5_51.sql
             dist/minimarket_bundle_prices_demo_0_5_52.sql
+            dist/minimarket_product_badges_demo_0_5_53.sql
           if-no-files-found: error
           retention-days: 14
 
@@ -170,6 +171,9 @@ jobs:
 
       - name: Native admin menus, AJAX pickers and bundle pricing UI
         run: php scripts/test-0-5-52-ui.php
+
+      - name: Product badge rounding, expiry, schema and bilingual storefront
+        run: php scripts/test-product-badges.php
 
       - name: Bundles, SKU components, nested stock and Joomla form
         run: php scripts/test-bundles.php

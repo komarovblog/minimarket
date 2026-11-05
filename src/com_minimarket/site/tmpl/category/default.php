@@ -5,6 +5,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Filter\InputFilter;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
+use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
 ?>
 <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BREADCRUMB')); ?>">
     <a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CATALOG_MENU_TITLE'); ?></a>
@@ -57,7 +58,9 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
                 <a href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
                     <?php echo $this->escape($product->title); ?>
                 </a>
+                <?php echo BadgeHelper::render($product); ?>
                 <span><?php echo $this->escape((string) $product->price); ?></span>
+                <?php echo BadgeHelper::oldPrice($product); ?>
             </li>
         <?php endforeach; ?>
         </ul>

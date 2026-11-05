@@ -44,6 +44,23 @@ verify($bundleSql!==false && str_contains($bundleSql,'nnop3_minimarket_bundle_it
     'bundle demo SQL exists');
 $bundleCi=str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $bundleSql);
 runMulti($db,$bundleCi,'bundle seed');
+$badgeSql=file_get_contents(__DIR__.'/../sample-data/minimarket_product_badges_demo_0_5_53.sql');
+verify($badgeSql!==false,'badge demo SQL found');
+$badgeCi=str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $badgeSql);
+runMulti($db,$badgeCi,'badge demo import');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+ WHERE id IN (1001,1090) AND badge_sale=1 AND old_price IS NOT NULL"
+)->fetch_assoc()['n']===2,'two sale badge examples with old prices');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+ WHERE id IN (1001,1003) AND badge_new=1"
+)->fetch_assoc()['n']===2,'timed and indefinite new badge examples');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+ WHERE id IN (1002,1004) AND badge_popular=1"
+)->fetch_assoc()['n']===2,'timed and indefinite popular badge examples');
+runMulti($db,$badgeCi,'idempotent badge import');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+ WHERE badge_sale=1")->fetch_assoc()['n']===2,'reimport does not duplicate badge flags');
+
 $pricingFile=file_get_contents(__DIR__.'/../sample-data/minimarket_bundle_prices_demo_0_5_52.sql');
 verify($pricingFile!==false,'pricing demo seed present');
 runMulti($db,str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $pricingFile),

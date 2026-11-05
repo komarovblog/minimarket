@@ -16,6 +16,9 @@
         <field name="sku" type="text" label="COM_MINIMARKET_PRODUCT_SKU" required="true" filter="string" size="40" maxlength="100"/>
         <field name="price" type="number" label="COM_MINIMARKET_PRODUCT_PRICE" default="0.00"
                min="0" max="9999999999999.99" step="0.01" required="true" filter="string"/>
+        <field name="old_price" type="number" label="COM_MINIMARKET_BADGE_OLD_PRICE"
+               description="COM_MINIMARKET_BADGE_OLD_PRICE_HELP"
+               min="0" max="9999999999999.99" step="0.01" filter="string"/>
         <field name="stock" type="number" label="COM_MINIMARKET_PRODUCT_STOCK" default="0"
                description="COM_MINIMARKET_OPTION_STOCK_MAIN_HELP"
                min="0" max="4294967295" step="1" required="true" filter="string"/>
@@ -27,6 +30,21 @@
         </field>
         <field name="sort_order" type="number" label="COM_MINIMARKET_CATEGORY_ORDER"
                filter="uint" default="0" min="0" max="4294967295"/>
+    </fieldset>
+    <fieldset name="badges" label="COM_MINIMARKET_BADGES_TAB">
+        <field name="badge_sale" type="checkbox" label="COM_MINIMARKET_BADGE_SALE_ENABLE"
+               description="COM_MINIMARKET_BADGE_SALE_HELP"
+               value="1" unchecked="0" default="0" filter="int"/>
+        <field name="badge_new" type="checkbox" label="COM_MINIMARKET_BADGE_NEW_ENABLE"
+               value="1" unchecked="0" default="0" filter="int"/>
+        <field name="badge_new_days" type="number" label="COM_MINIMARKET_BADGE_DAYS"
+               description="COM_MINIMARKET_BADGE_DAYS_HELP"
+               min="1" max="36500" step="1" filter="string"/>
+        <field name="badge_popular" type="checkbox" label="COM_MINIMARKET_BADGE_POPULAR_ENABLE"
+               value="1" unchecked="0" default="0" filter="int"/>
+        <field name="badge_popular_days" type="number" label="COM_MINIMARKET_BADGE_DAYS"
+               description="COM_MINIMARKET_BADGE_DAYS_HELP"
+               min="1" max="36500" step="1" filter="string"/>
     </fieldset>
     <fieldset name="merchandising" label="COM_MINIMARKET_PRODUCT_TAB_MERCHANDISING">
         <field name="brand_id" type="Brandlist" label="COM_MINIMARKET_PRODUCT_BRAND"

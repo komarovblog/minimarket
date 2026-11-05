@@ -5,6 +5,7 @@ use Joomla\CMS\Filter\InputFilter;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
+use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
 use MiniMarket\Component\Minimarket\Site\Service\ProductAttributeCatalog;
 
 // One product URL and one product price; gallery is filtered by the selected
@@ -85,6 +86,7 @@ $initialDescription=$hasCustomDescription
 </nav>
 <article class="com-minimarket-product">
     <h1><?php echo $this->escape($this->product->title); ?></h1>
+    <?php echo BadgeHelper::render($this->product); ?>
     <?php if ((string)($this->product->brand_title ?? '') !== '') : ?>
         <p><strong><?php echo Text::_('COM_MINIMARKET_BRAND'); ?>:</strong>
             <?php echo $this->escape((string)$this->product->brand_title); ?></p>
@@ -250,7 +252,8 @@ $initialDescription=$hasCustomDescription
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></dt>
         <dd data-mm-variant-sku><?php echo $this->escape((string) ($defaultVariant['sku'] ?? $this->product->sku)); ?></dd>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_PRICE'); ?></dt>
-        <dd data-mm-variant-price><?php echo $this->escape((string) $this->product->price); ?></dd>
+        <dd data-mm-variant-price><?php echo $this->escape((string) $this->product->price); ?>
+            <?php echo BadgeHelper::oldPrice($this->product); ?></dd>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
         <dd data-mm-variant-stock><?php echo (int) (
             ((int)($this->product->option_stock_mode??0)===0)
