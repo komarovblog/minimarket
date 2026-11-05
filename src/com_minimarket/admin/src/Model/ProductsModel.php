@@ -6,8 +6,9 @@ namespace MiniMarket\Component\Minimarket\Administrator\Model;
 use Joomla\CMS\MVC\Model\ListModel;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAdminTree;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice;
 
-final class ProductsModel extends ListModel
+class ProductsModel extends ListModel
 {
     protected string $entityType = 'simple';
     protected function getListQuery()
@@ -100,10 +101,13 @@ final class ProductsModel extends ListModel
     {
         $items=parent::getItems();
         $snapshot=null;
+        $priceSnapshot=null;
         foreach($items as $item) {
             if (($item->product_type ?? 'simple')==='bundle') {
                 $snapshot ??= BundleStock::snapshot($this->getDatabase());
                 $item->stock=BundleStock::available((int)$item->id,$snapshot);
+                $priceSnapshot ??= BundlePrice::snapshot($this->getDatabase());
+                $item->price=BundlePrice::calculate((int)$item->id,$priceSnapshot)['price'];
             }
         }
         return $items;
