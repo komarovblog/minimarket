@@ -25,8 +25,16 @@ final class CollectionlistField extends CheckboxesField
         foreach ((array)$db->loadObjectList() as $item) {
             // All existing records remain selectable so unpublished assignments
             // are not silently erased when editing an existing product.
-            $options[] = HTMLHelper::_('select.option', (int)$item->id,
+            $option = HTMLHelper::_('select.option', (int)$item->id,
                 (string)$item->title);
+            // Joomla 6 checkboxes.php accesses option->checked directly.
+            // The standard HTML select-option builder omits this property.
+            // Stored choices remain controlled by Joomla checkedOptions.
+            $option->checked = false;
+            $options[] = $option;
+        }
+        foreach ($options as $option) {
+            if (!isset($option->checked)) $option->checked = false;
         }
         return $options;
     }

@@ -365,6 +365,21 @@ try {
         exit 1
     }
 
+    $brandsSqlName = 'minimarket_brands_collections_demo.sql'
+    if ($null -ne $archive.GetEntry($brandsSqlName)) {
+        Write-Output 'PACKAGE_FAIL: BRAND_DEMO_SQL_INSIDE_COMPONENT'
+        exit 1
+    }
+    $brandsSqlPath = Join-Path (Split-Path -Parent $ZipPath) $brandsSqlName
+    $brandsSqlSource = Join-Path $root ('sample-data\' + $brandsSqlName)
+    if (-not (Test-Path -LiteralPath $brandsSqlPath -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $brandsSqlSource -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $brandsSqlSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $brandsSqlPath -Algorithm SHA256).Hash) {
+        Write-Output 'PACKAGE_FAIL: BRAND_DEMO_SQL_MISSING_OR_MISMATCH'
+        exit 1
+    }
+
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

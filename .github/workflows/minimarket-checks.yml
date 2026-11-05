@@ -73,6 +73,7 @@ jobs:
           path: |
             dist/com_minimarket-${{ steps.component_version.outputs.value }}.zip
             dist/minimarket_toys_rich_import.sql
+            dist/minimarket_brands_collections_demo.sql
           if-no-files-found: error
           retention-days: 14
 

@@ -22,6 +22,10 @@ namespace MiniMarket\BrandsCollectionsSmoke {
         catch (\InvalidArgumentException $e) {check(true,'invalid ID rejected');}
     }
     $root=__DIR__.'/../src/com_minimarket/';
+    $checkboxSource=(string)file_get_contents($root.'admin/src/Field/CollectionlistField.php');
+    check(str_contains($checkboxSource,'$option->checked = false;')
+        && str_contains($checkboxSource,'!isset($option->checked)'),
+        'Joomla 6 checkbox options always have defined checked property');
     $productForm=simplexml_load_file($root.'admin/forms/product.xml');
     check($productForm!==false,'product form valid XML');
     check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="brand_id" and @type="Brandlist"]'))===1,

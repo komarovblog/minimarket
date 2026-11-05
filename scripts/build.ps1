@@ -221,6 +221,19 @@ try {
     if ($sourceHash -ne $outputHash) {
         throw 'DEMO_SQL_HASH_MISMATCH'
     }
+    # Optional, additive seed for previously introduced brand/collection
+    # entities, distributed separately. Never imported during Joomla upgrade.
+    $brandsSqlSource = Join-Path $projectRoot 'sample-data\minimarket_brands_collections_demo.sql'
+    $brandsSqlOutput = Join-Path $zipDirectory 'minimarket_brands_collections_demo.sql'
+    if (-not (Test-Path -LiteralPath $brandsSqlSource -PathType Leaf)) {
+        throw 'Missing optional demo brand/collection seed source'
+    }
+    Copy-Item -LiteralPath $brandsSqlSource -Destination $brandsSqlOutput -Force
+    if ((Get-FileHash -LiteralPath $brandsSqlSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $brandsSqlOutput -Algorithm SHA256).Hash) {
+        throw 'BRAND_COLLECTION_DEMO_SQL_HASH_MISMATCH'
+    }
+    Write-Output "MiniMarket optional brand/collection demo SQL : $brandsSqlOutput"
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }
