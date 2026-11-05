@@ -94,8 +94,8 @@ namespace MiniMarket\OptionArchitecture {
     $groupForm=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/group.xml');
     verify(count($groupForm->xpath("//field[@name='member_editor' and @type='Groupeditor']"))===1,
         'standalone group uses the same filtered relationship editor');
-    verify(count($groupForm->xpath("//field[@name='type']"))===0,
-        'generic product links do not expose recommendation, brand or collection types');
+    verify(count($groupForm->xpath("//field[@name='type' and @type='hidden']"))===1,
+        'relationship type stays hidden; bundle groups are separated in their own admin list');
     $groupEditorField=file_get_contents(__DIR__.'/../src/com_minimarket/admin/src/Field/GroupeditorField.php');
     verify(str_contains($groupEditorField,'ProductGroups::forProduct(') &&
         str_contains($groupEditorField,'ProductGroups::members(') &&
