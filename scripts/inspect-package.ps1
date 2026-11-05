@@ -380,6 +380,20 @@ try {
         exit 1
     }
 
+    $demo84 = 'minimarket_mysql84_nnop3_full_demo.sql'
+    if ($null -ne $archive.GetEntry($demo84)) {
+        Write-Output 'PACKAGE_FAIL: MYSQL84_DEMO_INSIDE_COMPONENT'
+        exit 1
+    }
+    $demo84out = Join-Path (Split-Path -Parent $ZipPath) $demo84
+    $demo84src = Join-Path $root ('sample-data\' + $demo84)
+    if (-not (Test-Path -LiteralPath $demo84out -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $demo84src -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $demo84out -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $demo84src -Algorithm SHA256).Hash) {
+        Write-Output 'PACKAGE_FAIL: MYSQL84_DEMO_MISSING_OR_MISMATCH'
+        exit 1
+    }
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

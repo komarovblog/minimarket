@@ -234,6 +234,19 @@ try {
         throw 'BRAND_COLLECTION_DEMO_SQL_HASH_MISMATCH'
     }
     Write-Output "MiniMarket optional brand/collection demo SQL : $brandsSqlOutput"
+    # User's fresh MySQL 8.4 database (nnop3_ prefix):
+    # Complete, guarded demo import is distributed separately from Joomla ZIP.
+    $mysql84SqlSource = Join-Path $projectRoot 'sample-data\minimarket_mysql84_nnop3_full_demo.sql'
+    $mysql84SqlOutput = Join-Path $zipDirectory 'minimarket_mysql84_nnop3_full_demo.sql'
+    if (-not (Test-Path -LiteralPath $mysql84SqlSource -PathType Leaf)) {
+        throw 'Missing user database demo import'
+    }
+    Copy-Item -LiteralPath $mysql84SqlSource -Destination $mysql84SqlOutput -Force
+    if ((Get-FileHash -LiteralPath $mysql84SqlSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $mysql84SqlOutput -Algorithm SHA256).Hash) {
+        throw 'MYSQL84_SQL_HASH_MISMATCH'
+    }
+    Write-Output "MySQL 8.4 fresh catalog SQL : $mysql84SqlOutput"
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

@@ -47,6 +47,42 @@ jobs:
           MM_CI_DB_PASSWORD: test_category_password
         run: php scripts/test-category-schema.php
 
+  mysql-demo84:
+    name: MySQL 8.4 full demo import
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: demo_root_password
+          MYSQL_DATABASE: minimarket_ci_demo84
+          MYSQL_USER: democi
+          MYSQL_PASSWORD: demo_ci_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u democi -pdemo_ci_password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=22
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP MySQLi
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mysqli
+          coverage: none
+      - name: Import complete catalog and assert relationships on MySQL 8.4
+        env:
+          MINIMARKET_DEMO_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_demo84
+          MM_CI_DB_USER: democi
+          MM_CI_DB_PASSWORD: demo_ci_password
+        run: php scripts/test-demo-sql-mysql84.php
+
   windows-package:
     name: Windows component ZIP
     runs-on: windows-latest
@@ -74,6 +110,7 @@ jobs:
             dist/com_minimarket-${{ steps.component_version.outputs.value }}.zip
             dist/minimarket_toys_rich_import.sql
             dist/minimarket_brands_collections_demo.sql
+            dist/minimarket_mysql84_nnop3_full_demo.sql
           if-no-files-found: error
           retention-days: 14
 
