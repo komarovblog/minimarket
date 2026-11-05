@@ -18,6 +18,8 @@ use MiniMarket\Component\Minimarket\Administrator\Service\ProductSkuMatrix;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGroups;
 use MiniMarket\Component\Minimarket\Administrator\Service\GroupEditor;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductCollections;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundleItems;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 
 final class ProductModel extends AdminModel
 {
@@ -41,6 +43,7 @@ final class ProductModel extends AdminModel
             $item->variant_dimensions = ProductLocalDimensions::formRows($this->getDatabase(), (int) $item->id);
             $item->group_ids = ProductGroups::currentIds($this->getDatabase(), (int) $item->id);
             $item->collection_ids = ProductCollections::selected($this->getDatabase(), (int) $item->id);
+            $item->bundle_items = BundleItems::formRows($this->getDatabase(), (int) $item->id);
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
@@ -49,6 +52,7 @@ final class ProductModel extends AdminModel
             $item->variant_dimensions = [];
             $item->group_ids = [];
             $item->collection_ids = [];
+            $item->bundle_items = [];
         }
 
         return $item;
@@ -63,14 +67,33 @@ final class ProductModel extends AdminModel
         // Joomla repeatable subform posts no rows when the last row is removed.
         // Hidden sentinel makes an explicit empty gallery distinct from a legacy
         // form that never offered gallery editing.
-        $hasMatrix = array_key_exists('sku_matrix_payload', $data);
+        $isBundle = (string)($data['product_type'] ?? 'simple') === 'bundle';
+        $hasBundle = array_key_exists('bundle_items', $data)
+            || !empty($data['bundle_items_present']);
+        try {
+            $bundleRows = $hasBundle ? BundleItems::normalize($data['bundle_items'] ?? []) : [];
+        } catch (\InvalidArgumentException $error) {
+            $this->setError(Text::_('COM_MINIMARKET_BUNDLE_INVALID'));
+            return false;
+        }
+        if (!$isBundle && $bundleRows) {
+            $this->setError(Text::_('COM_MINIMARKET_BUNDLE_ONLY'));
+            return false;
+        }
+        if ($isBundle && (int)($data['state'] ?? 0)===1 && !$bundleRows && $hasBundle) {
+            $this->setError(Text::_('COM_MINIMARKET_BUNDLE_EMPTY'));
+            return false;
+        }
+        // Bundle stock is computed from its component SKUs. The existing SKU
+        // matrix is not processed or modified on a bundle card.
+        $hasMatrix = !$isBundle && array_key_exists('sku_matrix_payload', $data);
         $hasGallery = array_key_exists('gallery', $data) || !empty($data['gallery_present']);
         $hasVideos = array_key_exists('videos', $data) || !empty($data['videos_present']);
         $hasAttributes = array_key_exists('attribute_values', $data)
             || !empty($data['attributes_present']);
-        $hasVariants = array_key_exists('variants', $data) || !empty($data['variants_present']);
-        $hasLocal = array_key_exists('variant_dimensions', $data)
-            || !empty($data['variant_dimensions_present']);
+        $hasVariants = !$isBundle && (array_key_exists('variants', $data) || !empty($data['variants_present']));
+        $hasLocal = !$isBundle && (array_key_exists('variant_dimensions', $data)
+            || !empty($data['variant_dimensions_present']));
         $localDimensions = [];
         $hasCollections = array_key_exists('collection_ids', $data)
             || !empty($data['collections_present']);
@@ -205,7 +228,8 @@ final class ProductModel extends AdminModel
             return false;
         }
 
-        unset($data['collection_ids'], $data['collections_present']);
+        unset($data['collection_ids'], $data['collections_present'],
+            $data['bundle_items'], $data['bundle_items_present']);
         unset($data['group_ids'], $data['new_group_title'], $data['product_group_present'],
             $data['group_contents'], $data['group_editor']);
         unset($data['category_option_preview'], $data['sku_matrix_payload']);
@@ -222,6 +246,27 @@ final class ProductModel extends AdminModel
                 return false;
             }
 
+            $savedProductId = (int)$this->getState($this->getName().'.id');
+            if ($isBundle) {
+                // Do not silently discard old SKU matrix or dimensions when
+                // changing the type of an existing product to a bundle.
+                $countSql=$db->getQuery(true)->select('COUNT(*)')
+                    ->from($db->quoteName('#__minimarket_product_variants'))
+                    ->where('product_id='.$savedProductId);
+                $db->setQuery($countSql);
+                $skuCount=(int)$db->loadResult();
+                $dimSql=$db->getQuery(true)->select('COUNT(*)')
+                    ->from($db->quoteName('#__minimarket_variant_dimensions'))
+                    ->where('product_id='.$savedProductId);
+                $db->setQuery($dimSql);
+                if ($skuCount>0 || (int)$db->loadResult()>0) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_BUNDLE_HAS_VARIANTS');
+                }
+            }
+            if ($hasBundle) {
+                $resolved=BundleItems::validate($db,$savedProductId,$bundleRows);
+                BundleItems::replace($db,$savedProductId,$resolved);
+            }
             if ($hasVideos) {
                 $productId = (int) $this->getState($this->getName() . '.id');
                 ProductVideos::replace($db, $productId, $videoRows);
@@ -264,7 +309,9 @@ final class ProductModel extends AdminModel
             return true;
         } catch (\Throwable $error) {
             $db->transactionRollback();
-            $this->setError(Text::_('COM_MINIMARKET_VARIANTS_SAVE_FAILED'));
+            $key=$error->getMessage();
+            $this->setError(Text::_(str_starts_with($key,'COM_MINIMARKET_BUNDLE_')
+                ? $key : 'COM_MINIMARKET_VARIANTS_SAVE_FAILED'));
             return false;
         }
     }

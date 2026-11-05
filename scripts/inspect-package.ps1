@@ -394,6 +394,20 @@ try {
         Write-Output 'PACKAGE_FAIL: MYSQL84_DEMO_MISSING_OR_MISMATCH'
         exit 1
     }
+    $bundleSql = 'minimarket_bundles_demo_0_5_51.sql'
+    if ($null -ne $archive.GetEntry($bundleSql)) {
+        Write-Output 'PACKAGE_FAIL: BUNDLE_SQL_INSIDE_COMPONENT'
+        exit 1
+    }
+    $bundleSource = Join-Path $root ('sample-data\' + $bundleSql)
+    $bundleOutput = Join-Path (Split-Path -Parent $ZipPath) $bundleSql
+    if (-not (Test-Path -LiteralPath $bundleOutput -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $bundleSource -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $bundleOutput -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $bundleSource -Algorithm SHA256).Hash) {
+        Write-Output 'PACKAGE_FAIL: BUNDLE_SQL_MISSING_OR_MISMATCH'
+        exit 1
+    }
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

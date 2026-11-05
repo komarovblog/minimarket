@@ -247,6 +247,19 @@ try {
         throw 'MYSQL84_SQL_HASH_MISMATCH'
     }
     Write-Output "MySQL 8.4 fresh catalog SQL : $mysql84SqlOutput"
+    # An additive bundle seed for the nnop3_ MySQL 8.4 demo catalog.
+    # It does not belong inside the Joomla installation archive.
+    $bundleSqlSource = Join-Path $projectRoot 'sample-data\minimarket_bundles_demo_0_5_51.sql'
+    $bundleSqlOutput = Join-Path $zipDirectory 'minimarket_bundles_demo_0_5_51.sql'
+    if (-not (Test-Path -LiteralPath $bundleSqlSource -PathType Leaf)) {
+        throw 'Missing demo bundle data'
+    }
+    Copy-Item -LiteralPath $bundleSqlSource -Destination $bundleSqlOutput -Force
+    if ((Get-FileHash -LiteralPath $bundleSqlSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $bundleSqlOutput -Algorithm SHA256).Hash) {
+        throw 'BUNDLE_SQL_HASH_MISMATCH'
+    }
+    Write-Output "Bundle demo SQL : $bundleSqlOutput"
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

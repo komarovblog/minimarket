@@ -23,6 +23,11 @@ final class ProductTable extends Table
         $this->title = trim((string) $this->title);
         $this->alias = trim((string) $this->alias);
         $this->sku = trim((string) $this->sku);
+        $this->product_type=(string)($this->product_type ?? 'simple');
+        if (!in_array($this->product_type,['simple','bundle'],true)) {
+            $this->setError(Text::_('COM_MINIMARKET_BUNDLE_TYPE_INVALID'));
+            return false;
+        }
 
         if ($this->title === '') {
             $this->setError(Text::_('COM_MINIMARKET_ERROR_TITLE_REQUIRED'));

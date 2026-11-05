@@ -20,6 +20,7 @@ final class HtmlView extends BaseHtmlView
     public array $variants = ['axes'=>[], 'items'=>[]];
     public array $relatedGroups = [];
     public array $collections = [];
+    public array $bundleComponents = [];
 
     public function display($tpl = null)
     {
@@ -48,6 +49,11 @@ final class HtmlView extends BaseHtmlView
         unset($variant);
         $this->relatedGroups = $repo->getRelatedGroups($id);
         $this->collections = $repo->getProductCollections($id);
+        if (($product->product_type ?? 'simple') === 'bundle') {
+            $this->bundleComponents = $repo->getBundleComponents($id);
+            // Bundle does not have its own selectable SKU matrix.
+            $this->variants = ['axes'=>[], 'items'=>[]];
+        }
         // Color/size selectors for actual SKUs replace static descriptive rows.
         if ($this->variants['items']) {
             foreach (array_keys($this->variants['axes']) as $axisId) {

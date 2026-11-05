@@ -793,6 +793,34 @@ try {
     verify(true,'in-use collection deletion rejected by FK');
 }
 
+
+ // 0.5.51: bundle migration leaves old product and SKU records untouched.
+$beforeBundle=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.51.sql','catci_');
+$afterBundle=row($pdo,'catci_minimarket_products');
+foreach ($beforeBundle as $field=>$value) {
+    verify(array_key_exists($field,$afterBundle) && $afterBundle[$field]===$value,
+        '0.5.51 preserves existing product field '.$field);
+}
+verify($afterBundle['product_type']==='simple','old products stay simple');
+$pdo->exec("INSERT INTO catci_minimarket_products
+    (id,category_id,title,alias,sku,price,stock,product_type,state)
+    VALUES (1090,1,'Bundle','bundle','BUNDLE-1090',99,0,'bundle',1)");
+$pdo->exec("INSERT INTO catci_minimarket_bundle_items
+    (bundle_product_id,component_product_id,component_variant_id,quantity)
+    VALUES (1090,1,NULL,2)");
+verify((int)$pdo->query("SELECT quantity FROM catci_minimarket_bundle_items
+    WHERE bundle_product_id=1090")->fetchColumn()===2,'bundle component quantity stored');
+try {
+    $pdo->exec('DELETE FROM catci_minimarket_products WHERE id=1');
+    verify(false,'referenced component deletion should be rejected');
+} catch (PDOException $error) {
+    verify(true,'FK protects used component from deletion');
+}
+$pdo->exec('DELETE FROM catci_minimarket_products WHERE id=1090');
+verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_bundle_items')
+    ->fetchColumn()===0,'deleting parent bundle cascades component rows');
+
 $pdo->exec('DROP TABLE catci_minimarket_product_collections');
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
@@ -811,6 +839,7 @@ $pdo->exec('DROP TABLE catci_minimarket_order_options');
 $pdo->exec('DROP TABLE catci_minimarket_product_image_variants');
 $pdo->exec('DROP TABLE catci_minimarket_product_images');
 $pdo->exec('DROP TABLE catci_minimarket_product_variant_images');
+$pdo->exec('DROP TABLE catci_minimarket_bundle_items');
 $pdo->exec('DROP TABLE catci_minimarket_product_variants');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_free_values');
 $pdo->exec('DROP TABLE catci_minimarket_product_attribute_multi_values');
@@ -888,6 +917,12 @@ $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
     ->fetchAll(PDO::FETCH_COLUMN);
 verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
 verify(in_array('brand_id',$freshProducts,true),'fresh 0.5.49 optional brand ID');
+verify(in_array('product_type',$freshProducts,true),'fresh 0.5.51 bundle type');
+$freshBundleColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_bundle_items')
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['bundle_product_id','component_product_id','component_variant_id','quantity','sort_order'] as $col) {
+    verify(in_array($col,$freshBundleColumns,true),'fresh bundle item '.$col);
+}
 $brandColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_brands')->fetchAll(PDO::FETCH_COLUMN);
 $collectionColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_collections')->fetchAll(PDO::FETCH_COLUMN);
 foreach (['id','title','alias','description','image','meta_title','state','sort_order'] as $col) {

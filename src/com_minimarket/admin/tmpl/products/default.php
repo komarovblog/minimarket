@@ -20,6 +20,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
             <th class="w-1 text-center"><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_IMAGE'); ?></th>
             <th><?php echo HTMLHelper::_('searchtools.sort', 'JGLOBAL_TITLE', 'p.title', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
+            <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_TYPE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
             <th><?php echo HTMLHelper::_('searchtools.sort', 'COM_MINIMARKET_PRODUCT_PRICE', 'p.price', $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></th>
@@ -57,9 +58,13 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
                     <small class="d-block text-muted"><?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_COLLECTIONS') . ': ' . $item->collection_titles); ?></small>
                     <?php endif; ?>
                 </td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_TYPE')); ?>">
+                    <?php echo Text::_(($item->product_type ?? 'simple')==='bundle'
+                        ? 'COM_MINIMARKET_PRODUCT_TYPE_BUNDLE' : 'COM_MINIMARKET_PRODUCT_TYPE_SIMPLE'); ?>
+                </td>
                 <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_SKU')); ?>"><?php echo $this->escape($item->sku); ?></td>
                 <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_PRICE')); ?>"><?php echo $this->escape((string) $item->price); ?></td>
-                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_STOCK')); ?>"><?php echo (int) $item->stock; ?></td>
+                <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_STOCK')); ?>"><?php echo (int) $item->stock; ?><?php if (($item->product_type ?? 'simple')==='bundle') : ?><small class="d-block text-muted"><?php echo Text::_('COM_MINIMARKET_BUNDLE_STOCK_DERIVED'); ?></small><?php endif; ?></td>
                 <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_BRAND')); ?>">
                     <?php if ((int)($item->brand_id ?? 0)>0) : ?>
                         <a href="<?php echo AdminEntityLinks::edit('brand',(int)$item->brand_id); ?>"><?php echo $this->escape((string)$item->brand_title); ?></a>
@@ -71,7 +76,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
             </tr>
         <?php endforeach; ?>
         <?php if (!$this->items) : ?>
-            <tr><td colspan="11"><?php echo Text::_('COM_MINIMARKET_NO_PRODUCTS'); ?></td></tr>
+            <tr><td colspan="12"><?php echo Text::_('COM_MINIMARKET_NO_PRODUCTS'); ?></td></tr>
         <?php endif; ?>
         </tbody>
     </table>

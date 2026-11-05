@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
+    <field name="component" type="Bundlecomponent" required="true"
+           label="COM_MINIMARKET_BUNDLE_COMPONENT" filter="string">
+        <option value="">COM_MINIMARKET_BUNDLE_CHOOSE_COMPONENT</option>
+    </field>
+    <field name="quantity" type="number" required="true"
+           label="COM_MINIMARKET_BUNDLE_QUANTITY"
+           default="1" min="1" max="1000" step="1" filter="uint"/>
+</form>

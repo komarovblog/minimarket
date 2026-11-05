@@ -39,6 +39,47 @@ runMulti($db,str_replace('#__','nnop3_',$schema),'fresh install');
 // "minimarket"; CI safely rewrites only the USE statement to its disposable DB.
 $demoCi = str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $demo);
 runMulti($db,$demoCi,'demo import');
+$bundleSql=file_get_contents(__DIR__.'/../sample-data/minimarket_bundles_demo_0_5_51.sql');
+verify($bundleSql!==false && str_contains($bundleSql,'nnop3_minimarket_bundle_items'),
+    'bundle demo SQL exists');
+$bundleCi=str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $bundleSql);
+runMulti($db,$bundleCi,'bundle seed');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+    WHERE product_type='bundle'")->fetch_assoc()['n']===3,'3 bundle products');
+verify(total($db,'bundle_items')===6,'6 component rows, including SKU and nested bundle');
+$stockService=__DIR__.'/../src/com_minimarket/admin/src/Service/BundleStock.php';
+define('_JEXEC',1);
+require_once $stockService;
+$map=[];
+foreach ([
+    'products'=>['id','category_id','product_type','state','stock','option_stock_mode'],
+    'categories'=>['id','parent_id','state'],
+    'variants'=>['id','product_id','stock','state'],
+] as $key=>$columns) {
+    $result=$db->query('SELECT '.implode(',',$columns).' FROM nnop3_minimarket_'.
+        ($key==='variants'?'product_variants':$key));
+    $map[$key]=[];
+    while ($row=$result->fetch_assoc()) $map[$key][(int)$row['id']]=$row;
+}
+$map['hasVariants']=[];
+foreach ($map['variants'] as $row) $map['hasVariants'][(int)$row['product_id']]=true;
+$map['items']=[];
+$result=$db->query('SELECT * FROM nnop3_minimarket_bundle_items ORDER BY sort_order,id');
+while ($row=$result->fetch_assoc()) {
+    $map['items'][(int)$row['bundle_product_id']][]=$row;
+}
+$bundleClass=\MiniMarket\Component\Minimarket\Administrator\Service\BundleStock::class;
+verify($bundleClass::available(1090,$map)===14,'bundle 1090 counts quantities');
+verify($bundleClass::available(1091,$map)===9,'bundle 1091 uses exact SKU stock');
+verify($bundleClass::available(1092,$map)===9,
+    'nested bundle sums repeated component demand (28 / 3 = 9)');
+$map['products'][1003]['state']=0;
+verify($bundleClass::available(1092,$map)===0,
+    'unpublished component blocks nested bundle availability');
+$map['products'][1003]['state']=1;
+$map['variants'][7004]['stock']=0;
+verify($bundleClass::available(1091,$map)===0,'zero SKU stock blocks availability');
+
 verify(total($db,'categories')>=20,'categories imported');
 verify(total($db,'products')>=70,'products imported');
 verify(total($db,'attributes')>=5,'attributes imported');

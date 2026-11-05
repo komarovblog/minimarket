@@ -5,6 +5,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Model;
 
 use Joomla\CMS\MVC\Model\ListModel;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAdminTree;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 
 final class ProductsModel extends ListModel
 {
@@ -18,6 +19,7 @@ final class ProductsModel extends ListModel
                 $db->quoteName('p.sku'),
                 $db->quoteName('p.price'),
                 $db->quoteName('p.stock'),
+                $db->quoteName('p.product_type'),
                 $db->quoteName('p.state'),
                 $db->quoteName('p.sort_order'),
                 $db->quoteName('p.image'),
@@ -55,6 +57,11 @@ final class ProductsModel extends ListModel
                 ' WHERE pcs.product_id=p.id AND pcs.collection_id=' . $collectionId . ')');
         }
 
+        $type=(string)$this->getState('filter.product_type');
+        if (in_array($type,['simple','bundle'],true)) {
+            $query->where($db->quoteName('p.product_type').'='.$db->quote($type));
+        }
+
         $state = (string) $this->getState('filter.published');
         if ($state === '0' || $state === '1') {
             $query->where($db->quoteName('p.state') . ' = ' . (int) $state);
@@ -84,6 +91,19 @@ final class ProductsModel extends ListModel
     protected function populateState($ordering = 'p.id', $direction = 'DESC')
     {
         parent::populateState($ordering, $direction);
+    }
+
+    public function getItems()
+    {
+        $items=parent::getItems();
+        $snapshot=null;
+        foreach($items as $item) {
+            if (($item->product_type ?? 'simple')==='bundle') {
+                $snapshot ??= BundleStock::snapshot($this->getDatabase());
+                $item->stock=BundleStock::available((int)$item->id,$snapshot);
+            }
+        }
+        return $items;
     }
 
     /** One read for the category filter; no N+1 query for category ancestry. */

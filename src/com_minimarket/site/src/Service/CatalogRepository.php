@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Site\Service;
 \defined('_JEXEC') or die;
 
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 
 /**
  * All public reads exclude unpublished products and categories.
@@ -11,6 +12,23 @@ use Joomla\Database\DatabaseInterface;
 final class CatalogRepository
 {
     private ?CategoryTree $categoryTree = null;
+    private ?array $bundleSnapshot = null;
+
+    private function bundleSnapshot(): array
+    {
+        return $this->bundleSnapshot ??= BundleStock::snapshot($this->db);
+    }
+
+    private function derivedStock(array $products): array
+    {
+        foreach ($products as $product) {
+            if (($product->product_type ?? 'simple') === 'bundle') {
+                $product->stock = BundleStock::available((int)$product->id,
+                    $this->bundleSnapshot());
+            }
+        }
+        return $products;
+    }
 
     public function __construct(private DatabaseInterface $db)
     {
@@ -114,6 +132,7 @@ final class CatalogRepository
                 $this->db->quoteName('p.sku'),
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.product_type'),
                 $this->db->quoteName('p.option_stock_mode'),
                 $this->db->quoteName('p.image'),
                 $this->db->quoteName('p.image_alt'),
@@ -132,7 +151,7 @@ final class CatalogRepository
 
         $this->db->setQuery($q, max(0, $offset), max(1, min($limit, 48)));
 
-        return (array) $this->db->loadObjectList();
+        return $this->derivedStock((array) $this->db->loadObjectList());
     }
 
     public function getCategory(int $id): ?object
@@ -165,6 +184,7 @@ final class CatalogRepository
                 $this->db->quoteName('p.sku'),
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.product_type'),
                 $this->db->quoteName('p.image'),
                 $this->db->quoteName('p.image_alt'),
             ])
@@ -181,7 +201,7 @@ final class CatalogRepository
 
         $this->db->setQuery($q);
 
-        return (array) $this->db->loadObjectList();
+        return $this->derivedStock((array) $this->db->loadObjectList());
     }
 
     /**
@@ -298,6 +318,14 @@ final class CatalogRepository
         return (array)$this->db->loadObjectList();
     }
 
+    /** Bundle composition is read-only until cart/checkout is implemented. */
+    public function getBundleComponents(int $id): array
+    {
+        $items=BundleStock::components($this->db,$id);
+        return array_values(array_filter($items,fn($row) => (int)$row['state']===1
+            && $this->categoryTree()->isVisible((int)$row['category_id'])));
+    }
+
     public function getProduct(int $id): ?object
     {
         $q = $this->db->getQuery(true)
@@ -317,6 +345,7 @@ final class CatalogRepository
                 $this->db->quoteName('p.sku'),
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.product_type'),
                 $this->db->quoteName('p.image'),
                 $this->db->quoteName('p.image_alt'),
                 $this->db->quoteName('p.category_id'),
@@ -339,8 +368,12 @@ final class CatalogRepository
 
         $product = $this->db->loadObject();
 
-        return $product !== null && $this->categoryTree()->isVisible((int) $product->category_id)
-            ? $product
-            : null;
+        if ($product === null || !$this->categoryTree()->isVisible((int)$product->category_id)) {
+            return null;
+        }
+        if (($product->product_type ?? 'simple') === 'bundle') {
+            $product->stock=BundleStock::available((int)$product->id,$this->bundleSnapshot());
+        }
+        return $product;
     }
 }

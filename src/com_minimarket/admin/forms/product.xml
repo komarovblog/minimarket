@@ -8,6 +8,11 @@
                description="COM_MINIMARKET_PRODUCT_CATEGORY_DESC" default="" required="true" filter="int">
             <option value="">COM_MINIMARKET_SELECT_CATEGORY</option>
         </field>
+        <field name="product_type" type="list" label="COM_MINIMARKET_PRODUCT_TYPE"
+               description="COM_MINIMARKET_PRODUCT_TYPE_HELP" filter="string" default="simple">
+            <option value="simple">COM_MINIMARKET_PRODUCT_TYPE_SIMPLE</option>
+            <option value="bundle">COM_MINIMARKET_PRODUCT_TYPE_BUNDLE</option>
+        </field>
         <field name="sku" type="text" label="COM_MINIMARKET_PRODUCT_SKU" required="true" filter="string" size="40" maxlength="100"/>
         <field name="price" type="number" label="COM_MINIMARKET_PRODUCT_PRICE" default="0.00"
                min="0" max="9999999999999.99" step="0.01" required="true" filter="string"/>
@@ -77,6 +82,17 @@
                description="COM_MINIMARKET_VARIANTS_HELP"
                formsource="administrator/components/com_minimarket/forms/product_variant.xml"
                multiple="true" min="0" max="200" buttons="add,remove,move"
+               layout="joomla.form.field.subform.repeatable" validate="Subform"/>
+    </fieldset>
+    <fieldset name="bundle" label="COM_MINIMARKET_PRODUCT_TAB_BUNDLE">
+        <field name="bundle_help" type="note" label="COM_MINIMARKET_PRODUCT_TAB_BUNDLE"
+               description="COM_MINIMARKET_BUNDLE_HELP"/>
+        <field name="bundle_items_present" type="hidden" default="1" filter="int"/>
+        <field name="bundle_items" type="subform"
+               label="COM_MINIMARKET_BUNDLE_COMPONENTS"
+               description="COM_MINIMARKET_BUNDLE_COMPONENTS_HELP"
+               formsource="administrator/components/com_minimarket/forms/product_bundle_item.xml"
+               multiple="true" min="0" max="40" buttons="add,remove,move"
                layout="joomla.form.field.subform.repeatable" validate="Subform"/>
     </fieldset>
     <fieldset name="groups" label="COM_MINIMARKET_PRODUCT_TAB_GROUPS">

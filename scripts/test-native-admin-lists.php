@@ -60,7 +60,7 @@ ok(str_contains($css,'#adminForm .mm-rules-table')
 ok(str_contains($css,'@container (max-width: 900px)'),
    'small container rows become cards instead of scrolling horizontally');
 foreach ([
- 'products'=>11, 'categories'=>8, 'attributes'=>7,
+ 'products'=>12, 'categories'=>8, 'attributes'=>7,
  'brands'=>6, 'collections'=>6,
  'values'=>7, 'groups'=>5, 'orderoptions'=>6,
 ] as $entity=>$cells) {

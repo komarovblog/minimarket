@@ -94,6 +94,28 @@ $initialDescription=$hasCustomDescription
             <?php echo $this->escape(implode(', ',array_map(
                 static fn($row)=>(string)$row->title,$this->collections))); ?></p>
     <?php endif; ?>
+    <?php if (($this->product->product_type ?? 'simple') === 'bundle') : ?>
+        <section class="mm-bundle-composition" aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BUNDLE_COMPOSITION')); ?>">
+            <h2><?php echo Text::_('COM_MINIMARKET_BUNDLE_COMPOSITION'); ?></h2>
+            <?php if ($this->bundleComponents) : ?>
+                <ul>
+                <?php foreach ($this->bundleComponents as $entry) : ?>
+                    <li>
+                        <a href="<?php echo $this->escape(RouteHelper::product((int)$entry['component_product_id'])); ?>">
+                            <?php echo $this->escape((string)$entry['title']); ?>
+                        </a>
+                        <?php if (!empty($entry['variant_sku'])) : ?>
+                            (SKU: <?php echo $this->escape((string)$entry['variant_sku']); ?>)
+                        <?php endif; ?>
+                        — <?php echo (int)$entry['quantity']; ?> ×
+                    </li>
+                <?php endforeach; ?>
+                </ul>
+            <?php else : ?>
+                <p><?php echo Text::_('COM_MINIMARKET_BUNDLE_NO_COMPONENTS'); ?></p>
+            <?php endif; ?>
+        </section>
+    <?php endif; ?>
     <?php if ($main !== null) : ?>
         <div class="mm-product-gallery" data-mm-product-gallery>
             <a class="mm-product-gallery__main-link" data-mm-gallery-main-link

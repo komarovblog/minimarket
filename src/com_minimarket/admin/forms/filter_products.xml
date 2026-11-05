@@ -8,6 +8,12 @@
             <option value="1">JPUBLISHED</option>
             <option value="0">JUNPUBLISHED</option>
         </field>
+        <field name="product_type" type="list" label="COM_MINIMARKET_PRODUCT_TYPE"
+               class="js-select-submit-on-change">
+            <option value="">JOPTION_SELECT_ALL</option>
+            <option value="simple">COM_MINIMARKET_PRODUCT_TYPE_SIMPLE</option>
+            <option value="bundle">COM_MINIMARKET_PRODUCT_TYPE_BUNDLE</option>
+        </field>
         <field name="brand_id" type="Brandlist"
                label="COM_MINIMARKET_PRODUCT_BRAND"
                class="js-select-submit-on-change">
