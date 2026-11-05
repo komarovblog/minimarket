@@ -35,7 +35,10 @@ verify(!preg_match('/^\s*(DELETE FROM|TRUNCATE|ALTER TABLE|DROP TABLE)\b/im',$de
 verify(str_contains($demo,'sample-10.png') && !str_contains($demo,"'images/minimarket/sample.png'"),
     'all sample image names migrated');
 runMulti($db,str_replace('#__','nnop3_',$schema),'fresh install');
-runMulti($db,$demo,'demo import');
+// The distributed SQL deliberately targets the user's real database
+// "minimarket"; CI safely rewrites only the USE statement to its disposable DB.
+$demoCi = str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $demo);
+runMulti($db,$demoCi,'demo import');
 verify(total($db,'categories')>=20,'categories imported');
 verify(total($db,'products')>=70,'products imported');
 verify(total($db,'attributes')>=5,'attributes imported');
