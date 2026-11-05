@@ -39,7 +39,6 @@ final class ProductpickerController extends BaseController
         $input = $app->input;
         $queryText = trim((string) $input->getString('q', ''));
         $categoryId = $input->getInt('category_id', 0);
-        $groupType=$input->getCmd('group_type','simple');
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $q = $db->getQuery(true)
             ->select(['p.id','p.title','p.category_id','p.state',
@@ -49,7 +48,6 @@ final class ProductpickerController extends BaseController
                 . ' ON c.id = p.category_id')
             ->order('p.title ASC, p.id ASC');
         if ($categoryId > 0) $q->where('p.category_id = ' . $categoryId);
-        $q->where($groupType==='bundle' ? "p.product_type='bundle'" : "p.product_type='simple'");
         if ($queryText !== '') {
             $queryText = mb_substr($queryText, 0, 100);
             $q->where('(' . 'p.title LIKE ' . $db->quote('%'.$db->escape($queryText,true).'%')
@@ -62,6 +60,70 @@ final class ProductpickerController extends BaseController
                 'category_id'=>(int)$row['category_id'],
                 'category'=>(string)$row['category_title'],
                 'state'=>(int)$row['state']];
+        }
+        $this->respond(['items'=>$items]);
+    }
+
+    /** Small, paged collection search. Never load every collection in product HTML. */
+    public function collections(): void
+    {
+        $this->ensureAllowed();
+        $input=Factory::getApplication()->input;
+        $text=mb_substr(trim((string)$input->getString('q','')),0,100);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $q=$db->getQuery(true)->select(['id','title','state'])
+            ->from($db->quoteName('#__minimarket_collections'))
+            ->order('title ASC,id ASC');
+        if ($text!=='') {
+            $like=$db->quote('%'.$db->escape($text,true).'%',false);
+            $q->where('(title LIKE '.$like.' OR alias LIKE '.$like.')');
+        }
+        $db->setQuery($q,0,25);
+        $items=[];
+        foreach ((array)$db->loadAssocList() as $item) {
+            $id=(int)$item['id'];
+            $items[]=['id'=>$id,'key'=>(string)$id,'title'=>(string)$item['title'],
+                'state'=>(int)$item['state']];
+        }
+        $this->respond(['items'=>$items]);
+    }
+
+    /** Search by product name, product SKU or specific variant SKU. */
+    public function bundleCandidates(): void
+    {
+        $this->ensureAllowed();
+        $input=Factory::getApplication()->input;
+        $text=mb_substr(trim((string)$input->getString('q','')),0,100);
+        $category=(int)$input->getInt('category_id',0);
+        $self=(int)$input->getInt('current_id',0);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $q=$db->getQuery(true)->select([
+            'p.id','p.title','p.sku','p.product_type','p.category_id','p.state',
+            'v.id AS variant_id','v.sku AS variant_sku','v.state AS variant_state'
+        ])->from($db->quoteName('#__minimarket_products','p'))
+        ->join('LEFT',$db->quoteName('#__minimarket_product_variants','v').' ON v.product_id=p.id')
+        ->order('p.title ASC,p.id ASC,v.id ASC');
+        if ($self>0)$q->where('p.id <> '.$self);
+        if ($category>0)$q->where('p.category_id='.$category);
+        if ($text!=='') {
+            $like=$db->quote('%'.$db->escape($text,true).'%',false);
+            $q->where('(p.title LIKE '.$like.' OR p.sku LIKE '.$like
+                .' OR v.sku LIKE '.$like.')');
+        }
+        $db->setQuery($q,0,25);
+        $items=[];
+        foreach ((array)$db->loadAssocList() as $row) {
+            $id=(int)$row['id'];
+            $variant=$row['variant_id']!==null;
+            $key=$variant?'variant:'.(int)$row['variant_id']:'product:'.$id;
+            $items[]=[
+                'id'=>$id,'product_id'=>$id,'key'=>$key,
+                'title'=>(string)$row['title'],
+                'sku'=>(string)($variant?$row['variant_sku']:$row['sku']),
+                'state'=>(int)$row['state'],
+                'variant_state'=>$variant?(int)$row['variant_state']:null,
+                'product_type'=>(string)$row['product_type']
+            ];
         }
         $this->respond(['items'=>$items]);
     }
