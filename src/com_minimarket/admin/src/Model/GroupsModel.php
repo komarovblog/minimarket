@@ -5,8 +5,10 @@ namespace MiniMarket\Component\Minimarket\Administrator\Model;
 
 use Joomla\CMS\MVC\Model\ListModel;
 
-final class GroupsModel extends ListModel
+class GroupsModel extends ListModel
 {
+    protected string $groupType='product';
+
     protected function getListQuery()
     {
         $db = $this->getDatabase();
@@ -14,7 +16,8 @@ final class GroupsModel extends ListModel
             ->select(['g.id', 'g.title', 'g.state', 'g.sort_order',
                 '(SELECT COUNT(*) FROM ' . $db->quoteName('#__minimarket_product_group_members')
                   . ' AS m WHERE m.group_id = g.id) AS member_count'])
-            ->from($db->quoteName('#__minimarket_product_groups', 'g'));
+            ->from($db->quoteName('#__minimarket_product_groups', 'g'))
+            ->where($this->groupType==='bundle' ? "g.type='bundle'" : "g.type<>'bundle'");
         $search = trim((string) $this->getState('filter.search'));
         if ($search !== '') {
             $like = $db->quote('%' . $db->escape($search, true) . '%', false);

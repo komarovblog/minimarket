@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <fields name="filter">
+        <field name="search" type="text" inputmode="search" hint="JSEARCH_FILTER" label="COM_MINIMARKET_CATEGORY_FILTER_SEARCH"/>
+        <field name="published" type="list" label="JSTATUS" class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_CATEGORY_ALL_STATUSES</option>
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field name="fullordering" type="list" label="JGLOBAL_SORT_BY"
+               class="js-select-submit-on-change" default="g.id DESC" validate="options">
+            <option value="g.id DESC">JGRID_HEADING_ID_DESC</option>
+            <option value="g.id ASC">JGRID_HEADING_ID_ASC</option>
+            <option value="g.title ASC">JGLOBAL_TITLE_ASC</option>
+            <option value="g.title DESC">JGLOBAL_TITLE_DESC</option>
+            <option value="g.sort_order ASC">JGRID_HEADING_ORDERING</option>
+        </field>
+        <field name="limit" type="limitbox" label="JGLOBAL_LIST_LIMIT" class="js-select-submit-on-change" default="20"/>
+    </fields>
+</form>

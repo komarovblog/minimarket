@@ -39,6 +39,7 @@ final class ProductpickerController extends BaseController
         $input = $app->input;
         $queryText = trim((string) $input->getString('q', ''));
         $categoryId = $input->getInt('category_id', 0);
+        $groupType=$input->getCmd('group_type','simple');
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $q = $db->getQuery(true)
             ->select(['p.id','p.title','p.category_id','p.state',
@@ -48,6 +49,7 @@ final class ProductpickerController extends BaseController
                 . ' ON c.id = p.category_id')
             ->order('p.title ASC, p.id ASC');
         if ($categoryId > 0) $q->where('p.category_id = ' . $categoryId);
+        $q->where($groupType==='bundle' ? "p.product_type='bundle'" : "p.product_type='simple'");
         if ($queryText !== '') {
             $queryText = mb_substr($queryText, 0, 100);
             $q->where('(' . 'p.title LIKE ' . $db->quote('%'.$db->escape($queryText,true).'%')

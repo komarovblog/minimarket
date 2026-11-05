@@ -20,7 +20,7 @@ final class DisplayController extends BaseController
                 'media/com_minimarket/css/admin-ui.css'
             );
 
-        if (!\in_array($viewName, ['dashboard', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection'], true)) {
+        if (!\in_array($viewName, ['dashboard', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);
         }
 

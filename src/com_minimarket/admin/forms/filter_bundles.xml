@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
+    <fields name="filter">
+        <field name="search" type="text" label="COM_MINIMARKET_PRODUCT_SEARCH"
+               inputmode="search" hint="JSEARCH_FILTER" />
+        <field name="published" type="list" label="JSTATUS" class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_CATEGORY_ALL_STATUSES</option>
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+        <field name="brand_id" type="Brandlist"
+               label="COM_MINIMARKET_PRODUCT_BRAND"
+               class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_PRODUCT_ALL_BRANDS</option>
+        </field>
+        <field name="collection_id" type="Collectionfilter"
+               label="COM_MINIMARKET_PRODUCT_COLLECTIONS"
+               class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_PRODUCT_ALL_COLLECTIONS</option>
+        </field>
+        <field name="category_id" type="Productcategory"
+               label="COM_MINIMARKET_PRODUCT_CATEGORY"
+               class="js-select-submit-on-change">
+            <option value="">COM_MINIMARKET_PRODUCT_ALL_CATEGORIES</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field name="fullordering" type="list" label="JGLOBAL_SORT_BY"
+               class="js-select-submit-on-change" default="p.id DESC" validate="options">
+            <option value="p.id DESC">COM_MINIMARKET_PRODUCT_SORT_NEWEST</option>
+            <option value="p.id ASC">JGRID_HEADING_ID_ASC</option>
+            <option value="p.title ASC">COM_MINIMARKET_PRODUCT_SORT_TITLE</option>
+            <option value="p.title DESC">JGLOBAL_TITLE_DESC</option>
+            <option value="p.price ASC">COM_MINIMARKET_PRODUCT_SORT_PRICE_ASC</option>
+            <option value="p.price DESC">COM_MINIMARKET_PRODUCT_SORT_PRICE_DESC</option>
+            <option value="p.sort_order ASC">COM_MINIMARKET_PRODUCT_SORT_MANUAL</option>
+        </field>
+        <field name="limit" type="limitbox" label="JGLOBAL_LIST_LIMIT"
+               class="js-select-submit-on-change" default="20"/>
+    </fields>
+</form>

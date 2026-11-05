@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.5.51</version>
+    <version>0.5.52</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -32,15 +32,29 @@
             <folder>examples</folder>
             <folder>sql</folder>
         </files>
-        <menu link="option=com_minimarket">COM_MINIMARKET</menu>
+        <menu img="class:cart">COM_MINIMARKET</menu>
         <submenu>
-            <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES</menu>
-            <menu link="option=com_minimarket&amp;view=products">COM_MINIMARKET_PRODUCTS</menu>
-            <menu link="option=com_minimarket&amp;view=brands">COM_MINIMARKET_BRANDS</menu>
-            <menu link="option=com_minimarket&amp;view=collections">COM_MINIMARKET_COLLECTIONS</menu>
+            <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=category.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu type="separator" alias="mm-separator-1">-</menu>
+            <menu link="option=com_minimarket&amp;view=products">COM_MINIMARKET_PRODUCTS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=product&amp;layout=edit&amp;product_type=simple</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=bundles">COM_MINIMARKET_BUNDLES
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=product&amp;layout=edit&amp;product_type=bundle</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu type="separator" alias="mm-separator-2">-</menu>
             <menu link="option=com_minimarket&amp;view=groups">COM_MINIMARKET_GROUPS</menu>
+            <menu link="option=com_minimarket&amp;view=bundlegroups">COM_MINIMARKET_BUNDLE_GROUPS</menu>
+            <menu type="separator" alias="mm-separator-3">-</menu>
             <menu link="option=com_minimarket&amp;view=attributes">COM_MINIMARKET_ATTRIBUTES</menu>
             <menu link="option=com_minimarket&amp;view=orderoptions">COM_MINIMARKET_ORDER_OPTIONS</menu>
+            <menu type="separator" alias="mm-separator-4">-</menu>
+            <menu link="option=com_minimarket&amp;view=brands">COM_MINIMARKET_BRANDS</menu>
+            <menu type="separator" alias="mm-separator-5">-</menu>
+            <menu link="option=com_minimarket&amp;view=collections">COM_MINIMARKET_COLLECTIONS</menu>
+            <menu type="separator" alias="mm-separator-6">-</menu>
             <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
         </submenu>
     </administration>

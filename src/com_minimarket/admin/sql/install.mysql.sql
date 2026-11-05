@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `category_id` INT UNSIGNED NOT NULL,
     `brand_id` INT UNSIGNED NULL DEFAULT NULL,
     `product_type` VARCHAR(12) NOT NULL DEFAULT 'simple',
+    `bundle_price_mode` VARCHAR(12) NOT NULL DEFAULT 'fixed',
+    `bundle_discount_pct` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
     `title` VARCHAR(255) NOT NULL,
     `alias` VARCHAR(255) NOT NULL,
     `sku` VARCHAR(100) NOT NULL DEFAULT '',

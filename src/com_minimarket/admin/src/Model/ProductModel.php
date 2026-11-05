@@ -80,6 +80,19 @@ final class ProductModel extends AdminModel
             $this->setError(Text::_('COM_MINIMARKET_BUNDLE_ONLY'));
             return false;
         }
+        // Never turn an existing populated bundle into an ordinary product:
+        // clearing its component rows would discard a user's saved structure.
+        if (!$isBundle && (int)($data['id']??0)>0) {
+            $db0=$this->getDatabase();
+            $q0=$db0->getQuery(true)->select('COUNT(*)')
+                ->from($db0->quoteName('#__minimarket_bundle_items'))
+                ->where('bundle_product_id='.(int)$data['id']);
+            $db0->setQuery($q0);
+            if ((int)$db0->loadResult()>0) {
+                $this->setError(Text::_('COM_MINIMARKET_BUNDLE_TYPE_CHANGE_BLOCKED'));
+                return false;
+            }
+        }
         if ($isBundle && (int)($data['state'] ?? 0)===1 && !$bundleRows && $hasBundle) {
             $this->setError(Text::_('COM_MINIMARKET_BUNDLE_EMPTY'));
             return false;
@@ -319,7 +332,13 @@ final class ProductModel extends AdminModel
     protected function loadFormData()
     {
         $data = Factory::getApplication()->getUserState('com_minimarket.edit.product.data', []);
-
-        return empty($data) ? $this->getItem() : $data;
+        if (!empty($data)) return $data;
+        $item=$this->getItem();
+        // Native menu quick-add opens the existing product editor in bundle mode.
+        if ($item && (int)($item->id ?? 0)===0
+            && Factory::getApplication()->input->getCmd('product_type')==='bundle') {
+            $item->product_type='bundle';
+        }
+        return $item;
     }
 }

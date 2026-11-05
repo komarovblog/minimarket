@@ -23,6 +23,20 @@ use Joomla\CMS\Router\Route;
     ] as $section => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-product', $section, Text::_($label)); ?>
         <div class="card card-body mm-admin-panel"<?php echo $section === 'variants' ? ' data-mm-variants-editor' : ''; ?>>
+            <?php if ($section === 'bundle' && (int)($this->item->id ?? 0)>0
+                && ($this->item->product_type ?? 'simple')==='bundle') :
+                $bundleQuote=\MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice::calculate(
+                    (int)$this->item->id,
+                    \MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice::snapshot(
+                        \Joomla\CMS\Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class)));
+            ?>
+                <p class="alert alert-info">
+                    <?php echo Text::_('COM_MINIMARKET_BUNDLE_PRICE_CURRENT'); ?>:
+                    <strong><?php echo $this->escape((string)$bundleQuote['price']); ?></strong>
+                    (<?php echo Text::_('COM_MINIMARKET_BUNDLE_PRICE_COMPONENT_TOTAL'); ?>:
+                    <?php echo $this->escape((string)$bundleQuote['component_total']); ?>)
+                </p>
+            <?php endif; ?>
             <?php if ($section === 'variants') : ?>
                 <?php echo $this->form->renderField('variants_present'); ?>
                 <?php echo $this->form->renderField('variant_dimensions_present'); ?>

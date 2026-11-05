@@ -260,6 +260,16 @@ try {
         throw 'BUNDLE_SQL_HASH_MISMATCH'
     }
     Write-Output "Bundle demo SQL : $bundleSqlOutput"
+    $priceSource = Join-Path $projectRoot 'sample-data\minimarket_bundle_prices_demo_0_5_52.sql'
+    $priceOutput = Join-Path $zipDirectory 'minimarket_bundle_prices_demo_0_5_52.sql'
+    if (-not (Test-Path -LiteralPath $priceSource -PathType Leaf)) {
+        throw 'Missing optional bundle price sample SQL'
+    }
+    Copy-Item -LiteralPath $priceSource -Destination $priceOutput -Force
+    if ((Get-FileHash -LiteralPath $priceSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $priceOutput -Algorithm SHA256).Hash) {
+        throw 'BUNDLE_PRICE_SQL_HASH_MISMATCH'
+    }
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

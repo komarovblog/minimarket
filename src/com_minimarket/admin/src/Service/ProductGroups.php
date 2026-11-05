@@ -12,7 +12,7 @@ use Joomla\Database\DatabaseInterface;
  */
 final class ProductGroups
 {
-    public const TYPES = ['model', 'similar', 'collection', 'accessory'];
+    public const TYPES = ['model', 'similar', 'collection', 'accessory', 'bundle'];
 
     public static function normalizeIds(mixed $value): array
     {
@@ -53,8 +53,11 @@ final class ProductGroups
     {
         if ($productId < 1) return [];
         $q = $db->getQuery(true)->select('group_id')
-            ->from($db->quoteName('#__minimarket_product_group_members'))
-            ->where($db->quoteName('product_id') . ' = ' . $productId)
+            ->from($db->quoteName('#__minimarket_product_group_members','m'))
+            ->join('INNER',$db->quoteName('#__minimarket_product_groups','g').' ON g.id=m.group_id')
+            ->join('INNER',$db->quoteName('#__minimarket_products','p').' ON p.id=m.product_id')
+            ->where('m.product_id = '.$productId)
+            ->where("((g.type='bundle' AND p.product_type='bundle') OR (g.type<>'bundle' AND p.product_type='simple'))")
             ->order('group_id ASC');
         $db->setQuery($q);
         return array_map('intval', (array) $db->loadColumn());
@@ -71,10 +74,11 @@ final class ProductGroups
         return array_map('intval', (array) $db->loadColumn());
     }
 
-    public static function options(DatabaseInterface $db): array
+    public static function options(DatabaseInterface $db,string $productType='simple'): array
     {
         $q = $db->getQuery(true)->select(['id', 'title', 'state'])
             ->from($db->quoteName('#__minimarket_product_groups'))
+            ->where($productType==='bundle' ? "type='bundle'" : "type<>'bundle'")
             ->order('title ASC, id ASC');
         $db->setQuery($q);
         return (array) $db->loadAssocList();
@@ -162,6 +166,21 @@ final class ProductGroups
         if ($groupId < 1) throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
         $productIds = self::normalizeIds($productIds);
         self::assertExisting($db, $productIds, '#__minimarket_products');
+        // A bundle relationship must never contain ordinary products, and
+        // ordinary product relations must never contain a bundle.
+        $q=$db->getQuery(true)->select('type')->from($db->quoteName('#__minimarket_product_groups'))
+            ->where('id='.$groupId);
+        $db->setQuery($q);
+        $type=(string)$db->loadResult();
+        if($type==='')throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
+        if($productIds){
+            $q=$db->getQuery(true)->select('COUNT(*)')
+                ->from($db->quoteName('#__minimarket_products'))
+                ->where('id IN ('.implode(',',$productIds).')')
+                ->where($type==='bundle' ? "product_type<>'bundle'" : "product_type<>'simple'");
+            $db->setQuery($q);
+            if((int)$db->loadResult()>0)throw new \InvalidArgumentException('COM_MINIMARKET_GROUP_SCOPE_INVALID');
+        }
         $old = self::memberIds($db, $groupId);
         foreach (array_diff($old, $productIds) as $productId) {
             $q = $db->getQuery(true)->delete($db->quoteName('#__minimarket_product_group_members'))

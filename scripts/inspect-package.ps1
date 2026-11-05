@@ -408,6 +408,20 @@ try {
         Write-Output 'PACKAGE_FAIL: BUNDLE_SQL_MISSING_OR_MISMATCH'
         exit 1
     }
+    $priceSql = 'minimarket_bundle_prices_demo_0_5_52.sql'
+    if ($null -ne $archive.GetEntry($priceSql)) {
+        Write-Output 'PACKAGE_FAIL: PRICE_DEMO_INSIDE_COMPONENT'
+        exit 1
+    }
+    $priceSource = Join-Path $root ('sample-data\' + $priceSql)
+    $priceOutput = Join-Path (Split-Path -Parent $ZipPath) $priceSql
+    if (-not (Test-Path -LiteralPath $priceOutput -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $priceSource -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $priceOutput -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $priceSource -Algorithm SHA256).Hash) {
+        Write-Output 'PACKAGE_FAIL: BUNDLE_PRICE_DEMO_MISSING_OR_MISMATCH'
+        exit 1
+    }
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

@@ -2,6 +2,7 @@
 <form addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
     <fieldset name="details" label="COM_MINIMARKET_GROUP_DETAILS">
         <field name="id" type="hidden" default="0" filter="int"/>
+        <field name="type" type="hidden" default="similar" filter="string"/>
         <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60" maxlength="255"/>
         <field name="state" type="list" label="JSTATUS" default="1" filter="int">
             <option value="1">JPUBLISHED</option>

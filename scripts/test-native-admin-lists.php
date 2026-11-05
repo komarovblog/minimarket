@@ -5,7 +5,7 @@ define('_JEXEC', 1);
 $count=0;
 function ok(bool $yes,string $name):void {global $count;++$count;if(!$yes)throw new RuntimeException('NATIVE_ADMIN_LIST_FAIL: '.$name);}
 $root=__DIR__.'/../src/com_minimarket/admin/';
-foreach(['products','attributes','categories','brands','collections'] as $name){
+foreach(['products','bundles','attributes','categories','brands','collections','groups','bundlegroups'] as $name){
     $xml=simplexml_load_file($root.'forms/filter_'.$name.'.xml');
     ok($xml!==false,'filter XML valid: '.$name);
     ok(count($xml->xpath("//fields[@name='filter']/field[@name='search']"))===1,'native SearchTools search: '.$name);
@@ -60,7 +60,7 @@ ok(str_contains($css,'#adminForm .mm-rules-table')
 ok(str_contains($css,'@container (max-width: 900px)'),
    'small container rows become cards instead of scrolling horizontally');
 foreach ([
- 'products'=>12, 'categories'=>8, 'attributes'=>7,
+ 'products'=>12, 'bundles'=>12, 'groups'=>5, 'bundlegroups'=>5, 'categories'=>8, 'attributes'=>7,
  'brands'=>6, 'collections'=>6,
  'values'=>7, 'groups'=>5, 'orderoptions'=>6,
 ] as $entity=>$cells) {

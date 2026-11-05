@@ -5,6 +5,7 @@ namespace MiniMarket\Component\Minimarket\Site\Service;
 
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice;
 
 /**
  * All public reads exclude unpublished products and categories.
@@ -13,6 +14,12 @@ final class CatalogRepository
 {
     private ?CategoryTree $categoryTree = null;
     private ?array $bundleSnapshot = null;
+    private ?array $bundlePriceSnapshot = null;
+
+    private function bundlePriceSnapshot(): array
+    {
+        return $this->bundlePriceSnapshot ??= BundlePrice::snapshot($this->db);
+    }
 
     private function bundleSnapshot(): array
     {
@@ -25,6 +32,8 @@ final class CatalogRepository
             if (($product->product_type ?? 'simple') === 'bundle') {
                 $product->stock = BundleStock::available((int)$product->id,
                     $this->bundleSnapshot());
+                $product->price = BundlePrice::calculate((int)$product->id,
+                    $this->bundlePriceSnapshot())['price'];
             }
         }
         return $products;
@@ -373,6 +382,8 @@ final class CatalogRepository
         }
         if (($product->product_type ?? 'simple') === 'bundle') {
             $product->stock=BundleStock::available((int)$product->id,$this->bundleSnapshot());
+            $product->price=BundlePrice::calculate((int)$product->id,
+                $this->bundlePriceSnapshot())['price'];
         }
         return $product;
     }

@@ -123,6 +123,12 @@ final class GroupEditor
         if ($productId < 1) {
             throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
         }
+        $q=$db->getQuery(true)->select('product_type')
+            ->from($db->quoteName('#__minimarket_products'))->where('id='.$productId);
+        $db->setQuery($q);
+        $productType=(string)$db->loadResult();
+        if(!in_array($productType,['simple','bundle'],true))
+            throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');
         $original=ProductGroups::currentIds($db,$productId);
         $present=array_column($rows,'id');
         foreach ($original as $gid) {
@@ -132,7 +138,15 @@ final class GroupEditor
         }
         foreach ($rows as $row) {
             $id=$row['id'];
-            if ($id > 0) self::requireGroup($db,$id);
+            if ($id > 0) {
+                self::requireGroup($db,$id);
+                $q=$db->getQuery(true)->select('type')
+                    ->from($db->quoteName('#__minimarket_product_groups'))->where('id='.$id);
+                $db->setQuery($q);
+                $groupType=(string)$db->loadResult();
+                if (($productType==='bundle')!==($groupType==='bundle'))
+                    throw new \InvalidArgumentException('COM_MINIMARKET_GROUP_SCOPE_INVALID');
+            }
             if ($row['delete']) {
                 // Explicit, confirmed action: unlink all products and delete
                 // the group, leaving every product itself untouched.
@@ -154,7 +168,8 @@ final class GroupEditor
                 $q=$db->getQuery(true)
                     ->insert($db->quoteName('#__minimarket_product_groups'))
                     ->columns($db->quoteName(['title','type','state']))
-                    ->values($db->quote($row['title']).','.$db->quote('similar').',1');
+                    ->values($db->quote($row['title']).','.$db->quote(
+                        $productType==='bundle'?'bundle':'similar').',1');
                 $db->setQuery($q);$db->execute();
                 $id=(int)$db->insertid();
                 if ($id<1) throw new \RuntimeException('COM_MINIMARKET_PRODUCT_GROUP_INVALID');

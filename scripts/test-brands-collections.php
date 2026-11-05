@@ -22,16 +22,16 @@ namespace MiniMarket\BrandsCollectionsSmoke {
         catch (\InvalidArgumentException $e) {check(true,'invalid ID rejected');}
     }
     $root=__DIR__.'/../src/com_minimarket/';
-    $checkboxSource=(string)file_get_contents($root.'admin/src/Field/CollectionlistField.php');
-    check(str_contains($checkboxSource,'$option->checked = false;')
-        && str_contains($checkboxSource,'!isset($option->checked)'),
-        'Joomla 6 checkbox options always have defined checked property');
+    $checkboxSource=(string)file_get_contents($root.'admin/src/Field/CollectionpickerField.php');
+    check(str_contains($checkboxSource,'data-mm-picker="collections"')
+        && str_contains($checkboxSource,'data-mm-selected'),
+        'collection search editor replaces full-page native checkbox list');
     $productForm=simplexml_load_file($root.'admin/forms/product.xml');
     check($productForm!==false,'product form valid XML');
     check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="brand_id" and @type="Brandlist"]'))===1,
         'one brand on product');
-    check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="collection_ids" and @type="Collectionlist" and @multiple="true"]'))===1,
-        'native collection multiple checkboxes');
+    check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="collection_ids" and @type="Collectionpicker"]'))===1,
+        'searchable collection membership editor');
     check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="collections_present"]'))===1,
         'empty selections are submitted');
     foreach (['brand','collection'] as $name) {

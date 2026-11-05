@@ -821,6 +821,18 @@ $pdo->exec('DELETE FROM catci_minimarket_products WHERE id=1090');
 verify((int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_bundle_items')
     ->fetchColumn()===0,'deleting parent bundle cascades component rows');
 
+// 0.5.52: new pricing fields are additive and preserve fixed prices.
+$beforePricing=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.52.sql','catci_');
+$afterPricing=row($pdo,'catci_minimarket_products');
+foreach($beforePricing as $column=>$value){
+    verify(array_key_exists($column,$afterPricing) && $value===$afterPricing[$column],
+        '0.5.52 preserves original product field '.$column);
+}
+verify($afterPricing['bundle_price_mode']==='fixed' &&
+    (float)$afterPricing['bundle_discount_pct']===0.0,
+    'upgrade leaves existing products and bundles with fixed prices');
+
 $pdo->exec('DROP TABLE catci_minimarket_product_collections');
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
@@ -918,6 +930,9 @@ $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
 verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
 verify(in_array('brand_id',$freshProducts,true),'fresh 0.5.49 optional brand ID');
 verify(in_array('product_type',$freshProducts,true),'fresh 0.5.51 bundle type');
+verify(in_array('bundle_price_mode',$freshProducts,true) &&
+    in_array('bundle_discount_pct',$freshProducts,true),
+    'fresh 0.5.52 pricing columns');
 $freshBundleColumns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_bundle_items')
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['bundle_product_id','component_product_id','component_variant_id','quantity','sort_order'] as $col) {

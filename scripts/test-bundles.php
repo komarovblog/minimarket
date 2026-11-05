@@ -80,8 +80,8 @@ namespace MiniMarket\BundleSmoke {
     ok($form!==false,'product form parses as XML');
     ok(count($form->xpath("//fieldset[@name='details']/field[@name='product_type']"))===1,
         'simple or bundle type in native Joomla form');
-    ok(count($form->xpath("//fieldset[@name='bundle']/field[@name='bundle_items' and @type='subform']"))===1,
-        'native repeatable bundle components');
+    ok(count($form->xpath("//fieldset[@name='bundle']/field[@name='bundle_items' and @type='Bundlepicker']"))===1,
+        'searchable bundle SKU picker');
     $subform=simplexml_load_file($base.'admin/forms/product_bundle_item.xml');
     ok($subform!==false && count($subform->xpath("//field[@name='quantity']"))===1,
         'component line has quantity field');
@@ -106,5 +106,45 @@ namespace MiniMarket\BundleSmoke {
         && str_contains($seed,'7004')
         && !preg_match('/^\s*(DROP|DELETE|TRUNCATE|ALTER)\b/im',$seed),
         'separate demo bundle seed is additive and uses exact SKU IDs');
+    require __DIR__.'/../src/com_minimarket/admin/src/Service/BundlePrice.php';
+    $pricing=[
+        'products'=>[
+            1002=>['price'=>'1000.00','product_type'=>'simple'],
+            1003=>['price'=>'500.00','product_type'=>'simple'],
+            1090=>['price'=>'1990.00','product_type'=>'bundle','bundle_price_mode'=>'fixed','bundle_discount_pct'=>'0.00'],
+            1091=>['price'=>'0.00','product_type'=>'bundle','bundle_price_mode'=>'discount','bundle_discount_pct'=>'10.00'],
+            1092=>['price'=>'0.00','product_type'=>'bundle','bundle_price_mode'=>'discount','bundle_discount_pct'=>'15.00']
+        ],
+        'items'=>[
+            1090=>[
+                ['component_product_id'=>1002,'quantity'=>1],
+                ['component_product_id'=>1003,'quantity'=>2],
+            ],
+            1091=>[
+                ['component_product_id'=>1002,'quantity'=>2],
+                ['component_product_id'=>1003,'quantity'=>1],
+            ],
+            1092=>[
+                ['component_product_id'=>1091,'quantity'=>1],
+                ['component_product_id'=>1003,'quantity'=>1],
+            ]
+        ]
+    ];
+    $priced=\MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice::class;
+    ok($priced::calculate(1090,$pricing)['price']==='1990.00',
+        'fixed bundle price independent of component sum');
+    ok($priced::calculate(1091,$pricing)['price']==='2250.00',
+        '10% discount from 2500.00 sum');
+    ok($priced::calculate(1092,$pricing)['price']==='2337.50',
+        'nested bundle uses discounted child price: (2250 + 500) x 85%');
+    $pricing['products'][1003]['price']='700.00';
+    ok($priced::calculate(1091,$pricing)['price']==='2430.00',
+        'discount bundle price recalculates after changing component price');
+    $pricing['items'][1091][]=['component_product_id'=>1090,'quantity'=>1];
+    $pricing['items'][1090][]=['component_product_id'=>1092,'quantity'=>1];
+    $pricing['items'][1092][]=['component_product_id'=>1090,'quantity'=>1];
+    ok(!$priced::calculate(1092,$pricing)['valid'],
+        'cycle detection rejects circular discounted bundle pricing');
+
     echo 'BUNDLE_SMOKE_OK: '.$n." cases\n";
 }

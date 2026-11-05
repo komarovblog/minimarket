@@ -709,3 +709,28 @@
 .mm-dashboard .mm-dashboard__sections .list-group-item {
   overflow-wrap: break-word;
 }
+
+
+/* 0.5.52: searchable collections and bundle components use one compact UI. */
+#adminForm .mm-entity-picker { width:100%; min-width:0; }
+#adminForm .mm-entity-picker__row,
+#adminForm .mm-entity-picker__result {
+  display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+  padding:.55rem .25rem; border-bottom:1px solid var(--border-color,rgba(128,128,128,.3));
+}
+#adminForm .mm-entity-picker__row a { min-width:0; overflow-wrap:anywhere; }
+#adminForm .mm-entity-picker__row small { color:var(--text-muted,#999); }
+#adminForm .mm-entity-picker__row button,
+#adminForm .mm-entity-picker__result button { margin-left:auto; }
+#adminForm .mm-entity-picker__row label { margin-left:auto; display:flex; gap:.4rem; align-items:center; }
+#adminForm .mm-entity-picker__row label input { width:6rem; }
+#adminForm .mm-entity-picker > [data-mm-add] { margin:.7rem 0; }
+#adminForm .mm-entity-picker [data-mm-finder] {
+  border:1px solid var(--border-color,rgba(128,128,128,.3));
+  border-radius:.35rem; padding:.7rem; background:var(--body-bg,transparent);
+}
+#adminForm .mm-entity-picker__search { display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:.5rem; }
+#adminForm .mm-entity-picker__search input { flex:2 1 12rem; min-width:0; }
+#adminForm .mm-entity-picker__search select { flex:1 1 12rem; min-width:0; max-width:22rem; }
+#adminForm .mm-entity-picker__result > span { flex:1 1 12rem; overflow-wrap:anywhere; }
+#adminForm .mm-entity-picker [data-mm-message] { color:var(--danger,#c33); }

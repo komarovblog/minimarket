@@ -28,6 +28,9 @@ final class GroupeditorField extends FormField
             throw new \InvalidArgumentException('Invalid group editor mode');
         }
         $id = (int) ($this->form->getValue('id') ?: $app->input->getInt('id'));
+        $productType=(string)($mode==='product'
+            ? ($this->form->getValue('product_type')??'simple')
+            : (($this->form->getValue('type')??'similar')==='bundle'?'bundle':'simple'));
         $groups = [];
         if ($mode === 'product' && $id > 0) {
             foreach (ProductGroups::forProduct($db, $id) as $g) {
@@ -72,8 +75,9 @@ final class GroupeditorField extends FormField
             'currentTitle'=>$mode==='product'
                 ? (string)($this->form->getValue('title') ?: ('#'.$id)) : '',
             'groups'=>$groups, 'categories'=>$categories,
-            'otherGroups'=>$mode==='product' ? ProductGroups::options($db) : [],
-            'searchUrl'=>$endpoint.'search&'.$token.'=1',
+            'otherGroups'=>$mode==='product' ? ProductGroups::options($db,$productType) : [],
+            'groupType'=>$productType,
+            'searchUrl'=>$endpoint.'search&'.$token.'=1&group_type='.$productType,
             'groupUrl'=>$endpoint.'group&'.$token.'=1'
         ];
         $escape = static fn(string $v): string =>

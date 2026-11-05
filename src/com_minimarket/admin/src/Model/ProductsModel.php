@@ -9,6 +9,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 
 final class ProductsModel extends ListModel
 {
+    protected string $entityType = 'simple';
     protected function getListQuery()
     {
         $db = $this->getDatabase();
@@ -42,6 +43,8 @@ final class ProductsModel extends ListModel
                 . ' ON ' . $db->quoteName('p.category_id') . ' = ' . $db->quoteName('c.id'))
             ->join('LEFT', $db->quoteName('#__minimarket_brands', 'b')
                 . ' ON ' . $db->quoteName('p.brand_id') . ' = ' . $db->quoteName('b.id'));
+
+        $query->where('p.product_type = ' . $db->quote($this->entityType));
 
         $categoryId = (int) $this->getState('filter.category_id');
         if ($categoryId > 0) {

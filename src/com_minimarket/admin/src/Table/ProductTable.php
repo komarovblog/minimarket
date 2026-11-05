@@ -28,6 +28,15 @@ final class ProductTable extends Table
             $this->setError(Text::_('COM_MINIMARKET_BUNDLE_TYPE_INVALID'));
             return false;
         }
+        $this->bundle_price_mode=(string)($this->bundle_price_mode??'fixed');
+        $discount=(string)($this->bundle_discount_pct??'0');
+        if (!in_array($this->bundle_price_mode,['fixed','discount'],true)
+            || !preg_match('/^(?:[0-9]{1,2}|100)(?:\.[0-9]{1,2})?$/D',$discount)
+            || (float)$discount>100) {
+            $this->setError(Text::_('COM_MINIMARKET_BUNDLE_PRICE_INVALID'));
+            return false;
+        }
+        $this->bundle_discount_pct=number_format((float)$discount,2,'.','');
 
         if ($this->title === '') {
             $this->setError(Text::_('COM_MINIMARKET_ERROR_TITLE_REQUIRED'));

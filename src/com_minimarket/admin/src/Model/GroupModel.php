@@ -107,6 +107,12 @@ final class GroupModel extends AdminModel
     protected function loadFormData()
     {
         $data = Factory::getApplication()->getUserState('com_minimarket.edit.group.data', []);
-        return empty($data) ? $this->getItem() : $data;
+        if (!empty($data)) return $data;
+        $item=$this->getItem();
+        if($item && (int)($item->id??0)===0
+            && Factory::getApplication()->input->getCmd('group_type')==='bundle') {
+            $item->type='bundle';
+        }
+        return $item;
     }
 }

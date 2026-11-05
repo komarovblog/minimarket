@@ -44,6 +44,14 @@ verify($bundleSql!==false && str_contains($bundleSql,'nnop3_minimarket_bundle_it
     'bundle demo SQL exists');
 $bundleCi=str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $bundleSql);
 runMulti($db,$bundleCi,'bundle seed');
+$pricingFile=file_get_contents(__DIR__.'/../sample-data/minimarket_bundle_prices_demo_0_5_52.sql');
+verify($pricingFile!==false,'pricing demo seed present');
+runMulti($db,str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $pricingFile),
+    'bundle pricing demo');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+    WHERE id IN (1091,1092) AND bundle_price_mode='discount'")->fetch_assoc()['n']===2,
+    'existing bundles can switch to percentage pricing without data reset');
+
 verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
     WHERE product_type='bundle'")->fetch_assoc()['n']===3,'3 bundle products');
 verify(total($db,'bundle_items')===6,'6 component rows, including SKU and nested bundle');

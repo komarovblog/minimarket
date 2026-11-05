@@ -112,6 +112,7 @@ jobs:
             dist/minimarket_brands_collections_demo.sql
             dist/minimarket_mysql84_nnop3_full_demo.sql
             dist/minimarket_bundles_demo_0_5_51.sql
+            dist/minimarket_bundle_prices_demo_0_5_52.sql
           if-no-files-found: error
           retention-days: 14
 
@@ -166,6 +167,9 @@ jobs:
 
       - name: Options, stock modes and independent linked products
         run: php scripts/test-option-architecture.php
+
+      - name: Native admin menus, AJAX pickers and bundle pricing UI
+        run: php scripts/test-0-5-52-ui.php
 
       - name: Bundles, SKU components, nested stock and Joomla form
         run: php scripts/test-bundles.php

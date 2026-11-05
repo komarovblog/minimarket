@@ -34,7 +34,7 @@
             <option value="0">COM_MINIMARKET_PRODUCT_BRAND_NONE</option>
         </field>
         <field name="collections_present" type="hidden" filter="int" default="1"/>
-        <field name="collection_ids" type="Collectionlist" label="COM_MINIMARKET_PRODUCT_COLLECTIONS"
+        <field name="collection_ids" type="Collectionpicker" label="COM_MINIMARKET_PRODUCT_COLLECTIONS"
                description="COM_MINIMARKET_PRODUCT_COLLECTIONS_HELP"
                multiple="true" filter="array"/>
     </fieldset>
@@ -88,12 +88,18 @@
         <field name="bundle_help" type="note" label="COM_MINIMARKET_PRODUCT_TAB_BUNDLE"
                description="COM_MINIMARKET_BUNDLE_HELP"/>
         <field name="bundle_items_present" type="hidden" default="1" filter="int"/>
-        <field name="bundle_items" type="subform"
+        <field name="bundle_items" type="Bundlepicker"
                label="COM_MINIMARKET_BUNDLE_COMPONENTS"
                description="COM_MINIMARKET_BUNDLE_COMPONENTS_HELP"
-               formsource="administrator/components/com_minimarket/forms/product_bundle_item.xml"
-               multiple="true" min="0" max="40" buttons="add,remove,move"
-               layout="joomla.form.field.subform.repeatable" validate="Subform"/>
+               filter="raw"/>
+        <field name="bundle_price_mode" type="list" default="fixed" filter="string"
+               label="COM_MINIMARKET_BUNDLE_PRICE_MODE">
+            <option value="fixed">COM_MINIMARKET_BUNDLE_PRICE_FIXED</option>
+            <option value="discount">COM_MINIMARKET_BUNDLE_PRICE_DISCOUNT</option>
+        </field>
+        <field name="bundle_discount_pct" type="number" min="0" max="100" step="0.01"
+               default="0.00" filter="string" label="COM_MINIMARKET_BUNDLE_DISCOUNT_PCT"
+               description="COM_MINIMARKET_BUNDLE_DISCOUNT_HELP"/>
     </fieldset>
     <fieldset name="groups" label="COM_MINIMARKET_PRODUCT_TAB_GROUPS">
         <field name="group_editor" type="Groupeditor" mode="product" filter="raw"
