@@ -1,0 +1,10 @@
+
+/* Native Bootstrap cards and Joomla form controls; no global admin overrides. */
+.mm-feed-picker { max-height: 30rem; overflow-y: auto; }
+.mm-feed-picker .form-check { padding-block: .25rem; }
+.mm-feed-picker .form-check[hidden] { display: none !important; }
+.mm-feed-product .form-check-label { overflow-wrap: anywhere; }
+.mm-dashboard-cards .card { height: 100%; }
+.mm-dashboard-cards .card-body { display: flex; flex-direction: column; }
+.mm-dashboard-cards .card .btn { margin-top: auto; align-self: flex-start; }
+.mm-dashboard-stat { font-size: 1.75rem; font-weight: 700; }
