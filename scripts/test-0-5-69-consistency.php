@@ -46,7 +46,7 @@ ok69(str_contains($stock,'copy.value=stock.value') &&
 $backend=$read('src/com_minimarket/admin/src/Model/ProductModel.php');
 ok69(str_contains($backend,'$storedStock = $dbStock->loadResult()') &&
     str_contains($backend,'$inventoryEnabled') &&
-    str_contains($read('src/com_minimarket/admin/src/Service/ProductSkuMatrix.php'),"$old['stock']"),
+    str_contains($read('src/com_minimarket/admin/src/Service/ProductSkuMatrix.php'),'$old'."['stock']"),
     'server protects frozen product and SKU quantities');
 $group=$read('src/com_minimarket/media/js/group-editor.js');
 ok69(str_contains($group,'group._finderResults = items') &&
