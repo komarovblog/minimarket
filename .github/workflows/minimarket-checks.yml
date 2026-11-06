@@ -125,7 +125,7 @@ jobs:
             dist/minimarket_product_badges_demo_0_5_53.sql
             dist/minimarket_ui_benefit_demo_0_5_54.sql
             dist/minimarket_digital_demo_0_5_55.sql
-            dist/minimarket_mysql84_nnop3_update_0_5_59.sql
+            dist/minimarket_mysql84_nnop3_update_0_5_60.sql
           if-no-files-found: error
           retention-days: 14
 
@@ -202,6 +202,10 @@ jobs:
           node --check src/com_minimarket/media/js/product-badges.js
       - name: 0.5.59 component consistency audit
         run: php scripts/test-0-5-59-audit.php
+      - name: 0.5.60 promo interactions in simulated DOM
+        run: node scripts/test-promo-video-interactions.js
+      - name: 0.5.60 component review coverage
+        run: php scripts/test-0-5-60-wiring.php
       - name: Audit each administrator task route and registered media asset
         run: php scripts/audit-component-wiring.php
 

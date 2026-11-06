@@ -29,6 +29,24 @@ namespace MiniMarket\ProductBadgeSmoke {
         ],$fields);
     }
     $at=new \DateTimeImmutable('2026-11-05 12:00:00',new \DateTimeZone('UTC'));
+    $missingFields = product(['price'=>'89.00','old_price'=>'99.00','badge_sale'=>1]);
+    $oldHandler = set_error_handler(static function(int $severity,string $text):never {
+        throw new \ErrorException($text,0,$severity);
+    });
+    try {
+        $defaults = Badges::forProduct($missingFields,$at);
+        ok($defaults['sale_display']==='percent' &&
+            $defaults['benefit_display']==='money',
+            'legacy products without display columns fall back without notices');
+        $invalid = product(['badge_sale_display'=>'unexpected',
+            'badge_benefit_display'=>'unexpected']);
+        $defaults = Badges::forProduct($invalid,$at);
+        ok($defaults['sale_display']==='percent' &&
+            $defaults['benefit_display']==='money',
+            'unknown display enum values fall back safely');
+    } finally {
+        restore_error_handler();
+    }
     $sale=product(['price'=>'1490.00','old_price'=>'1990.00','badge_sale'=>1]);
     ok(Badges::forProduct($sale,$at)['sale']===26,'ceil(500/1990*100) is 26 percent');
     ok(Badges::forProduct($sale,$at)['old_price']==='1990.00','old price preserved');

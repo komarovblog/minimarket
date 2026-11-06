@@ -20,8 +20,17 @@
    const opened=!root.classList.contains('is-expanded');
    root.classList.toggle('is-expanded',opened);
    panel.hidden=!opened;
-   expand.setAttribute('aria-expanded',String(opened));
+   expand?.setAttribute('aria-expanded',String(opened));
+   player.setAttribute('aria-expanded',String(opened));
   }
+  // Clicking the floating video itself is an explicit expansion gesture.
+  player.addEventListener('click',toggle);
+  player.addEventListener('keydown',event=>{
+   if(event.key==='Enter'||event.key===' '){
+    event.preventDefault();
+    toggle();
+   }
+  });
   expand?.addEventListener('click',toggle);
   close?.addEventListener('click',()=>{
    root.hidden=true;player.pause();

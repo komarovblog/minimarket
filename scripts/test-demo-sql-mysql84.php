@@ -156,8 +156,8 @@ verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
  WHERE delivery_type='digital'")->fetch_assoc()['n']===1,
  'old demo products stay physical by default');
 // 0.5.57: the cumulative catalog updates an existing database in-place.
-$updateSql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_59.sql');
-verify($updateSql!==false,'cumulative 0.5.58 SQL exists');
+$updateSql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_60.sql');
+verify($updateSql!==false,'cumulative 0.5.60 SQL exists');
 $updateCi=str_replace('USE `minimarket`;','USE `minimarket_ci_demo84`;',$updateSql);
 $demoOptions=$db->query("SHOW COLUMNS FROM nnop3_minimarket_categories LIKE 'product_layout'")->fetch_assoc();
 verify((string)($demoOptions['Default']??'')==='inherit','new category layout inherits on fresh install');
@@ -176,6 +176,42 @@ verify((float)$db->query("SELECT price FROM nnop3_minimarket_products WHERE id=1
 verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_group_members WHERE product_id=1001 AND group_id=901")->fetch_row()[0]===1,
     'missing demo relation gets restored exactly once');
 verify(total($db,'bundle_items')===6,'bundle components not duplicated');
+
+// Storefront SKU data contract against ACTUAL imported MySQL 8.4 data.
+// A variant is selectable only if every product-local dimension maps to a
+// valid value and matches selection_json (v:<code>), not an old attribute.
+$skuRows=$db->query("SELECT id,product_id,sku,selection_json,stock
+ FROM nnop3_minimarket_product_variants WHERE state=1");
+$visibleSkus=0;$orderableSkus=0;$twoAxisSkus=0;
+while ($sku=$skuRows->fetch_assoc()) {
+    $id=(int)$sku['id'];$pid=(int)$sku['product_id'];
+    $selection=json_decode((string)$sku['selection_json'],true);
+    verify(is_array($selection) && count($selection)>=1 && count($selection)<=4,
+        'public SKU selection is normalized JSON '.$id);
+    $dims=$db->query("SELECT d.code AS axis,v.code AS value_code
+      FROM nnop3_minimarket_variant_value_assignments a
+      JOIN nnop3_minimarket_variant_dimensions d ON d.id=a.dimension_id
+      JOIN nnop3_minimarket_variant_dimension_values v
+        ON v.id=a.value_id AND v.dimension_id=d.id
+      WHERE a.variant_id=$id AND d.product_id=$pid");
+    $expected=[];
+    while ($dim=$dims->fetch_assoc()) {
+        verify(!isset($expected[$dim['axis']]), 'public SKU axis used only once '.$id);
+        $expected[$dim['axis']]='v:'.$dim['value_code'];
+    }
+    verify($expected==$selection && count($expected)===count($selection),
+        'SKU selection JSON matches actual configured local options '.$id);
+    $axisTotal=(int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_variant_dimensions
+      WHERE product_id=$pid")->fetch_row()[0];
+    verify(count($selection)===$axisTotal,
+        'every public SKU includes ALL required order-option axes '.$id);
+    if ($axisTotal>1)$twoAxisSkus++;
+    if ((int)$sku['stock']>0)$orderableSkus++;
+    $visibleSkus++;
+}
+verify($visibleSkus>=15 && $orderableSkus>=12 && $twoAxisSkus>=2,
+    'demo has usable one- and two-option SKU combinations');
+
 verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_images WHERE product_id=1012")->fetch_row()[0]>=3,
  'example product has three or more gallery images');
 verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_videos WHERE product_id=1012 AND is_promo=1")->fetch_row()[0]===1,

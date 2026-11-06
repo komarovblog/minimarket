@@ -19,3 +19,10 @@
  .mm-promo-video { right: .5rem; bottom: .5rem; width: min(12rem, calc(100vw - 1rem)); }
  .mm-promo-video.is-expanded { width: min(23rem, calc(100vw - 1rem)); }
 }
+
+/* Video surface is keyboard-operable; preserve visible focus in both themes. */
+.mm-promo-video [data-mm-promo-player] { cursor: pointer; }
+.mm-promo-video [data-mm-promo-player]:focus-visible {
+  outline: 3px solid var(--bs-focus-ring-color,#0d6efd);
+  outline-offset: -3px;
+}

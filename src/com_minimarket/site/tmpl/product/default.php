@@ -163,6 +163,8 @@ $initialDescription=$hasCustomDescription
         <aside class="mm-promo-video" data-mm-promo aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_VIDEO_PROMO')); ?>">
             <div class="mm-promo-video__media">
                 <video data-mm-promo-player autoplay muted loop playsinline preload="metadata"
+                       role="button" tabindex="0" aria-expanded="false"
+                       aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_VIDEO_PROMO_EXPAND')); ?>"
                        <?php if ($promoPosterUrl !== '') : ?>poster="<?php echo $this->escape($promoPosterUrl); ?>"<?php endif; ?>>
                     <source src="<?php echo $this->escape(Uri::root() . (string)$promoVideo->source); ?>">
                 </video>

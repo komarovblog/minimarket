@@ -75,15 +75,19 @@ final class ProductBadges
                 $benefitPercent=(string) (float)($product->bundle_discount_pct??0);
             }
         }
+        // Older projection objects and test fixtures may lack the newly
+        // introduced display columns. Never dereference a missing property.
+        $saleDisplay = (string) ($product->badge_sale_display ?? 'percent');
+        $benefitDisplay = (string) ($product->badge_benefit_display ?? 'money');
         return [
             'sale'=>$sale,
             'sale_amount'=>$amount,
             'benefit_amount'=>$benefit,
             'benefit_percent'=>$benefitPercent,
-            'sale_display'=>in_array(($product->badge_sale_display??'percent'),['percent','money'],true)
-                ? $product->badge_sale_display : 'percent',
-            'benefit_display'=>in_array(($product->badge_benefit_display??'money'),['percent','money'],true)
-                ? $product->badge_benefit_display : 'money',
+            'sale_display'=>in_array($saleDisplay,['percent','money'],true)
+                ? $saleDisplay : 'percent',
+            'benefit_display'=>in_array($benefitDisplay,['percent','money'],true)
+                ? $benefitDisplay : 'money',
             'new'=>self::timed((int)($product->badge_new??0)===1,
                 $product->badge_new_days??null,$product->badge_new_since??null,$now),
             'popular'=>self::timed((int)($product->badge_popular??0)===1,
