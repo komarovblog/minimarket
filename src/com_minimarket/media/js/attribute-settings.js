@@ -47,10 +47,12 @@
     // Native selects show hidden <option> entries inconsistently across browsers.
     // Rebuild from one original catalog instead of disabling invalid entries.
     const optionCatalog = new Map([
-      [mode, Array.from(mode.options, option => option.cloneNode(true))],
+      [mode, mode.options ? Array.from(mode.options, option => option.cloneNode(true)) : []],
       [filter, Array.from(filter.options, option => option.cloneNode(true))]
     ]);
     const updateOptions = (field, accepted, fallback) => {
+      // Hidden legacy storage field has no options; never reset saved mode.
+      if (!field?.options) return;
       const previous = field.value;
       const rendered = (optionCatalog.get(field) || [])
         .filter(option => accepted.includes(option.value))

@@ -46,15 +46,9 @@
             <option value="both">COM_MINIMARKET_COLOR_DISPLAY_BOTH</option>
             <option value="swatch">COM_MINIMARKET_COLOR_DISPLAY_SWATCH</option>
         </field>
-        <field name="input_mode" type="list" label="COM_MINIMARKET_INPUT_MODE"
-               description="COM_MINIMARKET_INPUT_MODE_DESC" default="auto" filter="cmd" showon="value_source:legacy">
-            <option value="auto">COM_MINIMARKET_MODE_AUTO</option>
-            <option value="number">COM_MINIMARKET_MODE_NUMBER</option>
-            <option value="presets">COM_MINIMARKET_MODE_PRESETS</option>
-            <option value="dropdown">COM_MINIMARKET_MODE_DROPDOWN</option>
-            <option value="radio">COM_MINIMARKET_MODE_RADIO</option>
-            <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
-        </field>
+        <!-- Old input mode stays in a hidden persisted field; no second
+             "Product input" dropdown or compatibility controls. -->
+        <field name="input_mode" type="hidden" default="auto" filter="cmd"/>
         <field name="text_options" type="hidden" filter="raw"/>
         <field name="text_preset_rows" type="subform"
                label="COM_MINIMARKET_TEXT_OPTIONS"
