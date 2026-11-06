@@ -39,3 +39,6 @@ E2E **пока не реализованы и не должны обознача
 
 ## 0.5.62: header quicklink
 Native administrator module: PHP render unit test (label/icon/off/ACL/XSS); simulated Joomla installer postflight fresh/upgrade/failed module install; Windows component ZIP and standalone module ZIP manifest/paths/version; both PHP versions. Настоящий Joomla 6/Atum браузерный тест НЕ выполнялся, так что установка/позиция status/навигация требуют ручной проверки после обновления.
+
+## 0.5.63 — standalone shortcut and quarter-width dashboard
+Новый PHP render/installer mock тест для standalone module, размещения перед mod_version, сохранения пользовательских параметров, отсутствия модуля в компонентном ZIP; Windows инспектирует два независимых ZIP, Joomla-native dashboard имеет 3 блока col-xl-3, залитую кнопку. Живые Joomla 6 / Atum браузерные тесты после установки всё ещё нужны.
