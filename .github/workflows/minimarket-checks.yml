@@ -82,6 +82,15 @@ jobs:
           MM_CI_DB_USER: democi
           MM_CI_DB_PASSWORD: demo_ci_password
         run: php scripts/test-demo-sql-mysql84.php
+      - name: Feed configuration MySQL 8.4 CRUD and category delta persistence
+        env:
+          MINIMARKET_DEMO_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_demo84
+          MM_CI_DB_USER: democi
+          MM_CI_DB_PASSWORD: demo_ci_password
+        run: php scripts/test-0-5-61-feeds-db.php
       - name: Full JSON v2 archive round-trip and transactional safety (MySQL 8.4)
         env:
           MINIMARKET_DEMO_CI: '1'
@@ -125,7 +134,7 @@ jobs:
             dist/minimarket_product_badges_demo_0_5_53.sql
             dist/minimarket_ui_benefit_demo_0_5_54.sql
             dist/minimarket_digital_demo_0_5_55.sql
-            dist/minimarket_mysql84_nnop3_update_0_5_60.sql
+            dist/minimarket_mysql84_nnop3_update_0_5_61.sql
           if-no-files-found: error
           retention-days: 14
 
@@ -208,6 +217,12 @@ jobs:
         run: node --check scripts/e2e/storefront.mjs
       - name: 0.5.60 component review coverage
         run: php scripts/test-0-5-60-wiring.php
+      - name: 0.5.61 feed selection, XML and native dashboard
+        run: php scripts/test-0-5-61-feeds.php
+      - name: 0.5.61 feed checkbox and category DOM
+        run: |
+          node scripts/test-0-5-61-feeds-editor.js
+          node --check src/com_minimarket/media/js/feed-editor.js
       - name: Audit each administrator task route and registered media asset
         run: php scripts/audit-component-wiring.php
 
