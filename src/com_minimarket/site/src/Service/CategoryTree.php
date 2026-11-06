@@ -91,7 +91,8 @@ final class CategoryTree
         $result = [];
         $seen = [$parentId => true];
         $queue = [$parentId];
-        foreach ($queue as $parent) {
+        for ($offset = 0; $offset < count($queue); $offset++) {
+            $parent = $queue[$offset];
             foreach ($children[$parent] ?? [] as $id) {
                 if (!isset($seen[$id])) {
                     $seen[$id] = true;
