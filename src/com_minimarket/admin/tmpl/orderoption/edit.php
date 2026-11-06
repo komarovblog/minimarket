@@ -11,7 +11,8 @@ use Joomla\CMS\Language\Text;
     <?php foreach ([
         'details' => 'COM_MINIMARKET_ORDER_OPTION_EDIT',
         'values' => 'COM_MINIMARKET_ORDER_OPTION_VALUES',
-        'categories' => 'COM_MINIMARKET_ORDER_OPTION_CATEGORIES'
+        'categories' => 'COM_MINIMARKET_ORDER_OPTION_CATEGORIES',
+        'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING'
     ] as $tab => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-orderoption', $tab, Text::_($label)); ?>
         <div class="card card-body mm-admin-panel<?php echo $tab === 'values' ? ' mm-order-option-values' : ''; ?>"><?php echo $this->form->renderFieldset($tab); ?></div>

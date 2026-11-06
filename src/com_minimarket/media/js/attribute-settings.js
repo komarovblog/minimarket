@@ -22,6 +22,7 @@
     const type = document.getElementById('jform_input_type');
     const mode = document.getElementById('jform_input_mode');
     const source = document.getElementById('jform_value_source');
+    const sourceUi = document.getElementById('jform_value_source_ui');
     const filter = document.getElementById('jform_filter_mode');
     const multi = document.getElementById('jform_is_multiple');
     const multiGroup = multi?.closest('.control-group, .mb-3');
@@ -121,6 +122,14 @@
     };
     type.addEventListener('change', refresh);
     mode.addEventListener('change', refresh);
+    sourceUi?.addEventListener('change', () => {
+      // Only deliberate user changes switch out of legacy storage.
+      if (source) {
+        source.value = sourceUi.value;
+        source.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      refresh();
+    });
     source?.addEventListener('change', refresh);
     filter.addEventListener('change', refresh);
     refresh();

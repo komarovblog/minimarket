@@ -27,6 +27,15 @@ final class AttributeModel extends AdminModel
     {
         $item = parent::getItem($pk);
         if ($item) {
+            // Keep database value IDs and product scalar rows intact.
+            // The editor only exposes Manual / Predefined selection.
+            $source = (string) ($item->value_source ?? 'manual');
+            $type = (string) ($item->input_type ?? '');
+            $mode = (string) ($item->input_mode ?? 'auto');
+            $item->value_source_ui = $source === 'legacy'
+                ? ((in_array($type, ['list','color'], true)
+                    || $mode === 'presets') ? 'preset' : 'manual')
+                : $source;
             $item->category_rules = CategoryAttributes::loadForAttribute(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
@@ -53,6 +62,7 @@ final class AttributeModel extends AdminModel
      */
     public function save($data)
     {
+        unset($data['value_source_ui']); // UI-only, never a database column.
         // The Joomla repeatable numeric values are a UI for the existing typed
         // number_options column. No new IDs or SQL tables are introduced.
         if (($data['value_source'] ?? 'legacy') === 'legacy'

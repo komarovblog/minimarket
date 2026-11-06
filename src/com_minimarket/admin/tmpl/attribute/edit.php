@@ -10,7 +10,9 @@ use Joomla\CMS\Language\Text;
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-attribute', ['active' => 'details']); ?>
     <?php foreach ([
         'details' => 'COM_MINIMARKET_ATTRIBUTE_DETAILS',
+        'filter' => 'COM_MINIMARKET_ATTRIBUTE_FILTER_TAB',
         'categories' => 'COM_MINIMARKET_ATTRCAT_TAB',
+        'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
     ] as $section => $title) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-attribute', $section, Text::_($title)); ?>
         <div class="card card-body mm-admin-panel"><?php echo $this->form->renderFieldset($section); ?></div>

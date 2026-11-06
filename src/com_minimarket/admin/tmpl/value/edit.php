@@ -15,9 +15,18 @@ $returnToAttribute = $parentAttributeId > 0
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=value&layout=edit&id=' . (int) $this->item->id); ?>"
       method="post" name="adminForm" id="adminForm" class="form-validate">
-    <div class="card card-body mm-admin-panel">
-        <?php echo $this->form->renderFieldset('details'); ?>
-    </div>
+    <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-value', ['active' => 'details']); ?>
+    <?php foreach ([
+        'details' => 'COM_MINIMARKET_VALUE_DETAILS',
+        'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
+    ] as $section => $label) : ?>
+        <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-value', $section, \Joomla\CMS\Language\Text::_($label)); ?>
+        <div class="card card-body mm-admin-panel">
+            <?php echo $this->form->renderFieldset($section); ?>
+        </div>
+        <?php echo HTMLHelper::_('uitab.endTab'); ?>
+    <?php endforeach; ?>
+    <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
     <?php if ($returnToAttribute !== '') : ?>
         <input type="hidden" name="return" value="<?php echo htmlspecialchars(
             $returnToAttribute, ENT_QUOTES, 'UTF-8'

@@ -69,10 +69,9 @@ use Joomla\CMS\Router\Route;
                 } else {
                     echo $this->form->renderField('price');
                     echo $this->form->renderField('old_price');
-                    echo $this->form->renderField('stock');
                     echo $this->form->renderField('option_stock_mode');
+                    echo $this->form->renderField('stock');
                 }
-                echo $this->form->renderField('sort_order');
                 ?>
             <?php elseif ($section === 'badges') : ?>
                 <?php

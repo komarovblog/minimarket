@@ -45,7 +45,7 @@
             <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
             <option value="grid">COM_MINIMARKET_LAYOUT_GRID</option>
         </field>
-        <field name="category_cards_mobile" type="list" label="COM_MINIMARKET_CARDS_MOBILE" default="1" filter="int" showon="category_product_layout:grid">
+        <field name="category_cards_mobile" type="list" label="COM_MINIMARKET_CARDS_MOBILE" default="1" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -53,7 +53,7 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="category_cards_tablet" type="list" label="COM_MINIMARKET_CARDS_TABLET" default="2" filter="int" showon="category_product_layout:grid">
+        <field name="category_cards_tablet" type="list" label="COM_MINIMARKET_CARDS_TABLET" default="2" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -61,7 +61,7 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="category_cards_desktop" type="list" label="COM_MINIMARKET_CARDS_DESKTOP" default="3" filter="int" showon="category_product_layout:grid">
+        <field name="category_cards_desktop" type="list" label="COM_MINIMARKET_CARDS_DESKTOP" default="3" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -69,13 +69,20 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="category_cards_wide" type="list" label="COM_MINIMARKET_CARDS_WIDE" default="4" filter="int" showon="category_product_layout:grid">
+        <field name="category_cards_wide" type="list" label="COM_MINIMARKET_CARDS_WIDE" default="4" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
             <option value="6">6</option>
+        </field>
+    </fieldset>
+    <fieldset name="inventory" label="COM_MINIMARKET_CONFIG_INVENTORY">
+        <field name="inventory_enabled" type="radio" default="1" filter="int"
+               label="COM_MINIMARKET_CONFIG_INVENTORY_ENABLED"
+               description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">
+            <option value="1">JYES</option><option value="0">JNO</option>
         </field>
     </fieldset>
     <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
