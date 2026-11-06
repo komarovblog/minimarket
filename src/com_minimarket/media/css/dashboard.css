@@ -1,53 +1,110 @@
-/* MiniMarket 0.5.65: dark Atum-compatible horizontal bands / tiles.
- * Local to this component. Joomla's sidebar, buttons and other themes remain untouched. */
+/* MiniMarket 0.5.66: compact Atum-style dashboard panels.
+ * Scoped to MiniMarket; never overrides Joomla dashboard, sidebar or other extensions. */
+.com-minimarket-dashboard .mm-dashboard-topbar,
+.com-minimarket-dashboard .mm-dashboard-grid {
+    max-width: 1120px;
+}
+.com-minimarket-dashboard .mm-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+}
 .com-minimarket-dashboard .mm-dashboard-band {
     width: 100%;
-    background: var(--template-bg-dark-80, #101821);
-    color: #edf3fb;
-    border: 1px solid rgba(215, 229, 246, .07);
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    background: #1c2a39;
+    border: 1px solid #344355;
+    border-radius: var(--bs-border-radius, .375rem);
+    color: #e9eff6;
+    box-shadow: none;
 }
-.com-minimarket-dashboard .mm-dashboard-band > .card-body { padding: 1.25rem; }
-.com-minimarket-dashboard .mm-dashboard-band > .card-body > h3 { color: #edf3fb; }
-.com-minimarket-dashboard .mm-dashboard-tiles > [class*="col-"] { min-width: 0; }
+.com-minimarket-dashboard .mm-dashboard-band-header {
+    padding: .8rem 1rem;
+    border-bottom: 1px solid #35465a;
+    background: #1b2837;
+    color: #e9eff6;
+}
+.com-minimarket-dashboard .mm-dashboard-band-header h3 {
+    color: inherit;
+    font-weight: 600;
+}
+.com-minimarket-dashboard .mm-dashboard-heading-icon {
+    color: #c0d7ed;
+    font-size: 1.1rem;
+}
+.com-minimarket-dashboard .mm-dashboard-band > .card-body {
+    padding: .8rem;
+    background: transparent;
+}
+.com-minimarket-dashboard .mm-dashboard-tiles > [class*="col-"] {
+    min-width: 0;
+}
 .com-minimarket-dashboard .mm-dashboard-tile {
-    min-height: 4.2rem;
-    padding: .85rem 1rem;
-    border: 1px solid rgba(216, 232, 249, .12);
-    border-radius: var(--bs-border-radius, .4rem);
-    background: var(--template-bg-dark-70, #1b2838);
-    color: #f0f5fb;
-    line-height: 1.35;
+    min-width: 0;
+    min-height: 4.8rem;
+    padding: .75rem .7rem;
+    border: 1px solid #35475c;
+    border-radius: var(--bs-border-radius, .375rem);
+    background: #283a4e;
+    color: #eff5fc;
+    line-height: 1.3;
     transition: border-color .15s ease, background-color .15s ease;
+}
+.com-minimarket-dashboard .mm-dashboard-tile .fw-semibold {
+    overflow-wrap: anywhere;
 }
 .com-minimarket-dashboard a.mm-dashboard-tile:hover,
 .com-minimarket-dashboard a.mm-dashboard-tile:focus-visible {
-    color: #ffffff;
-    background: var(--template-bg-dark-60, #25364a);
-    border-color: rgba(67, 175, 249, .6);
+    color: #fff;
+    background: #354d64;
+    border-color: #83b2db;
     text-decoration: none;
+}
+.com-minimarket-dashboard a.mm-dashboard-tile:focus-visible {
+    outline: 2px solid #a7cae9;
     outline-offset: 2px;
 }
-.com-minimarket-dashboard .mm-dashboard-tile > [class^="icon-"] {
-    font-size: 1.3rem;
-    flex: 0 0 auto;
-    color: #55b2ff;
+.com-minimarket-dashboard .mm-dashboard-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: 0 0 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #b8d8f1;
+    font-size: 1.35rem;
+}
+.com-minimarket-dashboard .mm-dashboard-icon--bundle {
+    overflow: visible;
 }
 .com-minimarket-dashboard .mm-dashboard-tile--pending {
-    opacity: .78;
+    opacity: .8;
     cursor: default;
 }
-.com-minimarket-dashboard .mm-dashboard-tile--pending .fw-semibold { color: #f0f5fb; }
-.com-minimarket-dashboard .mm-dashboard-tile--pending .text-muted { color: #adbccd !important; }
+.com-minimarket-dashboard .mm-dashboard-tile--pending .fw-semibold {
+    color: #eff5fc;
+}
+.com-minimarket-dashboard .mm-dashboard-tile--pending .text-muted {
+    color: #becddd !important;
+}
 .com-minimarket-dashboard .mm-dashboard-count {
     flex: 0 0 auto;
     margin-left: auto;
-    background: rgba(222, 235, 253, .11) !important;
-    color: #edf3fb !important;
-    border: 1px solid rgba(222, 235, 253, .13);
-    font-weight: 500;
-    min-width: 2rem;
+    min-width: 1.8rem;
     text-align: center;
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
+    color: #eaf2fb !important;
+    background: #374c61 !important;
+    border: 1px solid #51657a;
+}
+@media (min-width: 1200px) {
+    .com-minimarket-dashboard .mm-dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 @media (prefers-reduced-motion: reduce) {
     .com-minimarket-dashboard .mm-dashboard-tile { transition: none; }

@@ -138,12 +138,12 @@ namespace MiniMarket\DashboardCountsTest {
         'Import / Export displays dash, never zero');
     verify((bool)preg_match('/mm-dashboard-tile--pending[\\s\\S]*?—<\\/span>/u',$html),
         'Orders (not implemented) has a dash, not fake order count');
-    verify(substr_count($html,'mm-dashboard-band card mb-3')===3 &&
-        substr_count($html,'col-12 col-sm-6 col-lg-3')===12,
-        'horizontal bands and quarter-width buttons unchanged');
+    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===3 &&
+        substr_count($html,'col-12 col-sm-6 col-xl-4')===12,
+        'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
-    verify(str_contains($css,'var(--template-bg-dark-70') &&
-        str_contains($css,'var(--template-bg-dark-80') &&
+    verify(str_contains($css,'background: #283a4e') &&
+        str_contains($css,'background: #1c2a39') &&
         str_contains($css,'.mm-dashboard-count') &&
         !str_contains($css,'background: var(--bs-body-bg, #fff)'),
         'white fallback removed: dark Atum tiles and dark badges');
