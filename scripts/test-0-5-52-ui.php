@@ -8,7 +8,7 @@ function ensure(bool $ok,string $message):void {
     if(!$ok) throw new RuntimeException('MINIMARKET_052_UI_FAIL: '.$message);
 }
 $xml=simplexml_load_file($base.'minimarket.xml');
-ensure($xml!==false && (string)$xml->version==='0.5.53','version 0.5.53 plus 0.5.52 sidebar contracts');
+ensure($xml!==false && (string)$xml->version==='0.5.54','version 0.5.53 plus 0.5.52 sidebar contracts');
 $menus=$xml->xpath('//administration/submenu/menu');
 $views=[];
 foreach($menus as $menu) {
@@ -33,7 +33,7 @@ ensure(count($form->xpath("//field[@name='collection_ids' and @type='Collectionp
 ensure(count($form->xpath("//field[@name='bundle_items' and @type='Bundlepicker']"))===1,
     'bundle uses searchable SKU/product picker');
 foreach(['bundle_price_mode','bundle_discount_pct'] as $key) {
-    ensure(count($form->xpath("//fieldset[@name='bundle']/field[@name='".$key."']"))===1,
+    ensure(count($form->xpath("//fieldset[@name='bundle_pricing']/field[@name='".$key."']"))===1,
         'bundle pricing form field '.$key);
 }
 $js=(string)file_get_contents($base.'media/js/entity-picker.js');

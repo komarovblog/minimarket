@@ -436,6 +436,17 @@ try {
         Write-Output 'PACKAGE_FAIL: PRODUCT_BADGES_SQL_MISSING_OR_MISMATCH'
         exit 1
     }
+    $uiSqlName = 'minimarket_ui_benefit_demo_0_5_54.sql'
+    $uiSqlPath = Join-Path (Split-Path -Parent $ZipPath) $uiSqlName
+    $uiSqlSource = Join-Path $root ('sample-data\' + $uiSqlName)
+    if ($archive.GetEntry($uiSqlName) -ne $null -or
+        -not (Test-Path -LiteralPath $uiSqlPath -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $uiSqlSource -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $uiSqlPath -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $uiSqlSource -Algorithm SHA256).Hash) {
+        Write-Output 'PACKAGE_FAIL: MM_054_SQL_MISSING_OR_MISMATCH'
+        exit 1
+    }
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

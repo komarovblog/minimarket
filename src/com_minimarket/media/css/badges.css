@@ -9,3 +9,5 @@
 .mm-product-badge--new { background:#227749; }
 .mm-product-badge--popular { background:#865b13; }
 .mm-old-price { margin-inline:.4rem; opacity:.74; font-size:.9em; white-space:nowrap; }
+
+.mm-product-badge--benefit { background:#286391; }

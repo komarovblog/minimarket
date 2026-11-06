@@ -57,7 +57,7 @@ $labels=[
                 .((int)$row['state']===0?' <small>('.$esc(Text::_('JUNPUBLISHED')).')</small>':'')
                 .'<input type="hidden" name="'.$name.'[]" value="'.$id.'">'
                 .'<button class="btn btn-danger btn-sm" type="button" data-mm-remove aria-label="'
-                .$esc(Text::_('JREMOVE')).'">×</button></div>';
+                .$esc(Text::_('JREMOVE')).'">−</button></div>';
         }
         $out.='</div><button class="btn btn-success btn-sm" type="button" data-mm-add>+ '
             .$esc(Text::_('COM_MINIMARKET_COLLECTION_ADD')).'</button>'

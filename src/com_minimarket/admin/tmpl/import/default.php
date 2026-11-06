@@ -38,8 +38,9 @@ use Joomla\CMS\Session\Session;
             </table>
         </div>
         <p class="small text-muted mt-3 mb-0"><?php echo Text::_('COM_MINIMARKET_IMPORT_SCOPE_NOTE'); ?></p>
-    </div>
-    <form action="<?php echo Route::_('index.php?option=com_minimarket&task=import.preview'); ?>"
+        <hr class="my-3">
+        <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_IMPORT_FILE'); ?></h3>
+        <form action="<?php echo Route::_('index.php?option=com_minimarket&task=import.preview'); ?>"
           method="post" enctype="multipart/form-data" class="mb-4">
         <div class="mb-3">
             <label for="mm-import-file" class="form-label"><?php echo Text::_('COM_MINIMARKET_IMPORT_FILE'); ?></label>
@@ -50,7 +51,8 @@ use Joomla\CMS\Session\Session;
             <?php echo Text::_('COM_MINIMARKET_IMPORT_PREVIEW'); ?>
         </button>
         <?php echo HTMLHelper::_('form.token'); ?>
-    </form>
+        </form>
+    </div>
     <div class="card card-body mb-4">
         <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_EXPORT_TITLE'); ?></h2>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_EXPORT_HELP'); ?></p>

@@ -58,8 +58,19 @@ final class ProductBadges
         if($comparable && (int)($product->badge_sale??0)===1) {
             $sale=intdiv(($old-$current)*100+$old-1,$old);
         }
+        $amount=$comparable && $sale!==null
+            ? number_format(($old-$current)/100,2,'.','') : null;
+        $benefit=null;
+        if ((int)($product->badge_benefit??0)===1
+            && ($product->product_type??'simple')==='bundle'
+            && ($product->bundle_price_mode??'fixed')==='discount') {
+            $value=self::cents($product->bundle_discount_amount??null);
+            if ($value!==null && $value>0) $benefit=number_format($value/100,2,'.','');
+        }
         return [
             'sale'=>$sale,
+            'sale_amount'=>$amount,
+            'benefit_amount'=>$benefit,
             'new'=>self::timed((int)($product->badge_new??0)===1,
                 $product->badge_new_days??null,$product->badge_new_since??null,$now),
             'popular'=>self::timed((int)($product->badge_popular??0)===1,

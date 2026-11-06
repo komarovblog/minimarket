@@ -107,7 +107,9 @@ class ProductsModel extends ListModel
                 $snapshot ??= BundleStock::snapshot($this->getDatabase());
                 $item->stock=BundleStock::available((int)$item->id,$snapshot);
                 $priceSnapshot ??= BundlePrice::snapshot($this->getDatabase());
-                $item->price=BundlePrice::calculate((int)$item->id,$priceSnapshot)['price'];
+                $quote=BundlePrice::calculate((int)$item->id,$priceSnapshot);
+                $item->price=$quote['price'];
+                $item->bundle_discount_amount=$quote['discount_amount'];
             }
         }
         return $items;

@@ -23,6 +23,11 @@
             <option value="1">JYES</option>
             <option value="0">JNO</option>
         </field>
+        <field name="show_bundles" type="list" label="COM_MINIMARKET_CATEGORY_SHOW_BUNDLES" filter="int" default="-1">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
         <field name="show_products" type="list" label="COM_MINIMARKET_CATEGORY_SHOW_PRODUCTS" filter="int" default="-1">
             <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
             <option value="1">JYES</option>

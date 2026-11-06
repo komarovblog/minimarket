@@ -85,7 +85,7 @@ final class CategoryTable extends Table
             return false;
         }
         $this->sort_order = (int) $order;
-        foreach (['show_children', 'show_products'] as $field) {
+        foreach (['show_children', 'show_products', 'show_bundles'] as $field) {
             $flag = (int) ($this->$field ?? -1);
             if (!in_array($flag, [-1, 0, 1], true)) {
                 $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));

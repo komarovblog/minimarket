@@ -68,6 +68,19 @@ runMulti($db,str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $pr
 verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
     WHERE id IN (1091,1092) AND bundle_price_mode='discount'")->fetch_assoc()['n']===2,
     'existing bundles can switch to percentage pricing without data reset');
+$uiSeed=file_get_contents(__DIR__.'/../sample-data/minimarket_ui_benefit_demo_0_5_54.sql');
+verify($uiSeed!==false,'0.5.54 optional demo SQL exists');
+$uiCi=str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $uiSeed);
+runMulti($db,$uiCi,'new 0.5.54 benefit and category visibility examples');
+runMulti($db,$uiCi,'idempotent 0.5.54 UI demo');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+ WHERE id IN (1091,1092) AND product_type='bundle'
+ AND bundle_price_mode='discount' AND badge_benefit=1")->fetch_assoc()['n']===2,
+ 'two discount kits show benefit on demand');
+verify((int)$db->query("SELECT show_bundles FROM nnop3_minimarket_categories
+ WHERE id=101 AND alias='myagkie-igrushki'")->fetch_row()[0]===1,
+ 'category can show bundles independently in demo');
+
 
 verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
     WHERE product_type='bundle'")->fetch_assoc()['n']===3,'3 bundle products');

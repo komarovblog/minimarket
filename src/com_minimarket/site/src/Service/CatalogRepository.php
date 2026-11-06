@@ -32,8 +32,10 @@ final class CatalogRepository
             if (($product->product_type ?? 'simple') === 'bundle') {
                 $product->stock = BundleStock::available((int)$product->id,
                     $this->bundleSnapshot());
-                $product->price = BundlePrice::calculate((int)$product->id,
-                    $this->bundlePriceSnapshot())['price'];
+                $quote=BundlePrice::calculate((int)$product->id,
+                    $this->bundlePriceSnapshot());
+                $product->price=$quote['price'];
+                $product->bundle_discount_amount=$quote['discount_amount'];
             }
         }
         return $products;
@@ -142,6 +144,8 @@ final class CatalogRepository
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.old_price'),
                 $this->db->quoteName('p.badge_sale'),
+                $this->db->quoteName('p.badge_benefit'),
+                $this->db->quoteName('p.bundle_price_mode'),
                 $this->db->quoteName('p.badge_new'),
                 $this->db->quoteName('p.badge_new_days'),
                 $this->db->quoteName('p.badge_new_since'),
@@ -178,7 +182,7 @@ final class CatalogRepository
         }
 
         $q = $this->db->getQuery(true)
-            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description',
+            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'meta_title', 'meta_description',
                 'meta_robots', 'og_title', 'og_description', 'og_image', 'og_image_alt']))
             ->from($this->db->quoteName('#__minimarket_categories'))
             ->where($this->db->quoteName('id') . ' = ' . $id)
@@ -188,7 +192,7 @@ final class CatalogRepository
         return $this->db->loadObject() ?: null;
     }
 
-    public function getProductsForCategory(int $id): array
+    public function getProductsForCategory(int $id,bool $showProducts=true,bool $showBundles=true): array
     {
         if (!$this->categoryTree()->isVisible($id)) {
             return [];
@@ -202,6 +206,8 @@ final class CatalogRepository
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.old_price'),
                 $this->db->quoteName('p.badge_sale'),
+                $this->db->quoteName('p.badge_benefit'),
+                $this->db->quoteName('p.bundle_price_mode'),
                 $this->db->quoteName('p.badge_new'),
                 $this->db->quoteName('p.badge_new_days'),
                 $this->db->quoteName('p.badge_new_since'),
@@ -222,6 +228,10 @@ final class CatalogRepository
             ->where($this->db->quoteName('p.category_id') . ' = ' . $id)
             ->where($this->db->quoteName('p.state') . ' = 1')
             ->where($this->db->quoteName('c.state') . ' = 1')
+            ->where($showProducts && $showBundles ? '1=1' : (
+                $showProducts ? "p.product_type = 'simple'" :
+                ($showBundles ? "p.product_type = 'bundle'" : '1=0')
+            ))
             ->order($this->db->quoteName('p.id') . ' DESC');
 
         $this->db->setQuery($q);
@@ -371,6 +381,8 @@ final class CatalogRepository
                 $this->db->quoteName('p.price'),
                 $this->db->quoteName('p.old_price'),
                 $this->db->quoteName('p.badge_sale'),
+                $this->db->quoteName('p.badge_benefit'),
+                $this->db->quoteName('p.bundle_price_mode'),
                 $this->db->quoteName('p.badge_new'),
                 $this->db->quoteName('p.badge_new_days'),
                 $this->db->quoteName('p.badge_new_since'),
@@ -406,8 +418,10 @@ final class CatalogRepository
         }
         if (($product->product_type ?? 'simple') === 'bundle') {
             $product->stock=BundleStock::available((int)$product->id,$this->bundleSnapshot());
-            $product->price=BundlePrice::calculate((int)$product->id,
-                $this->bundlePriceSnapshot())['price'];
+            $quote=BundlePrice::calculate((int)$product->id,
+                $this->bundlePriceSnapshot());
+            $product->price=$quote['price'];
+            $product->bundle_discount_amount=$quote['discount_amount'];
         }
         return $product;
     }

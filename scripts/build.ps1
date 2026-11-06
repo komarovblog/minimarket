@@ -281,6 +281,15 @@ try {
         (Get-FileHash -LiteralPath $badgesSqlOutput -Algorithm SHA256).Hash) {
         throw 'PRODUCT_BADGES_SQL_HASH_MISMATCH'
     }
+    # 0.5.54 optional demo assignments; kept OUTSIDE the extension package.
+    $uiSqlSource = Join-Path $projectRoot 'sample-data\minimarket_ui_benefit_demo_0_5_54.sql'
+    $uiSqlOutput = Join-Path $zipDirectory 'minimarket_ui_benefit_demo_0_5_54.sql'
+    if (-not (Test-Path -LiteralPath $uiSqlSource -PathType Leaf)) { throw 'Missing 0.5.54 demo SQL' }
+    Copy-Item -LiteralPath $uiSqlSource -Destination $uiSqlOutput -Force
+    if ((Get-FileHash -LiteralPath $uiSqlSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $uiSqlOutput -Algorithm SHA256).Hash) {
+        throw 'MM_054_DEMO_HASH_MISMATCH'
+    }
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

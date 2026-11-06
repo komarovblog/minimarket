@@ -51,7 +51,7 @@ foreach ($beforeCategory as $col => $value) {
         'existing category column ' . $col);
 }
 verify($beforeProduct === row($pdo, 'catci_minimarket_products'), 'product unchanged on upgrade');
-foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description', 'meta_robots',
+foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'meta_title', 'meta_description', 'meta_robots',
     'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(array_key_exists($col, $after), 'new column ' . $col);
 }
@@ -856,6 +856,28 @@ verify((float)$afterSetBadges['old_price']===250.0
     && (int)$afterSetBadges['badge_sale']===1
     && (int)$afterSetBadges['badge_new_days']===7,
     '0.5.53 stores old price, toggle, timed badge and timestamp');
+// 0.5.54: category bundle visibility and optional savings flag.
+$beforeBundleVisibility=row($pdo,'catci_minimarket_categories');
+$beforeBenefits=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.54.sql','catci_');
+$afterBundleVisibility=row($pdo,'catci_minimarket_categories');
+$afterBenefits=row($pdo,'catci_minimarket_products');
+foreach($beforeBundleVisibility as $col=>$old) {
+    verify($afterBundleVisibility[$col]===$old,'0.5.54 preserves category '.$col);
+}
+foreach($beforeBenefits as $col=>$old) {
+    verify($afterBenefits[$col]===$old,'0.5.54 preserves product '.$col);
+}
+verify((int)$afterBundleVisibility['show_bundles']===-1,
+    '0.5.54 category bundle visibility inherits by default');
+verify((int)$afterBenefits['badge_benefit']===0,
+    '0.5.54 old kits do not display savings without user consent');
+$pdo->exec("UPDATE catci_minimarket_categories SET show_bundles=0 WHERE id=1");
+$pdo->exec("UPDATE catci_minimarket_products SET badge_benefit=1 WHERE id=1");
+verify((int)row($pdo,'catci_minimarket_categories')['show_bundles']===0,
+    '0.5.54 category can hide bundles independently');
+verify((int)row($pdo,'catci_minimarket_products')['badge_benefit']===1,
+    '0.5.54 kit savings flag persists');
 $pdo->exec('DROP TABLE catci_minimarket_product_collections');
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
@@ -956,7 +978,7 @@ verify(in_array('product_type',$freshProducts,true),'fresh 0.5.51 bundle type');
 verify(in_array('bundle_price_mode',$freshProducts,true) &&
     in_array('bundle_discount_pct',$freshProducts,true),
     'fresh 0.5.52 pricing columns');
-foreach(['old_price','badge_sale','badge_new','badge_new_days',
+foreach(['old_price','badge_sale','badge_benefit','badge_new','badge_new_days',
     'badge_new_since','badge_popular','badge_popular_days','badge_popular_since'] as $field) {
     verify(in_array($field,$freshProducts,true),'fresh 0.5.53 badge column '.$field);
 }

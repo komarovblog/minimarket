@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Session\Session;
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice;
 
 /**
  * Admin-only, paged search for adding members to product relationships.
@@ -64,6 +65,29 @@ final class ProductpickerController extends BaseController
         $this->respond(['items'=>$items]);
     }
 
+    /** ACL/CSRF-protected paginated single-brand selection. */
+    public function brands(): void
+    {
+        $this->ensureAllowed();
+        $term=mb_substr(trim((string)Factory::getApplication()->input->getString('q','')),0,100);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $q=$db->getQuery(true)->select(['id','title','state'])
+            ->from($db->quoteName('#__minimarket_brands'))
+            ->order('title ASC,id ASC');
+        if($term!=='') {
+            $like=$db->quote('%'.$db->escape($term,true).'%',false);
+            $q->where('(title LIKE '.$like.' OR alias LIKE '.$like.')');
+        }
+        $db->setQuery($q,0,25);
+        $items=[];
+        foreach((array)$db->loadAssocList() as $row) {
+            $id=(int)$row['id'];
+            $items[]=['id'=>$id,'key'=>(string)$id,'title'=>(string)$row['title'],
+                'state'=>(int)$row['state']];
+        }
+        $this->respond(['items'=>$items]);
+    }
+
     /** Small, paged collection search. Never load every collection in product HTML. */
     public function collections(): void
     {
@@ -99,7 +123,7 @@ final class ProductpickerController extends BaseController
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $q=$db->getQuery(true)->select([
             'p.id','p.title','p.sku','p.product_type','p.category_id','p.state',
-            'v.id AS variant_id','v.sku AS variant_sku','v.state AS variant_state'
+            'v.id AS variant_id','v.sku AS variant_sku','v.state AS variant_state', 'p.price'
         ])->from($db->quoteName('#__minimarket_products','p'))
         ->join('LEFT',$db->quoteName('#__minimarket_product_variants','v').' ON v.product_id=p.id')
         ->order('p.title ASC,p.id ASC,v.id ASC');
@@ -112,6 +136,7 @@ final class ProductpickerController extends BaseController
         }
         $db->setQuery($q,0,25);
         $items=[];
+        $priceSnapshot=BundlePrice::snapshot($db);
         foreach ((array)$db->loadAssocList() as $row) {
             $id=(int)$row['id'];
             $variant=$row['variant_id']!==null;
@@ -122,7 +147,10 @@ final class ProductpickerController extends BaseController
                 'sku'=>(string)($variant?$row['variant_sku']:$row['sku']),
                 'state'=>(int)$row['state'],
                 'variant_state'=>$variant?(int)$row['variant_state']:null,
-                'product_type'=>(string)$row['product_type']
+                'product_type'=>(string)$row['product_type'],
+                'price'=>$row['product_type']==='bundle'
+                    ? BundlePrice::calculate($id,$priceSnapshot)['price']
+                    : (string)$row['price']
             ];
         }
         $this->respond(['items'=>$items]);

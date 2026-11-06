@@ -20,7 +20,15 @@ final class BadgeHelper
         $tags=[];
         if($info['sale']!==null) {
             $tags[]='<span class="mm-product-badge mm-product-badge--sale">'
-                .self::escape(Text::sprintf('COM_MINIMARKET_BADGE_SALE_LABEL',$info['sale'])).'</span>';
+                .self::escape(Text::sprintf('COM_MINIMARKET_BADGE_SALE_LABEL',$info['sale']))
+                .' · '.self::escape((string)$info['sale_amount'])
+                .' '.self::escape(Text::_('COM_MINIMARKET_CURRENCY_SYMBOL')).'</span>';
+        }
+        if($info['benefit_amount']!==null) {
+            $tags[]='<span class="mm-product-badge mm-product-badge--benefit">'
+                .self::escape(Text::_('COM_MINIMARKET_BADGE_BENEFIT_LABEL'))
+                .' '.self::escape((string)$info['benefit_amount'])
+                .' '.self::escape(Text::_('COM_MINIMARKET_CURRENCY_SYMBOL')).'</span>';
         }
         if($info['new']) {
             $tags[]='<span class="mm-product-badge mm-product-badge--new">'

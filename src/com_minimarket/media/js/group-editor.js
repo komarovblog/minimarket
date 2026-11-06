@@ -164,8 +164,8 @@
             const isCurrent = config.mode === 'product' &&
               product.id === config.currentId;
             const key = isCurrent ? 'current' : String(product.id);
-            const add = button('+ ' + t('addProduct', 'Add'),
-              'btn-success', () => addMember(group, product));
+            const add = button('+', 'btn-success', () => addMember(group, product));
+            add.setAttribute('aria-label', t('addProduct', 'Add product') + ' ' + product.title);
             add.disabled = selected.has(key);
             row.append(caption, add);
             results.appendChild(row);
@@ -270,12 +270,12 @@
           el('small', 'text-muted', t('current', 'Current product')));
         if (member.state === 0) caption.appendChild(
           el('small', 'text-muted', t('unpublished', 'Unpublished')));
-        const remove = button(t('removeMember', 'Remove product'),
-          'btn-danger', () => update(() => {
+        const remove = button('−', 'btn-danger', () => update(() => {
             // Removing an entry only unlinks THIS product from THIS group.
             // The relationship and all other group members stay intact.
             g.members = g.members.filter(x => x !== member);
           }));
+        remove.setAttribute('aria-label',t('removeMember','Remove') + ': ' + member.title);
         remove.disabled = Boolean(g.delete);
         item.append(caption, remove);
         members.appendChild(item);
@@ -359,8 +359,7 @@
         for (const group of matches) {
           const row = el('div', 'mm-group-finder__result');
           const title = el('span', '', group.title + ' (#' + group.id + ')');
-          const add = button('+ ' + t('addGroup', 'Add relationship'),
-            'btn-success', async () => {
+          const add = button('+', 'btn-success', async () => {
               add.disabled = true;
               try {
                 const found = await api(config.groupUrl, { id: group.id });

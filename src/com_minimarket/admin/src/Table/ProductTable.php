@@ -79,7 +79,7 @@ final class ProductTable extends Table
             $this->old_price=$oldPrice;
         }
 
-        foreach(['badge_sale','badge_new','badge_popular'] as $flag) {
+        foreach(['badge_sale','badge_new','badge_popular','badge_benefit'] as $flag) {
             $value=(string)($this->$flag??0);
             if(!in_array($value,['0','1'],true)) {
                 $this->setError(Text::_('COM_MINIMARKET_BADGE_INVALID'));
@@ -98,6 +98,11 @@ final class ProductTable extends Table
             } else {
                 $this->$duration=(int)$days;
             }
+        }
+        if($this->badge_benefit===1
+            && ($this->product_type!=='bundle'||$this->bundle_price_mode!=='discount')) {
+            $this->setError(Text::_('COM_MINIMARKET_BADGE_BENEFIT_INVALID'));
+            return false;
         }
         // Dynamic bundle prices may change when components are edited;
         // storefront recomputes comparison against the derived price.

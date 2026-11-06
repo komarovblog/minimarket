@@ -107,8 +107,11 @@ final class ProductattributesField extends FormField
                         . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NO_VALUES'))
                         . '</p>';
                 }
-                $html .= '<p class="small"><a href="' . AdminEntityLinks::edit('attribute', $id) . '">' . $escape(Text::_('COM_MINIMARKET_EDIT_VALUES')) . '</a></p>';
             }
+            // Every attribute type has the SAME direct edit link. Values and
+            // presets belong to the attribute editor, never to the product.
+            $html .= '<p class="small"><a href="' . AdminEntityLinks::edit('attribute', $id) . '">'
+                . $escape(Text::_('COM_MINIMARKET_EDIT_ATTRIBUTE')) . '</a></p>';
             $html .= '<div class="text-warning small' . ($isApplicable ? ' d-none' : '')
                 . '" data-mm-attribute-incompatible>'
                 . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . '</div>';

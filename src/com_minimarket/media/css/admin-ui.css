@@ -734,3 +734,16 @@
 #adminForm .mm-entity-picker__search select { flex:1 1 12rem; min-width:0; max-width:22rem; }
 #adminForm .mm-entity-picker__result > span { flex:1 1 12rem; overflow-wrap:anywhere; }
 #adminForm .mm-entity-picker [data-mm-message] { color:var(--danger,#c33); }
+
+/* Consistent product/bundle assignment controls: text actions, +/- list rows. */
+#adminForm .mm-unavailable-setting { opacity:.7; }
+#adminForm .mm-unavailable-setting .control-label { opacity:.85; }
+#adminForm .mm-bundle-totals {
+    display:grid; grid-template-columns:minmax(8rem,1fr) auto;
+    gap:.5rem 1rem; margin-top:1rem; padding:1rem;
+    border-top:1px solid var(--border-color,rgba(128,128,128,.3));
+}
+#adminForm .mm-bundle-unit-price { color:var(--text-muted,#aab); white-space:nowrap; }
+#adminForm .mm-bundle-line-total { font-variant-numeric:tabular-nums; }
+#adminForm .mm-bundle-pricing-controls { border-top:1px solid var(--border-color,rgba(128,128,128,.3)); margin-top:1rem; padding-top:1rem; }
+.mm-product-badge--benefit { background:#286391; }

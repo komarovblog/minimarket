@@ -255,7 +255,7 @@ final class ProductModel extends AdminModel
         // Since timestamps are controlled by the server. Ignore any submitted
         // badge_*_since to prevent arbitrary extensions of promotion lifetime.
         unset($data['badge_new_since'],$data['badge_popular_since']);
-        foreach (['badge_sale','badge_new','badge_popular'] as $flag) {
+        foreach (['badge_sale','badge_new','badge_popular','badge_benefit'] as $flag) {
             $data[$flag]=isset($data[$flag]) && (string)$data[$flag]==='1' ? 1 : 0;
         }
         $db->transactionStart();

@@ -28,7 +28,7 @@ namespace MiniMarket\BrandsCollectionsSmoke {
         'collection search editor replaces full-page native checkbox list');
     $productForm=simplexml_load_file($root.'admin/forms/product.xml');
     check($productForm!==false,'product form valid XML');
-    check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="brand_id" and @type="Brandlist"]'))===1,
+    check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="brand_id" and @type="Brandpicker"]'))===1,
         'one brand on product');
     check(count($productForm->xpath('//fieldset[@name="merchandising"]/field[@name="collection_ids" and @type="Collectionpicker"]'))===1,
         'searchable collection membership editor');

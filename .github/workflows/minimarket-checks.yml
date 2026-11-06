@@ -114,6 +114,7 @@ jobs:
             dist/minimarket_bundles_demo_0_5_51.sql
             dist/minimarket_bundle_prices_demo_0_5_52.sql
             dist/minimarket_product_badges_demo_0_5_53.sql
+            dist/minimarket_ui_benefit_demo_0_5_54.sql
           if-no-files-found: error
           retention-days: 14
 
@@ -171,6 +172,9 @@ jobs:
 
       - name: Native admin menus, AJAX pickers and bundle pricing UI
         run: php scripts/test-0-5-52-ui.php
+
+      - name: 0.5.54 kit visibility, brands, benefits, unified editors and import layout
+        run: php scripts/test-0-5-54-ui.php
 
       - name: Product badge rounding, expiry, schema and bilingual storefront
         run: php scripts/test-product-badges.php

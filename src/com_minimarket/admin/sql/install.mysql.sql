@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `price` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `old_price` DECIMAL(15,2) NULL DEFAULT NULL,
     `badge_sale` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `badge_benefit` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `badge_new` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `badge_new_days` INT UNSIGNED NULL DEFAULT NULL,
     `badge_new_since` DATETIME NULL DEFAULT NULL,

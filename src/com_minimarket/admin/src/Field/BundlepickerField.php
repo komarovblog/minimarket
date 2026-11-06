@@ -7,6 +7,7 @@ use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Session\Session;
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice;
 
 /** Searchable bundle component/SKU rows with quantity controls. */
 final class BundlepickerField extends FormField
@@ -25,22 +26,27 @@ final class BundlepickerField extends FormField
             if(preg_match('/^variant:([1-9]\d*)$/D',$choice,$m))$variantIds[(int)$m[1]]=true;
         }
         $meta=[];
+        $prices=BundlePrice::snapshot($db);
         if($variantIds) {
-            $q=$db->getQuery(true)->select(['v.id','v.product_id','v.sku','p.title','p.state'])
+            $q=$db->getQuery(true)->select(['v.id','v.product_id','v.sku','p.title','p.state','p.price'])
                 ->from($db->quoteName('#__minimarket_product_variants','v'))
                 ->join('INNER',$db->quoteName('#__minimarket_products','p').' ON p.id=v.product_id')
                 ->where('v.id IN ('.implode(',',array_keys($variantIds)).')');
             $db->setQuery($q);
             foreach((array)$db->loadAssocList() as $r) $meta['variant:'.$r['id']]=[
-                'title'=>$r['title'],'sku'=>$r['sku'],'product'=>(int)$r['product_id'],'state'=>(int)$r['state']];
+                'title'=>$r['title'],'sku'=>$r['sku'],'product'=>(int)$r['product_id'],
+                'price'=>(string)$r['price'],'state'=>(int)$r['state']];
         }
         if($productIds) {
-            $q=$db->getQuery(true)->select(['id','title','sku','state'])
+            $q=$db->getQuery(true)->select(['id','title','sku','state','price','product_type'])
                 ->from($db->quoteName('#__minimarket_products'))
                 ->where('id IN ('.implode(',',array_keys($productIds)).')');
             $db->setQuery($q);
             foreach((array)$db->loadAssocList() as $r) $meta['product:'.$r['id']]=[
-                'title'=>$r['title'],'sku'=>$r['sku'],'product'=>(int)$r['id'],'state'=>(int)$r['state']];
+                'title'=>$r['title'],'sku'=>$r['sku'],'product'=>(int)$r['id'],
+                'price'=>$r['product_type']==='bundle'
+                    ? BundlePrice::calculate((int)$r['id'],$prices)['price']
+                    : (string)$r['price'],'state'=>(int)$r['state']];
         }
         $q=$db->getQuery(true)->select(['id','title'])
             ->from($db->quoteName('#__minimarket_categories'))->order('title ASC,id ASC');
@@ -71,16 +77,20 @@ $labels=[
             $key=(string)($row['component']??'');
             if(!preg_match('/^(product|variant):[1-9]\d*$/D',$key) || !isset($meta[$key]))continue;
             $data=$meta[$key];$index='row'.$seq++;
-            $out.='<div class="mm-entity-picker__row" data-mm-key="'.$esc($key).'">'
+            $out.='<div class="mm-entity-picker__row" data-mm-key="'.$esc($key).'"'
+                .' data-mm-unit-price="'.$esc($data['price']).'">'
                 .'<a href="index.php?option=com_minimarket&amp;task=product.edit&amp;id='.(int)$data['product'].'">'
                 .$esc($data['title']).'</a>'
                 .'<small>'.$esc($data['sku']).'</small>'
+                .'<span class="mm-bundle-unit-price">'.$esc(Text::_('COM_MINIMARKET_BUNDLE_UNIT_PRICE'))
+                .': '.$esc($data['price']).'</span>'
                 .'<input type="hidden" name="'.$name.'['.$index.'][component]" value="'.$esc($key).'">'
                 .'<label>'.$esc(Text::_('COM_MINIMARKET_BUNDLE_QUANTITY'))
                 .'<input type="number" class="form-control form-control-sm" min="1" max="1000" step="1" required'
                 .' name="'.$name.'['.$index.'][quantity]" value="'.max(1,(int)($row['quantity']??1)).'"></label>'
                 .'<button class="btn btn-danger btn-sm" type="button" data-mm-remove aria-label="'
-                .$esc(Text::_('JREMOVE')).'">×</button></div>';
+                .$esc(Text::_('JREMOVE')).'">−</button>'
+                .'<strong class="mm-bundle-line-total" data-mm-line-total></strong></div>';
         }
         $out.='</div><button class="btn btn-success btn-sm" type="button" data-mm-add>+ '
             .$esc(Text::_('COM_MINIMARKET_BUNDLE_ADD_PRODUCT')).'</button>'

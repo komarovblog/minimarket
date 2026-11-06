@@ -40,9 +40,14 @@ final class HtmlView extends BaseHtmlView
         $products = (int) ($category->show_products ?? -1);
         $this->children = ($children === 1 || ($children === -1 && (int) $options->get('category_show_children', 1) === 1))
             ? $repo->getChildCategories($id) : [];
-        $this->displayProducts = ($products === 1
-            || ($products === -1 && (int) $options->get('category_show_products', 1) === 1));
-        $this->products = $this->displayProducts ? $repo->getProductsForCategory($id) : [];
+        $showSimple = ($products === 1
+            || ($products === -1 && (int)$options->get('category_show_products', 1) === 1));
+        $bundleSetting = (int)($category->show_bundles ?? -1);
+        $showBundles = $bundleSetting === 1
+            || ($bundleSetting === -1 && (int)$options->get('category_show_bundles', 1) === 1);
+        $this->displayProducts = $showSimple || $showBundles;
+        $this->products = $this->displayProducts
+            ? $repo->getProductsForCategory($id,$showSimple,$showBundles) : [];
         $document = $this->getDocument();
         $metaTitle = trim((string) ($category->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $category->title);
