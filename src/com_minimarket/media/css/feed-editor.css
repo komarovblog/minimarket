@@ -6,5 +6,8 @@
 .mm-feed-product .form-check-label { overflow-wrap: anywhere; }
 .mm-dashboard-cards .card { height: 100%; }
 .mm-dashboard-cards .card-body { display: flex; flex-direction: column; }
-.mm-dashboard-cards .card .btn { margin-top: auto; align-self: flex-start; }
-.mm-dashboard-stat { font-size: 1.75rem; font-weight: 700; }
+.mm-dashboard-cards .card-body { padding: 1.1rem; }
+.mm-dashboard-cards .list-group-item { padding-inline: 0; }
+.mm-dashboard-cards .list-group-item:first-child { border-top: 0; }
+.mm-dashboard-cards .list-group-item:last-child { border-bottom: 0; }
+.mm-dashboard-cards .badge { font-weight: 500; }

@@ -136,9 +136,12 @@ checkUi(str_contains($categoryRules,"AdminEntityLinks::edit('attribute',") &&
     'entity links open the actual Joomla edit task instead of the dashboard');
 $dashboard=file_get_contents($base.'admin/tmpl/dashboard/default.php');
 checkUi(str_contains($dashboard,'mm-dashboard-cards') &&
-    str_contains($dashboard,'mm-dashboard-stat') &&
-    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_ORDERS_PENDING'),
-    'dashboard shows native Bootstrap widgets and honest unfinished-orders placeholder');
+    str_contains($dashboard,'col-12 col-md-6 col-xl-3') &&
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_SHOP') &&
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_TOOLS') &&
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_ORDERS_PENDING') &&
+    str_contains($dashboard,'btn btn-primary d-inline-flex'),
+    'dashboard has native quarter-width Orders / Store / Tools and a solid storefront button');
 checkUi(str_contains($editor,'sku_matrix_payload') &&
     str_contains($cssFrame,'.mm-sku-viewport') &&
     str_contains($cssFrame,'[data-mm-pinned="sku"]'),
