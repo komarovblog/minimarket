@@ -6,9 +6,9 @@ use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 
 /**
- * Three native-sized Atum dashboard panels, with adaptive action tiles.
+ * Three full-width stacked Atum dashboard sections; each uses a responsive
+ * tile grid. The native #wrapper.closed class switches 4 to 6 desktop tiles.
  * No vertical section menus and no fake Orders navigation.
- * Styles are scoped and use Joomla Bootstrap 5.
  */
 $sections = [
     [
@@ -72,9 +72,8 @@ $sections = [
         </a>
     </div>
 
-    <div class="mm-dashboard-grid">
     <?php foreach ($sections as $section) : ?>
-        <section class="mm-dashboard-band card mm-dashboard-band--<?php echo htmlspecialchars($section['type'], ENT_QUOTES, 'UTF-8'); ?>">
+        <section class="mm-dashboard-band card mm-dashboard-band--<?php echo htmlspecialchars($section['type'], ENT_QUOTES, 'UTF-8'); ?> mb-3">
             <div class="card-header mm-dashboard-band-header">
                 <h3 class="h6 d-flex align-items-center gap-2 mb-0">
                     <span class="<?php echo htmlspecialchars($section['icon'], ENT_QUOTES, 'UTF-8'); ?> mm-dashboard-heading-icon" aria-hidden="true"></span>
@@ -82,32 +81,32 @@ $sections = [
                 </h3>
             </div>
             <div class="card-body">
-                <div class="row g-2 mm-dashboard-tiles">
+                <div class="mm-dashboard-tiles">
                     <?php foreach ($section['items'] as $item) : ?>
-                        <div class="col-12 col-sm-6 col-xl-4">
-                            <?php if (!empty($item['pending'])) : ?>
-                                <div class="mm-dashboard-tile mm-dashboard-tile--pending d-flex align-items-center gap-3 h-100"
-                                     aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php if (!empty($item['pending'])) : ?>
+                            <div class="mm-dashboard-tile mm-dashboard-tile--pending"
+                                 aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
+                                <div class="mm-dashboard-tile-top">
                                     <span class="<?php echo htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8'); ?> mm-dashboard-icon" aria-hidden="true"></span>
-                                    <div class="flex-grow-1">
-                                        <div class="fw-semibold"><?php echo Text::_($item['label']); ?></div>
-                                        <small class="text-muted"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_COMING_SOON'); ?></small>
-                                    </div>
-                                    <span class="badge mm-dashboard-count" aria-label="<?php echo htmlspecialchars(Text::_('COM_MINIMARKET_DASHBOARD_NO_COUNT'), ENT_QUOTES, 'UTF-8'); ?>">—</span>
+                                    <span class="badge mm-dashboard-count"
+                                          aria-label="<?php echo htmlspecialchars(Text::_('COM_MINIMARKET_DASHBOARD_NO_COUNT'), ENT_QUOTES, 'UTF-8'); ?>">—</span>
                                 </div>
-                            <?php else : ?>
-                                <a class="mm-dashboard-tile d-flex align-items-center gap-3 h-100 text-decoration-none"
-                                   href="<?php echo AdminEntityLinks::view($item['view']); ?>">
+                                <span class="mm-dashboard-tile-title"><?php echo Text::_($item['label']); ?></span>
+                                <small class="mm-dashboard-tile-note"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_COMING_SOON'); ?></small>
+                            </div>
+                        <?php else : ?>
+                            <a class="mm-dashboard-tile text-decoration-none"
+                               href="<?php echo AdminEntityLinks::view($item['view']); ?>">
+                                <div class="mm-dashboard-tile-top">
                                     <?php if ($item['view'] === 'bundles') : ?>
                                         <svg class="mm-dashboard-icon mm-dashboard-icon--bundle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                                             <path d="M12 2 17 5 12 8 7 5 12 2ZM7 5v6l5 3 5-3V5M12 8v6"/>
                                             <path d="m6 12 5 3-5 3-5-3 5-3ZM1 15v5l5 3 5-3v-5M6 18v5"/>
-                                            <path d="m18 12 5 3-5 3-5-3 5-3ZM13 15v5l5 3 5-3v-5M18 18v5"/>
+                                            <path d="m18 12 5 3-5 3 5-3-5-3ZM13 15v5l5 3 5-3v-5M18 18v5"/>
                                         </svg>
                                     <?php else : ?>
                                         <span class="<?php echo htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8'); ?> mm-dashboard-icon" aria-hidden="true"></span>
                                     <?php endif; ?>
-                                    <span class="flex-grow-1 fw-semibold"><?php echo Text::_($item['label']); ?></span>
                                     <span class="badge mm-dashboard-count"
                                           data-mm-stat="<?php echo htmlspecialchars((string)($item['count'] ?? 'none'), ENT_QUOTES, 'UTF-8'); ?>"
                                           aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
@@ -117,13 +116,13 @@ $sections = [
                                             <?php echo (int) ($this->stats[$item['count']] ?? 0); ?>
                                         <?php endif; ?>
                                     </span>
-                                </a>
-                            <?php endif; ?>
-                        </div>
+                                </div>
+                                <span class="mm-dashboard-tile-title"><?php echo Text::_($item['label']); ?></span>
+                            </a>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
             </div>
         </section>
     <?php endforeach; ?>
-    </div>
 </div>

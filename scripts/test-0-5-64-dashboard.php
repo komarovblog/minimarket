@@ -44,8 +44,8 @@ namespace MiniMarket\DashboardTest {
     $html=(new View())->output();
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===3,
         'exactly three independent native dashboard panels');
-    verify(substr_count($html,'col-12 col-sm-6 col-xl-4')===12,
-        'one Orders, nine Store and two Tools native three-column buttons');
+    verify(substr_count($html,'class="mm-dashboard-tile')===12,
+        'one Orders, nine Store and two Tools tiles');
     verify(substr_count($html,'mm-dashboard-tiles')===3,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
@@ -70,9 +70,10 @@ namespace MiniMarket\DashboardTest {
         preg_match('/>\\s*5\\s*<\\/span>/', $html)===1 &&
         preg_match('/>\\s*3\\s*<\\/span>/', $html)===1,
         'live category/product/bundle/feed counters render alongside buttons');
-    verify(str_contains($html,'mm-dashboard-grid') &&
-        str_contains($html,'mm-dashboard-band-header'),
-        'Joomla dashboard-like panel headers and constrained grid rendered');
+    verify(str_contains($html,'mm-dashboard-band-header') &&
+        str_contains($html,'mm-dashboard-tile-top') &&
+        !str_contains($html,'mm-dashboard-grid'),
+        'three stacked full-width Joomla panels with icon above labels');
     verify(str_contains($html,'btn btn-primary d-inline-flex') &&
         str_contains($html,'https://example.local/index.php?option=com_minimarket&amp;view=catalog'),
         'Storefront button is solid and still points to public catalog');
@@ -87,7 +88,7 @@ namespace MiniMarket\DashboardTest {
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
     verify(str_contains($css,'.mm-dashboard-band > .card-body') &&
        str_contains($css,'.mm-dashboard-tile') &&
-       str_contains($css,'max-width: 1120px'),
+       str_contains($css,'max-width: none'),
        'responsive tiled layout has scoped Atum-aware styles');
     echo "MM064_DASHBOARD_RENDER_PASS: $checks assertions\n";
 }

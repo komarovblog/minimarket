@@ -1,111 +1,144 @@
-/* MiniMarket 0.5.66: compact Atum-style dashboard panels.
- * Scoped to MiniMarket; never overrides Joomla dashboard, sidebar or other extensions. */
+/* MiniMarket 0.5.67 — Joomla/Atum-style full-width stacked dashboard.
+ * The Joomla #wrapper.closed class is the source of truth for sidebar state.
+ * All rules are scoped to the component; Joomla core and other pages untouched. */
+.com-minimarket-dashboard,
 .com-minimarket-dashboard .mm-dashboard-topbar,
-.com-minimarket-dashboard .mm-dashboard-grid {
-    max-width: 1120px;
-}
-.com-minimarket-dashboard .mm-dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-    gap: 1rem;
-}
 .com-minimarket-dashboard .mm-dashboard-band {
     width: 100%;
+    max-width: none;
     min-width: 0;
-    margin: 0;
+}
+.com-minimarket-dashboard .mm-dashboard-band {
+    display: block;
+    margin: 0 0 1rem;
     overflow: hidden;
-    background: #1c2a39;
-    border: 1px solid #344355;
+    background: #151c24;
+    border: 1px solid #343e49;
     border-radius: var(--bs-border-radius, .375rem);
-    color: #e9eff6;
     box-shadow: none;
+    color: #eaf0f5;
 }
 .com-minimarket-dashboard .mm-dashboard-band-header {
-    padding: .8rem 1rem;
-    border-bottom: 1px solid #35465a;
-    background: #1b2837;
-    color: #e9eff6;
+    padding: .72rem 1rem;
+    background: #151c24;
+    border-bottom: 1px solid #343e49;
+    color: #eaf0f5;
 }
 .com-minimarket-dashboard .mm-dashboard-band-header h3 {
     color: inherit;
     font-weight: 600;
+    font-size: .875rem;
 }
 .com-minimarket-dashboard .mm-dashboard-heading-icon {
-    color: #c0d7ed;
-    font-size: 1.1rem;
+    color: #e2e9f1;
+    font-size: 1rem;
 }
 .com-minimarket-dashboard .mm-dashboard-band > .card-body {
-    padding: .8rem;
+    padding: .75rem;
     background: transparent;
 }
-.com-minimarket-dashboard .mm-dashboard-tiles > [class*="col-"] {
+.com-minimarket-dashboard .mm-dashboard-tiles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .7rem;
+    width: 100%;
     min-width: 0;
 }
 .com-minimarket-dashboard .mm-dashboard-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     min-width: 0;
-    min-height: 4.8rem;
-    padding: .75rem .7rem;
-    border: 1px solid #35475c;
+    min-height: 6.3rem;
+    padding: .8rem .85rem;
+    background: #272e36;
+    border: 1px solid #343d47;
     border-radius: var(--bs-border-radius, .375rem);
-    background: #283a4e;
-    color: #eff5fc;
-    line-height: 1.3;
-    transition: border-color .15s ease, background-color .15s ease;
-}
-.com-minimarket-dashboard .mm-dashboard-tile .fw-semibold {
-    overflow-wrap: anywhere;
+    color: #eff3f7;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: background-color .15s ease, border-color .15s ease;
 }
 .com-minimarket-dashboard a.mm-dashboard-tile:hover,
 .com-minimarket-dashboard a.mm-dashboard-tile:focus-visible {
     color: #fff;
-    background: #354d64;
-    border-color: #83b2db;
+    background: #303944;
+    border-color: #647487;
     text-decoration: none;
 }
 .com-minimarket-dashboard a.mm-dashboard-tile:focus-visible {
-    outline: 2px solid #a7cae9;
+    outline: 2px solid #8dbfe8;
     outline-offset: 2px;
 }
+.com-minimarket-dashboard .mm-dashboard-tile-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-bottom: .65rem;
+}
 .com-minimarket-dashboard .mm-dashboard-icon {
-    width: 1.4rem;
-    height: 1.4rem;
-    flex: 0 0 1.4rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #b8d8f1;
-    font-size: 1.35rem;
+    flex: 0 0 1.55rem;
+    width: 1.55rem;
+    height: 1.55rem;
+    font-size: 1.45rem;
+    color: #e7edf4;
 }
 .com-minimarket-dashboard .mm-dashboard-icon--bundle {
     overflow: visible;
 }
+.com-minimarket-dashboard .mm-dashboard-tile-title {
+    display: block;
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+    word-break: normal;
+    color: inherit;
+}
+.com-minimarket-dashboard .mm-dashboard-tile-note {
+    display: block;
+    margin-top: .22rem;
+    color: #bac4cf;
+    font-size: .8rem;
+}
 .com-minimarket-dashboard .mm-dashboard-tile--pending {
-    opacity: .8;
+    opacity: .83;
     cursor: default;
-}
-.com-minimarket-dashboard .mm-dashboard-tile--pending .fw-semibold {
-    color: #eff5fc;
-}
-.com-minimarket-dashboard .mm-dashboard-tile--pending .text-muted {
-    color: #becddd !important;
 }
 .com-minimarket-dashboard .mm-dashboard-count {
     flex: 0 0 auto;
-    margin-left: auto;
-    min-width: 1.8rem;
-    text-align: center;
+    min-width: 1.7rem;
+    padding: .18rem .36rem;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
-    color: #eaf2fb !important;
-    background: #374c61 !important;
-    border: 1px solid #51657a;
+    text-align: center;
+    background: #353e49 !important;
+    border: 1px solid #525f6e;
+    color: #f1f5fa !important;
 }
-@media (min-width: 1200px) {
-    .com-minimarket-dashboard .mm-dashboard-grid {
+/* Narrow screens: 1 tile per row. */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    .com-minimarket-dashboard .mm-dashboard-tiles {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+/* Desktop: exactly four columns with Joomla's sidebar expanded. */
+@media (min-width: 1200px) {
+    .com-minimarket-dashboard .mm-dashboard-tiles {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    /* Atum adds/removes #wrapper.closed when the left menu is collapsed.
+     * No JavaScript or body-wide layout overrides are required. */
+    #wrapper.closed .com-minimarket-dashboard .mm-dashboard-tiles {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
 @media (prefers-reduced-motion: reduce) {
-    .com-minimarket-dashboard .mm-dashboard-tile { transition: none; }
+    .com-minimarket-dashboard .mm-dashboard-tile {
+        transition: none;
+    }
 }
