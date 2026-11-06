@@ -84,7 +84,7 @@ namespace MiniMarket\DashboardTest {
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
     verify(str_contains($css,'.mm-dashboard-band > .card-body') &&
        str_contains($css,'.mm-dashboard-tile') &&
-       str_contains($css,'--bs-primary'),
+       str_contains($css,'--template-bg-dark-70'),
        'responsive tiled layout has scoped Atum-aware styles');
     echo "MM064_DASHBOARD_RENDER_PASS: $checks assertions\n";
 }
