@@ -42,3 +42,10 @@ Native administrator module: PHP render unit test (label/icon/off/ACL/XSS); simu
 
 ## 0.5.63 — standalone shortcut and quarter-width dashboard
 Новый PHP render/installer mock тест для standalone module, размещения перед mod_version, сохранения пользовательских параметров, отсутствия модуля в компонентном ZIP; Windows инспектирует два независимых ZIP, Joomla-native dashboard имеет 3 блока col-xl-3, залитую кнопку. Живые Joomla 6 / Atum браузерные тесты после установки всё ещё нужны.
+
+## 0.5.64: контракты дашборда и безопасная очистка старой кнопки
+
+- Реальный PHP шаблон главной рендерится с Joomla-моками: три полноширинные секции и 12 плиток, ширина `col-lg-3`, отсутствие прежнего вертикального меню, доступные маршруты, значки, залитая кнопка каталога.
+- Устаревший `mod_minimarket_quicklink` удаляется только Joomla Installer и только по точному `type=module, element=mod_minimarket_quicklink, client_id=1`; другие административные модули и новая `mod_minimarket_toolbar` не затрагиваются. Unit/mock тест отдельно проверяет повторный запуск и нефатальную ошибку удаления.
+- Независимый `mod_minimarket_toolbar` тестируется как Joomla 6 admin module с параметрами, ACL, XHTML-escaping и порядком перед `mod_version`. Компонентный ZIP не содержит кода модуля, самостоятельный ZIP проверяется Windows инспектором.
+- Живая установка в локальной Joomla/Atum — **NOT_RUN**, требуется после ZIP установки.
