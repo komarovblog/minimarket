@@ -16,6 +16,21 @@ namespace Joomla\CMS {
         {
             return self::$application;
         }
+
+        public static function getContainer(): object
+        {
+            return new class {
+                public function get(string $service): object
+                {
+                    return new class {
+                        private string $sql = '';
+                        public function quoteName(string $name): string { return '`'.$name.'`'; }
+                        public function setQuery(string $sql): void { $this->sql = $sql; }
+                        public function loadResult(): int { return 0; }
+                    };
+                }
+            };
+        }
     }
 }
 
