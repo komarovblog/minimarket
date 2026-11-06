@@ -22,7 +22,7 @@ namespace Joomla\CMS\Toolbar {
 }
 namespace Joomla\CMS\MVC\View {
     class HtmlView {
-        public function display($tpl=null):void {}
+        public function display($tpl=null) {}
     }
 }
 namespace MiniMarket\Component\Minimarket\Administrator\Service {
