@@ -144,7 +144,7 @@ try {
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
     Copy-Item -LiteralPath $manifestPath -Destination $stage
     Copy-Item -LiteralPath (Join-Path $componentRoot 'script.php') -Destination $stage
-    if (Test-Path -LiteralPath (Join-Path $stage 'admin\modules\mod_minimarket_quicklink')) {
+    if (Test-Path -LiteralPath (Join-Path $stage 'admin\modules\mod_minimarket_toolbar')) {
         throw 'QUICKLINK_MUST_NOT_BE_BUNDLED'
     }
     foreach ($folder in @('admin', 'site', 'media')) {
@@ -326,31 +326,31 @@ try {
     # Independently installable administrator module ZIP is shipped beside the
     # component as a recovery path. The component ZIP already contains these
     # files and attempts to install the module on update/install.
-    $moduleRoot = Join-Path $projectRoot 'src\mod_minimarket_quicklink'
+    $moduleRoot = Join-Path $projectRoot 'src\mod_minimarket_toolbar'
     foreach ($moduleRel in @(
-        'mod_minimarket_quicklink.xml',
-        'mod_minimarket_quicklink.php',
+        'mod_minimarket_toolbar.xml',
+        'mod_minimarket_toolbar.php',
         'script.php',
         'tmpl\default.php',
-        'language\en-GB\mod_minimarket_quicklink.ini',
-        'language\en-GB\mod_minimarket_quicklink.sys.ini',
-        'language\ru-RU\mod_minimarket_quicklink.ini',
-        'language\ru-RU\mod_minimarket_quicklink.sys.ini'
+        'language\en-GB\mod_minimarket_toolbar.ini',
+        'language\en-GB\mod_minimarket_toolbar.sys.ini',
+        'language\ru-RU\mod_minimarket_toolbar.ini',
+        'language\ru-RU\mod_minimarket_toolbar.sys.ini'
     )) {
         if (-not (Test-Path -LiteralPath (Join-Path $moduleRoot $moduleRel) -PathType Leaf)) {
             throw "QUICKLINK_MODULE_SOURCE_MISSING: $moduleRel"
         }
     }
-    $moduleXmlPath = Join-Path $moduleRoot 'mod_minimarket_quicklink.xml'
+    $moduleXmlPath = Join-Path $moduleRoot 'mod_minimarket_toolbar.xml'
     [xml]$moduleXml = Get-Content -LiteralPath $moduleXmlPath -Raw -Encoding UTF8
     if ($moduleXml.extension.type -ne 'module' -or
         $moduleXml.extension.client -ne 'administrator' -or
         [string]$moduleXml.extension.version -ne $version) {
         throw 'QUICKLINK_MODULE_MANIFEST_INVALID'
     }
-    $moduleZipPath = Join-Path $zipDirectory ("mod_minimarket_quicklink-$version.zip")
+    $moduleZipPath = Join-Path $zipDirectory ("mod_minimarket_toolbar-$version.zip")
     $moduleTempZip = Join-Path $zipDirectory (
-        "minimarket-quicklink-building-" + [guid]::NewGuid().ToString('N') + '.zip')
+        "minimarket-toolbar-building-" + [guid]::NewGuid().ToString('N') + '.zip')
     try {
         $moduleWriter = [System.IO.Compression.ZipFile]::Open(
             $moduleTempZip, [System.IO.Compression.ZipArchiveMode]::Create)

@@ -468,7 +468,7 @@ try {
     }
     # Validate the standalone fallback module installer ZIP, in addition to
     # the module sources embedded into the component installer.
-    $moduleZipName = 'mod_minimarket_quicklink-' + $expectedVersion + '.zip'
+    $moduleZipName = 'mod_minimarket_toolbar-' + $expectedVersion + '.zip'
     $moduleZipPath = Join-Path (Split-Path -Parent $ZipPath) $moduleZipName
     if (-not (Test-Path -LiteralPath $moduleZipPath -PathType Leaf)) {
         Write-Output 'PACKAGE_FAIL: QUICKLINK_STANDALONE_ZIP_MISSING'
@@ -485,14 +485,14 @@ try {
             exit 1
         }
         foreach ($required in @(
-            'mod_minimarket_quicklink.xml',
-            'mod_minimarket_quicklink.php',
+            'mod_minimarket_toolbar.xml',
+            'mod_minimarket_toolbar.php',
             'script.php',
             'tmpl/default.php',
-            'language/en-GB/mod_minimarket_quicklink.ini',
-            'language/en-GB/mod_minimarket_quicklink.sys.ini',
-            'language/ru-RU/mod_minimarket_quicklink.ini',
-            'language/ru-RU/mod_minimarket_quicklink.sys.ini'
+            'language/en-GB/mod_minimarket_toolbar.ini',
+            'language/en-GB/mod_minimarket_toolbar.sys.ini',
+            'language/ru-RU/mod_minimarket_toolbar.ini',
+            'language/ru-RU/mod_minimarket_toolbar.sys.ini'
         )) {
             if ($moduleMembers -notcontains $required) {
                 Write-Output ('PACKAGE_FAIL: QUICKLINK_MISSING_' + $required)
@@ -500,7 +500,7 @@ try {
             }
         }
         $moduleManifestReader = New-Object System.IO.StreamReader(
-            $moduleArchive.GetEntry('mod_minimarket_quicklink.xml').Open())
+            $moduleArchive.GetEntry('mod_minimarket_toolbar.xml').Open())
         try { [xml]$moduleManifest = $moduleManifestReader.ReadToEnd() }
         finally { $moduleManifestReader.Dispose() }
         if ($moduleManifest.extension.type -ne 'module' -or
@@ -518,8 +518,8 @@ try {
         exit 1
     }
     if (@($members | Where-Object {
-        $_ -like 'admin/modules/mod_minimarket_quicklink/*' -or
-        $_ -eq 'mod_minimarket_quicklink.xml'
+        $_ -like 'admin/modules/mod_minimarket_toolbar/*' -or
+        $_ -eq 'mod_minimarket_toolbar.xml'
     }).Count -gt 0) {
         Write-Output 'PACKAGE_FAIL: QUICKLINK_PRESENT_IN_COMPONENT_ZIP'
         exit 1
