@@ -3,6 +3,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Table;
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Filter\OutputFilter;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Table\Table;
@@ -24,15 +25,13 @@ final class ProductTable extends Table
         $this->alias = trim((string) $this->alias);
         $this->sku = trim((string) $this->sku);
         $this->product_type=(string)($this->product_type ?? 'simple');
-        $this->delivery_type=(string)($this->delivery_type ?? 'physical');
-        if(!in_array($this->delivery_type,['physical','digital'],true)) {
-            $this->setError(Text::_('COM_MINIMARKET_DELIVERY_TYPE_INVALID'));
-            return false;
-        }
-        // Bundles can contain physical, digital, or mixed components.
-        // The bundle record stores a neutral default; fulfillment is derived
-        // from its members at checkout in a later phase.
-        if($this->product_type==='bundle') $this->delivery_type='physical';
+        // All sale items, including bundles, inherit the global store format.
+        // Retain the old column on upgrades, but never trust a posted value.
+        $shopType = class_exists(ComponentHelper::class)
+            ? (string) ComponentHelper::getParams('com_minimarket')->get('shop_type', 'physical')
+            : 'physical';
+        $this->delivery_type = in_array($shopType, ['physical','digital'], true)
+            ? $shopType : 'physical';
         if (!in_array($this->product_type,['simple','bundle'],true)) {
             $this->setError(Text::_('COM_MINIMARKET_BUNDLE_TYPE_INVALID'));
             return false;

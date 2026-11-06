@@ -50,7 +50,6 @@ use Joomla\CMS\Router\Route;
                     echo $this->form->renderField('option_stock_mode');
                     echo '</div>';
                 } else {
-                    echo $this->form->renderField('delivery_type');
                     echo $this->form->renderField('price');
                     echo $this->form->renderField('old_price');
                     echo $this->form->renderField('stock');

@@ -10,11 +10,6 @@
         </field>
         <field name="product_type" type="hidden" default="simple" filter="string"/>
         <field name="sku" type="text" label="COM_MINIMARKET_PRODUCT_SKU" required="true" filter="string" size="40" maxlength="100"/>
-        <field name="delivery_type" type="list" label="COM_MINIMARKET_PRODUCT_DELIVERY_TYPE"
-               description="COM_MINIMARKET_PRODUCT_DELIVERY_TYPE_HELP" default="physical" filter="string">
-            <option value="physical">COM_MINIMARKET_PRODUCT_DELIVERY_PHYSICAL</option>
-            <option value="digital">COM_MINIMARKET_PRODUCT_DELIVERY_DIGITAL</option>
-        </field>
         <field name="price" type="number" label="COM_MINIMARKET_PRODUCT_PRICE" default="0.00"
                min="0" max="9999999999999.99" step="0.01" required="true" filter="string"/>
         <field name="old_price" type="number" label="COM_MINIMARKET_BADGE_OLD_PRICE"
