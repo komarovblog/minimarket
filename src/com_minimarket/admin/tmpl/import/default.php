@@ -50,7 +50,7 @@ use Joomla\CMS\Session\Session;
         <div class="d-flex flex-wrap gap-2">
             <?php foreach (['xlsx','csv','json'] as $format) : ?>
                 <a class="btn btn-primary" href="<?php echo Route::_(
-                    'index.php?option=com_minimarket&task=import.export&format=' . $format
+                    'index.php?option=com_minimarket&task=import.export&filetype=' . $format
                     . '&' . Session::getFormToken() . '=1'); ?>">
                     <?php echo Text::_('COM_MINIMARKET_EXPORT_DOWNLOAD') . ' ' . strtoupper($format); ?>
                 </a>
