@@ -36,3 +36,6 @@ E2E **пока не реализованы и не должны обознача
 
 ## 0.5.61 — Фиды / dashboard
 Проверять автоматическое правило по категориям, опубликованность потомков, ручное включение и исключение товаров, два режима и массовые чекбоксы, целостность XML и защиту секретного URL. CI делает PHP/Node/MySQL regression и ZIP, но не проходит авторизованные Joomla browser E2E; запускать их отдельно и отмечать явным PASS/NOT RUN. Старые JSON v2 архивы не содержат новые фиды — для полноты нужен совместимый v3.
+
+## 0.5.62: header quicklink
+Native administrator module: PHP render unit test (label/icon/off/ACL/XSS); simulated Joomla installer postflight fresh/upgrade/failed module install; Windows component ZIP and standalone module ZIP manifest/paths/version; both PHP versions. Настоящий Joomla 6/Atum браузерный тест НЕ выполнялся, так что установка/позиция status/навигация требуют ручной проверки после обновления.
