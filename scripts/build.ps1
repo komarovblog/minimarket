@@ -299,6 +299,21 @@ try {
         (Get-FileHash -LiteralPath $digitalOutput -Algorithm SHA256).Hash) {
         throw 'MM_055_DIGITAL_SQL_HASH_MISMATCH'
     }
+    # A new cumulative catalog SQL ships with EVERY component iteration.
+    # Never run automatically. phpMyAdmin import into an existing nnop3_ demo catalog.
+    $versionTag = $version.Replace('.', '_')
+    $updateSqlName = "minimarket_mysql84_nnop3_update_$versionTag.sql"
+    $updateSqlSource = Join-Path $projectRoot ("sample-data\\" + $updateSqlName)
+    $updateSqlOutput = Join-Path $zipDirectory $updateSqlName
+    if (-not (Test-Path -LiteralPath $updateSqlSource -PathType Leaf)) {
+        throw "MISSING_CUMULATIVE_SQL_FOR_VERSION: $version"
+    }
+    Copy-Item -LiteralPath $updateSqlSource -Destination $updateSqlOutput -Force
+    if ((Get-FileHash -LiteralPath $updateSqlSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $updateSqlOutput -Algorithm SHA256).Hash) {
+        throw 'CUMULATIVE_SQL_HASH_MISMATCH'
+    }
+    Write-Output "MiniMarket cumulative update SQL : $updateSqlOutput"
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

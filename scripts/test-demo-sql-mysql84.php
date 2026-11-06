@@ -155,6 +155,26 @@ verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
 verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
  WHERE delivery_type='digital'")->fetch_assoc()['n']===1,
  'old demo products stay physical by default');
+// 0.5.57: the cumulative catalog updates an existing database in-place.
+$updateSql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_57.sql');
+verify($updateSql!==false,'cumulative 0.5.57 SQL exists');
+$updateCi=str_replace('USE `minimarket`;','USE `minimarket_ci_demo84`;',$updateSql);
+$beforeProducts=total($db,'products');
+$beforeBrands=total($db,'brands');
+$beforeCollections=total($db,'collections');
+$db->query("UPDATE nnop3_minimarket_products SET price=1234.56 WHERE id=1001 AND sku='TOY-1001'");
+$db->query("DELETE FROM nnop3_minimarket_product_group_members WHERE product_id=1001 AND group_id=901");
+runMulti($db,$updateCi,'0.5.57 cumulative update on existing catalog');
+runMulti($db,$updateCi,'0.5.57 second update without duplicates');
+verify(total($db,'products')===$beforeProducts,'cumulative update does not duplicate products');
+verify(total($db,'brands')===$beforeBrands,'cumulative update does not duplicate brands');
+verify(total($db,'collections')===$beforeCollections,'cumulative update does not duplicate collections');
+verify((float)$db->query("SELECT price FROM nnop3_minimarket_products WHERE id=1001")->fetch_row()[0]===1234.56,
+    'manual demo price remains untouched');
+verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_group_members WHERE product_id=1001 AND group_id=901")->fetch_row()[0]===1,
+    'missing demo relation gets restored exactly once');
+verify(total($db,'bundle_items')===6,'bundle components not duplicated');
+
 echo "DEMO_MYSQL84_OK: " . total($db,'categories') . " categories, "
     .total($db,'products')." products, ".total($db,'product_variants')
     ." variants, ".total($db,'brands')." brands, ".total($db,'collections')
