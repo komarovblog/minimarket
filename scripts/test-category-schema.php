@@ -878,6 +878,19 @@ verify((int)row($pdo,'catci_minimarket_categories')['show_bundles']===0,
     '0.5.54 category can hide bundles independently');
 verify((int)row($pdo,'catci_minimarket_products')['badge_benefit']===1,
     '0.5.54 kit savings flag persists');
+// 0.5.55: delivery type is a distinct attribute of ordinary products.
+$beforeDelivery=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.55.sql','catci_');
+$afterDelivery=row($pdo,'catci_minimarket_products');
+foreach($beforeDelivery as $column=>$value) {
+    verify(array_key_exists($column,$afterDelivery) && $afterDelivery[$column]===$value,
+        '0.5.55 upgrade retains product data '.$column);
+}
+verify($afterDelivery['delivery_type']==='physical',
+    '0.5.55 existing products default to physical, not digital');
+$pdo->exec("UPDATE catci_minimarket_products SET delivery_type='digital' WHERE id=1");
+verify(row($pdo,'catci_minimarket_products')['delivery_type']==='digital',
+    '0.5.55 digital delivery flag persists on product');
 $pdo->exec('DROP TABLE catci_minimarket_product_collections');
 $pdo->exec('DROP TABLE catci_minimarket_import_group_keys');
 $pdo->exec('DROP TABLE catci_minimarket_product_group_members');
@@ -975,6 +988,7 @@ $freshProducts = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_products')
 verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option stock mode');
 verify(in_array('brand_id',$freshProducts,true),'fresh 0.5.49 optional brand ID');
 verify(in_array('product_type',$freshProducts,true),'fresh 0.5.51 bundle type');
+verify(in_array('delivery_type',$freshProducts,true),'fresh 0.5.55 physical/digital type');
 verify(in_array('bundle_price_mode',$freshProducts,true) &&
     in_array('bundle_discount_pct',$freshProducts,true),
     'fresh 0.5.52 pricing columns');

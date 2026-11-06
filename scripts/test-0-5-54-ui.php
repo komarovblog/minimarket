@@ -60,7 +60,7 @@ namespace MiniMarket\Smoke54 {
         'product hides composition, bundle hides SKU matrix');
     verify(str_contains($edit,"'COM_MINIMARKET_BUNDLE_GROUPS'"),
         'bundle relationship tab is correctly named');
-    verify(str_contains($edit,"renderFieldset('bundle_pricing')") &&
+    verify(str_contains($edit,"renderField('bundle_price_mode')") &&
         str_contains($edit,'data-mm-bundle-totals'),
         'bundle price on Details, component total in composition');
     $attributes=(string)file_get_contents($root.'admin/src/Field/ProductattributesField.php');
