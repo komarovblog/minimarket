@@ -92,7 +92,6 @@ $sections = [
                                           aria-label="<?php echo htmlspecialchars(Text::_('COM_MINIMARKET_DASHBOARD_NO_COUNT'), ENT_QUOTES, 'UTF-8'); ?>">—</span>
                                 </div>
                                 <span class="mm-dashboard-tile-title"><?php echo Text::_($item['label']); ?></span>
-                                <small class="mm-dashboard-tile-note"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_COMING_SOON'); ?></small>
                             </div>
                         <?php else : ?>
                             <a class="mm-dashboard-tile text-decoration-none"
@@ -103,6 +102,12 @@ $sections = [
                                             <path d="M12 2 17 5 12 8 7 5 12 2ZM7 5v6l5 3 5-3V5M12 8v6"/>
                                             <path d="m6 12 5 3-5 3-5-3 5-3ZM1 15v5l5 3 5-3v-5M6 18v5"/>
                                             <path d="m18 12 5 3-5 3 5-3-5-3ZM13 15v5l5 3 5-3v-5M18 18v5"/>
+                                        </svg>
+                                    <?php elseif ($item['view'] === 'import') : ?>
+                                        <svg class="mm-dashboard-icon mm-dashboard-icon--import" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                            <path d="M7 3v11m0 0-4-4m4 4 4-4"/>
+                                            <path d="M17 21V10m0 0-4 4m4-4 4 4"/>
+                                            <path d="M3 18v3h8M21 6V3h-8"/>
                                         </svg>
                                     <?php else : ?>
                                         <span class="<?php echo htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8'); ?> mm-dashboard-icon" aria-hidden="true"></span>

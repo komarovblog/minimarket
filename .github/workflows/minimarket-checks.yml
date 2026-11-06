@@ -134,7 +134,7 @@ jobs:
             dist/minimarket_product_badges_demo_0_5_53.sql
             dist/minimarket_ui_benefit_demo_0_5_54.sql
             dist/minimarket_digital_demo_0_5_55.sql
-            dist/minimarket_mysql84_nnop3_update_0_5_67.sql
+            dist/minimarket_mysql84_nnop3_update_0_5_68.sql
             dist/mod_minimarket_toolbar-${{ steps.component_version.outputs.value }}.zip
           if-no-files-found: error
           retention-days: 14
@@ -235,6 +235,9 @@ jobs:
 
       - name: MiniMarket 0.5.67 stacked full-width responsive dashboard
         run: php scripts/test-0-5-67-dashboard-responsive.php
+
+      - name: MiniMarket 0.5.68 compact tiles and import icon
+        run: php scripts/test-0-5-68-dashboard-compact.php
       - name: 0.5.61 feed checkbox and category DOM
         run: |
           node scripts/test-0-5-61-feeds-editor.js

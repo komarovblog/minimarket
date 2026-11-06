@@ -1,4 +1,4 @@
-/* MiniMarket 0.5.67 — Joomla/Atum-style full-width stacked dashboard.
+/* MiniMarket 0.5.68 — Joomla/Atum-style full-width stacked dashboard.
  * The Joomla #wrapper.closed class is the source of truth for sidebar state.
  * All rules are scoped to the component; Joomla core and other pages untouched. */
 .com-minimarket-dashboard,
@@ -49,8 +49,7 @@
     flex-direction: column;
     align-items: stretch;
     min-width: 0;
-    min-height: 6.3rem;
-    padding: .8rem .85rem;
+    padding: .72rem .85rem;
     background: #272e36;
     border: 1px solid #343d47;
     border-radius: var(--bs-border-radius, .375rem);
@@ -75,7 +74,7 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: .5rem;
-    margin-bottom: .65rem;
+    margin-bottom: .5rem;
 }
 .com-minimarket-dashboard .mm-dashboard-icon {
     display: inline-flex;
@@ -87,7 +86,8 @@
     font-size: 1.45rem;
     color: #e7edf4;
 }
-.com-minimarket-dashboard .mm-dashboard-icon--bundle {
+.com-minimarket-dashboard .mm-dashboard-icon--bundle,
+.com-minimarket-dashboard .mm-dashboard-icon--import {
     overflow: visible;
 }
 .com-minimarket-dashboard .mm-dashboard-tile-title {
