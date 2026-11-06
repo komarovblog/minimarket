@@ -108,7 +108,7 @@ final class FeedController extends BaseController
         foreach($usedCategories as $categoryId=>$_) {
             if(isset($categoryById[$categoryId]))$feedCategories[]=$categoryById[$categoryId];
         }
-        usort($feedCategories,static fn(array $a,array $b)=>((int)$a['id'])<=>(int)$b['id']));
+        usort($feedCategories,static fn(array $a,array $b) => ((int)$a['id']) <=> ((int)$b['id']));
         $xml=FeedYml::render($feed,$feedCategories,$offers,$base);
         $app->setHeader('Content-Type','application/xml; charset=UTF-8',true);
         $app->setHeader('X-Content-Type-Options','nosniff',true);
