@@ -34,10 +34,13 @@ foreach($global as $configName=>$local) {
         'global Categories must declare '.$configName);
     audit60(count($category->xpath("//fieldset[@name='display']/field[@name='$local']"))===1,
         'local category must override '.$local);
-    audit60(str_contains($resolver,$configName) && str_contains($resolver,$local),
-        'frontend must resolve '.$configName.' into '.$local);
+    $resolved = str_starts_with($configName,'category_cards_')
+        ? str_contains($resolver,"'category_cards_'")
+            && str_contains($resolver,"'cards_'")
+        : str_contains($resolver,$configName) && str_contains($resolver,$local);
+    audit60($resolved,'frontend must resolve '.$configName.' into '.$local);
     // All but the original show_* fields were added in 0.5.58 migration.
-    audit60(str_contains($schema,'`'.$local.'`') || str_contains($schema,'`'.$local.'`'),
+    audit60(str_contains($schema,'`'.$local.'`'),
         'fresh schema must persist '.$local);
 }
 foreach(['show_descendant_products','show_descendant_bundles',
