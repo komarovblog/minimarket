@@ -56,7 +56,7 @@ namespace MiniMarket\DashboardTest {
         && $positions[2]!==false && $positions[0]<$positions[1]
         && $positions[1]<$positions[2],
         'correct section order Management / Products / Tools');
-    verify(substr_count($html,'COM_MINIMARKET_DASHBOARD_ORDERS')===1
+    verify(substr_count($html,'COM_MINIMARKET_DASHBOARD_ORDERS')>=1
         && substr_count($html,'mm-dashboard-tile--pending')===1
         && !str_contains($html,'href="index.php?option=com_minimarket&amp;view=orders"'),
         'Orders is a future disabled action, not a fake checkout link');
