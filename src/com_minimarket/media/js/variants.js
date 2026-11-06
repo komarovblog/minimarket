@@ -17,6 +17,7 @@
     availability: root.querySelector('[data-mm-variant-availability]'),
   };
   const sharedStock = root.dataset.mmStockMode === '0';
+  const inventoryEnabled = root.dataset.mmInventoryEnabled !== '0';
   const baseStock = Number(root.dataset.mmStockBase || 0);
   const availableText = root.dataset.mmInStock || 'In stock';
   const unavailableText = root.dataset.mmOutOfStock || 'Out of stock';
@@ -148,7 +149,7 @@
   // available combination, even if the previously chosen size is invalid.
   // Once color is chosen, unavailable sizes are disabled immediately.
   const stockFor = (variant) => sharedStock ? baseStock : Number(variant.stock);
-  const canOrder = (variant) => stockFor(variant) > 0;
+  const canOrder = (variant) => !inventoryEnabled || stockFor(variant) > 0;
   const available = variants.filter(canOrder);
   const current = () => Object.fromEntries(
     selects.map(select => [select.dataset.mmVariantAxis, select.value])
@@ -200,9 +201,9 @@
     if (details.sku) details.sku.textContent = selected.sku;
     // Price belongs to the product, never to the selected combination.
     const stock = stockFor(selected);
-    if (details.stock) details.stock.textContent = String(stock);
+    if (details.stock) details.stock.textContent = inventoryEnabled ? String(stock) : '—';
     if (details.availability) details.availability.textContent =
-      stock > 0 ? availableText : unavailableText;
+      !inventoryEnabled || stock > 0 ? availableText : unavailableText;
     refreshOptions(selected);
     updateGallery(selected);
     updateDescriptions(selected);

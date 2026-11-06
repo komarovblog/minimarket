@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Model;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductGallery;
@@ -65,6 +66,23 @@ final class ProductModel extends AdminModel
      */
     public function save($data)
     {
+        // A frozen inventory field cannot overwrite stored stock in the database.
+        $inventoryEnabled = !class_exists(ComponentHelper::class)
+            || (int) ComponentHelper::getParams('com_minimarket')->get('inventory_enabled', 1) === 1;
+        $isPerSkuStock = (int)($data['option_stock_mode'] ?? 1) === 1;
+        if (!$inventoryEnabled || $isPerSkuStock) {
+            $productId = (int)($data['id'] ?? 0);
+            if ($productId > 0) {
+                $dbStock = $this->getDatabase();
+                $dbStock->setQuery('SELECT stock FROM '
+                    . $dbStock->quoteName('#__minimarket_products')
+                    . ' WHERE id=' . $productId);
+                $storedStock = $dbStock->loadResult();
+                if ($storedStock !== null) $data['stock'] = (string)$storedStock;
+            } else {
+                $data['stock'] = '0';
+            }
+        }
         // Joomla repeatable subform posts no rows when the last row is removed.
         // Hidden sentinel makes an explicit empty gallery distinct from a legacy
         // form that never offered gallery editing.
@@ -211,7 +229,8 @@ final class ProductModel extends AdminModel
                     $matrix = ProductSkuMatrix::normalize(
                         $db, (int) ($data['id'] ?? 0),
                         (int) ($data['category_id'] ?? 0),
-                        $data['sku_matrix_payload'], (string) ($data['price'] ?? '0')
+                        $data['sku_matrix_payload'], (string) ($data['price'] ?? '0'),
+                        $isPerSkuStock, $inventoryEnabled
                     );
                     $localDimensions = $matrix['dimensions'];
                     $variantRows = $matrix['variants'];

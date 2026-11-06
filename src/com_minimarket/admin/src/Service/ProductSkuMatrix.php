@@ -35,7 +35,8 @@ final class ProductSkuMatrix
      */
     public static function normalize(
         DatabaseInterface $db, int $productId, int $categoryId,
-        mixed $raw, string $productPrice
+        mixed $raw, string $productPrice,
+        bool $perSkuStock = true, bool $inventoryEnabled = true
     ): array {
         if (!is_string($raw) || strlen($raw) > 250000) {
             throw new \InvalidArgumentException('COM_MINIMARKET_VARIANTS_INVALID');
@@ -83,6 +84,9 @@ final class ProductSkuMatrix
                 continue; // Unavailable, never-created combination
             }
             $old = $id ? $byId[$id] : [];
+            if (!$perSkuStock || !$inventoryEnabled) {
+                $stock = (string) ($old['stock'] ?? '0');
+            }
             $merged[] = array_merge($old, [
                 'id' => $id, 'sku' => $sku, 'stock' => $stock,
                 'state' => (int) $state,

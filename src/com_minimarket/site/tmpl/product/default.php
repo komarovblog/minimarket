@@ -263,6 +263,7 @@ $initialDescription=$hasCustomDescription
              data-mm-description-base="<?php echo $this->escape(InputFilter::getInstance()->clean(
                  (string)($this->product->description??''),'HTML')); ?>"
              data-mm-stock-mode="<?php echo (int)($this->product->option_stock_mode??0); ?>"
+             data-mm-inventory-enabled="<?php echo $this->inventoryEnabled ? '1' : '0'; ?>"
              data-mm-stock-base="<?php echo (int)$this->product->stock; ?>"
              data-mm-gallery-base="<?php echo $this->escape(json_encode(
                  $baseImages,
@@ -300,11 +301,11 @@ $initialDescription=$hasCustomDescription
         <dd data-mm-variant-price><?php echo $this->escape((string) $this->product->price); ?>
             <?php echo BadgeHelper::oldPrice($this->product); ?></dd>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
-        <dd data-mm-variant-stock><?php echo (int) (
-            ((int)($this->product->option_stock_mode??0)===0)
+        <dd data-mm-variant-stock><?php echo $this->inventoryEnabled
+            ? (int) (((int)($this->product->option_stock_mode??0)===0)
                 ? $this->product->stock
-                : ($defaultVariant['stock'] ?? $this->product->stock)
-        ); ?></dd>
+                : ($defaultVariant['stock'] ?? $this->product->stock))
+            : '—'; ?></dd>
     </dl>
     <?php if (!empty($this->attributes)) : ?>
         <section class="mm-product-attributes" aria-labelledby="mm-product-attributes-heading">

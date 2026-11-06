@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Site\View\Product;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
@@ -18,6 +19,7 @@ final class HtmlView extends BaseHtmlView
     public array $videos = [];
     public array $attributes = [];
     public array $variants = ['axes'=>[], 'items'=>[]];
+    public bool $inventoryEnabled = true;
     public array $relatedGroups = [];
     public array $collections = [];
     public array $bundleComponents = [];
@@ -37,6 +39,8 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException(Text::_('JERROR_LAYOUT_PAGE_NOT_FOUND'), 404);
         }
 
+        $this->inventoryEnabled = (int)ComponentHelper::getParams('com_minimarket')
+            ->get('inventory_enabled', 1) === 1;
         $this->product = $product;
         $this->gallery = $repo->getProductGallery($id);
         $this->videos = $repo->getProductVideos($id);
