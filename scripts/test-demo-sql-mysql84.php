@@ -156,7 +156,7 @@ verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
  WHERE delivery_type='digital'")->fetch_assoc()['n']===1,
  'old demo products stay physical by default');
 // 0.5.57: the cumulative catalog updates an existing database in-place.
-$updateSql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_61.sql');
+$updateSql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_62.sql');
 verify($updateSql!==false,'cumulative 0.5.60 SQL exists');
 $updateCi=str_replace('USE `minimarket`;','USE `minimarket_ci_demo84`;',$updateSql);
 $demoOptions=$db->query("SHOW COLUMNS FROM nnop3_minimarket_categories LIKE 'product_layout'")->fetch_assoc();

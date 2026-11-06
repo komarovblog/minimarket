@@ -31,6 +31,11 @@ $needed = @(
     'minimarket.xml',
     'script.php',
     'admin\presets\minimarket.xml',
+    'admin\modules\mod_minimarket_quicklink\mod_minimarket_quicklink.xml',
+    'admin\modules\mod_minimarket_quicklink\mod_minimarket_quicklink.php',
+    'admin\modules\mod_minimarket_quicklink\tmpl\default.php',
+    'admin\modules\mod_minimarket_quicklink\language\ru-RU\mod_minimarket_quicklink.ini',
+    'admin\modules\mod_minimarket_quicklink\language\en-GB\mod_minimarket_quicklink.ini',
     'admin\config.xml',
     'admin\sql\install.mysql.sql',
     'admin\sql\updates\mysql\0.2.0.sql',
@@ -319,6 +324,44 @@ try {
         throw 'CUMULATIVE_SQL_HASH_MISMATCH'
     }
     Write-Output "MiniMarket cumulative update SQL : $updateSqlOutput"
+
+    # Independently installable administrator module ZIP is shipped beside the
+    # component as a recovery path. The component ZIP already contains these
+    # files and attempts to install the module on update/install.
+    $moduleRoot = Join-Path $componentRoot 'admin\modules\mod_minimarket_quicklink'
+    $moduleXmlPath = Join-Path $moduleRoot 'mod_minimarket_quicklink.xml'
+    [xml]$moduleXml = Get-Content -LiteralPath $moduleXmlPath -Raw -Encoding UTF8
+    if ($moduleXml.extension.type -ne 'module' -or
+        $moduleXml.extension.client -ne 'administrator' -or
+        [string]$moduleXml.extension.version -ne $version) {
+        throw 'QUICKLINK_MODULE_MANIFEST_INVALID'
+    }
+    $moduleZipPath = Join-Path $zipDirectory ("mod_minimarket_quicklink-$version.zip")
+    $moduleTempZip = Join-Path $zipDirectory (
+        "minimarket-quicklink-building-" + [guid]::NewGuid().ToString('N') + '.zip')
+    try {
+        $moduleWriter = [System.IO.Compression.ZipFile]::Open(
+            $moduleTempZip, [System.IO.Compression.ZipArchiveMode]::Create)
+        try {
+            foreach ($file in @(Get-ChildItem -LiteralPath $moduleRoot -Recurse -File | Sort-Object FullName)) {
+                $memberName = $file.FullName.Substring($moduleRoot.Length + 1).Replace('\', '/')
+                [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+                    $moduleWriter,
+                    $file.FullName,
+                    $memberName,
+                    [System.IO.Compression.CompressionLevel]::Optimal
+                ) | Out-Null
+            }
+        }
+        finally { $moduleWriter.Dispose() }
+        Move-Item -LiteralPath $moduleTempZip -Destination $moduleZipPath -Force
+    }
+    finally {
+        if (Test-Path -LiteralPath $moduleTempZip) {
+            Remove-Item -LiteralPath $moduleTempZip -Force
+        }
+    }
+    Write-Output "MiniMarket separate admin quicklink ZIP : $moduleZipPath"
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

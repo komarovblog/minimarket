@@ -1,7 +1,7 @@
 <?php
 /** Contract for the cumulative SQL delivered to an already-populated demo catalog. */
 declare(strict_types=1);
-$sql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_61.sql');
+$sql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_62.sql');
 if ($sql===false) throw new RuntimeException('CUMULATIVE_SQL_MISSING');
 function mm_assert(bool $yes,string $why):void { if (!$yes) throw new RuntimeException('CUMULATIVE_SQL_FAIL: '.$why); }
 mm_assert(str_contains($sql,'ck_mm_catalog_identity'),'identity collision guard missing');

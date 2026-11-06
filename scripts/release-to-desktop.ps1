@@ -14,7 +14,7 @@ if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_INSPECT_FAILED' }
 [xml]$manifest=Get-Content -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -Raw -Encoding UTF8
 $version=[string]$manifest.extension.version
 $versionTag=$version.Replace('.', '_')
-$names=@("com_minimarket-$version.zip","minimarket_mysql84_nnop3_update_$versionTag.sql")
+$names=@("com_minimarket-$version.zip","minimarket_mysql84_nnop3_update_$versionTag.sql","mod_minimarket_quicklink-$version.zip")
 if ([string]::IsNullOrWhiteSpace($DesktopPath)) { $DesktopPath=[Environment]::GetFolderPath('Desktop') }
 if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) { throw "DESKTOP_NOT_FOUND: $DesktopPath" }
 foreach ($name in $names) {
