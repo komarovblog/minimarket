@@ -91,7 +91,7 @@ check61(str_contains($direct,'<yml_catalog date="2026-11-06 12:00">'),
  'Yandex Direct XML date format supported separately');
 $root=__DIR__.'/../src/com_minimarket/';
 $manifest=simplexml_load_file($root.'minimarket.xml');
-check61($manifest!==false && (string)$manifest->version==='0.5.61','manifest version 0.5.61');
+check61($manifest!==false && version_compare((string)$manifest->version,'0.5.61','>='),'manifest version >= 0.5.61');
 check61((string)$manifest->administration->menu->params->dashboard==='minimarket'
  && count($manifest->dashboards->dashboard)===1,'native Joomla dashboard icon declared');
 check61((string)$manifest->administration->submenu->menu[count($manifest->administration->submenu->menu)-1]
