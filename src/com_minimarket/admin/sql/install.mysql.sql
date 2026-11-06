@@ -570,6 +570,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_feeds` (
     `company` VARCHAR(200) NOT NULL DEFAULT '',
     `provider` VARCHAR(32) NOT NULL DEFAULT 'yandex_direct',
     `state` TINYINT NOT NULL DEFAULT 0,
+    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     `selection_mode` VARCHAR(12) NOT NULL DEFAULT 'auto',
     `include_descendants` TINYINT NOT NULL DEFAULT 1,
     `include_bundles` TINYINT NOT NULL DEFAULT 1,
