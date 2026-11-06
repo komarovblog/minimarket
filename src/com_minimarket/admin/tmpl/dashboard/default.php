@@ -30,17 +30,17 @@ $sections = [
             ['view' => 'bundles', 'label' => 'COM_MINIMARKET_BUNDLES',
                 'icon' => 'icon-box', 'count' => 'bundles'],
             ['view' => 'brands', 'label' => 'COM_MINIMARKET_BRANDS',
-                'icon' => 'icon-tag', 'count' => null],
+                'icon' => 'icon-tag', 'count' => 'brands'],
             ['view' => 'collections', 'label' => 'COM_MINIMARKET_COLLECTIONS',
-                'icon' => 'icon-bookmark', 'count' => null],
+                'icon' => 'icon-bookmark', 'count' => 'collections'],
             ['view' => 'groups', 'label' => 'COM_MINIMARKET_GROUPS',
-                'icon' => 'icon-link', 'count' => null],
+                'icon' => 'icon-link', 'count' => 'groups'],
             ['view' => 'bundlegroups', 'label' => 'COM_MINIMARKET_BUNDLE_GROUPS',
-                'icon' => 'icon-link', 'count' => null],
+                'icon' => 'icon-link', 'count' => 'bundlegroups'],
             ['view' => 'attributes', 'label' => 'COM_MINIMARKET_ATTRIBUTES',
-                'icon' => 'icon-list', 'count' => null],
+                'icon' => 'icon-list', 'count' => 'attributes'],
             ['view' => 'orderoptions', 'label' => 'COM_MINIMARKET_ORDER_OPTIONS',
-                'icon' => 'icon-sliders-h', 'count' => null],
+                'icon' => 'icon-sliders-h', 'count' => 'orderoptions'],
         ],
     ],
     [
@@ -87,17 +87,20 @@ $sections = [
                                         <div class="fw-semibold"><?php echo Text::_($item['label']); ?></div>
                                         <small class="text-muted"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_COMING_SOON'); ?></small>
                                     </div>
+                                    <span class="badge mm-dashboard-count" aria-label="<?php echo htmlspecialchars(Text::_('COM_MINIMARKET_DASHBOARD_NO_COUNT'), ENT_QUOTES, 'UTF-8'); ?>">—</span>
                                 </div>
                             <?php else : ?>
                                 <a class="mm-dashboard-tile d-flex align-items-center gap-3 h-100 text-decoration-none"
                                    href="<?php echo AdminEntityLinks::view($item['view']); ?>">
                                     <span class="<?php echo htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></span>
                                     <span class="flex-grow-1 fw-semibold"><?php echo Text::_($item['label']); ?></span>
-                                    <?php if ($item['count'] !== null) : ?>
-                                        <span class="badge text-bg-light border" aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <span class="badge mm-dashboard-count" aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
+                                        <?php if ($item['count'] === null) : ?>
+                                            <span aria-hidden="true">—</span>
+                                        <?php else : ?>
                                             <?php echo (int) ($this->stats[$item['count']] ?? 0); ?>
-                                        </span>
-                                    <?php endif; ?>
+                                        <?php endif; ?>
+                                    </span>
                                 </a>
                             <?php endif; ?>
                         </div>

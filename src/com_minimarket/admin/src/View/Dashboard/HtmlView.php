@@ -14,11 +14,20 @@ final class HtmlView extends BaseHtmlView
     public function display($tpl = null)
     {
         $db=Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class);
+        // Use the same meaning as each list screen: all records, including
+        // drafts, while simple/bundle groups are filtered by their type.
+        // The mapping is static: table names/SQL conditions are never input.
         foreach ([
-            'categories'=>['categories','1=1'],
-            'products'=>['products',"product_type='simple'"],
-            'bundles'=>['products',"product_type='bundle'"],
-            'feeds'=>['feeds','1=1']
+            'categories'   => ['categories', '1=1'],
+            'products'     => ['products', "product_type='simple'"],
+            'bundles'      => ['products', "product_type='bundle'"],
+            'brands'       => ['brands', '1=1'],
+            'collections'  => ['collections', '1=1'],
+            'groups'       => ['product_groups', "type<>'bundle'"],
+            'bundlegroups' => ['product_groups', "type='bundle'"],
+            'attributes'   => ['attributes', '1=1'],
+            'orderoptions' => ['order_options', '1=1'],
+            'feeds'        => ['feeds', '1=1'],
         ] as $key=>[$table,$predicate]) {
             $db->setQuery('SELECT COUNT(*) FROM '
                 .$db->quoteName('#__minimarket_'.$table).' WHERE '.$predicate);

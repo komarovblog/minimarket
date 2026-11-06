@@ -1,36 +1,54 @@
-/* Horizontal MiniMarket control bands with 25%-width icon tiles.
- * Scoped to the component: native Atum sidebar, toolbar and other pages untouched. */
-.com-minimarket-dashboard .mm-dashboard-band { width: 100%; }
+/* MiniMarket 0.5.65: dark Atum-compatible horizontal bands / tiles.
+ * Local to this component. Joomla's sidebar, buttons and other themes remain untouched. */
+.com-minimarket-dashboard .mm-dashboard-band {
+    width: 100%;
+    background: var(--template-bg-dark-80, #101821);
+    color: #edf3fb;
+    border: 1px solid rgba(215, 229, 246, .07);
+}
 .com-minimarket-dashboard .mm-dashboard-band > .card-body { padding: 1.25rem; }
+.com-minimarket-dashboard .mm-dashboard-band > .card-body > h3 { color: #edf3fb; }
 .com-minimarket-dashboard .mm-dashboard-tiles > [class*="col-"] { min-width: 0; }
 .com-minimarket-dashboard .mm-dashboard-tile {
     min-height: 4.2rem;
     padding: .85rem 1rem;
-    border: 1px solid var(--bs-border-color, rgba(128, 128, 128, .3));
+    border: 1px solid rgba(216, 232, 249, .12);
     border-radius: var(--bs-border-radius, .4rem);
-    background: var(--bs-body-bg, #fff);
-    color: var(--bs-body-color, inherit);
+    background: var(--template-bg-dark-70, #1b2838);
+    color: #f0f5fb;
     line-height: 1.35;
     transition: border-color .15s ease, background-color .15s ease;
 }
 .com-minimarket-dashboard a.mm-dashboard-tile:hover,
 .com-minimarket-dashboard a.mm-dashboard-tile:focus-visible {
-    background: var(--bs-tertiary-bg, rgba(128, 128, 128, .08));
-    border-color: var(--bs-primary, #0066cc);
+    color: #ffffff;
+    background: var(--template-bg-dark-60, #25364a);
+    border-color: rgba(67, 175, 249, .6);
+    text-decoration: none;
+    outline-offset: 2px;
 }
 .com-minimarket-dashboard .mm-dashboard-tile > [class^="icon-"] {
     font-size: 1.3rem;
     flex: 0 0 auto;
-    color: var(--bs-primary, #005caa);
+    color: #55b2ff;
 }
 .com-minimarket-dashboard .mm-dashboard-tile--pending {
-    opacity: .75;
+    opacity: .78;
     cursor: default;
 }
-.com-minimarket-dashboard .mm-dashboard-tile--pending .fw-semibold {
-    color: var(--bs-body-color, inherit);
+.com-minimarket-dashboard .mm-dashboard-tile--pending .fw-semibold { color: #f0f5fb; }
+.com-minimarket-dashboard .mm-dashboard-tile--pending .text-muted { color: #adbccd !important; }
+.com-minimarket-dashboard .mm-dashboard-count {
+    flex: 0 0 auto;
+    margin-left: auto;
+    background: rgba(222, 235, 253, .11) !important;
+    color: #edf3fb !important;
+    border: 1px solid rgba(222, 235, 253, .13);
+    font-weight: 500;
+    min-width: 2rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
 }
-.com-minimarket-dashboard .mm-dashboard-tile .badge { font-weight: 500; }
 @media (prefers-reduced-motion: reduce) {
     .com-minimarket-dashboard .mm-dashboard-tile { transition: none; }
 }
