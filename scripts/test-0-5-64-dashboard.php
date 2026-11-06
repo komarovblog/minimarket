@@ -44,7 +44,8 @@ namespace MiniMarket\DashboardTest {
     $html=(new View())->output();
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===3,
         'exactly three independent native dashboard panels');
-    verify(substr_count($html,'class="mm-dashboard-tile')===12,
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===11 &&
+        substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===1),
         'one Orders, nine Store and two Tools tiles');
     verify(substr_count($html,'mm-dashboard-tiles')===3,
         'each band has its own responsive grid');

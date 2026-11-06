@@ -139,7 +139,8 @@ namespace MiniMarket\DashboardCountsTest {
     verify((bool)preg_match('/mm-dashboard-tile--pending[\\s\\S]*?—<\\/span>/u',$html),
         'Orders (not implemented) has a dash, not fake order count');
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===3 &&
-        substr_count($html,'class="mm-dashboard-tile')===12,
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===11 &&
+        substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===1),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
     verify(str_contains($css,'background: #272e36') &&
