@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service;
 \defined('_JEXEC') or die;
 
 use Joomla\Database\DatabaseInterface;
+use Joomla\CMS\Component\ComponentHelper;
 
 /**
  * Import package v1. No destructive sync, no SKU/gallery modifications.
@@ -19,7 +20,7 @@ final class CatalogImport
         'links' => '#__minimarket_product_groups',
     ];
     private const SECTIONS = [
-        'categories', 'attributes', 'options', 'products', 'links',
+        'categories', 'attributes', 'options', 'products', 'bundles', 'links',
         'category_attributes', 'category_options',
     ];
     private const MODES = ['disabled' => 0, 'optional' => 1, 'required' => 2, 'inherit' => -1];
@@ -72,7 +73,8 @@ final class CatalogImport
                     'categories' => ['key','title','alias','parent','state'],
                     'attributes' => ['key','title','code','type','state','values'],
                     'options' => ['key','title','code','state','values'],
-                    'products' => ['key','title','alias','sku','price','stock','stock_mode','category','state'],
+                    'products' => ['key','title','alias','sku','price','old_price','badge_sale','stock','stock_mode','category','state'],
+                    'bundles' => ['key','title','alias','sku','category','price','old_price','price_mode','discount_pct','badge_sale','badge_benefit','state','items'],
                     'links' => ['key','title','members','state'],
                     'category_attributes' => ['key','category','attribute','mode'],
                     'category_options' => ['key','category','option','mode'],
@@ -80,6 +82,26 @@ final class CatalogImport
                 foreach (array_keys($row) as $field) {
                     if (!in_array($field, $fields, true)) {
                         throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                    }
+                }
+                if ($section === 'bundles') {
+                    $items = $row['items'] ?? null;
+                    if (!is_array($items) || !array_is_list($items)
+                        || count($items) < 1 || count($items) > BundleItems::MAX_ITEMS) {
+                        throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                    }
+                    $unique = [];
+                    foreach ($items as $item) {
+                        if (!is_array($item) || array_is_list($item)
+                            || array_diff(array_keys($item), ['product','quantity'])) {
+                            throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                        }
+                        $ref = self::key($item['product'] ?? null);
+                        $qty = $item['quantity'] ?? null;
+                        if (!is_int($qty) || $qty < 1 || $qty > 1000 || isset($unique[$ref])) {
+                            throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                        }
+                        $unique[$ref] = true;
                     }
                 }
                 if (in_array($section, ['attributes','options'], true)) {
@@ -103,6 +125,13 @@ final class CatalogImport
                         $codes[$code] = true;
                     }
                 }
+            }
+        }
+        // Product and bundle keys occupy one namespace (both reference products).
+        $keys = array_column($doc['products'] ?? [], 'key');
+        foreach ($doc['bundles'] ?? [] as $bundle) {
+            if (in_array($bundle['key'], $keys, true)) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_DUPLICATE');
             }
         }
         return $doc;
@@ -250,6 +279,31 @@ final class CatalogImport
             $db->execute();
         }
         return [$id, $new];
+    }
+
+    /** Protect the technical product/bundle identity on re-import or adoption. */
+    private static function assertProductKind(DatabaseInterface $db, string $source,
+        array $row, string $expected): void
+    {
+        $id = self::mappedId($db, $source, 'products', self::key($row['key']));
+        if (!$id) {
+            $id = self::lookup($db, '#__minimarket_products', 'alias',
+                self::code($row['alias'] ?? null));
+        }
+        if ($id) {
+            $q = $db->getQuery(true)->select('product_type')
+                ->from($db->quoteName('#__minimarket_products'))->where('id = ' . $id);
+            $db->setQuery($q);
+            if ((string) $db->loadResult() !== $expected) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+            }
+        }
+    }
+
+    private static function shopType(): string
+    {
+        $value = (string) ComponentHelper::getParams('com_minimarket')->get('shop_type', 'physical');
+        return in_array($value, ['physical', 'digital'], true) ? $value : 'physical';
     }
 
     /** Idempotent value import by scoped natural code; never remove unmentioned values. */
@@ -405,16 +459,77 @@ final class CatalogImport
                     throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
                 }
                 $categoryId = self::localId($db, $source, 'categories', self::key($row['category'] ?? null));
+                self::assertProductKind($db, $source, $row, 'simple');
+                $price = self::money($row['price'] ?? null);
+                $oldPrice = array_key_exists('old_price', $row) ? self::money($row['old_price']) : null;
+                $sale = array_key_exists('badge_sale', $row) ? self::state($row['badge_sale']) : 0;
+                if ($sale && ($oldPrice === null || (float) $oldPrice <= (float) $price)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                }
                 [, $new] = self::upsert($db, $source, 'products', $row, [
                     'title' => self::name($row['title'] ?? null),
                     'alias' => self::code($row['alias'] ?? null),
                     'category_id' => $categoryId,
-                    'sku' => $sku, 'price' => self::money($row['price'] ?? null),
+                    'sku' => $sku, 'price' => $price,
+                    'product_type' => 'simple', 'delivery_type' => self::shopType(),
+                    ...(array_key_exists('old_price', $row) ? ['old_price' => $oldPrice] : []),
+                    ...(array_key_exists('badge_sale', $row) ? ['badge_sale' => $sale] : []),
                     'stock' => self::qty($row['stock'] ?? 0),
                     'option_stock_mode' => $stockMode,
                     'state' => self::state($row['state'] ?? 0)
                 ], 'alias', $adoptExisting);
                 ++$counts['products'][$new ? 'created' : 'updated'];
+            }
+            // Create all bundle identities before resolving components, so
+            // references may point to a later bundle or a nested bundle.
+            foreach ($doc['bundles'] ?? [] as $row) {
+                $categoryId = self::localId($db, $source, 'categories',
+                    self::key($row['category'] ?? null));
+                $sku = trim((string) ($row['sku'] ?? ''));
+                if ($sku === '' || mb_strlen($sku) > 100 || preg_match('/[\x00-\x1f<>]/u', $sku)) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                }
+                $mode = $row['price_mode'] ?? 'fixed';
+                $discount = (string) ($row['discount_pct'] ?? '0');
+                if (!in_array($mode, ['fixed','discount'], true)
+                    || !preg_match('/^(?:[0-9]{1,2}|100)(?:\.[0-9]{1,2})?$/D', $discount)
+                    || (float) $discount > 100) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                }
+                $price = self::money($row['price'] ?? null);
+                $oldPrice = array_key_exists('old_price', $row) ? self::money($row['old_price']) : null;
+                $sale = self::state($row['badge_sale'] ?? 0);
+                $benefit = self::state($row['badge_benefit'] ?? 0);
+                if (($mode === 'discount' && ($oldPrice !== null || $sale))
+                    || ($mode === 'fixed' && $benefit)
+                    || ($sale && ($oldPrice === null || (float) $oldPrice <= (float) $price))) {
+                    throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
+                }
+                self::assertProductKind($db, $source, $row, 'bundle');
+                [, $new] = self::upsert($db, $source, 'products', $row, [
+                    'title' => self::name($row['title'] ?? null),
+                    'alias' => self::code($row['alias'] ?? null),
+                    'sku' => $sku, 'category_id' => $categoryId, 'state' => self::state($row['state'] ?? 0),
+                    'product_type' => 'bundle', 'delivery_type' => self::shopType(),
+                    'price' => $price, 'old_price' => $oldPrice, 'stock' => 0,
+                    'option_stock_mode' => 0, 'bundle_price_mode' => $mode,
+                    'bundle_discount_pct' => number_format((float) $discount, 2, '.', ''),
+                    'badge_sale' => $sale, 'badge_benefit' => $benefit,
+                ], 'alias', $adoptExisting);
+                ++$counts['bundles'][$new ? 'created' : 'updated'];
+            }
+            foreach ($doc['bundles'] ?? [] as $row) {
+                $id = self::localId($db, $source, 'products', self::key($row['key']));
+                $items = [];
+                foreach ($row['items'] as $item) {
+                    $componentId = self::localId($db, $source, 'products',
+                        self::key($item['product']));
+                    $items[] = ['component' => 'product:' . $componentId,
+                        'quantity' => $item['quantity']];
+                }
+                $resolved = BundleItems::validate($db, $id, BundleItems::normalize($items));
+                BundleItems::replace($db, $id, $resolved);
+                $counts['bundles']['linked'] += count($resolved);
             }
             foreach ($doc['links'] ?? [] as $row) {
                 [$id, $new] = self::upsert($db, $source, 'links', $row, [

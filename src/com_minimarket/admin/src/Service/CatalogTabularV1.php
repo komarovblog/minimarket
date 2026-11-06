@@ -15,7 +15,8 @@ final class CatalogTabularV1
         'categories' => ['key','title','alias','parent','state'],
         'attributes' => ['key','title','code','type','state','values'],
         'options' => ['key','title','code','state','values'],
-        'products' => ['key','title','alias','sku','price','stock','stock_mode','category','state'],
+        'products' => ['key','title','alias','sku','price','old_price','badge_sale','stock','stock_mode','category','state'],
+        'bundles' => ['key','title','alias','sku','category','price','old_price','price_mode','discount_pct','badge_sale','badge_benefit','state','items'],
         'links' => ['key','title','members','state'],
         'category_attributes' => ['key','category','attribute','mode'],
         'category_options' => ['key','category','option','mode'],
@@ -54,7 +55,7 @@ final class CatalogTabularV1
 
     private static function decodeField(string $section, string $name, string $value): mixed
     {
-        if (in_array($name, ['values','members'], true)) {
+        if (in_array($name, ['values','members','items'], true)) {
             if ($value === '') return [];
             try { $parsed = json_decode($value, true, 40, JSON_THROW_ON_ERROR); }
             catch (\JsonException) { self::fail(); }
@@ -64,7 +65,7 @@ final class CatalogTabularV1
         if ($name === 'parent' && $section === 'categories') {
             return $value === '' ? null : $value;
         }
-        if (in_array($name, ['state','stock','stock_mode'], true)) {
+        if (in_array($name, ['state','stock','stock_mode','badge_sale','badge_benefit'], true)) {
             if (!preg_match('/^(0|[1-9][0-9]*)$/D', $value)) self::fail();
             $parsed = filter_var($value, FILTER_VALIDATE_INT);
             if ($parsed === false) self::fail();
