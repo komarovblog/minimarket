@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="module" client="administrator" method="upgrade">
+    <name>MOD_MINIMARKET_QUICKLINK</name>
+    <author>MiniMarket</author>
+    <creationDate>2026-11-06</creationDate>
+    <copyright>Copyright (C) MiniMarket contributors</copyright>
+    <license>GNU General Public License version 3 or later</license>
+    <version>0.5.62</version>
+    <description>MOD_MINIMARKET_QUICKLINK_DESCRIPTION</description>
+    <files>
+        <filename module="mod_minimarket_quicklink">mod_minimarket_quicklink.php</filename>
+        <folder>tmpl</folder>
+    </files>
+    <languages folder="language">
+        <language tag="en-GB">en-GB/mod_minimarket_quicklink.ini</language>
+        <language tag="en-GB">en-GB/mod_minimarket_quicklink.sys.ini</language>
+        <language tag="ru-RU">ru-RU/mod_minimarket_quicklink.ini</language>
+        <language tag="ru-RU">ru-RU/mod_minimarket_quicklink.sys.ini</language>
+    </languages>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="enabled" type="radio"
+                       label="MOD_MINIMARKET_QUICKLINK_ENABLED" default="1" filter="int">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="label" type="text"
+                       label="MOD_MINIMARKET_QUICKLINK_LABEL" default="MiniMarket"
+                       maxlength="80" filter="string" />
+                <field name="show_icon" type="radio"
+                       label="MOD_MINIMARKET_QUICKLINK_SHOW_ICON" default="1" filter="int">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="show_label" type="radio"
+                       label="MOD_MINIMARKET_QUICKLINK_SHOW_LABEL" default="1" filter="int">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
+</extension>
