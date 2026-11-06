@@ -40,7 +40,7 @@ final class FeedConfig
             .$db->quoteName('#__minimarket_categories')
             .' ORDER BY sort_order ASC,id ASC');
         $categories=(array)$db->loadAssocList();
-        $db->setQuery('SELECT id,category_id,title,sku,product_type,state FROM '
+        $db->setQuery('SELECT id,category_id,title,sku,product_type,state,stock,option_stock_mode FROM '
             .$db->quoteName('#__minimarket_products')
             .' ORDER BY category_id ASC,title ASC,id ASC');
         return [$categories,(array)$db->loadAssocList()];

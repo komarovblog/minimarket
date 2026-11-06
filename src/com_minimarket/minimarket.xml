@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.5.60</version>
+    <version>0.5.61</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -29,11 +29,15 @@
             <folder>tmpl</folder>
             <folder>language</folder>
             <folder>forms</folder>
+            <folder>presets</folder>
             <folder>examples</folder>
             <folder>sql</folder>
         </files>
-        <menu img="class:cart">COM_MINIMARKET</menu>
+        <menu img="class:cart">COM_MINIMARKET
+            <params><dashboard>minimarket</dashboard></params>
+        </menu>
         <submenu>
+            <menu link="option=com_minimarket&amp;view=dashboard">COM_MINIMARKET_DASHBOARD_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=category.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
@@ -56,8 +60,13 @@
             <menu link="option=com_minimarket&amp;view=collections">COM_MINIMARKET_COLLECTIONS</menu>
             <menu type="separator" alias="mm-separator-6">-</menu>
             <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE</menu>
         </submenu>
     </administration>
+    <dashboards>
+        <dashboard title="COM_MINIMARKET_DASHBOARD_TITLE" icon="icon-cart">minimarket</dashboard>
+    </dashboards>
+    <scriptfile>script.php</scriptfile>
     <install>
         <sql>
             <file driver="mysql" charset="utf8">sql/install.mysql.sql</file>

@@ -10,8 +10,20 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 
 final class HtmlView extends BaseHtmlView
 {
+    public array $stats=[];
     public function display($tpl = null)
     {
+        $db=Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class);
+        foreach ([
+            'categories'=>['categories','1=1'],
+            'products'=>['products',"product_type='simple'"],
+            'bundles'=>['products',"product_type='bundle'"],
+            'feeds'=>['feeds','1=1']
+        ] as $key=>[$table,$predicate]) {
+            $db->setQuery('SELECT COUNT(*) FROM '
+                .$db->quoteName('#__minimarket_'.$table).' WHERE '.$predicate);
+            $this->stats[$key]=(int)$db->loadResult();
+        }
         ToolbarHelper::title(Text::_('COM_MINIMARKET_DASHBOARD_TITLE'));
 
         $user = Factory::getApplication()->getIdentity();

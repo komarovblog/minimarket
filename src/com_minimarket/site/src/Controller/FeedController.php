@@ -74,8 +74,9 @@ final class FeedController extends BaseController
             }
             $stockMode=(int)($productById[$productId]['option_stock_mode']??0);
             foreach($variants['items'] as $variant) {
+                $variantOffer=$baseOffer;
                 $cover=(string)($variant['image']??'');
-                if($cover!=='')$baseOffer['image']=$base.$cover;
+                if($cover!=='')$variantOffer['image']=$base.$cover;
                 $parts=[];
                 foreach($variant['selection'] as $axis=>$value) {
                     $label=$value;
@@ -84,7 +85,7 @@ final class FeedController extends BaseController
                     }
                     $parts[]=$label;
                 }
-                $offers[]=array_merge($baseOffer,[
+                $offers[]=array_merge($variantOffer,[
                     'id'=>'sku-'.(int)$variant['id'],
                     'title'=>$p->title.' — '.implode(', ',$parts),
                     'sku'=>(string)$variant['sku'],
@@ -112,6 +113,7 @@ final class FeedController extends BaseController
         $app->setHeader('Content-Type','application/xml; charset=UTF-8',true);
         $app->setHeader('X-Content-Type-Options','nosniff',true);
         $app->setHeader('Cache-Control','no-store,max-age=0',true);
+        $app->setHeader('Referrer-Policy','no-referrer',true);
         $app->sendHeaders();
         echo $xml;
         $app->close();
