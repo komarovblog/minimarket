@@ -80,18 +80,7 @@ verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
 verify((int)$db->query("SELECT show_bundles FROM nnop3_minimarket_categories
  WHERE id=101 AND alias='myagkie-igrushki'")->fetch_row()[0]===1,
  'category can show bundles independently in demo');
-$digitalSql=file_get_contents(__DIR__.'/../sample-data/minimarket_digital_demo_0_5_55.sql');
-verify($digitalSql!==false,'0.5.55 digital demo found');
-$digitalCi=str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $digitalSql);
-runMulti($db,$digitalCi,'digital demo import');
-runMulti($db,$digitalCi,'digital demo repeatable import');
-verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
- WHERE id=1200 AND sku='DIGITAL-STEM-1200' AND delivery_type='digital'
- AND product_type='simple' AND state=0")->fetch_assoc()['n']===1,
- 'one unpublished digital example, no duplicates');
-verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
- WHERE delivery_type='digital'")->fetch_assoc()['n']===1,
- 'old demo products stay physical by default');
+
 
 
 
@@ -153,6 +142,19 @@ $allImages=$db->query("SELECT COUNT(DISTINCT image) n FROM nnop3_minimarket_prod
 verify((int)$allImages===10,'all ten sample images used');
 $joomla=$db->query("SHOW TABLES LIKE 'nnop3_users'")->num_rows;
 verify($joomla===0,'demo SQL test does not create Joomla system tables');
+// Add a separate unpublished digital sample AFTER all historical demo data assertions.
+$digitalSql=file_get_contents(__DIR__.'/../sample-data/minimarket_digital_demo_0_5_55.sql');
+verify($digitalSql!==false,'0.5.55 digital demo found');
+$digitalCi=str_replace('USE `minimarket`;', 'USE `minimarket_ci_demo84`;', $digitalSql);
+runMulti($db,$digitalCi,'digital demo import');
+runMulti($db,$digitalCi,'digital demo repeatable import');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+ WHERE id=1200 AND sku='DIGITAL-STEM-1200' AND delivery_type='digital'
+ AND product_type='simple' AND state=0")->fetch_assoc()['n']===1,
+ 'one unpublished digital example, no duplicates');
+verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
+ WHERE delivery_type='digital'")->fetch_assoc()['n']===1,
+ 'old demo products stay physical by default');
 echo "DEMO_MYSQL84_OK: " . total($db,'categories') . " categories, "
     .total($db,'products')." products, ".total($db,'product_variants')
     ." variants, ".total($db,'brands')." brands, ".total($db,'collections')
