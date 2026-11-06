@@ -1,0 +1,11 @@
+{
+  "name": "minimarket-local-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node storefront.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

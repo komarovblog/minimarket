@@ -22,4 +22,4 @@
 
 ## Автотесты
 
-GitHub Actions: PHP 8.4/8.5; MySQL 8.0 схема обновления; MySQL 8.4 повторяемый демо SQL и JSON v2; Node DOM promo; Windows component package. Browser E2E `NOT RUN`. Установочные файлы Joomla проходят CI, но реальное поведение на OpenServer может отличаться.
+GitHub Actions: PHP 8.4/8.5; MySQL 8.0 схема обновления; MySQL 8.4 повторяемый демо SQL и JSON v2; Node DOM promo; Windows component package. Доступен локальный [Playwright smoke](../scripts/e2e/README.md), но Browser E2E `NOT RUN` (нет доступа к пользовательской Joomla). Установочные файлы Joomla проходят CI, но реальное поведение на OpenServer может отличаться.
