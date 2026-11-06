@@ -7,12 +7,6 @@
     <field name="code" type="text" label="COM_MINIMARKET_ORDER_OPTION_CODE"
            description="COM_MINIMARKET_ORDER_OPTION_CODE_DESC" maxlength="100"
            filter="string" size="32"/>
-    <field name="state" type="list" label="JSTATUS" filter="int" default="1">
-      <option value="1">JPUBLISHED</option>
-      <option value="0">JUNPUBLISHED</option>
-    </field>
-    <field name="sort_order" type="number" label="JGRID_HEADING_ORDERING"
-           min="0" max="4294967295" default="0" filter="uint"/>
   </fieldset>
   <fieldset name="values" label="COM_MINIMARKET_ORDER_OPTION_VALUES">
     <field name="values_present" type="hidden" default="1" filter="int"/>
@@ -27,4 +21,12 @@
     <field name="category_rules" type="Optioncategories" filter="raw"
            label="COM_MINIMARKET_ORDER_OPTION_CATEGORIES"/>
   </fieldset>
+    <fieldset name="publishing" label="COM_MINIMARKET_CATEGORY_TAB_PUBLISHING">
+    <field name="state" type="list" label="JSTATUS" filter="int" default="1">
+      <option value="1">JPUBLISHED</option>
+      <option value="0">JUNPUBLISHED</option>
+    </field>
+    <field name="sort_order" type="number" label="JGRID_HEADING_ORDERING"
+           min="0" max="4294967295" default="0" filter="uint"/>
+    </fieldset>
 </form>

@@ -8,8 +8,6 @@
                description="COM_MINIMARKET_CATEGORY_PARENT_DESC" default="0" filter="int">
             <option value="0">COM_MINIMARKET_CATEGORY_PARENT_ROOT</option>
         </field>
-        <field name="sort_order" type="number" label="COM_MINIMARKET_CATEGORY_ORDER"
-               filter="uint" default="0" min="0" max="4294967295"/>
         <field name="image" type="media" label="COM_MINIMARKET_CATEGORY_IMAGE" filter="string" directory="images"/>
         <field name="image_alt" type="text" label="COM_MINIMARKET_CATEGORY_IMAGE_ALT" filter="string" size="60"/>
     </fieldset>
@@ -112,6 +110,8 @@
         <field name="og_image_alt" type="text" label="COM_MINIMARKET_OG_IMAGE_ALT" filter="string" maxlength="255"/>
     </fieldset>
     <fieldset name="publishing" label="COM_MINIMARKET_CATEGORY_TAB_PUBLISHING">
+        <field name="sort_order" type="number" label="COM_MINIMARKET_CATEGORY_ORDER"
+               filter="uint" default="0" min="0" max="4294967295"/>
         <field name="state" type="list" label="JSTATUS" default="0" filter="int">
             <option value="0">JUNPUBLISHED</option>
             <option value="1">JPUBLISHED</option>
