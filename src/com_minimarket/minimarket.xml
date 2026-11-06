@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.5.61</version>
+    <version>0.5.62</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -30,6 +30,7 @@
             <folder>language</folder>
             <folder>forms</folder>
             <folder>presets</folder>
+            <folder>modules</folder>
             <folder>examples</folder>
             <folder>sql</folder>
         </files>
