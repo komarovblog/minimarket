@@ -18,8 +18,8 @@ $href = Route::_('index.php?option=com_minimarket&view=dashboard', false);
 ?>
 <a href="<?php echo $encode($href); ?>"
    class="header-item-content mm-quicklink"
-   title="<?php echo $encode(Text::_('MOD_MINIMARKET_QUICKLINK_OPEN')); ?>"
-   aria-label="<?php echo $encode(Text::_('MOD_MINIMARKET_QUICKLINK_OPEN')); ?>">
+   title="<?php echo $encode(Text::_('MOD_MINIMARKET_TOOLBAR_OPEN')); ?>"
+   aria-label="<?php echo $encode(Text::_('MOD_MINIMARKET_TOOLBAR_OPEN')); ?>">
     <?php if ($showIcon) : ?>
         <span class="header-item-icon">
             <span class="icon-cart" aria-hidden="true"></span>

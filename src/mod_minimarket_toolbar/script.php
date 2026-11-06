@@ -9,7 +9,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Installer\InstallerScript;
 use Joomla\Database\DatabaseInterface;
 
-class mod_minimarket_quicklinkInstallerScript extends InstallerScript
+class mod_minimarket_toolbarInstallerScript extends InstallerScript
 {
     public function postflight($type, $parent)
     {
@@ -20,7 +20,7 @@ class mod_minimarket_quicklinkInstallerScript extends InstallerScript
         $db->setQuery($db->getQuery(true)
             ->select('id')
             ->from($db->quoteName('#__modules'))
-            ->where($db->quoteName('module') . '=' . $db->quote('mod_minimarket_quicklink'))
+            ->where($db->quoteName('module') . '=' . $db->quote('mod_minimarket_toolbar'))
             ->where($db->quoteName('client_id') . '=1')
             ->order('id ASC'));
         $id = (int) $db->loadResult();

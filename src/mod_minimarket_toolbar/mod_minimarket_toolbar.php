@@ -23,4 +23,4 @@ $showLabel = (int) $params->get('show_label', 1) === 1;
 if (!$showIcon && !$showLabel) {
     return;
 }
-require ModuleHelper::getLayoutPath('mod_minimarket_quicklink', $params->get('layout', 'default'));
+require ModuleHelper::getLayoutPath('mod_minimarket_toolbar', $params->get('layout', 'default'));
