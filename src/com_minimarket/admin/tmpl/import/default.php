@@ -14,7 +14,7 @@ use Joomla\CMS\Session\Session;
         <div class="table-responsive mb-3">
             <table class="table table-sm align-middle mm-import-templates">
                 <thead><tr><th><?php echo Text::_('COM_MINIMARKET_IMPORT_SAMPLE_KIND'); ?></th>
-                    <th>Excel (XLSX)</th><th>CSV</th><th>JSON</th></tr></thead>
+                    <th>XLSX</th><th>CSV</th><th>JSON</th></tr></thead>
                 <tbody>
                     <?php foreach (['rich' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_RICH',
                                     'catalog' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_SAMPLE',

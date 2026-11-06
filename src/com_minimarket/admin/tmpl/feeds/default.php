@@ -14,7 +14,7 @@ $e=static fn(mixed $value):string=>htmlspecialchars((string)$value,ENT_QUOTES|EN
             <p class="text-muted mb-0"><?php echo Text::_('COM_MINIMARKET_FEEDS_HELP'); ?></p>
         </div>
         <a class="btn btn-success" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feed',false)); ?>">
-            <span class="icon-plus" aria-hidden="true"></span> <?php echo Text::_('JNEW'); ?>
+            <span class="icon-plus" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_FEED_CREATE'); ?>
         </a>
     </div>
     <div class="table-responsive">

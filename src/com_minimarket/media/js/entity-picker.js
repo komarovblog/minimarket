@@ -22,6 +22,10 @@
    const category=root.querySelector('[data-mm-category]');
    const inputName=root.dataset.mmInput;
    if(!chosen||!finder||!results||!searchField||!inputName)return;
+   // All item pickers place Add above search above chosen rows.
+   const addAction=root.querySelector('[data-mm-add]');
+   if(addAction)root.insertBefore(addAction,chosen);
+   root.insertBefore(finder,chosen);
    let next=chosen.querySelectorAll('[data-mm-key]').length;
    let pending=null, request=0;
    const has=key=>Array.from(chosen.querySelectorAll('[data-mm-key]')).some(x=>x.dataset.mmKey===String(key));
@@ -141,14 +145,15 @@
        results.replaceChildren();
        const items=Array.isArray(json.items)?json.items:[];
        for(const item of items){
-         if(typeof item.key!=='string'||!/^(product:|variant:)?[1-9]\d*$/.test(item.key)||has(item.key))continue;
+         if(typeof item.key!=='string'||!/^(product:|variant:)?[1-9]\d*$/.test(item.key))continue;
          const row=el('div','mm-entity-picker__result');
          row.append(el('span','',label(item)));
          if(mode==='bundle'&&item.price!==undefined) row.append(el('small','',String(item.price)));
          const add=el('button','btn btn-success btn-sm','+');
          add.type='button';add.title=words.add||'Add';
          add.setAttribute('aria-label',(words.add||'Add')+' '+label(item));
-         add.addEventListener('click',()=>{append(item);row.remove();});
+         add.disabled=has(item.key);
+         add.addEventListener('click',()=>{append(item);add.disabled=true;});
          row.append(add);results.append(row);
        }
        if(!results.children.length)results.append(el('p','text-muted',
