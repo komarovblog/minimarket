@@ -135,16 +135,19 @@ checkUi(str_contains($categoryRules,"AdminEntityLinks::edit('attribute',") &&
     str_contains($optionRules,"AdminEntityLinks::edit('orderoption',"),
     'entity links open the actual Joomla edit task instead of the dashboard');
 $dashboard=file_get_contents($base.'admin/tmpl/dashboard/default.php');
-checkUi(str_contains($dashboard,'mm-dashboard-band card mb-3') &&
+checkUi(str_contains($dashboard,'mm-dashboard-grid') &&
+    str_contains($dashboard,'mm-dashboard-band card mm-dashboard-band--') &&
+    str_contains($dashboard,'mm-dashboard-band-header') &&
     str_contains($dashboard,'mm-dashboard-tiles') &&
-    str_contains($dashboard,'col-12 col-sm-6 col-lg-3') &&
+    str_contains($dashboard,'col-12 col-sm-6 col-xl-4') &&
     str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_MANAGEMENT') &&
-    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_PRODUCTS_SECTION') &&
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_SHOP') &&
     str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_TOOLS') &&
     str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_ORDERS') &&
+    str_contains($dashboard,'mm-dashboard-icon--bundle') &&
     str_contains($dashboard,'btn btn-primary d-inline-flex') &&
     !str_contains($dashboard,'list-group'),
-    'dashboard has three full-width horizontal sections with 25%-width icon tiles, no vertical menus');
+    'dashboard has three native-width Joomla panels, store/bundle icons and no vertical menus');
 checkUi(str_contains($editor,'sku_matrix_payload') &&
     str_contains($cssFrame,'.mm-sku-viewport') &&
     str_contains($cssFrame,'[data-mm-pinned="sku"]'),
@@ -160,11 +163,11 @@ foreach ([
         'entity link opens actual Joomla editor: '.$file);
 }
 $landing=file_get_contents($base.'admin/tmpl/dashboard/default.php');
-checkUi(str_contains($landing,'mm-dashboard-band card mb-3') &&
+checkUi(str_contains($landing,'mm-dashboard-band card mm-dashboard-band--') &&
     str_contains($landing,'COM_MINIMARKET_FEEDS_TITLE') &&
     str_contains($landing,'COM_MINIMARKET_IMPORT_TITLE') &&
     str_contains($landing,'view=catalog'),
-    'MiniMarket home has full-width tools band with feeds and prominent storefront button');
+    'MiniMarket home has native-size Tools panel, feeds and storefront button');
 $categoryAttrs=file_get_contents($base.'admin/src/Field/CategoryattributesField.php');
 $categoryOpts=file_get_contents($base.'admin/src/Field/CategoryorderoptionsField.php');
 checkUi(str_contains($categoryAttrs,'d-block text-muted') &&
