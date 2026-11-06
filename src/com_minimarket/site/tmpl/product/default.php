@@ -142,11 +142,54 @@ $initialDescription=$hasCustomDescription
                 </div>
         </div>
     <?php endif; ?>
+    <?php
+    // Exactly one local MP4/WebM promo is allowed by the form validator.
+    $promoVideo = null;
+    foreach ($this->videos as $videoEntry) {
+        $candidate = (string)($videoEntry->source ?? '');
+        if ((int)($videoEntry->is_promo ?? 0) === 1 &&
+            preg_match('~^(images|media)/[a-zA-Z0-9_./ -]+\\.(?:mp4|webm)$~iD', $candidate) &&
+            !str_contains($candidate, '..') && !str_contains($candidate, '//')) {
+            $promoVideo = $videoEntry;
+            break;
+        }
+    }
+    ?>
+    <?php if ($promoVideo !== null) : ?>
+        <?php
+        $promoPoster = explode('#', (string)($promoVideo->poster ?? ''), 2)[0];
+        $promoPosterUrl = $isSafeImage($promoPoster) ? Uri::root() . $promoPoster : '';
+        ?>
+        <aside class="mm-promo-video" data-mm-promo aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_VIDEO_PROMO')); ?>">
+            <div class="mm-promo-video__media">
+                <video data-mm-promo-player autoplay muted loop playsinline preload="metadata"
+                       <?php if ($promoPosterUrl !== '') : ?>poster="<?php echo $this->escape($promoPosterUrl); ?>"<?php endif; ?>>
+                    <source src="<?php echo $this->escape(Uri::root() . (string)$promoVideo->source); ?>">
+                </video>
+            </div>
+            <div class="mm-promo-video__actions">
+                <button type="button" class="btn btn-primary btn-sm" data-mm-promo-expand aria-expanded="false">
+                    <?php echo Text::_('COM_MINIMARKET_VIDEO_PROMO_EXPAND'); ?>
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-mm-promo-close
+                        aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_VIDEO_PROMO_CLOSE')); ?>">×</button>
+            </div>
+            <div class="mm-promo-video__expanded" data-mm-promo-panel hidden>
+                <p><?php echo $this->escape((string)($promoVideo->title ?: $this->product->title)); ?></p>
+                <button type="button" class="btn btn-secondary" disabled
+                        title="<?php echo $this->escape(Text::_('COM_MINIMARKET_CART_NOT_READY')); ?>">
+                    <?php echo Text::_('COM_MINIMARKET_VIDEO_PROMO_BUY'); ?>
+                </button>
+                <p class="small"><?php echo Text::_('COM_MINIMARKET_CART_NOT_READY'); ?></p>
+            </div>
+        </aside>
+    <?php endif; ?>
     <?php if (!empty($this->videos)) : ?>
         <section class="mm-product-videos" data-mm-model-videos
                  <?php echo $defaultVariant && (int)($defaultVariant['video_mode']??0)!==0 ? 'hidden' : ''; ?> aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS')); ?>">
             <h2><?php echo Text::_('COM_MINIMARKET_PRODUCT_TAB_VIDEOS'); ?></h2>
-            <?php foreach ($this->videos as $item) : ?>
+            <?php foreach ($this->videos as $item) :
+                if ((int)($item->is_promo ?? 0) === 1) continue; ?>
                 <?php
                 // Never render admin-entered HTML/iframe src directly.
                 $src = trim((string) ($item->source ?? ''));

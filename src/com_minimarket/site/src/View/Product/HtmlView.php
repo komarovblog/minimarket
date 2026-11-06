@@ -68,6 +68,8 @@ final class HtmlView extends BaseHtmlView
             ->registerAndUseStyle('com_minimarket.gallery', 'media/com_minimarket/css/gallery.css')
             ->registerAndUseStyle('com_minimarket.attributes', 'media/com_minimarket/css/attributes.css')
             ->registerAndUseStyle('com_minimarket.variants', 'media/com_minimarket/css/variants.css')
+            ->registerAndUseStyle('com_minimarket.promo', 'media/com_minimarket/css/promo-video.css')
+            ->registerAndUseScript('com_minimarket.promo', 'media/com_minimarket/js/promo-video.js', [], ['defer' => true])
             ->registerAndUseScript('com_minimarket.variants', 'media/com_minimarket/js/variants.js', [], ['defer' => true]);
         $document = $this->getDocument();
         $metaTitle = trim((string) ($product->meta_title ?? ''));

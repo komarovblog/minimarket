@@ -290,7 +290,7 @@ final class CatalogRepository
     {
         if ($id < 1) return [];
         $q = $this->db->getQuery(true)
-            ->select(['title','source','poster'])
+            ->select(['title','source','poster','is_promo'])
             ->from($this->db->quoteName('#__minimarket_product_videos'))
             ->where($this->db->quoteName('product_id') . ' = ' . $id)
             ->order('sort_order ASC, id ASC');

@@ -75,6 +75,7 @@ final class ProductVideos
         }
         $rows = [];
         $seen = [];
+        $hasPromo = false;
         foreach ($input as $row) {
             $row = is_object($row) ? (array) $row : $row;
             if (!is_array($row) || !is_scalar($row['title'] ?? '')
@@ -93,6 +94,18 @@ final class ProductVideos
                 }
             }
             $source = self::normalizeSource($mediaPath !== '' ? $mediaPath : (string) $row['source']);
+            $isPromoRaw = (string) ($row['is_promo'] ?? '0');
+            if (!in_array($isPromoRaw, ['0','1'], true)) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
+            }
+            $isPromo = $isPromoRaw === '1';
+            // Floating autoplay needs a local MP4/WebM. Never silently autoplay
+            // third-party embeds, tracking players or arbitrary external media.
+            if ($isPromo && ($hasPromo || $source === null
+                || !preg_match('~^(?:images|media)/[a-zA-Z0-9_./ -]+\\.(?:mp4|webm)$~iD', $source))) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
+            }
+            $hasPromo = $hasPromo || $isPromo;
             $posterInput = (string) ($row['poster'] ?? '');
             $poster = $posterInput === '' ? '' : MediaPath::normalize($posterInput);
             if ($source === null || $poster === null || isset($seen[$source]) || mb_strlen($title) > 255
@@ -100,7 +113,8 @@ final class ProductVideos
                 throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
             }
             $seen[$source] = true;
-            $rows[] = ['title'=>$title,'source'=>$source,'poster'=>$poster,'sort_order'=>count($rows)];
+            $rows[] = ['title'=>$title,'source'=>$source,'poster'=>$poster,
+                'is_promo'=>$isPromo ? 1 : 0,'sort_order'=>count($rows)];
         }
         return $rows;
     }
@@ -110,7 +124,7 @@ final class ProductVideos
     {
         if ($productId < 1) return [];
         $q = $db->getQuery(true)
-            ->select(['title','source','poster'])
+            ->select(['title','source','poster','is_promo'])
             ->from($db->quoteName('#__minimarket_product_videos'))
             ->where($db->quoteName('product_id') . ' = ' . $productId)
             ->order('sort_order ASC, id ASC');
@@ -121,7 +135,8 @@ final class ProductVideos
                 'title'=>(string)$row['title'],
                 'source'=>str_starts_with((string)$row['source'], 'https://') ? (string)$row['source'] : '',
                 'media_path'=>str_starts_with((string)$row['source'], 'https://') ? '' : (string)$row['source'],
-                'poster'=>(string) ($row['poster'] ?? '')
+                'poster'=>(string) ($row['poster'] ?? ''),
+                'is_promo'=>(int) ($row['is_promo'] ?? 0)
             ];
         }
         return $result;
@@ -140,13 +155,14 @@ final class ProductVideos
         if (!$rows) return;
         $q = $db->getQuery(true)
             ->insert($db->quoteName('#__minimarket_product_videos'))
-            ->columns($db->quoteName(['product_id','title','source','poster','sort_order']));
+            ->columns($db->quoteName(['product_id','title','source','poster','is_promo','sort_order']));
         foreach ($rows as $row) {
             $q->values(implode(',', [
                 (string) $productId,
                 $db->quote($row['title']),
                 $db->quote($row['source']),
                 $db->quote($row['poster']),
+                (string) ($row['is_promo'] ?? 0),
                 (string) $row['sort_order'],
             ]));
         }

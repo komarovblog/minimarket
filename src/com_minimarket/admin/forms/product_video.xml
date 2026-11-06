@@ -8,6 +8,9 @@
     <field name="poster" type="media" label="COM_MINIMARKET_VIDEO_POSTER"
            description="COM_MINIMARKET_VIDEO_POSTER_DESC" directory="images"
            preview="true" filter="string"/>
+    <field name="is_promo" type="checkbox" label="COM_MINIMARKET_VIDEO_PROMO"
+           description="COM_MINIMARKET_VIDEO_PROMO_HELP"
+           value="1" unchecked="0" default="0" filter="int"/>
     <field name="media_path" type="media" label="COM_MINIMARKET_VIDEO_MEDIA_FILE"
            description="COM_MINIMARKET_VIDEO_MEDIA_FILE_DESC"
            types="videos" directory="images" preview="false" filter="string"/>

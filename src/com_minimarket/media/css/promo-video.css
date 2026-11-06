@@ -1,0 +1,21 @@
+/* Floating promo is a component-level enhancement. No core Joomla assets modified. */
+.mm-promo-video {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 1010;
+  width: min(17rem, calc(100vw - 2rem));
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  border: 1px solid var(--bs-border-color, #bbb);
+  border-radius: .65rem; box-shadow: 0 .35rem 1.5rem rgba(0,0,0,.25);
+  overflow: hidden;
+}
+.mm-promo-video[hidden] { display: none !important; }
+.mm-promo-video.is-expanded { width: min(27rem, calc(100vw - 2rem)); }
+.mm-promo-video__media video { display: block; width: 100%; aspect-ratio: 16/9; object-fit: contain; background: #111; }
+.mm-promo-video__actions { display: flex; gap: .5rem; justify-content: space-between; padding: .5rem; }
+.mm-promo-video__expanded { padding: .25rem .75rem .8rem; }
+.mm-promo-video__expanded[hidden] { display: none; }
+.mm-promo-video__expanded p { margin: .25rem 0 .6rem; }
+@media (max-width: 480px) {
+ .mm-promo-video { right: .5rem; bottom: .5rem; width: min(12rem, calc(100vw - 1rem)); }
+ .mm-promo-video.is-expanded { width: min(23rem, calc(100vw - 1rem)); }
+}
