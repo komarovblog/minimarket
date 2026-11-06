@@ -94,7 +94,9 @@ $sections = [
                                    href="<?php echo AdminEntityLinks::view($item['view']); ?>">
                                     <span class="<?php echo htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></span>
                                     <span class="flex-grow-1 fw-semibold"><?php echo Text::_($item['label']); ?></span>
-                                    <span class="badge mm-dashboard-count" aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <span class="badge mm-dashboard-count"
+                                          data-mm-stat="<?php echo htmlspecialchars((string)($item['count'] ?? 'none'), ENT_QUOTES, 'UTF-8'); ?>"
+                                          aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
                                         <?php if ($item['count'] === null) : ?>
                                             <span aria-hidden="true">—</span>
                                         <?php else : ?>
