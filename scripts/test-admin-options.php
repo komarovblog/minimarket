@@ -128,6 +128,19 @@ namespace MiniMarket\AdminOptionsTest {
                 };
             }
 
+            public function getDocument(): object
+            {
+                return new class {
+                    public function getWebAssetManager(): object {
+                        return new class {
+                            public function registerAndUseStyle(string $name, string $file):self {
+                                return $this;
+                            }
+                        };
+                    }
+                };
+            }
+
             public function getIdentity(): object
             {
                 return new class($this->allowed) {
