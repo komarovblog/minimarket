@@ -14,6 +14,15 @@ foreach(glob($controllerDir.'*Controller.php') ?: [] as $path) {
     preg_match_all('/public\\s+function\\s+(\\w+)\\s*\\(/i',$text,$matches);
     $controllers[$name]=array_fill_keys($matches[1],true);
 }
+// Public feed XML links are printed in the administrator list, but are
+// handled by the public Site\Controller\FeedController, not the admin one.
+$siteControllers=[];
+foreach(glob($root.'site/src/Controller/*Controller.php') ?: [] as $path) {
+    $name=strtolower(substr(basename($path),0,-strlen('Controller.php')));
+    $source=(string)file_get_contents($path);
+    preg_match_all('/public\\s+function\\s+(\\w+)\\s*\\(/i',$source,$methods);
+    $siteControllers[$name]=array_fill_keys($methods[1],true);
+}
 $inherit=array_fill_keys([
     'add','edit','save','apply','cancel','save2new','save2copy','delete',
     'publish','unpublish','checkin','batch','reorder','saveorder','featured',
@@ -30,7 +39,8 @@ foreach(glob($root.'admin/tmpl/*/*.php') ?: [] as $path) {
         $id=$name.'.'.$method;
         $links[$id]=($links[$id]??0)+1;
         if(!isset($controllers[$name])) $mismatches[]='No controller for '.$id;
-        elseif(!isset($controllers[$name][$method])&&!isset($inherit[$method]))
+        elseif(!isset($controllers[$name][$method])&&!isset($inherit[$method])
+            && !isset($siteControllers[$name][$method]))
             $mismatches[]='No controller method for '.$id;
     }
     preg_match_all('/view=([a-z][a-z0-9_]*)/i',$source,$vm);
