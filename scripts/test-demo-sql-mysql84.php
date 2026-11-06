@@ -156,7 +156,7 @@ verify((int)$db->query("SELECT COUNT(*) n FROM nnop3_minimarket_products
  WHERE delivery_type='digital'")->fetch_assoc()['n']===1,
  'old demo products stay physical by default');
 // 0.5.57: the cumulative catalog updates an existing database in-place.
-$updateSql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_58.sql');
+$updateSql=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_5_59.sql');
 verify($updateSql!==false,'cumulative 0.5.58 SQL exists');
 $updateCi=str_replace('USE `minimarket`;','USE `minimarket_ci_demo84`;',$updateSql);
 $demoOptions=$db->query("SHOW COLUMNS FROM nnop3_minimarket_categories LIKE 'product_layout'")->fetch_assoc();
@@ -176,6 +176,11 @@ verify((float)$db->query("SELECT price FROM nnop3_minimarket_products WHERE id=1
 verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_group_members WHERE product_id=1001 AND group_id=901")->fetch_row()[0]===1,
     'missing demo relation gets restored exactly once');
 verify(total($db,'bundle_items')===6,'bundle components not duplicated');
+verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_images WHERE product_id=1012")->fetch_row()[0]>=3,
+ 'example product has three or more gallery images');
+verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_videos WHERE product_id=1012 AND is_promo=1")->fetch_row()[0]===1,
+ 'one optional promo remains after repeated SQL');
+
 
 echo "DEMO_MYSQL84_OK: " . total($db,'categories') . " categories, "
     .total($db,'products')." products, ".total($db,'product_variants')

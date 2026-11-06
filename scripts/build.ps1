@@ -58,6 +58,7 @@ $needed = @(
     'admin\forms\collection.xml',
     'admin\sql\updates\mysql\0.5.49.sql',
     'admin\sql\updates\mysql\0.5.58.sql',
+    'admin\sql\updates\mysql\0.5.59.sql',
     'admin\src\Field\ProductattributesField.php',
     'media\js\product-attributes.js',
     'admin\src\Service\CategoryAttributes.php',
