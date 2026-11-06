@@ -52,7 +52,12 @@ final class HtmlView extends BaseHtmlView
         Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseScript('com_minimarket.product-badges',
                 'media/com_minimarket/js/product-badges.js',[],['defer'=>true]);
-        ToolbarHelper::title(Text::_('COM_MINIMARKET_PRODUCT_EDIT_TITLE'));
+        $isBundle=($this->item->product_type ?? '')==='bundle'
+            || ((int)($this->item->id ?? 0)===0
+                && Factory::getApplication()->input->getCmd('product_type')==='bundle');
+        ToolbarHelper::title(Text::_($isBundle
+            ? 'COM_MINIMARKET_BUNDLE_EDIT_TITLE'
+            : 'COM_MINIMARKET_PRODUCT_EDIT_TITLE'));
         ToolbarHelper::apply('product.apply');
         ToolbarHelper::save('product.save');
         ToolbarHelper::cancel('product.cancel');

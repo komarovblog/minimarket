@@ -1,0 +1,10 @@
+/* MiniMarket 0.5.55: compact and visually separate Import / Export blocks. */
+.com-minimarket-import .mm-import-format { min-width: 6.25rem; text-align:center; }
+.com-minimarket-import .mm-import-templates th:first-child { min-width: 10rem; }
+.com-minimarket-import .mm-import-templates td { width: 7.25rem; }
+.com-minimarket-import .mm-import-upload { border-top: 1px solid var(--border-color,rgba(128,128,128,.25)); padding-top: 1rem; }
+.com-minimarket-import .mm-export-block { margin-top: 1.5rem !important; }
+@media(max-width:550px) {
+  .com-minimarket-import .mm-import-format { min-width: 4rem; }
+  .com-minimarket-import .mm-import-templates td { width: auto; }
+}

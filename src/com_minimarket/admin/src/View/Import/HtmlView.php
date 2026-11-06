@@ -22,6 +22,9 @@ final class HtmlView extends BaseHtmlView
         }
         $this->pending = Factory::getApplication()->getUserState('com_minimarket.import.pending');
         $this->last = Factory::getApplication()->getUserState('com_minimarket.import.last');
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseStyle('com_minimarket.import-layout',
+                'media/com_minimarket/css/import-layout.css');
         ToolbarHelper::title(Text::_('COM_MINIMARKET_IMPORT_TITLE'));
         parent::display($tpl);
     }

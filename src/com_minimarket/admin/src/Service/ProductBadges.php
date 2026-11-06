@@ -53,7 +53,11 @@ final class ProductBadges
         $now ??= new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $old=self::cents($product->old_price??null);
         $current=self::cents($product->price??null);
-        $comparable=$old!==null && $current!==null && $old>0 && $current<$old;
+        // Automatic bundle discounts use Savings, not Sale/old-price labels.
+        $automaticBundle=($product->product_type??'simple')==='bundle'
+            && ($product->bundle_price_mode??'fixed')==='discount';
+        $comparable=!$automaticBundle && $old!==null && $current!==null
+            && $old>0 && $current<$old;
         $sale=null;
         if($comparable && (int)($product->badge_sale??0)===1) {
             $sale=intdiv(($old-$current)*100+$old-1,$old);

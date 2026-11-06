@@ -447,6 +447,17 @@ try {
         Write-Output 'PACKAGE_FAIL: MM_054_SQL_MISSING_OR_MISMATCH'
         exit 1
     }
+    $digitalSqlName = 'minimarket_digital_demo_0_5_55.sql'
+    $digitalSqlOut = Join-Path (Split-Path -Parent $ZipPath) $digitalSqlName
+    $digitalSqlSrc = Join-Path $root ('sample-data\' + $digitalSqlName)
+    if ($archive.GetEntry($digitalSqlName) -ne $null -or
+        -not (Test-Path -LiteralPath $digitalSqlOut -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $digitalSqlSrc -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $digitalSqlOut -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $digitalSqlSrc -Algorithm SHA256).Hash) {
+        Write-Output 'PACKAGE_FAIL: MM_055_DIGITAL_SQL_MISSING_OR_MISMATCH'
+        exit 1
+    }
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')
     exit 0
 }

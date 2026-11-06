@@ -24,6 +24,15 @@ final class ProductTable extends Table
         $this->alias = trim((string) $this->alias);
         $this->sku = trim((string) $this->sku);
         $this->product_type=(string)($this->product_type ?? 'simple');
+        $this->delivery_type=(string)($this->delivery_type ?? 'physical');
+        if(!in_array($this->delivery_type,['physical','digital'],true)) {
+            $this->setError(Text::_('COM_MINIMARKET_DELIVERY_TYPE_INVALID'));
+            return false;
+        }
+        // Bundles can contain physical, digital, or mixed components.
+        // The bundle record stores a neutral default; fulfillment is derived
+        // from its members at checkout in a later phase.
+        if($this->product_type==='bundle') $this->delivery_type='physical';
         if (!in_array($this->product_type,['simple','bundle'],true)) {
             $this->setError(Text::_('COM_MINIMARKET_BUNDLE_TYPE_INVALID'));
             return false;
@@ -98,6 +107,12 @@ final class ProductTable extends Table
             } else {
                 $this->$duration=(int)$days;
             }
+        }
+        // The two price strategies have mutually exclusive promotional flags.
+        if($this->product_type==='bundle' && $this->bundle_price_mode==='discount'
+            && $this->badge_sale===1) {
+            $this->setError(Text::_('COM_MINIMARKET_BADGE_SALE_FIXED_ONLY'));
+            return false;
         }
         if($this->badge_benefit===1
             && ($this->product_type!=='bundle'||$this->bundle_price_mode!=='discount')) {

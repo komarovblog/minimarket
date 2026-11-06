@@ -34,16 +34,40 @@ use Joomla\CMS\Router\Route;
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-product', $section, Text::_($label)); ?>
         <div class="card card-body mm-admin-panel"<?php echo $section === 'variants' ? ' data-mm-variants-editor' : ''; ?>>
             <?php if ($section === 'details') : ?>
-                <?php echo $this->form->renderFieldset('details'); ?>
-                <?php if ($isBundle) : ?>
-                    <div class="mm-bundle-pricing-controls" data-mm-bundle-pricing>
-                        <?php echo $this->form->renderFieldset('bundle_pricing'); ?>
-                        <p class="text-muted small"><?php echo Text::_('COM_MINIMARKET_BUNDLE_PRICE_MODE_HELP'); ?></p>
-                    </div>
-                <?php endif; ?>
+                <?php
+                // Entity kind comes from the sidebar editor, not a dropdown.
+                // The bundle price method appears directly after SKU.
+                foreach (['id','title','alias','category_id','product_type','sku'] as $field)
+                    echo $this->form->renderField($field);
+                if ($isBundle) {
+                    echo $this->form->renderField('bundle_price_mode');
+                    echo $this->form->renderField('price');
+                    echo $this->form->renderField('old_price');
+                    echo $this->form->renderField('bundle_discount_pct');
+                    // Retain stored values for fields irrelevant to bundle sales.
+                    echo '<div hidden aria-hidden="true">';
+                    echo $this->form->renderField('stock');
+                    echo $this->form->renderField('option_stock_mode');
+                    echo '</div>';
+                } else {
+                    echo $this->form->renderField('delivery_type');
+                    echo $this->form->renderField('price');
+                    echo $this->form->renderField('old_price');
+                    echo $this->form->renderField('stock');
+                    echo $this->form->renderField('option_stock_mode');
+                }
+                echo $this->form->renderField('sort_order');
+                ?>
             <?php elseif ($section === 'badges') : ?>
-                <?php echo $this->form->renderFieldset('badges'); ?>
-                <?php if ($isBundle) echo $this->form->renderFieldset('bundle_benefit'); ?>
+                <?php
+                  // Explicit order is part of the admin UI contract.
+                  if ($isBundle) echo $this->form->renderField('badge_benefit');
+                  echo $this->form->renderField('badge_sale');
+                  echo $this->form->renderField('badge_new');
+                  echo $this->form->renderField('badge_new_days');
+                  echo $this->form->renderField('badge_popular');
+                  echo $this->form->renderField('badge_popular_days');
+                ?>
             <?php elseif ($section === 'variants') : ?>
                 <?php echo $this->form->renderField('variants_present'); ?>
                 <?php echo $this->form->renderField('variant_dimensions_present'); ?>

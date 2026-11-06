@@ -290,6 +290,15 @@ try {
         (Get-FileHash -LiteralPath $uiSqlOutput -Algorithm SHA256).Hash) {
         throw 'MM_054_DEMO_HASH_MISMATCH'
     }
+    # 0.5.55: optional digital delivery type example. Separate from Joomla ZIP.
+    $digitalSource = Join-Path $projectRoot 'sample-data\minimarket_digital_demo_0_5_55.sql'
+    $digitalOutput = Join-Path $zipDirectory 'minimarket_digital_demo_0_5_55.sql'
+    if (-not (Test-Path -LiteralPath $digitalSource -PathType Leaf)) { throw 'Missing 0.5.55 digital demo SQL' }
+    Copy-Item -LiteralPath $digitalSource -Destination $digitalOutput -Force
+    if ((Get-FileHash -LiteralPath $digitalSource -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $digitalOutput -Algorithm SHA256).Hash) {
+        throw 'MM_055_DIGITAL_SQL_HASH_MISMATCH'
+    }
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

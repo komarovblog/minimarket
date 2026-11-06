@@ -135,9 +135,13 @@ final class ProductpickerController extends BaseController
                 .' OR v.sku LIKE '.$like.')');
         }
         $db->setQuery($q,0,25);
+        // IMPORTANT: fetch candidates BEFORE the pricing snapshot. Snapshot()
+        // issues its own setQuery(), otherwise the subsequent loadAssocList()
+        // reads the final price query rather than the product search.
+        $candidateRows=(array)$db->loadAssocList();
         $items=[];
         $priceSnapshot=BundlePrice::snapshot($db);
-        foreach ((array)$db->loadAssocList() as $row) {
+        foreach ($candidateRows as $row) {
             $id=(int)$row['id'];
             $variant=$row['variant_id']!==null;
             $key=$variant?'variant:'.(int)$row['variant_id']:'product:'.$id;

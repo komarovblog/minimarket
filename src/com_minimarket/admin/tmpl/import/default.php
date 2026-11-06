@@ -7,27 +7,20 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 ?>
 <div class="com-minimarket-import">
-    <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_IMPORT_TITLE_ONLY'); ?></h2>
-    <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_IMPORT_HELP'); ?></p>
-    <div class="card card-body mb-3">
-        <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_IMPORT_STEPS_TITLE'); ?></h2>
-        <ol class="mb-3">
-            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_DOWNLOAD'); ?></li>
-            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_EDIT'); ?></li>
-            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_PREVIEW'); ?></li>
-            <li><?php echo Text::_('COM_MINIMARKET_IMPORT_STEP_APPLY'); ?></li>
-        </ol>
-        <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_IMPORT_EXAMPLES_TITLE'); ?></h3>
+    <section class="card card-body mb-4 mm-import-block">
+        <h2 class="h4 mb-2"><?php echo Text::_('COM_MINIMARKET_IMPORT_TITLE_ONLY'); ?></h2>
+        <p class="small text-muted mb-3"><?php echo Text::_('COM_MINIMARKET_IMPORT_COMPACT_HELP'); ?></p>
+        <h3 class="h6 mb-2"><?php echo Text::_('COM_MINIMARKET_IMPORT_EXAMPLES_TITLE'); ?></h3>
         <div class="table-responsive mb-3">
-            <table class="table table-sm align-middle">
+            <table class="table table-sm align-middle mm-import-templates">
                 <thead><tr><th><?php echo Text::_('COM_MINIMARKET_IMPORT_SAMPLE_KIND'); ?></th>
-                    <th>Excel (.xlsx)</th><th>CSV</th><th>JSON</th></tr></thead>
+                    <th>Excel (XLSX)</th><th>CSV</th><th>JSON</th></tr></thead>
                 <tbody>
                     <?php foreach (['catalog' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_SAMPLE',
                                     'empty' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_EMPTY'] as $template => $label) : ?>
                     <tr><th scope="row"><?php echo Text::_($label); ?></th>
                         <?php foreach (['xlsx','csv','json'] as $format) : ?>
-                        <td><a class="btn btn-secondary btn-sm"
+                        <td><a class="btn btn-secondary btn-sm mm-import-format"
                                href="<?php echo Route::_('index.php?option=com_minimarket&task=import.example&template='
                                    . $template . '&filetype=' . $format . '&' . Session::getFormToken() . '=1'); ?>">
                             <?php echo strtoupper($format); ?></a></td>
@@ -37,25 +30,21 @@ use Joomla\CMS\Session\Session;
                 </tbody>
             </table>
         </div>
-        <p class="small text-muted mt-3 mb-0"><?php echo Text::_('COM_MINIMARKET_IMPORT_SCOPE_NOTE'); ?></p>
-        <hr class="my-3">
-        <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_IMPORT_FILE'); ?></h3>
         <form action="<?php echo Route::_('index.php?option=com_minimarket&task=import.preview'); ?>"
-          method="post" enctype="multipart/form-data" class="mb-4">
-        <div class="mb-3">
+              method="post" enctype="multipart/form-data" class="mm-import-upload">
             <label for="mm-import-file" class="form-label"><?php echo Text::_('COM_MINIMARKET_IMPORT_FILE'); ?></label>
-            <input type="file" class="form-control" name="package" id="mm-import-file"
+            <input type="file" class="form-control mb-2" name="package" id="mm-import-file"
                    accept=".xlsx,.csv,.json,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
-        </div>
-        <button type="submit" class="btn btn-primary">
-            <?php echo Text::_('COM_MINIMARKET_IMPORT_PREVIEW'); ?>
-        </button>
-        <?php echo HTMLHelper::_('form.token'); ?>
+            <button type="submit" class="btn btn-primary">
+                <?php echo Text::_('COM_MINIMARKET_IMPORT_PREVIEW'); ?>
+            </button>
+            <?php echo HTMLHelper::_('form.token'); ?>
         </form>
-    </div>
-    <div class="card card-body mb-4">
-        <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_EXPORT_TITLE'); ?></h2>
-        <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_EXPORT_HELP'); ?></p>
+        <p class="small text-muted mb-0 mt-3"><?php echo Text::_('COM_MINIMARKET_IMPORT_SCOPE_NOTE'); ?></p>
+    </section>
+    <section class="card card-body mb-4 mt-4 mm-export-block">
+        <h2 class="h4 mb-2"><?php echo Text::_('COM_MINIMARKET_EXPORT_TITLE'); ?></h2>
+        <p class="text-muted mb-2"><?php echo Text::_('COM_MINIMARKET_EXPORT_HELP'); ?></p>
         <p class="small text-warning"><?php echo Text::_('COM_MINIMARKET_EXPORT_LIMIT_NOTE'); ?></p>
         <div class="d-flex flex-wrap gap-2">
             <?php foreach (['xlsx','csv','json'] as $format) : ?>
@@ -66,7 +55,7 @@ use Joomla\CMS\Session\Session;
                 </a>
             <?php endforeach; ?>
         </div>
-    </div>
+    </section>
     <?php
     $report = is_array($this->pending['report'] ?? null) ? $this->pending['report'] : null;
     $last = $report === null && is_array($this->last) ? $this->last : null;
