@@ -91,7 +91,7 @@ namespace MiniMarket\Smoke54 {
         !str_contains($productJs,'saleContainer.hidden'),
         'discount flag stays visible but disabled until old price entered');
     verify(str_contains($productJs,"mode.value==='discount'") &&
-        str_contains($productJs,'benefit.disabled=!automatic'),
+        str_contains($productJs,'benefit.disabled=!discounted'),
         'bundle discounted price UI and benefit flag conditions');
     $table=(string)file_get_contents($root.'admin/src/Table/ProductTable.php');
     verify(str_contains($table,'COM_MINIMARKET_BADGE_BENEFIT_INVALID'),
