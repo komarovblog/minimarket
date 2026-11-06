@@ -49,3 +49,7 @@ Native administrator module: PHP render unit test (label/icon/off/ACL/XSS); simu
 - Устаревший `mod_minimarket_quicklink` удаляется только Joomla Installer и только по точному `type=module, element=mod_minimarket_quicklink, client_id=1`; другие административные модули и новая `mod_minimarket_toolbar` не затрагиваются. Unit/mock тест отдельно проверяет повторный запуск и нефатальную ошибку удаления.
 - Независимый `mod_minimarket_toolbar` тестируется как Joomla 6 admin module с параметрами, ACL, XHTML-escaping и порядком перед `mod_version`. Компонентный ZIP не содержит кода модуля, самостоятельный ZIP проверяется Windows инспектором.
 - Живая установка в локальной Joomla/Atum — **NOT_RUN**, требуется после ZIP установки.
+
+## 0.5.65 — десять счётчиков и отсутствие белых плиток
+
+Unit/contract тест `scripts/test-0-5-65-dashboard-counts.php` вызывает реальный `Dashboard/HtmlView::display()` с имитацией Joomla DB и сверяет десять `SELECT COUNT(*)` для реальных сущностей. Затем рендерит действующий PHP-шаблон и сверяет суммы и прочерки (импорт, заказы); проверяет CSS background/badge и hover/focus. MySQL 8.4 демонстрационный импорт проверяет подсчёт связей в каждой подгруппе, включая допустимое 0. Прежние тесты и CI остаются обязательны. Живая Joomla/Atum браузерная визуальная проверка пока `NOT_RUN`.
