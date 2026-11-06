@@ -8,7 +8,7 @@ function ensure(bool $ok,string $message):void {
     if(!$ok) throw new RuntimeException('MINIMARKET_052_UI_FAIL: '.$message);
 }
 $xml=simplexml_load_file($base.'minimarket.xml');
-ensure($xml!==false && (string)$xml->version==='0.5.55','version 0.5.53 plus 0.5.52 sidebar contracts');
+ensure($xml!==false && version_compare((string)$xml->version,'0.5.55','>='),'0.5.52 sidebar contracts preserved in current release');
 $menus=$xml->xpath('//administration/submenu/menu');
 $views=[];
 foreach($menus as $menu) {
