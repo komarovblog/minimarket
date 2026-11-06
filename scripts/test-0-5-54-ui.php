@@ -87,7 +87,7 @@ namespace MiniMarket\Smoke54 {
         str_contains($api,'$db->setQuery($q,0,25)'),
         'protected paginated brand search endpoint');
     $productJs=(string)file_get_contents($root.'media/js/product-badges.js');
-    verify(str_contains($productJs,'sale.disabled=!canEnable') &&
+    verify(str_contains($productJs,'sale.disabled=!eligible') &&
         !str_contains($productJs,'saleContainer.hidden'),
         'discount flag stays visible but disabled until old price entered');
     verify(str_contains($productJs,"mode.value==='discount'") &&
