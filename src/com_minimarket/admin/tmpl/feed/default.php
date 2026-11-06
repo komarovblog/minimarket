@@ -33,6 +33,8 @@ $depth=static function(int $id) use($map):int {
           method="post" id="mm-feed-editor">
         <input type="hidden" name="feed[id]" value="<?php echo (int)$this->feed['id']; ?>">
         <?php echo HTMLHelper::_('form.token'); ?>
+        <?php echo HTMLHelper::_('uitab.startTabSet','minimarket-feed',['active'=>'details']); ?>
+        <?php echo HTMLHelper::_('uitab.addTab','minimarket-feed','details',Text::_('COM_MINIMARKET_FEED_GENERAL')); ?>
         <div class="card mb-3"><div class="card-body">
             <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_FEED_GENERAL'); ?></h3>
             <div class="row g-3">
@@ -127,11 +129,9 @@ $depth=static function(int $id) use($map):int {
                 </div>
             </div>
         </div></div>
-        <div class="d-flex gap-2 flex-wrap">
-            <button type="submit" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
-            <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
-        </div>
-            <div class="card mb-3" data-mm-feed-publication><div class="card-body">
+        <?php echo HTMLHelper::_('uitab.endTab'); ?>
+        <?php echo HTMLHelper::_('uitab.addTab','minimarket-feed','publishing',Text::_('COM_MINIMARKET_CATEGORY_TAB_PUBLISHING')); ?>
+                    <div class="card mb-3" data-mm-feed-publication><div class="card-body">
             <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_CATEGORY_TAB_PUBLISHING'); ?></h3>
             <div class="row g-3">
                 <div class="col-lg-6"><label class="form-label" for="mm-feed-state"><?php echo Text::_('JSTATUS'); ?></label>
@@ -147,6 +147,12 @@ $depth=static function(int $id) use($map):int {
                 </div>
             </div>
         </div></div>
+        <?php echo HTMLHelper::_('uitab.endTab'); ?>
+        <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
+            <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+        </div>
 </form>
     <p class="mt-3 text-muted small"><?php echo Text::_('COM_MINIMARKET_FEED_LIMITATIONS'); ?></p>
 </div>
