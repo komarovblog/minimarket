@@ -92,7 +92,7 @@ namespace MiniMarket\EntityLinksSmoke {
         'admin/src/Field/ProductattributesField.php' => "Links::edit('attribute'",
         'admin/src/Field/GroupcontentsField.php' => "Links::edit('group'",
         'admin/src/Field/ProductcategoryoptionsField.php' => "Links::view('categories'",
-        'admin/tmpl/dashboard/default.php' => 'Links::view($view)',
+        'admin/tmpl/dashboard/default.php' => "Links::view(\$item['view'])",
     ];
     foreach ($targets as $path => $call) {
         $source = file_get_contents($root . $path);
