@@ -26,7 +26,7 @@
    let pending=null, request=0;
    const has=key=>Array.from(chosen.querySelectorAll('[data-mm-key]')).some(x=>x.dataset.mmKey===String(key));
    const label=item=>item.sku?item.title+' · '+item.sku:item.title;
-   const totalBox=document.querySelector('[data-mm-bundle-totals]');
+   const totalBoxes=Array.from(document.querySelectorAll('[data-mm-bundle-totals]'));
    const updateTotals=()=>{
      if(mode!=='bundle')return;
      let total=0;
@@ -44,11 +44,15 @@
      const modePrice=pricing?.value||'fixed';
      const pct=Math.min(100,Math.max(0,Number(discount?.value||0)));
      const price=modePrice==='discount'?Math.round(total*(1-pct/100)):cents(fixed?.value);
-     if(totalBox){
+     for(const totalBox of totalBoxes){
+       totalBox.hidden=totalBox.hasAttribute('data-mm-discount-only') && modePrice!=='discount';
        const sum=totalBox.querySelector('[data-mm-bundle-components-total]');
        const final=totalBox.querySelector('[data-mm-bundle-final-total]');
+       const label=totalBox.querySelector('[data-mm-bundle-final-label]');
        if(sum)sum.textContent=fmt(total);
        if(final)final.textContent=fmt(price);
+       if(label)label.textContent=modePrice==='discount'
+         ?label.dataset.mmDiscountLabel:label.dataset.mmFixedLabel;
      }
    };
    chosen.addEventListener('click',ev=>{
@@ -79,8 +83,15 @@
      link.href='index.php?option=com_minimarket&task='
        +(mode==='bundle'?'product':mode==='brand'?'brand':'collection')
        +'.edit&id='+Number(item.product_id||item.id);
-     row.append(link);
-     if(item.sku)row.append(el('small','',item.sku));
+     if(mode==='bundle'){
+       const productCell=el('div','mm-bundle-product');
+       productCell.append(link);
+       if(item.sku)productCell.append(el('small','',item.sku));
+       row.append(productCell);
+     }else{
+       row.append(link);
+       if(item.sku)row.append(el('small','',item.sku));
+     }
      const hidden=el('input');
      hidden.type='hidden';
      if(mode==='bundle'){
@@ -90,7 +101,8 @@
        row.append(el('span','mm-bundle-unit-price',
          (words.unit||'Price')+': '+String(item.price||'0.00')));
        row.append(hidden);
-       const quantityLabel=el('label','',words.quantity||'Quantity');
+       const quantityLabel=el('label','mm-bundle-quantity');
+       quantityLabel.append(el('span','visually-hidden',words.quantity||'Quantity'));
        const qty=el('input','form-control form-control-sm');
        qty.name=prefix+'[quantity]';qty.type='number';qty.min='1';
        qty.max='1000';qty.step='1';qty.required=true;qty.value='1';

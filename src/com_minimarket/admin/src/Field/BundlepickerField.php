@@ -64,13 +64,20 @@ $labels=[
             'error'=>Text::_('COM_MINIMARKET_PICKER_ERROR'),
             'remove'=>Text::_('COM_MINIMARKET_PICKER_REMOVE'),
             'quantity'=>Text::_('COM_MINIMARKET_BUNDLE_QUANTITY'),
+            'unit'=>Text::_('COM_MINIMARKET_BUNDLE_UNIT_PRICE'),
         ];
         $labelsJson=htmlspecialchars(json_encode($labels,JSON_THROW_ON_ERROR|
             JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT),
             ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
         $out='<div class="mm-entity-picker" data-mm-picker="bundle"'
             .' data-mm-url="'.$esc($url).'" data-mm-input="'.$name.'" data-mm-labels="'.$labelsJson.'"'
-            .' data-mm-current="'.$id.'"><div data-mm-selected>';
+            .' data-mm-current="'.$id.'"><div data-mm-selected>'
+            .'<div class="mm-bundle-grid-head" aria-hidden="true">'
+            .'<span>'.$esc(Text::_('COM_MINIMARKET_BUNDLE_COMPONENT')).'</span>'
+            .'<span>'.$esc(Text::_('COM_MINIMARKET_BUNDLE_UNIT_PRICE')).'</span>'
+            .'<span>'.$esc(Text::_('COM_MINIMARKET_BUNDLE_QUANTITY')).'</span>'
+            .'<span>'.$esc(Text::_('COM_MINIMARKET_BUNDLE_LINE_TOTAL')).'</span>'
+            .'<span></span></div>';
         $seq=0;
         foreach($rows as $row){
             if(!is_array($row))continue;
@@ -79,18 +86,18 @@ $labels=[
             $data=$meta[$key];$index='row'.$seq++;
             $out.='<div class="mm-entity-picker__row" data-mm-key="'.$esc($key).'"'
                 .' data-mm-unit-price="'.$esc($data['price']).'">'
-                .'<a href="index.php?option=com_minimarket&amp;task=product.edit&amp;id='.(int)$data['product'].'">'
+                .'<div class="mm-bundle-product"><a href="index.php?option=com_minimarket&amp;task=product.edit&amp;id='.(int)$data['product'].'">'
                 .$esc($data['title']).'</a>'
-                .'<small>'.$esc($data['sku']).'</small>'
+                .'<small>'.$esc($data['sku']).'</small></div>'
                 .'<span class="mm-bundle-unit-price">'.$esc(Text::_('COM_MINIMARKET_BUNDLE_UNIT_PRICE'))
                 .': '.$esc($data['price']).'</span>'
                 .'<input type="hidden" name="'.$name.'['.$index.'][component]" value="'.$esc($key).'">'
-                .'<label>'.$esc(Text::_('COM_MINIMARKET_BUNDLE_QUANTITY'))
+                .'<label class="mm-bundle-quantity"><span class="visually-hidden">'.$esc(Text::_('COM_MINIMARKET_BUNDLE_QUANTITY')).'</span>'
                 .'<input type="number" class="form-control form-control-sm" min="1" max="1000" step="1" required'
                 .' name="'.$name.'['.$index.'][quantity]" value="'.max(1,(int)($row['quantity']??1)).'"></label>'
+                .'<strong class="mm-bundle-line-total" data-mm-line-total></strong>'
                 .'<button class="btn btn-danger btn-sm" type="button" data-mm-remove aria-label="'
-                .$esc(Text::_('JREMOVE')).'">−</button>'
-                .'<strong class="mm-bundle-line-total" data-mm-line-total></strong></div>';
+                .$esc(Text::_('JREMOVE')).'">−</button></div>';
         }
         $out.='</div><button class="btn btn-success btn-sm" type="button" data-mm-add>+ '
             .$esc(Text::_('COM_MINIMARKET_BUNDLE_ADD_PRODUCT')).'</button>'

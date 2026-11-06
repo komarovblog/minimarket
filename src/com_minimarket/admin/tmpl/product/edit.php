@@ -27,6 +27,13 @@ use Joomla\CMS\Router\Route;
         'seo' => 'COM_MINIMARKET_CATEGORY_TAB_SEO',
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
     ];
+    $bundleQuote = ['price'=>'0.00','component_total'=>'0.00','discount_amount'=>'0.00'];
+    if ($isBundle && (int)($this->item->id??0)>0) {
+        $bundleQuote=\MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice::calculate(
+            (int)$this->item->id,
+            \MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice::snapshot(
+                \Joomla\CMS\Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class)));
+    }
     unset($sections[$isBundle?'variants':'bundle']);
     if (!$isBundle) $sections['groups']='COM_MINIMARKET_PRODUCT_TAB_GROUPS';
     else $sections['groups']='COM_MINIMARKET_BUNDLE_GROUPS';
@@ -44,6 +51,16 @@ use Joomla\CMS\Router\Route;
                     echo $this->form->renderField('price');
                     echo $this->form->renderField('old_price');
                     echo $this->form->renderField('bundle_discount_pct');
+                    ?>
+                    <div class="mm-bundle-totals" data-mm-bundle-totals data-mm-discount-only<?php echo (($this->item->bundle_price_mode ?? "fixed")==="discount") ? "" : " hidden"; ?>>
+                        <span><?php echo Text::_('COM_MINIMARKET_BUNDLE_PRICE_COMPONENT_TOTAL'); ?></span>
+                        <strong data-mm-bundle-components-total><?php echo $this->escape($bundleQuote['component_total']); ?></strong>
+                        <span data-mm-bundle-final-label
+                            data-mm-fixed-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BUNDLE_PRICE_FINAL_FIXED')); ?>"
+                            data-mm-discount-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BUNDLE_PRICE_FINAL_DISCOUNT')); ?>"><?php echo Text::_(($this->item->bundle_price_mode ?? 'fixed')==='discount' ? 'COM_MINIMARKET_BUNDLE_PRICE_FINAL_DISCOUNT' : 'COM_MINIMARKET_BUNDLE_PRICE_FINAL_FIXED'); ?></span>
+                        <strong data-mm-bundle-final-total><?php echo $this->escape($bundleQuote['price']); ?></strong>
+                    </div>
+                    <?php
                     // Retain stored values for fields irrelevant to bundle sales.
                     echo '<div hidden aria-hidden="true">';
                     echo $this->form->renderField('stock');
@@ -75,19 +92,13 @@ use Joomla\CMS\Router\Route;
             <?php else : ?>
                 <?php echo $this->form->renderFieldset($section); ?>
                 <?php if ($section === 'bundle' && $isBundle) : ?>
-                    <?php
-                      $quote=(int)($this->item->id??0)>0
-                        ? \MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice::calculate(
-                            (int)$this->item->id,
-                            \MiniMarket\Component\Minimarket\Administrator\Service\BundlePrice::snapshot(
-                              \Joomla\CMS\Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class)))
-                        : ['price'=>'0.00','component_total'=>'0.00','discount_amount'=>'0.00'];
-                    ?>
                     <div class="mm-bundle-totals" data-mm-bundle-totals>
                         <span><?php echo Text::_('COM_MINIMARKET_BUNDLE_PRICE_COMPONENT_TOTAL'); ?></span>
-                        <strong data-mm-bundle-components-total><?php echo $this->escape($quote['component_total']); ?></strong>
-                        <span><?php echo Text::_('COM_MINIMARKET_BUNDLE_PRICE_CURRENT'); ?></span>
-                        <strong data-mm-bundle-final-total><?php echo $this->escape($quote['price']); ?></strong>
+                        <strong data-mm-bundle-components-total><?php echo $this->escape($bundleQuote['component_total']); ?></strong>
+                        <span data-mm-bundle-final-label
+                            data-mm-fixed-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BUNDLE_PRICE_FINAL_FIXED')); ?>"
+                            data-mm-discount-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BUNDLE_PRICE_FINAL_DISCOUNT')); ?>"><?php echo Text::_(($this->item->bundle_price_mode ?? 'fixed')==='discount' ? 'COM_MINIMARKET_BUNDLE_PRICE_FINAL_DISCOUNT' : 'COM_MINIMARKET_BUNDLE_PRICE_FINAL_FIXED'); ?></span>
+                        <strong data-mm-bundle-final-total><?php echo $this->escape($bundleQuote['price']); ?></strong>
                     </div>
                 <?php endif; ?>
             <?php endif; ?>

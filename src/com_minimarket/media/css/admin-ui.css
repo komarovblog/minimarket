@@ -747,3 +747,38 @@
 #adminForm .mm-bundle-line-total { font-variant-numeric:tabular-nums; }
 #adminForm .mm-bundle-pricing-controls { border-top:1px solid var(--border-color,rgba(128,128,128,.3)); margin-top:1rem; padding-top:1rem; }
 .mm-product-badge--benefit { background:#286391; }
+
+/* 0.5.58: five aligned columns for bundle component table. */
+#adminForm [data-mm-picker="bundle"] [data-mm-selected] {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+#adminForm [data-mm-picker="bundle"] .mm-bundle-grid-head,
+#adminForm [data-mm-picker="bundle"] .mm-entity-picker__row {
+  display: grid;
+  grid-template-columns: minmax(13rem,1fr) 9rem 8rem 8rem 2.75rem;
+  align-items: center;
+  gap: .65rem;
+  min-width: 42rem;
+}
+#adminForm [data-mm-picker="bundle"] .mm-bundle-grid-head {
+  font-weight: 600;
+  padding: .6rem .25rem;
+  border-bottom: 1px solid var(--border-color,rgba(128,128,128,.35));
+}
+#adminForm [data-mm-picker="bundle"] .mm-entity-picker__row { padding: .6rem .25rem; }
+#adminForm [data-mm-picker="bundle"] .mm-bundle-product {
+  display: grid; gap: .2rem; min-width: 0;
+}
+#adminForm [data-mm-picker="bundle"] .mm-bundle-product a { min-width:0; overflow-wrap:anywhere; }
+#adminForm [data-mm-picker="bundle"] .mm-bundle-product small { color:var(--text-muted,#aab); }
+#adminForm [data-mm-picker="bundle"] .mm-entity-picker__row .mm-bundle-quantity {
+  display: block; margin: 0; min-width: 0;
+}
+#adminForm [data-mm-picker="bundle"] .mm-bundle-quantity input {
+  width: 100%; min-width: 0; margin: 0;
+}
+#adminForm [data-mm-picker="bundle"] .mm-entity-picker__row button[data-mm-remove] {
+  margin: 0; justify-self: end;
+}
+#adminForm [data-mm-picker="bundle"] .mm-bundle-line-total { text-align:right; }
