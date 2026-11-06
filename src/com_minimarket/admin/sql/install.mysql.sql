@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_categories` (
     `image_alt` VARCHAR(255) NOT NULL DEFAULT '',
     `show_children` TINYINT NOT NULL DEFAULT -1,
     `show_products` TINYINT NOT NULL DEFAULT -1,
+    `show_bundles` TINYINT NOT NULL DEFAULT -1,
     `meta_title` VARCHAR(255) NOT NULL DEFAULT '',
     `meta_description` VARCHAR(320) NOT NULL DEFAULT '',
     `meta_robots` VARCHAR(32) NOT NULL DEFAULT '',

@@ -51,7 +51,7 @@ foreach ($beforeCategory as $col => $value) {
         'existing category column ' . $col);
 }
 verify($beforeProduct === row($pdo, 'catci_minimarket_products'), 'product unchanged on upgrade');
-foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'meta_title', 'meta_description', 'meta_robots',
+foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description', 'meta_robots',
     'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(array_key_exists($col, $after), 'new column ' . $col);
 }
@@ -916,7 +916,7 @@ $pdo->exec('DROP TABLE catci_minimarket_categories');
 runSql($pdo, $dir . 'install.mysql.sql', 'freshcatci_');
 $columns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_categories')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'meta_title', 'meta_description', 'meta_robots',
+foreach (['introtext', 'sort_order', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'meta_title', 'meta_description', 'meta_robots',
     'og_title', 'og_description', 'og_image', 'og_image_alt'] as $col) {
     verify(in_array($col, $columns, true), 'fresh-install column ' . $col);
 }
