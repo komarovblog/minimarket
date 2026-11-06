@@ -131,6 +131,17 @@ verify(total($db,'collections')===6,'6 demo collections');
 verify(total($db,'product_collections')>total($db,'products'),
     'some products have multiple collections');
 verify(total($db,'product_groups')>=5,'named product links imported');
+$ordinaryGroupCount=(int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_groups
+ WHERE type<>'bundle'")->fetch_row()[0];
+$bundleGroupCount=(int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_groups
+ WHERE type='bundle'")->fetch_row()[0];
+verify($ordinaryGroupCount+$bundleGroupCount===total($db,'product_groups'),
+    'dashboard group counters partition exactly the existing link groups');
+verify($ordinaryGroupCount>=1 && $bundleGroupCount>=1,
+    'dashboard counts both ordinary and bundle relationship groups');
+verify(total($db,'brands')>=1 && total($db,'collections')>=1
+    && total($db,'order_options')>=1 && total($db,'attributes')>=1,
+    'dashboard ancillary section counters map to populated real tables');
 verify(total($db,'product_images')>0,'gallery imported');
 verify(total($db,'product_image_variants')>0,'SKU cover mapping imported');
 $unbranded=(int)$db->query('SELECT COUNT(*) n FROM nnop3_minimarket_products WHERE brand_id IS NULL')->fetch_assoc()['n'];

@@ -227,6 +227,8 @@ jobs:
           php scripts/test-0-5-64-retired-module.php
       - name: 0.5.64 full-width control bands and quarter-width tiles
         run: php scripts/test-0-5-64-dashboard.php
+      - name: 0.5.65 all ten live entity counters and dark Atum tiles
+        run: php scripts/test-0-5-65-dashboard-counts.php
       - name: 0.5.61 feed checkbox and category DOM
         run: |
           node scripts/test-0-5-61-feeds-editor.js
