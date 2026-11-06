@@ -8,11 +8,10 @@
 -- Pictures sample-01.png..sample-10.png are REFERENCES; files must exist separately.
 -- Note: global shop type is configured in Joomla, not by this SQL.
 
--- MiniMarket 0.5.50, fresh demo catalog for MySQL 8.4.8 / Joomla 6.
--- Generated 2026-11-05 from the uploaded EMPTY 31-table schema (prefix nnop3_).
+-- Base records originate from the original 0.5.50 demo dataset (MySQL 8.4 / Joomla 6).
+-- This file has been adapted for cumulative, repeatable updates on an EXISTING demo catalog.
 -- Prepared for database minimarket; requires 10 files images/minimarket/sample-01.png ... sample-10.png.
 -- All catalog and price data are FICTIONAL, for tests only.
--- IMPORTANT: import into an EMPTY MiniMarket only. Safeguard will reject nonempty catalog.
 -- Never touches Joomla system tables, existing images or PHP files.
 -- No permanent DROP, DELETE, ALTER, TRUNCATE, or FOREIGN_KEY_CHECKS=0.
 -- Make a complete database backup before import.
@@ -1660,12 +1659,14 @@ JOIN `nnop3_minimarket_collections` c ON c.alias = CASE
  WHEN p.category_id IN (107,108,109) THEN 'demo-family-evening'
  WHEN p.category_id IN (110,111,112) THEN 'demo-little-explorers'
  ELSE 'demo-creativity' END
-WHERE p.sku=CONCAT('TOY-',p.id);
+WHERE p.sku=CONCAT('TOY-',p.id)
+ON DUPLICATE KEY UPDATE `product_id`=`product_id`;
 
 INSERT INTO `nnop3_minimarket_product_collections` (product_id,collection_id,sort_order)
 SELECT p.id,c.id,1 FROM `nnop3_minimarket_products` p
 JOIN `nnop3_minimarket_collections` c ON c.alias='demo-gifts'
-WHERE p.sku=CONCAT('TOY-',p.id) AND MOD(p.id,3)=0;
+WHERE p.sku=CONCAT('TOY-',p.id) AND MOD(p.id,3)=0
+ON DUPLICATE KEY UPDATE `product_id`=`product_id`;
 
 -- Assign an existing gallery image as the main photo for selected SKU variants.
 INSERT INTO `nnop3_minimarket_product_image_variants` (image_id,variant_id,is_cover)

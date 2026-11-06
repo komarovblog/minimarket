@@ -10,4 +10,4 @@ mm_assert(substr_count($sql,'ON DUPLICATE KEY UPDATE')>=30,'idempotent insert cl
 mm_assert(str_contains($sql,'BUNDLE-1092') && str_contains($sql,'SKU-1012-SET60-BLUE'),'nested and SKU bundle demos missing');
 mm_assert(!preg_match('/^\\s*(?:DELETE\\s+FROM|TRUNCATE\\s+TABLE|DROP\\s+TABLE|ALTER\\s+TABLE)\\b/im',$sql),'destructive SQL not permitted');
 mm_assert(str_contains($sql,'USE `minimarket`;'),'wrong demo database');
-echo "CUMULATIVE_SQL_CONTRACT_OK\\n";
+echo "CUMULATIVE_SQL_CONTRACT_OK\n";
