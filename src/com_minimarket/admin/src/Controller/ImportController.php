@@ -12,12 +12,14 @@ use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CatalogImport;
 use MiniMarket\Component\Minimarket\Administrator\Service\CatalogTabularV1;
 use MiniMarket\Component\Minimarket\Administrator\Service\CatalogExportV1;
+use MiniMarket\Component\Minimarket\Administrator\Service\CatalogArchiveV2;
 
 /** Two-step upload → preview → apply, bound to the current administrator session. */
 final class ImportController extends BaseController
 {
     private const SESSION_KEY = 'com_minimarket.import.pending';
     private const MAX_UPLOAD = 3145728;
+    private const FULL_SESSION_KEY = 'com_minimarket.import.full.pending';
 
     private function assertCanImport(): void
     {
@@ -104,6 +106,102 @@ final class ImportController extends BaseController
                 self::friendlyError($error), 'error');
             $this->setRedirect(Route::_('index.php?option=com_minimarket&view=import', false));
         }
+    }
+
+    /** Complete JSON v2 transfer is intentionally restricted to superusers. */
+    private function assertCanTransferFull(): void
+    {
+        $this->assertCanImport();
+        if (!Factory::getApplication()->getIdentity()->authorise('core.admin', 'com_minimarket')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+    }
+
+    public function exportFull(): void
+    {
+        Session::checkToken('get') or die(Text::_('JINVALID_TOKEN'));
+        $this->assertCanTransferFull();
+        try {
+            $doc = CatalogArchiveV2::document(
+                Factory::getContainer()->get(DatabaseInterface::class)
+            );
+            $bytes = json_encode($doc, JSON_THROW_ON_ERROR
+                | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $this->sendDownload($bytes . "\n", 'minimarket-full-catalog-v2.json',
+                'application/json; charset=utf-8');
+        } catch (\Throwable $error) {
+            Factory::getApplication()->enqueueMessage(
+                Text::_('COM_MINIMARKET_EXPORT_FAILED') . ': '
+                . self::friendlyError($error), 'error');
+            $this->setRedirect(Route::_('index.php?option=com_minimarket&view=import',false));
+        }
+    }
+
+    public function previewFull(): void
+    {
+        Session::checkToken('post') or die(Text::_('JINVALID_TOKEN'));
+        $this->assertCanTransferFull();
+        $app = Factory::getApplication();
+        $app->setUserState(self::FULL_SESSION_KEY, null);
+        try {
+            $file = $app->input->files->get('full_package');
+            if (!is_array($file)
+                || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK
+                || !is_string($file['tmp_name'] ?? null)
+                || !is_uploaded_file($file['tmp_name'])
+                || !is_int($file['size'] ?? null)
+                || $file['size'] < 1 || $file['size'] > CatalogArchiveV2::MAX_BYTES
+                || strtolower(pathinfo((string)($file['name']??''),PATHINFO_EXTENSION))!=='json') {
+                throw new \InvalidArgumentException('COM_MINIMARKET_EXCHANGE_LIMIT');
+            }
+            $bytes=file_get_contents($file['tmp_name']);
+            if (!is_string($bytes)) throw new \InvalidArgumentException('COM_MINIMARKET_EXCHANGE_SCHEMA');
+            $doc=CatalogArchiveV2::decode($bytes);
+            $report=CatalogArchiveV2::run(
+                Factory::getContainer()->get(DatabaseInterface::class),$doc,false
+            );
+            // Bind exact validated bytes and report to the administrator session.
+            $app->setUserState(self::FULL_SESSION_KEY,['raw'=>$bytes,'report'=>$report]);
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_EXCHANGE_PREVIEW_OK'),'success');
+        } catch (\Throwable $error) {
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_IMPORT_PREVIEW_FAILED') . ': '
+                . self::friendlyError($error),'error');
+        }
+        $this->setRedirect(Route::_('index.php?option=com_minimarket&view=import',false));
+    }
+
+    public function applyFull(): void
+    {
+        Session::checkToken('post') or die(Text::_('JINVALID_TOKEN'));
+        $this->assertCanTransferFull();
+        $app=Factory::getApplication();
+        $pending=$app->getUserState(self::FULL_SESSION_KEY);
+        if (!is_array($pending) || !is_string($pending['raw']??null)) {
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_IMPORT_PREVIEW_REQUIRED'),'warning');
+            $this->setRedirect(Route::_('index.php?option=com_minimarket&view=import',false));
+            return;
+        }
+        try {
+            $doc=CatalogArchiveV2::decode($pending['raw']);
+            $result=CatalogArchiveV2::run(
+                Factory::getContainer()->get(DatabaseInterface::class),$doc,true
+            );
+            $app->setUserState(self::FULL_SESSION_KEY,null);
+            $app->setUserState('com_minimarket.import.full.last',$result);
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_IMPORT_APPLIED'),'success');
+        } catch (\Throwable $error) {
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_IMPORT_APPLY_FAILED') . ': '
+                . self::friendlyError($error),'error');
+        }
+        $this->setRedirect(Route::_('index.php?option=com_minimarket&view=import',false));
+    }
+
+    public function cancelFull(): void
+    {
+        Session::checkToken('post') or die(Text::_('JINVALID_TOKEN'));
+        $this->assertCanTransferFull();
+        Factory::getApplication()->setUserState(self::FULL_SESSION_KEY,null);
+        $this->setRedirect(Route::_('index.php?option=com_minimarket&view=import',false));
     }
 
     public function preview(): void

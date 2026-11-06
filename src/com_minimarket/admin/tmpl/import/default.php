@@ -57,6 +57,71 @@ use Joomla\CMS\Session\Session;
             <?php endforeach; ?>
         </div>
     </section>
+
+    <?php if ($this->canFull) : ?>
+        <section class="card card-body mb-4 mm-export-block">
+            <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_EXCHANGE_FULL_TITLE'); ?></h2>
+            <p><?php echo Text::_('COM_MINIMARKET_EXCHANGE_FULL_HELP'); ?></p>
+            <p class="small text-warning"><?php echo Text::_('COM_MINIMARKET_EXCHANGE_FULL_WARNING'); ?></p>
+            <p>
+                <a class="btn btn-primary" href="<?php echo Route::_(
+                    'index.php?option=com_minimarket&task=import.exportFull&'
+                    . Session::getFormToken() . '=1'); ?>">
+                    <?php echo Text::_('COM_MINIMARKET_EXCHANGE_FULL_EXPORT'); ?>
+                </a>
+            </p>
+            <form action="<?php echo Route::_('index.php?option=com_minimarket&task=import.previewFull'); ?>"
+                  method="post" enctype="multipart/form-data">
+                <label class="form-label" for="mm-full-json"><?php echo Text::_('COM_MINIMARKET_EXCHANGE_FULL_UPLOAD'); ?></label>
+                <input id="mm-full-json" name="full_package" type="file" class="form-control mb-2"
+                       accept=".json,application/json" required>
+                <button type="submit" class="btn btn-primary">
+                    <?php echo Text::_('COM_MINIMARKET_IMPORT_PREVIEW'); ?>
+                </button>
+                <?php echo HTMLHelper::_('form.token'); ?>
+            </form>
+            <?php
+              $fullReport = is_array($this->fullPending['report'] ?? null)
+                  ? $this->fullPending['report'] : null;
+              $fullLast = $fullReport===null && is_array($this->fullLast) ? $this->fullLast : null;
+              $fullRows = $fullReport ?? $fullLast;
+            ?>
+            <?php if ($fullRows !== null) : ?>
+                <table class="table table-sm table-striped mt-3 align-middle">
+                    <thead><tr>
+                        <th><?php echo Text::_('COM_MINIMARKET_IMPORT_SECTION'); ?></th>
+                        <th><?php echo Text::_('COM_MINIMARKET_IMPORT_CREATED'); ?></th>
+                        <th><?php echo Text::_('COM_MINIMARKET_EXCHANGE_UNCHANGED'); ?></th>
+                    </tr></thead>
+                    <tbody>
+                        <?php foreach ($fullRows as $section => $amount) : ?>
+                            <tr>
+                                <th scope="row"><?php echo $this->escape($section); ?></th>
+                                <td><?php echo (int)($amount['created'] ?? 0); ?></td>
+                                <td><?php echo (int)($amount['unchanged'] ?? 0); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+            <?php if ($fullReport !== null) : ?>
+                <div class="d-flex gap-2 mt-3">
+                    <form action="<?php echo Route::_('index.php?option=com_minimarket&task=import.applyFull'); ?>" method="post">
+                        <button type="submit" class="btn btn-success">
+                            <?php echo Text::_('COM_MINIMARKET_IMPORT_APPLY'); ?>
+                        </button>
+                        <?php echo HTMLHelper::_('form.token'); ?>
+                    </form>
+                    <form action="<?php echo Route::_('index.php?option=com_minimarket&task=import.cancelFull'); ?>" method="post">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <?php echo Text::_('JCANCEL'); ?>
+                        </button>
+                        <?php echo HTMLHelper::_('form.token'); ?>
+                    </form>
+                </div>
+            <?php endif; ?>
+        </section>
+    <?php endif; ?>
     <?php
     $report = is_array($this->pending['report'] ?? null) ? $this->pending['report'] : null;
     $last = $report === null && is_array($this->last) ? $this->last : null;

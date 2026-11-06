@@ -12,6 +12,9 @@ final class HtmlView extends BaseHtmlView
 {
     public ?array $pending = null;
     public ?array $last = null;
+    public ?array $fullPending = null;
+    public ?array $fullLast = null;
+    public bool $canFull = false;
 
     public function display($tpl = null)
     {
@@ -19,6 +22,11 @@ final class HtmlView extends BaseHtmlView
         if (!$user->authorise('core.create', 'com_minimarket')
             || !$user->authorise('core.edit', 'com_minimarket')) {
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+        $this->canFull = $user->authorise('core.admin','com_minimarket');
+        if ($this->canFull) {
+            $this->fullPending=Factory::getApplication()->getUserState('com_minimarket.import.full.pending');
+            $this->fullLast=Factory::getApplication()->getUserState('com_minimarket.import.full.last');
         }
         $this->pending = Factory::getApplication()->getUserState('com_minimarket.import.pending');
         $this->last = Factory::getApplication()->getUserState('com_minimarket.import.last');

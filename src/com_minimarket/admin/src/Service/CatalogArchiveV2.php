@@ -143,7 +143,7 @@ final class CatalogArchiveV2
                     if ($value!==null && !is_scalar($value))
                         throw new \InvalidArgumentException('COM_MINIMARKET_EXCHANGE_SCHEMA');
                     if (is_string($value)
-                        && (strlen($value)>1048576 || str_contains($value,"\\0"))) {
+                        && (strlen($value)>1048576 || str_contains($value,chr(0)))) {
                         throw new \InvalidArgumentException('COM_MINIMARKET_EXCHANGE_LIMIT');
                     }
                 }
