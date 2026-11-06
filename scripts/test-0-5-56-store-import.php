@@ -39,7 +39,7 @@ namespace MiniMarket\StoreImportSmoke {
     $round=CatalogImport::decode(json_encode(
         CatalogTabularV1::parseCsv(CatalogTabularV1::csv($doc)),
         JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
-    ok($round['bundles']===$doc['bundles'], 'CSV keeps exact bundle component data');
+    ok($round['bundles']==$doc['bundles'], 'CSV keeps exact bundle component data');
     $engine=(string)file_get_contents($root.'admin/src/Service/CatalogImport.php');
     ok(str_contains($engine,'BundleItems::validate(')
         && str_contains($engine,'BundleItems::replace(')

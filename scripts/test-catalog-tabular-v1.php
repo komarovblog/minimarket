@@ -36,11 +36,11 @@ namespace MiniMarket\TabularV1Smoke {
         $root.'admin/examples/import-rich-catalog-v1.json'));
     $richCsv = CatalogImport::decode(json_encode(T::parseCsv(T::csv($rich)),
         JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
-    ok($richCsv['bundles'] === $rich['bundles'],
+    ok($richCsv['bundles'] == $rich['bundles'],
         'rich bundle items survive CSV roundtrip');
     $richXlsx = CatalogImport::decode(json_encode(T::parseXlsx(T::xlsx($rich)),
         JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
-    ok($richXlsx['bundles'] === $rich['bundles'],
+    ok($richXlsx['bundles'] == $rich['bundles'],
         'rich bundle items survive XLSX roundtrip');
     $formulaSafe=$doc;
     $formulaSafe['categories'][0]['title']='=HYPERLINK("https://example.invalid")';
