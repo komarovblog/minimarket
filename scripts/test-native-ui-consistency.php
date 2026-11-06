@@ -135,13 +135,16 @@ checkUi(str_contains($categoryRules,"AdminEntityLinks::edit('attribute',") &&
     str_contains($optionRules,"AdminEntityLinks::edit('orderoption',"),
     'entity links open the actual Joomla edit task instead of the dashboard');
 $dashboard=file_get_contents($base.'admin/tmpl/dashboard/default.php');
-checkUi(str_contains($dashboard,'mm-dashboard-cards') &&
-    str_contains($dashboard,'col-12 col-md-6 col-xl-3') &&
-    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_SHOP') &&
+checkUi(str_contains($dashboard,'mm-dashboard-band card mb-3') &&
+    str_contains($dashboard,'mm-dashboard-tiles') &&
+    str_contains($dashboard,'col-12 col-sm-6 col-lg-3') &&
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_MANAGEMENT') &&
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_PRODUCTS_SECTION') &&
     str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_TOOLS') &&
-    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_ORDERS_PENDING') &&
-    str_contains($dashboard,'btn btn-primary d-inline-flex'),
-    'dashboard has native quarter-width Orders / Store / Tools and a solid storefront button');
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_ORDERS') &&
+    str_contains($dashboard,'btn btn-primary d-inline-flex') &&
+    !str_contains($dashboard,'list-group'),
+    'dashboard has three full-width horizontal sections with 25%-width icon tiles, no vertical menus');
 checkUi(str_contains($editor,'sku_matrix_payload') &&
     str_contains($cssFrame,'.mm-sku-viewport') &&
     str_contains($cssFrame,'[data-mm-pinned="sku"]'),

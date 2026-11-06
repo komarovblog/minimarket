@@ -220,10 +220,11 @@ jobs:
         run: php scripts/test-0-5-60-wiring.php
       - name: 0.5.61 feed selection, XML and native dashboard
         run: php scripts/test-0-5-61-feeds.php
-      - name: 0.5.63 standalone header quicklink rendering and module lifecycle
+      - name: 0.5.64 standalone toolbar and retired legacy extension safety
         run: |
-          php scripts/test-0-5-63-quicklink.php
-          php scripts/test-0-5-63-installer.php
+          php scripts/test-0-5-64-toolbar.php
+          php scripts/test-0-5-64-installer.php
+          php scripts/test-0-5-64-retired-module.php
       - name: 0.5.61 feed checkbox and category DOM
         run: |
           node scripts/test-0-5-61-feeds-editor.js

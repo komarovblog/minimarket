@@ -28,7 +28,7 @@ namespace MiniMarket\QuicklinkInstallerTest {
     function check(bool $passed,string $message): void {
         global $checks;
         ++$checks;
-        if (!$passed) throw new \RuntimeException('QUICKLINK_063_INSTALL_FAIL: '.$message);
+        if (!$passed) throw new \RuntimeException('TOOLBAR_064_INSTALL_FAIL: '.$message);
     }
     class Query {
         public string $operation='select';
@@ -58,7 +58,7 @@ namespace MiniMarket\QuicklinkInstallerTest {
                 1=>['id'=>1,'module'=>'mod_frontend','ordering'=>2,'position'=>'status','published'=>1],
                 2=>['id'=>2,'module'=>'mod_version','ordering'=>4,'position'=>'status','published'=>1],
                 3=>['id'=>3,'module'=>'mod_user','ordering'=>6,'position'=>'status','published'=>1],
-                4=>['id'=>4,'module'=>'mod_minimarket_quicklink','ordering'=>9,'position'=>'status','published'=>0],
+                4=>['id'=>4,'module'=>'mod_minimarket_toolbar','ordering'=>9,'position'=>'status','published'=>0],
             ];
         }
         public function getQuery(bool $fresh=true):Query{return new Query();}
@@ -102,7 +102,7 @@ namespace MiniMarket\QuicklinkInstallerTest {
         }
     }
     \define('_JEXEC',1);
-    require __DIR__.'/../src/mod_minimarket_quicklink/script.php';
+    require __DIR__.'/../src/mod_minimarket_toolbar/script.php';
     $checks=0;
     Factory::$app=new class {
         public array $messages=[];
@@ -112,14 +112,14 @@ namespace MiniMarket\QuicklinkInstallerTest {
     };
     $db=new Db();
     Factory::$db=$db;
-    $installer=new \mod_minimarket_quicklinkInstallerScript();
+    $installer=new \mod_minimarket_toolbarInstallerScript();
     check($installer->postflight('install',null)===true,'standalone module installation returns true');
     check($db->assignments===1 && $db->rows[4]['published']===1
         && $db->rows[4]['position']==='status',
         'first module installation publishes in Joomla status for all admin pages');
     $all=$db->loadAssocList();
     $order=array_column($all,'module');
-    check(array_search('mod_minimarket_quicklink',$order,true)+1
+    check(array_search('mod_minimarket_toolbar',$order,true)+1
         ===array_search('mod_version',$order,true),
         'cart button is immediately left of Joomla version');
     check(count($db->rows)===4 && count(Factory::$app->messages)===0,
@@ -145,8 +145,8 @@ namespace MiniMarket\QuicklinkInstallerTest {
     check($installer->postflight('uninstall',null)===true,
         'uninstall does not try to reconfigure deleted module');
     $component=(string)file_get_contents(__DIR__.'/../src/com_minimarket/script.php');
-    check(!str_contains($component,'mod_minimarket_quicklink')
+    check(!str_contains($component,'mod_minimarket_toolbar')
        && !str_contains($component,'installQuicklink'),
-       'MiniMarket component upgrade does not install or touch shortcut module');
-    echo "QUICKLINK_063_INSTALL_OK: $checks checks\n";
+       'MiniMarket component upgrade never installs or touches new toolbar module');
+    echo "TOOLBAR_064_INSTALL_OK: $checks checks\n";
 }

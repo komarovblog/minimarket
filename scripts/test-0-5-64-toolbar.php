@@ -15,7 +15,7 @@ namespace Joomla\CMS\Helper {
     final class ModuleHelper {
         public static string $source;
         public static function getLayoutPath(string $name, string $layout='default'): string {
-            if ($name!=='mod_minimarket_quicklink'||$layout!=='default') {
+            if ($name!=='mod_minimarket_toolbar'||$layout!=='default') {
                 throw new \RuntimeException('Invalid quicklink layout request');
             }
             return self::$source . '/tmpl/default.php';
@@ -32,7 +32,7 @@ namespace Joomla\CMS\Router {
 namespace Joomla\CMS\Language {
     final class Text {
         public static function _(string $key): string {
-            return 'MOD_MINIMARKET_QUICKLINK_OPEN' === $key
+            return 'MOD_MINIMARKET_TOOLBAR_OPEN' === $key
                 ? 'Open MiniMarket dashboard' : $key;
         }
     }
@@ -41,7 +41,7 @@ namespace MiniMarket\QuicklinkTest {
     use Joomla\CMS\Factory;
     use Joomla\CMS\Helper\ModuleHelper;
     $root=__DIR__.'/../src/com_minimarket/';
-    $dir=__DIR__.'/../src/mod_minimarket_quicklink';
+    $dir=__DIR__.'/../src/mod_minimarket_toolbar';
     \define('_JEXEC',1);
     ModuleHelper::$source=$dir;
     $checks=0;
@@ -51,7 +51,7 @@ namespace MiniMarket\QuicklinkTest {
         if (!$ok) throw new \RuntimeException('QUICKLINK_TEST_FAIL: '.$description);
     }
     function render(array $settings=[],bool $authorized=true): string {
-        $source=ModuleHelper::$source.'/mod_minimarket_quicklink.php';
+        $source=ModuleHelper::$source.'/mod_minimarket_toolbar.php';
         Factory::$app=new class($authorized) {
             public function __construct(private bool $authorized) {}
             public function getIdentity(): object {
@@ -74,28 +74,28 @@ namespace MiniMarket\QuicklinkTest {
         catch (\Throwable $e) { ob_end_clean(); throw $e; }
     }
     $component=simplexml_load_file($root.'minimarket.xml');
-    $module=simplexml_load_file($dir.'/mod_minimarket_quicklink.xml');
+    $module=simplexml_load_file($dir.'/mod_minimarket_toolbar.xml');
     testIt($component!==false && $module!==false,'component and module manifests parse');
     testIt((string)$module['type']==='module' &&
        (string)$module['client']==='administrator' &&
        (string)$module['method']==='upgrade',
        'separate module has Joomla administrator client and upgrade semantics');
     testIt((string)$component->version===(string)$module->version &&
-       (string)$component->version==='0.5.63','component and module versions agree');
+       (string)$component->version==='0.5.64','component and module versions agree');
     testIt(count($component->xpath('/extension/administration/files/folder[text()="modules"]'))===0,
        'component does not bundle or automatically install the administrator quicklink');
-    testIt(count($module->xpath('/extension/files/filename[@module="mod_minimarket_quicklink"]'))===1,
+    testIt(count($module->xpath('/extension/files/filename[@module="mod_minimarket_toolbar"]'))===1,
        'Joomla module entrypoint declared in module manifest');
     foreach(['enabled','label','show_icon','show_label'] as $field) {
         testIt(count($module->xpath('/extension/config/fields/fieldset/field[@name="'.$field.'"]'))===1,
             'native module setting '.$field);
     }
     foreach(['ru-RU','en-GB'] as $locale) {
-        $strings=parse_ini_file($dir.'/language/'.$locale.'/mod_minimarket_quicklink.ini');
-        testIt(is_array($strings) && isset($strings['MOD_MINIMARKET_QUICKLINK_OPEN'])
-            && isset($strings['MOD_MINIMARKET_QUICKLINK_ENABLED']),
+        $strings=parse_ini_file($dir.'/language/'.$locale.'/mod_minimarket_toolbar.ini');
+        testIt(is_array($strings) && isset($strings['MOD_MINIMARKET_TOOLBAR_OPEN'])
+            && isset($strings['MOD_MINIMARKET_TOOLBAR_ENABLED']),
             'translated module options '.$locale);
-        testIt(is_file($dir.'/language/'.$locale.'/mod_minimarket_quicklink.sys.ini'),
+        testIt(is_file($dir.'/language/'.$locale.'/mod_minimarket_toolbar.sys.ini'),
             'translated module description '.$locale);
     }
     $html=render();
@@ -129,15 +129,16 @@ namespace MiniMarket\QuicklinkTest {
         'admin-set button label is correctly HTML-escaped');
     $moduleScript=(string)file_get_contents($dir.'/script.php');
     $componentScript=(string)file_get_contents($root.'script.php');
-    testIt(str_contains($moduleScript,'mod_minimarket_quicklinkInstallerScript') &&
+    testIt(str_contains($moduleScript,'mod_minimarket_toolbarInstallerScript') &&
         str_contains($moduleScript,"'mod_version'") &&
         str_contains($moduleScript,"'status'"),
         'standalone module installer places shortcut before Joomla version');
     testIt(!str_contains($componentScript,'installQuicklink') &&
-        !str_contains($componentScript,'mod_minimarket_quicklink') &&
+        !str_contains($componentScript,'mod_minimarket_toolbar') &&
+        str_contains($componentScript,'mod_minimarket_quicklink') &&
         is_file($dir.'/script.php'),
-        'component installer does not install, update or change standalone module');
+        'component retires exact legacy quicklink but never auto-installs new toolbar module');
     testIt(count($module->xpath('/extension/files/filename[text()="script.php"]'))===1,
         'standalone module manifest installs its own script');
-    echo "QUICKLINK_063_RENDER_OK: $checks checks\n";
+    echo "TOOLBAR_064_RENDER_OK: $checks checks\n";
 }
