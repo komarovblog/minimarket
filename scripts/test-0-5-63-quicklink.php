@@ -41,7 +41,7 @@ namespace MiniMarket\QuicklinkTest {
     use Joomla\CMS\Factory;
     use Joomla\CMS\Helper\ModuleHelper;
     $root=__DIR__.'/../src/com_minimarket/';
-    $dir=$root.'admin/modules/mod_minimarket_quicklink';
+    $dir=__DIR__.'/../src/mod_minimarket_quicklink';
     \define('_JEXEC',1);
     ModuleHelper::$source=$dir;
     $checks=0;
@@ -81,9 +81,9 @@ namespace MiniMarket\QuicklinkTest {
        (string)$module['method']==='upgrade',
        'separate module has Joomla administrator client and upgrade semantics');
     testIt((string)$component->version===(string)$module->version &&
-       (string)$component->version==='0.5.62','component and module versions agree');
-    testIt(count($component->xpath('/extension/administration/files/folder[text()="modules"]'))===1,
-       'component bundles the child administrator module source');
+       (string)$component->version==='0.5.63','component and module versions agree');
+    testIt(count($component->xpath('/extension/administration/files/folder[text()="modules"]'))===0,
+       'component does not bundle or automatically install the administrator quicklink');
     testIt(count($module->xpath('/extension/files/filename[@module="mod_minimarket_quicklink"]'))===1,
        'Joomla module entrypoint declared in module manifest');
     foreach(['enabled','label','show_icon','show_label'] as $field) {
@@ -100,7 +100,11 @@ namespace MiniMarket\QuicklinkTest {
     }
     $html=render();
     testIt(str_contains($html,'class="icon-cart"') &&
-        str_contains($html,'>MiniMarket</span>'),
+        str_contains($html,'>MiniMarket</span>') &&
+        str_contains($html,'class="header-item-content') &&
+        str_contains($html,'class="header-item-icon"') &&
+        str_contains($html,'class="header-item-text'),
+
         'published module renders icon and label by default');
     testIt(str_contains($html,'index.php?option=com_minimarket&amp;view=dashboard'),
         'link opens component dashboard, with escaping exactly once');
@@ -123,11 +127,17 @@ namespace MiniMarket\QuicklinkTest {
     testIt(!str_contains($html,'<script>') &&
         str_contains($html,'&lt;script&gt;'),
         'admin-set button label is correctly HTML-escaped');
-    $script=(string)file_get_contents($root.'script.php');
-    testIt(str_contains($script,'new Installer()') &&
-        str_contains($script,'mod_minimarket_quicklink') &&
-        str_contains($script,"$"."alreadyInstalled") &&
-        str_contains($script,"$"."db->execute()"),
-        'component installer installs and configures the module');
-    echo "QUICKLINK_RENDER_OK: $checks checks\n";
+    $moduleScript=(string)file_get_contents($dir.'/script.php');
+    $componentScript=(string)file_get_contents($root.'script.php');
+    testIt(str_contains($moduleScript,'mod_minimarket_quicklinkInstallerScript') &&
+        str_contains($moduleScript,"'mod_version'") &&
+        str_contains($moduleScript,"'status'"),
+        'standalone module installer places shortcut before Joomla version');
+    testIt(!str_contains($componentScript,'installQuicklink') &&
+        !str_contains($componentScript,'mod_minimarket_quicklink') &&
+        is_file($dir.'/script.php'),
+        'component installer does not install, update or change standalone module');
+    testIt(count($module->xpath('/extension/files/filename[text()="script.php"]'))===1,
+        'standalone module manifest installs its own script');
+    echo "QUICKLINK_063_RENDER_OK: $checks checks\n";
 }
