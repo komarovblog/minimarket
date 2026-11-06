@@ -72,8 +72,8 @@ namespace MiniMarket\ImportTest {
     $ui = file_get_contents($base . 'admin/tmpl/import/default.php');
     verify(!str_contains($ui, 'github.com') &&
         str_contains($ui, 'task=import.example') &&
-        str_contains($ui, 'COM_MINIMARKET_IMPORT_TITLE_ONLY' &&
-        str_contains($ui, 'COM_MINIMARKET_IMPORT_COMPACT_HELP')),
+        str_contains($ui, 'COM_MINIMARKET_IMPORT_TITLE_ONLY') &&
+        str_contains($ui, 'COM_MINIMARKET_IMPORT_COMPACT_HELP'),
         'all examples are local downloads and instructions inside administrator');
     $controller = file_get_contents($base . 'admin/src/Controller/ImportController.php');
     verify(str_contains($controller, "Session::checkToken('get')") &&
