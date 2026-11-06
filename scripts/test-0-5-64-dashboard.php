@@ -65,10 +65,10 @@ namespace MiniMarket\DashboardTest {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
     }
-    verify(str_contains($html,'>7</span>') &&
-        str_contains($html,'>26</span>') &&
-        str_contains($html,'>5</span>') &&
-        str_contains($html,'>3</span>'),
+    verify(preg_match('/>\\s*7\\s*<\\/span>/', $html)===1 &&
+        preg_match('/>\\s*26\\s*<\\/span>/', $html)===1 &&
+        preg_match('/>\\s*5\\s*<\\/span>/', $html)===1 &&
+        preg_match('/>\\s*3\\s*<\\/span>/', $html)===1,
         'live category/product/bundle/feed counters render alongside buttons');
     verify(str_contains($html,'btn btn-primary d-inline-flex') &&
         str_contains($html,'https://example.local/index.php?option=com_minimarket&amp;view=catalog'),
