@@ -22,7 +22,7 @@ final class FeedYml
 
     public static function render(
         array $feed, array $categories, array $offers, string $baseUrl,
-        ?\DateTimeInterface $now=null
+        ?\DateTimeInterface $now=null, bool $inventoryEnabled=true
     ): string {
         if (!isset(FeedConfig::PROVIDERS[(string)($feed['provider']??'')])) {
             throw new \InvalidArgumentException('COM_MINIMARKET_FEED_INVALID');
@@ -60,7 +60,7 @@ final class FeedYml
                 || !str_starts_with($link,$url)
                 || !str_starts_with($picture,$url))continue;
             $xml.='<offer id="'.self::escape($id).'" available="'
-                .((int)($o['stock']??0)>0?'true':'false').'">';
+                .(!$inventoryEnabled || (int)($o['stock']??0)>0?'true':'false').'">';
             $xml.=self::el('url',$link).self::el('price',number_format($price,2,'.',''));
             $old=(float)($o['old_price']??0);
             if($old>$price)$xml.=self::el('oldprice',number_format($old,2,'.',''));

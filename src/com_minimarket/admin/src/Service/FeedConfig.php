@@ -22,7 +22,7 @@ final class FeedConfig
 
     public static function all(DatabaseInterface $db): array
     {
-        $db->setQuery('SELECT * FROM '.self::table($db).' ORDER BY id DESC');
+        $db->setQuery('SELECT * FROM '.self::table($db).' ORDER BY sort_order ASC, id DESC');
         return (array)$db->loadAssocList();
     }
 
@@ -99,9 +99,15 @@ final class FeedConfig
             $excluded=array_values(array_diff($defaults,$checked));
         }
         $state=(int)($input['state']??0)===1?1:0;
+        $order=(string)($input['sort_order']??'0');
+        if(!ctype_digit($order)||strlen($order)>10
+            || (strlen($order)===10 && strcmp($order,'4294967295')>0)) {
+            throw new \InvalidArgumentException('COM_MINIMARKET_FEED_INVALID');
+        }
         $key=$existing ? (string)$existing['access_key'] : bin2hex(random_bytes(20));
         $values=[
             'title'=>$name,'company'=>$company,'provider'=>$provider,'state'=>$state,
+            'sort_order'=>(int)$order,
             'selection_mode'=>$mode,'include_descendants'=>$descendants,
             'include_bundles'=>$bundles,'category_ids_json'=>json_encode($selected),
             'include_product_ids_json'=>json_encode($included),

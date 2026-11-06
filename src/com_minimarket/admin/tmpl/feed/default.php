@@ -54,12 +54,6 @@ $depth=static function(int $id) use($map):int {
                     </select>
                     <div class="form-text"><?php echo Text::_('COM_MINIMARKET_FEED_PROVIDER_HELP'); ?></div>
                 </div>
-                <div class="col-lg-6"><label class="form-label" for="mm-feed-state"><?php echo Text::_('JSTATUS'); ?></label>
-                    <select id="mm-feed-state" name="feed[state]" class="form-select">
-                        <option value="0" <?php echo (int)$this->feed['state']===0?'selected':''; ?>><?php echo Text::_('JUNPUBLISHED'); ?></option>
-                        <option value="1" <?php echo (int)$this->feed['state']===1?'selected':''; ?>><?php echo Text::_('JPUBLISHED'); ?></option>
-                    </select>
-                </div>
             </div>
         </div></div>
         <div class="card mb-3"><div class="card-body">
@@ -137,6 +131,22 @@ $depth=static function(int $id) use($map):int {
             <button type="submit" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
             <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
         </div>
-    </form>
+            <div class="card mb-3" data-mm-feed-publication><div class="card-body">
+            <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_CATEGORY_TAB_PUBLISHING'); ?></h3>
+            <div class="row g-3">
+                <div class="col-lg-6"><label class="form-label" for="mm-feed-state"><?php echo Text::_('JSTATUS'); ?></label>
+                    <select id="mm-feed-state" name="feed[state]" class="form-select">
+                        <option value="0" <?php echo (int)$this->feed['state']===0?'selected':''; ?>><?php echo Text::_('JUNPUBLISHED'); ?></option>
+                        <option value="1" <?php echo (int)$this->feed['state']===1?'selected':''; ?>><?php echo Text::_('JPUBLISHED'); ?></option>
+                    </select>
+                </div>
+                <div class="col-lg-6">
+                    <label class="form-label" for="mm-feed-order"><?php echo Text::_('COM_MINIMARKET_CATEGORY_ORDER'); ?></label>
+                    <input class="form-control" type="number" id="mm-feed-order" name="feed[sort_order]"
+                        min="0" max="4294967295" step="1" value="<?php echo (int)($this->feed['sort_order']??0); ?>">
+                </div>
+            </div>
+        </div></div>
+</form>
     <p class="mt-3 text-muted small"><?php echo Text::_('COM_MINIMARKET_FEED_LIMITATIONS'); ?></p>
 </div>

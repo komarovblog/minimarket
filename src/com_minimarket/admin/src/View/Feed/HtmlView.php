@@ -31,7 +31,7 @@ final class HtmlView extends BaseHtmlView
         if($id>0 && !$stored)throw new \RuntimeException(Text::_('COM_MINIMARKET_FEED_NOT_FOUND'),404);
         [$this->categories,$this->products]=FeedConfig::catalog($db);
         $this->feed=$stored??['id'=>0,'title'=>'','company'=>'',
-            'provider'=>'yandex_direct','state'=>0];
+            'provider'=>'yandex_direct','state'=>0,'sort_order'=>0];
         $this->settings=FeedConfig::settings($stored);
         if(!$stored) {
             $this->settings['category_ids']=FeedSelection::visibleCategories($this->categories);

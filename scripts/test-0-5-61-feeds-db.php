@@ -55,14 +55,15 @@ namespace MiniMarket\FeedDbTest {
     $chosen=array_slice($defaults,0,3);
     $values=[
         'title'=>'CI feed — promotion','company'=>'CI demo','provider'=>'vk_yml',
-        'state'=>1,'selection_mode'=>'auto','include_descendants'=>1,'include_bundles'=>1,
+        'state'=>1,'sort_order'=>12,'selection_mode'=>'auto','include_descendants'=>1,'include_bundles'=>1,
         'categories'=>$visible,'products'=>$chosen,
     ];
     $id=FeedConfig::save($db,$values,$categories,$products);
     verify($id>0,'new feed ID allocated');
     try {
         $feed=FeedConfig::find($db,$id);
-        verify($feed!==null && strlen($feed['access_key'])===40
+        verify($feed!==null && (int)$feed['sort_order']===12 &&
+            strlen($feed['access_key'])===40
             && preg_match('/^[a-f0-9]{40}$/D',$feed['access_key'])===1,
             'feed has random private URL key');
         $settings=FeedConfig::settings($feed);

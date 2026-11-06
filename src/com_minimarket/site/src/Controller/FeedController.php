@@ -4,6 +4,7 @@ namespace MiniMarket\Component\Minimarket\Site\Controller;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Uri\Uri;
@@ -109,7 +110,9 @@ final class FeedController extends BaseController
             if(isset($categoryById[$categoryId]))$feedCategories[]=$categoryById[$categoryId];
         }
         usort($feedCategories,static fn(array $a,array $b) => ((int)$a['id']) <=> ((int)$b['id']));
-        $xml=FeedYml::render($feed,$feedCategories,$offers,$base);
+        $inventoryEnabled=(int)ComponentHelper::getParams('com_minimarket')
+            ->get('inventory_enabled',1)===1;
+        $xml=FeedYml::render($feed,$feedCategories,$offers,$base,null,$inventoryEnabled);
         $app->setHeader('Content-Type','application/xml; charset=UTF-8',true);
         $app->setHeader('X-Content-Type-Options','nosniff',true);
         $app->setHeader('Cache-Control','no-store,max-age=0',true);
