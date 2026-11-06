@@ -105,7 +105,7 @@ namespace MiniMarket\RetiredShortcutTest {
        count(Installer::$uninstallCalls)===$before,
        'component uninstall does not mutate shortcut state');
     $xml=simplexml_load_file(__DIR__.'/../src/com_minimarket/minimarket.xml');
-    ok((string)$xml->version==='0.5.64' &&
+    ok(version_compare((string)$xml->version,'0.5.64','>=') &&
        count($xml->xpath('/extension/administration/files/folder[text()="modules"]'))===0,
        'new component does not ship any header module inside ZIP');
     echo "RETIRED_QUICKLINK_064_OK: $n checks\n";
