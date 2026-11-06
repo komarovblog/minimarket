@@ -182,7 +182,7 @@ final class CatalogRepository
         }
 
         $q = $this->db->getQuery(true)
-            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'meta_title', 'meta_description',
+            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'show_descendant_products', 'show_descendant_bundles', 'product_layout', 'cards_mobile', 'cards_tablet', 'cards_desktop', 'cards_wide', 'meta_title', 'meta_description',
                 'meta_robots', 'og_title', 'og_description', 'og_image', 'og_image_alt']))
             ->from($this->db->quoteName('#__minimarket_categories'))
             ->where($this->db->quoteName('id') . ' = ' . $id)
@@ -192,11 +192,31 @@ final class CatalogRepository
         return $this->db->loadObject() ?: null;
     }
 
-    public function getProductsForCategory(int $id,bool $showProducts=true,bool $showBundles=true): array
+    public function getProductsForCategory(
+        int $id, bool $showProducts = true, bool $showBundles = true,
+        bool $descendantProducts = false, bool $descendantBundles = false
+    ): array
     {
         if (!$this->categoryTree()->isVisible($id)) {
             return [];
         }
+
+        $descendantIds = ($descendantProducts || $descendantBundles)
+            ? $this->categoryTree()->descendantIds($id) : [];
+        $typeSql = static function (bool $simple, bool $bundles): string {
+            if ($simple && $bundles) return "p.product_type IN ('simple','bundle')";
+            return $simple ? "p.product_type = 'simple'" : "p.product_type = 'bundle'";
+        };
+        $conditions = [];
+        if ($showProducts || $showBundles) {
+            $conditions[] = '(p.category_id = ' . $id . ' AND '
+                . $typeSql($showProducts, $showBundles) . ')';
+        }
+        if ($descendantIds !== []) {
+            $conditions[] = '(p.category_id IN (' . implode(',', $descendantIds) . ') AND '
+                . $typeSql($descendantProducts, $descendantBundles) . ')';
+        }
+        if ($conditions === []) return [];
 
         $q = $this->db->getQuery(true)
             ->select([
@@ -225,13 +245,9 @@ final class CatalogRepository
                 $this->db->quoteName('#__minimarket_categories', 'c')
                 . ' ON ' . $this->db->quoteName('c.id') . ' = ' . $this->db->quoteName('p.category_id')
             )
-            ->where($this->db->quoteName('p.category_id') . ' = ' . $id)
+            ->where('(' . implode(' OR ', $conditions) . ')')
             ->where($this->db->quoteName('p.state') . ' = 1')
             ->where($this->db->quoteName('c.state') . ' = 1')
-            ->where($showProducts && $showBundles ? '1=1' : (
-                $showProducts ? "p.product_type = 'simple'" :
-                ($showBundles ? "p.product_type = 'bundle'" : '1=0')
-            ))
             ->order($this->db->quoteName('p.id') . ' DESC');
 
         $this->db->setQuery($q);

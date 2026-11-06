@@ -43,24 +43,39 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <?php endif; ?>
 
     <?php if ($this->products) : ?>
-        <ul class="list-unstyled">
+        <?php
+        $grid = ($this->productListOptions['layout'] ?? 'list') === 'grid';
+        $gridClasses = $grid
+            ? \MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions::bootstrapGridClasses($this->productListOptions)
+            : 'list-unstyled mm-product-list';
+        ?>
+        <ul class="<?php echo $this->escape($gridClasses); ?> list-unstyled mm-category-products" data-mm-category-layout="<?php echo $grid ? 'grid' : 'list'; ?>">
         <?php foreach ($this->products as $product) : ?>
-            <li>
-                <?php
-                            $photo = explode('#', (string) ($product->image ?? ''), 2)[0];
-                            if (str_starts_with($photo, 'images/') && !str_contains($photo, '..')
-                                && !preg_match('/[\x00-\x1f<>]/', $photo)) :
-                            ?>
-                                <img src="<?php echo $this->escape(Uri::root() . $photo); ?>"
-                                     alt="<?php echo $this->escape((string) ($product->image_alt ?: $product->title)); ?>"
-                                     width="96" height="96" loading="lazy" style="object-fit:contain">
-                            <?php endif; ?>
-                <a href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
-                    <?php echo $this->escape($product->title); ?>
-                </a>
-                <?php echo BadgeHelper::render($product); ?>
-                <span><?php echo $this->escape((string) $product->price); ?></span>
-                <?php echo BadgeHelper::oldPrice($product); ?>
+            <li class="<?php echo $grid ? 'col' : 'mm-product-list__item'; ?>">
+                <div class="<?php echo $grid ? 'mm-product-card' : 'mm-product-list__inner'; ?>">
+                    <?php
+                    $photo = explode('#', (string) ($product->image ?? ''), 2)[0];
+                    $hasPhoto = str_starts_with($photo, 'images/') && !str_contains($photo, '..')
+                        && !preg_match('/[\x00-\x1f<>]/', $photo);
+                    ?>
+                    <?php if ($hasPhoto) : ?>
+                        <a class="mm-product-card__media" href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
+                            <img src="<?php echo $this->escape(Uri::root() . $photo); ?>"
+                                alt="<?php echo $this->escape((string) ($product->image_alt ?: $product->title)); ?>"
+                                loading="lazy" class="mm-product-card__image">
+                        </a>
+                    <?php endif; ?>
+                    <div class="mm-product-card__info">
+                        <a href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
+                            <?php echo $this->escape($product->title); ?>
+                        </a>
+                        <?php echo BadgeHelper::render($product); ?>
+                        <div class="mm-product-card__price">
+                            <span><?php echo $this->escape((string) $product->price); ?></span>
+                            <?php echo BadgeHelper::oldPrice($product); ?>
+                        </div>
+                    </div>
+                </div>
             </li>
         <?php endforeach; ?>
         </ul>

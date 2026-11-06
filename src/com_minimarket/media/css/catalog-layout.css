@@ -1,0 +1,48 @@
+/* MiniMarket 0.5.58: component-owned Bootstrap 5 product list/grid.
+   No Joomla template overrides or framework copies required. */
+.com-minimarket-category .mm-category-products { margin: 1rem 0; padding: 0; }
+.com-minimarket-category .mm-category-products > li { list-style: none; }
+.com-minimarket-category .mm-product-card {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  height: 100%;
+  padding: .85rem;
+  border: 1px solid var(--bs-border-color, rgba(128,128,128,.3));
+  border-radius: .45rem;
+  background: var(--bs-body-bg, transparent);
+}
+.com-minimarket-category .mm-product-card__media {
+  display: block;
+  min-width: 0;
+}
+.com-minimarket-category .mm-product-card__image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+.com-minimarket-category .mm-product-card__info {
+  display: grid;
+  align-content: start;
+  gap: .5rem;
+  min-width: 0;
+}
+.com-minimarket-category .mm-product-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .4rem;
+}
+.com-minimarket-category .mm-product-list { display: grid; gap: .65rem; }
+.com-minimarket-category .mm-product-list__inner {
+  display: flex; gap: 1rem; align-items: center;
+  padding: .6rem 0; border-bottom: 1px solid var(--bs-border-color, rgba(128,128,128,.3));
+}
+.com-minimarket-category .mm-product-list__inner .mm-product-card__media { flex: 0 0 5rem; }
+.com-minimarket-category .mm-product-list__inner .mm-product-card__info { flex: 1; }
+.com-minimarket-category .mm-product-list__inner .mm-product-card__image { max-width: 5rem; }
+@media (max-width: 420px) {
+  .com-minimarket-category .mm-product-list__inner { align-items: flex-start; gap: .6rem; }
+  .com-minimarket-category .mm-product-list__inner .mm-product-card__media { flex-basis: 4rem; }
+}

@@ -11,6 +11,7 @@ use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Site\Helper\SeoHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
+use MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions;
 
 final class HtmlView extends BaseHtmlView
 {
@@ -18,6 +19,7 @@ final class HtmlView extends BaseHtmlView
     public array $products = [];
     public array $children = [];
     public bool $displayProducts = true;
+    public array $productListOptions = [];
 
     public function display($tpl = null)
     {
@@ -36,18 +38,16 @@ final class HtmlView extends BaseHtmlView
 
         $this->category = $category;
         $options = ComponentHelper::getParams('com_minimarket');
-        $children = (int) ($category->show_children ?? -1);
-        $products = (int) ($category->show_products ?? -1);
-        $this->children = ($children === 1 || ($children === -1 && (int) $options->get('category_show_children', 1) === 1))
-            ? $repo->getChildCategories($id) : [];
-        $showSimple = ($products === 1
-            || ($products === -1 && (int)$options->get('category_show_products', 1) === 1));
-        $bundleSetting = (int)($category->show_bundles ?? -1);
-        $showBundles = $bundleSetting === 1
-            || ($bundleSetting === -1 && (int)$options->get('category_show_bundles', 1) === 1);
-        $this->displayProducts = $showSimple || $showBundles;
+        $this->productListOptions = CategoryDisplayOptions::resolve($category, $options);
+        $display = $this->productListOptions;
+        $this->children = $display['show_children'] ? $repo->getChildCategories($id) : [];
+        $this->displayProducts = $display['show_products'] || $display['show_bundles']
+            || $display['show_descendant_products'] || $display['show_descendant_bundles'];
         $this->products = $this->displayProducts
-            ? $repo->getProductsForCategory($id,$showSimple,$showBundles) : [];
+            ? $repo->getProductsForCategory(
+                $id, $display['show_products'], $display['show_bundles'],
+                $display['show_descendant_products'], $display['show_descendant_bundles']
+            ) : [];
         $document = $this->getDocument();
         $metaTitle = trim((string) ($category->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $category->title);
@@ -83,7 +83,9 @@ final class HtmlView extends BaseHtmlView
 
         $this->getDocument()->getWebAssetManager()
             ->registerAndUseStyle('com_minimarket.badges',
-                'media/com_minimarket/css/badges.css');
+                'media/com_minimarket/css/badges.css')
+            ->registerAndUseStyle('com_minimarket.catalog-layout',
+                'media/com_minimarket/css/catalog-layout.css');
 
         parent::display($tpl);
     }
