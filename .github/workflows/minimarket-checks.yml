@@ -82,6 +82,15 @@ jobs:
           MM_CI_DB_USER: democi
           MM_CI_DB_PASSWORD: demo_ci_password
         run: php scripts/test-demo-sql-mysql84.php
+      - name: Full JSON v2 archive round-trip and transactional safety (MySQL 8.4)
+        env:
+          MINIMARKET_DEMO_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_demo84
+          MM_CI_DB_USER: democi
+          MM_CI_DB_PASSWORD: demo_ci_password
+        run: php scripts/test-catalog-archive-v2-db.php
 
   windows-package:
     name: Windows component ZIP
