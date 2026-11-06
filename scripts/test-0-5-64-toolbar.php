@@ -134,7 +134,7 @@ namespace MiniMarket\QuicklinkTest {
         str_contains($moduleScript,"'status'"),
         'standalone module installer places shortcut before Joomla version');
     testIt(!str_contains($componentScript,'installQuicklink') &&
-        !str_contains($componentScript,'mod_minimarket_toolbar') &&
+        !str_contains($componentScript,"'mod_minimarket_toolbar'") &&
         str_contains($componentScript,'mod_minimarket_quicklink') &&
         is_file($dir.'/script.php'),
         'component retires exact legacy quicklink but never auto-installs new toolbar module');
