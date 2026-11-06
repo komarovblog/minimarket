@@ -100,12 +100,12 @@ namespace MiniMarket\GroupEditorSmoke {
         'standalone delete checks post token, ACL and calls group-only deletion');
     check(str_contains($js, "groups.unshift({") &&
         str_contains($js, "group.members.unshift({") &&
-        str_contains($js, "mount.prepend(addExisting())"),
+        str_contains($js, "toolbar.after(addExisting())"),
         'new relationships, attached groups, search and new members appear first');
     check(str_contains($js,'mm-group-toolbar--top') &&
-        str_contains($js,'mount.appendChild(toolbar)') &&
+        str_contains($js,'mount.prepend(toolbar)') &&
         str_contains($js,'for (const [i, group] of groups.entries())'),
-        'relationship creation buttons are below the existing relationship list');
+        'relationship creation buttons appear above the existing relationship list');
     check(str_contains($js,"mm-group-finder__search--groups") &&
         str_contains($js,"mm-group-existing__results") &&
         str_contains($js,"'btn-success'") &&
