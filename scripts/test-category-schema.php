@@ -1082,4 +1082,38 @@ $pdo->exec("INSERT INTO freshcatci_minimarket_categories
     (id,title,alias,state) VALUES (1,'New category','new-category',1)");
 verify((int) row($pdo, 'freshcatci_minimarket_categories')['sort_order'] === 0,
     'fresh category defaults');
+// 0.5.58 additive category layout overrides on an existing populated catalog.
+$beforeDisplay = row($pdo, 'catci_minimarket_categories');
+runSql($pdo, $dir . 'updates/mysql/0.5.58.sql', 'catci_');
+$afterDisplay = row($pdo, 'catci_minimarket_categories');
+foreach ($beforeDisplay as $col => $value) {
+    verify(isset($afterDisplay[$col]) && $value === $afterDisplay[$col],
+        '0.5.58 preserved existing category column ' . $col);
+}
+foreach (['show_descendant_products','show_descendant_bundles','product_layout',
+    'cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $field) {
+    verify(array_key_exists($field,$afterDisplay),'0.5.58 new category option '.$field);
+}
+verify((int)$afterDisplay['show_descendant_products']===-1
+    && (int)$afterDisplay['show_descendant_bundles']===-1,
+    '0.5.58 defaults to inherited descendant visibility');
+verify($afterDisplay['product_layout']==='inherit'
+    && (int)$afterDisplay['cards_mobile']===-1,
+    '0.5.58 layout and columns inherit by default');
+$pdo->exec("UPDATE catci_minimarket_categories SET product_layout='grid',
+    cards_mobile=1,cards_tablet=2,cards_desktop=3,cards_wide=4,
+    show_descendant_products=1,show_descendant_bundles=0 WHERE id=1");
+verify(row($pdo, 'catci_minimarket_categories')['product_layout']==='grid'
+    && (int)row($pdo,'catci_minimarket_categories')['cards_desktop']===3,
+    '0.5.58 override persists without touching category data');
+verify($beforeProduct === row($pdo, 'catci_minimarket_products')
+    || (string)row($pdo, 'catci_minimarket_products')['sku']==='TEST-001',
+    '0.5.58 upgrade does not change product SKU');
+$freshDisplay = $pdo->query("SHOW COLUMNS FROM freshcatci_minimarket_categories")
+    ->fetchAll(PDO::FETCH_COLUMN);
+foreach (['show_descendant_products','show_descendant_bundles','product_layout',
+    'cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $field) {
+    verify(in_array($field,$freshDisplay,true),'fresh install has 0.5.58 '.$field);
+}
+
 echo 'CATEGORY_SCHEMA_OK: ' . $checks . " cases\n";

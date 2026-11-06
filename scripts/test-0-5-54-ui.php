@@ -97,8 +97,9 @@ namespace MiniMarket\Smoke54 {
     verify(str_contains($table,'COM_MINIMARKET_BADGE_BENEFIT_INVALID'),
         'server enforces savings badge eligibility');
     $category=(string)file_get_contents($root.'site/src/View/Category/HtmlView.php');
-    verify(str_contains($category,'category_show_bundles') &&
-        str_contains($category,'$showSimple,$showBundles'),
+    verify(str_contains($category,'CategoryDisplayOptions::resolve') &&
+        str_contains($category,"$"+"display['show_bundles']") &&
+        str_contains($category,"$"+"display['show_descendant_bundles']"),
         'category displays kits independently of ordinary products');
     $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.54.sql');
     verify(str_contains($migration,'ADD COLUMN `show_bundles`') &&

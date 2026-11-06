@@ -184,6 +184,11 @@ namespace MiniMarket\CategoryTreeSmoke {
     expect(array_map(static fn ($r) => (int) $r->id, $tree->children(2)) === [3],
         'nested category displays direct grandchildren');
     expect($tree->children(4) === [], 'unpublished parent has no visible children');
+    expect($tree->descendantIds(1) === [2,3], 'visible descendants include all published generations');
+    expect($tree->descendantIds(4) === [], 'unpublished parent excludes descendants');
+    expect($tree->descendantIds(5) === [], 'child of unpublished parent excludes descendants');
+    expect($tree->descendantIds(7) === [], 'cyclic branch never leaks descendants');
+    expect($tree->descendantIds(9) === [], 'leaf category has no descendants');
     $orderedTree = new CategoryTree([
         (object) ['id' => 11, 'title' => 'Alpha', 'parent_id' => 0, 'state' => 1, 'sort_order' => 20],
         (object) ['id' => 12, 'title' => 'Zulu', 'parent_id' => 0, 'state' => 1, 'sort_order' => 5],
