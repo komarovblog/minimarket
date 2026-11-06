@@ -85,13 +85,27 @@ final class CategoryTable extends Table
             return false;
         }
         $this->sort_order = (int) $order;
-        foreach (['show_children', 'show_products', 'show_bundles'] as $field) {
+        foreach (['show_children', 'show_products', 'show_bundles', 'show_descendant_products', 'show_descendant_bundles'] as $field) {
             $flag = (int) ($this->$field ?? -1);
             if (!in_array($flag, [-1, 0, 1], true)) {
                 $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));
                 return false;
             }
             $this->$field = $flag;
+        }
+        $layout = (string) ($this->product_layout ?? 'inherit');
+        if (!in_array($layout, ['inherit', 'list', 'grid'], true)) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));
+            return false;
+        }
+        $this->product_layout = $layout;
+        foreach (['cards_mobile', 'cards_tablet', 'cards_desktop', 'cards_wide'] as $field) {
+            $count = (int) ($this->$field ?? -1);
+            if ($count < -1 || $count === 0 || $count > 6) {
+                $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));
+                return false;
+            }
+            $this->$field = $count;
         }
         $this->image_alt = trim((string) ($this->image_alt ?? ''));
         $cover = MediaPath::normalize((string) ($this->image ?? ''));

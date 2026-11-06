@@ -24,11 +24,58 @@
             <option value="physical">COM_MINIMARKET_SHOP_TYPE_PHYSICAL</option>
             <option value="digital">COM_MINIMARKET_SHOP_TYPE_DIGITAL</option>
         </field>
+    </fieldset>
+    <fieldset name="categories" label="COM_MINIMARKET_CONFIG_CATEGORIES">
         <field name="category_show_children" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_CHILDREN" default="1" filter="int">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
         <field name="category_show_products" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_PRODUCTS" default="1" filter="int">
             <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_show_bundles" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_BUNDLES" default="1" filter="int">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_show_descendant_products" type="radio" label="COM_MINIMARKET_GLOBAL_DESCENDANT_PRODUCTS" default="0" filter="int">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_show_descendant_bundles" type="radio" label="COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES" default="0" filter="int">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="list" filter="cmd">
+            <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
+            <option value="grid">COM_MINIMARKET_LAYOUT_GRID</option>
+        </field>
+        <field name="category_cards_mobile" type="list" label="COM_MINIMARKET_CARDS_MOBILE" default="1" filter="int" showon="category_product_layout:grid">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="category_cards_tablet" type="list" label="COM_MINIMARKET_CARDS_TABLET" default="2" filter="int" showon="category_product_layout:grid">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="category_cards_desktop" type="list" label="COM_MINIMARKET_CARDS_DESKTOP" default="3" filter="int" showon="category_product_layout:grid">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="category_cards_wide" type="list" label="COM_MINIMARKET_CARDS_WIDE" default="4" filter="int" showon="category_product_layout:grid">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
         </field>
     </fieldset>
     <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">

@@ -33,6 +33,57 @@
             <option value="1">JYES</option>
             <option value="0">JNO</option>
         </field>
+        <field name="show_descendant_products" type="list" label="COM_MINIMARKET_CATEGORY_DESCENDANT_PRODUCTS" filter="int" default="-1">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+        <field name="show_descendant_bundles" type="list" label="COM_MINIMARKET_CATEGORY_DESCENDANT_BUNDLES" filter="int" default="-1">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+        <field name="product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="inherit" filter="cmd">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
+            <option value="grid">COM_MINIMARKET_LAYOUT_GRID</option>
+        </field>
+        <field name="cards_mobile" type="list" label="COM_MINIMARKET_CARDS_MOBILE" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="cards_tablet" type="list" label="COM_MINIMARKET_CARDS_TABLET" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="cards_desktop" type="list" label="COM_MINIMARKET_CARDS_DESKTOP" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="cards_wide" type="list" label="COM_MINIMARKET_CARDS_WIDE" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
     </fieldset>
     <fieldset name="attributes" label="COM_MINIMARKET_CATEGORY_TAB_ATTRIBUTES">
         <field name="attribute_rules" type="Categoryattributes" filter="raw"

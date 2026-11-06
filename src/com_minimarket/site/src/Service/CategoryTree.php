@@ -78,6 +78,32 @@ final class CategoryTree
         return $ids;
     }
 
+    /** All published descendants, excluding this category and hidden branches. */
+    public function descendantIds(int $parentId): array
+    {
+        if (!$this->isVisible($parentId)) return [];
+        $children = [];
+        foreach ($this->items as $id => $item) {
+            if ($this->isVisible($id)) {
+                $children[(int)($item->parent_id ?? 0)][] = $id;
+            }
+        }
+        $result = [];
+        $seen = [$parentId => true];
+        $queue = [$parentId];
+        foreach ($queue as $parent) {
+            foreach ($children[$parent] ?? [] as $id) {
+                if (!isset($seen[$id])) {
+                    $seen[$id] = true;
+                    $result[] = $id;
+                    $queue[] = $id;
+                }
+            }
+        }
+        sort($result, SORT_NUMERIC);
+        return $result;
+    }
+
     /** @return object[] */
     public function children(int $parentId): array
     {
