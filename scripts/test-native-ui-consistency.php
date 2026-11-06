@@ -135,9 +135,10 @@ checkUi(str_contains($categoryRules,"AdminEntityLinks::edit('attribute',") &&
     str_contains($optionRules,"AdminEntityLinks::edit('orderoption',"),
     'entity links open the actual Joomla edit task instead of the dashboard');
 $dashboard=file_get_contents($base.'admin/tmpl/dashboard/default.php');
-checkUi(str_contains($dashboard,'mm-dashboard__sections') &&
-    str_contains($dashboard,'btn btn-primary mm-dashboard__open'),
-    'dashboard shows text, a vertical section list and a solid catalog button');
+checkUi(str_contains($dashboard,'mm-dashboard-cards') &&
+    str_contains($dashboard,'mm-dashboard-stat') &&
+    str_contains($dashboard,'COM_MINIMARKET_DASHBOARD_ORDERS_PENDING'),
+    'dashboard shows native Bootstrap widgets and honest unfinished-orders placeholder');
 checkUi(str_contains($editor,'sku_matrix_payload') &&
     str_contains($cssFrame,'.mm-sku-viewport') &&
     str_contains($cssFrame,'[data-mm-pinned="sku"]'),
@@ -153,10 +154,10 @@ foreach ([
         'entity link opens actual Joomla editor: '.$file);
 }
 $landing=file_get_contents($base.'admin/tmpl/dashboard/default.php');
-checkUi(str_contains($landing,'mm-dashboard__sections') &&
-    str_contains($landing,'mm-dashboard__open') &&
+checkUi(str_contains($landing,'mm-dashboard-cards') &&
+    str_contains($landing,'COM_MINIMARKET_FEEDS_TITLE') &&
     str_contains($landing,'view=catalog'),
-    'MiniMarket home shows intro, a section list and solid catalog button');
+    'MiniMarket home exposes feeds, widgets and storefront preview button');
 $categoryAttrs=file_get_contents($base.'admin/src/Field/CategoryattributesField.php');
 $categoryOpts=file_get_contents($base.'admin/src/Field/CategoryorderoptionsField.php');
 checkUi(str_contains($categoryAttrs,'d-block text-muted') &&
