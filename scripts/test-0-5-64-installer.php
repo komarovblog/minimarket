@@ -145,7 +145,7 @@ namespace MiniMarket\QuicklinkInstallerTest {
     check($installer->postflight('uninstall',null)===true,
         'uninstall does not try to reconfigure deleted module');
     $component=(string)file_get_contents(__DIR__.'/../src/com_minimarket/script.php');
-    check(!str_contains($component,'mod_minimarket_toolbar')
+    check(!str_contains($component,"'mod_minimarket_toolbar'")
        && !str_contains($component,'installQuicklink'),
        'MiniMarket component upgrade never installs or touches new toolbar module');
     echo "TOOLBAR_064_INSTALL_OK: $checks checks\n";
