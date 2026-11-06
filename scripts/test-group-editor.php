@@ -102,7 +102,7 @@ namespace MiniMarket\GroupEditorSmoke {
         str_contains($js, "group.members.unshift({") &&
         str_contains($js, "mount.prepend(addExisting())"),
         'new relationships, attached groups, search and new members appear first');
-    check(str_contains($js,'mm-group-toolbar--footer') &&
+    check(str_contains($js,'mm-group-toolbar--top') &&
         str_contains($js,'mount.appendChild(toolbar)') &&
         str_contains($js,'for (const [i, group] of groups.entries())'),
         'relationship creation buttons are below the existing relationship list');

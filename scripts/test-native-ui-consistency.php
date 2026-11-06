@@ -121,7 +121,7 @@ $cssFrame=file_get_contents($base.'media/css/admin-ui.css');
 checkUi(str_contains($cssFrame,'#adminForm .mm-admin-panel') &&
     str_contains($cssFrame,'#adminForm .mm-admin-panel .mm-rules-table'),
     'all category/option/attribute tables use matching bordered styling');
-checkUi(str_contains($cssFrame,'.mm-group-toolbar--footer') &&
+checkUi(str_contains($cssFrame,'.mm-group-toolbar--top') &&
     str_contains($cssFrame,'.mm-group-finder__search--groups'),
     'group search uses the same framed finder and footer buttons');
 $categoryRules=file_get_contents($base.'admin/src/Field/CategoryattributesField.php');

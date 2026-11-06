@@ -39,7 +39,9 @@
       status.classList.toggle('text-danger', error);
     };
     const save = () => {
-      output.value = JSON.stringify(groups);
+      output.value = JSON.stringify(groups.map(group => Object.fromEntries(
+        Object.entries(group).filter(([key]) => !key.startsWith('_'))
+      )));
       output.dispatchEvent(new Event('change', { bubbles: true }));
     };
     const api = async (url, params) => {
@@ -110,6 +112,9 @@
       }
       save();
       render();
+      const index = groups.indexOf(group);
+      mount.querySelectorAll('.mm-group-item')[index]
+        ?.querySelector('.mm-group-finder input[type="search"]')?.focus();
     };
 
     const finder = group => {
@@ -135,6 +140,31 @@
       box.append(toolbar, results);
       category.value = group._findCategory || '0';
       let loading = false, debounce = null, serial = 0;
+      const paintResults = items => {
+        results.replaceChildren();
+        const selected = new Set(group.members.map(memberKey));
+        if (!items.length) results.appendChild(el('p', 'small text-muted',
+          t('noMatches', 'No products found')));
+        for (const product of items) {
+          const row = el('div', 'mm-group-finder__result');
+          const caption = el('span', '');
+          caption.appendChild(openLink(productHref(product),
+            String(product.title) + ' (#' + product.id + ')', ''));
+          caption.appendChild(el('span', 'text-muted ms-1',
+            '— ' + product.category));
+          if (product.state !== 1) caption.appendChild(
+            el('small', 'text-muted ms-1', t('unpublished', 'Unpublished')));
+          const isCurrent = config.mode === 'product' &&
+            product.id === config.currentId;
+          const key = isCurrent ? 'current' : String(product.id);
+          const add = button('+', 'btn-success', () => addMember(group, product));
+          add.setAttribute('aria-label', t('addProduct', 'Add product') + ' ' + product.title);
+          add.disabled = selected.has(key);
+          row.append(caption, add);
+          results.appendChild(row);
+        }
+      };
+      if (Array.isArray(group._finderResults)) paintResults(group._finderResults);
       const look = async () => {
         const number = ++serial;
         if (loading) { /* stale response suppressed by serial */ }
@@ -145,31 +175,9 @@
             q: query.value.trim(), category_id: category.value,
           });
           if (number !== serial) return;
-          results.replaceChildren();
-          const selected = new Set(group.members.map(memberKey));
           const items = Array.isArray(data.items) ? data.items : [];
-          if (!items.length) {
-            results.appendChild(el('p', 'small text-muted',
-              t('noMatches', 'No products found')));
-          }
-          for (const product of items) {
-            const row = el('div', 'mm-group-finder__result');
-            const caption = el('span', '');
-            caption.appendChild(openLink(productHref(product),
-              String(product.title) + ' (#' + product.id + ')', ''));
-            caption.appendChild(el('span', 'text-muted ms-1',
-              '— ' + product.category));
-            if (product.state !== 1) caption.appendChild(
-              el('small', 'text-muted ms-1', t('unpublished', 'Unpublished')));
-            const isCurrent = config.mode === 'product' &&
-              product.id === config.currentId;
-            const key = isCurrent ? 'current' : String(product.id);
-            const add = button('+', 'btn-success', () => addMember(group, product));
-            add.setAttribute('aria-label', t('addProduct', 'Add product') + ' ' + product.title);
-            add.disabled = selected.has(key);
-            row.append(caption, add);
-            results.appendChild(row);
-          }
+          group._finderResults = items;
+          paintResults(items);
         } catch (_) {
           if (number === serial) report(t('error', 'Search failed'), true);
         } finally {
@@ -178,11 +186,13 @@
       };
       query.addEventListener('input', () => {
         group._findQuery = query.value;
+        group._finderResults = null;
         clearTimeout(debounce);
         debounce = setTimeout(look, 300);
       });
       category.addEventListener('change', () => {
         group._findCategory = category.value;
+        group._finderResults = null;
         void look();
       });
       search.addEventListener('click', event => event.stopPropagation());
@@ -297,7 +307,7 @@
                 ?.querySelector('.mm-group-finder input[type="search"]')?.focus();
             }
           });
-        content.appendChild(pick);
+        content.insertBefore(pick, content.querySelector('.mm-group-finder') || members);
       }
       // Explicit save/cancel actions are visually separate from Add product.
       const saveActions = el('div', 'mm-group-item__save-actions');
@@ -414,7 +424,7 @@
         mount.appendChild(renderGroup(group, i));
       }
       if (config.mode === 'product') {
-        const toolbar = el('div', 'mm-group-toolbar mm-group-toolbar--footer');
+        const toolbar = el('div', 'mm-group-toolbar mm-group-toolbar--top');
         toolbar.appendChild(button('+ ' + t('addGroup', 'Add relationship'),
           'btn-success', () => {
             update(() => {
@@ -433,10 +443,9 @@
           render();
           mount.querySelector('.mm-group-existing input[type="search"]')?.focus();
         }));
-        mount.appendChild(toolbar);
+        mount.prepend(toolbar);
         if (existingPickerOpen) {
-          // Search at the FIRST visible position; footer buttons stay below.
-          mount.prepend(addExisting());
+          toolbar.after(addExisting());
         }
       }
       save();

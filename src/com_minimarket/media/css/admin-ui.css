@@ -434,7 +434,7 @@
 #adminForm .mm-admin-panel .mm-group-item {
   border-color: var(--border-color, rgba(128,128,128,.35));
 }
-#adminForm .mm-group-toolbar--footer {
+#adminForm .mm-group-toolbar--top {
   margin: .9rem 0 0;
   padding-top: .65rem;
   border-top: 1px solid var(--border-color, rgba(128,128,128,.2));
