@@ -160,10 +160,11 @@ foreach ([
         'entity link opens actual Joomla editor: '.$file);
 }
 $landing=file_get_contents($base.'admin/tmpl/dashboard/default.php');
-checkUi(str_contains($landing,'mm-dashboard-cards') &&
+checkUi(str_contains($landing,'mm-dashboard-band card mb-3') &&
     str_contains($landing,'COM_MINIMARKET_FEEDS_TITLE') &&
+    str_contains($landing,'COM_MINIMARKET_IMPORT_TITLE') &&
     str_contains($landing,'view=catalog'),
-    'MiniMarket home exposes feeds, widgets and storefront preview button');
+    'MiniMarket home has full-width tools band with feeds and prominent storefront button');
 $categoryAttrs=file_get_contents($base.'admin/src/Field/CategoryattributesField.php');
 $categoryOpts=file_get_contents($base.'admin/src/Field/CategoryorderoptionsField.php');
 checkUi(str_contains($categoryAttrs,'d-block text-muted') &&
