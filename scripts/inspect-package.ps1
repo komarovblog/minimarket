@@ -78,11 +78,6 @@ try {
     foreach ($file in @(
         'script.php',
         'admin/presets/minimarket.xml',
-        'admin/modules/mod_minimarket_quicklink/mod_minimarket_quicklink.xml',
-        'admin/modules/mod_minimarket_quicklink/mod_minimarket_quicklink.php',
-        'admin/modules/mod_minimarket_quicklink/tmpl/default.php',
-        'admin/modules/mod_minimarket_quicklink/language/ru-RU/mod_minimarket_quicklink.ini',
-        'admin/modules/mod_minimarket_quicklink/language/en-GB/mod_minimarket_quicklink.ini',
         'admin/services/provider.php',
         'admin/src/Field/ShopmenuField.php',
         'admin/sql/updates/mysql/0.4.1.sql',
@@ -492,6 +487,7 @@ try {
         foreach ($required in @(
             'mod_minimarket_quicklink.xml',
             'mod_minimarket_quicklink.php',
+            'script.php',
             'tmpl/default.php',
             'language/en-GB/mod_minimarket_quicklink.ini',
             'language/en-GB/mod_minimarket_quicklink.sys.ini',
@@ -516,9 +512,16 @@ try {
     }
     finally { $moduleArchive.Dispose() }
 
-    if ($null -eq $xml.SelectSingleNode(
+    if ($null -ne $xml.SelectSingleNode(
         "/extension/administration/files[@folder='admin']/folder[text()='modules']")) {
-        Write-Output 'PACKAGE_FAIL: QUICKLINK_BUNDLED_FOLDER_UNDECLARED'
+        Write-Output 'PACKAGE_FAIL: QUICKLINK_MUST_NOT_BE_BUNDLED'
+        exit 1
+    }
+    if (@($members | Where-Object {
+        $_ -like 'admin/modules/mod_minimarket_quicklink/*' -or
+        $_ -eq 'mod_minimarket_quicklink.xml'
+    }).Count -gt 0) {
+        Write-Output 'PACKAGE_FAIL: QUICKLINK_PRESENT_IN_COMPONENT_ZIP'
         exit 1
     }
     Write-Output ('PACKAGE_OK: ' + $expectedVersion + ' (' + $expectedName + ')')

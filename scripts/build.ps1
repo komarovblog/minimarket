@@ -31,11 +31,6 @@ $needed = @(
     'minimarket.xml',
     'script.php',
     'admin\presets\minimarket.xml',
-    'admin\modules\mod_minimarket_quicklink\mod_minimarket_quicklink.xml',
-    'admin\modules\mod_minimarket_quicklink\mod_minimarket_quicklink.php',
-    'admin\modules\mod_minimarket_quicklink\tmpl\default.php',
-    'admin\modules\mod_minimarket_quicklink\language\ru-RU\mod_minimarket_quicklink.ini',
-    'admin\modules\mod_minimarket_quicklink\language\en-GB\mod_minimarket_quicklink.ini',
     'admin\config.xml',
     'admin\sql\install.mysql.sql',
     'admin\sql\updates\mysql\0.2.0.sql',
@@ -149,6 +144,9 @@ try {
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
     Copy-Item -LiteralPath $manifestPath -Destination $stage
     Copy-Item -LiteralPath (Join-Path $componentRoot 'script.php') -Destination $stage
+    if (Test-Path -LiteralPath (Join-Path $stage 'admin\modules\mod_minimarket_quicklink')) {
+        throw 'QUICKLINK_MUST_NOT_BE_BUNDLED'
+    }
     foreach ($folder in @('admin', 'site', 'media')) {
         Copy-Item -LiteralPath (Join-Path $componentRoot $folder) -Destination $stage -Recurse
     }
@@ -328,7 +326,21 @@ try {
     # Independently installable administrator module ZIP is shipped beside the
     # component as a recovery path. The component ZIP already contains these
     # files and attempts to install the module on update/install.
-    $moduleRoot = Join-Path $componentRoot 'admin\modules\mod_minimarket_quicklink'
+    $moduleRoot = Join-Path $projectRoot 'src\mod_minimarket_quicklink'
+    foreach ($moduleRel in @(
+        'mod_minimarket_quicklink.xml',
+        'mod_minimarket_quicklink.php',
+        'script.php',
+        'tmpl\default.php',
+        'language\en-GB\mod_minimarket_quicklink.ini',
+        'language\en-GB\mod_minimarket_quicklink.sys.ini',
+        'language\ru-RU\mod_minimarket_quicklink.ini',
+        'language\ru-RU\mod_minimarket_quicklink.sys.ini'
+    )) {
+        if (-not (Test-Path -LiteralPath (Join-Path $moduleRoot $moduleRel) -PathType Leaf)) {
+            throw "QUICKLINK_MODULE_SOURCE_MISSING: $moduleRel"
+        }
+    }
     $moduleXmlPath = Join-Path $moduleRoot 'mod_minimarket_quicklink.xml'
     [xml]$moduleXml = Get-Content -LiteralPath $moduleXmlPath -Raw -Encoding UTF8
     if ($moduleXml.extension.type -ne 'module' -or

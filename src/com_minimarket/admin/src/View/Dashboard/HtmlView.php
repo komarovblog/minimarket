@@ -24,6 +24,9 @@ final class HtmlView extends BaseHtmlView
                 .$db->quoteName('#__minimarket_'.$table).' WHERE '.$predicate);
             $this->stats[$key]=(int)$db->loadResult();
         }
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseStyle('com_minimarket.dashboard',
+                'media/com_minimarket/css/dashboard.css');
         ToolbarHelper::title(Text::_('COM_MINIMARKET_DASHBOARD_TITLE'));
 
         $user = Factory::getApplication()->getIdentity();
