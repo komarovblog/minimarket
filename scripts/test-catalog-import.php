@@ -57,6 +57,21 @@ namespace MiniMarket\ImportTest {
         }
     }
 
+    $rich = CatalogImport::decode((string)file_get_contents(
+        __DIR__ . '/../examples/import-rich-catalog-v1.json'));
+    verify(count($rich['categories']) === 11 && count($rich['products']) === 18,
+        'new rich example contains a diverse category tree and products');
+    verify(count($rich['bundles']) === 5
+        && $rich['bundles'][3]['items'][0]['product'] === 'bundle-mechanics',
+        'extended example includes nested and fixed/discount bundles');
+    $invalidBundle = $rich;
+    $invalidBundle['bundles'][0]['items'][] = $invalidBundle['bundles'][0]['items'][0];
+    try {
+        CatalogImport::decode(json_encode($invalidBundle, JSON_THROW_ON_ERROR));
+        verify(false, 'duplicate bundle component accepted');
+    } catch (\InvalidArgumentException $e) {
+        verify(true, 'duplicate bundle component rejected');
+    }
     $bundled = __DIR__ . '/../src/com_minimarket/admin/examples/';
     $sample = (string) file_get_contents($bundled . 'import-catalog-v1.json');
     $blank = (string) file_get_contents($bundled . 'import-empty-v1.json');

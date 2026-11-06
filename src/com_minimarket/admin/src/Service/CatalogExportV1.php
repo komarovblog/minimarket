@@ -126,7 +126,7 @@ final class CatalogExportV1
                     'badge_sale'=>(int)($r['badge_sale']??0),
                     'badge_benefit'=>(int)($r['badge_benefit']??0),
                     'state'=>(int)$r['state'], 'items'=>[]];
-                if ($mode === 'fixed' && $r['old_price'] !== null) {
+                if ($mode === 'fixed' && ($r['old_price'] ?? null) !== null) {
                     $item['old_price']=(string)$r['old_price'];
                 }
                 $doc['bundles'][]=$item;
@@ -136,7 +136,7 @@ final class CatalogExportV1
                     'price'=>(string)$r['price'], 'stock'=>(int)$r['stock'],
                     'stock_mode'=>(int)$r['option_stock_mode'],
                     'category'=>$categoryIds[$catId], 'state'=>(int)$r['state']];
-                if ($r['old_price'] !== null) $item['old_price']=(string)$r['old_price'];
+                if (($r['old_price'] ?? null) !== null) $item['old_price']=(string)$r['old_price'];
                 if ((int)($r['badge_sale']??0)===1) $item['badge_sale']=1;
                 $doc['products'][]=$item;
             } else {

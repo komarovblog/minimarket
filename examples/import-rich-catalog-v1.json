@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "source": "minimarket-rich-demo",
+  "categories": [
+    {
+      "key": "toys",
+      "title": "Развивающие игрушки",
+      "alias": "razvivayushchie-igrushki",
+      "parent": null,
+      "state": 1
+    },
+    {
+      "key": "construction",
+      "title": "Конструкторы",
+      "alias": "konstruktory",
+      "parent": "toys",
+      "state": 1
+    },
+    {
+      "key": "wooden",
+      "title": "Деревянные игрушки",
+      "alias": "derevyannye-igrushki",
+      "parent": "toys",
+      "state": 1
+    },
+    {
+      "key": "sensory",
+      "title": "Сенсорные игры",
+      "alias": "sensornye-igry",
+      "parent": "toys",
+      "state": 1
+    },
+    {
+      "key": "wall",
+      "title": "Настенные игровые системы",
+      "alias": "nastennye-sistemy",
+      "parent": null,
+      "state": 1
+    },
+    {
+      "key": "marble",
+      "title": "Трассы для шариков",
+      "alias": "trassy-dlya-sharikov",
+      "parent": "wall",
+      "state": 1
+    },
+    {
+      "key": "magnetic",
+      "title": "Магнитные модули",
+      "alias": "magnitnye-moduli",
+      "parent": "wall",
+      "state": 1
+    },
+    {
+      "key": "creative",
+      "title": "Творчество",
+      "alias": "tvorchestvo",
+      "parent": null,
+      "state": 1
+    },
+    {
+      "key": "painting",
+      "title": "Рисование",
+      "alias": "risovanie",
+      "parent": "creative",
+      "state": 1
+    },
+    {
+      "key": "games",
+      "title": "Настольные игры",
+      "alias": "nastolnye-igry",
+      "parent": null,
+      "state": 1
+    },
+    {
+      "key": "board",
+      "title": "Логические игры",
+      "alias": "logicheskie-igry",
+      "parent": "games",
+      "state": 1
+    }
+  ],
+  "attributes": [
+    {
+      "key": "age",
+      "title": "Возраст, лет",
+      "code": "age",
+      "type": "number",
+      "state": 1
+    },
+    {
+      "key": "material",
+      "title": "Материал",
+      "code": "material",
+      "type": "text",
+      "state": 1
+    },
+    {
+      "key": "weight",
+      "title": "Масса, г",
+      "code": "weight",
+      "type": "number",
+      "state": 1
+    },
+    {
+      "key": "color",
+      "title": "Цвет",
+      "code": "color",
+      "type": "color",
+      "state": 1,
+      "values": [
+        {
+          "code": "red",
+          "title": "Красный",
+          "color_hex": "#D84040",
+          "state": 1
+        },
+        {
+          "code": "blue",
+          "title": "Синий",
+          "color_hex": "#3269C9",
+          "state": 1
+        },
+        {
+          "code": "green",
+          "title": "Зелёный",
+          "color_hex": "#2F8F5B",
+          "state": 1
+        }
+      ]
+    },
+    {
+      "key": "eco",
+      "title": "Экологичные материалы",
+      "code": "eco",
+      "type": "boolean",
+      "state": 1
+    },
+    {
+      "key": "details",
+      "title": "Описание комплектации",
+      "code": "details",
+      "type": "editor",
+      "state": 1
+    }
+  ],
+  "options": [
+    {
+      "key": "size",
+      "title": "Размер",
+      "code": "size",
+      "state": 1,
+      "values": [
+        {
+          "code": "s",
+          "title": "S",
+          "state": 1
+        },
+        {
+          "code": "m",
+          "title": "M",
+          "state": 1
+        },
+        {
+          "code": "l",
+          "title": "L",
+          "state": 1
+        }
+      ]
+    },
+    {
+      "key": "assembly",
+      "title": "Сборка",
+      "code": "assembly",
+      "state": 1,
+      "values": [
+        {
+          "code": "assembled",
+          "title": "Собранный",
+          "state": 1
+        },
+        {
+          "code": "kit",
+          "title": "Для самостоятельной сборки",
+          "state": 1
+        }
+      ]
+    },
+    {
+      "key": "mount",
+      "title": "Тип крепления",
+      "code": "mount",
+      "state": 1,
+      "values": [
+        {
+          "code": "magnet",
+          "title": "Магнит",
+          "state": 1
+        },
+        {
+          "code": "wall",
+          "title": "Крепление к стене",
+          "state": 1
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "key": "constructor-starter",
+      "title": "Конструктор «Первые механизмы»",
+      "alias": "pervye-mehanizmy",
+      "sku": "CON-1001",
+      "price": "2990.00",
+      "stock": 20,
+      "stock_mode": 0,
+      "category": "construction",
+      "state": 1,
+      "old_price": "3490.00",
+      "badge_sale": 1
+    },
+    {
+      "key": "constructor-gears",
+      "title": "Конструктор «Шестерёнки»",
+      "alias": "shesterenki",
+      "sku": "CON-1002",
+      "price": "3990.00",
+      "stock": 8,
+      "stock_mode": 0,
+      "category": "construction",
+      "state": 1
+    },
+    {
+      "key": "constructor-bridge",
+      "title": "Конструктор «Мосты»",
+      "alias": "mosty",
+      "sku": "CON-1003",
+      "price": "4990.00",
+      "stock": 0,
+      "stock_mode": 0,
+      "category": "construction",
+      "state": 1
+    },
+    {
+      "key": "constructor-engineer",
+      "title": "Конструктор «Юный инженер»",
+      "alias": "yunyj-inzhener",
+      "sku": "CON-1004",
+      "price": "6490.00",
+      "stock": 6,
+      "stock_mode": 0,
+      "category": "construction",
+      "state": 1
+    },
+    {
+      "key": "wood-train",
+      "title": "Деревянный поезд",
+      "alias": "derevyannyj-poezd",
+      "sku": "WOOD-1005",
+      "price": "2390.00",
+      "stock": 16,
+      "stock_mode": 0,
+      "category": "wooden",
+      "state": 1
+    },
+    {
+      "key": "wood-blocks",
+      "title": "Кубики «Город»",
+      "alias": "kubiki-gorod",
+      "sku": "WOOD-1006",
+      "price": "1890.00",
+      "stock": 25,
+      "stock_mode": 0,
+      "category": "wooden",
+      "state": 1
+    },
+    {
+      "key": "wood-puzzle",
+      "title": "Пазл «Лесные животные»",
+      "alias": "pazl-lesnye-zhivotnye",
+      "sku": "WOOD-1007",
+      "price": "990.00",
+      "stock": 28,
+      "stock_mode": 0,
+      "category": "wooden",
+      "state": 1
+    },
+    {
+      "key": "sensory-sorter",
+      "title": "Сортер «Формы и цвета»",
+      "alias": "sorter-formy-i-cveta",
+      "sku": "SENS-1008",
+      "price": "1590.00",
+      "stock": 18,
+      "stock_mode": 0,
+      "category": "sensory",
+      "state": 1
+    },
+    {
+      "key": "sensory-mat",
+      "title": "Тактильный коврик",
+      "alias": "taktilnyj-kovrik",
+      "sku": "SENS-1009",
+      "price": "2890.00",
+      "stock": 9,
+      "stock_mode": 0,
+      "category": "sensory",
+      "state": 1
+    },
+    {
+      "key": "marble-basic",
+      "title": "Трасса «Шарикопад»",
+      "alias": "sharikopad",
+      "sku": "WALL-1010",
+      "price": "7990.00",
+      "stock": 7,
+      "stock_mode": 0,
+      "category": "marble",
+      "state": 1
+    },
+    {
+      "key": "marble-turn",
+      "title": "Модуль «Поворот»",
+      "alias": "modul-povorot",
+      "sku": "WALL-1011",
+      "price": "1890.00",
+      "stock": 30,
+      "stock_mode": 0,
+      "category": "marble",
+      "state": 1
+    },
+    {
+      "key": "marble-elevator",
+      "title": "Модуль «Подъёмник»",
+      "alias": "modul-podyomnik",
+      "sku": "WALL-1012",
+      "price": "3490.00",
+      "stock": 10,
+      "stock_mode": 0,
+      "category": "marble",
+      "state": 1
+    },
+    {
+      "key": "magnetic-panel",
+      "title": "Магнитная игровая стена",
+      "alias": "magnitnaya-igrovaya-stena",
+      "sku": "MAG-1013",
+      "price": "11990.00",
+      "stock": 4,
+      "stock_mode": 0,
+      "category": "magnetic",
+      "state": 1
+    },
+    {
+      "key": "magnetic-gears",
+      "title": "Магнитный набор «Шестерни»",
+      "alias": "magnitnye-shesterni",
+      "sku": "MAG-1014",
+      "price": "2590.00",
+      "stock": 12,
+      "stock_mode": 0,
+      "category": "magnetic",
+      "state": 1
+    },
+    {
+      "key": "art-colors",
+      "title": "Акварель «Палитра»",
+      "alias": "akvarel-palitra",
+      "sku": "ART-1015",
+      "price": "890.00",
+      "stock": 35,
+      "stock_mode": 0,
+      "category": "painting",
+      "state": 1
+    },
+    {
+      "key": "art-canvas",
+      "title": "Альбом «Рисуем вместе»",
+      "alias": "albom-risuem-vmeste",
+      "sku": "ART-1016",
+      "price": "1290.00",
+      "stock": 22,
+      "stock_mode": 0,
+      "category": "painting",
+      "state": 1
+    },
+    {
+      "key": "board-memory",
+      "title": "Мемо «Найди пару»",
+      "alias": "memo-najdi-paru",
+      "sku": "GAME-1017",
+      "price": "1390.00",
+      "stock": 14,
+      "stock_mode": 0,
+      "category": "board",
+      "state": 1
+    },
+    {
+      "key": "board-labyrinth",
+      "title": "Настольная игра «Лабиринт»",
+      "alias": "nastolnyj-labirint",
+      "sku": "GAME-1018",
+      "price": "2190.00",
+      "stock": 8,
+      "stock_mode": 0,
+      "category": "board",
+      "state": 1
+    }
+  ],
+  "bundles": [
+    {
+      "key": "bundle-mechanics",
+      "title": "Комплект «Первые механизмы»",
+      "alias": "komplekt-pervye-mehanizmy",
+      "sku": "KIT-2001",
+      "category": "construction",
+      "price": "0.00",
+      "price_mode": "discount",
+      "discount_pct": "10.00",
+      "state": 1,
+      "items": [
+        {
+          "product": "constructor-starter",
+          "quantity": 1
+        },
+        {
+          "product": "constructor-gears",
+          "quantity": 1
+        }
+      ],
+      "badge_benefit": 1
+    },
+    {
+      "key": "bundle-wall",
+      "title": "Комплект «Большая трасса»",
+      "alias": "komplekt-bolshaya-trassa",
+      "sku": "KIT-2002",
+      "category": "marble",
+      "price": "0.00",
+      "price_mode": "discount",
+      "discount_pct": "15.00",
+      "state": 1,
+      "items": [
+        {
+          "product": "marble-basic",
+          "quantity": 1
+        },
+        {
+          "product": "marble-turn",
+          "quantity": 2
+        }
+      ],
+      "badge_benefit": 1
+    },
+    {
+      "key": "bundle-creative",
+      "title": "Подарочный набор «Творчество»",
+      "alias": "podarochnyj-nabor-tvorchestvo",
+      "sku": "KIT-2003",
+      "category": "painting",
+      "price": "1990.00",
+      "price_mode": "fixed",
+      "discount_pct": "0.00",
+      "state": 1,
+      "items": [
+        {
+          "product": "art-colors",
+          "quantity": 1
+        },
+        {
+          "product": "art-canvas",
+          "quantity": 1
+        }
+      ],
+      "old_price": "2490.00",
+      "badge_sale": 1
+    },
+    {
+      "key": "bundle-studio",
+      "title": "Комплект «Инженерная студия»",
+      "alias": "komplekt-inzhenernaya-studiya",
+      "sku": "KIT-2004",
+      "category": "wall",
+      "price": "12990.00",
+      "price_mode": "fixed",
+      "discount_pct": "0.00",
+      "state": 1,
+      "items": [
+        {
+          "product": "bundle-mechanics",
+          "quantity": 1
+        },
+        {
+          "product": "magnetic-panel",
+          "quantity": 1
+        }
+      ],
+      "old_price": "15990.00",
+      "badge_sale": 1
+    },
+    {
+      "key": "bundle-gift",
+      "title": "Комплект «Умный подарок»",
+      "alias": "komplekt-umnyj-podarok",
+      "sku": "KIT-2005",
+      "category": "board",
+      "price": "0.00",
+      "price_mode": "discount",
+      "discount_pct": "8.00",
+      "state": 1,
+      "items": [
+        {
+          "product": "wood-puzzle",
+          "quantity": 1
+        },
+        {
+          "product": "board-memory",
+          "quantity": 1
+        }
+      ],
+      "badge_benefit": 1
+    }
+  ],
+  "links": [
+    {
+      "key": "constructors-line",
+      "title": "Серия конструкторов",
+      "members": [
+        "constructor-starter",
+        "constructor-gears",
+        "constructor-bridge"
+      ],
+      "state": 1
+    },
+    {
+      "key": "marble-line",
+      "title": "Модули трассы",
+      "members": [
+        "marble-basic",
+        "marble-turn",
+        "marble-elevator"
+      ],
+      "state": 1
+    },
+    {
+      "key": "gift-line",
+      "title": "Подарочные наборы",
+      "members": [
+        "bundle-creative",
+        "bundle-gift"
+      ],
+      "state": 1
+    }
+  ],
+  "category_attributes": [
+    {
+      "key": "age-toys",
+      "category": "toys",
+      "attribute": "age",
+      "mode": "required"
+    },
+    {
+      "key": "material-wood",
+      "category": "wooden",
+      "attribute": "material",
+      "mode": "required"
+    },
+    {
+      "key": "weight-wall",
+      "category": "wall",
+      "attribute": "weight",
+      "mode": "optional"
+    },
+    {
+      "key": "color-construct",
+      "category": "construction",
+      "attribute": "color",
+      "mode": "optional"
+    },
+    {
+      "key": "eco-creative",
+      "category": "creative",
+      "attribute": "eco",
+      "mode": "optional"
+    },
+    {
+      "key": "details-games",
+      "category": "games",
+      "attribute": "details",
+      "mode": "optional"
+    }
+  ],
+  "category_options": [
+    {
+      "key": "assembly-construct",
+      "category": "construction",
+      "option": "assembly",
+      "mode": "optional"
+    },
+    {
+      "key": "mount-wall",
+      "category": "wall",
+      "option": "mount",
+      "mode": "optional"
+    },
+    {
+      "key": "size-creative",
+      "category": "creative",
+      "option": "size",
+      "mode": "optional"
+    }
+  ]
+}

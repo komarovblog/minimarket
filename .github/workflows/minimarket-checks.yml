@@ -176,6 +176,8 @@ jobs:
 
       - name: 0.5.55 type-specific product forms, bundle search and import/export
         run: php scripts/test-0-5-55-ui.php
+      - name: 0.5.56 global shop and rich import
+        run: php scripts/test-0-5-56-store-import.php
 
       - name: 0.5.54 kit visibility, brands, benefits, unified editors and import layout
         run: php scripts/test-0-5-54-ui.php
