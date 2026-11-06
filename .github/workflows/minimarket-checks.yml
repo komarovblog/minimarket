@@ -134,7 +134,7 @@ jobs:
             dist/minimarket_product_badges_demo_0_5_53.sql
             dist/minimarket_ui_benefit_demo_0_5_54.sql
             dist/minimarket_digital_demo_0_5_55.sql
-            dist/minimarket_mysql84_nnop3_update_0_5_68.sql
+            dist/minimarket_mysql84_nnop3_update_0_5_69.sql
             dist/mod_minimarket_toolbar-${{ steps.component_version.outputs.value }}.zip
           if-no-files-found: error
           retention-days: 14
@@ -347,6 +347,12 @@ jobs:
 
       - name: Nested variant gallery Media metadata cleanup
         run: node scripts/test-clean-variant-media.js
+
+      - name: MiniMarket 0.5.69 unified forms, inventory and picker audit
+        run: |
+          php scripts/test-0-5-69-consistency.php
+          node --check src/com_minimarket/media/js/stock-controls.js
+          node --check src/com_minimarket/media/js/entity-picker.js
 
       - name: Shop menu selector regression tests
         run: php scripts/test-shopmenu.php
