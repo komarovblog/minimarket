@@ -5,10 +5,12 @@
     <creationDate>2026-11-06</creationDate>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.5.62</version>
+    <version>0.5.63</version>
     <description>MOD_MINIMARKET_QUICKLINK_DESCRIPTION</description>
+    <scriptfile>script.php</scriptfile>
     <files>
         <filename module="mod_minimarket_quicklink">mod_minimarket_quicklink.php</filename>
+        <filename>script.php</filename>
         <folder>tmpl</folder>
     </files>
     <languages folder="language">
