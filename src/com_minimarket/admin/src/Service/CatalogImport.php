@@ -87,7 +87,7 @@ final class CatalogImport
                 if ($section === 'bundles') {
                     $items = $row['items'] ?? null;
                     if (!is_array($items) || !array_is_list($items)
-                        || count($items) < 1 || count($items) > BundleItems::MAX_ITEMS) {
+                        || count($items) < 1 || count($items) > 40) {
                         throw new \InvalidArgumentException('COM_MINIMARKET_IMPORT_SCHEMA_INVALID');
                     }
                     $unique = [];

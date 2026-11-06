@@ -16,7 +16,8 @@ use Joomla\CMS\Session\Session;
                 <thead><tr><th><?php echo Text::_('COM_MINIMARKET_IMPORT_SAMPLE_KIND'); ?></th>
                     <th>Excel (XLSX)</th><th>CSV</th><th>JSON</th></tr></thead>
                 <tbody>
-                    <?php foreach (['catalog' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_SAMPLE',
+                    <?php foreach (['rich' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_RICH',
+                                    'catalog' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_SAMPLE',
                                     'empty' => 'COM_MINIMARKET_IMPORT_DOWNLOAD_EMPTY'] as $template => $label) : ?>
                     <tr><th scope="row"><?php echo Text::_($label); ?></th>
                         <?php foreach (['xlsx','csv','json'] as $format) : ?>

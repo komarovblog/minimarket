@@ -31,7 +31,7 @@ final class CatalogExportV1
     {
         $doc=['version'=>1,'source'=>'minimarket-export'];
         foreach (CatalogTabularV1::FIELDS as $section=>$_) $doc[$section]=[];
-        $categoryIds=[]; $attributeIds=[]; $optionIds=[]; $productIds=[]; $groupIds=[];
+        $categoryIds=[]; $attributeIds=[]; $optionIds=[]; $productIds=[]; $groupIds=[]; $bundleIndexes=[];
         foreach (self::rows($db,'#__minimarket_categories','id ASC') as $r) {
             $id=(int)$r['id'];
             $categoryIds[$id]='category-'.$id;
@@ -112,13 +112,47 @@ final class CatalogExportV1
                 throw new \RuntimeException('COM_MINIMARKET_EXPORT_INCOMPATIBLE');
             }
             $productIds[$id]='product-'.$id;
-            $doc['products'][]=[
-                'key'=>$productIds[$id], 'title'=>(string)$r['title'],
-                'alias'=>(string)$r['alias'],'sku'=>(string)$r['sku'],
-                'price'=>(string)$r['price'], 'stock'=>(int)$r['stock'],
-                'stock_mode'=>(int)$r['option_stock_mode'],
-                'category'=>$categoryIds[$catId], 'state'=>(int)$r['state'],
-            ];
+            if (($r['product_type'] ?? 'simple') === 'bundle') {
+                $mode = (string) ($r['bundle_price_mode'] ?? 'fixed');
+                if (!in_array($mode, ['fixed','discount'], true)) {
+                    throw new \RuntimeException('COM_MINIMARKET_EXPORT_INCOMPATIBLE');
+                }
+                $bundleIndexes[$id]=count($doc['bundles']);
+                $item=['key'=>$productIds[$id], 'title'=>(string)$r['title'],
+                    'alias'=>(string)$r['alias'],'sku'=>(string)$r['sku'],
+                    'category'=>$categoryIds[$catId],
+                    'price'=>(string)$r['price'], 'price_mode'=>$mode,
+                    'discount_pct'=>(string)($r['bundle_discount_pct'] ?? '0'),
+                    'badge_sale'=>(int)($r['badge_sale']??0),
+                    'badge_benefit'=>(int)($r['badge_benefit']??0),
+                    'state'=>(int)$r['state'], 'items'=>[]];
+                if ($mode === 'fixed' && $r['old_price'] !== null) {
+                    $item['old_price']=(string)$r['old_price'];
+                }
+                $doc['bundles'][]=$item;
+            } elseif (($r['product_type'] ?? 'simple') === 'simple') {
+                $item=['key'=>$productIds[$id], 'title'=>(string)$r['title'],
+                    'alias'=>(string)$r['alias'],'sku'=>(string)$r['sku'],
+                    'price'=>(string)$r['price'], 'stock'=>(int)$r['stock'],
+                    'stock_mode'=>(int)$r['option_stock_mode'],
+                    'category'=>$categoryIds[$catId], 'state'=>(int)$r['state']];
+                if ($r['old_price'] !== null) $item['old_price']=(string)$r['old_price'];
+                if ((int)($r['badge_sale']??0)===1) $item['badge_sale']=1;
+                $doc['products'][]=$item;
+            } else {
+                throw new \RuntimeException('COM_MINIMARKET_EXPORT_INCOMPATIBLE');
+            }
+        }
+        foreach (self::rows($db,'#__minimarket_bundle_items','bundle_product_id ASC, sort_order ASC, id ASC') as $r) {
+            $bid=(int)$r['bundle_product_id'];
+            $pid=(int)$r['component_product_id'];
+            // v1 does not transfer variant IDs or SKU matrices. Fail explicitly.
+            if (!isset($bundleIndexes[$bid],$productIds[$pid])
+                || $r['component_variant_id'] !== null) {
+                throw new \RuntimeException('COM_MINIMARKET_EXPORT_INCOMPATIBLE');
+            }
+            $doc['bundles'][$bundleIndexes[$bid]]['items'][]=[
+                'product'=>$productIds[$pid], 'quantity'=>(int)$r['quantity']];
         }
         foreach (self::rows($db,'#__minimarket_product_groups','id ASC') as $r) {
             $id=(int)$r['id'];

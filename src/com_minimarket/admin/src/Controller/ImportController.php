@@ -69,6 +69,7 @@ final class ImportController extends BaseController
         $name = $this->input->getCmd('template', '');
         $format = $this->input->getCmd('filetype', 'json');
         $examples = ['catalog'=>'import-catalog-v1.json',
+            'rich'=>'import-rich-catalog-v1.json',
             'empty'=>'import-empty-v1.json'];
         if (!isset($examples[$name]) || !in_array($format,['json','csv','xlsx'],true)) {
             throw new \RuntimeException('Unknown MiniMarket example', 404);
