@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="urn:joomla.org" xsi:schemaLocation="urn:joomla.org menu.xsd">
+    <menuitem title="COM_MINIMARKET" type="heading" icon="cart" dashboard="minimarket">
+        <menuitem title="COM_MINIMARKET_DASHBOARD_TITLE" type="component"
+                  element="com_minimarket"
+                  link="index.php?option=com_minimarket&amp;view=dashboard"/>
+        <menuitem title="COM_MINIMARKET_CATEGORIES" type="component"
+                  element="com_minimarket"
+                  link="index.php?option=com_minimarket&amp;view=categories"/>
+        <menuitem title="COM_MINIMARKET_PRODUCTS" type="component"
+                  element="com_minimarket"
+                  link="index.php?option=com_minimarket&amp;view=products"/>
+        <menuitem title="COM_MINIMARKET_BUNDLES" type="component"
+                  element="com_minimarket"
+                  link="index.php?option=com_minimarket&amp;view=bundles"/>
+        <menuitem title="COM_MINIMARKET_FEEDS_TITLE" type="component"
+                  element="com_minimarket"
+                  link="index.php?option=com_minimarket&amp;view=feeds"/>
+        <menuitem title="COM_MINIMARKET_IMPORT_TITLE" type="component"
+                  element="com_minimarket"
+                  link="index.php?option=com_minimarket&amp;view=import"/>
+    </menuitem>
+</menu>

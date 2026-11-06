@@ -76,6 +76,8 @@ try {
     }
 
     foreach ($file in @(
+        'script.php',
+        'admin/presets/minimarket.xml',
         'admin/services/provider.php',
         'admin/src/Field/ShopmenuField.php',
         'admin/sql/updates/mysql/0.4.1.sql',

@@ -29,6 +29,8 @@ if ([string]::IsNullOrWhiteSpace($OutputPath)) {
 $OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
 $needed = @(
     'minimarket.xml',
+    'script.php',
+    'admin\presets\minimarket.xml',
     'admin\config.xml',
     'admin\sql\install.mysql.sql',
     'admin\sql\updates\mysql\0.2.0.sql',
@@ -141,6 +143,7 @@ $temporaryZip = $null
 try {
     New-Item -ItemType Directory -Path $stage -Force | Out-Null
     Copy-Item -LiteralPath $manifestPath -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $componentRoot 'script.php') -Destination $stage
     foreach ($folder in @('admin', 'site', 'media')) {
         Copy-Item -LiteralPath (Join-Path $componentRoot $folder) -Destination $stage -Recurse
     }
