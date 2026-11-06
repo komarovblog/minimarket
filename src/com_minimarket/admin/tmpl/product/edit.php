@@ -77,8 +77,12 @@ use Joomla\CMS\Router\Route;
             <?php elseif ($section === 'badges') : ?>
                 <?php
                   // Explicit order is part of the admin UI contract.
-                  if ($isBundle) echo $this->form->renderField('badge_benefit');
+                  if ($isBundle) {
+                      echo $this->form->renderField('badge_benefit');
+                      echo $this->form->renderField('badge_benefit_display');
+                  }
                   echo $this->form->renderField('badge_sale');
+                  echo $this->form->renderField('badge_sale_display');
                   echo $this->form->renderField('badge_new');
                   echo $this->form->renderField('badge_new_days');
                   echo $this->form->renderField('badge_popular');

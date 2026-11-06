@@ -18,17 +18,21 @@ final class BadgeHelper
     {
         $info=ProductBadges::forProduct($product);
         $tags=[];
-        if($info['sale']!==null) {
-            $tags[]='<span class="mm-product-badge mm-product-badge--sale">'
-                .self::escape(Text::sprintf('COM_MINIMARKET_BADGE_SALE_LABEL',$info['sale']))
-                .' · '.self::escape((string)$info['sale_amount'])
-                .' '.self::escape(Text::_('COM_MINIMARKET_CURRENCY_SYMBOL')).'</span>';
+        if ($info['sale'] !== null) {
+            $value = $info['sale_display'] === 'money'
+                ? Text::_('COM_MINIMARKET_BADGE_SALE_MONEY') . ' ' . $info['sale_amount']
+                    . ' ' . Text::_('COM_MINIMARKET_CURRENCY_SYMBOL')
+                : Text::sprintf('COM_MINIMARKET_BADGE_SALE_LABEL', $info['sale']);
+            $tags[] = '<span class="mm-product-badge mm-product-badge--sale">'
+                . self::escape($value) . '</span>';
         }
-        if($info['benefit_amount']!==null) {
-            $tags[]='<span class="mm-product-badge mm-product-badge--benefit">'
-                .self::escape(Text::_('COM_MINIMARKET_BADGE_BENEFIT_LABEL'))
-                .' '.self::escape((string)$info['benefit_amount'])
-                .' '.self::escape(Text::_('COM_MINIMARKET_CURRENCY_SYMBOL')).'</span>';
+        if ($info['benefit_amount'] !== null) {
+            $value = $info['benefit_display'] === 'percent'
+                ? (string)$info['benefit_percent'] . '%'
+                : (string)$info['benefit_amount'] . ' ' . Text::_('COM_MINIMARKET_CURRENCY_SYMBOL');
+            $tags[] = '<span class="mm-product-badge mm-product-badge--benefit">'
+                . self::escape(Text::_('COM_MINIMARKET_BADGE_BENEFIT_LABEL'))
+                . ' ' . self::escape($value) . '</span>';
         }
         if($info['new']) {
             $tags[]='<span class="mm-product-badge mm-product-badge--new">'

@@ -41,6 +41,11 @@
         <field name="badge_sale" type="checkbox" label="COM_MINIMARKET_BADGE_SALE_ENABLE"
                description="COM_MINIMARKET_BADGE_SALE_HELP"
                value="1" unchecked="0" default="0" filter="int"/>
+        <field name="badge_sale_display" type="list" label="COM_MINIMARKET_BADGE_DISPLAY"
+               default="percent" filter="cmd">
+            <option value="percent">COM_MINIMARKET_BADGE_DISPLAY_PERCENT</option>
+            <option value="money">COM_MINIMARKET_BADGE_DISPLAY_MONEY</option>
+        </field>
         <field name="badge_new" type="checkbox" label="COM_MINIMARKET_BADGE_NEW_ENABLE"
                value="1" unchecked="0" default="0" filter="int"/>
         <field name="badge_new_days" type="number" label="COM_MINIMARKET_BADGE_DAYS"
@@ -56,6 +61,11 @@
         <field name="badge_benefit" type="checkbox" label="COM_MINIMARKET_BADGE_BENEFIT_ENABLE"
                description="COM_MINIMARKET_BADGE_BENEFIT_HELP"
                value="1" unchecked="0" default="0" filter="int"/>
+        <field name="badge_benefit_display" type="list" label="COM_MINIMARKET_BADGE_DISPLAY"
+               default="money" filter="cmd">
+            <option value="money">COM_MINIMARKET_BADGE_DISPLAY_MONEY</option>
+            <option value="percent">COM_MINIMARKET_BADGE_DISPLAY_PERCENT</option>
+        </field>
     </fieldset>
     <fieldset name="merchandising" label="COM_MINIMARKET_PRODUCT_TAB_MERCHANDISING">
         <field name="brand_id" type="Brandpicker" label="COM_MINIMARKET_PRODUCT_BRAND"

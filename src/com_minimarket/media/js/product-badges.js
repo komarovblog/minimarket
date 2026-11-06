@@ -11,6 +11,8 @@
     const check=name=>form.querySelector('input[type="checkbox"][name="jform['+name+']"]');
     const old=field('old_price');
     const sale=check('badge_sale');
+    const saleDisplay=field('badge_sale_display');
+    const benefitDisplay=field('badge_benefit_display');
     const benefit=check('badge_benefit');
     const fresh=check('badge_new');
     const popular=check('badge_popular');
@@ -47,6 +49,8 @@
         if(!discounted)benefit.checked=false;
         row(benefit)?.classList.toggle('mm-unavailable-setting',!discounted);
       }
+      if (saleDisplay && row(saleDisplay)) row(saleDisplay).hidden=!(sale?.checked && !sale.disabled);
+      if (benefitDisplay && row(benefitDisplay)) row(benefitDisplay).hidden=!(benefit?.checked && !benefit.disabled);
       for(const [toggle,days] of [[fresh,daysNew],[popular,daysPopular]]){
         const wrap=row(days);if(toggle&&wrap)wrap.hidden=!toggle.checked;
       }

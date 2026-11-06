@@ -65,16 +65,25 @@ final class ProductBadges
         $amount=$comparable && $sale!==null
             ? number_format(($old-$current)/100,2,'.','') : null;
         $benefit=null;
+        $benefitPercent = null;
         if ((int)($product->badge_benefit??0)===1
             && ($product->product_type??'simple')==='bundle'
             && ($product->bundle_price_mode??'fixed')==='discount') {
             $value=self::cents($product->bundle_discount_amount??null);
-            if ($value!==null && $value>0) $benefit=number_format($value/100,2,'.','');
+            if ($value!==null && $value>0) {
+                $benefit=number_format($value/100,2,'.','');
+                $benefitPercent=(string) (float)($product->bundle_discount_pct??0);
+            }
         }
         return [
             'sale'=>$sale,
             'sale_amount'=>$amount,
             'benefit_amount'=>$benefit,
+            'benefit_percent'=>$benefitPercent,
+            'sale_display'=>in_array(($product->badge_sale_display??'percent'),['percent','money'],true)
+                ? $product->badge_sale_display : 'percent',
+            'benefit_display'=>in_array(($product->badge_benefit_display??'money'),['percent','money'],true)
+                ? $product->badge_benefit_display : 'money',
             'new'=>self::timed((int)($product->badge_new??0)===1,
                 $product->badge_new_days??null,$product->badge_new_since??null,$now),
             'popular'=>self::timed((int)($product->badge_popular??0)===1,

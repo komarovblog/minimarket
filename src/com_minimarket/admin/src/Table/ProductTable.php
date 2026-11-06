@@ -95,6 +95,15 @@ final class ProductTable extends Table
             }
             $this->$flag=(int)$value;
         }
+        foreach (['badge_sale_display' => 'percent',
+            'badge_benefit_display' => 'money'] as $field => $default) {
+            $mode = (string) ($this->$field ?? $default);
+            if (!in_array($mode, ['money', 'percent'], true)) {
+                $this->setError(Text::_('COM_MINIMARKET_BADGE_INVALID'));
+                return false;
+            }
+            $this->$field = $mode;
+        }
         foreach(['badge_new_days','badge_popular_days'] as $duration) {
             $days=trim((string)($this->$duration??''));
             if($days==='') {
