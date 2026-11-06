@@ -98,74 +98,8 @@ namespace MiniMarket\Smoke54 {
         'server enforces savings badge eligibility');
     $category=(string)file_get_contents($root.'site/src/View/Category/HtmlView.php');
     verify(str_contains($category,'CategoryDisplayOptions::resolve') &&
-        str_contains($category, ' &&
-        str_contains($category, ',
-        'category displays kits independently of ordinary products');
-    $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.54.sql');
-    verify(str_contains($migration,'ADD COLUMN `show_bundles`') &&
-        str_contains($migration,'ADD COLUMN `badge_benefit`') &&
-        !preg_match('/\bDROP\b|\bDELETE\b|\bTRUNCATE\b/i',$migration),
-        '0.5.54 only adds safe optional columns');
-    foreach(['admin','site'] as $surface) {
-        foreach(['ru-RU','en-GB'] as $lang) {
-            $translation=(string)file_get_contents($root.$surface.'/language/'.$lang.'/com_minimarket.ini');
-            verify(str_contains($translation,'COM_MINIMARKET_BADGE_BENEFIT_LABEL='),
-                'savings label bilingual '.$surface.'/'.$lang);
-        }
-    }
-    echo 'MM_054_UI_OK '.$n." assertions\n";
-}
- . "display['show_bundles']") &&
-        str_contains($category,"$"+"display['show_descendant_bundles']"),
-        'category displays kits independently of ordinary products');
-    $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.54.sql');
-    verify(str_contains($migration,'ADD COLUMN `show_bundles`') &&
-        str_contains($migration,'ADD COLUMN `badge_benefit`') &&
-        !preg_match('/\bDROP\b|\bDELETE\b|\bTRUNCATE\b/i',$migration),
-        '0.5.54 only adds safe optional columns');
-    foreach(['admin','site'] as $surface) {
-        foreach(['ru-RU','en-GB'] as $lang) {
-            $translation=(string)file_get_contents($root.$surface.'/language/'.$lang.'/com_minimarket.ini');
-            verify(str_contains($translation,'COM_MINIMARKET_BADGE_BENEFIT_LABEL='),
-                'savings label bilingual '.$surface.'/'.$lang);
-        }
-    }
-    echo 'MM_054_UI_OK '.$n." assertions\n";
-}
- . "display['show_descendant_bundles']"),
-        'category displays kits independently of ordinary products');
-    $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.54.sql');
-    verify(str_contains($migration,'ADD COLUMN `show_bundles`') &&
-        str_contains($migration,'ADD COLUMN `badge_benefit`') &&
-        !preg_match('/\bDROP\b|\bDELETE\b|\bTRUNCATE\b/i',$migration),
-        '0.5.54 only adds safe optional columns');
-    foreach(['admin','site'] as $surface) {
-        foreach(['ru-RU','en-GB'] as $lang) {
-            $translation=(string)file_get_contents($root.$surface.'/language/'.$lang.'/com_minimarket.ini');
-            verify(str_contains($translation,'COM_MINIMARKET_BADGE_BENEFIT_LABEL='),
-                'savings label bilingual '.$surface.'/'.$lang);
-        }
-    }
-    echo 'MM_054_UI_OK '.$n." assertions\n";
-}
- . "display['show_bundles']") &&
-        str_contains($category, ',
-        'category displays kits independently of ordinary products');
-    $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.54.sql');
-    verify(str_contains($migration,'ADD COLUMN `show_bundles`') &&
-        str_contains($migration,'ADD COLUMN `badge_benefit`') &&
-        !preg_match('/\bDROP\b|\bDELETE\b|\bTRUNCATE\b/i',$migration),
-        '0.5.54 only adds safe optional columns');
-    foreach(['admin','site'] as $surface) {
-        foreach(['ru-RU','en-GB'] as $lang) {
-            $translation=(string)file_get_contents($root.$surface.'/language/'.$lang.'/com_minimarket.ini');
-            verify(str_contains($translation,'COM_MINIMARKET_BADGE_BENEFIT_LABEL='),
-                'savings label bilingual '.$surface.'/'.$lang);
-        }
-    }
-    echo 'MM_054_UI_OK '.$n." assertions\n";
-}
- . "display['show_descendant_bundles']"),
+        str_contains($category,'show_bundles') &&
+        str_contains($category,'show_descendant_bundles'),
         'category displays kits independently of ordinary products');
     $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.54.sql');
     verify(str_contains($migration,'ADD COLUMN `show_bundles`') &&
