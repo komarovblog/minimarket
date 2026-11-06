@@ -4,9 +4,11 @@
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Component\ComponentHelper;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=product&layout=edit&id=' . (int) $this->item->id); ?>"
-      method="post" name="adminForm" id="adminForm" class="form-validate">
+      method="post" name="adminForm" id="adminForm" class="form-validate"
+      data-mm-inventory-enabled="<?php echo (int) ComponentHelper::getParams('com_minimarket')->get('inventory_enabled',1) === 1 ? '1' : '0'; ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-product', ['active' => 'details']); ?>
     <?php
     // Distinct admin lists share one persisted entity and schema, not one UI.

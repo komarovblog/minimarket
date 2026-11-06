@@ -41,6 +41,9 @@ final class HtmlView extends BaseHtmlView
                 ['defer' => true]
             );
         Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript('com_minimarket.stock-controls',
+                'media/com_minimarket/js/stock-controls.js', [], ['defer' => true]);
+        Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseScript('com_minimarket.sku-matrix',
                 'media/com_minimarket/js/sku-matrix.js', [], ['defer' => true])
             ->registerAndUseScript('com_minimarket.group-editor',

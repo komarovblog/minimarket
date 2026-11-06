@@ -583,10 +583,8 @@
   max-width: var(--mm-pin-sku);
   box-shadow: -2px 0 3px rgba(0,0,0,.2);
 }
-#adminForm [data-mm-sku-matrix][data-mm-shared-stock="1"] .mm-sku-matrix
-  [data-mm-pinned="sku"] {
-  right: var(--mm-pin-active);
-}
+/* Shared stock keeps the SKU stock column visible but read-only.
+ * Preserve pinned SKU/stock column offsets in both modes. */
 #adminForm [data-mm-sku-matrix] .mm-sku-matrix td input.form-control {
   width: 100%;
   min-width: 0;
@@ -782,3 +780,11 @@
   margin: 0; justify-self: end;
 }
 #adminForm [data-mm-picker="bundle"] .mm-bundle-line-total { text-align:right; }
+
+/* Read-only stock fields retain values when inventory settings change. */
+#adminForm input.mm-stock-frozen,
+#adminForm [data-mm-stock-column] input:disabled {
+  opacity: .72;
+  cursor: not-allowed;
+  background-color: var(--body-bg, #20272e);
+}

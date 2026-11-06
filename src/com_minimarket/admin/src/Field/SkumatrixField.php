@@ -48,6 +48,8 @@ final class SkumatrixField extends FormField
             'limit' => Text::_('COM_MINIMARKET_PRODUCT_OPTIONS_TOO_MANY'),
             'noVariants' => Text::_('COM_MINIMARKET_MATRIX_NO_VARIANTS'),
             'sharedStock' => Text::_('COM_MINIMARKET_OPTION_STOCK_SHARED'),
+            'stockDisabled' => Text::_('COM_MINIMARKET_STOCK_DISABLED_NOTICE'),
+            'stockSharedNotice' => Text::_('COM_MINIMARKET_STOCK_SHARED_NOTICE'),
             'photoShow' => Text::_('COM_MINIMARKET_PHOTO_SHOW_SKUS'),
             'photoCover' => Text::_('COM_MINIMARKET_PHOTO_COVER_SKUS'),
             'photoVisibility' => Text::_('COM_MINIMARKET_PHOTO_VISIBILITY'),
@@ -68,6 +70,7 @@ final class SkumatrixField extends FormField
             '" data-mm-matrix-labels="' . $esc($labelJson) . '">' .
             '<p class="small text-muted">' .
                 $esc(Text::_('COM_MINIMARKET_MATRIX_HELP')) . '</p>' .
+            '<p class="small text-muted" data-mm-stock-notice hidden></p>' .
             '<div data-mm-matrix-table aria-live="polite"></div>' .
             '<input type="hidden" name="' . $esc($this->name) .
                 '" id="' . $esc($this->id) .

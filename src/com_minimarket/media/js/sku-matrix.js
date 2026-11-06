@@ -10,6 +10,7 @@
   const payload = root.querySelector('[data-mm-matrix-payload]');
   const price = document.querySelector('[name="jform[price]"]');
   const stockModes = Array.from(document.querySelectorAll('[name="jform[option_stock_mode]"]'));
+  const stockTracking = document.querySelector('#adminForm')?.dataset.mmInventoryEnabled !== '0';
   let config = {}, labels = {};
   try {
     config = JSON.parse(root.dataset.mmConfig || '{}');
@@ -344,8 +345,17 @@
   };
   const setStockMode = () => {
     root.dataset.mmSharedStock = isShared() ? '1' : '0';
-    for (const field of mount.querySelectorAll('[data-mm-stock-column]')) {
-      field.hidden = isShared();
+    // Never clear SKU quantities when switching modes or global inventory.
+    for (const field of mount.querySelectorAll('[data-mm-stock-column] input[type="number"]')) {
+      field.disabled = !stockTracking || isShared();
+      field.setAttribute('aria-disabled', String(field.disabled));
+    }
+    const notice = root.querySelector('[data-mm-stock-notice]');
+    if (notice) {
+      notice.hidden = stockTracking && !isShared();
+      notice.textContent = !stockTracking
+        ? t('stockDisabled', 'Inventory tracking is off; saved values are preserved.')
+        : isShared() ? t('stockSharedNotice', 'Enable SKU-specific inventory in Details.') : '';
     }
   };
   // Category assignment is the only source of new option definitions.
