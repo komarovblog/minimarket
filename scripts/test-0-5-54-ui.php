@@ -26,7 +26,9 @@ namespace MiniMarket\Smoke54 {
     verify($result['sale']===26,'percentage rounds up from old price');
     verify($result['sale_amount']==='500.00','money sale is old minus current');
     verify($result['benefit_amount']===null,'regular product cannot have benefit');
-    verify(str_contains(BadgeHelper::render($product),'500.00'),'site discount badge includes money');
+    verify(str_contains(BadgeHelper::render($product),'BADGE_SALE_LABEL') &&
+        !str_contains(BadgeHelper::render($product),'500.00'),
+        'default discount display shows percentage only');
     $product->product_type='bundle';
     $product->bundle_price_mode='discount';
     $product->badge_benefit=1;
