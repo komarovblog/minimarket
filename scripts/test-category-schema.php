@@ -906,6 +906,22 @@ verify($beforeProduct === row($pdo, 'catci_minimarket_products')
     || (string)row($pdo, 'catci_minimarket_products')['sku']==='TEST-001',
     '0.5.58 upgrade does not change product SKU');
 
+// 0.5.59 safe schema upgrade of already populated product/video records.
+$before59=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.59.sql','catci_');
+$after59=row($pdo,'catci_minimarket_products');
+foreach($before59 as $k=>$v) {
+ verify(array_key_exists($k,$after59) && $after59[$k]===$v,
+  '0.5.59 preserves product field '.$k);
+}
+verify($after59['badge_sale_display']==='percent'
+ && $after59['badge_benefit_display']==='money','new default badge display');
+$promoColumn=$pdo->query("SHOW COLUMNS FROM catci_minimarket_product_videos LIKE 'is_promo'")
+ ->fetch(PDO::FETCH_ASSOC);
+verify((int)$promoColumn['Default']===0,'existing videos remain ordinary');
+$pdo->exec("UPDATE catci_minimarket_products SET badge_sale_display='money' WHERE id=1");
+verify(row($pdo,'catci_minimarket_products')['badge_sale_display']==='money',
+ 'badge display is persisted');
 // 0.5.55: delivery type is a distinct attribute of ordinary products.
 $beforeDelivery=row($pdo,'catci_minimarket_products');
 runSql($pdo,$dir.'updates/mysql/0.5.55.sql','catci_');
@@ -1017,6 +1033,11 @@ verify(in_array('option_stock_mode',$freshProducts,true),'fresh 0.5.26 option st
 verify(in_array('brand_id',$freshProducts,true),'fresh 0.5.49 optional brand ID');
 verify(in_array('product_type',$freshProducts,true),'fresh 0.5.51 bundle type');
 verify(in_array('delivery_type',$freshProducts,true),'fresh 0.5.55 physical/digital type');
+verify(in_array('badge_sale_display',$freshProducts,true)
+ && in_array('badge_benefit_display',$freshProducts,true),
+ 'fresh badge display mode columns');
+verify(in_array('is_promo',$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_videos')
+ ->fetchAll(PDO::FETCH_COLUMN),true),'fresh promo column');
 verify(in_array('bundle_price_mode',$freshProducts,true) &&
     in_array('bundle_discount_pct',$freshProducts,true),
     'fresh 0.5.52 pricing columns');

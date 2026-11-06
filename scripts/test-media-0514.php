@@ -56,6 +56,18 @@ namespace MiniMarket\MediaSmoke {
         try {ProductVideos::normalize($bad);check(false,'unsafe video should fail');}
         catch(\InvalidArgumentException $ex){check(true,'unsafe video rejected');}
     }
+    $promo=ProductVideos::normalize([['source'=>'images/minimarket/demo-promo.mp4',
+       'title'=>'Demo promo','is_promo'=>1]]);
+    check($promo[0]['is_promo']===1,'safe local MP4 promo can be saved');
+    foreach ([
+      [['source'=>'https://youtu.be/dQw4w9WgXcQ','is_promo'=>1]],
+      [['source'=>'https://cdn.example.org/movie.mp4','is_promo'=>1]],
+      [['source'=>'images/a.mp4','is_promo'=>1],
+       ['source'=>'images/b.mp4','is_promo'=>1]],
+    ] as $invalid) {
+      try {ProductVideos::normalize($invalid); check(false,'invalid promo accepted');}
+      catch(\InvalidArgumentException $e){check(true,'invalid promo rejected');}
+    }
     $legacy=[
         10=>['id'=>10,'title'=>'Red','code'=>'red','color_hex'=>'','state'=>1,'sort_order'=>0],
         11=>['id'=>11,'title'=>'Yellow','code'=>'yellow','color_hex'=>'','state'=>1,'sort_order'=>1],

@@ -187,6 +187,12 @@ jobs:
         run: php scripts/test-0-5-58-bundle-ui.php
       - name: 0.5.58 bundle picker syntax
         run: node --check src/com_minimarket/media/js/entity-picker.js
+      - name: 0.5.59 safety of promo and badge JS
+        run: |
+          node --check src/com_minimarket/media/js/promo-video.js
+          node --check src/com_minimarket/media/js/product-badges.js
+      - name: 0.5.59 component consistency audit
+        run: php scripts/test-0-5-59-audit.php
 
       - name: 0.5.54 kit visibility, brands, benefits, unified editors and import layout
         run: php scripts/test-0-5-54-ui.php

@@ -73,6 +73,20 @@ namespace MiniMarket\ProductBadgeSmoke {
     $out=BadgeHelper::render($sale);
     ok(str_contains($out,'COM_MINIMARKET_BADGE_SALE_LABEL:26') &&
         str_contains($out,'mm-product-badge--sale'),'badge markup is derived from percentage');
+    $moneySale=product(['price'=>'1490.00','old_price'=>'1990.00',
+        'badge_sale'=>1,'badge_sale_display'=>'money']);
+    ok(str_contains(BadgeHelper::render($moneySale),'500.00') &&
+       !str_contains(BadgeHelper::render($moneySale),'BADGE_SALE_LABEL:26'),
+       'money-only sale renders amount, not percentage');
+    $pctBundle=product(['price'=>'1000.00','product_type'=>'bundle',
+        'bundle_price_mode'=>'discount','badge_benefit'=>1,
+        'bundle_discount_amount'=>'125.00','bundle_discount_pct'=>'12.50',
+        'badge_benefit_display'=>'percent']);
+    ok(str_contains(BadgeHelper::render($pctBundle),'12.5%'),
+       'percent-only savings uses configured component discount');
+    $pctBundle->badge_benefit_display='money';
+    ok(str_contains(BadgeHelper::render($pctBundle),'125.00'),
+       'money-only savings uses derived amount');
     ok(str_contains(BadgeHelper::oldPrice($sale),'<del') &&
         str_contains(BadgeHelper::oldPrice($sale),'1990.00'),'old price marked as comparison');
     $base=__DIR__.'/../src/com_minimarket/';
@@ -104,6 +118,10 @@ namespace MiniMarket\ProductBadgeSmoke {
         !preg_match('/\bDROP\b|\bDELETE\b|\bTRUNCATE\b/i',$migration),
         'migration is additive');
     $repo=file_get_contents($base.'site/src/Service/CatalogRepository.php');
+    ok(substr_count($repo,"quoteName('p.badge_sale_display')")===3
+       && substr_count($repo,"quoteName('p.badge_benefit_display')")===3
+       && substr_count($repo,"quoteName('p.bundle_discount_pct')")===3,
+       'badge display and benefit discount present in all public reads');
     ok(substr_count($repo,"quoteName('p.old_price')")===3 &&
         substr_count($repo,"quoteName('p.badge_new_since')")===3,
         'public product, catalog and category select all badge fields');

@@ -36,8 +36,9 @@ namespace MiniMarket\Regression55 {
   ['benefit','sale','new','popular']);
  check(!in_array(false,$f,true) && $f[0]<$f[1] && $f[1]<$f[2] && $f[2]<$f[3],
   'Savings Sale New Popular order');
- check(str_contains($edit,"if (\$isBundle) echo \$this->form->renderField('badge_benefit')"),
-  'simple goods skip Savings flag');
+ check(str_contains($edit,"if (\$isBundle) {")
+  && str_contains($edit,"renderField('badge_benefit_display')"),
+  'simple goods skip Savings flag while bundle controls it');
  check(str_contains($edit,"unset(\$sections[\$isBundle?'variants':'bundle'])"),
   'normal products and bundles have separate tabs');
  $view=file_get_contents($dir.'admin/src/View/Product/HtmlView.php');
