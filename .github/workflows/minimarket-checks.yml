@@ -116,7 +116,7 @@ jobs:
             dist/minimarket_product_badges_demo_0_5_53.sql
             dist/minimarket_ui_benefit_demo_0_5_54.sql
             dist/minimarket_digital_demo_0_5_55.sql
-            dist/minimarket_mysql84_nnop3_update_0_5_57.sql
+            dist/minimarket_mysql84_nnop3_update_0_5_58.sql
           if-no-files-found: error
           retention-days: 14
 
@@ -181,6 +181,12 @@ jobs:
         run: php scripts/test-0-5-56-store-import.php
       - name: 0.5.57 cumulative catalog SQL static contract
         run: php scripts/test-cumulative-sql.php
+      - name: 0.5.58 category settings and descendants
+        run: php scripts/test-0-5-58-category-options.php
+      - name: 0.5.58 bundle editor columns and calculated totals
+        run: php scripts/test-0-5-58-bundle-ui.php
+      - name: 0.5.58 bundle picker syntax
+        run: node --check src/com_minimarket/media/js/entity-picker.js
 
       - name: 0.5.54 kit visibility, brands, benefits, unified editors and import layout
         run: php scripts/test-0-5-54-ui.php
