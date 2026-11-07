@@ -134,7 +134,7 @@ jobs:
             dist/minimarket_product_badges_demo_0_5_53.sql
             dist/minimarket_ui_benefit_demo_0_5_54.sql
             dist/minimarket_digital_demo_0_5_55.sql
-            dist/minimarket_mysql84_nnop3_update_0_5_69.sql
+            dist/minimarket_mysql84_nnop3_update_0_5_70.sql
             dist/mod_minimarket_toolbar-${{ steps.component_version.outputs.value }}.zip
           if-no-files-found: error
           retention-days: 14
