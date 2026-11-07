@@ -15,7 +15,7 @@ final class ProductAttributes
     public static function definitions(DatabaseInterface $db): array
     {
         $q = $db->getQuery(true)
-            ->select(['id','title','input_type','input_mode','text_options','number_options','number_unit','number_min','number_max','number_step','is_multiple','value_source','color_display','state'])
+            ->select(['id','title','input_type','number_unit','number_min','number_max','number_step','is_multiple','value_source','color_display','state'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -27,11 +27,8 @@ final class ProductAttributes
                 'title' => (string) $row['title'],
                 'type' => (string) $row['input_type'],
                 'is_multiple' => (int) $row['is_multiple'] === 1,
-                'input_mode' => (string) ($row['input_mode'] ?? 'auto'),
-                'value_source' => (string) ($row['value_source'] ?? 'legacy'),
+                'value_source' => (string) ($row['value_source'] ?? 'manual'),
                 'color_display' => (string) ($row['color_display'] ?? 'both'),
-                'text_options' => (string) ($row['text_options'] ?? ''),
-                'number_options' => (string) ($row['number_options'] ?? ''),
                 'number_unit' => (string) ($row['number_unit'] ?? ''),
                 'number_min' => isset($row['number_min']) ? (string) $row['number_min'] : null,
                 'number_max' => isset($row['number_max']) ? (string) $row['number_max'] : null,
@@ -110,20 +107,7 @@ final class ProductAttributes
         foreach ((array) $db->loadAssocList() as $row) {
             $result[(int) $row['attribute_id']][] = (int) $row['value_id'];
         }
-        $q = $db->getQuery(true)
-            ->select(['attribute_id','value_text'])
-            ->from($db->quoteName('#__minimarket_product_attribute_multi_values'))
-            ->where($db->quoteName('product_id') . ' = ' . $productId)
-            ->order('attribute_id ASC, value_text ASC');
-        $db->setQuery($q);
-        foreach ((array) $db->loadAssocList() as $row) {
-            $id = (int) $row['attribute_id'];
-            if (!is_array($result[$id] ?? null)) {
-                $result[$id] = isset($result[$id]) ? [(string) $result[$id]] : [];
-            }
-            $result[$id][] = (string) $row['value_text'];
-        }
-        // Modern manual multi-values have their own ordered MEDIUMTEXT table.
+        // Ordered free values are the only manual multiple-value representation.
         $q = $db->getQuery(true)
             ->select(['attribute_id','value_text'])
             ->from($db->quoteName('#__minimarket_product_attribute_free_values'))
@@ -153,7 +137,7 @@ final class ProductAttributes
             throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
         }
         $allowed = array_fill_keys($categoryMap[$categoryId] ?? [], true);
-        $out = ['scalars' => [], 'options' => [], 'multi_values' => []];
+        $out = ['scalars' => [], 'options' => [], 'free_values' => []];
         foreach ((array) $posted as $id => $value) {
             if (!ctype_digit((string) $id) || (int) $id < 1) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
@@ -167,7 +151,7 @@ final class ProductAttributes
             }
             $def = $definitions[$id];
             $type = $def['type'];
-            $source = (string) ($def['value_source'] ?? 'legacy');
+            $source = (string) ($def['value_source'] ?? 'manual');
             if ($source === 'preset') {
                 $items = is_array($value) ? $value : [$value];
                 if (!$def['is_multiple'] && count($items) > 1) {
@@ -213,44 +197,6 @@ final class ProductAttributes
                 if ($unique) $out['free_values'][$id] = array_values($unique);
                 continue;
             }
-            if ($source === 'legacy' && ($type === 'list' || $type === 'color')) {
-                $items = is_array($value) ? $value : [$value];
-                if (!$def['is_multiple'] && count($items) > 1) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                }
-                $selected = [];
-                foreach ($items as $candidate) {
-                    if (!is_scalar($candidate) || !ctype_digit((string) $candidate)
-                        || (int) $candidate < 1 || isset($selected[(int) $candidate])
-                        || !isset($def['values'][(int) $candidate])
-                        ) {
-                        throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                    }
-                    $selected[(int) $candidate] = (int) $candidate;
-                }
-                if ($selected) {
-                    $out['options'][$id] = array_values($selected);
-                }
-                continue;
-            }
-            if ($source === 'legacy' && $type === 'text' && ($def['input_mode'] ?? 'auto') === 'presets'
-                && !empty($def['is_multiple'])) {
-                $items = is_array($value) ? $value : [$value];
-                if (count($items) > TextPresetRows::MAX_ROWS) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
-                }
-                $allowedValues = TextPresetRows::values((string) ($def['text_options'] ?? ''));
-                $selected = [];
-                foreach ($items as $item) {
-                    if (!is_string($item) || !in_array($item, $allowedValues, true)
-                        || isset($selected[$item])) {
-                        throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
-                    }
-                    $selected[$item] = $item;
-                }
-                if ($selected) $out['multi_values'][$id] = array_values($selected);
-                continue;
-            }
             if (!is_scalar($value)) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
             }
@@ -258,74 +204,44 @@ final class ProductAttributes
             if ($value === '') {
                 continue;
             }
-            if (in_array($type, ['text','textarea','editor'], true)) {
-                $limit = $type === 'text' ? 1024 : ($type === 'editor' ? 60000 : 10000);
-                if (mb_strlen($value) > $limit
-                    || ($type !== 'editor' && preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u', $value))
-                    || ($type === 'editor' && preg_match('/<\s*(script|iframe|object|embed|form|svg|math)\b|\bon\w+\s*=|javascript\s*:/iu', $value))) {
+            if ($type === 'text') {
+                if (mb_strlen($value)>1024 || preg_match('/[\x00-\x1f<>]/u',$value)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                }
-                if ($source === 'legacy' && $type === 'text' && ($def['input_mode'] ?? 'auto') === 'presets'
-                    && !in_array($value, TextPresetRows::values((string) ($def['text_options'] ?? '')), true)) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_TEXT_PRESETS_INVALID');
                 }
             } elseif ($type === 'editor') {
-                if (mb_strlen($value) > 10000) {
+                if (mb_strlen($value)>60000 ||
+                    preg_match('/<\s*(script|iframe|object|embed|form|svg|math)\b|\bon\w+\s*=|javascript\s*:/iu',$value)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_EDITOR_HTML_INVALID');
                 }
-                // Joomla InputFilter is also used when the storefront displays
-                // the value, so scripts and event handlers cannot be persisted.
-                $value = \Joomla\CMS\Filter\InputFilter::getInstance()->clean($value, 'HTML');
+                $value=\Joomla\CMS\Filter\InputFilter::getInstance()->clean($value,'HTML');
             } elseif ($type === 'document') {
-                if (strlen($value) > 1024
-                    || !preg_match('~^(?:images|files|media)/[a-zA-Z0-9_./ -]+\.(?:pdf|doc|docx|xls|xlsx|txt|md|csv|zip|jpg|jpeg|png|webp)$~iD', $value)
-                    || str_contains($value, '..') || str_contains($value, '//')) {
+                if (strlen($value)>1024 || str_contains($value,'..')
+                    || str_contains($value,'//')
+                    || !preg_match('~^(?:images|files|media)/[a-zA-Z0-9_./ -]+\.(?:pdf|doc|docx|xls|xlsx|txt|md|csv|zip|jpg|jpeg|png|webp)$~iD',$value)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_DOCUMENT_INVALID');
                 }
-                if ($source === 'legacy' && $type === 'text' && ($def['input_mode'] ?? 'auto') === 'presets'
-                    && !in_array($value, TextPresetRows::values((string) ($def['text_options'] ?? '')), true)) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                }
-            } elseif ($type === 'color' && $source === 'manual') {
-                if (!preg_match('/^#[a-fA-F0-9]{6}$/D', $value)) {
+            } elseif ($type === 'color') {
+                if (!preg_match('/^#[a-fA-F0-9]{6}$/D',$value)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_COLOR_INVALID');
                 }
-                $value = strtoupper($value);
+                $value=strtoupper($value);
             } elseif ($type === 'number') {
-                if (!AttributeSettings::decimal($value)) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                }
-                if (!AttributeSettings::inRange(
-                    $value, $def['number_min'] ?? null, $def['number_max'] ?? null
-                )) {
+                if (!AttributeSettings::decimal($value)
+                    || !AttributeSettings::inRange(
+                        $value,$def['number_min']??null,$def['number_max']??null)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NUMERIC_INVALID');
                 }
-                $options = AttributeSettings::numericOptions((string) ($def['number_options'] ?? ''));
-                if ($source === 'legacy' && ($def['input_mode'] ?? 'auto') === 'presets'
-                    && !in_array(AttributeSettings::canonicalDecimal($value), $options, true)) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NUMERIC_INVALID');
-                }
-                $step = $def['number_step'] ?? null;
-                if ($step !== null && (float) $step > 0) {
-                    $origin = (float) ($def['number_min'] ?? 0);
-                    $remainder = fmod(abs((float) $value - $origin), (float) $step);
-                    if ($remainder > 0.00001 && abs($remainder - (float) $step) > 0.00001) {
+                $step=$def['number_step']??null;
+                if ($step!==null && (float)$step>0) {
+                    $origin=(float)($def['number_min']??0);
+                    $remainder=fmod(abs((float)$value-$origin),(float)$step);
+                    if ($remainder>0.00001 &&
+                        abs($remainder-(float)$step)>0.00001) {
                         throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_NUMERIC_INVALID');
                     }
                 }
-            } elseif ($type === 'date') {
-                if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/D', $value, $parts)
-                    || !checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                }
-            } elseif ($type === 'url') {
-                if (strlen($value) > 1024 || filter_var($value, FILTER_VALIDATE_URL) === false
-                    || !in_array(strtolower((string) parse_url($value, PHP_URL_SCHEME)),
-                        ['http','https'], true)) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                }
             } elseif ($type === 'boolean') {
-                if (!in_array($value, ['0','1'], true)) {
+                if (!in_array($value,['0','1'],true)) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                 }
             } else {
@@ -338,7 +254,7 @@ final class ProductAttributes
             if (!isset($allowed[$id]) || !isset($definitions[$id])) continue;
             // A boolean value of 0 is valid and already present as a scalar.
             if (!isset($out['scalars'][$id]) && empty($out['options'][$id])
-                && empty($out['multi_values'][$id]) && empty($out['free_values'][$id])) {
+                && empty($out['free_values'][$id])) {
                 throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_REQUIRED:' . $id);
             }
         }
@@ -351,7 +267,7 @@ final class ProductAttributes
         if ($productId < 1) {
             throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
         }
-        foreach (['#__minimarket_product_attribute_scalars', '#__minimarket_product_attribute_options', '#__minimarket_product_attribute_multi_values', '#__minimarket_product_attribute_free_values'] as $table) {
+        foreach (['#__minimarket_product_attribute_scalars', '#__minimarket_product_attribute_options', '#__minimarket_product_attribute_free_values'] as $table) {
             $q = $db->getQuery(true)->delete($db->quoteName($table))
                 ->where($db->quoteName('product_id') . ' = ' . $productId);
             $db->setQuery($q);
@@ -366,7 +282,7 @@ final class ProductAttributes
                 $value = $row['value'];
                 $q->values(implode(',',[
                     (string) $productId, (string) (int) $id,
-                    in_array($type, ['text','textarea','date','url','editor','document','color'], true) ? $db->quote($value) : 'NULL',
+                    in_array($type, ['text','editor','document','color'], true) ? $db->quote($value) : 'NULL',
                     $type === 'number' ? $db->quote($value) : 'NULL',
                     $type === 'boolean' ? (string) (int) $value : 'NULL',
                 ]));
@@ -384,18 +300,6 @@ final class ProductAttributes
                         (string) $productId, (string) (int) $id,
                         $db->quote((string) $value), (string) (int) $position,
                     ]));
-                }
-            }
-            $db->setQuery($q);
-            $db->execute();
-        }
-        if (!empty($normalized['multi_values'])) {
-            $q = $db->getQuery(true)
-                ->insert($db->quoteName('#__minimarket_product_attribute_multi_values'))
-                ->columns($db->quoteName(['product_id','attribute_id','value_text']));
-            foreach ($normalized['multi_values'] as $id => $values) {
-                foreach ($values as $value) {
-                    $q->values(implode(',', [(string) $productId,(string) (int) $id,$db->quote($value)]));
                 }
             }
             $db->setQuery($q);
