@@ -142,18 +142,18 @@ namespace MiniMarket\AttributeValueRowsSmoke {
 
     $root=__DIR__.'/../src/com_minimarket/admin/';
     $form=simplexml_load_file($root.'forms/attribute.xml');
-    $sub=simplexml_load_file($root.'forms/attribute_value_row.xml');
+    $sub=simplexml_load_file($root.'forms/attribute_unified_value_row.xml');
     ok($form!==false && $sub!==false,'both Joomla XML forms parse');
-    $field=$form->xpath("//fieldset[@name='details']/field[@name='values']");
+    $field=$form->xpath("//fieldset[@name='details']/field[@name='unified_values']");
     ok(count($field)===1 && (string)$field[0]['type']==='subform'
         && (string)$field[0]['multiple']==='true','one native repeatable field in Attribute details');
     ok((string)$field[0]['buttons']==='add,remove,move','native Joomla add/remove/move handles');
-    ok((string)$field[0]['showon']==='value_source:legacy[AND]input_type:list',
-        'legacy List values remain isolated from unified dictionary');
+    ok((string)$field[0]['showon']==='value_source:preset',
+        'canonical preset values shown only for dictionary-backed attributes');
     ok(count($form->xpath("//field[@name='values_present']"))===1,'empty field sentinel');
     ok(count($sub->xpath("//field[@name='id' and @type='hidden']"))===1,'stable ID hidden in each row');
     ok(count($sub->xpath("//field[@name='title']"))===1,'simple title entry');
-    ok(count($sub->xpath("//field[@name='code' and @required='false']"))===1,'code optional');
+    ok(count($sub->xpath("//field[@name='code']"))===1,'code optional');
     ok(count($sub->xpath("//field[@name='state']"))===1,'individual publishing status');
     $edit=file_get_contents($root.'tmpl/attribute/edit.php');
     ok(!str_contains($edit, "'minimarket-attribute', 'values'"),'no separate values tab');
