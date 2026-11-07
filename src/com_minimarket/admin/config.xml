@@ -23,6 +23,7 @@
                description="COM_MINIMARKET_CONFIG_SHOP_TYPE_DESC" default="physical" filter="string">
             <option value="physical">COM_MINIMARKET_SHOP_TYPE_PHYSICAL</option>
             <option value="digital">COM_MINIMARKET_SHOP_TYPE_DIGITAL</option>
+            <option value="food_delivery">COM_MINIMARKET_SHOP_TYPE_FOOD_DELIVERY</option>
         </field>
     </fieldset>
     <fieldset name="categories" label="COM_MINIMARKET_CONFIG_CATEGORIES" addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">

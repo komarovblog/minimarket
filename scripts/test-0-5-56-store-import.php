@@ -22,8 +22,8 @@ namespace MiniMarket\StoreImportSmoke {
     ok($config !== false && $form !== false, 'Joomla configuration XML parses');
     ok(count($config->xpath("//field[@name='shop_type' and @default='physical']")) === 1,
         'physical is the global default');
-    ok(count($config->xpath("//field[@name='shop_type']/option")) === 2,
-        'only physical and digital store types');
+    ok(count($config->xpath("//field[@name='shop_type']/option")) === 3,
+        'physical, digital and food delivery profiles');
     ok(count($form->xpath("//field[@name='delivery_type']")) === 0,
         'products and bundles have no independent format picker');
     $table=(string)file_get_contents($root.'admin/src/Table/ProductTable.php');

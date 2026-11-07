@@ -207,6 +207,8 @@ jobs:
         run: php scripts/test-0-5-55-ui.php
       - name: 0.5.56 global shop and rich import
         run: php scripts/test-0-5-56-store-import.php
+      - name: 0.5.72 three global store profiles
+        run: php scripts/test-0-5-72-store-profiles.php
       - name: 0.5.57 cumulative catalog SQL static contract
         run: php scripts/test-cumulative-sql.php
       - name: 0.5.58 category settings and descendants
