@@ -12,7 +12,7 @@ final class AttributeTable extends Table
     public function __construct(DatabaseInterface $db)
     {
         parent::__construct('#__minimarket_attributes','id',$db);
-        $this->setColumnAlias('published','state');
+        $this->setColumnAlias('published', 'state');
     }
 
     public function check()
