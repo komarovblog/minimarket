@@ -25,7 +25,7 @@
             <option value="digital">COM_MINIMARKET_SHOP_TYPE_DIGITAL</option>
         </field>
     </fieldset>
-    <fieldset name="categories" label="COM_MINIMARKET_CONFIG_CATEGORIES">
+    <fieldset name="categories" label="COM_MINIMARKET_CONFIG_CATEGORIES" addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
         <field name="category_show_children" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_CHILDREN" default="1" filter="int">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
@@ -45,7 +45,8 @@
             <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
             <option value="grid">COM_MINIMARKET_LAYOUT_GRID</option>
         </field>
-        <field name="category_cards_mobile" type="list" label="COM_MINIMARKET_CARDS_MOBILE" default="1" filter="int">
+        <field name="category_cards_xs" type="Gridcards" label="COM_MINIMARKET_CARDS_XS"
+               description="COM_MINIMARKET_CARDS_XS_DESC" default="1" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -53,7 +54,8 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="category_cards_tablet" type="list" label="COM_MINIMARKET_CARDS_TABLET" default="2" filter="int">
+        <field name="category_cards_sm" type="Gridcards" label="COM_MINIMARKET_CARDS_SM"
+               description="COM_MINIMARKET_CARDS_SM_DESC" default="1" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -61,7 +63,8 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="category_cards_desktop" type="list" label="COM_MINIMARKET_CARDS_DESKTOP" default="3" filter="int">
+        <field name="category_cards_md" type="Gridcards" label="COM_MINIMARKET_CARDS_MD"
+               description="COM_MINIMARKET_CARDS_MD_DESC" default="2" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -69,7 +72,26 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="category_cards_wide" type="list" label="COM_MINIMARKET_CARDS_WIDE" default="4" filter="int">
+        <field name="category_cards_lg" type="Gridcards" label="COM_MINIMARKET_CARDS_LG"
+               description="COM_MINIMARKET_CARDS_LG_DESC" default="3" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="category_cards_xl" type="Gridcards" label="COM_MINIMARKET_CARDS_XL"
+               description="COM_MINIMARKET_CARDS_XL_DESC" default="4" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="category_cards_xxl" type="Gridcards" label="COM_MINIMARKET_CARDS_XXL"
+               description="COM_MINIMARKET_CARDS_XXL_DESC" default="4" filter="int">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>

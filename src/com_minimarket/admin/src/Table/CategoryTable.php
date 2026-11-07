@@ -99,7 +99,7 @@ final class CategoryTable extends Table
             return false;
         }
         $this->product_layout = $layout;
-        foreach (['cards_mobile', 'cards_tablet', 'cards_desktop', 'cards_wide'] as $field) {
+        foreach (['cards_xs', 'cards_sm', 'cards_md', 'cards_lg', 'cards_xl', 'cards_xxl'] as $field) {
             $count = (int) ($this->$field ?? -1);
             if ($count < -1 || $count === 0 || $count > 6) {
                 $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));

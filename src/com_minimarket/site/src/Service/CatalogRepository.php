@@ -185,7 +185,7 @@ final class CatalogRepository
         }
 
         $q = $this->db->getQuery(true)
-            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'show_descendant_products', 'show_descendant_bundles', 'product_layout', 'cards_mobile', 'cards_tablet', 'cards_desktop', 'cards_wide', 'meta_title', 'meta_description',
+            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'show_descendant_products', 'show_descendant_bundles', 'product_layout', 'cards_xs', 'cards_sm', 'cards_md', 'cards_lg', 'cards_xl', 'cards_xxl', 'meta_title', 'meta_description',
                 'meta_robots', 'og_title', 'og_description', 'og_image', 'og_image_alt']))
             ->from($this->db->quoteName('#__minimarket_categories'))
             ->where($this->db->quoteName('id') . ' = ' . $id)

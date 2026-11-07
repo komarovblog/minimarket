@@ -27,21 +27,24 @@ final class CategoryDisplayOptions
             $layout = (string) $global->get('category_product_layout', 'list');
         }
         $result['layout'] = in_array($layout, ['list', 'grid'], true) ? $layout : 'list';
-        foreach (['mobile' => 1, 'tablet' => 2, 'desktop' => 3, 'wide' => 4] as $size => $default) {
-            $local = (int) ($category->{'cards_' . $size} ?? -1);
-            $count = $local === -1
-                ? (int) $global->get('category_cards_' . $size, $default)
-                : $local;
-            $result['cards_' . $size] = max(1, min(6, $count));
+        // All six Bootstrap 5 viewport breakpoints have independent column
+        // counts; -1 is always the global component setting.
+        foreach (['xs'=>1,'sm'=>1,'md'=>2,'lg'=>3,'xl'=>4,'xxl'=>4] as $size=>$default) {
+            $local=(int)($category->{'cards_'.$size} ?? -1);
+            $globalValue=(int)$global->get('category_cards_'.$size,$default);
+            $count=$local===-1?$globalValue:$local;
+            $result['cards_'.$size]=max(1,min(6,$count));
         }
         return $result;
     }
 
     public static function bootstrapGridClasses(array $config): string
     {
-        return 'row row-cols-' . $config['cards_mobile']
-            . ' row-cols-md-' . $config['cards_tablet']
-            . ' row-cols-lg-' . $config['cards_desktop']
-            . ' row-cols-xl-' . $config['cards_wide'] . ' g-3';
+        return 'row row-cols-' . $config['cards_xs']
+            . ' row-cols-sm-' . $config['cards_sm']
+            . ' row-cols-md-' . $config['cards_md']
+            . ' row-cols-lg-' . $config['cards_lg']
+            . ' row-cols-xl-' . $config['cards_xl']
+            . ' row-cols-xxl-' . $config['cards_xxl'] . ' g-3';
     }
 }
