@@ -36,7 +36,7 @@ WHERE a.value_source='legacy' AND a.input_type='text'
   AND a.input_mode='presets' AND j.label IS NOT NULL
   AND NOT EXISTS (
       SELECT 1 FROM nnop3_minimarket_attribute_values v
-      WHERE v.attribute_id=a.id AND v.title=j.label
+      WHERE v.attribute_id=a.id AND v.title=j.label COLLATE utf8mb4_unicode_ci
   );
 
 -- A duplicate/missing declaration must stop BEFORE deleting the old rows.
@@ -45,7 +45,7 @@ SELECT COUNT(*) FROM nnop3_minimarket_attributes a
 JOIN JSON_TABLE(a.text_options, '$[*]'
     COLUMNS (ordinal FOR ORDINALITY, label VARCHAR(255) PATH '$')) j
 LEFT JOIN nnop3_minimarket_attribute_values v
-  ON v.attribute_id=a.id AND v.title=j.label
+  ON v.attribute_id=a.id AND v.title=j.label COLLATE utf8mb4_unicode_ci
 WHERE a.value_source='legacy' AND a.input_type='text'
   AND a.input_mode='presets' AND (j.label IS NULL OR v.id IS NULL);
 
