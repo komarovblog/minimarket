@@ -238,6 +238,12 @@ jobs:
 
       - name: MiniMarket 0.5.68 compact tiles and import icon
         run: php scripts/test-0-5-68-dashboard-compact.php
+
+      - name: Published product facets and exact SKU option intersections
+        run: php scripts/test-faceted-catalog.php
+
+      - name: JavaScript catalog facet syntax
+        run: node --check src/com_minimarket/media/js/faceted-catalog.js
       - name: 0.5.61 feed checkbox and category DOM
         run: |
           node scripts/test-0-5-61-feeds-editor.js

@@ -14,7 +14,8 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
 <form class="mm-facet-form" data-mm-facet-form method="get"
       action="<?php echo $escape(RouteHelper::category((int)$this->category->id)); ?>">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_FILTER_TITLE'); ?></h2>
-    <p class="small text-muted" role="status" data-mm-facet-count>
+    <p class="small text-muted" role="status" data-mm-facet-count
+       data-mm-facet-label="<?php echo $escape(Text::sprintf('COM_MINIMARKET_FILTER_RESULTS','{count}')); ?>">
         <?php echo Text::sprintf('COM_MINIMARKET_FILTER_RESULTS',
             count(array_filter($this->facetMatches))); ?>
     </p>
