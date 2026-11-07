@@ -1,71 +1,71 @@
 <?php
-/** Seven types, independent input and filter presentation, numeric presets. */
+/** Six canonical data types, independent product and facet presentations. */
 declare(strict_types=1);
-\define('_JEXEC', 1);
-require __DIR__ . '/../src/com_minimarket/admin/src/Service/TextPresetRows.php';
-require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
-
+\define('_JEXEC',1);
+require __DIR__.'/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
 use MiniMarket\Component\Minimarket\Administrator\Service\AttributeSettings as S;
-$count = 0;
-function valid(bool $assertion, string $name): void {
-    global $count;
-    ++$count;
-    if (!$assertion) throw new RuntimeException('ATTRIBUTE_PRESENTATION_FAIL: ' . $name);
+$count=0;
+function valid(bool $yes,string $case):void {
+    global $count;$count++;
+    if(!$yes)throw new RuntimeException('ATTRIBUTE_PRESENTATION_FAIL: '.$case);
 }
-function attr(string $type, string $input='auto', string $filter='none'): object {
+function field(string $type,string $source='manual',string $filter='none'):object {
     return (object)[
-        'input_type'=>$type,'input_mode'=>$input,'filter_mode'=>$filter,
-        'is_multiple'=>0,'is_filterable'=>($filter!=='none' ? 1 : 0),
-        'filter_multiple'=>0,'number_options'=>'','number_unit'=>'',
-        'number_min'=>null,'number_max'=>null,'number_step'=>null,
+        'input_type'=>$type,'value_source'=>$source,
+        'filter_mode'=>$filter,'filter_multiple'=>0,'is_multiple'=>0,
+        'is_filterable'=>$filter!=='none'?1:0,
+        'number_unit'=>'','number_min'=>null,'number_max'=>null,
+        'number_step'=>null,'color_display'=>'both',
     ];
 }
-foreach (S::TYPES as $type) {
-    $a=attr($type);
-    valid(S::normalize($a)===null, "valid type $type");
+valid(S::TYPES===['text','number','editor','boolean','document','color'],
+    'exactly six supported characteristic types');
+foreach(S::TYPES as $type){
+    $f=field($type);
+    valid(S::normalize($f)===null,'valid '.$type);
 }
-valid(S::numericOptions('1000, 1500.0000;2000') === ['1000','1500','2000'],
-    'numerical preset normalization');
-try {S::numericOptions('1000,1000.00'); valid(false,'duplicate numeric value');}
-catch(InvalidArgumentException $e) {valid(true,'duplicate numeric value rejected');}
-try {S::numericOptions('15a,200'); valid(false,'non numeric preset');}
-catch(InvalidArgumentException $e) {valid(true,'non numeric preset rejected');}
-$a=attr('number','presets','slider');
-$a->number_options='1000, 1500, 2000';
-$a->number_unit='Вт';$a->number_min='1000';$a->number_max='2000';$a->number_step='500';
-valid(S::normalize($a)===null && $a->number_options==='1000,1500,2000',
-    'power can be preset input and slider output');
-$a->number_options='1000, 2500';
-valid(S::normalize($a)==='COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID',
-    'preset outside max rejected');
-$a->number_options='1000,1500';$a->number_min='3000';
-valid(S::normalize($a)==='COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID',
-    'minimum greater than maximum rejected');
-$a=attr('number','auto','checkboxes');
-valid(S::normalize($a)===null && $a->filter_multiple===1,
-    'checkbox filter can be multiple although product stores one number');
-$a=attr('list','radio','checkboxes');$a->is_multiple=1;
-valid(S::normalize($a)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
-    'radio cannot store multiple product values');
-$a=attr('list','checkboxes','dropdown');$a->is_multiple=1;$a->filter_multiple=0;
-valid(S::normalize($a)===null && $a->filter_multiple===0,
-    'multi-checkbox product and single dropdown filter are independent');
-$a=attr('text','auto','values');$a->filter_multiple=1;
-valid(S::normalize($a)===null,'text supports existing values facet');
-$a=attr('date','auto','date_range');
-valid(S::normalize($a)===null,'date range is supported as filter setting');
-$a=attr('date','auto','slider');
-valid(S::normalize($a)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
-    'date cannot use numeric slider');
-$a=attr('url','auto','none');$a->is_filterable=1;
-valid(S::normalize($a)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
-    'URL not faceted');
-$a=attr('textarea','auto','none');$a->is_filterable=1;
-valid(S::normalize($a)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
-    'long descriptions not faceted');
-$a=attr('boolean','auto','boolean');
-valid(S::normalize($a)===null,'boolean filtering mode supported');
-$a=attr('list','auto','checkboxes');$a->is_multiple=0;
-valid(S::normalize($a)===null && $a->filter_multiple===1,
-    'one value per product, multiple values in filter');
-echo 'ATTRIBUTE_PRESENTATION_OK: '.$count." cases\n";
+foreach(['list','textarea','url','date'] as $old){
+    valid(S::normalize(field($old))==='COM_MINIMARKET_ATTRIBUTE_TYPE_INVALID',
+        'obsolete type denied '.$old);
+}
+valid(S::normalize(field('text','legacy'))==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
+    'obsolete value source not accepted');
+$f=field('boolean','preset','boolean');
+$f->is_multiple=1;
+valid(S::normalize($f)===null && $f->value_source==='manual' && $f->is_multiple===0,
+    'boolean always manually entered once');
+$f=field('number','manual','slider');
+$f->number_min='0';$f->number_max='3000';$f->number_step='100';$f->number_unit='Вт';
+valid(S::normalize($f)===null,'number supports bounds/step/slider');
+$f->number_min='4000';
+valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID',
+    'reversed range rejected');
+$f->number_min='0';$f->number_step='0';
+valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID',
+    'zero step rejected');
+$f=field('number','preset','checkboxes');
+valid(S::normalize($f)===null && $f->filter_multiple===1,
+    'numeric presets can use multiple checkbox filtering');
+$f=field('number','manual','radio');
+valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
+    'number radio filter unsupported');
+$f=field('text','preset','dropdown');$f->is_multiple=1;
+$f->filter_multiple=0;
+valid(S::normalize($f)===null && $f->filter_multiple===0,
+    'multi product choices and single filter dropdown independent');
+$f=field('text','manual','values');$f->filter_multiple=1;
+valid(S::normalize($f)===null,'text can filter by available values');
+$f=field('color','preset','swatches');
+valid(S::normalize($f)===null && $f->filter_multiple===1,
+    'color swatches imply multi-choice facet');
+foreach(['editor','document'] as $type){
+    $f=field($type);$f->is_filterable=1;
+    valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
+        'non-faceted '.$type);
+}
+$f=field('text');$f->number_unit='old';$f->number_min='1';
+valid(S::normalize($f)===null && $f->number_min===null && $f->number_unit==='',
+    'non-numeric metadata normalized to empty');
+valid(S::decimal('3.5000') && !S::decimal('3e6')
+    && S::canonicalDecimal('3.5000')==='3.5','numeric decimals canonical');
+echo "ATTRIBUTE_PRESENTATION_OK: $count cases\n";

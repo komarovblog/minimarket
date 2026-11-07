@@ -54,6 +54,10 @@ final class AttributeSettings
             || !in_array($attribute->filter_multiple, [0,1], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
+        if ((int) ($attribute->is_filterable ?? 0) === 1
+            && in_array($type, ['editor','document'], true)) {
+            return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
+        }
         if ((int) ($attribute->is_filterable ?? 0) === 0) {
             $attribute->filter_mode = 'none';
             $attribute->filter_multiple = 0;
