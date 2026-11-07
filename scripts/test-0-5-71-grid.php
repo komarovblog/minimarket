@@ -67,7 +67,8 @@ foreach ($defaults as $size=>$default) {
     check71((string)$gf[0]['default']===(string)$default &&
         (string)$cf[0]['default']==='-1',
         'correct global default and category inherit '.$size);
-    $choices=array_map(static fn($e)=>(string)$e['value'],$cf[0]->option);
+    $choices=[];
+    foreach($cf[0]->option as $option)$choices[]=(string)$option['value'];
     check71($choices===['-1','1','2','3','4','5','6'],
         'category has independent 1-6 and inherit choices '.$size);
 }
