@@ -62,12 +62,12 @@ final class ValueTable extends Table
 
         $db = $this->getDbo();
         $query = $db->getQuery(true)
-            ->select($db->quoteName('input_type'))
+            ->select($db->quoteName('value_source'))
             ->from($db->quoteName('#__minimarket_attributes'))
             ->where($db->quoteName('id') . ' = ' . $this->attribute_id);
         $db->setQuery($query);
 
-        if ((string) $db->loadResult() !== 'list') {
+        if ((string) $db->loadResult() !== 'preset') {
             $this->setError(Text::_('COM_MINIMARKET_VALUE_ATTRIBUTE_INVALID'));
 
             return false;
