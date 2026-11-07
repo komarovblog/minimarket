@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<form>
-  <field name="value" type="text" label="COM_MINIMARKET_TEXT_PRESET_VALUE"
-         required="false" filter="string" maxlength="255" size="45"/>
-  <field name="image" type="media" label="COM_MINIMARKET_VALUE_SAMPLE_IMAGE" directory="images" preview="true" filter="string"/>
-</form>

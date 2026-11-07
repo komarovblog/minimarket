@@ -114,10 +114,7 @@ try {
         'media/css/variants.css',
         'site/src/Service/ProductAttributeCatalog.php',
         'media/css/attributes.css',
-        'admin/src/Service/TextPresetRows.php',
         'admin/src/Service/ProductVideos.php',
-        'admin/forms/attribute_text_preset_row.xml',
-        'admin/forms/attribute_color_row.xml',
         'admin/forms/product_video.xml',
         'admin/src/Service/AttributeSettings.php',
         'media/js/attribute-settings.js',
@@ -151,12 +148,8 @@ try {
         'admin/src/Controller/ValuesController.php',
         'admin/forms/attribute.xml',
         'admin/src/Service/AttributeValueRows.php',
-        'admin/forms/attribute_value_row.xml',
-        'admin/forms/attribute_number_preset_row.xml',
-        'admin/forms/attribute_text_preset_row.xml',
-        'admin/src/Service/TextPresetRows.php',
+        'admin/forms/attribute_unified_value_row.xml',
         'admin/sql/updates/mysql/0.5.14.sql',
-        'admin/src/Service/NumericPresetRows.php',
         'admin/forms/filter_products.xml',
         'admin/forms/filter_attributes.xml',
         'admin/forms/filter_categories.xml',
@@ -264,7 +257,7 @@ try {
         }
     }
 
-    $valueRowFormEntry = $archive.GetEntry('admin/forms/attribute_value_row.xml')
+    $valueRowFormEntry = $archive.GetEntry('admin/forms/attribute_unified_value_row.xml')
     $valueRowReader = New-Object System.IO.StreamReader($valueRowFormEntry.Open())
     try {
         [xml]$valueRowXml = $valueRowReader.ReadToEnd()
