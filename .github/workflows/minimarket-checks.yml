@@ -110,6 +110,42 @@ jobs:
           MM_CI_DB_PASSWORD: demo_ci_password
         run: php scripts/test-0-5-71-grid-mysql84.php
 
+  mysql-canonical73:
+    name: MySQL 8.4 canonical fresh schema and repeatable catalog
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: canonical_root_password
+          MYSQL_DATABASE: minimarket_ci_canonical73
+          MYSQL_USER: canonci
+          MYSQL_PASSWORD: canonical_ci_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u canonci -pcanonical_ci_password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=22
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP MySQLi
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mysqli
+          coverage: none
+      - name: Canonical 0.5.73 fresh database and idempotent demo
+        env:
+          MINIMARKET_CANONICAL_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_canonical73
+          MM_CI_DB_USER: canonci
+          MM_CI_DB_PASSWORD: canonical_ci_password
+        run: php scripts/test-0-5-73-fresh-mysql84.php
+
   windows-package:
     name: Windows component ZIP
     runs-on: windows-latest
