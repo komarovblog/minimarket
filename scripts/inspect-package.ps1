@@ -134,6 +134,7 @@ try {
         'admin/sql/updates/mysql/0.5.49.sql',
         'admin/sql/updates/mysql/0.5.58.sql',
         'admin/sql/updates/mysql/0.5.59.sql',
+        'admin/sql/updates/mysql/0.5.73.sql',
         'media/js/promo-video.js',
         'media/css/promo-video.css',
         'site/src/Service/CategoryDisplayOptions.php',

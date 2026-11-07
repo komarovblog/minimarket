@@ -26,7 +26,7 @@ function total(mysqli $db,string $table):int {
 function verify(bool $condition,string $test):void {
     if (!$condition) throw new RuntimeException('DEMO_SQL_FAIL: '.$test);
 }
-$schema=file_get_contents(__DIR__.'/../src/com_minimarket/admin/sql/install.mysql.sql');
+$schema=file_get_contents(__DIR__.'/fixtures/legacy-install-0.5.72.sql');
 $demo=file_get_contents(__DIR__.'/../sample-data/minimarket_mysql84_nnop3_full_demo.sql');
 verify($schema!==false && $demo!==false, 'SQL files present');
 verify(str_contains($demo,'CHECK (existing_rows=0)'), 'nonempty catalog import guard');
@@ -229,6 +229,31 @@ verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_product_videos WHE
  'one optional promo remains after repeated SQL');
 
 
+// Upgrade the populated historical catalog to the canonical schema.
+// Every product ID and pre-existing dictionary value ID must survive.
+$oldScalar=total($db,'product_attribute_scalars');
+$oldMultiple=total($db,'product_attribute_multi_values');
+$oldLinks=total($db,'product_attribute_options');
+verify($oldScalar>=462 && $oldMultiple===111 && $oldLinks===77,
+    'historical product attributes available before migration');
+$upgrade=file_get_contents(__DIR__.'/../src/com_minimarket/admin/sql/updates/mysql/0.5.73.sql');
+verify(is_string($upgrade),'canonical upgrade SQL exists');
+runMulti($db,str_replace('#__','nnop3_',$upgrade),'canonical attributes upgrade');
+verify(total($db,'attributes')===12,'all 12 attribute definitions retained');
+verify(total($db,'attribute_values')===52,'13 prior dictionary IDs plus 39 presets');
+verify(total($db,'product_attribute_options')===496,'419 existing textual assignments now use IDs');
+verify(total($db,'product_attribute_scalars')===462,'number and boolean scalar values retained');
+verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_attribute_values
+ WHERE id BETWEEN 301 AND 313")->fetch_row()[0]===13,
+ 'existing color value IDs preserved');
+verify($db->query("SHOW TABLES LIKE 'nnop3_minimarket_product_attribute_multi_values'")->num_rows===0,
+ 'old multi storage removed from installed schema');
+foreach(['input_mode','number_options','text_options'] as $oldColumn) {
+    verify($db->query("SHOW COLUMNS FROM nnop3_minimarket_attributes
+      LIKE '$oldColumn'")->num_rows===0, 'obsolete metadata removed: '.$oldColumn);
+}
+verify((int)$db->query("SELECT COUNT(*) FROM nnop3_minimarket_attributes
+ WHERE value_source='legacy'")->fetch_row()[0]===0, 'all attributes in canonical mode');
 echo "DEMO_MYSQL84_OK: " . total($db,'categories') . " categories, "
     .total($db,'products')." products, ".total($db,'product_variants')
     ." variants, ".total($db,'brands')." brands, ".total($db,'collections')
