@@ -1,0 +1,4 @@
+/* Joomla Atum/com_config: inactive sizes remain visible and legible.
+   Disabled native selects cannot be tabbed into or changed accidentally. */
+.mm-grid-disabled { opacity: .55; }
+.mm-grid-disabled .form-select { cursor: not-allowed; }

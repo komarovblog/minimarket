@@ -29,8 +29,12 @@ final class CategoryDisplayOptions
         $result['layout'] = in_array($layout, ['list', 'grid'], true) ? $layout : 'list';
         // All six Bootstrap 5 viewport breakpoints have independent column
         // counts; -1 is always the global component setting.
+        $categoryOwnsGrid = (string)($category->product_layout ?? 'inherit') === 'grid';
         foreach (['xs'=>1,'sm'=>1,'md'=>2,'lg'=>3,'xl'=>4,'xxl'=>4] as $size=>$default) {
-            $local=(int)($category->{'cards_'.$size} ?? -1);
+            // Category overrides are active only when its layout is Grid.
+            // "Inherit" means use both global layout AND global card counts.
+            // Previously entered overrides remain saved for future Grid use.
+            $local=$categoryOwnsGrid ? (int)($category->{'cards_'.$size} ?? -1) : -1;
             $globalValue=(int)$global->get('category_cards_'.$size,$default);
             $count=$local===-1?$globalValue:$local;
             $result['cards_'.$size]=max(1,min(6,$count));

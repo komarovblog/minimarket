@@ -24,6 +24,10 @@ final class GridcardsField extends ListField
                     'media/com_minimarket/js/category-grid-settings.js',
                     [],
                     ['defer'=>true]
+                )
+                ->registerAndUseStyle(
+                    'com_minimarket.category-grid-settings',
+                    'media/com_minimarket/css/category-grid-settings.css'
                 );
             self::$registered=true;
         }

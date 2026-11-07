@@ -41,10 +41,14 @@ check58($v['show_children'] && $v['show_products'] && !$v['show_bundles'],
  'local category flag overrides global');
 check58(!$v['show_descendant_products'] && $v['show_descendant_bundles'],
  'each descendant setting inherits or overrides separately');
-check58($v['layout']==='list' && $v['cards_xs']===1 && $v['cards_sm']===2
-    && $v['cards_md']===3 && $v['cards_lg']===5
+check58($v['layout']==='list' && $v['cards_xs']===2 && $v['cards_sm']===2
+    && $v['cards_md']===3 && $v['cards_lg']===4
     && $v['cards_xl']===6 && $v['cards_xxl']===6,
-    'each breakpoint may be local or inherited');
+    'List disables local grid overrides and retains global defaults');
+$category->product_layout='grid';
+$v=Options::resolve($category,$global);
+check58($v['cards_xs']===1 && $v['cards_lg']===5,
+    'Grid activates previously saved independent local counts');
 $category->product_layout='inherit';$category->cards_lg=-1;
 $global->values['category_cards_lg']=99;
 $v=Options::resolve($category,$global);

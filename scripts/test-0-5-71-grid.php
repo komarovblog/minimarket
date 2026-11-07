@@ -39,9 +39,16 @@ check71($v['cards_xs']===1 && $v['cards_sm']===3 &&
 $category->product_layout='list';
 check71(Grid::resolve($category,$params)['layout']==='list',
     'category list overrides global grid without deleting counts');
+check71(Grid::resolve($category,$params)['cards_xs']===2 &&
+    Grid::resolve($category,$params)['cards_xl']===6,
+    'disabled category counts do not override global List mode');
 $category->product_layout='inherit';
 check71(Grid::resolve($category,$params)['layout']==='grid',
     'category default inherits global grid');
+check71(Grid::resolve($category,$params)['cards_xs']===2 &&
+    Grid::resolve($category,$params)['cards_xl']===6,
+    'default category layout inherits global grid sizes, not dormant local overrides');
+$category->product_layout='grid';
 $category->cards_xxl=99;
 check71(Grid::resolve($category,$params)['cards_xxl']===6,
     'unsafe values clamped to Bootstrap limit 6');
