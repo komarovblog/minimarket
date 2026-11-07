@@ -137,8 +137,7 @@ final class FacetedCatalog
                 self::add($facts,$facets,$pid,'a'.$aid,self::key($type,$value),
                     $type==='boolean'?($value==='0'?'No':'Yes'):$value);
             }
-            foreach (['#__minimarket_product_attribute_free_values',
-                '#__minimarket_product_attribute_multi_values'] as $table) {
+            foreach (['#__minimarket_product_attribute_free_values'] as $table) {
                 foreach (self::query($db,$table,
                     ['product_id','attribute_id','value_text'],
                     'product_id IN ('.$productSql.') AND attribute_id IN ('.$attributeSql.')') as $row) {

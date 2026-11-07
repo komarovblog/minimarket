@@ -41,6 +41,9 @@ final class BulkDeleteGuard
             : [
                 ['#__minimarket_attribute_values', 'attribute_id'],
                 ['#__minimarket_category_attributes', 'attribute_id'],
+                ['#__minimarket_product_attribute_scalars', 'attribute_id'],
+                ['#__minimarket_product_attribute_options', 'attribute_id'],
+                ['#__minimarket_product_attribute_free_values', 'attribute_id'],
             ];
         foreach ($refs as [$table, $column]) {
             $q = $db->getQuery(true)->select('COUNT(*)')
