@@ -8,7 +8,7 @@ use Joomla\Database\DatabaseInterface;
 /**
  * Public product characteristics. Reads only a product already authorized by
  * CatalogRepository::getProduct(); never exposes unpublished/unassigned data.
- * Product-level selections are not variant combinations.
+ * Product-level selections are not variant combinations or public filters.
  */
 final class ProductAttributeCatalog
 {
@@ -44,13 +44,14 @@ final class ProductAttributeCatalog
         }
         $allowSql = implode(',', array_map('intval', $allowed));
         $q = $db->getQuery(true)
-            ->select(['id', 'title', 'input_type', 'number_unit', 'value_source', 'color_display'])
+            ->select(['id', 'title', 'input_type', 'number_unit', 'text_options', 'value_source', 'color_display'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->where($db->quoteName('id') . ' IN (' . $allowSql . ')')
             ->where($db->quoteName('state') . ' = 1')
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
         $attributes = [];
+        $imagesByPreset = [];
         foreach ((array) $db->loadObjectList() as $row) {
             $id = (int) $row->id;
             if (!isset($enabled[$id]) || !$enabled[$id]) {
@@ -61,10 +62,22 @@ final class ProductAttributeCatalog
                 'title' => (string) $row->title,
                 'type' => $type,
                 'unit' => (string) ($row->number_unit ?? ''),
-                'source' => (string) ($row->value_source ?? 'manual'),
+                'source' => (string) ($row->value_source ?? 'legacy'),
                 'color_display' => (string) ($row->color_display ?? 'both'),
                 'values' => [],
             ];
+            if ($type === 'text') {
+                $presets = json_decode((string) ($row->text_options ?? ''), true);
+                if (is_array($presets)) {
+                    foreach ($presets as $preset) {
+                        if (is_array($preset) && is_string($preset['value'] ?? null)
+                            && is_string($preset['image'] ?? null)) {
+                            $imagesByPreset[$id][$preset['value']] =
+                                self::safeImage($preset['image']);
+                        }
+                    }
+                }
+            }
         }
         if ($attributes === []) {
             return [];
@@ -87,7 +100,7 @@ final class ProductAttributeCatalog
                 'text' => (string) $value,
                 'hex' => $type === 'color' && preg_match('/^#[a-fA-F0-9]{6}$/D', (string) $value)
                     ? (string) $value : '',
-                'image' => '',
+                'image' => $imagesByPreset[$id][(string) $value] ?? '',
             ];
         }
 
@@ -108,16 +121,35 @@ final class ProductAttributeCatalog
             $id = (int) $option->attribute_id;
             if (!isset($attributes[$id])) continue;
             $type = $attributes[$id]['type'];
-            if ($attributes[$id]['source'] !== 'preset') continue;
+            $modern = $attributes[$id]['source'] === 'preset';
+            if (!$modern && !in_array($type, ['color', 'list'], true)) continue;
             $hex = (string) ($option->color_hex ?? '');
             $payload = (string) ($option->value_payload ?? '');
-            $displayText = in_array($type, ['number','document','editor'], true)
+            $displayText = $modern && in_array($type, ['number','document','editor'], true)
                 ? ($payload !== '' ? $payload : (string) $option->title)
                 : (string) $option->title;
             $attributes[$id]['values'][] = [
                 'text' => $displayText,
                 'hex' => preg_match('/^#[0-9a-fA-F]{6}$/D', $hex) ? $hex : '',
                 'image' => self::safeImage((string) ($option->sample_image ?? '')),
+            ];
+        }
+
+        $q = $db->getQuery(true)
+            ->select(['attribute_id', 'value_text'])
+            ->from($db->quoteName('#__minimarket_product_attribute_multi_values'))
+            ->where($db->quoteName('product_id') . ' = ' . $productId)
+            ->where($db->quoteName('attribute_id') . ' IN (' . $attrSql . ')')
+            ->order('attribute_id ASC, value_text ASC');
+        $db->setQuery($q);
+        foreach ((array) $db->loadObjectList() as $choice) {
+            $id = (int) $choice->attribute_id;
+            if (!isset($attributes[$id]) || $attributes[$id]['type'] !== 'text') continue;
+            $value = (string) $choice->value_text;
+            if ($value === '') continue;
+            $attributes[$id]['values'][] = [
+                'text' => $value, 'hex' => '',
+                'image' => $imagesByPreset[$id][$value] ?? '',
             ];
         }
 

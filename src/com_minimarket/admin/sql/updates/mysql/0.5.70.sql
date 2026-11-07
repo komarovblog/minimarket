@@ -1,4 +1,2 @@
--- 0.5.70: canonical attribute changes are applied from
--- migrations/minimarket_0_5_70_canonical_nnop3.sql BEFORE installing this
--- release. The SQL is deliberately NOT replayed by the Joomla updater,
--- because the operator must back up the live catalog and verify the migration.
+-- MiniMarket 0.5.70 introduces storefront facet UI only; no schema changes.
+-- Canonical attribute cleanup requires a separately verified migration.
