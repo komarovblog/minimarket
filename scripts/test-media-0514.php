@@ -87,13 +87,13 @@ namespace MiniMarket\MediaSmoke {
 
     $f=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/attribute.xml');
     $p=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product.xml');
-    $color=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/attribute_color_row.xml');
+    $color=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/attribute_unified_value_row.xml');
     $video=simplexml_load_file(__DIR__.'/../src/com_minimarket/admin/forms/product_video.xml');
     check($f!==false && $p!==false && $color!==false && $video!==false,'forms parse');
-    check(count($f->xpath("//field[@name='color_values' and @type='subform']"))===1,
-        'color named HEX swatches repeatable');
-    check(count($color->xpath("//field[@name='color_hex' and @type='color']"))===1,
-        'native Joomla color picker');
+    check(count($f->xpath("//field[@name='unified_values' and @type='subform']"))===1,
+        'color swatches are edited in the canonical dictionary');
+    check(count($color->xpath("//field[@name='color_hex']"))===1,
+        'HEX and sample image supported by the common value form');
     check(count($p->xpath("//fieldset[@name='videos']/field[@name='videos' and @type='subform']"))===1,
         'videos belong directly to product');
     check(count($video->xpath("//field[@name='source']"))===1,'video source per row');
