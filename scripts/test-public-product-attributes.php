@@ -60,32 +60,28 @@ namespace MiniMarket\PublicAttributeSmoke {
                     ['category_id'=>2,'attribute_id'=>10,'enabled'=>1],
                 ],
                 '#__minimarket_attributes'=>[
-                    ['id'=>1,'title'=>'Материал','input_type'=>'text','number_unit'=>'',
-                     'text_options'=>'[{"value":"Камень","image":"images/samples/stone.webp"},{"value":"Металл","image":""}]'],
-                    ['id'=>2,'title'=>'Цвет','input_type'=>'color','number_unit'=>'','text_options'=>''],
-                    ['id'=>3,'title'=>'Мощность','input_type'=>'number','number_unit'=>'Вт','text_options'=>''],
-                    ['id'=>4,'title'=>'Bluetooth','input_type'=>'boolean','number_unit'=>'','text_options'=>''],
-                    ['id'=>5,'title'=>'Описание свойства','input_type'=>'editor','number_unit'=>'','text_options'=>''],
-                    ['id'=>6,'title'=>'Инструкция','input_type'=>'document','number_unit'=>'','text_options'=>''],
-                    ['id'=>7,'title'=>'Сайт','input_type'=>'url','number_unit'=>'','text_options'=>''],
-                    ['id'=>10,'title'=>'Особенность','input_type'=>'text','number_unit'=>'','text_options'=>''],
+                    ['id'=>1,'title'=>'Материал','input_type'=>'text','value_source'=>'preset','number_unit'=>''],
+                    ['id'=>2,'title'=>'Цвет','input_type'=>'color','value_source'=>'preset','number_unit'=>''],
+                    ['id'=>3,'title'=>'Мощность','input_type'=>'number','value_source'=>'manual','number_unit'=>'Вт'],
+                    ['id'=>4,'title'=>'Bluetooth','input_type'=>'boolean','value_source'=>'manual','number_unit'=>''],
+                    ['id'=>5,'title'=>'Описание свойства','input_type'=>'editor','value_source'=>'manual','number_unit'=>''],
+                    ['id'=>6,'title'=>'Инструкция','input_type'=>'document','value_source'=>'manual','number_unit'=>''],
+                    ['id'=>10,'title'=>'Особенность','input_type'=>'text','value_source'=>'manual','number_unit'=>''],
                 ],
                 '#__minimarket_product_attribute_scalars'=>[
                     ['attribute_id'=>3,'value_text'=>null,'value_number'=>'1400.0000','value_boolean'=>null],
                     ['attribute_id'=>4,'value_text'=>null,'value_number'=>null,'value_boolean'=>0],
                     ['attribute_id'=>5,'value_text'=>'<p>Описание</p>','value_number'=>null,'value_boolean'=>null],
                     ['attribute_id'=>6,'value_text'=>'images/docs/instruction.pdf','value_number'=>null,'value_boolean'=>null],
-                    ['attribute_id'=>7,'value_text'=>'https://example.org','value_number'=>null,'value_boolean'=>null],
                     ['attribute_id'=>10,'value_text'=>'Жаростойкий','value_number'=>null,'value_boolean'=>null],
                 ],
                 '#__minimarket_product_attribute_options AS o'=>[
-                    ['attribute_id'=>2,'title'=>'Красный','color_hex'=>'#EE0000','sample_image'=>''],
-                    ['attribute_id'=>2,'title'=>'Камень','color_hex'=>'','sample_image'=>'images/samples/marble.webp'],
+                    ['attribute_id'=>1,'title'=>'Камень','color_hex'=>'','sample_image'=>'images/samples/stone.webp','value_payload'=>null],
+                    ['attribute_id'=>1,'title'=>'Металл','color_hex'=>'','sample_image'=>'','value_payload'=>null],
+                    ['attribute_id'=>2,'title'=>'Красный','color_hex'=>'#EE0000','sample_image'=>'','value_payload'=>null],
+                    ['attribute_id'=>2,'title'=>'Камень','color_hex'=>'','sample_image'=>'images/samples/marble.webp','value_payload'=>null],
                 ],
-                '#__minimarket_product_attribute_multi_values'=>[
-                    ['attribute_id'=>1,'value_text'=>'Камень'],
-                    ['attribute_id'=>1,'value_text'=>'Металл'],
-                ],
+                '#__minimarket_product_attribute_free_values'=>[],
                 default=>throw new \RuntimeException('Unexpected query table: '.$table),
             };
             return array_map(static fn(array $row): object => (object) $row, $rows);
@@ -109,13 +105,13 @@ namespace MiniMarket\PublicAttributeSmoke {
     $db=new FakeDb();
     $attrs=S::load($db,50,$tree->ancestorIds(2));
     check(count($db->queries)===5,'five queries regardless of attribute count');
-    check(array_keys($attrs)===[1,2,3,4,5,6,7,10], 'all and only enabled populated attributes shown');
+    check(array_keys($attrs)===[1,2,3,4,5,6,10], 'all and only enabled populated attributes shown');
     check(!isset($attrs[9]),'child category overrides inherited enabled attribute');
     check($attrs[1]['values'][0]['text']==='Камень'
         && $attrs[1]['values'][1]['text']==='Металл',
-        'multiple preset materials are separate public values');
+        'multiple preset materials use separate dictionary IDs');
     check($attrs[1]['values'][0]['image']==='images/samples/stone.webp',
-        'text preset image resolved to chosen value');
+        'dictionary image resolved from selected stable value ID');
     check($attrs[2]['values'][0]['hex']==='#EE0000',
         'color has validated HEX swatch');
     check($attrs[2]['values'][1]['image']==='images/samples/marble.webp',
@@ -130,8 +126,6 @@ namespace MiniMarket\PublicAttributeSmoke {
     check(S::safeDocument('images/evil.php')==='','executable document rejected');
     check(S::safeImage('images/preset.jpg')==='images/preset.jpg','legitimate preview accepted');
     check(S::safeImage('images/../../secret.webp')==='','traversal image rejected');
-    check(S::safeUrl('javascript:alert(1)')==='','unsafe external URL rejected');
-    check(S::safeUrl('https://example.org')==='https://example.org','valid HTTPS link');
     check(S::load($db,50,[])===[],'no query when category is not public');
     check(($db->queries[1]->conditions[1] ?? '')==='state = 1',
         'attribute definition query explicitly filters unpublished');
