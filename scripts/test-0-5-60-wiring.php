@@ -21,10 +21,12 @@ $global=['category_show_children'=>'show_children',
  'category_show_descendant_products'=>'show_descendant_products',
  'category_show_descendant_bundles'=>'show_descendant_bundles',
  'category_product_layout'=>'product_layout',
- 'category_cards_mobile'=>'cards_mobile',
- 'category_cards_tablet'=>'cards_tablet',
- 'category_cards_desktop'=>'cards_desktop',
- 'category_cards_wide'=>'cards_wide'];
+ 'category_cards_xs'=>'cards_xs',
+ 'category_cards_sm'=>'cards_sm',
+ 'category_cards_md'=>'cards_md',
+ 'category_cards_lg'=>'cards_lg',
+ 'category_cards_xl'=>'cards_xl',
+ 'category_cards_xxl'=>'cards_xxl'];
 $resolver=(string)file_get_contents($root.'site/src/Service/CategoryDisplayOptions.php');
 $schema=(string)file_get_contents($root.'admin/sql/install.mysql.sql');
 $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.58.sql');
@@ -43,14 +45,21 @@ foreach($global as $configName=>$local) {
     audit60(str_contains($schema,'`'.$local.'`'),
         'fresh schema must persist '.$local);
 }
-foreach(['show_descendant_products','show_descendant_bundles',
- 'product_layout','cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $field) {
+foreach(['show_descendant_products','show_descendant_bundles','product_layout'] as $field) {
     audit60(str_contains($migration,'ADD COLUMN `'.$field.'`'),
-        'upgrade migration must add '.$field);
-    audit60(str_contains($table,$field) ||
-        in_array($field,['show_descendant_products','show_descendant_bundles'],true),
-        'category save validation must handle '.$field);
+        'historical 0.5.58 migration must add '.$field);
 }
+$gridMigration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.71.sql');
+foreach(['xs','sm','md','lg','xl','xxl'] as $tier) {
+    audit60(str_contains($schema,'`cards_'.$tier.'`'),
+        'new DB must have cards_'.$tier);
+    audit60(str_contains($table,"'cards_".$tier."'"),
+        'category save must validate cards_'.$tier);
+}
+audit60(str_contains($gridMigration,'RENAME COLUMN `cards_mobile` TO `cards_xs`')
+    && str_contains($gridMigration,'ADD COLUMN `cards_sm`')
+    && str_contains($gridMigration,'ADD COLUMN `cards_xxl`'),
+    '0.5.71 migration preserves existing four tiers');
 $siteRepo=(string)file_get_contents($root.'site/src/Service/CatalogRepository.php');
 $siteView=(string)file_get_contents($root.'site/src/View/Category/HtmlView.php');
 $siteTpl=(string)file_get_contents($root.'site/tmpl/category/default.php');

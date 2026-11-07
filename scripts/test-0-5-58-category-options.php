@@ -19,35 +19,36 @@ check58($v['show_children'] && $v['show_products'] && $v['show_bundles'],
 check58(!$v['show_descendant_products'] && !$v['show_descendant_bundles'],
  'legacy descendants stay excluded by default');
 check58($v['layout']==='list','legacy listing is the default');
-check58(Options::bootstrapGridClasses($v)==='row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3',
+check58(Options::bootstrapGridClasses($v)==='row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-4 g-3',
  'bootstrap grid has safe mobile to xl defaults');
 $global->values=['category_show_children'=>0,'category_show_products'=>0,
     'category_show_bundles'=>1,'category_show_descendant_products'=>1,
     'category_show_descendant_bundles'=>1,'category_product_layout'=>'grid',
-    'category_cards_mobile'=>2,'category_cards_tablet'=>3,
-    'category_cards_desktop'=>4,'category_cards_wide'=>6];
+    'category_cards_xs'=>2,'category_cards_sm'=>2,'category_cards_md'=>3,
+    'category_cards_lg'=>4,'category_cards_xl'=>6,'category_cards_xxl'=>6];
 $v=Options::resolve($category,$global);
 check58(!$v['show_children'] && !$v['show_products'] && $v['show_bundles'],
  'global flags resolved independently');
 check58($v['show_descendant_products'] && $v['show_descendant_bundles'],
  'global nested products and kits work independently');
-check58($v['layout']==='grid' && $v['cards_wide']===6,'global responsive layout');
+check58($v['layout']==='grid' && $v['cards_xxl']===6,'global responsive layout');
 $category=(object)['show_children'=>1,'show_products'=>1,'show_bundles'=>0,
     'show_descendant_products'=>0,'show_descendant_bundles'=>-1,
-    'product_layout'=>'list','cards_mobile'=>1,'cards_tablet'=>-1,
-    'cards_desktop'=>5,'cards_wide'=>-1];
+    'product_layout'=>'list','cards_xs'=>1,'cards_sm'=>-1,'cards_md'=>-1,
+    'cards_lg'=>5,'cards_xl'=>-1,'cards_xxl'=>-1];
 $v=Options::resolve($category,$global);
 check58($v['show_children'] && $v['show_products'] && !$v['show_bundles'],
  'local category flag overrides global');
 check58(!$v['show_descendant_products'] && $v['show_descendant_bundles'],
  'each descendant setting inherits or overrides separately');
-check58($v['layout']==='list' && $v['cards_mobile']===1 && $v['cards_tablet']===3
-    && $v['cards_desktop']===5 && $v['cards_wide']===6,
+check58($v['layout']==='list' && $v['cards_xs']===1 && $v['cards_sm']===2
+    && $v['cards_md']===3 && $v['cards_lg']===5
+    && $v['cards_xl']===6 && $v['cards_xxl']===6,
     'each breakpoint may be local or inherited');
-$category->product_layout='inherit';$category->cards_desktop=-1;
-$global->values['category_cards_desktop']=99;
+$category->product_layout='inherit';$category->cards_lg=-1;
+$global->values['category_cards_lg']=99;
 $v=Options::resolve($category,$global);
-check58($v['layout']==='grid' && $v['cards_desktop']===6,'global unsafe number clamped');
+check58($v['layout']==='grid' && $v['cards_lg']===6,'global unsafe number clamped');
 $global->values['category_product_layout']='unsupported';
 $v=Options::resolve($category,$global);
 check58($v['layout']==='list','unexpected global layout safely falls back to list');
@@ -73,12 +74,12 @@ check58(count($config->xpath('//fieldset[@name="categories"]'))===1
     'exact General and Categories settings tabs');
 foreach(['category_show_children','category_show_products','category_show_bundles',
  'category_show_descendant_products','category_show_descendant_bundles','category_product_layout',
- 'category_cards_mobile','category_cards_tablet','category_cards_desktop','category_cards_wide'] as $key){
+ 'category_cards_xs','category_cards_sm','category_cards_md','category_cards_lg','category_cards_xl','category_cards_xxl'] as $key){
  check58(count($config->xpath('//fieldset[@name="categories"]/field[@name="'.$key.'"]'))===1,
   'global category field '.$key);
 }
 foreach(['show_descendant_products','show_descendant_bundles','product_layout',
- 'cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $key){
+ 'cards_xs','cards_sm','cards_md','cards_lg','cards_xl','cards_xxl'] as $key){
  check58(count($form->xpath('//fieldset[@name="display"]/field[@name="'.$key.'"]'))===1,
   'category override field '.$key);
 }
@@ -96,6 +97,6 @@ foreach(['ru-RU','en-GB'] as $lang){
  $ini=parse_ini_file($root.'admin/language/'.$lang.'/com_minimarket.ini');
  check58(isset($ini['COM_MINIMARKET_CONFIG_CATEGORIES']) &&
   isset($ini['COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES']) &&
-  isset($ini['COM_MINIMARKET_CARDS_WIDE']),'translated category options '.$lang);
+  isset($ini['COM_MINIMARKET_CARDS_XXL']),'translated category options '.$lang);
 }
 echo "MM_058_CATEGORY_OPTIONS_OK: $checks checks\n";

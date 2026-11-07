@@ -13,16 +13,20 @@ use Joomla\CMS\Form\Field\ListField;
 final class GridcardsField extends ListField
 {
     protected $type='Gridcards';
+    private static bool $registered=false;
 
     protected function getInput()
     {
-        Factory::getApplication()->getDocument()->getWebAssetManager()
-            ->registerAndUseScript(
-                'com_minimarket.category-grid-settings',
-                'media/com_minimarket/js/category-grid-settings.js',
-                [],
-                ['defer'=>true]
-            );
+        if (!self::$registered) {
+            Factory::getApplication()->getDocument()->getWebAssetManager()
+                ->registerAndUseScript(
+                    'com_minimarket.category-grid-settings',
+                    'media/com_minimarket/js/category-grid-settings.js',
+                    [],
+                    ['defer'=>true]
+                );
+            self::$registered=true;
+        }
         return parent::getInput();
     }
 }
