@@ -100,6 +100,15 @@ jobs:
           MM_CI_DB_USER: democi
           MM_CI_DB_PASSWORD: demo_ci_password
         run: php scripts/test-catalog-archive-v2-db.php
+      - name: 0.5.71 old-grid migration on disposable MySQL 8.4 table
+        env:
+          MINIMARKET_DEMO_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_demo84
+          MM_CI_DB_USER: democi
+          MM_CI_DB_PASSWORD: demo_ci_password
+        run: php scripts/test-0-5-71-grid-mysql84.php
 
   windows-package:
     name: Windows component ZIP
@@ -202,6 +211,11 @@ jobs:
         run: php scripts/test-cumulative-sql.php
       - name: 0.5.58 category settings and descendants
         run: php scripts/test-0-5-58-category-options.php
+      - name: 0.5.71 six Bootstrap grid tiers and disabled form rules
+        run: |
+          php scripts/test-0-5-71-grid.php
+          node --check src/com_minimarket/media/js/category-grid-settings.js
+          node scripts/test-0-5-71-grid-ui.js
       - name: 0.5.58 bundle editor columns and calculated totals
         run: php scripts/test-0-5-58-bundle-ui.php
       - name: 0.5.58 bundle picker syntax
