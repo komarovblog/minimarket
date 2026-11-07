@@ -24,10 +24,12 @@ foreach(['is_filterable','filter_mode','filter_multiple','filter_planned_notice'
     ok69(count($a->xpath('/form/fieldset[@name="filter"]/field[@name="'.$field.'"]'))===1,
         'filter '.$field.' separate tab');
 }
-ok69(count($a->xpath('/form/fieldset[@name="details"]/field[@name="value_source_ui"]/option[@value="legacy"]'))===0,
+ok69(count($a->xpath('/form/fieldset[@name="details"]/field[@name="value_source"]/option[@value="legacy"]'))===0,
     'old compatibility choice absent');
-ok69(count($a->xpath('/form/fieldset[@name="details"]/field[@name="value_source" and @type="hidden"]'))===1,
-    'hidden value source keeps compatibility storage');
+ok69(count($a->xpath('/form/fieldset[@name="details"]/field[@name="value_source" and @type="list"]'))===1,
+    'canonical manual or predefined mode shown directly in Joomla settings');
+ok69(count($a->xpath('/form/fieldset[@name="details"]/field[@name="value_source_ui"]'))===0,
+    'hidden compatibility field fully removed');
 $cfg=$read('src/com_minimarket/admin/config.xml');
 ok69(str_contains($cfg,'name="inventory_enabled"') &&
     !str_contains($cfg,'showon="category_product_layout:grid"'),
