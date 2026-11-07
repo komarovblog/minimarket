@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Joomla\Database { interface DatabaseInterface {} }
 namespace MiniMarket\UnifiedAttributeSmoke {
     \define('_JEXEC', 1);
-    require __DIR__ . '/../src/com_minimarket/admin/src/Service/TextPresetRows.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeSettings.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/AttributeValueRows.php';
     require __DIR__ . '/../src/com_minimarket/admin/src/Service/ProductAttributes.php';
@@ -20,18 +19,18 @@ namespace MiniMarket\UnifiedAttributeSmoke {
     }
     $number=(object)[
         'input_type'=>'number','value_source'=>'manual','color_display'=>'both',
-        'input_mode'=>'presets','is_multiple'=>1,'is_filterable'=>0,
-        'filter_mode'=>'none','filter_multiple'=>0,'text_options'=>'',
-        'number_unit'=>'Вт','number_options'=>'','number_min'=>'0',
+        'is_multiple'=>1,'is_filterable'=>0,
+        'filter_mode'=>'none','filter_multiple'=>0,
+        'number_unit'=>'Вт','number_min'=>'0',
         'number_max'=>'15','number_step'=>'5'
     ];
     ok(S::normalize($number)===null && $number->is_multiple===1,
         'multiple numbers survive normalization');
-    ok($number->input_mode==='auto','modern numbers do not use legacy preset mode');
+    ok(!property_exists($number,'input_mode'),'no obsolete input mode in the attribute model');
     $defs=[
         1=>['id'=>1,'title'=>'Мощность','type'=>'number','value_source'=>'manual',
             'is_multiple'=>true,'number_min'=>'0','number_max'=>'15','number_step'=>'5',
-            'number_options'=>'','values'=>[]],
+            'values'=>[]],
         2=>['id'=>2,'title'=>'Мощности из справочника','type'=>'number','value_source'=>'preset',
             'is_multiple'=>true,'values'=>[
                 201=>['title'=>'5 Вт','value_payload'=>'5','state'=>1],
@@ -82,9 +81,10 @@ namespace MiniMarket\UnifiedAttributeSmoke {
         'Joomla form has independent source choice');
     ok(count($xml->xpath("//field[@name='unified_values' and @type='subform']"))===1,
         'one Joomla repeatable dictionary');
-    $migration=file_get_contents($root.'admin/sql/updates/mysql/0.5.45.sql');
-    ok(str_contains($migration,'product_attribute_free_values') &&
-        str_contains($migration,'value_payload') && str_contains($migration,'value_source'),
-        'additive upgrade includes typed presets and long manual multi-values');
+    $migration=file_get_contents($root.'admin/sql/updates/mysql/0.5.73.sql');
+    ok(str_contains($migration,'product_attribute_options') &&
+        str_contains($migration,'DROP COLUMN input_mode') &&
+        str_contains($migration,'DROP TABLE #__minimarket_product_attribute_multi_values'),
+        'final upgrade migrates all dictionary values and removes obsolete storage');
     echo 'UNIFIED_ATTRIBUTES_OK: '.$count." cases\n";
 }
