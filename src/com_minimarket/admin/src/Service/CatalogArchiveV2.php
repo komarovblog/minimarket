@@ -6,7 +6,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service;
 use Joomla\Database\DatabaseInterface;
 
 /**
- * Complete catalog JSON archive v2. Stores all 32 MiniMarket tables including
+ * Complete catalog JSON archive v2. Stores all 31 MiniMarket tables including
  * exact SKU IDs, images/links, bundles, options, videos and SEO text.
  * Binary media files are NOT included. Never drops, deletes or overwrites rows.
  * Intended for fresh catalogs and exact, idempotent reimports of a snapshot.
@@ -23,7 +23,7 @@ final class CatalogArchiveV2
         'product_collections','product_images','product_videos',
         'attributes','attribute_values','category_attributes',
         'product_attribute_scalars','product_attribute_options',
-        'product_attribute_multi_values','product_attribute_free_values',
+        'product_attribute_free_values',
         'product_variants','variant_dimensions','variant_dimension_values',
         'variant_value_assignments','variant_value_images',
         'product_variant_images','product_variant_videos','product_image_variants',
