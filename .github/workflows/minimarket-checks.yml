@@ -214,6 +214,7 @@ jobs:
       - name: 0.5.71 six Bootstrap grid tiers and disabled form rules
         run: |
           php scripts/test-0-5-71-grid.php
+          php scripts/test-0-5-71-global-options.php
           node --check src/com_minimarket/media/js/category-grid-settings.js
           node scripts/test-0-5-71-grid-ui.js
       - name: 0.5.58 bundle editor columns and calculated totals
