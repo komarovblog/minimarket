@@ -1103,7 +1103,7 @@ verify(!in_array('is_variant',$freshAttrColumns,true),'fresh 0.5.29 contains no 
 foreach (['value_source','color_display'] as $col) {
     verify(in_array($col,$freshAttrColumns,true),'fresh 0.5.45 attribute '.$col);
 }
-foreach (['id','title','code','input_type','input_mode','number_options','text_options','number_unit',
+foreach (['id','title','code','input_type','value_source','number_unit',
     'number_min','number_max','number_step','is_multiple','is_filterable',
     'filter_mode','filter_multiple','sort_order','state'] as $col) {
     verify(in_array($col, $freshAttrColumns, true), 'fresh 0.5.4 attribute column ' . $col);

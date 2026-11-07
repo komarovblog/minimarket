@@ -223,7 +223,7 @@ try {
     finally {
         $attrReader.Dispose()
     }
-    foreach ($fieldName in @('input_mode','filter_mode','filter_multiple','number_options','number_unit')) {
+    foreach ($fieldName in @('value_source','filter_mode','filter_multiple','number_unit')) {
         if ($null -eq $attrXml.SelectSingleNode("/form/fieldset/field[@name='" + $fieldName + "']")) {
             Write-Output ('PACKAGE_FAIL: ATTRIBUTE_PRESENTATION_FIELD_MISSING: ' + $fieldName)
             exit 1
@@ -233,8 +233,7 @@ try {
         Write-Output 'PACKAGE_FAIL: VALUE_CARDINALITY_FORM_MISSING'
         exit 1
     }
-    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='value_source_ui' and @type='list']") -or
-        $null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='value_source' and @type='hidden']") -or
+    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='value_source' and @type='list']") -or
         $null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='unified_values' and @type='subform' and @multiple='true']")) {
         Write-Output 'PACKAGE_FAIL: UNIFIED_ATTRIBUTE_FIELDS_MISSING'
         exit 1
