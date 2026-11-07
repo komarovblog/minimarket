@@ -327,14 +327,11 @@ $initialDescription=$hasCustomDescription
                                     $value = $entry['text'];
                                     $type = $attribute['type'];
                                     $file = $type === 'document' ? ProductAttributeCatalog::safeDocument($value) : '';
-                                    $url = $type === 'url' ? ProductAttributeCatalog::safeUrl($value) : '';
                                     $image = ProductAttributeCatalog::safeImage($entry['image']);
                                     $hex = $type === 'color' && preg_match('/^#[a-fA-F0-9]{6}$/D', $entry['hex'])
                                         ? $entry['hex'] : '';
                                     ?>
                                     <?php if ($type === 'document' && $file === '') : ?>
-                                        <?php continue; ?>
-                                    <?php elseif ($type === 'url' && $url === '') : ?>
                                         <?php continue; ?>
                                     <?php endif; ?>
                                     <span class="mm-product-attributes__value">
@@ -349,11 +346,6 @@ $initialDescription=$hasCustomDescription
                                             <a href="<?php echo $this->escape(Uri::root() . $file); ?>"
                                                target="_blank" rel="noopener">
                                                 <?php echo Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTE_OPEN_FILE'); ?>
-                                            </a>
-                                        <?php elseif ($url !== '') : ?>
-                                            <a href="<?php echo $this->escape($url); ?>"
-                                               target="_blank" rel="noopener noreferrer">
-                                                <?php echo $this->escape($value); ?>
                                             </a>
                                         <?php elseif ($type === 'boolean') : ?>
                                             <?php echo Text::_($value === '1' ? 'JYES' : 'JNO'); ?>

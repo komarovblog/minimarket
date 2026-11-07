@@ -167,10 +167,4 @@ final class ProductAttributeCatalog
             ) ? $path : '';
     }
 
-    public static function safeUrl(string $url): string
-    {
-        if (strlen($url) > 2048 || !filter_var($url, FILTER_VALIDATE_URL)) return '';
-        return in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true)
-            ? $url : '';
-    }
 }
