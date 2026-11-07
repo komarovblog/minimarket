@@ -243,13 +243,10 @@ try {
         Write-Output 'PACKAGE_FAIL: UNIFIED_ATTRIBUTE_ASSETS_MISSING'
         exit 1
     }
-    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='values' and @type='subform' and @multiple='true' and @buttons='add,remove,move']") -or
-        $null -eq $attrXml.SelectSingleNode("/form/field[@name='values_present']")) {
-        Write-Output 'PACKAGE_FAIL: ATTRIBUTE_SUBFORM_FIELDS_MISSING'
-        exit 1
-    }
-    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='number_preset_rows' and @type='subform' and @multiple='true' and @buttons='add,remove,move']")) {
-        Write-Output 'PACKAGE_FAIL: NUMERIC_PRESET_SUBFORM_MISSING'
+    if ($null -eq $attrXml.SelectSingleNode("/form/field[@name='values_present']") -or
+        $null -ne $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='number_preset_rows']") -or
+        $null -ne $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='values']")) {
+        Write-Output 'PACKAGE_FAIL: CANONICAL_ATTRIBUTE_SUBFORM_INVALID'
         exit 1
     }
     foreach ($name in @('products','attributes','categories')) {
