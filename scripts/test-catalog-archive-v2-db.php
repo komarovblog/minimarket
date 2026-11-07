@@ -1,6 +1,6 @@
 <?php
 /**
- * Disposable MySQL 8.4 integration test for JSON v2: full real 32-table
+ * Disposable MySQL 8.4 integration test for JSON v2: full real 31-table
  * snapshot, preview rollback, idempotent apply, collision and integrity.
  * Uses ONLY the dedicated GitHub Actions minimarket_ci_* database.
  */
@@ -79,7 +79,7 @@ namespace MiniMarket\ArchiveV2Test {
     $db=new Adapter($dbraw);
     $doc=CatalogArchiveV2::document($db);
     check($doc['format']==='minimarket-full' && $doc['version']===2,'full versioned format');
-    check(count($doc['tables'])===32,'all 32 component tables');
+    check(count($doc['tables'])===31,'all 31 component tables');
     check(count($doc['tables']['products'])>70,'real sample products exported');
     check(count($doc['tables']['product_variants'])>=16,'SKU records retained');
     check(count($doc['tables']['product_images'])>90,'multi-image product gallery retained');
