@@ -241,6 +241,8 @@ final class CatalogRepository
                 $this->db->quoteName('p.badge_popular_days'),
                 $this->db->quoteName('p.badge_popular_since'),
                 $this->db->quoteName('p.stock'),
+                $this->db->quoteName('p.category_id'),
+                $this->db->quoteName('p.option_stock_mode'),
                 $this->db->quoteName('p.product_type'),
                 $this->db->quoteName('p.image'),
                 $this->db->quoteName('p.image_alt'),

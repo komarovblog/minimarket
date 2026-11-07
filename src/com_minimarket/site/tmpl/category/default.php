@@ -43,6 +43,13 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <?php endif; ?>
 
     <?php if ($this->products) : ?>
+        <?php if ($this->facetData['facets']) : ?>
+            <div class="mm-facet-layout" data-mm-facet-layout>
+                <aside class="mm-facet-sidebar">
+                    <?php include __DIR__ . '/filters.php'; ?>
+                </aside>
+                <div class="mm-facet-results">
+        <?php endif; ?>
         <?php
         $grid = ($this->productListOptions['layout'] ?? 'list') === 'grid';
         $gridClasses = $grid
@@ -51,7 +58,8 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
         ?>
         <ul class="<?php echo $this->escape($gridClasses); ?> list-unstyled mm-category-products" data-mm-category-layout="<?php echo $grid ? 'grid' : 'list'; ?>">
         <?php foreach ($this->products as $product) : ?>
-            <li class="<?php echo $grid ? 'col' : 'mm-product-list__item'; ?>">
+            <li class="<?php echo $grid ? 'col' : 'mm-product-list__item'; ?>"
+                data-mm-facet-product="<?php echo (int)$product->id; ?>"<?php echo ($this->facetMatches[(int)$product->id]??true) ? '' : ' hidden'; ?>>
                 <div class="<?php echo $grid ? 'mm-product-card' : 'mm-product-list__inner'; ?>">
                     <?php
                     $photo = explode('#', (string) ($product->image ?? ''), 2)[0];
@@ -79,6 +87,13 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
             </li>
         <?php endforeach; ?>
         </ul>
+        <?php if ($this->facetData['facets']) : ?>
+                <p class="mm-facet-empty" data-mm-facet-empty<?php echo in_array(true,$this->facetMatches,true) ? ' hidden' : ''; ?>>
+                    <?php echo Text::_('COM_MINIMARKET_FILTER_NO_MATCHES'); ?>
+                </p>
+                </div>
+            </div>
+        <?php endif; ?>
     <?php elseif ($this->displayProducts && !$this->children) : ?>
         <p><?php echo Text::_('COM_MINIMARKET_CATEGORY_EMPTY'); ?></p>
     <?php endif; ?>

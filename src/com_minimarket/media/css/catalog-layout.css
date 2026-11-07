@@ -46,3 +46,23 @@
   .com-minimarket-category .mm-product-list__inner { align-items: flex-start; gap: .6rem; }
   .com-minimarket-category .mm-product-list__inner .mm-product-card__media { flex-basis: 4rem; }
 }
+
+/* Component-local responsive catalog facets, no Joomla core overrides. */
+.com-minimarket-category .mm-facet-layout { display:grid; gap:1.5rem; grid-template-columns:minmax(0,1fr); align-items:start; margin-top:1rem; }
+@media (min-width:992px) {
+  .com-minimarket-category .mm-facet-layout { grid-template-columns:minmax(215px,265px) minmax(0,1fr); }
+}
+.com-minimarket-category .mm-facet-results,
+.com-minimarket-category .mm-facet-sidebar { min-width:0; }
+.com-minimarket-category .mm-facet-form { padding:1rem; border:1px solid var(--bs-border-color,rgba(128,128,128,.3)); border-radius:.45rem; }
+.com-minimarket-category .mm-facet-group { padding:.75rem 0; border-top:1px solid var(--bs-border-color,rgba(128,128,128,.25)); }
+.com-minimarket-category .mm-facet-group legend { float:none; width:100%; font-size:1rem; font-weight:600; margin-bottom:.5rem; }
+.com-minimarket-category .mm-facet-choice { display:flex; align-items:center; gap:.5rem; margin:.35rem 0; min-width:0; }
+.com-minimarket-category .mm-facet-choice label { overflow-wrap:anywhere; min-width:0; cursor:pointer; }
+.com-minimarket-category .mm-facet-count { margin-inline-start:auto; color:var(--bs-secondary-color,#777); font-size:.8rem; font-variant-numeric:tabular-nums; }
+.com-minimarket-category .mm-facet-choice--unavailable { opacity:.55; }
+.com-minimarket-category .mm-facet-swatch { width:1rem; height:1rem; display:inline-block; vertical-align:middle; border:1px solid var(--bs-border-color,#aaa); border-radius:50%; }
+.com-minimarket-category .mm-facet-range-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
+.com-minimarket-category .mm-facet-slider { width:100%; }
+.com-minimarket-category [data-mm-facet-product][hidden],
+.com-minimarket-category [data-mm-facet-empty][hidden] { display:none !important; }

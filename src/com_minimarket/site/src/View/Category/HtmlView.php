@@ -12,6 +12,7 @@ use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Site\Helper\SeoHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 use MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions;
+use MiniMarket\Component\Minimarket\Site\Service\FacetedCatalog;
 
 final class HtmlView extends BaseHtmlView
 {
@@ -20,6 +21,9 @@ final class HtmlView extends BaseHtmlView
     public array $children = [];
     public bool $displayProducts = true;
     public array $productListOptions = [];
+    public array $facetData = ['facets'=>[], 'facts'=>[], 'skus'=>[]];
+    public array $facetSelection = [];
+    public array $facetMatches = [];
 
     public function display($tpl = null)
     {
@@ -48,6 +52,22 @@ final class HtmlView extends BaseHtmlView
                 $id, $display['show_products'], $display['show_bundles'],
                 $display['show_descendant_products'], $display['show_descendant_bundles']
             ) : [];
+        // Query all public facts for this exact list in bounded batches.
+        if ($this->products) {
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $this->facetData=FacetedCatalog::build(
+                $db,$this->products,(int)$options->get('inventory_enabled',1)===1);
+            $raw=Factory::getApplication()->input->get('mmf',[],'array');
+            $this->facetSelection=FacetedCatalog::selection(
+                is_array($raw)?$raw:[],$this->facetData['facets']);
+            foreach ($this->products as $product) {
+                $pid=(int)$product->id;
+                $this->facetMatches[$pid]=FacetedCatalog::matches(
+                    $this->facetData['facts'][$pid]??[],
+                    $this->facetData['skus'][$pid]??[],
+                    $this->facetData['facets'],$this->facetSelection);
+            }
+        }
         $document = $this->getDocument();
         $metaTitle = trim((string) ($category->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $category->title);
@@ -61,7 +81,9 @@ final class HtmlView extends BaseHtmlView
             $document->setDescription($metaDescription);
         }
         $robots = (string) ($category->meta_robots ?? '');
-        if (in_array($robots, ['index,follow', 'noindex,follow', 'noindex,nofollow'], true)) {
+        if (FacetedCatalog::active($this->facetSelection)) {
+            $document->setMetaData('robots','noindex,follow');
+        } elseif (in_array($robots, ['index,follow', 'noindex,follow', 'noindex,nofollow'], true)) {
             $document->setMetaData('robots', $robots);
         }
         $document->setMetaData('og:type', 'website', 'property');
@@ -85,7 +107,9 @@ final class HtmlView extends BaseHtmlView
             ->registerAndUseStyle('com_minimarket.badges',
                 'media/com_minimarket/css/badges.css')
             ->registerAndUseStyle('com_minimarket.catalog-layout',
-                'media/com_minimarket/css/catalog-layout.css');
+                'media/com_minimarket/css/catalog-layout.css')
+            ->registerAndUseScript('com_minimarket.faceted-catalog',
+                'media/com_minimarket/js/faceted-catalog.js',[],['defer'=>true]);
 
         parent::display($tpl);
     }
