@@ -60,6 +60,13 @@ namespace MiniMarket\RetiredShortcutTest {
         public function quoteName(string $name):string{return '`'.$name.'`';}
         public function quote(string $value):string{return "'".str_replace("'","''",$value)."'";}
         public function setQuery($query):void{$this->q=$query;}
+        public function loadAssoc():?array{
+            if ($this->q?->table !== '`#__extensions`'
+                || !str_contains(implode(' ',$this->q->clauses),"'com_minimarket'")){
+                throw new \RuntimeException('Grid settings query must target only com_minimarket');
+            }
+            return null; // Component settings absent from this old test fixture.
+        }
         public function loadResult():int{
             if($this->q?->table==='`#__modules`')return 1; // dashboard exists
             if($this->q?->table!=='`#__extensions`')throw new \RuntimeException('Unexpected SQL');

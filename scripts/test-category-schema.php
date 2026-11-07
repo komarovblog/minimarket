@@ -1134,8 +1134,35 @@ verify((int) row($pdo, 'freshcatci_minimarket_categories')['sort_order'] === 0,
 $freshDisplay = $pdo->query("SHOW COLUMNS FROM freshcatci_minimarket_categories")
     ->fetchAll(PDO::FETCH_COLUMN);
 foreach (['show_descendant_products','show_descendant_bundles','product_layout',
-    'cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $field) {
-    verify(in_array($field,$freshDisplay,true),'fresh install has 0.5.58 '.$field);
+    'cards_xs','cards_sm','cards_md','cards_lg','cards_xl','cards_xxl'] as $field) {
+    verify(in_array($field,$freshDisplay,true),'fresh install has current grid tier '.$field);
 }
+foreach (['cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $oldField) {
+    verify(!in_array($oldField,$freshDisplay,true),
+        'fresh install does not retain old responsive column '.$oldField);
+}
+// Upgrade a populated old-schema category: rename each original value rather
+// than dropping and recreating it. Existing commercial data must be untouched.
+$beforeGridCategory=row($pdo,'catci_minimarket_categories');
+$beforeGridProduct=row($pdo,'catci_minimarket_products');
+runSql($pdo,$dir.'updates/mysql/0.5.71.sql','catci_');
+$afterGridCategory=row($pdo,'catci_minimarket_categories');
+foreach (['id','title','alias','parent_id','state','sort_order'] as $field) {
+    verify($beforeGridCategory[$field]===$afterGridCategory[$field],
+        '0.5.71 preserves category field '.$field);
+}
+foreach (['mobile'=>'xs','tablet'=>'md','desktop'=>'lg','wide'=>'xl'] as $before=>$after) {
+    verify($beforeGridCategory['cards_'.$before]===$afterGridCategory['cards_'.$after],
+        '0.5.71 maps '.$before.' -> '.$after);
+}
+verify((int)$afterGridCategory['cards_sm']===-1 &&
+    (int)$afterGridCategory['cards_xxl']===-1,
+    '0.5.71 new breakpoint overrides inherit globally by default');
+foreach (['cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $oldField) {
+    verify(!array_key_exists($oldField,$afterGridCategory),
+        '0.5.71 removes old column '.$oldField);
+}
+verify($beforeGridProduct===row($pdo,'catci_minimarket_products'),
+    '0.5.71 grid schema migration does not modify products');
 
 echo 'CATEGORY_SCHEMA_OK: ' . $checks . " cases\n";
