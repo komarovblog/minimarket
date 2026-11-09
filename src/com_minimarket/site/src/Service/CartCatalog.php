@@ -21,7 +21,8 @@ final class CartCatalog
         $product = $this->repository->getProduct($productId);
         if ($product === null) throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
         $type = (string)($product->product_type ?? 'simple');
-        if (!in_array($type,['simple','bundle'],true)) {
+        if (!in_array($type,['simple','bundle'],true)
+            || (string)($product->delivery_type ?? 'physical') !== 'physical') {
             throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
         }
         if ($type === 'bundle' && $variantId !== 0) {
