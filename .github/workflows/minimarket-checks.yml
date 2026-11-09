@@ -145,6 +145,15 @@ jobs:
           MM_CI_DB_USER: canonci
           MM_CI_DB_PASSWORD: canonical_ci_password
         run: php scripts/test-0-5-73-fresh-mysql84.php
+      - name: Canonical 0.5.73 upgrade from populated legacy tables on MySQL 8.4
+        env:
+          MINIMARKET_CANONICAL_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_canonical73
+          MM_CI_DB_USER: canonci
+          MM_CI_DB_PASSWORD: canonical_ci_password
+        run: php scripts/test-0-5-73-upgrade-mysql84.php
 
   windows-package:
     name: Windows component ZIP
