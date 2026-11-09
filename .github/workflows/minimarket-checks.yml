@@ -206,6 +206,20 @@ jobs:
             throw 'CLEAN_SQL_CONTENT_INVALID'
           }
           Write-Output 'CLEAN_SQL_GENERATOR_WINDOWS_OK'
+      - name: Generate color demo PNG assets on Windows PowerShell
+        shell: powershell
+        run: |
+          $site = Join-Path (Get-Location) 'dist\demo-joomla'
+          New-Item -ItemType Directory -Path $site -Force | Out-Null
+          Set-Content -LiteralPath (Join-Path $site 'configuration.php') -Value '<?php /* test-only */' -Encoding UTF8
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-demo-images.ps1 -SiteRoot $site
+          if ($LASTEXITCODE -ne 0) { throw 'COLOR_DEMO_IMAGE_GENERATION_FAILED' }
+          $pics = @(Get-ChildItem -LiteralPath (Join-Path $site 'images\minimarket') -Filter '*.png')
+          if ($pics.Count -ne 30) { throw "COLOR_DEMO_PNG_COUNT_INCORRECT: $($pics.Count)" }
+          foreach ($picture in $pics) {
+            if ($picture.Length -lt 5000) { throw "COLOR_DEMO_PNG_EMPTY: $($picture.Name)" }
+          }
+          Write-Output 'COLOR_DEMO_IMAGES_WINDOWS_OK: 30 PNG files'
       - name: Get component version for release archive
         id: component_version
         shell: powershell
