@@ -91,3 +91,45 @@ if ((int)$db->query('SELECT @@SESSION.foreign_key_checks')->fetch_row()[0] !== 1
     throw new RuntimeException('MM73_CLEAN_FOREIGN_KEY_CHECKS_NOT_RESTORED');
 }
 echo "MM73_CLEAN_SQL_MYSQL84_PASS: 12 attributes, 52 values, 496 options, 462 scalars\n";
+
+// Additive color-switch demo: execute exactly the same optional SQL supplied
+// to the user (only its USE target differs), then verify photos and SKU links.
+$demoFile = dirname(__DIR__) . '/sample-data/minimarket_demo_color_switch_0_5_73.sql';
+$demoSource = file_get_contents($demoFile);
+if (!is_string($demoSource)) {
+    throw new RuntimeException('MM73_COLOR_DEMO_SOURCE_MISSING');
+}
+$demoSql = str_replace('USE `minimarket`;', 'USE `minimarket_ci_canonical73`;', $demoSource);
+for ($pass = 1; $pass <= 2; $pass++) {
+    try {
+        $db->multi_query($demoSql);
+        do {
+            $result = $db->store_result();
+            if ($result instanceof mysqli_result) $result->free();
+            if (!$db->more_results()) break;
+        } while ($db->next_result());
+    } catch (Throwable $e) {
+        throw new RuntimeException('MM73_COLOR_DEMO_IMPORT_FAIL_PASS_'.$pass.': '.$e->getMessage(), 0, $e);
+    }
+}
+foreach ([
+    "SELECT COUNT(*) FROM nnop3_minimarket_products WHERE id IN (1201,1202)" => 2,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_variants WHERE product_id IN (1201,1202)" => 12,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_images WHERE product_id IN (1201,1202)" => 10,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_image_variants WHERE variant_id BETWEEN 7401 AND 7414" => 24,
+    "SELECT COUNT(*) FROM nnop3_minimarket_variant_value_assignments WHERE variant_id BETWEEN 7401 AND 7414" => 24,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_variants
+       WHERE product_id IN (1201,1202) AND signature=SHA2(selection_json,256)" => 12,
+    "SELECT COUNT(DISTINCT price) FROM nnop3_minimarket_product_variants WHERE product_id=1201" => 1,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_image_variants piv
+      JOIN nnop3_minimarket_product_images pi ON pi.id=piv.image_id
+      JOIN nnop3_minimarket_product_variants v ON v.id=piv.variant_id
+      WHERE piv.is_cover=1 AND v.product_id IN (1201,1202)" => 12,
+] as $query => $expected) {
+    $actual = (int)$db->query($query)->fetch_row()[0];
+    if ($actual !== $expected) {
+        throw new RuntimeException('MM73_COLOR_DEMO_EXPECTED_'.$expected.'_GOT_'.$actual.' SQL: '.$query);
+    }
+}
+echo "MM73_COLOR_DEMO_MYSQL84_PASS: 2 products, 12 SKUs, 10 gallery images, 24 SKU photo links; repeat import OK\n";
+
