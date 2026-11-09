@@ -135,6 +135,12 @@ class com_minimarketInstallerScript extends InstallerScript
      */
     private function retireObsoleteSchemaChecks(DatabaseInterface $db): void
     {
+        // Joomla defines this constant. Standalone options tests do not,
+        // and do not have an installed SQL history to inspect.
+        if (!defined('JPATH_ADMINISTRATOR')) return;
+        $dir = JPATH_ADMINISTRATOR.'/components/com_minimarket/sql/updates/mysql';
+        if (!is_dir($dir)) return;
+
         $db->setQuery(
             $db->getQuery(true)->select('s.version_id')
                 ->from($db->quoteName('#__schemas', 's'))
@@ -161,8 +167,6 @@ class com_minimarketInstallerScript extends InstallerScript
         ));
         if ($db->loadResult()) return;
 
-        $dir = JPATH_ADMINISTRATOR.'/components/com_minimarket/sql/updates/mysql';
-        if (!is_dir($dir)) return;
         $files = glob($dir.'/*.sql');
         if (!$files) return;
         $latest = $dir.'/0.5.73.sql';
