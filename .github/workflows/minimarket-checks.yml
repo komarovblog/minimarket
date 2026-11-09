@@ -177,6 +177,21 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
+      - name: Verify clean catalog SQL generator on Windows PowerShell
+        shell: powershell
+        run: |
+          & .\scripts\build-clean-catalog.ps1 -DbPrefix nnop3_ -DatabaseName minimarket -OutputPath .\dist\minimarket_clean_ci_0.5.73.sql
+          if ($LASTEXITCODE -ne 0) { throw 'CLEAN_SQL_GENERATOR_FAILED' }
+          $sql = Get-Content .\dist\minimarket_clean_ci_0.5.73.sql -Raw -Encoding UTF8
+          if ($sql -notmatch 'DROP TABLE IF EXISTS' -or
+              $sql -notmatch 'CREATE TABLE IF NOT EXISTS' -or
+              $sql -notmatch 'nnop3_minimarket_attribute_values' -or
+              $sql -notmatch "s.version_id = '0.5.73'" -or
+              $sql -match '#__minimarket_' -or
+              $sql -match 'DROP TABLE.*nnop3_users') {
+            throw 'CLEAN_SQL_CONTENT_INVALID'
+          }
+          Write-Output 'CLEAN_SQL_GENERATOR_WINDOWS_OK'
       - name: Get component version for release archive
         id: component_version
         shell: powershell
