@@ -1,6 +1,6 @@
 -- MiniMarket 0.5.73: optional, additive DEMO (no catalog reset).
 -- Import AFTER clean 0.5.73 SQL or a fully updated MiniMarket component.
--- Adds test products 1201/1202, two categories, 13 SKU combinations,
+-- Adds test products 1201/1202, two categories, 12 SKU combinations,
 -- and SKU-specific front/detail photo links. Re-running does not duplicate IDs.
 -- Images are generated separately by scripts/create-demo-images.ps1.
 -- All data is invented for testing. Existing categories/products remain intact.
