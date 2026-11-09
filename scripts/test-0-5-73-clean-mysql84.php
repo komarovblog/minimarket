@@ -16,8 +16,8 @@ if (!is_file($file) || !str_ends_with($file, '.sql')) {
 $sql = file_get_contents($file);
 if (!is_string($sql)
     || !str_contains($sql, 'USE `minimarket_ci_canonical73`;')
-    || !str_contains($sql, 'zz73_minimarket_categories')
-    || str_contains($sql, 'nnop3_minimarket_')
+    || !str_contains($sql, 'nnop3_minimarket_categories')
+    || str_contains($sql, '#__minimarket_')
     || str_contains($sql, 'GREATEST(@@SESSION.group_concat_max_len')) {
     throw new RuntimeException('MM73_CLEAN_SQL_WRONG_TARGET');
 }
@@ -31,19 +31,19 @@ $db = new mysqli(
     (int) (getenv('MM_CI_DB_PORT') ?: 3306)
 );
 $db->set_charset('utf8mb4');
-$db->query('CREATE TABLE IF NOT EXISTS zz73_extensions (
+$db->query('CREATE TABLE IF NOT EXISTS nnop3_extensions (
     extension_id INT NOT NULL PRIMARY KEY,
     type VARCHAR(32) NOT NULL,
     element VARCHAR(128) NOT NULL
 ) ENGINE=InnoDB');
-$db->query('CREATE TABLE IF NOT EXISTS zz73_schemas (
+$db->query('CREATE TABLE IF NOT EXISTS nnop3_schemas (
     extension_id INT NOT NULL PRIMARY KEY,
     version_id VARCHAR(32) NOT NULL
 ) ENGINE=InnoDB');
-$db->query("INSERT INTO zz73_extensions (extension_id,type,element)
+$db->query("INSERT INTO nnop3_extensions (extension_id,type,element)
     VALUES (930073,'component','com_minimarket')
     ON DUPLICATE KEY UPDATE type=VALUES(type),element=VALUES(element)");
-$db->query("INSERT INTO zz73_schemas (extension_id,version_id)
+$db->query("INSERT INTO nnop3_schemas (extension_id,version_id)
     VALUES (930073,'0.5.69')
     ON DUPLICATE KEY UPDATE version_id='0.5.69'");
 
@@ -70,19 +70,19 @@ foreach ([
     'product_attribute_options' => 496,
     'product_attribute_scalars' => 462,
 ] as $name => $expected) {
-    $got = (int) $db->query('SELECT COUNT(*) FROM zz73_minimarket_'.$name)
+    $got = (int) $db->query('SELECT COUNT(*) FROM nnop3_minimarket_'.$name)
         ->fetch_row()[0];
     if ($got !== $expected) {
         throw new RuntimeException("MM73_CLEAN_ROW_COUNT: $name $got != $expected");
     }
 }
-$version = $db->query("SELECT version_id FROM zz73_schemas
+$version = $db->query("SELECT version_id FROM nnop3_schemas
     WHERE extension_id=930073")->fetch_row()[0] ?? '';
 if ($version !== '0.5.73') {
     throw new RuntimeException('MM73_CLEAN_JOOMLA_SCHEMA_MARKER_INCORRECT: '.$version);
 }
 $legacyColumns = $db->query(
-    "SHOW COLUMNS FROM zz73_minimarket_attributes LIKE 'input_mode'"
+    "SHOW COLUMNS FROM nnop3_minimarket_attributes LIKE 'input_mode'"
 )->num_rows;
 if ($legacyColumns) {
     throw new RuntimeException('MM73_CLEAN_LEFT_LEGACY_ATTRIBUTE_COLUMN');
