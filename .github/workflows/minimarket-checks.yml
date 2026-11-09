@@ -173,7 +173,7 @@ jobs:
           MM_CI_DB_USER: canonci
           MM_CI_DB_PASSWORD: canonical_ci_password
         run: |
-          pwsh -NoProfile -File ./scripts/build-clean-catalog.ps1 -DbPrefix zz73_ -DatabaseName minimarket_ci_canonical73 -OutputPath ./clean-ci-73.sql
+          pwsh -NoProfile -File ./scripts/build-clean-catalog.ps1 -DbPrefix nnop3_ -DatabaseName minimarket_ci_canonical73 -OutputPath ./clean-ci-73.sql
           php scripts/test-0-5-73-clean-mysql84.php ./clean-ci-73.sql
 
   windows-package:
