@@ -26,4 +26,17 @@ foreach ($name in $names) {
         (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash) { throw "DESKTOP_HASH_MISMATCH: $name" }
     Write-Output "DESKTOP_FILE_OK: $dst"
 }
+# The one-time, versioned SQL migration is optional: use only when
+# importing SQL before installing the component instead of Joomla auto-upgrade.
+$manualSqlName="minimarket_mysql84_nnop3_upgrade_$versionTag.sql"
+$manualSqlPath=Join-Path (Join-Path $root 'releases') $manualSqlName
+if (Test-Path -LiteralPath $manualSqlPath -PathType Leaf) {
+    $targetSql=Join-Path $DesktopPath $manualSqlName
+    Copy-Item -LiteralPath $manualSqlPath -Destination $targetSql -Force
+    if ((Get-FileHash -LiteralPath $manualSqlPath -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $targetSql -Algorithm SHA256).Hash) {
+        throw "DESKTOP_HASH_MISMATCH: $manualSqlName"
+    }
+    Write-Output "DESKTOP_SQL_UPGRADE_OK: $targetSql"
+}
 Write-Output "MINIMARKET_DESKTOP_RELEASE_OK: $version"

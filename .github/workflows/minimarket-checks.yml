@@ -340,6 +340,9 @@ jobs:
       - name: Catalog import v1 strict package and security checks
         run: php scripts/test-catalog-import.php
 
+      - name: Final MySQL 8.4 manual upgrade equals validated Joomla migration
+        run: php scripts/test-0-5-73-final-upgrade.php
+
       - name: Typed category-scoped product attributes
         run: php scripts/test-product-attributes.php
 
