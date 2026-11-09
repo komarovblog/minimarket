@@ -80,6 +80,9 @@ $initialIntro=$hasCustomDescription
 $initialDescription=$hasCustomDescription
     ? (string)($defaultVariant['description_override']??'')
     : (string)($this->product->description??'');
+$isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physical'
+    && (string)\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket')
+        ->get('shop_type','physical') === 'physical';
 ?>
 <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BREADCRUMB')); ?>">
     <a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CATALOG_MENU_TITLE'); ?></a>
@@ -180,11 +183,11 @@ $initialDescription=$hasCustomDescription
             </div>
             <div class="mm-promo-video__expanded" data-mm-promo-panel hidden>
                 <p><?php echo $this->escape((string)($promoVideo->title ?: $this->product->title)); ?></p>
-                <button type="button" class="btn btn-secondary" disabled
-                        title="<?php echo $this->escape(Text::_('COM_MINIMARKET_CART_NOT_READY')); ?>">
-                    <?php echo Text::_('COM_MINIMARKET_VIDEO_PROMO_BUY'); ?>
-                </button>
-                <p class="small"><?php echo Text::_('COM_MINIMARKET_CART_NOT_READY'); ?></p>
+                <?php if ($isPhysical) : ?>
+                    <a class="btn btn-primary" href="#mm-cart-add-form">
+                        <?php echo Text::_('COM_MINIMARKET_VIDEO_PROMO_BUY'); ?>
+                    </a>
+                <?php endif; ?>
             </div>
         </aside>
     <?php endif; ?>
@@ -310,16 +313,13 @@ $initialDescription=$hasCustomDescription
             : '—'; ?></dd>
     </dl>
     <?php
-    $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physical'
-        && (string)\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket')
-            ->get('shop_type','physical') === 'physical';
     $initialStock = $defaultVariant && (int)($this->product->option_stock_mode??1) !== 0
         ? (int)$defaultVariant['stock'] : (int)$this->product->stock;
     $initialCanBuy = !$this->inventoryEnabled || $initialStock > 0;
     ?>
     <?php if ($isPhysical) : ?>
         <form action="<?php echo $this->escape(RouteHelper::cartAction('add')); ?>"
-              method="post" class="mm-cart-add" data-mm-cart-form>
+              method="post" class="mm-cart-add" id="mm-cart-add-form" data-mm-cart-form>
             <input type="hidden" name="product_id" value="<?php echo (int)$this->product->id; ?>">
             <input type="hidden" name="variant_id" value="<?php echo (int)($defaultVariant['id'] ?? 0); ?>"
                    data-mm-cart-variant>
