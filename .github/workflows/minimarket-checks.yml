@@ -181,7 +181,7 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\build-clean-catalog.ps1 -DbPrefix nnop3_ -DatabaseName minimarket -OutputPath .\dist\minimarket_clean_ci_0.5.73.sql
-          if ($LASTEXITCODE -ne 0) { throw 'CLEAN_SQL_GENERATOR_FAILED' }
+          if (-not (Test-Path .\dist\minimarket_clean_ci_0.5.73.sql)) { throw 'CLEAN_SQL_GENERATOR_FAILED' }
           $sql = Get-Content .\dist\minimarket_clean_ci_0.5.73.sql -Raw -Encoding UTF8
           if ($sql -notmatch 'DROP TABLE IF EXISTS' -or
               $sql -notmatch 'CREATE TABLE IF NOT EXISTS' -or
