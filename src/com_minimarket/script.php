@@ -14,6 +14,53 @@ use Joomla\Database\DatabaseInterface;
  */
 class com_minimarketInstallerScript extends InstallerScript
 {
+    /**
+     * START TRANSACTION is not accepted by MySQL 8.4 as a prepared statement.
+     * Joomla executes SQL upgrade scripts using prepared statements, so begin
+     * the 0.5.73 data migration via Joomla's database driver.
+     */
+    public function preflight($type, $parent)
+    {
+        if (!parent::preflight($type, $parent)) {
+            return false;
+        }
+        if ($type !== 'update') {
+            return true;
+        }
+
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+        $db->setQuery(
+            $db->getQuery(true)
+                ->select('s.version_id')
+                ->from($db->quoteName('#__schemas', 's'))
+                ->join('INNER', $db->quoteName('#__extensions', 'e')
+                    . ' ON s.extension_id = e.extension_id')
+                ->where('e.type = ' . $db->quote('component'))
+                ->where('e.element = ' . $db->quote('com_minimarket'))
+        );
+        $schemaVersion = (string) ($db->loadResult() ?? '');
+        if ($schemaVersion !== '' && version_compare($schemaVersion, '0.5.73', '>=')) {
+            return true;
+        }
+
+        // An interrupted destructive upgrade must be inspected, not replayed.
+        $db->setQuery('SHOW COLUMNS FROM '
+            . $db->quoteName('#__minimarket_attributes') . ' LIKE '
+            . $db->quote('input_mode'));
+        if (!$db->loadResult()) {
+            throw new \RuntimeException(
+                'MiniMarket 0.5.73: legacy attribute columns are already absent '
+                . 'while Joomla schema version is below 0.5.73. '
+                . 'Stop and verify the database backup/schema before retrying.'
+            );
+        }
+
+        // Joomla's 0.5.73.sql COMMIT completes the data-only transaction.
+        // Upgrades with earlier outstanding DDL may implicitly commit first.
+        $db->transactionStart();
+        return true;
+    }
+
     public function postflight($type, $parent)
     {
         if (!in_array($type, ['install', 'update'], true)) {

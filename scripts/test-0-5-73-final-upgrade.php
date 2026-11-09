@@ -12,6 +12,15 @@ if($start===false)throw new RuntimeException('MM73_FINAL_START_MARKER_MISSING');
 $start+=strlen($begin);$last=strpos($manual,$end,$start);
 if($last===false)throw new RuntimeException('MM73_FINAL_END_MARKER_MISSING');
 $reimport=trim(str_replace('nnop3_','#__',substr($manual,$start,$last-$start)));
+if(!str_contains($reimport,'START TRANSACTION;')) {
+    throw new RuntimeException('MM73_MANUAL_TRANSACTION_REQUIRED');
+}
+$reimport=str_replace('START TRANSACTION;',
+    '-- The installer script starts this transaction via the Joomla DB driver.', $reimport);
+if(preg_match('/^\\s*START\\s+TRANSACTION\\s*;/mi', $installer)
+ || !str_contains($installer,'COMMIT;')) {
+    throw new RuntimeException('MM73_PREPARED_TRANSACTION_CONTRACT_FAILED');
+}
 if($reimport!==trim($installer))throw new RuntimeException('MM73_FINAL_SQL_MISMATCH');
 if(!str_contains($manual,"UPDATE nnop3_schemas SET version_id='0.5.73'")
  || !str_contains($manual,'element=\'com_minimarket\''))

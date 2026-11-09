@@ -1,3 +1,15 @@
+# 09.11.2026 — исправление ошибки Joomla prepared statements на 0.5.73
+
+При обновлении в Joomla возникало `This command is not supported in the prepared statement protocol yet`
+из-за `START TRANSACTION` в SQL-обновлении. Старт транзакции переведён в
+`script.php::preflight()` через Joomla DB driver. SQL установщика
+подготовлен к протоколу MySQL 8.4, тестируется через `mysqli::prepare()`.
+Старый ZIP нельзя повторно использовать; после сбоя сверить версию
+`#__schemas` и исходные колонки и иметь резервную копию.
+Отдельный ручной SQL для phpMyAdmin не изменён; это альтернативный путь.
+
+---
+
 # Текущее состояние 09.11.2026 — MiniMarket 0.5.73, завершено
 
 Нормализация характеристик: канонические шесть типов и manual/preset,

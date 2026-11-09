@@ -6,7 +6,7 @@
 CREATE TEMPORARY TABLE mm73_attribute_guard (
     invalid_count INT NOT NULL CHECK (invalid_count = 0)
 ) ENGINE=InnoDB;
-START TRANSACTION;
+-- The installer script starts this transaction via the Joomla DB driver.
 
 -- Do not convert undocumented old data types, sources or numeric presets.
 INSERT INTO mm73_attribute_guard (invalid_count)

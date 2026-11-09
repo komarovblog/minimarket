@@ -25,12 +25,21 @@ function count73u(mysqli $db,string $table):int {
     return (int)$db->query('SELECT COUNT(*) FROM zz73_'.$table)->fetch_row()[0];
 }
 function run73u(mysqli $db,string $sql):void {
-    $db->multi_query($sql);
-    do {
-        $res=$db->store_result();
-        if($res instanceof mysqli_result)$res->free();
-        if(!$db->more_results())break;
-    } while($db->next_result());
+    // Exercise Joomla's prepared protocol, not the permissive multi_query().
+    $parts=preg_split('/;(?=\\s*(?:\\r?\\n|$))/', $sql);
+    if(!is_array($parts))throw new RuntimeException('MM73_SQL_SPLIT_FAILED');
+    foreach($parts as $part) {
+        $statement=trim($part);
+        if($statement==='')continue;
+        $stmt=$db->prepare($statement);
+        try {
+            $stmt->execute();
+            $res=$stmt->get_result();
+            if($res instanceof mysqli_result)$res->free();
+        } finally {
+            $stmt->close();
+        }
+    }
 }
 try {
     $ddl=[
@@ -106,6 +115,7 @@ try {
     yes73(is_string($sql) && str_contains($sql,'DROP TABLE #__minimarket_product_attribute_multi_values'),
         'actual updater contains legacy cleanup');
     $sql=str_replace('#__minimarket_','zz73_',$sql);
+    $db->begin_transaction(); // Equivalent to the installer preflight hook.
     run73u($db,$sql);
     yes73(count73u($db,'attributes')===6,'all attribute IDs retained');
     yes73(count73u($db,'attribute_values')===5,'three text preset IDs materialized');
