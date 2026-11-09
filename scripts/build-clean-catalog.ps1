@@ -32,7 +32,7 @@ if (-not $schema.Contains('CREATE TABLE IF NOT EXISTS `#__minimarket_attributes`
 
 # Use the database selected at the top of the file; do not allow the
 # cumulative seed to silently switch to another database.
-$usePattern = '(?mi)^[ \t]*USE[ \t]+`minimarket`[ \t]*;[ \t]*\r?
+$usePattern = '(?mi)^[ \t]*USE[ \t]+`minimarket`[ \t]*;[ \t]*\r?$'
 if ([regex]::Matches($seed, $usePattern).Count -lt 1) {
     throw 'CLEAN_SQL_UNEXPECTED_SEED_DATABASE_SWITCH'
 }
