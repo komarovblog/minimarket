@@ -34,34 +34,17 @@ if (-not $prefixMatch.Success -or -not $dbMatch.Success) {
 $prefix = $prefixMatch.Groups['v'].Value
 $database = $dbMatch.Groups['v'].Value
 
-# This step creates only missing demonstration pictures and overwrites
-# the 10 dedicated color-test pictures. Never overwrites user-uploaded media.
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'create-demo-images.ps1') -SiteRoot $siteRoot
-if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_DEMO_IMAGE_GENERATION_FAILED' }
-
+# The user already has sample-01.png ... sample-10.png in Joomla.
+# Never create, replace, or copy any media. Fail if a required file is absent.
 $mediaRoot = Join-Path $siteRoot 'images\minimarket'
-$required = @(
-    'sample-11.png','sample-12.png','sample-13.png','sample-14.png',
-    'sample-15.png','sample-16.png','sample-17.png','sample-18.png',
-    'sample-19.png','sample-20.png',
-    'demo-tee-blue-front.png','demo-tee-blue-detail.png',
-    'demo-tee-white-front.png','demo-tee-white-detail.png',
-    'demo-tee-black-front.png','demo-tee-black-detail.png',
-    'demo-mug-white-front.png','demo-mug-white-detail.png',
-    'demo-mug-red-front.png','demo-mug-red-detail.png'
-)
+$required = 1..10 | ForEach-Object { 'sample-{0:D2}.png' -f $_ }
 foreach ($name in $required) {
     $img = Join-Path $mediaRoot $name
     if (-not (Test-Path -LiteralPath $img -PathType Leaf)) {
-        throw "MINIMARKET_DEMO_IMAGE_MISSING: $img"
-    }
-    $data = [System.IO.File]::ReadAllBytes($img)
-    if ($data.Length -lt 5000 -or
-        $data[0] -ne 137 -or $data[1] -ne 80 -or
-        $data[2] -ne 78 -or $data[3] -ne 71) {
-        throw "MINIMARKET_DEMO_IMAGE_INVALID_PNG: $img"
+        throw "MINIMARKET_DEMO_EXISTING_IMAGE_MISSING: $img"
     }
 }
+Write-Output "MINIMARKET_DEMO_EXISTING_IMAGES_OK: 10 files in $mediaRoot"
 
 $source = Join-Path $root 'sample-data\minimarket_demo_color_switch_0_5_73.sql'
 if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
@@ -69,8 +52,10 @@ if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
 }
 $sql = [System.IO.File]::ReadAllText($source,[System.Text.Encoding]::UTF8)
 if (-not $sql.Contains('nnop3_minimarket_product_image_variants') -or
-    -not $sql.Contains('demo-tee-blue-front.png') -or
-    -not $sql.Contains('demo-mug-red-front.png')) {
+    -not $sql.Contains('images/minimarket/sample-01.png') -or
+    -not $sql.Contains('images/minimarket/sample-10.png') -or
+    $sql.Contains('images/minimarket/demo-tee-') -or
+    $sql.Contains('images/minimarket/demo-mug-')) {
     throw 'MINIMARKET_DEMO_SQL_SOURCE_INVALID'
 }
 $sql = $sql.Replace('nnop3_',$prefix)
@@ -84,6 +69,6 @@ if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
 $dest = Join-Path $DesktopPath ("minimarket_demo_color_switch_0.5.73_" + $prefix.TrimEnd('_') + ".sql")
 [System.IO.File]::WriteAllText($dest,$sql,[System.Text.UTF8Encoding]::new($false))
 Write-Output "MINIMARKET_DEMO_SQL_DESKTOP_OK: $dest"
-Write-Output "MINIMARKET_DEMO_IMAGES_READY: $mediaRoot"
-Write-Output 'MINIMARKET_DEMO_VARIANTS_READY: 12 SKUs, 5 colors, 10 photos'
+Write-Output "MINIMARKET_DEMO_EXISTING_IMAGES_REUSED: $mediaRoot"
+Write-Output 'MINIMARKET_DEMO_VARIANTS_READY: 12 SKUs, 5 colors, 10 existing sample photos'
 Write-Output 'MINIMARKET_DEMO_MEDIA_RELEASE_OK: 0.5.73'
