@@ -12,7 +12,7 @@ namespace Joomla\CMS\Filter {
 }
 namespace MiniMarket\SkuV3Smoke {
     \define('_JEXEC',1);
-    foreach (['MediaPath','ProductGallery','ProductVideos','TextPresetRows',
+    foreach (['MediaPath','ProductGallery','ProductVideos',
               'VariantValueGallery','VariantMatrix','ProductVariants'] as $name) {
         require __DIR__.'/../src/com_minimarket/admin/src/Service/'.$name.'.php';
     }
