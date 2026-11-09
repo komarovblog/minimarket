@@ -111,6 +111,7 @@ $controller=$source[$paths[0]];
 check74(str_contains($controller,"Session::checkToken('post')"),'CSRF protected POST');
 check74(str_contains($controller,"getMethod() !== 'POST'"),'no GET mutation');
 check74(str_contains($controller,'assertAvailable('),'server enforces combined stock');
+check74(str_contains($controller,"get('shop_type','physical')"),'other shop modes cannot add');
 check74(!str_contains($controller,'->price'),'client cannot set price');
 check74(str_contains($source[$paths[1]],"'cart'"),'display controller allows cart');
 check74(str_contains($source[$paths[3]],"HTMLHelper::_('form.token')"),'cart update/remove forms have CSRF');

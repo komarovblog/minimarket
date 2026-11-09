@@ -309,6 +309,30 @@ $initialDescription=$hasCustomDescription
                 : ($defaultVariant['stock'] ?? $this->product->stock))
             : '—'; ?></dd>
     </dl>
+    <?php
+    $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physical'
+        && (string)\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket')
+            ->get('shop_type','physical') === 'physical';
+    $initialStock = $defaultVariant && (int)($this->product->option_stock_mode??1) !== 0
+        ? (int)$defaultVariant['stock'] : (int)$this->product->stock;
+    $initialCanBuy = !$this->inventoryEnabled || $initialStock > 0;
+    ?>
+    <?php if ($isPhysical) : ?>
+        <form action="<?php echo $this->escape(RouteHelper::cartAction('add')); ?>"
+              method="post" class="mm-cart-add" data-mm-cart-form>
+            <input type="hidden" name="product_id" value="<?php echo (int)$this->product->id; ?>">
+            <input type="hidden" name="variant_id" value="<?php echo (int)($defaultVariant['id'] ?? 0); ?>"
+                   data-mm-cart-variant>
+            <label><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?>
+                <input class="form-control" type="number" name="quantity" min="1" max="99"
+                       value="1" step="1" required>
+            </label>
+            <?php echo HTMLHelper::_('form.token'); ?>
+            <button type="submit" class="btn btn-primary" data-mm-cart-add
+                    <?php echo $initialCanBuy ? '' : 'disabled'; ?>>
+                <?php echo Text::_('COM_MINIMARKET_CART_ADD'); ?></button>
+        </form>
+    <?php endif; ?>
     <?php if (!empty($this->attributes)) : ?>
         <section class="mm-product-attributes" aria-labelledby="mm-product-attributes-heading">
             <h2 id="mm-product-attributes-heading"><?php echo Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES'); ?></h2>
@@ -403,33 +427,5 @@ $initialDescription=$hasCustomDescription
             <?php endforeach; ?>
         </section>
     <?php endif; ?>
-    <?php
-    $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physical';
-    $initialStock = $defaultVariant && (int)($this->product->option_stock_mode??1) !== 0
-        ? (int)$defaultVariant['stock'] : (int)$this->product->stock;
-    $initialCanBuy = !$this->inventoryEnabled || $initialStock > 0;
-    ?>
-    <?php if ($isPhysical) : ?>
-        <form action="<?php echo $this->escape(RouteHelper::cartAction('add')); ?>"
-              method="post" class="mm-cart-add" data-mm-cart-form>
-            <input type="hidden" name="product_id" value="<?php echo (int)$this->product->id; ?>">
-            <input type="hidden" name="variant_id" value="<?php echo (int)($defaultVariant['id'] ?? 0); ?>"
-                   data-mm-cart-variant>
-            <label><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?>
-                <input class="form-control" type="number" name="quantity" min="1" max="99"
-                       value="1" step="1" required>
-            </label>
-            <?php echo HTMLHelper::_('form.token'); ?>
-            <button type="submit" class="btn btn-primary" data-mm-cart-add
-                    <?php echo $initialCanBuy ? '' : 'disabled'; ?>>
-                <?php echo Text::_('COM_MINIMARKET_CART_ADD'); ?></button>
-        </form>
-    <?php endif; ?>
-    <p class="mm-cart__nav">
-        <a href="<?php echo $this->escape(RouteHelper::cart()); ?>">
-            <?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?>
-            (<?php echo CartState::count(\Joomla\CMS\Factory::getApplication()->getSession()
-                ->get(CartState::SESSION_KEY,[])); ?>)
-        </a>
-    </p>
+    <p class="mm-cart__nav"><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></a></p>
 </article>
