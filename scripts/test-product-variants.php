@@ -14,7 +14,7 @@ namespace Joomla\CMS\Filter {
 namespace MiniMarket\VariantSmoke {
     \define('_JEXEC',1);
     $services=__DIR__.'/../src/com_minimarket/admin/src/Service/';
-    foreach (['MediaPath','TextPresetRows','ProductGallery','ProductVideos',
+    foreach (['MediaPath','ProductGallery','ProductVideos',
               'VariantValueGallery','VariantMatrix','ProductLocalDimensions','ProductVariants'] as $file) {
         require $services.$file.'.php';
     }
