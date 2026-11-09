@@ -54,7 +54,8 @@
       if (photo.cover) add(photo.path, photo.alt);
     }
     if (!hasCover && variant.image) add(variant.image, variant.image_alt);
-    for (const img of baseImages) {
+    // SKU-specific gallery covers suppress the product-wide fallback image.
+    for (const img of (hasCover ? [] : baseImages)) {
       if (!img?.url || seen.has(img.url)) continue;
       seen.add(img.url);
       imgs.push(img);
