@@ -145,3 +145,46 @@ foreach ([
 }
 echo "MM73_COLOR_DEMO_MYSQL84_PASS: 2 products, 12 SKUs, 10 gallery images, 24 SKU photo links; repeat import OK\n";
 
+
+
+// The Windows filesystem repair is gated by this read-only PDO validator.
+// Prove that the canonical database is accepted but a stale schema is refused.
+$guardDir = sys_get_temp_dir() . '/mm73-guard-' . bin2hex(random_bytes(6));
+if (!mkdir($guardDir, 0700)) {
+    throw new RuntimeException('MM73_GUARD_TEST_TMP_DIR_FAIL');
+}
+$guardFile = $guardDir . '/configuration.php';
+$configValues = [
+    'host' => '127.0.0.1',
+    'db' => 'minimarket_ci_canonical73',
+    'user' => getenv('MM_CI_DB_USER') ?: '',
+    'password' => getenv('MM_CI_DB_PASSWORD') ?: '',
+    'dbprefix' => 'nnop3_',
+];
+$configPhp = "<?php\nclass JConfig {\n";
+foreach ($configValues as $property => $value) {
+    $configPhp .= ' public $' . $property . ' = ' . var_export($value, true) . ";\n";
+}
+$configPhp .= "}\n";
+file_put_contents($guardFile, $configPhp);
+$guardCli = dirname(__DIR__) . '/scripts/verify-installed-canonical-073.php';
+$runGuard = static function () use ($guardFile, $guardCli): array {
+    $lines = [];
+    $exit = 1;
+    exec(escapeshellarg(PHP_BINARY).' '.escapeshellarg($guardCli)
+        .' '.escapeshellarg($guardFile).' 2>&1', $lines, $exit);
+    return [$exit, implode("\n", $lines)];
+};
+[$guardExit, $guardOutput] = $runGuard();
+if ($guardExit !== 0 || !str_contains($guardOutput, 'MM73_CANONICAL_DATABASE_VERIFIED')) {
+    throw new RuntimeException('MM73_READONLY_GUARD_REJECTED_CANONICAL: '.$guardOutput);
+}
+$db->query("UPDATE nnop3_schemas SET version_id='0.5.72' WHERE extension_id=930073");
+[$guardExit, $guardOutput] = $runGuard();
+$db->query("UPDATE nnop3_schemas SET version_id='0.5.73' WHERE extension_id=930073");
+if ($guardExit === 0 || !str_contains($guardOutput, 'MM73_SQL_HISTORY_DATABASE_GUARD_FAILED')) {
+    throw new RuntimeException('MM73_READONLY_GUARD_ACCEPTED_LEGACY_SCHEMA');
+}
+unlink($guardFile);
+rmdir($guardDir);
+echo "MM73_JOOMLA_SQL_HISTORY_READONLY_GUARD_MYSQL84_PASS\n";
