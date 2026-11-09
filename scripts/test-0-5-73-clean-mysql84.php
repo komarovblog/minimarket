@@ -101,6 +101,12 @@ if (!is_string($demoSource)) {
 }
 $demoSql = str_replace('USE `minimarket`;', 'USE `minimarket_ci_canonical73`;', $demoSource);
 for ($pass = 1; $pass <= 2; $pass++) {
+    // Recreate old demo-only references and prove the additive import repairs
+    // them without touching the Joomla media directory.
+    if ($pass === 2) {
+        $db->query("UPDATE nnop3_minimarket_products SET image='images/minimarket/demo-tee-blue-front.png' WHERE id=1201");
+        $db->query("UPDATE nnop3_minimarket_product_images SET path='images/minimarket/demo-mug-red-detail.png' WHERE id=12020");
+    }
     try {
         $db->multi_query($demoSql);
         do {
@@ -120,6 +126,12 @@ foreach ([
     "SELECT COUNT(*) FROM nnop3_minimarket_variant_value_assignments WHERE variant_id BETWEEN 7401 AND 7414" => 24,
     "SELECT COUNT(*) FROM nnop3_minimarket_product_variants
        WHERE product_id IN (1201,1202) AND signature=SHA2(selection_json,256)" => 12,
+    "SELECT COUNT(*) FROM nnop3_minimarket_products
+       WHERE id IN (1201,1202) AND image LIKE 'images/minimarket/sample-%.png'" => 2,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_images
+       WHERE product_id IN (1201,1202) AND path LIKE 'images/minimarket/sample-%.png'" => 10,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_images
+       WHERE product_id IN (1201,1202) AND path LIKE 'images/minimarket/demo-%'" => 0,
     "SELECT COUNT(DISTINCT price) FROM nnop3_minimarket_product_variants WHERE product_id=1201" => 1,
     "SELECT COUNT(*) FROM nnop3_minimarket_product_image_variants piv
       JOIN nnop3_minimarket_product_images pi ON pi.id=piv.image_id
