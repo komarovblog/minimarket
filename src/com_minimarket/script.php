@@ -200,7 +200,7 @@ class com_minimarketInstallerScript extends InstallerScript
             throw new \RuntimeException('Cannot write canonical Joomla schema marker');
         }
         foreach ($files as $file) {
-            if ($file !== $latest && !unlink($file)) {
+            if (basename($file) !== '0.5.73.sql' && !unlink($file)) {
                 throw new \RuntimeException('Cannot retire old SQL file '.basename($file));
             }
         }
