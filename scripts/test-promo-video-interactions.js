@@ -72,6 +72,8 @@ const template=fs.readFileSync(path.join(__dirname,'../src/com_minimarket/site/t
 test(template.includes('role="button" tabindex="0" aria-expanded="false"') &&
  template.includes('data-mm-promo-player'),
  'real markup exposes video surface to keyboard and screen readers');
-test(template.includes('COM_MINIMARKET_CART_NOT_READY') &&
- template.includes('disabled'),'buy action does not pretend unfinished cart is available');
+test(template.includes('href="#mm-cart-add-form"') &&
+ template.includes('data-mm-cart-form') &&
+ template.includes('if ($isPhysical) :'),
+ 'promo buy links to the real physical SKU cart form, not a fake checkout');
 console.log('PROMO_VIDEO_DOM_OK: '+checks+' checks');
