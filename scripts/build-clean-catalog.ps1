@@ -72,7 +72,6 @@ DROP TEMPORARY TABLE `_mm73_clean_guard`;
 -- Use a literal: MySQL 8.4 rejects GREATEST() as a SET-variable argument (#1232).
 -- Set before suspending FK checks, so failures cannot leave FK checks off.
 SET SESSION group_concat_max_len = 65535;
-SET @mm73_prior_fk_checks = @@SESSION.FOREIGN_KEY_CHECKS;
 SET FOREIGN_KEY_CHECKS = 0;
 SELECT GROUP_CONCAT(
     CONCAT('`', REPLACE(TABLE_NAME, '`', '``'), '`')
@@ -86,7 +85,7 @@ SET @mm73_drop_catalog = IF(@mm73_old_catalog_tables IS NULL,
 PREPARE mm73_clean_drop FROM @mm73_drop_catalog;
 EXECUTE mm73_clean_drop;
 DEALLOCATE PREPARE mm73_clean_drop;
-SET FOREIGN_KEY_CHECKS = @mm73_prior_fk_checks;
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Canonical 0.5.73 fresh install schema:
 '@
