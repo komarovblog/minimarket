@@ -183,7 +183,9 @@ jobs:
           & .\scripts\build-clean-catalog.ps1 -DbPrefix nnop3_ -DatabaseName minimarket -OutputPath .\dist\minimarket_clean_ci_0.5.73.sql
           if (-not (Test-Path .\dist\minimarket_clean_ci_0.5.73.sql)) { throw 'CLEAN_SQL_GENERATOR_FAILED' }
           $sql = Get-Content .\dist\minimarket_clean_ci_0.5.73.sql -Raw -Encoding UTF8
-          if ($sql -notmatch 'DROP TABLE IF EXISTS' -or
+          if ($sql -notmatch 'SET SESSION group_concat_max_len = 65535;' -or
+              $sql -match 'group_concat_max_len\s*=\s*GREATEST' -or
+              $sql -notmatch 'DROP TABLE IF EXISTS' -or
               $sql -notmatch 'CREATE TABLE IF NOT EXISTS' -or
               $sql -notmatch 'nnop3_minimarket_attribute_values' -or
               $sql -notmatch "s.version_id = '0.5.73'" -or
