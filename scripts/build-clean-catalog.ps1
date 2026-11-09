@@ -69,9 +69,11 @@ DROP TEMPORARY TABLE `_mm73_clean_guard`;
 
 -- Delete only the existing MiniMarket tables, including old legacy tables.
 -- Other Joomla tables and unrelated components are never included.
+-- Use a literal: MySQL 8.4 rejects GREATEST() as a SET-variable argument (#1232).
+-- Set before suspending FK checks, so failures cannot leave FK checks off.
+SET SESSION group_concat_max_len = 65535;
 SET @mm73_prior_fk_checks = @@SESSION.FOREIGN_KEY_CHECKS;
 SET FOREIGN_KEY_CHECKS = 0;
-SET SESSION group_concat_max_len = GREATEST(@@SESSION.group_concat_max_len, 65535);
 SELECT GROUP_CONCAT(
     CONCAT('`', REPLACE(TABLE_NAME, '`', '``'), '`')
     ORDER BY TABLE_NAME SEPARATOR ', '
