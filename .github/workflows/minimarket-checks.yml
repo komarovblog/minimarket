@@ -218,6 +218,21 @@ jobs:
             if (-not $sql.Contains($name)) { throw "COLOR_DEMO_MISSING_EXISTING_MEDIA_REFERENCE: $name" }
           }
           Write-Output 'COLOR_DEMO_REUSES_10_EXISTING_IMAGES_OK'
+      - name: Validate Joomla DB-check repair script on Windows
+        shell: powershell
+        run: |
+          $token = $null
+          $errors = $null
+          $path = Join-Path (Get-Location) 'scripts\repair-joomla-dbcheck-073.ps1'
+          [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$token, [ref]$errors) | Out-Null
+          if ($errors.Count -ne 0) { throw "MM73_REPAIR_POWERSHELL_SYNTAX_FAILED: $($errors[0])" }
+          $contents = Get-Content $path -Raw -Encoding UTF8
+          if ($contents -notmatch 'verify-installed-canonical-073.php' -or
+              $contents -notmatch 'Get-FileHash' -or
+              $contents -notmatch 'MM73_NO_DATABASE_CHANGES') {
+            throw 'MM73_REPAIR_GUARDS_MISSING'
+          }
+          Write-Output 'MM73_JOOMLA_SQL_HISTORY_REPAIR_WINDOWS_SYNTAX_PASS'
       - name: Get component version for release archive
         id: component_version
         shell: powershell
