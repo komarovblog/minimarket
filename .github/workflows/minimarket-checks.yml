@@ -154,6 +154,15 @@ jobs:
           MM_CI_DB_USER: canonci
           MM_CI_DB_PASSWORD: canonical_ci_password
         run: php scripts/test-0-5-73-upgrade-mysql84.php
+      - name: Manual SQL includes pre-0.5.71 category migration and is repeatable
+        env:
+          MINIMARKET_CANONICAL_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_canonical73
+          MM_CI_DB_USER: canonci
+          MM_CI_DB_PASSWORD: canonical_ci_password
+        run: php scripts/test-0-5-73-manual-grid-mysql84.php
 
   windows-package:
     name: Windows component ZIP

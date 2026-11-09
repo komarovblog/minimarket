@@ -4,6 +4,32 @@
 -- Joomla has automatically applied 0.5.73 via Extensions -> Install.
 -- MySQL DDL is not transactional; failure after COMMIT may require backup restore.
 -- Only #__minimarket_* tables are migrated; Joomla #__schemas is version-marked.
+-- BEGIN GRID PRELUDE
+-- If the installation is still at 0.5.69, apply the 0.5.71 Bootstrap grid
+-- before marking the schema at 0.5.73. Already migrated installs are skipped.
+SET @mm73_old_grid = (
+ SELECT COUNT(*) FROM information_schema.COLUMNS
+ WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='nnop3_minimarket_categories'
+ AND COLUMN_NAME IN ('cards_mobile','cards_tablet','cards_desktop','cards_wide')
+);
+SET @mm73_new_grid = (
+ SELECT COUNT(*) FROM information_schema.COLUMNS
+ WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='nnop3_minimarket_categories'
+ AND COLUMN_NAME IN ('cards_xs','cards_sm','cards_md','cards_lg','cards_xl','cards_xxl')
+);
+CREATE TEMPORARY TABLE mm73_grid_guard (invalid_count INT NOT NULL CHECK (invalid_count=0)) ENGINE=InnoDB;
+INSERT INTO mm73_grid_guard(invalid_count)
+VALUES (IF((@mm73_old_grid=4 AND @mm73_new_grid=0) OR
+           (@mm73_old_grid=0 AND @mm73_new_grid=6),0,1));
+DROP TEMPORARY TABLE mm73_grid_guard;
+SET @mm73_grid_sql = IF(@mm73_old_grid=4,
+ 'ALTER TABLE `nnop3_minimarket_categories` RENAME COLUMN `cards_mobile` TO `cards_xs`, RENAME COLUMN `cards_tablet` TO `cards_md`, RENAME COLUMN `cards_desktop` TO `cards_lg`, RENAME COLUMN `cards_wide` TO `cards_xl`, ADD COLUMN `cards_sm` TINYINT NOT NULL DEFAULT -1 AFTER `cards_xs`, ADD COLUMN `cards_xxl` TINYINT NOT NULL DEFAULT -1 AFTER `cards_xl`',
+ 'SELECT 1');
+PREPARE mm73_grid_stmt FROM @mm73_grid_sql;
+EXECUTE mm73_grid_stmt;
+DEALLOCATE PREPARE mm73_grid_stmt;
+-- END GRID PRELUDE
+
 -- BEGIN SHARED MIGRATION
 -- MiniMarket 0.5.73: FINAL canonical attribute storage, MySQL 8.0/8.4.
 -- Joomla replaces nnop3_ with the configured prefix. Never run this file manually
