@@ -26,7 +26,7 @@ function count73u(mysqli $db,string $table):int {
 }
 function run73u(mysqli $db,string $sql):void {
     // Exercise Joomla's prepared protocol, not the permissive multi_query().
-    $parts=preg_split('/;(?=\\s*(?:\\r?\\n|$))/', $sql);
+    $parts=preg_split('/;(?=\s*(?:\r?\n|$))/', $sql);
     if(!is_array($parts))throw new RuntimeException('MM73_SQL_SPLIT_FAILED');
     foreach($parts as $part) {
         $statement=trim($part);

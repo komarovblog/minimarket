@@ -17,7 +17,7 @@ if(!str_contains($reimport,'START TRANSACTION;')) {
 }
 $reimport=str_replace('START TRANSACTION;',
     '-- The installer script starts this transaction via the Joomla DB driver.', $reimport);
-if(preg_match('/^\\s*START\\s+TRANSACTION\\s*;/mi', $installer)
+if(preg_match('/^\s*START\s+TRANSACTION\s*;/mi', $installer)
  || !str_contains($installer,'COMMIT;')) {
     throw new RuntimeException('MM73_PREPARED_TRANSACTION_CONTRACT_FAILED');
 }
