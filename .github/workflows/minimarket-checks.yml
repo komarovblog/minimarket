@@ -164,6 +164,18 @@ jobs:
           MM_CI_DB_PASSWORD: canonical_ci_password
         run: php scripts/test-0-5-73-manual-grid-mysql84.php
 
+      - name: Execute actual 0.5.73 clean SQL on disposable MySQL 8.4 database
+        env:
+          MINIMARKET_CANONICAL_CI: '1'
+          MM_CI_DB_HOST: 127.0.0.1
+          MM_CI_DB_PORT: '3306'
+          MM_CI_DB_DATABASE: minimarket_ci_canonical73
+          MM_CI_DB_USER: canonci
+          MM_CI_DB_PASSWORD: canonical_ci_password
+        run: |
+          pwsh -NoProfile -File ./scripts/build-clean-catalog.ps1 -DbPrefix zz73_ -DatabaseName minimarket_ci_canonical73 -OutputPath ./clean-ci-73.sql
+          php scripts/test-0-5-73-clean-mysql84.php ./clean-ci-73.sql
+
   windows-package:
     name: Windows component ZIP
     runs-on: windows-latest
