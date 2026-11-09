@@ -50,14 +50,14 @@ if ($defaultVariant) {
         $add((string)$defaultVariant['image'],
              (string)($defaultVariant['image_alt'] ?: $this->product->title));
     }
-    if ($productCover) $add($cover, $productCover['alt']);
+    if ($productCover && !$specialCover) $add($cover, $productCover['alt']);
     foreach ($defaultVariant['gallery'] ?? [] as $photo) {
         $add((string)$photo['path'], (string)($photo['alt'] ?: $this->product->title));
     }
     foreach ($defaultVariant['photos'] ?? [] as $photo) {
         $add((string)$photo['path'], (string)($photo['alt'] ?: $this->product->title));
     }
-    $baseImages = $productCover ? [$productCover] : [];
+    $baseImages = $productCover && !$specialCover ? [$productCover] : [];
 } else {
     if ($productCover) $images[$cover] = $productCover;
     foreach ($this->gallery as $photo) {
