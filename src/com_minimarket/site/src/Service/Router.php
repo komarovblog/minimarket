@@ -61,6 +61,10 @@ final class Router implements RouterInterface
             unset($query['view']);
             return [];
         }
+        if ($view === 'cart') {
+            unset($query['view']);
+            return ['cart'];
+        }
 
         if (!\in_array($view, ['category', 'product'], true) || empty($query['id'])) {
             return [];
@@ -102,6 +106,10 @@ final class Router implements RouterInterface
         }
 
         if (\count($segments) === 1) {
+            if ((string)$segments[0] === 'cart') {
+                $segments = [];
+                return ['view'=>'cart'];
+            }
             // Temporary legacy compatibility; 301 redirects need separate tests.
             $matches = [];
 

@@ -34,6 +34,19 @@ final class RouteHelper
         return Route::_($route, false);
     }
 
+    public static function cart(): string
+    {
+        return Route::_('index.php?option=com_minimarket&view=cart', false);
+    }
+
+    public static function cartAction(string $action): string
+    {
+        if (!\in_array($action,['add','update','remove'],true)) {
+            throw new \InvalidArgumentException('Invalid cart action');
+        }
+        return Route::_('index.php?option=com_minimarket&task=cart.'.$action, false);
+    }
+
     public static function category(int $id): string
     {
         return Route::_('index.php?option=com_minimarket&view=category&id=' . $id, false);

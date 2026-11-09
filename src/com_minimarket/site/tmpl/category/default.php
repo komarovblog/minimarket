@@ -12,6 +12,13 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
 </nav>
 <section class="com-minimarket-category">
     <h1><?php echo $this->escape($this->category->title); ?></h1>
+    <p class="mm-cart__nav">
+    <a href="<?php echo $this->escape(RouteHelper::cart()); ?>">
+        <?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?> (<?php echo \MiniMarket\Component\Minimarket\Site\Service\CartState::count(
+            \Joomla\CMS\Factory::getApplication()->getSession()->get(
+            \MiniMarket\Component\Minimarket\Site\Service\CartState::SESSION_KEY, [])); ?>)
+    </a>
+</p>
     <?php
     $image = explode('#', (string) ($this->category->image ?? ''), 2)[0];
     $safeImage = str_starts_with($image, 'images/') && !str_contains($image, '..')

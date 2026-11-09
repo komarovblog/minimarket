@@ -8,6 +8,8 @@
   try { baseImages = JSON.parse(root.dataset.mmGalleryBase || '[]'); } catch (_) {}
   if (!Array.isArray(variants) || !variants.length) return;
   const selects = Array.from(root.querySelectorAll('[data-mm-variant-axis]'));
+  const cartVariant = document.querySelector('[data-mm-cart-variant]');
+  const cartButton = document.querySelector('[data-mm-cart-add]');
   const startId = Number(root.dataset.mmSelected || 0);
   let lastSelected = variants.find(v => v.id === startId) || variants[0];
   const details = {
@@ -196,6 +198,8 @@
       }
     }
     lastSelected = selected;
+    if (cartVariant) cartVariant.value = String(selected.id);
+    if (cartButton) cartButton.disabled = !canOrder(selected);
     selects.forEach(select => {
       select.value = selected.selection[select.dataset.mmVariantAxis] || '';
     });

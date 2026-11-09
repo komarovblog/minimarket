@@ -1,0 +1,67 @@
+<?php
+\defined('_JEXEC') or die;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
+use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
+use MiniMarket\Component\Minimarket\Site\Service\CartState;
+?>
+<section class="mm-cart">
+    <h1><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></h1>
+    <p><a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_CONTINUE'); ?></a></p>
+    <?php if (!$this->cart['lines']) : ?>
+        <p><?php echo Text::_('COM_MINIMARKET_CART_EMPTY'); ?></p>
+    <?php else : ?>
+        <?php if (!$this->cart['available']) : ?>
+            <div class="alert alert-warning" role="alert"><?php echo Text::_(
+                $this->cart['error'] ?: 'COM_MINIMARKET_CART_NOT_AVAILABLE'); ?></div>
+        <?php endif; ?>
+        <ul class="mm-cart__lines list-unstyled">
+        <?php foreach ($this->cart['lines'] as $line) : ?>
+            <li class="mm-cart__line">
+                <?php if ($line['image']) : ?>
+                    <img src="<?php echo $this->escape(Uri::root().$line['image']); ?>" alt=""
+                         width="96" height="96" loading="lazy">
+                <?php endif; ?>
+                <div class="mm-cart__info">
+                    <?php if ($line['valid']) : ?>
+                        <a href="<?php echo $this->escape(RouteHelper::product((int)$line['product_id'])); ?>">
+                            <?php echo $this->escape($line['title']); ?></a>
+                        <?php if ($line['sku'] !== '') : ?><div class="small"><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?>:
+                            <?php echo $this->escape($line['sku']); ?></div><?php endif; ?>
+                        <div><?php echo Text::_('COM_MINIMARKET_CART_UNIT_PRICE'); ?>:
+                            <?php echo CartState::format($line['unit_cents']); ?>
+                            <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></div>
+                    <?php else : ?>
+                        <strong><?php echo Text::_('COM_MINIMARKET_CART_NOT_AVAILABLE'); ?></strong>
+                    <?php endif; ?>
+                    <div class="mm-cart__controls">
+                        <form action="<?php echo $this->escape(RouteHelper::cartAction('update')); ?>" method="post">
+                            <input type="hidden" name="product_id" value="<?php echo (int)$line['product_id']; ?>">
+                            <input type="hidden" name="variant_id" value="<?php echo (int)$line['variant_id']; ?>">
+                            <label><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?>
+                                <input class="form-control" name="quantity" type="number"
+                                    min="1" max="99" step="1" value="<?php echo (int)$line['quantity']; ?>" required>
+                            </label>
+                            <?php echo HTMLHelper::_('form.token'); ?>
+                            <button class="btn btn-outline-primary" type="submit"><?php echo Text::_('COM_MINIMARKET_CART_UPDATE'); ?></button>
+                        </form>
+                        <form action="<?php echo $this->escape(RouteHelper::cartAction('remove')); ?>" method="post">
+                            <input type="hidden" name="product_id" value="<?php echo (int)$line['product_id']; ?>">
+                            <input type="hidden" name="variant_id" value="<?php echo (int)$line['variant_id']; ?>">
+                            <?php echo HTMLHelper::_('form.token'); ?>
+                            <button class="btn btn-outline-danger" type="submit"><?php echo Text::_('COM_MINIMARKET_CART_REMOVE'); ?></button>
+                        </form>
+                    </div>
+                </div>
+                <strong><?php echo CartState::format($line['line_cents']); ?>
+                    <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong>
+            </li>
+        <?php endforeach; ?>
+        </ul>
+        <p class="mm-cart__total"><strong><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?>:
+            <?php echo CartState::format($this->cart['total_cents']); ?>
+            <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></p>
+        <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CART_CHECKOUT_NEXT'); ?></p>
+    <?php endif; ?>
+</section>

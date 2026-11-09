@@ -8,6 +8,13 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
 ?>
 <section class="com-minimarket-catalog">
     <h1><?php echo $this->escape($this->catalogTitle); ?></h1>
+    <p class="mm-cart__nav">
+    <a href="<?php echo $this->escape(RouteHelper::cart()); ?>">
+        <?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?> (<?php echo \MiniMarket\Component\Minimarket\Site\Service\CartState::count(
+            \Joomla\CMS\Factory::getApplication()->getSession()->get(
+            \MiniMarket\Component\Minimarket\Site\Service\CartState::SESSION_KEY, [])); ?>)
+    </a>
+</p>
 
     <?php if ($this->showCategories) : ?>
         <section class="com-minimarket-catalog__categories">

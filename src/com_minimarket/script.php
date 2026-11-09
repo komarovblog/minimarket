@@ -149,7 +149,9 @@ class com_minimarketInstallerScript extends InstallerScript
                 ->where('e.type=' . $db->quote('component'))
                 ->where('e.element=' . $db->quote('com_minimarket'))
         );
-        if ((string)($db->loadResult() ?? '') !== '0.5.73') {
+        $schemaVersion = (string)($db->loadResult() ?? '');
+        if (version_compare($schemaVersion, '0.5.73', '<')
+            || version_compare($schemaVersion, '0.5.74', '>')) {
             return;
         }
 
@@ -169,17 +171,17 @@ class com_minimarketInstallerScript extends InstallerScript
 
         $files = glob($dir.'/*.sql');
         if (!$files) return;
-        $latest = $dir.'/0.5.73.sql';
+        $latest = $dir.'/'.$schemaVersion.'.sql';
         if (!is_file($latest)) return;
         foreach ($files as $file) {
             $filename = basename($file, '.sql');
             if (!preg_match('/^\d+(?:\.\d+){2}$/D', $filename)
-                || version_compare($filename, '0.5.73', '>')) {
+                || version_compare($filename, $schemaVersion, '>')) {
                 // Future or foreign schema files must never be retired.
                 return;
             }
         }
-        $marker = "-- MiniMarket 0.5.73 canonical baseline for Joomla Database Maintenance.\n"
+        $marker = "-- MiniMarket ".$schemaVersion." canonical baseline for Joomla Database Maintenance.\n"
             . "-- Prior migration files are archived outside sql/updates/mysql.\n"
             . "-- Upgrade SQL remains available in the versioned project repository.\n"
             . "SELECT 1;\n";
@@ -204,7 +206,7 @@ class com_minimarketInstallerScript extends InstallerScript
             throw new \RuntimeException('Cannot write canonical Joomla schema marker');
         }
         foreach ($files as $file) {
-            if (basename($file) !== '0.5.73.sql' && !unlink($file)) {
+            if (basename($file) !== $schemaVersion.'.sql' && !unlink($file)) {
                 throw new \RuntimeException('Cannot retire old SQL file '.basename($file));
             }
         }

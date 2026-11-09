@@ -1,0 +1,120 @@
+<?php
+namespace MiniMarket\Component\Minimarket\Site\Service;
+\defined('_JEXEC') or die;
+
+use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
+
+/** All cart quotes are reread from published server data (never from a form). */
+final class CartCatalog
+{
+    private CatalogRepository $repository;
+
+    public function __construct(private DatabaseInterface $db)
+    {
+        $this->repository = new CatalogRepository($db);
+    }
+
+    /** @return array{product_id:int,variant_id:int,title:string,sku:string,image:string,unit_cents:int,stock:int,type:string} */
+    public function quote(int $productId,int $variantId): array
+    {
+        $product = $this->repository->getProduct($productId);
+        if ($product === null) throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
+        $type = (string)($product->product_type ?? 'simple');
+        if (!in_array($type,['simple','bundle'],true)) {
+            throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
+        }
+        if ($type === 'bundle' && $variantId !== 0) {
+            throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
+        }
+        $sku = (string)($product->sku ?? '');
+        $image = (string)($product->image ?? '');
+        $title = (string)$product->title;
+        $stock = (int)$product->stock;
+        if ($type === 'simple') {
+            $options = $this->repository->getProductVariants($productId,(int)$product->category_id);
+            $items = $options['items'] ?? [];
+            if ($items && $variantId === 0) {
+                throw new \DomainException('COM_MINIMARKET_CART_CHOOSE_VARIANT');
+            }
+            if ($variantId > 0) {
+                $found = null;
+                foreach ($items as $variant) {
+                    if ((int)$variant['id'] === $variantId) { $found = $variant; break; }
+                }
+                if ($found === null) throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
+                $sku = (string)$found['sku'];
+                $stock = (int)($product->option_stock_mode ?? 1) === 0
+                    ? (int)$product->stock : (int)$found['stock'];
+                $cover = '';
+                foreach ($found['gallery'] ?? [] as $photo) {
+                    if (!empty($photo['cover'])) { $cover = (string)$photo['path']; break; }
+                }
+                $image = $cover ?: (string)($found['image'] ?: $image);
+                $parts = [];
+                foreach ($found['selection'] as $axis => $value) {
+                    foreach ($options['axes'][$axis]['options'] ?? [] as $option) {
+                        if ($option['value'] === $value) {
+                            $parts[] = (string)$option['title']; break;
+                        }
+                    }
+                }
+                if ($parts) $title .= ' — '.implode(', ',$parts);
+            }
+        }
+        $image = explode('#',$image,2)[0];
+        if (!preg_match('~^images/[a-zA-Z0-9_./ -]+\.(?:png|jpe?g|gif|webp|avif)$~iD',$image)
+            || str_contains($image,'..') || str_contains($image,'//')) $image = '';
+        return [
+            'product_id'=>$productId, 'variant_id'=>$variantId,
+            'title'=>$title, 'sku'=>$sku, 'image'=>$image, 'stock'=>$stock,
+            'type'=>$type, 'unit_cents'=>CartState::cents((string)$product->price),
+        ];
+    }
+
+    /** @return array{lines:array,total_cents:int,units:int,available:bool,error:string} */
+    public function details(array $state,bool $inventoryEnabled): array
+    {
+        $lines=[]; $total=0; $quantity=0; $rows=[];
+        foreach (CartState::normalize($state) as $key=>$qty) {
+            [$productId,$variantId] = array_map('intval',explode(':',$key));
+            try {
+                $line = $this->quote($productId,$variantId);
+                $line['valid'] = true;
+                $total += $line['unit_cents']*$qty;
+                $rows[] = ['product_id'=>$productId,'variant_id'=>$variantId,'quantity'=>$qty];
+            } catch (\DomainException) {
+                $line = ['product_id'=>$productId,'variant_id'=>$variantId,
+                    'title'=>'#'.$productId,'sku'=>'','image'=>'','stock'=>0,
+                    'type'=>'invalid','unit_cents'=>0,'valid'=>false];
+            }
+            $line['quantity'] = $qty;
+            $line['key'] = $key;
+            $line['line_cents'] = $line['unit_cents']*$qty;
+            $lines[] = $line;
+            $quantity += $qty;
+        }
+        $error = '';
+        $available = count($rows) === count($lines);
+        if ($available) {
+            try {
+                CartStock::assertAvailable($rows, BundleStock::snapshot($this->db), $inventoryEnabled);
+            } catch (\DomainException $exception) {
+                $available = false; $error = $exception->getMessage();
+            }
+        } else {
+            $error = 'COM_MINIMARKET_CART_NOT_AVAILABLE';
+        }
+        return ['lines'=>$lines,'total_cents'=>$total,'units'=>$quantity,
+            'available'=>$available,'error'=>$error];
+    }
+
+    /** Re-validate whole cart, including shared stock and nested bundle items. */
+    public function assertAvailable(array $cart,bool $inventoryEnabled): void
+    {
+        $details = $this->details($cart,$inventoryEnabled);
+        if (!$details['available']) {
+            throw new \DomainException($details['error'] ?: 'COM_MINIMARKET_CART_NOT_AVAILABLE');
+        }
+    }
+}

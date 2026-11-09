@@ -283,6 +283,9 @@ jobs:
             | xargs -0 -n 1 php -l > /dev/null
           echo "PHP_LINT_OK"
 
+      - name: MiniMarket cart 0.5.74 state, bundles and UI contract
+        run: php scripts/test-0-5-74-cart.php
+
       - name: Router regression tests
         run: php scripts/test-router.php
 
