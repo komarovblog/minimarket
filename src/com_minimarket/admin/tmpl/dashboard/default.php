@@ -108,7 +108,11 @@ $sections = [
                             <a class="mm-dashboard-tile text-decoration-none"
                                href="<?php echo AdminEntityLinks::view($item['view']); ?>">
                                 <div class="mm-dashboard-tile-top">
-                                    <?php if ($item['view'] === 'bundles') : ?>
+                                    <?php if ($item['view'] === 'deliveries') : ?>
+                                        <svg class="mm-dashboard-icon mm-dashboard-icon--delivery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="<?php echo htmlspecialchars(Text::_('COM_MINIMARKET_DASHBOARD_DELIVERIES'),ENT_QUOTES,'UTF-8'); ?>">
+                                            <path d="M3 6h11v12H3zM14 10h4l3 4v4h-7M5 18a2 2 0 1 0 4 0M16 18a2 2 0 1 0 4 0M3 10h11"/>
+                                        </svg>
+                                    <?php elseif ($item['view'] === 'bundles') : ?>
                                         <svg class="mm-dashboard-icon mm-dashboard-icon--bundle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                                             <path d="M12 2 17 5 12 8 7 5 12 2ZM7 5v6l5 3 5-3V5M12 8v6"/>
                                             <path d="m6 12 5 3-5 3-5-3 5-3ZM1 15v5l5 3 5-3v-5M6 18v5"/>

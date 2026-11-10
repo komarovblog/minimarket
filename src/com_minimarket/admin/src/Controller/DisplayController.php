@@ -32,12 +32,12 @@ final class DisplayController extends BaseController
                 ['defer'=>true]
             );
 
-        if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order'], true)) {
+        if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order', 'deliveries'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);
         }
 
         // Keep the proven M0 dashboard without introducing a dummy Model.
-        if (in_array($viewName, ['dashboard','import','feeds','feed','orders','order'],true)) {
+        if (in_array($viewName, ['dashboard','import','feeds','feed','orders','order','deliveries'],true)) {
             if(in_array($viewName,['feeds','feed'],true)) {
                 \Joomla\CMS\Factory::getApplication()->getDocument()->getWebAssetManager()
                     ->registerAndUseStyle('com_minimarket.feed-editor',
