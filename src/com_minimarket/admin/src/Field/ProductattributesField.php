@@ -68,6 +68,7 @@ final class ProductattributesField extends FormField
                 continue;
             }
             $type = $def['type'];
+            $source = (string) ($def['value_source'] ?? 'manual');
             $value = $selected[$id] ?? ($selected[(string) $id] ?? '');
             $values = is_array($value) ? array_map('intval', $value) : [(int) $value];
             // List data is stored as value IDs even when the field is single-
@@ -114,7 +115,6 @@ final class ProductattributesField extends FormField
                 . '" data-mm-attribute-incompatible>'
                 . $escape(Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INCOMPATIBLE')) . '</div>';
 
-            $source = (string) ($def['value_source'] ?? 'manual');
             if ($source === 'preset') {
                 // Modern dictionaries always store stable value IDs.
                 // Single choices are dropdowns, multiple choices checkboxes.
