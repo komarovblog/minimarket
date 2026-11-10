@@ -132,6 +132,15 @@
     let timer;
     const delayed=()=>{clearTimeout(timer);timer=setTimeout(()=>update(true),160);};
     form.addEventListener('change',event=>{
+      const control=event.target.closest('[data-mm-facet-value]');
+      if (control && control.type==='checkbox') {
+        const group=control.closest('[data-mm-facet]');
+        if (group?.dataset.mmFacetMultiple==='0' && control.checked) {
+          for (const other of group.querySelectorAll('[data-mm-facet-value]')) {
+            if (other!==control) other.checked=false;
+          }
+        }
+      }
       const slider=event.target.closest('[data-mm-facet-slider]');
       if (slider) {
         const group=slider.closest('[data-mm-facet]');

@@ -36,15 +36,17 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
                         <strong><?php echo Text::_('COM_MINIMARKET_CART_NOT_AVAILABLE'); ?></strong>
                     <?php endif; ?>
                     <div class="mm-cart__controls">
-                        <form action="<?php echo $this->escape(RouteHelper::cartAction('update')); ?>" method="post">
+                        <form action="<?php echo $this->escape(RouteHelper::cartAction('update')); ?>" method="post" data-mm-cart-quantity-form>
                             <input type="hidden" name="product_id" value="<?php echo (int)$line['product_id']; ?>">
                             <input type="hidden" name="variant_id" value="<?php echo (int)$line['variant_id']; ?>">
                             <label><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?>
                                 <input class="form-control" name="quantity" type="number"
-                                    min="1" max="99" step="1" value="<?php echo (int)$line['quantity']; ?>" required>
+                                    min="1" max="<?php echo max(1,(int)$line['max_quantity']); ?>"
+                                    step="1" value="<?php echo (int)$line['quantity']; ?>" required
+                                    data-mm-cart-quantity>
                             </label>
                             <?php echo HTMLHelper::_('form.token'); ?>
-                            <button class="btn btn-outline-primary" type="submit"><?php echo Text::_('COM_MINIMARKET_CART_UPDATE'); ?></button>
+                            <noscript><button class="btn btn-outline-primary" type="submit"><?php echo Text::_('COM_MINIMARKET_CART_UPDATE'); ?></button></noscript>
                         </form>
                         <form action="<?php echo $this->escape(RouteHelper::cartAction('remove')); ?>" method="post">
                             <input type="hidden" name="product_id" value="<?php echo (int)$line['product_id']; ?>">

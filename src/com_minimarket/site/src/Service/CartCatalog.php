@@ -9,6 +9,40 @@ use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 final class CartCatalog
 {
     private CatalogRepository $repository;
+    private ?array $snapshot = null;
+
+    private function snapshot(): array
+    {
+        return $this->snapshot ??= BundleStock::snapshot($this->db);
+    }
+
+    /** Exact stock limit after accounting for every OTHER cart line. */
+    public function maxQuantity(array $state,int $productId,int $variantId,bool $inventoryEnabled): int
+    {
+        $this->quote($productId,$variantId);
+        if (!$inventoryEnabled) return CartState::MAX_QUANTITY;
+        $others=CartState::normalize($state);
+        unset($others[CartState::key($productId,$variantId)]);
+        $rows=[];
+        foreach ($others as $key=>$qty) {
+            [$pid,$vid]=array_map('intval',explode(':',$key));
+            $this->quote($pid,$vid);
+            $rows[]=['product_id'=>$pid,'variant_id'=>$vid,'quantity'=>$qty];
+        }
+        $lo=0;$hi=CartState::MAX_QUANTITY;
+        while ($lo<$hi) {
+            $mid=intdiv($lo+$hi+1,2);
+            try {
+                CartStock::assertAvailable(array_merge($rows,[[
+                    'product_id'=>$productId,'variant_id'=>$variantId,'quantity'=>$mid
+                ]]),$this->snapshot(),true);
+                $lo=$mid;
+            } catch (\DomainException) {
+                $hi=$mid-1;
+            }
+        }
+        return $lo;
+    }
 
     public function __construct(private DatabaseInterface $db)
     {
@@ -99,13 +133,24 @@ final class CartCatalog
         $available = count($rows) === count($lines);
         if ($available) {
             try {
-                CartStock::assertAvailable($rows, BundleStock::snapshot($this->db), $inventoryEnabled);
+                CartStock::assertAvailable($rows, $this->snapshot(), $inventoryEnabled);
             } catch (\DomainException $exception) {
                 $available = false; $error = $exception->getMessage();
             }
         } else {
             $error = 'COM_MINIMARKET_CART_NOT_AVAILABLE';
         }
+        foreach ($lines as &$line) {
+            $line['max_quantity']=0;
+            if ($line['valid']) {
+                try {
+                    $line['max_quantity']=$this->maxQuantity(
+                        $state,(int)$line['product_id'],(int)$line['variant_id'],$inventoryEnabled
+                    );
+                } catch (\DomainException) { /* Removed/unpublished lines remain removable. */ }
+            }
+        }
+        unset($line);
         return ['lines'=>$lines,'total_cents'=>$total,'units'=>$quantity,
             'available'=>$available,'error'=>$error];
     }

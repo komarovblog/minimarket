@@ -32,8 +32,11 @@ audit(str_contains($edit,"renderField('badge_sale_display')")
  && str_contains($edit,"renderField('badge_benefit_display')"),
  'badge format fields do not render');
 $catalog=file_get_contents($r.'site/src/Service/CatalogRepository.php');
-audit(substr_count($catalog,"quoteName('p.badge_benefit_display')")===3 &&
- substr_count($catalog,"quoteName('p.bundle_discount_pct')")===3,
+audit(substr_count($catalog,"quoteName('p.badge_benefit_display')")===2 &&
+ substr_count($catalog,"quoteName('p.bundle_discount_pct')")===2 &&
+ str_contains($catalog,"'badge_benefit_display'") &&
+ str_contains($catalog,"'bundle_discount_pct'") &&
+ str_contains($catalog,"fn($field)=>$this->db->quoteName('p.'.$field)"),
  'catalog/category/product reads omit price badge fields');
 $front=file_get_contents($r.'site/tmpl/product/default.php');
 $selector=file_get_contents($r.'media/js/variants.js');

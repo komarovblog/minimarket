@@ -27,6 +27,7 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
     ?>
         <fieldset class="mm-facet-group" data-mm-facet="<?php echo $escape($id); ?>"
                   data-mm-facet-mode="<?php echo $escape($mode); ?>"
+                  data-mm-facet-multiple="<?php echo $facet['multiple']?'1':'0'; ?>"
                   data-mm-facet-type="<?php echo $escape($facet['type']); ?>">
             <legend><?php echo $escape($caption); ?>
                 <small class="mm-facet-count" data-mm-facet-group-count></small>
@@ -78,7 +79,9 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
                        aria-label="<?php echo $escape($caption.' '.Text::_('COM_MINIMARKET_FILTER_SEARCH')); ?>">
                 <?php foreach ($facet['choices'] as $i=>$choice):
                     $checked=in_array($choice['value'],$chosen,true);
-                    $multiple=$facet['multiple'];$kind=$multiple?'checkbox':'radio';
+                    $multiple=$facet['multiple'];
+                    $kind=($multiple || in_array($mode,['dropdown','values'],true))
+                        ?'checkbox':'radio';
                     $fieldId='mm-facet-'.$id.'-'.$i;
                 ?>
                     <div class="mm-facet-choice" data-mm-facet-choice-row>

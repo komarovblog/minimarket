@@ -31,6 +31,25 @@ final class CartController extends BaseController
         $variantId = $app->input->post->getInt('variant_id',0);
         $quantity = $mode === 'remove' ? 0 : $app->input->post->getInt('quantity',1);
         try {
+            if ($mode !== 'remove') {
+                $requested=max(1,(int)$quantity);
+                $catalog=new CartCatalog(Factory::getContainer()->get(DatabaseInterface::class));
+                $inventory=(int)ComponentHelper::getParams('com_minimarket')
+                    ->get('inventory_enabled',1)===1;
+                $max=$catalog->maxQuantity($cart,$productId,$variantId,$inventory);
+                if ($max<1) throw new \DomainException('COM_MINIMARKET_CART_STOCK_ERROR');
+                $target=$mode==='add'
+                    ?($cart[CartState::key($productId,$variantId)]??0)+$requested
+                    :$requested;
+                if ($target>$max) {
+                    $quantity=$mode==='add'?$max-($cart[CartState::key($productId,$variantId)]??0):$max;
+                    $app->enqueueMessage(Text::sprintf('COM_MINIMARKET_CART_CLAMPED',$max),'warning');
+                } else $quantity=$requested;
+                // Existing line was already at its available maximum.
+                if ($mode==='add' && $quantity<=0) {
+                    throw new \DomainException('COM_MINIMARKET_CART_STOCK_ERROR');
+                }
+            }
             if ($mode !== 'remove' && (string)ComponentHelper::getParams('com_minimarket')
                 ->get('shop_type','physical') !== 'physical') {
                 throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');

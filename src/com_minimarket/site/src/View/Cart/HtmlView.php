@@ -27,8 +27,11 @@ final class HtmlView extends BaseHtmlView
         $document->setTitle(Text::_('COM_MINIMARKET_CART_TITLE'));
         $document->setMetaData('robots','noindex,nofollow');
         $app->setHeader('Cache-Control','private, no-store',true);
-        $document->getWebAssetManager()->registerAndUseStyle(
-            'com_minimarket.cart','media/com_minimarket/css/cart.css');
+        $assets=$document->getWebAssetManager();
+        $assets->registerAndUseStyle('com_minimarket.cart',
+                'media/com_minimarket/css/cart.css')
+            ->registerAndUseScript('com_minimarket.cart',
+                'media/com_minimarket/js/cart.js',[],['defer'=>true]);
         parent::display($tpl);
     }
 }
