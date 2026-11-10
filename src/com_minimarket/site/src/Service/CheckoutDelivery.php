@@ -95,7 +95,7 @@ final class CheckoutDelivery
         $city=trim((string)($input['delivery_city']??''));
         $address=trim(strip_tags((string)($input['delivery_address']??'')));
         if ($city==='' || mb_strlen($city)>120 || mb_strlen($address)<5
-            || mb_strlen($address)>512 || preg_match('/[\x00-\x1f<>]/u',$address)) {
+            || mb_strlen($address)>512 || preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u',$address)) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_ADDRESS_INVALID');
         }
         $key=mb_strtolower($city,'UTF-8');

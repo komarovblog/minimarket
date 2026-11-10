@@ -87,6 +87,8 @@ $ok(str_contains($config,'name="delivery_rate_source"')
  && str_contains($config,'name="delivery_city_rates"')
  && str_contains($config,'name="payment_on_receipt_enabled"'),'delivery and payment settings');
 $controller=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
+$ok(str_contains($controller,"CheckoutSettings::mode(\$params)==='sms' && (int)\$app->getIdentity()->id<1"),
+ 'SMS mode blocks only guests until SMS service is connected');
 $ok(str_contains($controller,'CheckoutDelivery::quote')
  && str_contains($controller,'CheckoutSettings::mode')
  && str_contains($controller,'CheckoutSettings::fields'),'server checkout wiring');

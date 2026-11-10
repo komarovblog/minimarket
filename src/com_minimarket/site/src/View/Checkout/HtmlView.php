@@ -40,7 +40,7 @@ final class HtmlView extends BaseHtmlView
             $this->paymentMethods=CheckoutDelivery::payments($params);
             $this->cityRates=CheckoutDelivery::rates($params);
             $this->pickupAddress=(string)($this->deliveryMethods['pickup']['address']??'');
-            if (CheckoutSettings::mode($params)==='sms') {
+            if (CheckoutSettings::mode($params)==='sms' && (int)$app->getIdentity()->id<1) {
                 $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_SMS_PENDING');
             } elseif (!$this->deliveryMethods || !$this->paymentMethods) {
                 $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_METHODS_MISSING');
