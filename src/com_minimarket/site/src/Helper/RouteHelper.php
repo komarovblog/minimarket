@@ -68,6 +68,11 @@ final class RouteHelper
         return Route::_('index.php?option=com_minimarket&task=cart.'.$action, false);
     }
 
+    public static function seoFilter(int $id):string
+    {
+        return Route::_('index.php?option=com_minimarket&view=seofilter&id='.(int)$id,false);
+    }
+
     public static function category(int $id): string
     {
         return Route::_('index.php?option=com_minimarket&view=category&id=' . $id, false);

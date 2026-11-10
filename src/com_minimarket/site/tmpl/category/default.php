@@ -12,7 +12,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CATALOG_MENU_TITLE'); ?></a>
 </nav>
 <section class="com-minimarket-category">
-    <h1><?php echo $this->escape($this->category->title); ?></h1>
+    <h1><?php echo $this->escape($this->seoHeading??$this->category->title); ?></h1>
     <p class="mm-cart__nav"><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></a></p>
     <?php
     $image = explode('#', (string) ($this->category->image ?? ''), 2)[0];
@@ -24,13 +24,15 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
              alt="<?php echo $this->escape((string) ($this->category->image_alt ?: $this->category->title)); ?>"
              loading="lazy" class="com-minimarket-category__image">
     <?php endif; ?>
-    <?php if ($this->productListOptions['category_intro'] &&
-        trim((string) ($this->category->introtext ?? '')) !== '') : ?>
-        <div class="com-minimarket-category__intro"><?php echo InputFilter::getInstance()->clean((string) $this->category->introtext, 'HTML'); ?></div>
+    <?php
+        $categoryIntro=$this->seoIntro??(string)($this->category->introtext??'');
+        $categoryDescription=$this->seoDescription??(string)($this->category->description??'');
+    ?>
+    <?php if ($this->productListOptions['category_intro'] && trim($categoryIntro)!=='') : ?>
+        <div class="com-minimarket-category__intro"><?php echo InputFilter::getInstance()->clean($categoryIntro,'HTML'); ?></div>
     <?php endif; ?>
-    <?php if ($this->productListOptions['category_description'] &&
-        (string) $this->category->description !== '') : ?>
-        <div class="com-minimarket-category__description"><?php echo InputFilter::getInstance()->clean((string) $this->category->description, 'HTML'); ?></div>
+    <?php if ($this->productListOptions['category_description'] && trim($categoryDescription)!=='') : ?>
+        <div class="com-minimarket-category__description"><?php echo InputFilter::getInstance()->clean($categoryDescription,'HTML'); ?></div>
     <?php endif; ?>
 
     <?php if ($this->children) : ?>

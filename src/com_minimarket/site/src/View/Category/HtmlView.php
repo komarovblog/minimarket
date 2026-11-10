@@ -14,9 +14,12 @@ use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 use MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions;
 use MiniMarket\Component\Minimarket\Site\Service\FacetedCatalog;
 
-final class HtmlView extends BaseHtmlView
+class HtmlView extends BaseHtmlView
 {
     public object $category;
+    public ?string $seoHeading=null;
+    public ?string $seoIntro=null;
+    public ?string $seoDescription=null;
     public array $products = [];
     public array $categoryAttributeRows = [];
     public array $categoryVariantOptions = [];

@@ -18,7 +18,7 @@ final class SeoHelper
 {
     public static function setCanonical(HtmlDocument $document, string $view, int $id = 0, int $page = 1): void
     {
-        if (!\in_array($view, ['catalog', 'category', 'product'], true)) {
+        if (!\in_array($view, ['catalog', 'category', 'product', 'seofilter'], true)) {
             throw new \InvalidArgumentException('Unknown MiniMarket SEO view');
         }
 

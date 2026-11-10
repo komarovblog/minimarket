@@ -61,6 +61,14 @@ final class Router implements RouterInterface
             unset($query['view']);
             return [];
         }
+        if ($view === 'seofilter' && isset($query['id'])) {
+            $id=filter_var($query['id'],FILTER_VALIDATE_INT,['options'=>['min_range'=>1]]);
+            if ($id===false) return [];
+            $record=$this->getPublished('seofilter',(int)$id);
+            if ($record===null)return [];
+            unset($query['view'],$query['id']);
+            return ['seo',$record->alias.'-'.(int)$id];
+        }
         if ($view === 'cart') {
             unset($query['view']);
             return ['cart'];
@@ -103,6 +111,11 @@ final class Router implements RouterInterface
         if (\count($segments) === 2) {
             $view = (string) $segments[0];
 
+            if ($view==='seo') {
+                $id=$this->parseSlug((string)$segments[1],'seofilter');
+                $segments=[];
+                return ['view'=>'seofilter','id'=>$id];
+            }
             if (!\in_array($view, ['category', 'product'], true)) {
                 throw new \RuntimeException('MiniMarket route not found', 404);
             }
@@ -228,7 +241,16 @@ final class Router implements RouterInterface
 
     private function getPublished(string $view, int $id): ?object
     {
-        if ($view === 'category') {
+        if ($view==='seofilter') {
+            $query=$this->db->getQuery(true)
+                ->select([$this->db->quoteName('s.id'),$this->db->quoteName('s.alias')])
+                ->from($this->db->quoteName('#__minimarket_seo_filters','s'))
+                ->join('INNER',$this->db->quoteName('#__minimarket_categories','c')
+                    .' ON c.id=s.category_id')
+                ->where('s.id='.(int)$id)
+                ->where('s.state=1')
+                ->where('c.state=1');
+        } elseif ($view === 'category') {
             $query = $this->db->getQuery(true)
                 ->select([$this->db->quoteName('id'), $this->db->quoteName('alias')])
                 ->from($this->db->quoteName('#__minimarket_categories'))
