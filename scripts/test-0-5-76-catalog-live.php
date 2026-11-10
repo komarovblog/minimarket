@@ -13,6 +13,13 @@ $opts=$menu->xpath("//field[@name='products_per_page']/option");
 $values=array_map(static fn($node)=>(string)$node['value'],$opts);
 mm76Catalog($values===['0','10','20','30','50'],
     'menu has global inherit and all accepted card counts');
+$repository=(string)file_get_contents($root.'site/src/Service/CatalogRepository.php');
+foreach (['products_per_page','filter_price_mode','filter_sku_mode','filter_stock_mode'] as $column) {
+    mm76Catalog(str_contains($repository,"'".$column."'"),
+        'category query selects override '.$column);
+}
+mm76Catalog(str_contains($repository,'min(50,$limit)'),
+    '50-item pages are not cut to the old 48-item limit');
 $view=(string)file_get_contents($root.'site/src/View/Catalog/HtmlView.php');
 mm76Catalog(str_contains($view,"category_products_per_page")
     && str_contains($view,'[10, 20, 30, 50]'), 'global store limit inherited');
