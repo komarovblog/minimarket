@@ -58,7 +58,7 @@ $local=simplexml_load_file($root.'admin/forms/category.xml');
 check71($global!==false && $local!==false,'Joomla XML parses');
 foreach ($defaults as $size=>$default) {
     $key='category_cards_'.$size;$short='cards_'.$size;
-    $gf=$global->xpath('//fieldset[@name="categories"]/field[@name="'.$key.'"]');
+    $gf=$global->xpath('//fieldset[@name="display"]/field[@name="'.$key.'"]');
     $cf=$local->xpath('//fieldset[@name="display"]/field[@name="'.$short.'"]');
     check71(count($gf)===1 && count($cf)===1,'matching global/category field '.$size);
     check71((string)$gf[0]['type']==='Gridcards' &&
