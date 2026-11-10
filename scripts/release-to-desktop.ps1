@@ -33,7 +33,7 @@ $version = [string]$manifest.extension.version
 if ($version -notmatch '^\d+\.\d+\.\d+$') {
     throw "MINIMARKET_INVALID_VERSION: $version"
 }
-$demo = Join-Path $root 'sample-data\minimarket_demo_gallery_filters_0_5_78.sql'
+$demo = Join-Path $root 'sample-data\minimarket_demo_gallery_filters_0_5_79.sql'
 if ($version -ne '0.5.79' -or -not (Test-Path -LiteralPath $demo -PathType Leaf)) {
     throw "MINIMARKET_DEMO_SQL_NOT_READY_FOR_VERSION: $version"
 }
@@ -51,7 +51,7 @@ if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
 $deliverables = @(
     @{ Source = Join-Path $root "dist\com_minimarket-$version.zip"; Name = "com_minimarket-$version.zip" },
     @{ Source = Join-Path $root "dist\mod_minimarket_toolbar-$version.zip"; Name = "mod_minimarket_toolbar-$version.zip" },
-    @{ Source = $demo; Name = 'minimarket_demo_gallery_filters_0_5_78.sql' }
+    @{ Source = $demo; Name = 'minimarket_demo_gallery_filters_0_5_79.sql' }
 )
 foreach ($item in $deliverables) {
     if (-not (Test-Path -LiteralPath $item.Source -PathType Leaf)) {
