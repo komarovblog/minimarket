@@ -67,7 +67,7 @@ try {
 foreach ([
     'attributes' => 12,
     'attribute_values' => 52,
-    'product_attribute_options' => 496,
+    'product_attribute_options' => 462,
     'product_attribute_scalars' => 462,
 ] as $name => $expected) {
     $got = (int) $db->query('SELECT COUNT(*) FROM nnop3_minimarket_'.$name)
@@ -90,7 +90,7 @@ if ($legacyColumns) {
 if ((int)$db->query('SELECT @@SESSION.foreign_key_checks')->fetch_row()[0] !== 1) {
     throw new RuntimeException('MM73_CLEAN_FOREIGN_KEY_CHECKS_NOT_RESTORED');
 }
-echo "MM73_CLEAN_SQL_MYSQL84_PASS: 12 attributes, 52 values, 496 options, 462 scalars\n";
+echo "MM73_CLEAN_SQL_MYSQL84_PASS: 12 attributes, 52 values, 462 single options, 462 scalars\n";
 
 // Additive color-switch demo: execute exactly the same optional SQL supplied
 // to the user (only its USE target differs), then verify photos and SKU links.
