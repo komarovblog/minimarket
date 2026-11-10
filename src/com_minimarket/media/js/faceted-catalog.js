@@ -15,6 +15,17 @@
     const empty=layout.querySelector('[data-mm-facet-empty]');
     const counter=form.querySelector('[data-mm-facet-count]');
     const groups=Array.from(form.querySelectorAll('[data-mm-facet]'));
+    // The filter value search changes only the option list, not the catalog.
+    for (const search of form.querySelectorAll('[data-mm-choice-search]')) {
+      search.addEventListener('input',()=>{
+        const needle=search.value.trim().toLocaleLowerCase();
+        const group=search.closest('[data-mm-facet]');
+        for (const row of group?.querySelectorAll('[data-mm-facet-choice-row]')||[]) {
+          const label=row.querySelector('label')?.textContent?.toLocaleLowerCase()||'';
+          row.hidden=!!needle && !label.includes(needle);
+        }
+      });
+    }
 
     const state=()=>{
       const selected={};
@@ -115,6 +126,7 @@
       update(true);
     });
     form.addEventListener('input',event=>{
+      if (event.target.matches('[data-mm-choice-search]')) return;
       const slider=event.target.closest('[data-mm-facet-slider]');
       if (slider) {
         const input=slider.closest('[data-mm-facet]')?.querySelector(
@@ -127,6 +139,10 @@
       event.preventDefault();
       form.reset();
       for (const field of form.querySelectorAll('[data-mm-facet-bound]')) field.value='';
+      for (const search of form.querySelectorAll('[data-mm-choice-search]')) {
+        search.value='';
+        for (const row of search.closest('[data-mm-facet]').querySelectorAll('[data-mm-facet-choice-row]')) row.hidden=false;
+      }
       update(true);
     });
     update(false);

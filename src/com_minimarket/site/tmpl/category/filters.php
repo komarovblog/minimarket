@@ -11,7 +11,7 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
     'skus'=>$this->facetData['skus']],
     JSON_THROW_ON_ERROR|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT);
 ?>
-<form class="mm-facet-form" data-mm-facet-form method="get"
+<form id="mm-facet-form" class="mm-facet-form" data-mm-facet-form method="get"
       action="<?php echo $escape(RouteHelper::category((int)$this->category->id)); ?>">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_FILTER_TITLE'); ?></h2>
     <p class="small text-muted" role="status" data-mm-facet-count
@@ -58,19 +58,21 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
                                aria-label="<?php echo $escape($caption.' '.Text::_($boundary==='min'?'COM_MINIMARKET_FILTER_MIN':'COM_MINIMARKET_FILTER_MAX')); ?>">
                     <?php endforeach; ?>
                 <?php endif; ?>
-            <?php elseif ($mode==='dropdown' && !$facet['multiple']): ?>
-                <select class="form-select form-select-sm"
-                        name="<?php echo $escape($name); ?>">
-                    <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
-                    <?php foreach ($facet['choices'] as $choice): ?>
-                        <option value="<?php echo $escape($choice['value']); ?>"
-                                data-mm-facet-value="<?php echo $escape($choice['value']); ?>"
-                                <?php echo in_array($choice['value'],$chosen,true)?'selected':''; ?>>
-                            <?php echo $escape($choice['label']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
             <?php else: ?>
+                <?php if ($mode==='dropdown' || $mode==='values'): ?>
+                    <details class="mm-facet-dropdown" <?php echo $chosen?'open':''; ?>>
+                        <summary><?php echo $escape($chosen ? implode(', ',array_map(
+                            static function($v) use ($facet):string {
+                                foreach ($facet['choices'] as $item) {
+                                    if ($item['value']===$v) return $item['label'];
+                                }
+                                return (string)$v;
+                            }, $chosen)) : Text::_('COM_MINIMARKET_FILTER_ANY')); ?></summary>
+                <?php endif; ?>
+                <input type="search" class="form-control form-control-sm mm-facet-search"
+                       data-mm-choice-search autocomplete="off"
+                       placeholder="<?php echo $escape(Text::_('COM_MINIMARKET_FILTER_SEARCH')); ?>"
+                       aria-label="<?php echo $escape($caption.' '.Text::_('COM_MINIMARKET_FILTER_SEARCH')); ?>">
                 <?php foreach ($facet['choices'] as $i=>$choice):
                     $checked=in_array($choice['value'],$chosen,true);
                     $multiple=$facet['multiple'];$kind=$multiple?'checkbox':'radio';
@@ -95,6 +97,7 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
                         <small class="mm-facet-count" data-mm-choice-count><?php echo (int)$choice['count']; ?></small>
                     </div>
                 <?php endforeach; ?>
+                <?php if ($mode==='dropdown' || $mode==='values'): ?></details><?php endif; ?>
             <?php endif; ?>
         </fieldset>
     <?php endforeach; ?>

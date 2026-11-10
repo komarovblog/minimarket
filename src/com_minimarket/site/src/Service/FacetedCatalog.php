@@ -76,6 +76,16 @@ final class FacetedCatalog
         }
         if (!$byId) return ['facets'=>[], 'facts'=>[], 'skus'=>[]];
         $productSql=self::ids(array_keys($byId));
+        // Price is a native numeric facet based on the displayed product price.
+        $prices=array_values(array_filter(array_map(
+            static fn($p):float => (float)($p->price??0),$byId
+        ),static fn(float $price):bool=>$price>=0));
+        if ($prices) {
+            $low=min($prices);$high=max($prices);
+            $priceFacet=['id'=>'price','title'=>'Цена','type'=>'number',
+                'mode'=>'slider','unit'=>'','multiple'=>false,'choices'=>[],
+                'min'=>$low,'max'=>$high];
+        }
         $cats=[];$parents=[];
         foreach (self::query($db,'#__minimarket_categories',
             ['id','parent_id','state']) as $cat) {
@@ -102,7 +112,13 @@ final class FacetedCatalog
                 }
             }
         }
-        $facets=[];$definitions=[];
+        $facets=isset($priceFacet)?['price'=>$priceFacet]:[];
+        if (isset($priceFacet)) {
+            foreach ($byId as $pid=>$product) {
+                $facts[$pid]['price']=[(float)($product->price??0)];
+            }
+        }
+        $definitions=[];
         foreach (self::query($db,'#__minimarket_attributes',
             ['id','title','input_type','filter_mode','filter_multiple',
              'number_unit','is_filterable','state'],
