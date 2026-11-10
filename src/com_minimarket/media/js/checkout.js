@@ -29,7 +29,9 @@
                 const option=city?.selectedOptions?.[0];
                 if (option && option.value) {
                     fee=Number.parseInt(option.dataset.feeCents||'0',10);
+                    const freeFrom=Number.parseInt(option.dataset.freeFromCents||'0',10);
                     if (!Number.isSafeInteger(fee)||fee<0) fee=0;
+                    if (freeFrom>0 && items>=freeFrom) fee=0;
                 } else {
                     if (shipping) shipping.textContent='—';
                     if (total) total.textContent='—';

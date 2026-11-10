@@ -8,7 +8,7 @@ namespace MiniMarket\Component\Minimarket\Site\Service;
  */
 final class CheckoutDelivery
 {
-    /** @return array<string,array{city:string,fee_cents:int}> normalized city => tariff */
+    /** @return array<string,array{city:string,fee_cents:int,free_from_cents:int}> normalized city => tariff */
     public static function rates(object $params): array
     {
         $source=trim((string)$params->get('delivery_city_rates',''));
@@ -21,14 +21,16 @@ final class CheckoutDelivery
         foreach ($lines as $line) {
             if (trim($line)==='') continue;
             $parts=explode('|',$line);
-            if (count($parts)!==2) {
+            if (count($parts)<2 || count($parts)>3) {
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
             }
             $city=trim($parts[0]);
             $price=trim($parts[1]);
+            $freeFrom=trim($parts[2]??'');
             if ($city==='' || mb_strlen($city)>120 ||
                 !preg_match('/^[\p{L}\p{N} .\-()]+$/uD',$city) ||
-                !preg_match('/^[0-9]{1,8}(?:[.,][0-9]{1,2})?$/D',$price)) {
+                !preg_match('/^[0-9]{1,8}(?:[.,][0-9]{1,2})?$/D',$price)
+                || ($freeFrom!==''&&!preg_match('/^[0-9]{1,8}(?:[.,][0-9]{1,2})?$/D',$freeFrom))) {
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
             }
             $key=mb_strtolower($city,'UTF-8');
@@ -38,7 +40,9 @@ final class CheckoutDelivery
             $decimal=str_replace(',','.',$price);
             $split=explode('.',$decimal,2);
             $cents=((int)$split[0]*100)+(int)str_pad($split[1]??'',2,'0');
-            $rates[$key]=['city'=>$city,'fee_cents'=>$cents];
+            $partsFree=explode('.',str_replace(',','.',$freeFrom),2);
+            $freeCents=$freeFrom===''?0:((int)$partsFree[0]*100)+(int)str_pad($partsFree[1]??'',2,'0');
+            $rates[$key]=['city'=>$city,'fee_cents'=>$cents,'free_from_cents'=>$freeCents];
         }
         return $rates;
     }
@@ -73,7 +77,7 @@ final class CheckoutDelivery
     }
 
     /** Server-validated order snapshot; never accept any browser-supplied fee. */
-    public static function quote(object $params,array $input): array
+    public static function quote(object $params,array $input,int $itemsTotalCents=0): array
     {
         $methods=self::methods($params);
         $payments=self::payments($params);
@@ -103,8 +107,11 @@ final class CheckoutDelivery
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CITY_INVALID');
         }
         $selected=$methods['courier']['rates'][$key];
+        if($itemsTotalCents<0)throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
+        $fee=$selected['fee_cents'];
+        if($selected['free_from_cents']>0 && $itemsTotalCents>=$selected['free_from_cents'])$fee=0;
         return ['method'=>'courier','city'=>$selected['city'],'address'=>$address,
-            'fee_cents'=>$selected['fee_cents'],'rate_source'=>'directory',
+            'fee_cents'=>$fee,'rate_source'=>'directory',
             'payment_method'=>$payment];
     }
 }

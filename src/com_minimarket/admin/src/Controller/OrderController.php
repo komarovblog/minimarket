@@ -55,7 +55,7 @@ final class OrderController extends BaseController
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
                 'payment_method'=>$app->input->post->get('payment_method','','string'),
-            ]);
+            ],(int)$quote['total_cents']);
             $id=\MiniMarket\Component\Minimarket\Site\Service\OrderStorage::create(
                 $db,$contact,$quote,bin2hex(random_bytes(16)),0,$delivery,'manual');
             $app->enqueueMessage(Text::_('COM_MINIMARKET_MANUAL_ORDER_CREATED'));

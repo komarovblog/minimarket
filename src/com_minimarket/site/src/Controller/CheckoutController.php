@@ -32,8 +32,8 @@ final class CheckoutController extends BaseController
         }
         // SMS mode must never silently save unverified orders. Until a real
         // provider and Joomla account flow exist it remains fail-closed.
-        if ((CheckoutSettings::mode($params)==='email'
-            || (CheckoutSettings::mode($params)==='sms' && (int)$app->getIdentity()->id<1))) {
+        if (in_array(CheckoutSettings::mode($params),['email','sms'],true)
+            && (int)$app->getIdentity()->id<1) {
             $pending=CheckoutSettings::mode($params)==='email'
                 ?'COM_MINIMARKET_CHECKOUT_EMAIL_PENDING':'COM_MINIMARKET_CHECKOUT_SMS_PENDING';
             $app->enqueueMessage(Text::_($pending),'warning');
@@ -70,16 +70,16 @@ final class CheckoutController extends BaseController
                 'email'=>$app->input->post->get('email','','string'),
                 'comment'=>$app->input->post->get('comment','','string'),
             ],$policies);
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $inventory=(int)$params->get('inventory_enabled',1)===1;
+            $quote=(new CartCatalog($db))->details($cart,$inventory);
+            if (!$quote['available']) throw new \DomainException($quote['error']?:'COM_MINIMARKET_CHECKOUT_CART_INVALID');
             $delivery=CheckoutDelivery::quote($params,[
                 'delivery_method'=>$app->input->post->get('delivery_method','','string'),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
                 'payment_method'=>$app->input->post->get('payment_method','','string'),
-            ]);
-            $db=Factory::getContainer()->get(DatabaseInterface::class);
-            $inventory=(int)$params->get('inventory_enabled',1)===1;
-            $quote=(new CartCatalog($db))->details($cart,$inventory);
-            if (!$quote['available']) throw new \DomainException($quote['error']?:'COM_MINIMARKET_CHECKOUT_CART_INVALID');
+            ],(int)$quote['total_cents']);
             $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery);
             $session->set('com_minimarket.checkout.key','');
             $session->set(CartState::SESSION_KEY,[]);

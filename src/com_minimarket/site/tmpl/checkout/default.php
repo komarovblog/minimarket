@@ -91,7 +91,8 @@ $firstPayment=array_key_first($this->paymentMethods);
                                     <option value=""><?php echo Text::_('COM_MINIMARKET_DELIVERY_CHOOSE_CITY'); ?></option>
                                     <?php foreach ($this->cityRates as $rate) : ?>
                                         <option value="<?php echo $this->escape($rate['city']); ?>"
-                                                data-fee-cents="<?php echo (int)$rate['fee_cents']; ?>">
+                                                data-fee-cents="<?php echo (int)$rate['fee_cents']; ?>"
+                                                data-free-from-cents="<?php echo (int)$rate['free_from_cents']; ?>">
                                             <?php echo $this->escape($rate['city']); ?>
                                         </option>
                                     <?php endforeach; ?>
