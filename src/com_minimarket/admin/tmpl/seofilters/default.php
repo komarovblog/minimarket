@@ -3,7 +3,6 @@
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
-use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 ?>
 <section class="mm-admin-panel card card-body">
  <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
@@ -19,7 +18,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
     <td><?php echo (int)$row->id; ?></td>
     <td><?php echo $this->escape($row->title); ?></td>
     <td><?php echo $this->escape($row->category_title); ?></td>
-    <td><a href="<?php echo $this->escape(RouteHelper::seoFilter((int)$row->id)); ?>" target="_blank" rel="noopener noreferrer">/seo/<?php echo $this->escape($row->alias); ?>-<?php echo (int)$row->id; ?></a></td>
+    <td><a href="<?php echo $this->escape(\Joomla\CMS\Uri\Uri::root().'index.php?option=com_minimarket&view=seofilter&id='.(int)$row->id); ?>" target="_blank" rel="noopener noreferrer">/seo/<?php echo $this->escape($row->alias); ?>-<?php echo (int)$row->id; ?></a></td>
     <td>
      <span class="badge bg-<?php echo (int)$row->state===1?'success':'secondary'; ?>"><?php echo Text::_((int)$row->state===1?'COM_MINIMARKET_SEOFILTER_PUBLISHED':'COM_MINIMARKET_SEOFILTER_UNPUBLISHED'); ?></span>
      <?php if($this->canPublish): ?>

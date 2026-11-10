@@ -30,6 +30,21 @@
                description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
+        <field name="mm_commands_note" type="note" label="COM_MINIMARKET_COMMANDS_GROUP"
+               description="COM_MINIMARKET_COMMANDS_GROUP_DESC"/>
+        <field name="offcanvas_cart_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_CART" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-cart"/>
+        <field name="offcanvas_filters_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_FILTERS" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-filters"/>
+        <field name="offcanvas_account_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_ACCOUNT" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-account"/>
+        <field name="offcanvas_menu_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_MENU" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-menu"/>
+
     </fieldset>
     <fieldset name="display" label="COM_MINIMARKET_CONFIG_DISPLAY">
         <field name="mm_display_categories_note" type="note" label="COM_MINIMARKET_DISPLAY_CATEGORIES_SECTION" />
