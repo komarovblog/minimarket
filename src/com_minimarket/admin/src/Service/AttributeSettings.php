@@ -53,7 +53,7 @@ final class AttributeSettings
         $mode = (string) ($attribute->filter_mode ?? 'none');
         $mode = match($mode) {
             'values','swatches','radio','boolean' => 'checkboxes',
-            'text' => 'dropdown',
+            'text' => $type === 'text' ? 'dropdown' : 'text',
             default => $mode,
         };
         $attribute->filter_mode = $mode;
