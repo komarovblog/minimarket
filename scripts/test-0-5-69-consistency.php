@@ -20,7 +20,7 @@ foreach($forms as $entity){
         $entity.' has no sort field in Details');
 }
 $a=simplexml_load_string($read('src/com_minimarket/admin/forms/attribute.xml'));
-foreach(['is_filterable','filter_mode','filter_multiple','filter_planned_notice'] as $field){
+foreach(['is_filterable','filter_mode','filter_multiple','filter_search','filter_rules_help'] as $field){
     ok69(count($a->xpath('/form/fieldset[@name="filter"]/field[@name="'.$field.'"]'))===1,
         'filter '.$field.' separate tab');
 }
