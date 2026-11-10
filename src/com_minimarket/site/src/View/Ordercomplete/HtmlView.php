@@ -26,8 +26,9 @@ final class HtmlView extends BaseHtmlView
             $db->setQuery($q);
             $owner=$db->loadResult();
             if ($owner!==null && $owner!==false
-                && ((int)$owner===0 || ((int)$identity->id>0
-                    && empty($identity->block) && (int)$owner===(int)$identity->id))) {
+                && (((int)$owner===0 && (int)$identity->id===0)
+                    || ((int)$identity->id>0 && empty($identity->block)
+                    && (int)$owner===(int)$identity->id))) {
                 $this->orderId=$id;
             }
         }

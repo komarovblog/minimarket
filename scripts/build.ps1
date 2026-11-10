@@ -60,6 +60,7 @@ $needed = @(
     'admin\sql\updates\mysql\0.5.59.sql',
     'admin\sql\updates\mysql\0.5.73.sql',
     'admin\sql\updates\mysql\0.5.79.sql',
+    'admin\sql\updates\mysql\0.5.80.sql',
     'admin\src\Field\ProductattributesField.php',
     'media\js\product-attributes.js',
     'admin\src\Service\CategoryAttributes.php',
