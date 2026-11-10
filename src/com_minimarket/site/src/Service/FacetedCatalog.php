@@ -344,6 +344,14 @@ final class FacetedCatalog
                     if (is_scalar($value) && $value!=='' && is_numeric((string)$value)
                         && is_finite((float)$value)) $range[$bound]=(float)$value;
                 }
+                // Full min/max bounds are the unfiltered state, not a
+                // permanent constraint and should not create a noindex URL.
+                if (isset($range['min'],$facet['min']) &&
+                    $range['min'] <= (float)$facet['min']) unset($range['min']);
+                if (isset($range['max'],$facet['max']) &&
+                    $range['max'] >= (float)$facet['max']) unset($range['max']);
+                if (isset($range['min'],$range['max']) &&
+                    $range['min'] > $range['max']) continue;
                 if ($range) $out[$id]=$range;
             } else {
                 $items=is_array($data)?array_values($data):[$data];
