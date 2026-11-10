@@ -48,8 +48,11 @@ final class CatalogRepository
     private function filterListingRows(array $rows): array
     {
         if (!$this->inventoryEnabled()) return $rows;
+        // SQL already checks published SKU stock for simple products.
+        // Their base p.stock may legitimately be zero when SKU stock is used.
         return array_values(array_filter($rows,static fn($p):bool=>
-            !isset($p->stock) || (int)$p->stock > 0));
+            ($p->product_type ?? 'simple') !== 'bundle'
+            || !isset($p->stock) || (int)$p->stock > 0));
     }
 
 
