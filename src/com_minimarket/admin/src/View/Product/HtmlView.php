@@ -55,6 +55,9 @@ final class HtmlView extends BaseHtmlView
         Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseScript('com_minimarket.product-badges',
                 'media/com_minimarket/js/product-badges.js',[],['defer'=>true]);
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript('com_minimarket.promo-video-editor',
+                'media/com_minimarket/js/promo-video-editor.js',[],['defer'=>true]);
         $isBundle=($this->item->product_type ?? '')==='bundle'
             || ((int)($this->item->id ?? 0)===0
                 && Factory::getApplication()->input->getCmd('product_type')==='bundle');

@@ -124,6 +124,21 @@ use Joomla\CMS\Component\ComponentHelper;
                 <?php echo $this->form->renderField('variant_dimensions_present'); ?>
                 <?php echo $this->form->renderField('category_option_preview'); ?>
                 <?php echo $this->form->renderField('sku_matrix_payload'); ?>
+            <?php elseif ($section === 'videos') : ?>
+                <?php echo $this->form->renderField('videos_present'); ?>
+                <section class="card mb-3" data-mm-promo-video-editor>
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <strong><?php echo Text::_('COM_MINIMARKET_PROMO_VIDEO_SECTION'); ?></strong>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-mm-promo-toggle>
+                            <?php echo Text::_('COM_MINIMARKET_PROMO_VIDEO_ADD'); ?></button>
+                    </div>
+                    <div class="card-body" data-mm-promo-fields<?php echo empty($this->item->promo_video)?' hidden':''; ?>>
+                        <p class="text-muted small"><?php echo Text::_('COM_MINIMARKET_PROMO_VIDEO_HELP'); ?></p>
+                        <?php echo $this->form->renderField('promo_video'); ?>
+                    </div>
+                </section>
+                <h3 class="h5 mb-3"><?php echo Text::_('COM_MINIMARKET_REGULAR_VIDEOS_SECTION'); ?></h3>
+                <?php echo $this->form->renderField('videos'); ?>
             <?php else : ?>
                 <?php echo $this->form->renderFieldset($section); ?>
                 <?php if ($section === 'bundle' && $isBundle) : ?>

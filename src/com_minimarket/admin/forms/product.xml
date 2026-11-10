@@ -95,6 +95,10 @@
     </fieldset>
     <fieldset name="videos" label="COM_MINIMARKET_PRODUCT_TAB_VIDEOS">
         <field name="videos_present" type="hidden" default="1" filter="int"/>
+        <field name="promo_video" type="subform" label="COM_MINIMARKET_PROMO_VIDEO_SECTION"
+               description="COM_MINIMARKET_PROMO_VIDEO_HELP"
+               formsource="administrator/components/com_minimarket/forms/product_promo_video.xml"
+               multiple="false" filter="array"/>
         <field name="videos" type="subform" label="COM_MINIMARKET_PRODUCT_TAB_VIDEOS"
                description="COM_MINIMARKET_VIDEO_HELP"
                formsource="administrator/components/com_minimarket/forms/product_video.xml"

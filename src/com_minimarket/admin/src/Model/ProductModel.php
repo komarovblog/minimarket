@@ -39,7 +39,13 @@ final class ProductModel extends AdminModel
         $item = parent::getItem($pk);
         if ($item && (int) ($item->id ?? 0) > 0) {
             $item->gallery = ProductGallery::loadFormRows($this->getDatabase(), (int) $item->id);
-            $item->videos = ProductVideos::loadFormRows($this->getDatabase(), (int) $item->id);
+            $allVideos=ProductVideos::loadFormRows($this->getDatabase(), (int)$item->id);
+            $item->videos=[];
+            $item->promo_video=[];
+            foreach ($allVideos as $key=>$row) {
+                if ((int)($row['is_promo']??0)===1) $item->promo_video=$row;
+                else $item->videos[$key]=$row;
+            }
             $item->attribute_values = ProductAttributes::load($this->getDatabase(), (int) $item->id);
             $item->variants = ProductVariants::formRows($this->getDatabase(), (int) $item->id);
             $item->variant_dimensions = ProductLocalDimensions::formRows($this->getDatabase(), (int) $item->id);
@@ -49,6 +55,7 @@ final class ProductModel extends AdminModel
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
+            $item->promo_video = [];
             $item->attribute_values = [];
             $item->variants = [];
             $item->variant_dimensions = [];
@@ -173,8 +180,21 @@ final class ProductModel extends AdminModel
         }
 
         try {
-            $videoRows = $hasVideos ? ProductVideos::normalize($data['videos'] ?? []) : [];
-        } catch (\InvalidArgumentException $error) {
+            $inputRows=$data['videos']??[];
+            if (is_string($inputRows)) $inputRows=json_decode($inputRows,true,512,JSON_THROW_ON_ERROR);
+            if (!is_array($inputRows)) throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
+            $promo=$data['promo_video']??[];
+            if ($promo!==null && $promo!=='' && !is_array($promo)) {
+                throw new \InvalidArgumentException('COM_MINIMARKET_VIDEO_INVALID');
+            }
+            if (is_array($promo) && array_filter([
+                $promo['title']??'',$promo['source']??'',$promo['poster']??'',$promo['media_path']??''
+            ],static fn($value):bool=>trim((string)$value)!=='')) {
+                $promo['is_promo']=1;
+                $inputRows[]=$promo;
+            }
+            $videoRows=$hasVideos ? ProductVideos::normalize($inputRows) : [];
+        } catch (\InvalidArgumentException | \JsonException $error) {
             $this->setError(Text::_('COM_MINIMARKET_VIDEO_INVALID'));
             return false;
         }
