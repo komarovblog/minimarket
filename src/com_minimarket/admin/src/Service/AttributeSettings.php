@@ -6,13 +6,15 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service;
 final class AttributeSettings
 {
     public const TYPES = ['text','number','editor','boolean','document','color'];
+    // Visual presentation, not selection cardinality. Legacy aliases remain
+    // accepted only to permit editing older saved attributes before migration.
     public const FILTERS = [
-        'text' => ['none','text','values','checkboxes','dropdown'],
-        'number' => ['none','range','slider','checkboxes','dropdown'],
+        'text' => ['none','dropdown','checkboxes','values','text'],
+        'number' => ['none','range','slider','dropdown','checkboxes'],
         'editor' => ['none'],
-        'boolean' => ['none','boolean'],
+        'boolean' => ['none','dropdown','checkboxes','boolean'],
         'document' => ['none'],
-        'color' => ['none','swatches','checkboxes','radio','dropdown'],
+        'color' => ['none','dropdown','checkboxes','swatches','radio'],
     ];
 
     public static function decimal(string $value): bool
@@ -48,23 +50,29 @@ final class AttributeSettings
         if (!in_array($attribute->color_display, ['both','swatch'], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
-        $attribute->filter_mode = (string) ($attribute->filter_mode ?? 'none');
+        $mode = (string) ($attribute->filter_mode ?? 'none');
+        $mode = match($mode) {
+            'values','swatches','radio','boolean' => 'checkboxes',
+            'text' => 'dropdown',
+            default => $mode,
+        };
+        $attribute->filter_mode = $mode;
         $attribute->filter_multiple = (int) ($attribute->filter_multiple ?? 0);
-        if (!in_array($attribute->filter_mode, self::FILTERS[$type], true)
-            || !in_array($attribute->filter_multiple, [0,1], true)) {
+        $attribute->filter_search = (int) ($attribute->filter_search ?? 0);
+        if (!in_array($mode, self::FILTERS[$type], true)
+            || !in_array($attribute->filter_multiple, [0,1], true)
+            || !in_array($attribute->filter_search, [0,1], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
-        if ((int) ($attribute->is_filterable ?? 0) === 1
-            && in_array($type, ['editor','document'], true)) {
-            return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
+        $attribute->is_filterable = $mode === 'none' ? 0 : 1;
+        if ($mode === 'none' || in_array($mode, ['range','slider'], true)
+            || $type === 'boolean') {
+            $attribute->filter_multiple = 0;
         }
-        if ((int) ($attribute->is_filterable ?? 0) === 0) {
-            $attribute->filter_mode = 'none';
-            $attribute->filter_multiple = 0;
-        } elseif (in_array($attribute->filter_mode, ['checkboxes','swatches'], true)) {
-            $attribute->filter_multiple = 1;
-        } elseif (!in_array($attribute->filter_mode, ['values','dropdown'], true)) {
-            $attribute->filter_multiple = 0;
+        // Search is a separate presentation option for textual choices.
+        if (!in_array($mode, ['checkboxes','dropdown'], true)
+            || !in_array($type, ['text','color'], true)) {
+            $attribute->filter_search = 0;
         }
         $attribute->number_unit = trim((string) ($attribute->number_unit ?? ''));
         foreach (['number_min','number_max','number_step'] as $name) {

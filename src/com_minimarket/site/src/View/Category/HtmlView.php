@@ -25,6 +25,10 @@ final class HtmlView extends BaseHtmlView
     public array $facetSelection = [];
     public array $facetMatches = [];
     public string $sortOrder = 'newest';
+    public int $productPage = 1;
+    public int $productsPerPage = 10;
+    public int $productTotal = 0;
+    public int $productPageCount = 1;
 
     public function display($tpl = null)
     {
@@ -44,6 +48,7 @@ final class HtmlView extends BaseHtmlView
         $this->category = $category;
         $options = ComponentHelper::getParams('com_minimarket');
         $this->productListOptions = CategoryDisplayOptions::resolve($category, $options);
+        $this->productsPerPage = $this->productListOptions['products_per_page'];
         $display = $this->productListOptions;
         $this->children = $display['show_children'] ? $repo->getChildCategories($id) : [];
         $this->displayProducts = $display['show_products'] || $display['show_bundles']
@@ -70,7 +75,8 @@ final class HtmlView extends BaseHtmlView
         if ($this->products) {
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             $this->facetData=FacetedCatalog::build(
-                $db,$this->products,(int)$options->get('inventory_enabled',1)===1);
+                $db,$this->products,(int)$options->get('inventory_enabled',1)===1,
+                $this->productListOptions);
             $raw=Factory::getApplication()->input->get('mmf',[],'array');
             $this->facetSelection=FacetedCatalog::selection(
                 is_array($raw)?$raw:[],$this->facetData['facets']);
@@ -81,7 +87,42 @@ final class HtmlView extends BaseHtmlView
                     $this->facetData['skus'][$pid]??[],
                     $this->facetData['facets'],$this->facetSelection);
             }
+            // Counts include all matching catalog products, NOT just the
+            // current page. Ignore the selected values of this same facet.
+            foreach ($this->facetData['facets'] as $fid=>&$facet) {
+                if (!in_array($facet['mode'],['dropdown','checkboxes','values','radio','swatches','boolean'],true)) {
+                    continue;
+                }
+                $other=$this->facetSelection;
+                unset($other[$fid]);
+                foreach ($facet['choices'] as &$choice) {
+                    $trial=$other;
+                    $trial[$fid]=['values'=>[$choice['value']]];
+                    $count=0;
+                    foreach ($this->products as $candidate) {
+                        $pid=(int)$candidate->id;
+                        if (FacetedCatalog::matches(
+                            $this->facetData['facts'][$pid]??[],
+                            $this->facetData['skus'][$pid]??[],
+                            $this->facetData['facets'],$trial)) $count++;
+                    }
+                    $choice['count']=$count;
+                }
+                unset($choice);
+            }
+            unset($facet);
         }
+        // Pagination is performed only AFTER matching all published products.
+        // The browser receives just the requested slice; AJAX pages and sort
+        // operate on the complete server catalog, not on loaded DOM nodes.
+        $filtered=array_values(array_filter($this->products,fn($p):bool=>
+            $this->facetMatches[(int)$p->id]??true));
+        $this->productTotal=count($filtered);
+        $this->productPageCount=max(1,(int)ceil($this->productTotal/$this->productsPerPage));
+        $this->productPage=min($this->productPageCount,
+            max(1,Factory::getApplication()->input->getInt('mm_page',1)));
+        $this->products=array_slice($filtered,
+            ($this->productPage-1)*$this->productsPerPage,$this->productsPerPage);
         $document = $this->getDocument();
         $metaTitle = trim((string) ($category->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $category->title);

@@ -7,8 +7,9 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 $escape=static fn(mixed $text):string=>htmlspecialchars((string)$text,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
 $facets=$this->facetData['facets'];
 $selected=$this->facetSelection;
-$json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
-    'skus'=>$this->facetData['skus']],
+// All product matches are computed on the server. Never embed a full catalog
+// snapshot in HTML when showing only one lazy-loaded page.
+$json=json_encode(['facets'=>$facets],
     JSON_THROW_ON_ERROR|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT);
 ?>
 <form id="mm-facet-form" class="mm-facet-form" data-mm-facet-form method="get"
@@ -33,7 +34,8 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
                   data-mm-facet-multiple="<?php echo $facet['multiple']?'1':'0'; ?>"
                   data-mm-facet-type="<?php echo $escape($facet['type']); ?>">
             <legend><?php echo $escape($caption); ?>
-                <small class="mm-facet-count" data-mm-facet-group-count></small>
+                <small class="mm-facet-count" data-mm-facet-group-count><?php echo
+                    (int)($this->facetGroupCounts[$id]??$this->productTotal); ?></small>
             </legend>
             <?php if ($mode==='text'): ?>
                 <input type="search" class="form-control form-control-sm"
@@ -51,19 +53,22 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
                                    data-mm-facet-bound="<?php echo $boundary; ?>"
                                    min="<?php echo $escape($facet['min']); ?>"
                                    max="<?php echo $escape($facet['max']); ?>" step="any"
-                                   value="<?php echo $escape($selection[$boundary]??''); ?>">
+                                   value="<?php echo $escape($selection[$boundary]??$facet[$boundary]); ?>">
                         </label>
                     <?php endforeach; ?>
                 </div>
                 <?php if ($mode==='slider' && $facet['min']<$facet['max']): ?>
-                    <?php foreach (['min','max'] as $boundary): ?>
-                        <input type="range" class="mm-facet-slider"
-                               data-mm-facet-slider="<?php echo $boundary; ?>"
-                               min="<?php echo $escape($facet['min']); ?>"
-                               max="<?php echo $escape($facet['max']); ?>" step="any"
-                               value="<?php echo $escape($selection[$boundary]??$facet[$boundary]); ?>"
-                               aria-label="<?php echo $escape($caption.' '.Text::_($boundary==='min'?'COM_MINIMARKET_FILTER_MIN':'COM_MINIMARKET_FILTER_MAX')); ?>">
-                    <?php endforeach; ?>
+                    <div class="mm-dual-range" data-mm-dual-range
+                        style="--mm-range-start:0%;--mm-range-end:100%">
+                        <?php foreach (['min','max'] as $boundary): ?>
+                            <input type="range" class="mm-facet-slider"
+                                   data-mm-facet-slider="<?php echo $boundary; ?>"
+                                   min="<?php echo $escape($facet['min']); ?>"
+                                   max="<?php echo $escape($facet['max']); ?>" step="any"
+                                   value="<?php echo $escape($selection[$boundary]??$facet[$boundary]); ?>"
+                                   aria-label="<?php echo $escape($caption.' '.Text::_($boundary==='min'?'COM_MINIMARKET_FILTER_MIN':'COM_MINIMARKET_FILTER_MAX')); ?>">
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             <?php else: ?>
                 <?php if ($mode==='dropdown' || $mode==='values'): ?>
@@ -74,12 +79,14 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
                                     if ($item['value']===$v) return $item['label'];
                                 }
                                 return (string)$v;
-                            }, $chosen)) : Text::_('COM_MINIMARKET_FILTER_ANY')); ?></summary>
+                            }, $chosen)) : Text::_('COM_MINIMARKET_FILTER_ALL_VALUES')); ?></summary>
                 <?php endif; ?>
-                <input type="search" class="form-control form-control-sm mm-facet-search"
-                       data-mm-choice-search autocomplete="off"
-                       placeholder="<?php echo $escape(Text::_('COM_MINIMARKET_FILTER_VALUE_SEARCH')); ?>"
-                       aria-label="<?php echo $escape($caption.' '.Text::_('COM_MINIMARKET_FILTER_SEARCH')); ?>">
+                <?php if (!empty($facet['search'])): ?>
+                    <input type="search" class="form-control form-control-sm mm-facet-search"
+                           data-mm-choice-search autocomplete="off"
+                           placeholder="<?php echo $escape(Text::_('COM_MINIMARKET_FILTER_VALUE_SEARCH')); ?>"
+                           aria-label="<?php echo $escape($caption.' '.Text::_('COM_MINIMARKET_FILTER_SEARCH')); ?>">
+                <?php endif; ?>
                 <?php foreach ($facet['choices'] as $i=>$choice):
                     $checked=in_array($choice['value'],$chosen,true);
                     $multiple=$facet['multiple'];

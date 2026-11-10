@@ -43,7 +43,8 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
         </section>
     <?php endif; ?>
 
-    <?php if ($this->products) : ?>
+    <div data-mm-ajax-content>
+    <?php if ($this->displayProducts) : ?>
         <?php if ($this->facetData['facets']) : ?>
             <div class="mm-facet-layout" data-mm-facet-layout>
                 <aside class="mm-facet-sidebar">
@@ -117,6 +118,30 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
             </li>
         <?php endforeach; ?>
         </ul>
+        <?php if ($this->productPageCount > 1) :
+            $url = RouteHelper::category((int)$this->category->id);
+            $params = ['mm_order'=>$this->sortOrder,'mmf'=>$this->facetSelection];
+            $pageUrl = static function(int $page) use ($url,$params):string {
+                $params['mm_page']=$page;
+                return $url.(str_contains($url,'?')?'&':'?')
+                    .http_build_query($params,'','&',PHP_QUERY_RFC3986);
+            };
+        ?>
+            <nav class="mm-category-pages" data-mm-category-pages
+                 aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PAGINATION_LABEL')); ?>">
+                <span><?php echo Text::sprintf('COM_MINIMARKET_PAGINATION_STATUS',
+                    $this->productPage,$this->productPageCount); ?></span>
+                <?php if ($this->productPage > 1) : ?>
+                    <a href="<?php echo $this->escape($pageUrl($this->productPage-1)); ?>"
+                       rel="prev" data-mm-page-link><?php echo Text::_('JPREV'); ?></a>
+                <?php endif; ?>
+                <?php if ($this->productPage < $this->productPageCount) : ?>
+                    <a href="<?php echo $this->escape($pageUrl($this->productPage+1)); ?>"
+                       rel="next" data-mm-page-link data-mm-next-page>
+                       <?php echo Text::_('JNEXT'); ?></a>
+                <?php endif; ?>
+            </nav>
+        <?php endif; ?>
         <?php if ($this->facetData['facets']) : ?>
                 <p class="mm-facet-empty" data-mm-facet-empty<?php echo in_array(true,$this->facetMatches,true) ? ' hidden' : ''; ?>>
                     <?php echo Text::_('COM_MINIMARKET_FILTER_NO_MATCHES'); ?>
@@ -124,7 +149,6 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                 </div>
             </div>
         <?php endif; ?>
-    <?php elseif ($this->displayProducts && !$this->children) : ?>
-        <p><?php echo Text::_('COM_MINIMARKET_CATEGORY_EMPTY'); ?></p>
     <?php endif; ?>
+    </div>
 </section>

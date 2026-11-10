@@ -99,6 +99,27 @@ final class CategoryTable extends Table
             return false;
         }
         $this->product_layout = $layout;
+        $perPage=(int)($this->products_per_page??0);
+        if (!in_array($perPage,[0,10,20,30,50],true)) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));
+            return false;
+        }
+        $this->products_per_page=$perPage;
+        foreach (['filter_price_mode'=>['inherit','none','range','slider'],
+                  'filter_sku_mode'=>['inherit','none','text']] as $field=>$allowed) {
+            $mode=(string)($this->$field??'inherit');
+            if (!in_array($mode,$allowed,true)) {
+                $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));
+                return false;
+            }
+            $this->$field=$mode;
+        }
+        $stock=(int)($this->filter_stock_mode??-1);
+        if (!in_array($stock,[-1,0,1],true)) {
+            $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));
+            return false;
+        }
+        $this->filter_stock_mode=$stock;
         foreach (['cards_xs', 'cards_sm', 'cards_md', 'cards_lg', 'cards_xl', 'cards_xxl'] as $field) {
             $count = (int) ($this->$field ?? -1);
             if ($count < -1 || $count === 0 || $count > 6) {

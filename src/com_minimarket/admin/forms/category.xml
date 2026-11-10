@@ -106,6 +106,34 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
+        <field name="products_per_page" type="list" default="0" filter="int"
+               label="COM_MINIMARKET_PRODUCTS_PER_PAGE">
+            <option value="0">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+        </field>
+    </fieldset>
+    <fieldset name="system_filters" label="COM_MINIMARKET_SYSTEM_FILTERS">
+        <field name="filter_price_mode" type="list" default="inherit" filter="cmd"
+               label="COM_MINIMARKET_SYSTEM_PRICE_FILTER">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="none">COM_MINIMARKET_MODE_NONE</option>
+            <option value="range">COM_MINIMARKET_FILTER_RANGE</option>
+            <option value="slider">COM_MINIMARKET_FILTER_SLIDER</option>
+        </field>
+        <field name="filter_sku_mode" type="list" default="inherit" filter="cmd"
+               label="COM_MINIMARKET_SYSTEM_SKU_FILTER">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="none">COM_MINIMARKET_MODE_NONE</option>
+            <option value="text">COM_MINIMARKET_SYSTEM_SKU_SEARCH</option>
+        </field>
+        <field name="filter_stock_mode" type="list" default="-1" filter="int"
+               label="COM_MINIMARKET_SYSTEM_STOCK_FILTER">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="0">JNO</option><option value="1">JYES</option>
+        </field>
     </fieldset>
     <fieldset name="attributes" label="COM_MINIMARKET_CATEGORY_TAB_ATTRIBUTES">
         <field name="attribute_rules" type="Categoryattributes" filter="raw"

@@ -39,6 +39,22 @@ final class CategoryDisplayOptions
             $count=$local===-1?$globalValue:$local;
             $result['cards_'.$size]=max(1,min(6,$count));
         }
+        $globalLimit=(int)$global->get('category_products_per_page',10);
+        if (!in_array($globalLimit,[10,20,30,50],true)) $globalLimit=10;
+        $localLimit=(int)($category->products_per_page??0);
+        $result['products_per_page']=in_array($localLimit,[10,20,30,50],true)
+            ?$localLimit:$globalLimit;
+        foreach (['filter_price_mode'=>['none','range','slider'],
+                  'filter_sku_mode'=>['none','text']] as $field=>$allowed) {
+            $fallback=$field==='filter_price_mode'?'slider':'none';
+            $glob=(string)$global->get($field,$fallback);
+            if (!in_array($glob,$allowed,true)) $glob=$fallback;
+            $local=(string)($category->$field??'inherit');
+            $result[$field]=in_array($local,$allowed,true)?$local:$glob;
+        }
+        $stock=(int)($category->filter_stock_mode??-1);
+        $result['filter_stock_enabled']=$stock===-1
+            ?(int)$global->get('filter_stock_enabled',0)===1:$stock===1;
         return $result;
     }
 

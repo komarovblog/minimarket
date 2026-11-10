@@ -65,7 +65,7 @@ final class FacetedCatalog
      * @return array{facets:array,facts:array,skus:array}
      */
     public static function build(DatabaseInterface $db, array $products,
-        bool $inventoryEnabled=true): array
+        bool $inventoryEnabled=true, array $systemFilters=[]): array
     {
         $byId=[];$facts=[];$skus=[];
         foreach ($products as $product) {
@@ -76,15 +76,19 @@ final class FacetedCatalog
         }
         if (!$byId) return ['facets'=>[], 'facts'=>[], 'skus'=>[]];
         $productSql=self::ids(array_keys($byId));
-        // Price is a native numeric facet based on the displayed product price.
+        // System facets are configured globally with category overrides.
+        $priceMode=(string)($systemFilters['filter_price_mode']??'slider');
+        if (!in_array($priceMode,['slider','range'],true)) $priceMode='none';
+        $skuMode=(string)($systemFilters['filter_sku_mode']??'none');
+        $stockMode=!empty($systemFilters['filter_stock_enabled']);
         $prices=array_values(array_filter(array_map(
             static fn($p):float => (float)($p->price??0),$byId
         ),static fn(float $price):bool=>$price>=0));
-        if ($prices) {
+        if ($prices && $priceMode!=='none') {
             $low=min($prices);$high=max($prices);
             $priceFacet=['id'=>'price','title'=>'Цена','type'=>'number',
-                'mode'=>'slider','unit'=>'','multiple'=>false,'choices'=>[],
-                'min'=>$low,'max'=>$high];
+                'mode'=>$priceMode,'unit'=>'','multiple'=>false,'search'=>false,
+                'choices'=>[], 'min'=>$low,'max'=>$high];
         }
         $cats=[];$parents=[];
         foreach (self::query($db,'#__minimarket_categories',
@@ -118,10 +122,28 @@ final class FacetedCatalog
                 $facts[$pid]['price']=[(float)($product->price??0)];
             }
         }
+        if ($skuMode==='text') {
+            $facets['sku']=['id'=>'sku','title'=>'Артикул','type'=>'text',
+                'mode'=>'text','unit'=>'','multiple'=>false,'search'=>false,'choices'=>[]];
+            foreach ($byId as $pid=>$product) {
+                $sku=trim((string)($product->sku??''));
+                if ($sku!=='') $facts[$pid]['sku']=[$sku];
+            }
+        }
+        if ($stockMode) {
+            $facets['stock']=['id'=>'stock','title'=>'Наличие','type'=>'boolean',
+                'mode'=>'dropdown','unit'=>'','multiple'=>false,'search'=>false,
+                'choices'=>[
+                    'b:1'=>['value'=>'b:1','label'=>'Есть в наличии','hex'=>'','count'=>0],
+                    'b:0'=>['value'=>'b:0','label'=>'Нет в наличии','hex'=>'','count'=>0]]];
+            foreach ($byId as $pid=>$product) {
+                $facts[$pid]['stock']=[(int)($product->stock??0)>0?'b:1':'b:0'];
+            }
+        }
         $definitions=[];
         foreach (self::query($db,'#__minimarket_attributes',
             ['id','title','input_type','filter_mode','filter_multiple',
-             'number_unit','is_filterable','state'],
+             'filter_search','number_unit','is_filterable','state'],
             'state=1 AND is_filterable=1 AND filter_mode<>'.$db->quote('none'),
             'sort_order ASC,id ASC') as $row) {
             $mode=(string)$row['filter_mode'];
@@ -134,8 +156,10 @@ final class FacetedCatalog
             $facets[$key]=[
                 'id'=>$key,'title'=>(string)$row['title'],'type'=>$type,
                 'mode'=>$mode,'unit'=>(string)$row['number_unit'],
-                'multiple'=>(int)$row['filter_multiple']===1
-                    || in_array($mode,['checkboxes','swatches'],true),
+                'multiple'=>(int)$row['filter_multiple']===1,
+                'search'=>(int)($row['filter_search']??0)===1
+                    && in_array($type,['text','color'],true)
+                    && in_array($mode,['checkboxes','dropdown','values','swatches'],true),
                 'choices'=>[]
             ];
         }
@@ -226,7 +250,7 @@ final class FacetedCatalog
             if ($values) {
                 $variantIds=[];
                 foreach (self::query($db,'#__minimarket_product_variants',
-                    ['id','product_id','stock'],
+                    ['id','product_id','stock','sku'],
                     'product_id IN ('.$productSql.') AND state=1') as $variant) {
                     $pid=(int)$variant['product_id'];
                     $product=$byId[$pid]??null;
@@ -236,6 +260,10 @@ final class FacetedCatalog
                         || ((int)($product->option_stock_mode??1)===0 && (int)($product->stock??0)<1)
                     )) continue;
                     $id=(int)$variant['id'];$variantIds[$id]=$pid;$skus[$pid][$id]=[];
+                    if ($skuMode==='text') {
+                        $variantSku=trim((string)($variant['sku']??''));
+                        if ($variantSku!=='') $facts[$pid]['sku'][]=$variantSku;
+                    }
                 }
                 if ($variantIds) {
                     foreach (self::query($db,'#__minimarket_variant_value_assignments',

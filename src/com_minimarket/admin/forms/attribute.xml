@@ -51,30 +51,28 @@
         <field name="categories_present" type="hidden" default="1" filter="int"/>
     </fieldset>
     <fieldset name="filter" label="COM_MINIMARKET_ATTRIBUTE_FILTER_TAB">
-        <field name="is_filterable" type="radio" label="COM_MINIMARKET_ATTRIBUTE_FILTERABLE" description="COM_MINIMARKET_ATTRIBUTE_FILTERABLE_DESC" default="0" filter="integer">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
+        <field name="is_filterable" type="hidden" default="0" filter="int"/>
         <field name="filter_mode" type="list" label="COM_MINIMARKET_FILTER_MODE"
-               description="COM_MINIMARKET_FILTER_MODE_DESC" default="none" filter="cmd" showon="is_filterable:1">
+               description="COM_MINIMARKET_FILTER_PRESENTATION_DESC" default="none" filter="cmd">
             <option value="none">COM_MINIMARKET_MODE_NONE</option>
-            <option value="text">COM_MINIMARKET_FILTER_TEXT</option>
-            <option value="values">COM_MINIMARKET_FILTER_VALUES</option>
+            <option value="dropdown">COM_MINIMARKET_MODE_DROPDOWN</option>
+            <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
             <option value="range">COM_MINIMARKET_FILTER_RANGE</option>
             <option value="slider">COM_MINIMARKET_FILTER_SLIDER</option>
-            <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
-            <option value="radio">COM_MINIMARKET_MODE_RADIO</option>
-            <option value="dropdown">COM_MINIMARKET_MODE_DROPDOWN</option>
-            <option value="boolean">COM_MINIMARKET_ATTRIBUTE_BOOLEAN</option>
-            <option value="date_range">COM_MINIMARKET_FILTER_DATE_RANGE</option>
-            <option value="swatches">COM_MINIMARKET_FILTER_SWATCHES</option>
         </field>
         <field name="filter_multiple" type="radio" label="COM_MINIMARKET_FILTER_MULTIPLE"
-               description="COM_MINIMARKET_FILTER_MULTIPLE_DESC" default="0" filter="int"
-               showon="is_filterable:1[AND]filter_mode:dropdown,values">
+               description="COM_MINIMARKET_FILTER_MULTIPLE_INDEPENDENT_DESC" default="0" filter="int"
+               showon="filter_mode:dropdown,checkboxes">
             <option value="0">JNO</option><option value="1">JYES</option>
         </field>
-        <field name="filter_planned_notice" type="note" label="COM_MINIMARKET_FILTER_PLANNED"
-               description="COM_MINIMARKET_FILTER_PLANNED_DESC" showon="is_filterable:1"/>
+        <field name="filter_search" type="radio" label="COM_MINIMARKET_FILTER_SEARCH_VALUES"
+               description="COM_MINIMARKET_FILTER_SEARCH_VALUES_DESC" default="0" filter="int"
+               showon="filter_mode:dropdown,checkboxes">
+            <option value="0">JNO</option><option value="1">JYES</option>
+        </field>
+        <field name="filter_rules_help" type="note"
+               label="COM_MINIMARKET_FILTER_RULES_TITLE"
+               description="COM_MINIMARKET_FILTER_RULES_DESC"/>
     </fieldset>
     <fieldset name="publishing" label="COM_MINIMARKET_CATEGORY_TAB_PUBLISHING">
         <field name="sort_order" type="number" label="JGRID_HEADING_ORDERING" default="0" min="0" max="4294967295" step="1" filter="uint"/>

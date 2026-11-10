@@ -101,6 +101,30 @@
             <option value="6">6</option>
         </field>
     </fieldset>
+    <fieldset name="filters" label="COM_MINIMARKET_SYSTEM_FILTERS">
+        <field name="filter_price_mode" type="list" default="slider" filter="cmd"
+               label="COM_MINIMARKET_SYSTEM_PRICE_FILTER" description="COM_MINIMARKET_SYSTEM_PRICE_FILTER_DESC">
+            <option value="none">COM_MINIMARKET_MODE_NONE</option>
+            <option value="range">COM_MINIMARKET_FILTER_RANGE</option>
+            <option value="slider">COM_MINIMARKET_FILTER_SLIDER</option>
+        </field>
+        <field name="filter_sku_mode" type="list" default="none" filter="cmd"
+               label="COM_MINIMARKET_SYSTEM_SKU_FILTER">
+            <option value="none">COM_MINIMARKET_MODE_NONE</option>
+            <option value="text">COM_MINIMARKET_SYSTEM_SKU_SEARCH</option>
+        </field>
+        <field name="filter_stock_enabled" type="radio" default="0" filter="int"
+               label="COM_MINIMARKET_SYSTEM_STOCK_FILTER">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_products_per_page" type="list" default="10" filter="int"
+               label="COM_MINIMARKET_PRODUCTS_PER_PAGE" description="COM_MINIMARKET_PRODUCTS_PER_PAGE_DESC">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+        </field>
+    </fieldset>
     <fieldset name="inventory" label="COM_MINIMARKET_CONFIG_INVENTORY">
         <field name="inventory_enabled" type="radio" default="1" filter="int"
                label="COM_MINIMARKET_CONFIG_INVENTORY_ENABLED"

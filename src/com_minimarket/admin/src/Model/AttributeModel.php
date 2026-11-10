@@ -76,6 +76,8 @@ final class AttributeModel extends AdminModel
                 return false;
             }
         }
+        $mode=(string)($data['filter_mode']??'none');
+        $data['is_filterable']=$mode==='none'?0:1;
         unset($data['category_rules'],$data['categories_present'],
             $data['unified_values'],$data['values_present']);
         $db->transactionStart();

@@ -1,176 +1,201 @@
-/* Facet filtering progressive enhancement: server GET remains the fallback.
- * Live product visibility and incompatible options use current published facts.
+/* MiniMarket category filtering, sorting and lazy pages.
+ * Filter/sort is calculated against the FULL published catalog on the server;
+ * only one page of cards is delivered to the browser. Without JS, GET works.
  */
 (() => {
   'use strict';
-  const init = () => {
-    const form=document.querySelector('[data-mm-facet-form]');
-    const source=document.querySelector('script[data-mm-facet-data]');
-    const layout=document.querySelector('[data-mm-facet-layout]');
-    if (!form || !source || !layout) return;
-    let data;
-    try { data=JSON.parse(source.textContent); } catch (_) { return; }
-    const facets=data.facets||{}, facts=data.facts||{}, skus=data.skus||{};
-    const rows=Array.from(layout.querySelectorAll('[data-mm-facet-product]'));
-    const empty=layout.querySelector('[data-mm-facet-empty]');
-    const counter=form.querySelector('[data-mm-facet-count]');
-    const groups=Array.from(form.querySelectorAll('[data-mm-facet]'));
-    const sortControl=document.querySelector('[data-mm-sort]');
-    if (sortControl) sortControl.addEventListener('change',()=>sortControl.form?.requestSubmit());
-    // The filter value search changes only the option list, not the catalog.
-    for (const search of form.querySelectorAll('[data-mm-choice-search]')) {
-      search.addEventListener('input',()=>{
-        const needle=search.value.trim().toLocaleLowerCase();
-        const group=search.closest('[data-mm-facet]');
-        for (const row of group?.querySelectorAll('[data-mm-facet-choice-row]')||[]) {
-          const label=row.querySelector('label')?.textContent?.toLocaleLowerCase()||'';
-          row.hidden=!!needle && !label.includes(needle);
-        }
-      });
-    }
+  const root = document.querySelector('.com-minimarket-category');
+  if (!root || !root.querySelector('[data-mm-ajax-content]')) return;
 
-    const state=()=>{
-      const selected={};
-      for (const group of groups) {
-        const id=group.dataset.mmFacet, mode=group.dataset.mmFacetMode;
-        if (mode==='text') {
-          const text=group.querySelector('[data-mm-facet-text]')?.value.trim();
-          if (text) selected[id]={text};
-        } else if (mode==='range' || mode==='slider') {
-          const bounds={};
-          for (const input of group.querySelectorAll('[data-mm-facet-bound]')) {
-            if (input.value.trim()!=='' && Number.isFinite(Number(input.value))) {
-              bounds[input.dataset.mmFacetBound]=Number(input.value);
-            }
-          }
-          if (Object.keys(bounds).length) selected[id]=bounds;
-        } else {
-          const values=Array.from(group.querySelectorAll('[data-mm-facet-value]'))
-            .filter(input=>input.tagName==='OPTION'?input.selected:input.checked)
-            .map(input=>input.value).filter(Boolean);
-          if (values.length) selected[id]={values};
-        }
+  let request = null;
+  let debounce = null;
+  let observer = null;
+  let loadingMore = false;
+
+  const form = () => root.querySelector('[data-mm-facet-form]');
+  const sort = () => root.querySelector('[data-mm-sort]');
+  const allValues = () => {
+    for (const search of root.querySelectorAll('[data-mm-choice-search]')) {
+      const group = search.closest('[data-mm-facet]');
+      const needle = search.value.trim().toLocaleLowerCase();
+      for (const row of group?.querySelectorAll('[data-mm-facet-choice-row]') || []) {
+        const label = row.querySelector('label')?.textContent?.toLocaleLowerCase() || '';
+        row.hidden = needle !== '' && !label.includes(needle);
       }
-      return selected;
-    };
-    const matches=(pid,selected)=>{
-      const productFacts=facts[pid]||{}, productSkus=skus[pid]||[], skuRules=[];
-      for (const [id,filter] of Object.entries(selected)) {
-        const facet=facets[id];
-        if (!facet) continue;
-        if (facet.type==='sku') {
-          if (filter.values?.length) skuRules.push([id,filter.values]);
-          continue;
-        }
-        const values=productFacts[id]||[];
-        if (facet.mode==='text' && filter.text) {
-          const needle=filter.text.toLocaleLowerCase();
-          if (!values.some(v=>String(v).toLocaleLowerCase().includes(needle))) return false;
-        } else if (['slider','range'].includes(facet.mode) && ('min' in filter || 'max' in filter)) {
-          if (!values.some(v=>Number.isFinite(Number(v))
-             && (!('min' in filter) || Number(v)>=filter.min)
-             && (!('max' in filter) || Number(v)<=filter.max))) return false;
-        } else if (filter.values?.length && !filter.values.some(v=>values.includes(v))) {
-          return false;
-        }
-      }
-      return skuRules.length===0 || productSkus.some(sku=>
-        skuRules.every(([id,values])=>values.includes(sku[id])));
-    };
-    const update=(updateUrl=false)=>{
-      const selected=state();
-      let visible=0;
-      for (const row of rows) {
-        const yes=matches(row.dataset.mmFacetProduct,selected);
-        row.hidden=!yes;
-        if (yes) visible++;
-      }
-      if (empty) empty.hidden=visible>0;
-      if (counter) {
-        const template=counter.dataset.mmFacetLabel||'{count}';
-        counter.textContent=template.replace('{count}',String(visible));
-      }
-      // Compute option compatibility ignoring the current facet. This allows
-      // multi-select OR inside the group and AND against all other groups.
-      for (const group of groups) {
-        const id=group.dataset.mmFacet, facet=facets[id];
-        if (!facet) continue;
-        const other={...selected};delete other[id];
-        const groupCount=group.querySelector('[data-mm-facet-group-count]');
-        if (groupCount) groupCount.textContent=String(rows.reduce((n,row)=>
-          n+(matches(row.dataset.mmFacetProduct,other)?1:0),0));
-        if (['text','range','slider'].includes(facet.mode)) continue;
-        const summary=group.querySelector('.mm-facet-dropdown summary');
-        if (summary) {
-          const labels=Array.from(group.querySelectorAll('[data-mm-facet-value]:checked'))
-            .map(input=>input.closest('[data-mm-facet-choice-row]')?.querySelector('label')?.textContent?.trim())
-            .filter(Boolean);
-          summary.textContent=labels.join(', ')||'–';
-        }
-        for (const control of group.querySelectorAll('[data-mm-facet-value]')) {
-          const candidate={...other,[id]:{values:[control.value]}};
-          const count=rows.reduce((total,row)=>
-            total+(matches(row.dataset.mmFacetProduct,candidate)?1:0),0);
-          const active=control.tagName==='OPTION'?control.selected:control.checked;
-          control.disabled=count===0 && !active;
-          const row=control.closest('[data-mm-facet-choice-row]');
-          row?.classList.toggle('mm-facet-choice--unavailable',count===0 && !active);
-          const badge=row?.querySelector('[data-mm-choice-count]');
-          if (badge) badge.textContent=String(count);
-        }
-      }
-      if (updateUrl) {
-        const url=new URL(form.action,window.location.href);
-        for (const [key,value] of new FormData(form)) {
-          if (String(value).trim()!=='') url.searchParams.append(key,String(value));
-        }
-        if (sortControl && sortControl.value !== 'newest')
-          url.searchParams.set('mm_order',sortControl.value);
-        history.replaceState(null,'',url);
-      }
-    };
-    let timer;
-    const delayed=()=>{clearTimeout(timer);timer=setTimeout(()=>update(true),160);};
-    form.addEventListener('change',event=>{
-      const control=event.target.closest('[data-mm-facet-value]');
-      if (control && control.type==='checkbox') {
-        const group=control.closest('[data-mm-facet]');
-        if (group?.dataset.mmFacetMultiple==='0' && control.checked) {
-          for (const other of group.querySelectorAll('[data-mm-facet-value]')) {
-            if (other!==control) other.checked=false;
-          }
-        }
-      }
-      const slider=event.target.closest('[data-mm-facet-slider]');
-      if (slider) {
-        const group=slider.closest('[data-mm-facet]');
-        const input=group?.querySelector('[data-mm-facet-bound="'+slider.dataset.mmFacetSlider+'"]');
-        if (input) input.value=slider.value;
-      }
-      update(true);
-    });
-    form.addEventListener('input',event=>{
-      if (event.target.matches('[data-mm-choice-search]')) return;
-      const slider=event.target.closest('[data-mm-facet-slider]');
-      if (slider) {
-        const input=slider.closest('[data-mm-facet]')?.querySelector(
-          '[data-mm-facet-bound="'+slider.dataset.mmFacetSlider+'"]');
-        if (input) input.value=slider.value;
-      }
-      delayed();
-    });
-    form.querySelector('[data-mm-facet-reset]')?.addEventListener('click',event=>{
-      event.preventDefault();
-      form.reset();
-      for (const field of form.querySelectorAll('[data-mm-facet-bound]')) field.value='';
-      for (const search of form.querySelectorAll('[data-mm-choice-search]')) {
-        search.value='';
-        for (const row of search.closest('[data-mm-facet]').querySelectorAll('[data-mm-facet-choice-row]')) row.hidden=false;
-      }
-      update(true);
-    });
-    update(false);
+    }
   };
-  if (document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+  const ranges = () => {
+    for (const range of root.querySelectorAll('[data-mm-dual-range]')) {
+      const field = range.closest('[data-mm-facet]');
+      const low = field?.querySelector('[data-mm-facet-bound="min"]');
+      const high = field?.querySelector('[data-mm-facet-bound="max"]');
+      const sliders = range.querySelectorAll('[data-mm-facet-slider]');
+      if (!low || !high || sliders.length !== 2) continue;
+      const base = Number(sliders[0].min);
+      const ceiling = Number(sliders[0].max);
+      if (!(ceiling > base)) continue;
+      let min = Number(low.value), max = Number(high.value);
+      if (!Number.isFinite(min)) min = base;
+      if (!Number.isFinite(max)) max = ceiling;
+      min = Math.max(base, Math.min(ceiling, min));
+      max = Math.max(min, Math.min(ceiling, max));
+      low.value = String(min);
+      high.value = String(max);
+      sliders[0].value = String(min);
+      sliders[1].value = String(max);
+      range.style.setProperty('--mm-range-start', (100 * (min - base) / (ceiling - base)) + '%');
+      range.style.setProperty('--mm-range-end', (100 * (max - base) / (ceiling - base)) + '%');
+    }
+  };
+  const urlFor = () => {
+    const f = form();
+    const url = new URL(f?.action || window.location.href, window.location.href);
+    if (f) {
+      for (const [key,value] of new FormData(f)) {
+        if (String(value).trim() !== '') url.searchParams.append(key, String(value));
+      }
+    }
+    const order = sort()?.value;
+    if (order && order !== 'newest') url.searchParams.set('mm_order',order);
+    url.searchParams.delete('mm_page'); // Filter and sort always start on page 1.
+    return url;
+  };
+  const load = async (url, {push=true, append=false}={}) => {
+    if (request) request.abort();
+    const controller = new AbortController();
+    request = controller;
+    root.setAttribute('aria-busy','true');
+    try {
+      const response = await fetch(url, {
+        credentials:'same-origin',
+        headers:{'X-Requested-With':'XMLHttpRequest'},
+        signal:controller.signal
+      });
+      if (!response.ok) throw new Error('Request failed');
+      const html = new DOMParser().parseFromString(await response.text(),'text/html');
+      const remote = html.querySelector('.com-minimarket-category [data-mm-ajax-content]');
+      const current = root.querySelector('[data-mm-ajax-content]');
+      if (!remote || !current) throw new Error('Missing catalog content');
+      if (append) {
+        const destination = current.querySelector('.mm-category-products');
+        const source = remote.querySelector('.mm-category-products');
+        if (!destination || !source) throw new Error('Missing next product page');
+        for (const product of source.querySelectorAll(':scope > li')) {
+          destination.appendChild(document.importNode(product,true));
+        }
+        const currentNav = current.querySelector('[data-mm-category-pages]');
+        const nextNav = remote.querySelector('[data-mm-category-pages]');
+        if (currentNav && nextNav) {
+          currentNav.replaceWith(document.importNode(nextNav,true));
+        } else if (currentNav) {
+          currentNav.remove();
+        }
+      } else {
+        current.replaceWith(document.importNode(remote,true));
+        if (push) history.pushState(null,'',url);
+        allValues();
+        ranges();
+      }
+      observeNext();
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        // Real server-side GET fallback is preferable to silently showing
+        // the wrong subset of products.
+        window.location.assign(url);
+      }
+    } finally {
+      if (request === controller) {
+        request = null;
+        root.removeAttribute('aria-busy');
+      }
+      loadingMore = false;
+    }
+  };
+  const afterInput = (wait=250) => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => load(urlFor()),wait);
+  };
+  const observeNext = () => {
+    observer?.disconnect();
+    if (!('IntersectionObserver' in window)) return;
+    const anchor = root.querySelector('[data-mm-next-page]');
+    if (!anchor) return;
+    observer = new IntersectionObserver(entries => {
+      if (!entries.some(entry=>entry.isIntersecting) || loadingMore || request) return;
+      loadingMore = true;
+      observer.disconnect();
+      load(new URL(anchor.href,location.href),{push:false,append:true});
+    }, {rootMargin:'200px'});
+    observer.observe(anchor);
+  };
+  root.addEventListener('input', event => {
+    if (event.target.matches('[data-mm-choice-search]')) {
+      allValues();
+      return;
+    }
+    if (event.target.matches('[data-mm-facet-slider]')) {
+      const thumb = event.target, group = thumb.closest('[data-mm-facet]');
+      const field = group?.querySelector('[data-mm-facet-bound="'+thumb.dataset.mmFacetSlider+'"]');
+      if (field) {
+        const other = group.querySelector('[data-mm-facet-bound="'+(thumb.dataset.mmFacetSlider==='min'?'max':'min')+'"]');
+        let value = Number(thumb.value);
+        if (other) value = thumb.dataset.mmFacetSlider==='min'
+          ?Math.min(value,Number(other.value)):Math.max(value,Number(other.value));
+        field.value = String(value);
+      }
+      ranges();
+      afterInput(250);
+    } else if (event.target.matches('[data-mm-facet-bound]')) {
+      // Do not submit in the middle of typing a number.
+      afterInput(650);
+    } else if (event.target.matches('[data-mm-facet-text]')) {
+      afterInput(400);
+    }
+  });
+  root.addEventListener('change', event => {
+    const el = event.target;
+    if (el.matches('[data-mm-sort]')) {
+      load(urlFor());
+      return;
+    }
+    if (el.matches('[data-mm-facet-value]') && el.type==='checkbox' && el.checked) {
+      const group = el.closest('[data-mm-facet]');
+      if (group?.dataset.mmFacetMultiple==='0') {
+        for (const input of group.querySelectorAll('[data-mm-facet-value]')) {
+          if (input !== el) input.checked = false;
+        }
+      }
+    }
+    if (el.matches('[data-mm-facet-bound],[data-mm-facet-slider]')) ranges();
+    if (el.matches('[data-mm-facet-value],[data-mm-facet-bound],[data-mm-facet-slider],[data-mm-facet-text]')) {
+      clearTimeout(debounce);
+      load(urlFor());
+    }
+  });
+  root.addEventListener('submit',event=>{
+    if (event.target.matches('[data-mm-facet-form],.mm-sort-bar')) {
+      event.preventDefault();
+      clearTimeout(debounce);
+      load(urlFor());
+    }
+  });
+  root.addEventListener('click',event=>{
+    const reset = event.target.closest('[data-mm-facet-reset]');
+    if (reset) {
+      event.preventDefault();
+      const url = new URL(reset.href, location.href);
+      const selectedSort = sort()?.value;
+      if (selectedSort && selectedSort !== 'newest')
+        url.searchParams.set('mm_order',selectedSort);
+      load(url);
+    }
+    const link = event.target.closest('[data-mm-page-link]');
+    if (link) {
+      event.preventDefault();
+      load(new URL(link.href,location.href));
+    }
+  });
+  window.addEventListener('popstate',()=>load(new URL(location.href),{push:false}));
+  ranges();
+  observeNext();
 })();
