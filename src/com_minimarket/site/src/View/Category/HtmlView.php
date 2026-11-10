@@ -18,6 +18,9 @@ final class HtmlView extends BaseHtmlView
 {
     public object $category;
     public array $products = [];
+    public array $categoryAttributeRows = [];
+    public array $categoryVariantOptions = [];
+    public array $variantsInProducts = [];
     public array $children = [];
     public bool $displayProducts = true;
     public array $productListOptions = [];
@@ -133,6 +136,48 @@ final class HtmlView extends BaseHtmlView
             max(1,Factory::getApplication()->input->getInt('mm_page',1)));
         $this->products=array_slice($filtered,
             ($this->productPage-1)*$this->productsPerPage,$this->productsPerPage);
+        if ($this->products) {
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $ids=array_map(static fn($p):int=>(int)$p->id,$this->products);
+            $q=$db->getQuery(true)->select('DISTINCT product_id')
+                ->from($db->quoteName('#__minimarket_product_variants'))
+                ->where('product_id IN ('.implode(',',$ids).')');
+            $db->setQuery($q);
+            $this->variantsInProducts=array_fill_keys(array_map('intval',(array)$db->loadColumn()),true);
+            $optionLocations=[];
+            $q=$db->getQuery(true)->select(['code','display_location'])
+                ->from($db->quoteName('#__minimarket_order_options'))
+                ->where('state=1');
+            $db->setQuery($q);
+            foreach((array)$db->loadAssocList() as $row) {
+                $optionLocations[(string)$row['code']]=(string)$row['display_location'];
+            }
+            foreach($this->products as $product) {
+                $pid=(int)$product->id;
+                $this->categoryAttributeRows[$pid]=$repo->getProductAttributes(
+                    $pid,(int)$product->category_id,'category');
+                if (isset($this->variantsInProducts[$pid])) {
+                    $variants=$repo->getProductVariants($pid,(int)$product->category_id);
+                    foreach($variants['axes']??[] as $code=>$axis) {
+                        $location=$optionLocations[(string)$code]??'inherit';
+                        if ($location==='inherit') {
+                            $location=$this->productListOptions['option_display_location'];
+                        }
+                        if (!in_array($location,['category','both'],true))continue;
+                        $values=[];
+                        foreach($variants['items']??[] as $variant) {
+                            $chosen=(string)($variant['selection'][$code]??'');
+                            foreach($axis['options']??[] as $option) {
+                                if ((string)$option['value']===$chosen)
+                                    $values[(string)$option['title']]=(string)$option['title'];
+                            }
+                        }
+                        $this->categoryVariantOptions[$pid][]=['title'=>(string)$axis['title'],
+                            'values'=>array_slice(array_values($values),0,6)];
+                    }
+                }
+            }
+        }
         $document = $this->getDocument();
         $metaTitle = trim((string) ($category->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $category->title);
@@ -174,7 +219,9 @@ final class HtmlView extends BaseHtmlView
             ->registerAndUseStyle('com_minimarket.catalog-layout',
                 'media/com_minimarket/css/catalog-layout.css')
             ->registerAndUseScript('com_minimarket.faceted-catalog',
-                'media/com_minimarket/js/faceted-catalog.js',[],['defer'=>true]);
+                'media/com_minimarket/js/faceted-catalog.js',[],['defer'=>true])
+            ->registerAndUseScript('com_minimarket.category-actions',
+                'media/com_minimarket/js/category-actions.js',[],['defer'=>true]);
 
         parent::display($tpl);
     }

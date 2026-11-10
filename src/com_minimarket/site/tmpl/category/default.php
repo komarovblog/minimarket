@@ -4,6 +4,7 @@
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Filter\InputFilter;
+use Joomla\CMS\HTML\HTMLHelper;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
 ?>
@@ -108,11 +109,71 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                         <a href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
                             <?php echo $this->escape($product->title); ?>
                         </a>
-                        <?php echo BadgeHelper::render($product); ?>
+                        <?php if ($this->productListOptions['show_badges']) echo BadgeHelper::render($product); ?>
                         <div class="mm-product-card__price">
                             <span><?php echo $this->escape((string) $product->price); ?></span>
                             <?php echo BadgeHelper::oldPrice($product); ?>
                         </div>
+                        <?php if (!empty($this->categoryAttributeRows[(int)$product->id])) : ?>
+                            <dl class="mm-product-card__attributes small mb-2">
+                                <?php foreach (array_slice($this->categoryAttributeRows[(int)$product->id],0,5) as $attr) : ?>
+                                <dt><?php echo $this->escape((string)$attr['title']); ?></dt>
+                                <dd><?php echo $this->escape(implode(', ',array_map(
+                                    static fn($v)=>(string)$v['text'],$attr['values']))); ?>
+                                    <?php echo $this->escape((string)$attr['unit']); ?></dd>
+                                <?php endforeach; ?>
+                            </dl>
+                        <?php endif; ?>
+                        <?php if (!empty($this->categoryVariantOptions[(int)$product->id])) : ?>
+                            <dl class="mm-product-card__attributes small mb-2">
+                                <?php foreach (array_slice($this->categoryVariantOptions[(int)$product->id],0,4) as $axis) : ?>
+                                    <dt><?php echo $this->escape($axis['title']); ?></dt>
+                                    <dd><?php echo $this->escape(implode(', ',$axis['values'])); ?></dd>
+                                <?php endforeach; ?>
+                            </dl>
+                        <?php endif; ?>
+                        <div class="mm-product-card__actions d-flex flex-wrap gap-2 mt-2">
+                            <?php if ($this->productListOptions['show_add_to_cart']) : ?>
+                                <?php if (empty($this->variantsInProducts[(int)$product->id])) : ?>
+                                    <form method="post" action="<?php echo $this->escape(RouteHelper::cartAction('add')); ?>">
+                                        <input type="hidden" name="product_id" value="<?php echo (int)$product->id; ?>">
+                                        <input type="hidden" name="variant_id" value="0">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <?php echo HTMLHelper::_('form.token'); ?>
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <?php echo Text::_('COM_MINIMARKET_CATEGORY_ADD_TO_CART'); ?></button>
+                                    </form>
+                                <?php else : ?>
+                                    <a class="btn btn-outline-primary btn-sm"
+                                       href="<?php echo $this->escape(RouteHelper::product((int)$product->id)); ?>">
+                                        <?php echo Text::_('COM_MINIMARKET_CATEGORY_CHOOSE_OPTIONS'); ?></a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            <?php if ($this->productListOptions['quick_view']) : ?>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        data-mm-quick-view="<?php echo (int)$product->id; ?>">
+                                    <?php echo Text::_('COM_MINIMARKET_CATEGORY_QUICK_VIEW'); ?></button>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($this->productListOptions['quick_view']) : ?>
+                            <dialog id="mm-category-preview-<?php echo (int)$product->id; ?>"
+                                    class="mm-category-preview p-3 rounded">
+                                <h3 class="h5"><?php echo $this->escape($product->title); ?></h3>
+                                <?php if ($hasPhoto) : ?>
+                                    <img loading="lazy" class="img-fluid rounded mb-2"
+                                         src="<?php echo $this->escape(Uri::root().$photo); ?>"
+                                         alt="<?php echo $this->escape((string)($product->image_alt?:$product->title)); ?>">
+                                <?php endif; ?>
+                                <p><?php echo $this->escape((string)$product->price); ?>
+                                    <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></p>
+                                <p class="small"><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?>:
+                                    <?php echo $this->escape((string)$product->sku); ?></p>
+                                <a class="btn btn-primary" href="<?php echo $this->escape(RouteHelper::product((int)$product->id)); ?>">
+                                    <?php echo Text::_('COM_MINIMARKET_CATEGORY_PRODUCT_DETAILS'); ?></a>
+                                <form method="dialog" class="mt-2"><button class="btn btn-outline-secondary">
+                                    <?php echo Text::_('COM_MINIMARKET_CATEGORY_CLOSE'); ?></button></form>
+                            </dialog>
+                        <?php endif; ?>
                     </div>
                 </div>
             </li>
