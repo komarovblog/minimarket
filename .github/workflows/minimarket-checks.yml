@@ -201,7 +201,7 @@ jobs:
           & .\scripts\release-to-desktop.ps1 -SkipPull -DesktopPath $dest
           if ($LASTEXITCODE -ne 0) { throw 'MM75_DESKTOP_RELEASE_FAILED' }
           $actual = @(Get-ChildItem -LiteralPath $dest -File | Select-Object -ExpandProperty Name | Sort-Object)
-          $expected = @('com_minimarket-0.5.81.zip', 'minimarket_demo_gallery_filters_0_5_81.sql', 'mod_minimarket_toolbar-0.5.81.zip')
+          $expected = @('com_minimarket-0.5.82.zip', 'minimarket_demo_gallery_filters_0_5_82.sql', 'mod_minimarket_toolbar-0.5.82.zip')
           if (($actual -join '|') -ne ($expected -join '|')) {
             throw ("MM75_DESKTOP_RELEASE_EXPECTED_THREE: " + ($actual -join ','))
           }
@@ -309,6 +309,11 @@ jobs:
           php scripts/test-0-5-79-auth.php
           php scripts/test-0-5-80-checkout-phase.php
           php scripts/test-0-5-81-checkout.php
+          php scripts/test-0-5-82-ui.php
+          node --check src/com_minimarket/media/js/admin-columns.js
+          node --check src/com_minimarket/media/js/manual-order.js
+          node --check src/com_minimarket/media/js/inherited-options.js
+          node --check src/com_minimarket/media/js/category-actions.js
           node --check src/com_minimarket/media/js/checkout.js
           php -l src/com_minimarket/site/src/Service/CheckoutData.php
           php -l src/com_minimarket/site/src/Service/OrderStorage.php
