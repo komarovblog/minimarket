@@ -114,6 +114,16 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                             <span><?php echo $this->escape((string) $product->price); ?></span>
                             <?php echo BadgeHelper::oldPrice($product); ?>
                         </div>
+                        <?php if (in_array($this->productListOptions['system_display_location'],['category','both'],true)) : ?>
+                            <dl class="mm-product-card__attributes small mb-2">
+                                <?php if (empty($this->variantsInProducts[(int)$product->id])) : ?>
+                                <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></dt>
+                                <dd><?php echo $this->escape((string)$product->sku); ?></dd>
+                                <?php endif; ?>
+                                <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
+                                <dd><?php echo (int)$product->stock; ?></dd>
+                            </dl>
+                        <?php endif; ?>
                         <?php if (!empty($this->categoryAttributeRows[(int)$product->id])) : ?>
                             <dl class="mm-product-card__attributes small mb-2">
                                 <?php foreach (array_slice($this->categoryAttributeRows[(int)$product->id],0,5) as $attr) : ?>
@@ -166,8 +176,11 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                                 <?php endif; ?>
                                 <p><?php echo $this->escape((string)$product->price); ?>
                                     <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></p>
+                                <?php if (in_array($this->productListOptions['system_display_location'],['category','both'],true)
+                                        && empty($this->variantsInProducts[(int)$product->id])) : ?>
                                 <p class="small"><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?>:
                                     <?php echo $this->escape((string)$product->sku); ?></p>
+                                <?php endif; ?>
                                 <a class="btn btn-primary" href="<?php echo $this->escape(RouteHelper::product((int)$product->id)); ?>">
                                     <?php echo Text::_('COM_MINIMARKET_CATEGORY_PRODUCT_DETAILS'); ?></a>
                                 <form method="dialog" class="mt-2"><button class="btn btn-outline-secondary">

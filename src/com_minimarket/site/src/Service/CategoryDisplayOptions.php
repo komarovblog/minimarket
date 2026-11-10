@@ -16,7 +16,8 @@ final class CategoryDisplayOptions
             'show_descendant_bundles' => ['category_show_descendant_bundles', 0],
         ];
         $result = [];
-        $result['show_add_to_cart']=(int)$global->get('category_show_add_to_cart',1)===1;
+        $result['show_add_to_cart']=(int)$global->get('category_show_add_to_cart',1)===1
+            && (string)$global->get('shop_type','physical')==='physical';
         $result['quick_view']=(int)$global->get('category_quick_view',0)===1;
         $result['show_badges']=(int)$global->get('category_show_badges',1)===1;
         foreach (['attribute_display_location','option_display_location','system_display_location'] as $key) {

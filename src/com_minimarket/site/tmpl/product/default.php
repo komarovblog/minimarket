@@ -80,6 +80,9 @@ $initialIntro=$hasCustomDescription
 $initialDescription=$hasCustomDescription
     ? (string)($defaultVariant['description_override']??'')
     : (string)($this->product->description??'');
+$systemLocation=(string)\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket')
+    ->get('system_display_location','both');
+$showSystem=in_array($systemLocation,['product','both'],true);
 $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physical'
     && (string)\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket')
         ->get('shop_type','physical') === 'physical';
@@ -300,13 +303,13 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
         <?php echo InputFilter::getInstance()->clean($initialIntro, 'HTML'); ?>
     </div>
     <dl>
-        <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></dt>
-        <dd data-mm-variant-sku><?php echo $this->escape((string) ($defaultVariant['sku'] ?? $this->product->sku)); ?></dd>
+        <dt<?php echo $showSystem?'':' hidden'; ?>><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></dt>
+        <dd data-mm-variant-sku<?php echo $showSystem?'':' hidden'; ?>><?php echo $this->escape((string) ($defaultVariant['sku'] ?? $this->product->sku)); ?></dd>
         <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_PRICE'); ?></dt>
         <dd data-mm-variant-price><?php echo $this->escape((string) $this->product->price); ?>
             <?php echo BadgeHelper::oldPrice($this->product); ?></dd>
-        <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
-        <dd data-mm-variant-stock><?php echo $this->inventoryEnabled
+        <dt<?php echo $showSystem?'':' hidden'; ?>><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
+        <dd data-mm-variant-stock<?php echo $showSystem?'':' hidden'; ?>><?php echo $this->inventoryEnabled
             ? (int) (((int)($this->product->option_stock_mode??0)===0)
                 ? $this->product->stock
                 : ($defaultVariant['stock'] ?? $this->product->stock))
