@@ -24,6 +24,7 @@ final class HtmlView extends BaseHtmlView
     public array $facetData = ['facets'=>[], 'facts'=>[], 'skus'=>[]];
     public array $facetSelection = [];
     public array $facetMatches = [];
+    public string $sortOrder = 'newest';
 
     public function display($tpl = null)
     {
@@ -52,6 +53,19 @@ final class HtmlView extends BaseHtmlView
                 $id, $display['show_products'], $display['show_bundles'],
                 $display['show_descendant_products'], $display['show_descendant_bundles']
             ) : [];
+        $requestedOrder=Factory::getApplication()->input->getCmd('mm_order','newest');
+        $this->sortOrder=in_array($requestedOrder,['newest','name','price_asc','price_desc'],true)
+            ?$requestedOrder:'newest';
+        if ($this->sortOrder==='name') {
+            usort($this->products,static fn($x,$y):int=>
+                strnatcasecmp((string)$x->title,(string)$y->title) ?: ((int)$x->id<=>(int)$y->id));
+        } elseif ($this->sortOrder==='price_asc') {
+            usort($this->products,static fn($x,$y):int=>
+                ((float)$x->price<=>(float)$y->price) ?: ((int)$x->id<=>(int)$y->id));
+        } elseif ($this->sortOrder==='price_desc') {
+            usort($this->products,static fn($x,$y):int=>
+                ((float)$y->price<=>(float)$x->price) ?: ((int)$x->id<=>(int)$y->id));
+        }
         // Query all public facts for this exact list in bounded batches.
         if ($this->products) {
             $db=Factory::getContainer()->get(DatabaseInterface::class);
