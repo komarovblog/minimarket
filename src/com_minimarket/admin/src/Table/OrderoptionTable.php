@@ -19,6 +19,10 @@ final class OrderoptionTable extends Table
     {
         $this->title = trim((string) ($this->title ?? ''));
         $this->code = strtolower(trim((string) ($this->code ?? '')));
+        $this->display_location=(string)($this->display_location??'inherit');
+        if (!in_array($this->display_location,['inherit','product','category','both'],true)) {
+            $this->setError(Text::_('COM_MINIMARKET_ENTITY_DISPLAY_LOCATION_INVALID'));return false;
+        }
         $this->state = (int) ($this->state ?? 1);
         $this->sort_order = (int) ($this->sort_order ?? 0);
         if ($this->code === '' && $this->title !== '') {

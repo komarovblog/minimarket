@@ -16,7 +16,8 @@ final class ProductAttributeCatalog
      * @param int[] $ancestors Published category IDs, root first, leaf last.
      * @return array<int,array{title:string,type:string,unit:string,values:array<int,array{text:string,hex:string,image:string}>}>
      */
-    public static function load(DatabaseInterface $db, int $productId, array $ancestors): array
+    public static function load(DatabaseInterface $db, int $productId, array $ancestors,
+        string $context='product', string $globalLocation='both'): array
     {
         if ($productId < 1 || $ancestors === []) {
             return [];
@@ -44,7 +45,7 @@ final class ProductAttributeCatalog
         }
         $allowSql = implode(',', array_map('intval', $allowed));
         $q = $db->getQuery(true)
-            ->select(['id', 'title', 'input_type', 'number_unit', 'value_source', 'color_display'])
+            ->select(['id', 'title', 'input_type', 'number_unit', 'value_source', 'color_display','display_location'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->where($db->quoteName('id') . ' IN (' . $allowSql . ')')
             ->where($db->quoteName('state') . ' = 1')
@@ -56,6 +57,10 @@ final class ProductAttributeCatalog
             if (!isset($enabled[$id]) || !$enabled[$id]) {
                 continue;
             }
+            $location=(string)($row->display_location??'inherit');
+            if ($location==='inherit')$location=$globalLocation;
+            if (!in_array($location,['product','category','both'],true))$location='both';
+            if ($location!==$context && $location!=='both')continue;
             $type = (string) $row->input_type;
             $attributes[$id] = [
                 'title' => (string) $row->title,

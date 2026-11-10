@@ -35,6 +35,10 @@ final class AttributeTable extends Table
             }
             $this->$field=(int)$this->$field;
         }
+        $this->display_location=(string)($this->display_location??'inherit');
+        if (!in_array($this->display_location,['inherit','product','category','both'],true)) {
+            $this->setError(Text::_('COM_MINIMARKET_ENTITY_DISPLAY_LOCATION_INVALID'));return false;
+        }
         $error=AttributeSettings::normalize($this);
         if ($error!==null) {$this->setError(Text::_($error));return false;}
         $sort=trim((string)$this->sort_order);

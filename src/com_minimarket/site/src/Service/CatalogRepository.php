@@ -315,11 +315,13 @@ final class CatalogRepository
      * Published attributes only, with category rule inheritance.
      * Called after getProduct() has confirmed visible product and category.
      */
-    public function getProductAttributes(int $productId, int $categoryId): array
+    public function getProductAttributes(int $productId, int $categoryId,string $context='product'): array
     {
         if ($productId < 1) return [];
+        $global=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
         return ProductAttributeCatalog::load(
-            $this->db, $productId, $this->categoryTree()->ancestorIds($categoryId)
+            $this->db,$productId,$this->categoryTree()->ancestorIds($categoryId),
+            $context,(string)$global->get('attribute_display_location','both')
         );
     }
 

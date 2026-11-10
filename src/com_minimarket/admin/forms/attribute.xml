@@ -4,6 +4,14 @@
         <field name="id" type="hidden" default="0" filter="int"/>
         <field name="title" type="text" label="JGLOBAL_TITLE" required="true" filter="string" size="60"/>
         <field name="code" type="text" label="COM_MINIMARKET_ATTRIBUTE_CODE" description="COM_MINIMARKET_ATTRIBUTE_CODE_DESC" required="true" filter="string" size="40"/>
+        <field name="display_location" type="list" default="inherit" filter="cmd"
+               label="COM_MINIMARKET_ENTITY_DISPLAY_LOCATION"
+               description="COM_MINIMARKET_ENTITY_DISPLAY_LOCATION_DESC">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="product">COM_MINIMARKET_VISIBILITY_PRODUCT</option>
+            <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
+            <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
+        </field>
         <field name="input_type" type="list" label="COM_MINIMARKET_ATTRIBUTE_TYPE" description="COM_MINIMARKET_ATTRIBUTE_TYPE_DESC" default="text" filter="cmd">
             <option value="text">COM_MINIMARKET_ATTRIBUTE_TEXT</option>
             <option value="number">COM_MINIMARKET_ATTRIBUTE_NUMBER</option>
