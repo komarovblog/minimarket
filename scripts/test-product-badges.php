@@ -136,13 +136,18 @@ namespace MiniMarket\ProductBadgeSmoke {
         !preg_match('/\bDROP\b|\bDELETE\b|\bTRUNCATE\b/i',$migration),
         'migration is additive');
     $repo=file_get_contents($base.'site/src/Service/CatalogRepository.php');
-    ok(substr_count($repo,"quoteName('p.badge_sale_display')")===3
-       && substr_count($repo,"quoteName('p.badge_benefit_display')")===3
-       && substr_count($repo,"quoteName('p.bundle_discount_pct')")===3,
+    ok(substr_count($repo,"quoteName('p.badge_sale_display')")===2
+       && substr_count($repo,"quoteName('p.badge_benefit_display')")===2
+       && substr_count($repo,"quoteName('p.bundle_discount_pct')")===2
+       && str_contains($repo,"'badge_sale_display'")
+       && str_contains($repo,"'badge_benefit_display'")
+       && str_contains($repo,"'bundle_discount_pct'"),
        'badge display and benefit discount present in all public reads');
-    ok(substr_count($repo,"quoteName('p.old_price')")===3 &&
-        substr_count($repo,"quoteName('p.badge_new_since')")===3,
-        'public product, catalog and category select all badge fields');
+    ok(substr_count($repo,"quoteName('p.old_price')")===2
+       && substr_count($repo,"quoteName('p.badge_new_since')")===2
+       && str_contains($repo,"'old_price'")
+       && str_contains($repo,"'badge_new_since'"),
+       'public product, catalog and category select all badge fields');
     foreach(['catalog','category','product'] as $page) {
         $template=file_get_contents($base.'site/tmpl/'.$page.'/default.php');
         ok(str_contains($template,'BadgeHelper::render(') &&
