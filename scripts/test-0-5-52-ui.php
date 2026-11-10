@@ -14,8 +14,8 @@ $views=[];
 foreach($menus as $menu) {
     if(isset($menu['link']))$views[]=(string)$menu['link'];
 }
-ensure(count($xml->xpath('//administration/submenu/menu[@type="separator"]'))===8,
-    'native Joomla menu now separates orders and settings in addition to six entity dividers');
+ensure(count($xml->xpath('//administration/submenu/menu[@type="separator"]'))===9,
+    'native Joomla menu also separates SEO filters from Import/Export');
 ensure(count($xml->xpath('//administration/submenu/menu[@link="option=com_minimarket&view=dashboard"]'))===0,
     'duplicate MiniMarket dashboard submenu removed');
 ensure(count($xml->xpath('//administration/submenu/menu[@link="option=com_config&view=component&component=com_minimarket"]'))===1,
