@@ -89,9 +89,10 @@ namespace MiniMarket\Smoke54 {
         str_contains($api,'$db->setQuery($q,0,25)'),
         'protected paginated brand search endpoint');
     $productJs=(string)file_get_contents($root.'media/js/product-badges.js');
-    verify(str_contains($productJs,'sale.disabled=!eligible') &&
-        !str_contains($productJs,'saleContainer.hidden'),
-        'discount flag stays visible but disabled until old price entered');
+    verify(str_contains($productJs,'sale.disabled=discounted') &&
+        !str_contains($productJs,'sale.disabled=!eligible') &&
+        str_contains($productJs,'row(saleDisplay).hidden=discounted'),
+        'sale remains selectable with manual price; format is independently configurable');
     verify(str_contains($productJs,"mode.value==='discount'") &&
         str_contains($productJs,'benefit.disabled=!discounted'),
         'bundle discounted price UI and benefit flag conditions');
