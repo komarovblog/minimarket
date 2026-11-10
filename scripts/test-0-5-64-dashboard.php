@@ -16,15 +16,17 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
         public static function view(string $name):string{
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
-                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders'
+                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','settings'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
+            if ($name==='deliveries') return 'index.php?option=com_minimarket&amp;view=orders&amp;filter_delivery=courier';
+            if ($name==='settings') return 'index.php?option=com_config&amp;view=component&amp;component=com_minimarket';
             return 'index.php?option=com_minimarket&amp;view='.$name;
         }
     }
 }
 namespace MiniMarket\DashboardTest {
     class View {
-        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3,'orders'=>2];
+        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3,'orders'=>2,'deliveries'=>1];
         public function output():string {
             ob_start();
             try {
@@ -42,21 +44,23 @@ namespace MiniMarket\DashboardTest {
     }
     \define('_JEXEC',1);
     $html=(new View())->output();
-    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===3,
-        'exactly three independent native dashboard panels');
-    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===12 &&
+    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===4,
+        'four independent native dashboard panels including settings');
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===14 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
-        'twelve working management/store/tools tiles');
-    verify(substr_count($html,'mm-dashboard-tiles')===3,
+        'fourteen working management/store/tools/settings tiles');
+    verify(substr_count($html,'mm-dashboard-tiles')===4,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
         'COM_MINIMARKET_DASHBOARD_SHOP',
-        'COM_MINIMARKET_DASHBOARD_TOOLS'];
+        'COM_MINIMARKET_DASHBOARD_TOOLS',
+        'COM_MINIMARKET_DASHBOARD_SETTINGS'];
     $positions=array_map(static fn($name)=>strpos($html,$name),$names);
     verify($positions[0]!==false && $positions[1]!==false
         && $positions[2]!==false && $positions[0]<$positions[1]
-        && $positions[1]<$positions[2],
-        'correct section order Management / Store / Tools');
+        && $positions[1]<$positions[2]
+        && $positions[2]<$positions[3],
+        'correct section order Management / Store / Tools / Settings');
     verify(substr_count($html,'COM_MINIMARKET_DASHBOARD_ORDERS')>=1
         && substr_count($html,'mm-dashboard-tile--pending')===0
         && str_contains($html,'href="index.php?option=com_minimarket&amp;view=orders"'),
@@ -66,6 +70,9 @@ namespace MiniMarket\DashboardTest {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
     }
+    verify(str_contains($html,'&amp;filter_delivery=courier') &&
+        str_contains($html,'option=com_config&amp;view=component&amp;component=com_minimarket'),
+        'Deliveries and Settings cards resolve to functional targets');
     verify(preg_match('/>\\s*7\\s*<\\/span>/', $html)===1 &&
         preg_match('/>\\s*26\\s*<\\/span>/', $html)===1 &&
         preg_match('/>\\s*5\\s*<\\/span>/', $html)===1 &&
@@ -74,7 +81,7 @@ namespace MiniMarket\DashboardTest {
     verify(str_contains($html,'mm-dashboard-band-header') &&
         str_contains($html,'mm-dashboard-tile-top') &&
         !str_contains($html,'mm-dashboard-grid'),
-        'three stacked full-width Joomla panels with icon above labels');
+        'four stacked full-width Joomla panels with icon above labels');
     verify(str_contains($html,'btn btn-primary d-inline-flex') &&
         str_contains($html,'https://example.local/index.php?option=com_minimarket&amp;view=catalog'),
         'Storefront button is solid and still points to public catalog');
