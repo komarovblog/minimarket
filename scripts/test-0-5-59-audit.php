@@ -19,7 +19,7 @@ $mirrors=['category_show_children'=>'show_children','category_show_products'=>'s
  'category_cards_md'=>'cards_md','category_cards_lg'=>'cards_lg',
  'category_cards_xl'=>'cards_xl','category_cards_xxl'=>'cards_xxl'];
 foreach($mirrors as $global=>$local) {
- audit(count($c->xpath("//fieldset[@name='categories']/field[@name='$global']"))===1,
+ audit(count($c->xpath("//fieldset[@name='display']/field[@name='$global']"))===1,
   'missing global category option '.$global);
  audit(count($f->xpath("//fieldset[@name='display']/field[@name='$local']"))===1,
   'missing local category override '.$local);
