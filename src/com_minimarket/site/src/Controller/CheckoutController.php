@@ -32,7 +32,8 @@ final class CheckoutController extends BaseController
         }
         // SMS mode must never silently save unverified orders. Until a real
         // provider and Joomla account flow exist it remains fail-closed.
-        if (CheckoutSettings::mode($params)!=='guest' && (int)$app->getIdentity()->id<1) {
+        if ((CheckoutSettings::mode($params)==='email'
+            || (CheckoutSettings::mode($params)==='sms' && (int)$app->getIdentity()->id<1))) {
             $pending=CheckoutSettings::mode($params)==='email'
                 ?'COM_MINIMARKET_CHECKOUT_EMAIL_PENDING':'COM_MINIMARKET_CHECKOUT_SMS_PENDING';
             $app->enqueueMessage(Text::_($pending),'warning');
