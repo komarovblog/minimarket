@@ -6,7 +6,8 @@ $href='index.php?option=com_minimarket&view=orders'
     .'&filter_search='.rawurlencode($this->search)
     .'&filter_product='.rawurlencode($this->productSearch)
     .'&filter_status='.rawurlencode($this->statusFilter)
-    .'&filter_delivery='.rawurlencode($this->deliveryFilter);
+    .'&filter_delivery='.rawurlencode($this->deliveryFilter)
+    .'&filter_trash='.($this->showTrash?'1':'0');
 $statuses=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelled'=>'secondary'];
 ?>
 <section class="mm-admin-panel mm-admin-list-panel">
@@ -18,9 +19,11 @@ $statuses=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelle
                 <?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_TITLE'); ?></a>
         <?php endif; ?>
     </div>
+    <div class="d-flex justify-content-end mb-2"><a class="btn btn-outline-secondary btn-sm" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders&filter_trash='.($this->showTrash?'0':'1'),false)); ?>"><?php echo Text::_($this->showTrash?'COM_MINIMARKET_ORDER_SHOW_ACTIVE':'COM_MINIMARKET_ORDER_SHOW_TRASH'); ?></a></div>
     <form class="row g-2 align-items-end mb-3" method="get" action="index.php" role="search">
         <input type="hidden" name="option" value="com_minimarket">
         <input type="hidden" name="view" value="orders">
+        <input type="hidden" name="filter_trash" value="<?php echo $this->showTrash?'1':'0'; ?>">
         <div class="col-12 col-md-3">
             <label class="form-label" for="mm-order-search"><?php echo Text::_('COM_MINIMARKET_ORDERS_FILTER_CUSTOMER'); ?></label>
             <input id="mm-order-search" class="form-control" type="search" name="filter_search"

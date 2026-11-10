@@ -69,6 +69,34 @@ final class OrderController extends BaseController
         }
     }
 
+
+    public function trash(): void { $this->changeTrash(true); }
+    public function restore(): void { $this->changeTrash(false); }
+
+    /** Reversible removal: never delete financial snapshots or live orders. */
+    private function changeTrash(bool $remove): void
+    {
+        $app=Factory::getApplication();
+        if ($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        if (!$app->getIdentity()->authorise('core.delete','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $id=$app->input->post->getInt('id',0);
+        if ($id<1)throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_TRASH_DENIED'),400);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
+            ->set($db->quoteName('deleted_at').'='.($remove?'UTC_TIMESTAMP()':'NULL'))
+            ->where($db->quoteName('id').'='.(int)$id);
+        if($remove)$q->where($db->quoteName('status').'='.$db->quote('cancelled'))
+                      ->where($db->quoteName('deleted_at').' IS NULL');
+        else $q->where($db->quoteName('deleted_at').' IS NOT NULL');
+        $db->setQuery($q);$db->execute();
+        if ($db->getAffectedRows()<1)
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_TRASH_DENIED'),400);
+        $app->enqueueMessage(Text::_($remove?'COM_MINIMARKET_ORDER_TRASHED':'COM_MINIMARKET_ORDER_RESTORED'));
+        $this->setRedirect('index.php?option=com_minimarket&view=orders&filter_trash='.($remove?'1':'0'));
+    }
+
     public function status(): void
     {
         $app=Factory::getApplication();
@@ -86,7 +114,7 @@ final class OrderController extends BaseController
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
             ->set($db->quoteName('status').'='.$db->quote($status))
-            ->where($db->quoteName('id').'='.(int)$id);
+            ->where($db->quoteName('id').'='.(int)$id)->where($db->quoteName('deleted_at').' IS NULL');
         $db->setQuery($q);$db->execute();
         $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_SAVED'));
         $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);

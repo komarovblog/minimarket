@@ -13,6 +13,7 @@ final class HtmlView extends BaseHtmlView
     public ?object $order=null;
     public array $items=[];
     public bool $canUpdate=false;
+    public bool $canDelete=false;
     public bool $isCreate=false;
     public array $productChoices=[];
     public array $deliveryMethods=[];
@@ -27,6 +28,7 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }
         $this->canUpdate=$identity->authorise('core.edit.state','com_minimarket');
+        $this->canDelete=$identity->authorise('core.delete','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {
             if (!$identity->authorise('core.create','com_minimarket')) {

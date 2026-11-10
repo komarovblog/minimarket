@@ -20,6 +20,7 @@ final class HtmlView extends BaseHtmlView
     public string $statusFilter='';
     public string $deliveryFilter='';
     public bool $canCreate=false;
+    public bool $showTrash=false;
 
     public function display($tpl=null)
     {
@@ -29,6 +30,7 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }
         $this->canCreate=$user->authorise('core.create','com_minimarket');
+        $this->showTrash=$app->input->getInt('filter_trash',0)===1;
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $this->offset=max(0,min(1000000,$app->input->getInt('limitstart',0)));
         $this->search=mb_substr(trim($app->input->getString('filter_search','')),0,100);
@@ -38,7 +40,7 @@ final class HtmlView extends BaseHtmlView
             ['new','confirmed','completed','cancelled'],true)?$status:'';
         $delivery=$app->input->getCmd('filter_delivery','');
         $this->deliveryFilter=in_array($delivery,['pickup','courier'],true)?$delivery:'';
-        $where=[];
+        $where=['o.deleted_at IS '.($this->showTrash?'NOT NULL':'NULL')];
         if ($this->statusFilter!=='') {
             $where[]='o.status='.$db->quote($this->statusFilter);
         }

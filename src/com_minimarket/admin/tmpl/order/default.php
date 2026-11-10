@@ -63,7 +63,17 @@ $order=$this->order;
     <?php $statusColors=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelled'=>'secondary']; ?>
     <p><span class="badge bg-<?php echo $statusColors[(string)$order->status]??'secondary'; ?>">
         <?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$order->status)); ?></span></p>
-    <?php if ($this->canUpdate) : ?>
+    <?php if ($this->canDelete && ((string)$order->status==='cancelled' || !empty($order->deleted_at))) : ?>
+        <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.'.(!empty($order->deleted_at)?'restore':'trash'),false)); ?>" class="mb-3"
+              <?php if(empty($order->deleted_at)) : ?>data-confirm="<?php echo $this->escape(Text::_('COM_MINIMARKET_ORDER_TRASH_CONFIRM')); ?>" onsubmit="return confirm(this.dataset.confirm)"<?php endif; ?>>
+            <input type="hidden" name="id" value="<?php echo (int)$order->id; ?>">
+            <?php echo HTMLHelper::_('form.token'); ?>
+            <button type="submit" class="btn btn-outline-<?php echo empty($order->deleted_at)?'danger':'secondary'; ?>">
+                <?php echo Text::_(empty($order->deleted_at)?'COM_MINIMARKET_ORDER_TRASH':'COM_MINIMARKET_ORDER_RESTORE'); ?>
+            </button>
+        </form>
+    <?php endif; ?>
+    <?php if ($this->canUpdate && empty($order->deleted_at)) : ?>
         <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>">
             <input type="hidden" name="id" value="<?php echo (int)$order->id; ?>">
             <label for="mm-order-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?></label>

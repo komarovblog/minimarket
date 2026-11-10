@@ -619,6 +619,7 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     items_total_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     total_cents BIGINT UNSIGNED NOT NULL,
     item_count INT UNSIGNED NOT NULL,
+    deleted_at DATETIME NULL DEFAULT NULL,
     created_at DATETIME NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY idx_mm_order_checkout_key (checkout_key),
