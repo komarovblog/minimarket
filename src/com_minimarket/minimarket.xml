@@ -37,8 +37,10 @@
             <params><dashboard>minimarket</dashboard></params>
         </menu>
         <submenu>
-            <menu link="option=com_minimarket&amp;view=orders">COM_MINIMARKET_ORDERS_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=dashboard">COM_MINIMARKET_DASHBOARD_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=orders">COM_MINIMARKET_ORDERS_TITLE
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=order&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu type="separator" alias="mm-separator-orders">-</menu>
             <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=category.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
@@ -62,6 +64,8 @@
             <menu type="separator" alias="mm-separator-6">-</menu>
             <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE</menu>
+            <menu type="separator" alias="mm-separator-settings">-</menu>
+            <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
         </submenu>
     </administration>
     <dashboards>

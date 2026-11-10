@@ -18,6 +18,8 @@ $sections = [
         'items' => [
             ['view' => 'orders', 'label' => 'COM_MINIMARKET_DASHBOARD_ORDERS',
                 'icon' => 'icon-cart', 'count' => 'orders'],
+            ['view' => 'deliveries', 'label' => 'COM_MINIMARKET_DASHBOARD_DELIVERIES',
+                'icon' => 'icon-truck', 'count' => null],
         ],
     ],
     [
@@ -54,6 +56,15 @@ $sections = [
                 'icon' => 'icon-exchange-alt', 'count' => null],
             ['view' => 'feeds', 'label' => 'COM_MINIMARKET_FEEDS_TITLE',
                 'icon' => 'icon-share', 'count' => 'feeds'],
+        ],
+    ],
+    [
+        'title' => 'COM_MINIMARKET_DASHBOARD_SETTINGS',
+        'type' => 'settings',
+        'icon' => 'icon-cog',
+        'items' => [
+            ['view' => 'settings', 'label' => 'COM_MINIMARKET_CONFIG_SETTINGS_MENU',
+                'icon' => 'icon-cog', 'count' => null],
         ],
     ],
 ];

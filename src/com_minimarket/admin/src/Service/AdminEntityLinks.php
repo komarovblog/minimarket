@@ -13,7 +13,7 @@ final class AdminEntityLinks
 {
     private const ENTITIES = ['attribute', 'orderoption', 'category', 'product', 'group', 'value', 'brand', 'collection'];
     private const VIEWS = ['dashboard', 'categories', 'products', 'groups', 'attributes',
-        'orderoptions', 'import', 'feeds', 'brands', 'collections', 'bundles', 'bundlegroups','orders'];
+        'orderoptions', 'import', 'feeds', 'brands', 'collections', 'bundles', 'bundlegroups','orders','deliveries','settings'];
 
     public static function edit(string $entity, int $id): string
     {
@@ -39,6 +39,10 @@ final class AdminEntityLinks
             throw new \InvalidArgumentException('Invalid MiniMarket list target');
         }
 
+        if ($view==='settings' || $view==='deliveries') {
+            return self::htmlUrl('index.php?option=com_config&view=component&component=com_minimarket'
+                .($view==='deliveries'?'#delivery':''));
+        }
         return self::htmlUrl('index.php?option=com_minimarket&view=' . $view);
     }
 
