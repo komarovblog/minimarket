@@ -20,6 +20,14 @@ $order=$this->order;
         <dd class="col-sm-9"><?php echo $this->escape($order->email); ?></dd>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_COMMENT'); ?></dt>
         <dd class="col-sm-9"><?php echo nl2br($this->escape($order->customer_comment)); ?></dd>
+        <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></dt>
+        <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_'.strtoupper((string)($order->delivery_method??'pickup'))); ?></dd>
+        <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_CITY'); ?></dt>
+        <dd class="col-sm-9"><?php echo $this->escape((string)($order->delivery_city??'')); ?></dd>
+        <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_ADDRESS'); ?></dt>
+        <dd class="col-sm-9"><?php echo $this->escape((string)($order->delivery_address??'')); ?></dd>
+        <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_METHOD'); ?></dt>
+        <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_'.strtoupper((string)($order->payment_method??'on_receipt'))); ?></dd>
     </dl>
     <table class="table table-striped mm-admin-list">
         <thead><tr>
@@ -41,6 +49,12 @@ $order=$this->order;
         <?php endforeach; ?>
         </tbody>
     </table>
+    <dl class="row">
+        <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_ITEMS_TOTAL'); ?></dt>
+        <dd class="col-sm-9"><?php echo number_format((int)($order->items_total_cents??$order->total_cents)/100,2,'.',' '); ?> ₽</dd>
+        <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_FEE'); ?></dt>
+        <dd class="col-sm-9"><?php echo number_format((int)($order->delivery_fee_cents??0)/100,2,'.',' '); ?> ₽</dd>
+    </dl>
     <p><strong><?php echo Text::_('COM_MINIMARKET_ORDER_AMOUNT'); ?>:
         <?php echo number_format((int)$order->total_cents/100,2,'.',' '); ?> ₽</strong></p>
     <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_ORDER_NO_PAYMENT'); ?></p>
