@@ -188,3 +188,38 @@ if ($guardExit === 0 || !str_contains($guardOutput, 'MM73_SQL_HISTORY_DATABASE_G
 unlink($guardFile);
 rmdir($guardDir);
 echo "MM73_JOOMLA_SQL_HISTORY_READONLY_GUARD_MYSQL84_PASS\n";
+
+
+// 0.5.75 optional DEMO is additive: gallery photos and diverse filter attributes
+// must import twice without changing other published products.
+$gallerySql=file_get_contents(dirname(__DIR__).'/sample-data/minimarket_demo_gallery_filters_0_5_75.sql');
+if (!is_string($gallerySql) || str_contains($gallerySql,'sample-11.png')) {
+    throw new RuntimeException('MM75_DEMO_SQL_MISSING_OR_UNSHIPPED_IMAGE_PATH');
+}
+$gallerySql=str_replace('USE `minimarket`;', 'USE `minimarket_ci_canonical73`;', $gallerySql);
+for ($pass=1;$pass<=2;$pass++) {
+    try {
+        $db->multi_query($gallerySql);
+        do {
+            $res=$db->store_result();
+            if ($res instanceof mysqli_result) $res->free();
+            if (!$db->more_results()) break;
+        } while ($db->next_result());
+    } catch (Throwable $error) {
+        throw new RuntimeException('MM75_DEMO_IMPORT_FAILED_PASS_'.$pass.': '.$error->getMessage(),0,$error);
+    }
+}
+foreach ([
+    "SELECT COUNT(*) FROM nnop3_minimarket_attributes WHERE code LIKE 'mm-demo-%'" => 5,
+    "SELECT COUNT(*) FROM nnop3_minimarket_attribute_values v JOIN nnop3_minimarket_attributes a ON a.id=v.attribute_id WHERE a.code LIKE 'mm-demo-%'" => 11,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_images WHERE product_id=1090 AND path LIKE 'images/minimarket/sample-%.png'" => 3,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_images WHERE product_id=1091 AND path LIKE 'images/minimarket/sample-%.png'" => 3,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_images WHERE product_id=1092 AND path LIKE 'images/minimarket/sample-%.png'" => 3,
+    "SELECT COUNT(*) FROM nnop3_minimarket_product_attribute_scalars s JOIN nnop3_minimarket_attributes a ON a.id=s.attribute_id WHERE a.code='mm-demo-weight' AND s.product_id IN (1201,1202)" => 2,
+] as $query=>$expected) {
+    $got=(int)$db->query($query)->fetch_row()[0];
+    if ($got!==$expected) {
+        throw new RuntimeException('MM75_DEMO_EXPECTED_'.$expected.'_GOT_'.$got.' QUERY '.$query);
+    }
+}
+echo "MM75_GALLERY_FILTER_DEMO_MYSQL84_PASS: sample-01..10 only, repeatable\n";
