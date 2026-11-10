@@ -24,6 +24,7 @@ final class HtmlView extends BaseHtmlView
     public array $facetData = ['facets'=>[], 'facts'=>[], 'skus'=>[]];
     public array $facetSelection = [];
     public array $facetMatches = [];
+    public array $facetGroupCounts = [];
     public string $sortOrder = 'newest';
     public int $productPage = 1;
     public int $productsPerPage = 10;
@@ -95,6 +96,15 @@ final class HtmlView extends BaseHtmlView
                 }
                 $other=$this->facetSelection;
                 unset($other[$fid]);
+                $groupCount=0;
+                foreach ($this->products as $candidate) {
+                    $pid=(int)$candidate->id;
+                    if (FacetedCatalog::matches(
+                        $this->facetData['facts'][$pid]??[],
+                        $this->facetData['skus'][$pid]??[],
+                        $this->facetData['facets'],$other)) $groupCount++;
+                }
+                $this->facetGroupCounts[$fid]=$groupCount;
                 foreach ($facet['choices'] as &$choice) {
                     $trial=$other;
                     $trial[$fid]=['values'=>[$choice['value']]];
