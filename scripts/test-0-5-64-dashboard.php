@@ -16,7 +16,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
         public static function view(string $name):string{
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
-                'groups','bundlegroups','attributes','orderoptions','import','feeds'
+                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
             return 'index.php?option=com_minimarket&amp;view='.$name;
         }
@@ -24,7 +24,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
 }
 namespace MiniMarket\DashboardTest {
     class View {
-        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3];
+        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3,'orders'=>2];
         public function output():string {
             ob_start();
             try {
@@ -44,9 +44,9 @@ namespace MiniMarket\DashboardTest {
     $html=(new View())->output();
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===3,
         'exactly three independent native dashboard panels');
-    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===11 &&
-        substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===1),
-        'one Orders, nine Store and two Tools tiles');
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===12 &&
+        substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
+        'twelve working management/store/tools tiles');
     verify(substr_count($html,'mm-dashboard-tiles')===3,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
@@ -58,11 +58,11 @@ namespace MiniMarket\DashboardTest {
         && $positions[1]<$positions[2],
         'correct section order Management / Store / Tools');
     verify(substr_count($html,'COM_MINIMARKET_DASHBOARD_ORDERS')>=1
-        && substr_count($html,'mm-dashboard-tile--pending')===1
-        && !str_contains($html,'href="index.php?option=com_minimarket&amp;view=orders"'),
-        'Orders is a future disabled action, not a fake checkout link');
+        && substr_count($html,'mm-dashboard-tile--pending')===0
+        && str_contains($html,'href="index.php?option=com_minimarket&amp;view=orders"'),
+        'Orders opens a real administrator list');
     foreach(['categories','products','bundles','brands','collections','groups',
-        'bundlegroups','attributes','orderoptions','import','feeds'] as $view) {
+        'bundlegroups','attributes','orderoptions','import','feeds','orders'] as $view) {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
     }

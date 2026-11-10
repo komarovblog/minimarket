@@ -87,6 +87,7 @@ namespace MiniMarket\DashboardCountsTest {
             'attributes|1=1'=>12,
             'order_options|1=1'=>7,
             'feeds|1=1'=>3,
+            'orders|1=1'=>2,
         ];
         public function quoteName(string $name):string{return '`'.$name.'`';}
         public function setQuery(string $query):void{$this->query=$query;$this->queries[]=$query;}
@@ -121,11 +122,11 @@ namespace MiniMarket\DashboardCountsTest {
     $expected=[
         'categories'=>27,'products'=>78,'bundles'=>3,'brands'=>5,
         'collections'=>6,'groups'=>4,'bundlegroups'=>2,'attributes'=>12,
-        'orderoptions'=>7,'feeds'=>3
+        'orderoptions'=>7,'feeds'=>3,'orders'=>2
     ];
-    verify($view->stats===$expected,'all ten counts use the correct database entities and filters');
-    verify(count(Factory::$database->queries)===10,'exactly ten count queries, no invented order/import counts');
-    verify(count(array_unique(Factory::$database->queries))===10,
+    verify($view->stats===$expected,'all eleven counters use actual database entities and filters');
+    verify(count(Factory::$database->queries)===11,'exactly eleven count queries including real orders');
+    verify(count(array_unique(Factory::$database->queries))===11,
         'each entity has its own distinct correctly filtered query');
     $html=(new Renderer($view->stats))->html();
     foreach($expected as $key=>$count){
@@ -136,11 +137,12 @@ namespace MiniMarket\DashboardCountsTest {
         'the only link with non-numeric counter is Import / Export');
     verify(substr_count($html,'<span aria-hidden="true">—</span>')===1,
         'Import / Export displays dash, never zero');
-    verify((bool)preg_match('/mm-dashboard-tile--pending[\\s\\S]*?—<\\/span>/u',$html),
-        'Orders (not implemented) has a dash, not fake order count');
+    verify(str_contains($html,'data-mm-stat="orders"')
+        && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
+        'Orders now has a real counter and active link');
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===3 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===11 &&
-        substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===1),
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===12 &&
+        substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
     verify(str_contains($css,'background: #272e36') &&
@@ -154,7 +156,7 @@ namespace MiniMarket\DashboardCountsTest {
     foreach(['ru-RU','en-GB'] as $lang) {
         $ini=parse_ini_file(__DIR__.'/../src/com_minimarket/admin/language/'.$lang.'/com_minimarket.ini');
         verify(isset($ini['COM_MINIMARKET_DASHBOARD_NO_COUNT']),
-            'non-numeric Orders description translated: '.$lang);
+            'historical no-count description translated: '.$lang);
     }
     echo 'DASHBOARD_065_COUNTS_AND_DARK_OK: '.$checks." checks\n";
 }

@@ -13,10 +13,10 @@ $css=(string)file_get_contents($base.'media/css/dashboard.css');
 verify68(!str_contains($tpl, "Text::_('COM_MINIMARKET_DASHBOARD_COMING_SOON')") &&
     !str_contains($tpl, '<small class="mm-dashboard-tile-note">'),
     'Orders no longer displays Coming soon');
-verify68(str_contains($tpl, "'pending' => true") &&
-    str_contains($tpl, "'count' => null") &&
-    str_contains($tpl, 'mm-dashboard-tile--pending'),
-    'Orders remains a disabled tile and keeps its dash counter');
+verify68(str_contains($tpl, "'view' => 'orders'") &&
+    str_contains($tpl, "'count' => 'orders'") &&
+    !str_contains($tpl, "'pending' => true"),
+    'Orders is a real management tile with live count');
 verify68(str_contains($tpl, "\$item['view'] === 'import'") &&
     str_contains($tpl, 'mm-dashboard-icon--import') &&
     str_contains($tpl, '<svg') &&
