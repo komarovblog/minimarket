@@ -175,6 +175,7 @@ jobs:
         run: |
           pwsh -NoProfile -File ./scripts/build-clean-catalog.ps1 -DbPrefix nnop3_ -DatabaseName minimarket_ci_canonical73 -OutputPath ./clean-ci-73.sql
           php scripts/test-0-5-73-clean-mysql84.php ./clean-ci-73.sql
+          php scripts/test-0-5-75-stock-mysql84.php
 
   windows-package:
     name: Windows component ZIP
