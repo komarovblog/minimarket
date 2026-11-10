@@ -1,53 +1,74 @@
 param(
-    [string]$DesktopPath = ''
+    [string]$DesktopPath = '',
+    [switch]$SkipPull
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+# One command => EXACTLY three deliverables on the user's Windows Desktop:
+# 1) component ZIP, 2) standalone toolbar module ZIP,
+# 3) additive demo-gallery/filters SQL. Never modifies the database.
 $root = Split-Path -Parent $PSScriptRoot
+if (-not (Test-Path -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -PathType Leaf)) {
+    throw "MINIMARKET_PROJECT_ROOT_NOT_FOUND: $root"
+}
 Set-Location -LiteralPath $root
-& git pull --ff-only origin development
-if ($LASTEXITCODE -ne 0) { throw 'GIT_PULL_FAILED' }
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'build.ps1')
-if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_BUILD_FAILED' }
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'inspect-package.ps1')
-if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_INSPECT_FAILED' }
-[xml]$manifest=Get-Content -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -Raw -Encoding UTF8
-$version=[string]$manifest.extension.version
-$versionTag=$version.Replace('.', '_')
-$names=@("com_minimarket-$version.zip","minimarket_mysql84_nnop3_update_$versionTag.sql","mod_minimarket_toolbar-$version.zip")
-if ([string]::IsNullOrWhiteSpace($DesktopPath)) { $DesktopPath=[Environment]::GetFolderPath('Desktop') }
-if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) { throw "DESKTOP_NOT_FOUND: $DesktopPath" }
-foreach ($name in $names) {
-    $src=Join-Path (Join-Path $root 'dist') $name
-    if (-not (Test-Path -LiteralPath $src -PathType Leaf)) { throw "OUTPUT_NOT_FOUND: $src" }
-    $dst=Join-Path $DesktopPath $name
-    Copy-Item -LiteralPath $src -Destination $dst -Force
-    if ((Get-FileHash -LiteralPath $src -Algorithm SHA256).Hash -ne
-        (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash) { throw "DESKTOP_HASH_MISMATCH: $name" }
+
+if (-not $SkipPull) {
+    & git -C $root pull --ff-only origin development
+    if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_GIT_PULL_FAILED' }
+}
+
+# Avoid hardcoded OSPanel/PHP paths. Build and inspect within the current
+# PowerShell process so Windows does not need to locate a second interpreter.
+& (Join-Path $PSScriptRoot 'build.ps1')
+if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -is [int]) {
+    throw 'MINIMARKET_BUILD_FAILED'
+}
+& (Join-Path $PSScriptRoot 'inspect-package.ps1')
+if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -is [int]) {
+    throw 'MINIMARKET_PACKAGE_INSPECTION_FAILED'
+}
+
+[xml]$manifest = Get-Content -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -Raw -Encoding UTF8
+$version = [string]$manifest.extension.version
+if ($version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "MINIMARKET_INVALID_VERSION: $version"
+}
+$demo = Join-Path $root 'sample-data\minimarket_demo_gallery_filters_0_5_75.sql'
+if ($version -ne '0.5.75' -or -not (Test-Path -LiteralPath $demo -PathType Leaf)) {
+    throw "MINIMARKET_DEMO_SQL_NOT_READY_FOR_VERSION: $version"
+}
+# Desktop may be redirected to OneDrive. Windows supplies the actual location.
+if ([string]::IsNullOrWhiteSpace($DesktopPath)) {
+    $DesktopPath = [Environment]::GetFolderPath('Desktop')
+}
+if ([string]::IsNullOrWhiteSpace($DesktopPath)) {
+    $DesktopPath = Join-Path $env:USERPROFILE 'Desktop'
+}
+if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
+    throw "MINIMARKET_DESKTOP_NOT_FOUND: $DesktopPath"
+}
+
+$deliverables = @(
+    @{ Source = Join-Path $root "dist\com_minimarket-$version.zip"; Name = "com_minimarket-$version.zip" },
+    @{ Source = Join-Path $root "dist\mod_minimarket_toolbar-$version.zip"; Name = "mod_minimarket_toolbar-$version.zip" },
+    @{ Source = $demo; Name = 'minimarket_demo_gallery_filters_0_5_75.sql' }
+)
+foreach ($item in $deliverables) {
+    if (-not (Test-Path -LiteralPath $item.Source -PathType Leaf)) {
+        throw "MINIMARKET_REQUIRED_FILE_MISSING: $($item.Source)"
+    }
+}
+foreach ($item in $deliverables) {
+    $dst = Join-Path $DesktopPath $item.Name
+    Copy-Item -LiteralPath $item.Source -Destination $dst -Force
+    $fromHash = (Get-FileHash -LiteralPath $item.Source -Algorithm SHA256).Hash
+    $toHash = (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash
+    if ($fromHash -ne $toHash) {
+        throw "MINIMARKET_DESKTOP_HASH_MISMATCH: $dst"
+    }
     Write-Output "DESKTOP_FILE_OK: $dst"
 }
-# The one-time, versioned SQL migration is optional: use only when
-# importing SQL before installing the component instead of Joomla auto-upgrade.
-$manualSqlName="minimarket_mysql84_nnop3_upgrade_$versionTag.sql"
-$manualSqlPath=Join-Path (Join-Path $root 'releases') $manualSqlName
-if (Test-Path -LiteralPath $manualSqlPath -PathType Leaf) {
-    $targetSql=Join-Path $DesktopPath $manualSqlName
-    Copy-Item -LiteralPath $manualSqlPath -Destination $targetSql -Force
-    if ((Get-FileHash -LiteralPath $manualSqlPath -Algorithm SHA256).Hash -ne
-        (Get-FileHash -LiteralPath $targetSql -Algorithm SHA256).Hash) {
-        throw "DESKTOP_HASH_MISMATCH: $manualSqlName"
-    }
-    Write-Output "DESKTOP_SQL_UPGRADE_OK: $targetSql"
-}
-$extraDemo=Join-Path $root 'sample-data\minimarket_demo_gallery_filters_0_5_75.sql'
-if ($version -eq '0.5.75' -and (Test-Path -LiteralPath $extraDemo -PathType Leaf)) {
-    $name='minimarket_demo_gallery_filters_0_5_75.sql'
-    $destination=Join-Path $DesktopPath $name
-    Copy-Item -LiteralPath $extraDemo -Destination $destination -Force
-    if ((Get-FileHash -LiteralPath $extraDemo -Algorithm SHA256).Hash -ne
-        (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash) {
-        throw 'MINIMARKET_DEMO75_DESKTOP_HASH_MISMATCH'
-    }
-    Write-Output "MINIMARKET_DEMO_SQL_DESKTOP_OK: $destination"
-}
-Write-Output "MINIMARKET_DESKTOP_RELEASE_OK: $version"
+Write-Output "MINIMARKET_DESKTOP_3_FILES_OK: version=$version"
+Write-Output 'SQL_IS_OPTIONAL: import ONLY to add demo galleries/filters; do not import cumulative or clean SQL.'
