@@ -98,10 +98,10 @@ WHERE p.id BETWEEN 1001 AND 1077 AND p.sku LIKE 'TOY-%'
 INSERT IGNORE INTO nnop3_minimarket_product_images
 (product_id,path,alt,sort_order)
 SELECT p.id,
- CONCAT('images/minimarket/sample-',LPAD(MOD(p.id+v.offset,10)+1,2,'0'),'.png'),
- CONCAT(p.sku,' / demo angle ',v.offset+1),v.offset+1
+ CONCAT('images/minimarket/sample-',LPAD(MOD(p.id+v.shift_index,10)+1,2,'0'),'.png'),
+ CONCAT(p.sku,' / demo angle ',v.shift_index+1),v.shift_index+1
 FROM nnop3_minimarket_products AS p
-CROSS JOIN (SELECT 0 AS offset UNION ALL SELECT 1) AS v
+CROSS JOIN (SELECT 0 AS shift_index UNION ALL SELECT 1) AS v
 WHERE ((p.id BETWEEN 1001 AND 1077 AND p.sku=CONCAT('TOY-',p.id))
     OR (p.id IN (1090,1091,1092) AND p.sku=CONCAT('BUNDLE-',p.id)))
  AND p.product_type IN ('simple','bundle');
