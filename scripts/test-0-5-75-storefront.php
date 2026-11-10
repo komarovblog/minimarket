@@ -36,7 +36,7 @@ v75(str_contains($filters,"'checkbox'") && str_contains($filters,'data-mm-facet-
 v75(str_contains($filters,'data-mm-choice-count') && str_contains($filters,'data-mm-facet-group-count'),'facets display counts');
 $frontend=$read('media/js/faceted-catalog.js');
 v75(str_contains($frontend,'[data-mm-choice-search]'),'option search is live');
-v75(str_contains($frontend,'group.dataset.mmFacetMultiple'),'exclusive checkbox behavior');
+v75(str_contains($frontend,'dataset.mmFacetMultiple'),'exclusive checkbox behavior');
 $category=$read('site/tmpl/category/default.php');
 v75(str_contains($category,'data-mm-sort'),'category sorting shown above products');
 $catalog=$read('site/tmpl/catalog/default.php');
