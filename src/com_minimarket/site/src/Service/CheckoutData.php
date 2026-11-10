@@ -13,7 +13,7 @@ final class CheckoutData
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_INVALID');
             }
         }
-        $policies=array_merge(CheckoutSettings::FIELD_DEFAULTS,$policies);
+        $policies=array_merge(['name'=>'required','phone'=>'required','email'=>'optional','comment'=>'optional'],$policies);
         foreach ($policies as $mode) {
             if (!in_array($mode,['hidden','optional','required'],true)) {
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_INVALID');

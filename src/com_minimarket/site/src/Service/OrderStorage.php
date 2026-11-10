@@ -15,7 +15,8 @@ final class OrderStorage
         array $contact,
         array $quote,
         string $checkoutKey,
-        int $userId
+        int $userId,
+        array $delivery=[]
     ): int {
         // Contact-only orders may have user_id=0 during UX development.
         if ($userId<0) throw new \DomainException('COM_MINIMARKET_CHECKOUT_INVALID');
@@ -23,6 +24,21 @@ final class OrderStorage
             || empty($quote['available']) || empty($quote['lines'])
             || count($quote['lines'])>CartState::MAX_LINES) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_CART_INVALID');
+        }
+        $delivery=array_merge([
+            'method'=>'pickup','city'=>'','address'=>'','fee_cents'=>0,
+            'rate_source'=>'none','payment_method'=>'on_receipt'
+        ],$delivery);
+        if (!in_array($delivery['method'],['pickup','courier'],true)
+            || !in_array($delivery['payment_method'],['on_receipt','bank_transfer'],true)
+            || !in_array($delivery['rate_source'],['none','directory'],true)
+            || !is_int($delivery['fee_cents']) || $delivery['fee_cents']<0
+            || $delivery['fee_cents']>99999999999
+            || !is_string($delivery['city']) || !is_string($delivery['address'])
+            || mb_strlen($delivery['city'])>120
+            || mb_strlen($delivery['address'])>512
+            || ($delivery['method']==='pickup' && $delivery['fee_cents']!==0)) {
+            throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
         }
         $total=0;$units=0;$lines=[];
         foreach ($quote['lines'] as $line) {
@@ -56,12 +72,18 @@ final class OrderStorage
         $db->transactionStart();
         try {
             $columns=['checkout_key','user_id','customer_name','phone','email',
-                'customer_comment','status','currency','total_cents','item_count','created_at'];
+                'customer_comment','delivery_method','delivery_city','delivery_address',
+                'delivery_rate_source','delivery_fee_cents','payment_method',
+                'status','currency','items_total_cents','total_cents','item_count','created_at'];
             $values=[
                 $db->quote($checkoutKey),(string)$userId,
                 $db->quote($contact['name']),$db->quote($contact['phone']),
                 $db->quote($contact['email']),$db->quote($contact['comment']),
+                $db->quote($delivery['method']),$db->quote($delivery['city']),
+                $db->quote($delivery['address']),$db->quote($delivery['rate_source']),
+                (string)$delivery['fee_cents'],$db->quote($delivery['payment_method']),
                 $db->quote('new'),$db->quote('RUB'),(string)$total,
+                (string)($total+$delivery['fee_cents']),
                 (string)$units,$db->quote(gmdate('Y-m-d H:i:s'))
             ];
             $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_orders'))

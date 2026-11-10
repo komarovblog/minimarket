@@ -12,6 +12,8 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CartCatalog;
 use MiniMarket\Component\Minimarket\Site\Service\CartState;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutData;
+use MiniMarket\Component\Minimarket\Site\Service\CheckoutSettings;
+use MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery;
 use MiniMarket\Component\Minimarket\Site\Service\OrderStorage;
 
 /** Customer POST only: validate nonce, CSRF, inventory and fresh server prices. */
@@ -24,11 +26,18 @@ final class CheckoutController extends BaseController
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
         }
         $session=$app->getSession();
-        if ((string)ComponentHelper::getParams('com_minimarket')->get('shop_type','physical')!=='physical') {
+        $params=ComponentHelper::getParams('com_minimarket');
+        if ((string)$params->get('shop_type','physical')!=='physical') {
             throw new \RuntimeException(Text::_('COM_MINIMARKET_CART_NOT_AVAILABLE'),403);
         }
-        // Current phase: contact-only checkout. SMS verification and user
-        // creation are reserved for a later, explicitly enabled integration.
+        // SMS mode must never silently save unverified orders. Until a real
+        // provider and Joomla account flow exist it remains fail-closed.
+        if (CheckoutSettings::mode($params)==='sms') {
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_CHECKOUT_SMS_PENDING'),'warning');
+            $this->setRedirect(RouteHelper::checkout());
+            return;
+        }
+        // Guest mode is used to test the final checkout UX without integrations.
         $identity=$app->getIdentity();
         if ((int)$identity->id>0 && !empty($identity->block)) {
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
@@ -51,17 +60,24 @@ final class CheckoutController extends BaseController
             return;
         }
         try {
+            $policies=CheckoutSettings::fields($params);
             $contact=CheckoutData::normalize([
                 'name'=>$app->input->post->get('customer_name','','string'),
                 'phone'=>$app->input->post->get('phone','','string'),
                 'email'=>$app->input->post->get('email','','string'),
                 'comment'=>$app->input->post->get('comment','','string'),
+            ],$policies);
+            $delivery=CheckoutDelivery::quote($params,[
+                'delivery_method'=>$app->input->post->get('delivery_method','','string'),
+                'delivery_city'=>$app->input->post->get('delivery_city','','string'),
+                'delivery_address'=>$app->input->post->get('delivery_address','','string'),
+                'payment_method'=>$app->input->post->get('payment_method','','string'),
             ]);
             $db=Factory::getContainer()->get(DatabaseInterface::class);
-            $inventory=(int)ComponentHelper::getParams('com_minimarket')->get('inventory_enabled',1)===1;
+            $inventory=(int)$params->get('inventory_enabled',1)===1;
             $quote=(new CartCatalog($db))->details($cart,$inventory);
             if (!$quote['available']) throw new \DomainException($quote['error']?:'COM_MINIMARKET_CHECKOUT_CART_INVALID');
-            $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id);
+            $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery);
             $session->set('com_minimarket.checkout.key','');
             $session->set(CartState::SESSION_KEY,[]);
             $session->set('com_minimarket.checkout.last_order',$id);
