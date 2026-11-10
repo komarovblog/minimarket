@@ -118,7 +118,8 @@ namespace MiniMarket\Tests\CanonicalAttributes {
     $item->number_min='0';$item->number_step='0';
     check($item->check()===false,'zero numeric step rejected');
     $item->number_step='5';$item->filter_mode='radio';
-    check($item->check()===false,'radio incompatible with number');
+    check($item->check()===true && $item->filter_mode==='checkboxes',
+        'legacy radio mode normalizes to canonical checkbox display for numbers');
     $item->filter_mode='slider';$db->hasSavedValues=true;
     check($item->check()===false,'cannot change type/source when product values exist');
     $db->hasSavedValues=false;
