@@ -15,6 +15,43 @@ final class CatalogRepository
     private ?CategoryTree $categoryTree = null;
     private ?array $bundleSnapshot = null;
     private ?array $bundlePriceSnapshot = null;
+    /** @var object[]|null Published, in-stock catalog entries cached per request. */
+    private ?array $listingCache = null;
+    private ?bool $inventoryEnabled = null;
+
+    private function inventoryEnabled(): bool
+    {
+        if ($this->inventoryEnabled === null) {
+            $this->inventoryEnabled = !class_exists(\Joomla\CMS\Component\ComponentHelper::class)
+                || (int)\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket')
+                    ->get('inventory_enabled',1) === 1;
+        }
+        return $this->inventoryEnabled;
+    }
+
+    /** A product can be sold only if its relevant SKU stock has units left. */
+    private function availabilitySql(): string
+    {
+        if (!$this->inventoryEnabled()) return '1=1';
+        $variants = $this->db->quoteName('#__minimarket_product_variants');
+        return "(p.product_type = 'bundle' OR (p.product_type = 'simple' AND ("
+            . "(p.option_stock_mode = 0 AND p.stock > 0)"
+            . " OR (p.option_stock_mode <> 0 AND ("
+            . "EXISTS (SELECT 1 FROM ".$variants." AS mmv"
+            . " WHERE mmv.product_id=p.id AND mmv.state=1 AND mmv.stock>0)"
+            . " OR (p.stock>0 AND NOT EXISTS (SELECT 1 FROM ".$variants." AS mmv2"
+            . " WHERE mmv2.product_id=p.id))"
+            . ")))))";
+    }
+
+    /** Physical bundle stock is derived from its real components, not p.stock. */
+    private function filterListingRows(array $rows): array
+    {
+        if (!$this->inventoryEnabled()) return $rows;
+        return array_values(array_filter($rows,static fn($p):bool=>
+            !isset($p->stock) || (int)$p->stock > 0));
+    }
+
 
     private function bundlePriceSnapshot(): array
     {
@@ -86,96 +123,61 @@ final class CatalogRepository
     }
 
     /**
-     * Count only published products whose category is also published.
-     * This source is deliberately shared by all menu contexts.
+     * Load published candidates once, filter real bundle availability before
+     * pagination, and let SEO product URLs continue resolving independently.
+     * This prevents empty pages caused by filtering only after LIMIT/OFFSET.
      */
-    public function countAllProducts(): int
+    private function catalogListing(): array
     {
+        if ($this->listingCache !== null) return $this->listingCache;
         $visibleIds = $this->visibleCategoryIdsSql();
-
-        if ($visibleIds === '') {
-            return 0;
-        }
-
-        $q = $this->db->getQuery(true)
-            ->select('COUNT(*)')
-            ->from($this->db->quoteName('#__minimarket_products', 'p'))
-            ->join(
-                'INNER',
-                $this->db->quoteName('#__minimarket_categories', 'c')
-                . ' ON ' . $this->db->quoteName('p.category_id')
-                . ' = ' . $this->db->quoteName('c.id')
-            )
-            ->where($this->db->quoteName('p.state') . ' = 1')
-            ->where($this->db->quoteName('c.state') . ' = 1')
-            ->where($this->db->quoteName('p.category_id') . ' IN (' . $visibleIds . ')');
-
+        if ($visibleIds === '') return $this->listingCache = [];
+        $fields=['id','title','sku','price','old_price','badge_sale',
+            'badge_benefit','badge_sale_display','badge_benefit_display',
+            'bundle_price_mode','bundle_discount_pct','badge_new','badge_new_days',
+            'badge_new_since','badge_popular','badge_popular_days',
+            'badge_popular_since','stock','product_type','option_stock_mode',
+            'category_id','image','image_alt'];
+        $q=$this->db->getQuery(true)
+            ->select(array_map(fn($field)=>$this->db->quoteName('p.'.$field),$fields))
+            ->from($this->db->quoteName('#__minimarket_products','p'))
+            ->join('INNER',$this->db->quoteName('#__minimarket_categories','c')
+                .' ON p.category_id=c.id')
+            ->where('p.state = 1')->where('c.state = 1')
+            ->where('p.category_id IN ('.$visibleIds.')')
+            ->where($this->availabilitySql())
+            ->order('p.id DESC');
         $this->db->setQuery($q);
-
-        return (int) $this->db->loadResult();
+        return $this->listingCache = $this->filterListingRows(
+            $this->derivedStock((array)$this->db->loadObjectList()));
     }
 
-    /**
-     * Page of real, published products; fixed allowlist prevents SQL injection
-     * via a menu option or a future public sorting control.
-     *
-     * @return object[]
-     */
-    public function getAllProductsPage(int $offset, int $limit, string $order): array
+    public function countAllProducts(): int
     {
-        $visibleIds = $this->visibleCategoryIdsSql();
+        return count($this->catalogListing());
+    }
 
-        if ($visibleIds === '') {
-            return [];
+    /** All item quantities and bundle discounts are resolved before sorting. */
+    public function getAllProductsPage(int $offset,int $limit,string $order): array
+    {
+        $rows=$this->catalogListing();
+        switch ($order) {
+            case 'name':
+                usort($rows,static fn($a,$b):int=>
+                    strnatcasecmp((string)$a->title,(string)$b->title)
+                    ?:((int)$a->id<=>(int)$b->id));break;
+            case 'price_asc':
+                usort($rows,static fn($a,$b):int=>
+                    ((float)$a->price<=>(float)$b->price)
+                    ?:((int)$a->id<=>(int)$b->id));break;
+            case 'price_desc':
+                usort($rows,static fn($a,$b):int=>
+                    ((float)$b->price<=>(float)$a->price)
+                    ?:((int)$a->id<=>(int)$b->id));break;
+            default:
+                usort($rows,static fn($a,$b):int=>(int)$b->id<=>(int)$a->id);
         }
-
-        $orders = [
-            'newest' => $this->db->quoteName('p.id') . ' DESC',
-            'name' => $this->db->quoteName('p.title') . ' ASC, ' . $this->db->quoteName('p.id') . ' ASC',
-            'price_asc' => $this->db->quoteName('p.price') . ' ASC, ' . $this->db->quoteName('p.id') . ' ASC',
-            'price_desc' => $this->db->quoteName('p.price') . ' DESC, ' . $this->db->quoteName('p.id') . ' ASC',
-        ];
-
-        $q = $this->db->getQuery(true)
-            ->select([
-                $this->db->quoteName('p.id'),
-                $this->db->quoteName('p.title'),
-                $this->db->quoteName('p.sku'),
-                $this->db->quoteName('p.price'),
-                $this->db->quoteName('p.old_price'),
-                $this->db->quoteName('p.badge_sale'),
-                $this->db->quoteName('p.badge_benefit'),
-                $this->db->quoteName('p.badge_sale_display'),
-                $this->db->quoteName('p.badge_benefit_display'),
-                $this->db->quoteName('p.bundle_price_mode'),
-                $this->db->quoteName('p.bundle_discount_pct'),
-                $this->db->quoteName('p.badge_new'),
-                $this->db->quoteName('p.badge_new_days'),
-                $this->db->quoteName('p.badge_new_since'),
-                $this->db->quoteName('p.badge_popular'),
-                $this->db->quoteName('p.badge_popular_days'),
-                $this->db->quoteName('p.badge_popular_since'),
-                $this->db->quoteName('p.stock'),
-                $this->db->quoteName('p.product_type'),
-                $this->db->quoteName('p.option_stock_mode'),
-                $this->db->quoteName('p.image'),
-                $this->db->quoteName('p.image_alt'),
-            ])
-            ->from($this->db->quoteName('#__minimarket_products', 'p'))
-            ->join(
-                'INNER',
-                $this->db->quoteName('#__minimarket_categories', 'c')
-                . ' ON ' . $this->db->quoteName('p.category_id')
-                . ' = ' . $this->db->quoteName('c.id')
-            )
-            ->where($this->db->quoteName('p.state') . ' = 1')
-            ->where($this->db->quoteName('c.state') . ' = 1')
-            ->where($this->db->quoteName('p.category_id') . ' IN (' . $visibleIds . ')')
-            ->order($orders[$order] ?? $orders['newest']);
-
-        $this->db->setQuery($q, max(0, $offset), max(1, min($limit, 48)));
-
-        return $this->derivedStock((array) $this->db->loadObjectList());
+        return array_slice($rows,max(0,$offset),max(1,min(48,$limit)));
     }
 
     public function getCategory(int $id): ?object
@@ -256,11 +258,13 @@ final class CatalogRepository
             ->where('(' . implode(' OR ', $conditions) . ')')
             ->where($this->db->quoteName('p.state') . ' = 1')
             ->where($this->db->quoteName('c.state') . ' = 1')
+            ->where($this->availabilitySql())
             ->order($this->db->quoteName('p.id') . ' DESC');
 
         $this->db->setQuery($q);
 
-        return $this->derivedStock((array) $this->db->loadObjectList());
+        return $this->filterListingRows(
+            $this->derivedStock((array) $this->db->loadObjectList()));
     }
 
     /**
