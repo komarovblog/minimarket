@@ -66,6 +66,10 @@
             <menu type="separator" alias="mm-separator-5">-</menu>
             <menu link="option=com_minimarket&amp;view=collections">COM_MINIMARKET_COLLECTIONS</menu>
             <menu type="separator" alias="mm-separator-6">-</menu>
+            <menu link="option=com_minimarket&amp;view=seofilters">COM_MINIMARKET_SEOFILTERS_TITLE
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=seofilter&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu type="separator" alias="mm-separator-seo-import">-</menu>
             <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE</menu>
             <menu type="separator" alias="mm-separator-settings">-</menu>

@@ -54,6 +54,8 @@ $sections = [
         'type' => 'tools',
         'icon' => 'icon-wrench',
         'items' => [
+            ['view' => 'seofilters', 'label' => 'COM_MINIMARKET_SEOFILTERS_TITLE',
+                'icon' => 'icon-filter', 'count' => 'seofilters'],
             ['view' => 'import', 'label' => 'COM_MINIMARKET_IMPORT_TITLE',
                 'icon' => 'icon-exchange-alt', 'count' => null],
             ['view' => 'feeds', 'label' => 'COM_MINIMARKET_FEEDS_TITLE',
