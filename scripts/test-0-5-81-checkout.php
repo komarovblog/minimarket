@@ -91,9 +91,9 @@ $ok(str_contains($config,'name="delivery_rate_source"')
  && str_contains($config,'name="delivery_city_rates"')
  && str_contains($config,'name="payment_on_receipt_enabled"'),'delivery and payment settings');
 $controller=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
-$ok(str_contains($controller,"CheckoutSettings::mode(\$params)==='email'") &&
-    str_contains($controller,"CheckoutSettings::mode(\$params)==='sms' && (int)\$app->getIdentity()->id<1"),
- 'unavailable email blocks all orders and unavailable SMS blocks guests');
+$ok(str_contains($controller,"in_array(CheckoutSettings::mode(\$params),['email','sms'],true)")
+    && str_contains($controller,"(int)\$app->getIdentity()->id<1"),
+ 'unavailable SMS and email block guests only');
 $ok(str_contains($controller,'CheckoutDelivery::quote')
  && str_contains($controller,'CheckoutSettings::mode')
  && str_contains($controller,'CheckoutSettings::fields'),'server checkout wiring');
@@ -102,5 +102,5 @@ $ok(str_contains($view,'name="delivery_method"')
  && str_contains($view,'name="payment_method"')
  && str_contains($view,'data-fee-cents'),'single page checkout form');
 $xml=(string)file_get_contents($root.'minimarket.xml');
-$ok(str_contains($xml,'<version>0.5.83</version>'),'version 0.5.83');
+$ok(str_contains($xml,'<version>0.5.84</version>'),'version 0.5.84');
 echo "MM81_CHECKOUT_PASS: $n checks\n";

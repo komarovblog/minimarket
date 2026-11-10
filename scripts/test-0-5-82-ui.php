@@ -14,7 +14,7 @@ $ok(count($sysLang)===2
  && in_array('en-GB/com_minimarket.sys.ini',array_map('strval',$sysLang),true),
  'administrator menu language files installed globally');
 
-$ok($xml!==false && (string)$xml->version==='0.5.83','manifest');
+$ok($xml!==false && (string)$xml->version==='0.5.84','manifest');
 $menus=$xml->xpath('//administration/submenu/menu');
 $links=[];
 foreach($menus as $menu)if(isset($menu['link']))$links[]=(string)$menu['link'];
@@ -25,10 +25,13 @@ $order=$xml->xpath('//administration/submenu/menu[@link="option=com_minimarket&v
 $ok(count($order)===1 && count($order[0]->xpath('./params/menu-quicktask'))===1,'Orders quicktask');
 $cfg=simplexml_load_file($root.'admin/config.xml');
 $ok($cfg!==false,'global options parse');
-foreach(['basic','display','checkout','delivery','payment','registration'] as $section){
+foreach(['basic','display','checkout','registration','reviews'] as $section){
     $ok(count($cfg->xpath('//fieldset[@name="'.$section.'"]'))===1,
         'options tab '.$section);
 }
+$ok(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="delivery_city_rates"]'))===1
+    && count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="payment_on_receipt_enabled"]'))===1,
+    'checkout fields include delivery and payment');
 $ok(count($cfg->xpath('//fieldset[@name="inventory"]'))===0
     && count($cfg->xpath('//fieldset[@name="filters"]'))===0,
     'inventory moved to Basic and filters moved to Display');

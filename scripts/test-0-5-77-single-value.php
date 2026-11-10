@@ -52,5 +52,5 @@ foreach (['attribute_multivalue_archive','INSERT IGNORE INTO','DELETE extra',
     m77(str_contains($migration,$marker),'safe migration includes '.$marker);
 }
 $manifest=(string)file_get_contents($root.'/src/com_minimarket/minimarket.xml');
-m77(str_contains($manifest,'<version>0.5.83</version>'),'version released');
+m77(str_contains($manifest,'<version>0.5.84</version>'),'version released');
 echo "MM77_SINGLE_VALUE_UI_PASS: $n checks\n";
