@@ -132,35 +132,29 @@ namespace MiniMarket\CatalogSmoke {
     $db = new FakeDb();
     $repository = new CatalogRepository($db);
     $total = $repository->countAllProducts();
-    check($total === 74, 'total uses database COUNT result');
-    check($db->lastQuery !== null, 'total builds SQL');
-    check($db->lastQuery?->select === ['COUNT(*)'], 'total uses COUNT not full list');
-    check(str_contains($db->lastQuery?->from ?? '', '#__minimarket_products'), 'total uses products table');
-    check(count($db->lastQuery?->joins ?? []) === 1, 'total joins category once');
-    check(in_array('p.state = 1', $db->lastQuery?->conditions ?? [], true), 'total excludes unpublished products');
-    check(in_array('c.state = 1', $db->lastQuery?->conditions ?? [], true), 'total excludes unpublished categories');
-    check(in_array('p.category_id IN (1)', $db->lastQuery?->conditions ?? [], true), 'total restricts to visible parent chains');
-
-    $items = $repository->getAllProductsPage(24, 12, 'price_asc');
-    check(count($items) === 1, 'page returns database result list');
-    check($db->offset === 24, 'page applies server-side offset');
-    check($db->limit === 12, 'page applies server-side page size');
-    check(count($db->lastQuery?->joins ?? []) === 1, 'page joins category once');
-    check(in_array('p.state = 1', $db->lastQuery?->conditions ?? [], true), 'page excludes unpublished products');
-    check(in_array('c.state = 1', $db->lastQuery?->conditions ?? [], true), 'page excludes unpublished categories');
-    check(($db->lastQuery?->orders[0] ?? '') === 'p.price ASC, p.id ASC', 'price ASC has stable ID tie-break');
-
-    $repository->getAllProductsPage(-100, 999, 'price_desc');
-    check($db->offset === 0, 'negative offsets clamp to zero');
-    check($db->limit === 48, 'unbounded page sizes clamp to 48');
-    check(($db->lastQuery?->orders[0] ?? '') === 'p.price DESC, p.id ASC', 'price DESC has stable ID tie-break');
-
-    $repository->getAllProductsPage(0, 12, 'name');
-    check(($db->lastQuery?->orders[0] ?? '') === 'p.title ASC, p.id ASC', 'name order is deterministic');
-
-    $repository->getAllProductsPage(0, 12, 'untrusted SQL; DROP TABLE products');
-    check(($db->lastQuery?->orders[0] ?? '') === 'p.id DESC', 'unexpected order falls back to safe allowlist');
-    check($db->queryCount === 6, 'one cached category read, one count and four page queries');
+    check($total === 1, 'published listing is counted AFTER effective stock filtering');
+    check($db->lastQuery !== null, 'visible listing builds SQL');
+    check(str_contains($db->lastQuery?->from ?? '', '#__minimarket_products'), 'listing uses products table');
+    check(count($db->lastQuery?->joins ?? []) === 1, 'listing joins categories once');
+    check(in_array('p.state = 1', $db->lastQuery?->conditions ?? [], true), 'unpublished products excluded');
+    check(in_array('c.state = 1', $db->lastQuery?->conditions ?? [], true), 'unpublished categories excluded');
+    check(in_array('p.category_id IN (1)', $db->lastQuery?->conditions ?? [], true),
+        'only published ancestor chains listed');
+    check(str_contains(implode(' ', $db->lastQuery?->conditions ?? []),
+        'mmv.stock>0'), 'variant SKU availability enforced in SQL');
+    check(str_contains(implode(' ', $db->lastQuery?->conditions ?? []),
+        'p.product_type'), 'bundles participate with derived availability');
+    $items = $repository->getAllProductsPage(0, 12, 'price_asc');
+    check(count($items) === 1, 'returns currently available published product');
+    check($repository->getAllProductsPage(24, 12, 'price_asc')===[], 'page offset applies after filtering');
+    check(count($repository->getAllProductsPage(-1, 999, 'newest'))===1,
+        'page bounds do not remove eligible rows');
+    $repository->getAllProductsPage(0,12,'name');
+    $repository->getAllProductsPage(0,12,'price_desc');
+    $repository->getAllProductsPage(0,12,'unsafe SQL');
+    check($db->queryCount===2,'one cached category read and one complete available listing');
+    check($db->offset===0 && $db->limit===0,
+        'full in-stock listing loaded before paging, so no gaps from OOS bundles');
 
     if ($failures !== []) {
         fwrite(STDERR, 'CATALOG_TEST_FAIL: ' . implode('; ', $failures) . PHP_EOL);
