@@ -4,7 +4,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 ?>
-<section class="mm-admin-panel card card-body">
+<section class="mm-admin-panel mm-admin-list-panel">
  <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
   <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_SEOFILTERS_TITLE'); ?></h2>
   <?php if($this->canCreate): ?><a class="btn btn-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilter&layout=create',false)); ?>"><span class="icon-plus"></span> <?php echo Text::_('COM_MINIMARKET_SEOFILTER_CREATE'); ?></a><?php endif; ?>

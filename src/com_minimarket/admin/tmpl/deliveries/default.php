@@ -4,9 +4,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 $colors=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelled'=>'secondary'];
 ?>
-<section class="card card-body mm-admin-panel">
+<section class="mm-admin-panel mm-admin-list-panel">
  <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_DELIVERIES'); ?></h2>
- <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_DELIVERIES_EXPLAIN'); ?></p>
  <form method="get" action="index.php" class="d-flex flex-wrap align-items-end gap-2 mb-3">
   <input type="hidden" name="option" value="com_minimarket"><input type="hidden" name="view" value="deliveries">
   <div><label class="form-label" for="mm-delivery-status"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?></label>

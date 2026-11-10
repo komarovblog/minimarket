@@ -9,7 +9,7 @@ $href='index.php?option=com_minimarket&view=orders'
     .'&filter_delivery='.rawurlencode($this->deliveryFilter);
 $statuses=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelled'=>'secondary'];
 ?>
-<section class="mm-admin-panel card card-body">
+<section class="mm-admin-panel mm-admin-list-panel">
     <div class="d-flex justify-content-between gap-2 flex-wrap align-items-center mb-3">
         <h2 class="h4 mb-0"><?php echo Text::_('COM_MINIMARKET_ORDERS_TITLE'); ?></h2>
         <?php if ($this->canCreate) : ?>

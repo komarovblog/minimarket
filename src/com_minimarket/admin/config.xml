@@ -30,7 +30,7 @@
                description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
-        <field name="mm_commands_note" type="note" label="COM_MINIMARKET_COMMANDS_GROUP"
+        <field name="mm_commands_note" type="note" class="alert alert-info" label="COM_MINIMARKET_COMMANDS_GROUP"
                description="COM_MINIMARKET_COMMANDS_GROUP_DESC"/>
         <field name="offcanvas_cart_target" type="text" filter="string" maxlength="64"
                label="COM_MINIMARKET_COMMANDS_CART" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
@@ -47,7 +47,7 @@
 
     </fieldset>
     <fieldset name="display" label="COM_MINIMARKET_CONFIG_DISPLAY">
-        <field name="mm_display_categories_note" type="note" label="COM_MINIMARKET_DISPLAY_CATEGORIES_SECTION" />
+        <field name="mm_display_categories_note" type="note" label="COM_MINIMARKET_DISPLAY_CATEGORIES_SECTION" description="COM_MINIMARKET_DISPLAY_CATEGORIES_HELP" class="alert alert-info" />
         <field name="category_show_children" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_CHILDREN" default="1" filter="int">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
@@ -72,7 +72,7 @@
         <field name="category_show_description" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_DESCRIPTION">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
-        <field name="mm_display_products_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCTS_SECTION" />
+        <field name="mm_display_products_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCTS_SECTION" description="COM_MINIMARKET_DISPLAY_PRODUCTS_HELP" class="alert alert-info" />
         <field name="category_product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="list" filter="cmd">
             <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
             <option value="grid">COM_MINIMARKET_LAYOUT_GRID</option>
@@ -153,7 +153,7 @@
         <field name="category_product_gallery_limit" type="list" default="5" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY_LIMIT" showon="category_product_gallery_enabled:1">
             <option value="3">3</option><option value="5">5</option><option value="8">8</option>
         </field>
-        <field name="mm_display_card_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCT_CARD_SECTION" />
+        <field name="mm_display_card_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCT_CARD_SECTION" description="COM_MINIMARKET_DISPLAY_CARD_HELP" class="alert alert-info" />
         <field name="attribute_display_location" type="list" default="both" filter="cmd" label="COM_MINIMARKET_DISPLAY_ATTRIBUTES_LOCATION">
             <option value="product">COM_MINIMARKET_VISIBILITY_PRODUCT</option>
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
@@ -170,7 +170,7 @@
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
 
-        <field name="mm_system_filters_note" type="note" label="COM_MINIMARKET_SYSTEM_ATTRIBUTES_IN_FILTER" />
+        <field name="mm_system_filters_note" type="note" label="COM_MINIMARKET_SYSTEM_ATTRIBUTES_IN_FILTER" description="COM_MINIMARKET_FILTERS_SECTION_HELP" class="alert alert-info" />
         <field name="filter_price_mode" type="list" default="slider" filter="cmd"
                label="COM_MINIMARKET_SYSTEM_PRICE_FILTER" description="COM_MINIMARKET_SYSTEM_PRICE_FILTER_DESC">
             <option value="none">COM_MINIMARKET_MODE_NONE</option>
@@ -190,6 +190,7 @@
     </fieldset>
     <!-- Checkout is deliberately separated from authentication integrations. -->
     <fieldset name="checkout" label="COM_MINIMARKET_CONFIG_CHECKOUT">
+        <field name="checkout_buyer_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CHECKOUT_BUYER_SECTION" description="COM_MINIMARKET_CHECKOUT_BUYER_NOTE"/>
         <field name="checkout_auth_mode" type="list" default="guest" filter="cmd"
                label="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH"
                description="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH_DESC">
@@ -213,29 +214,8 @@
                label="COM_MINIMARKET_CONFIG_FIELD_COMMENT" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
-    </fieldset>
-    <fieldset name="registration" label="COM_MINIMARKET_CONFIG_REGISTRATION">
-        <field name="registration_note" type="note" label="COM_MINIMARKET_REGISTRATION_FUTURE" description="COM_MINIMARKET_REGISTRATION_DESC" />
-        <field name="registration_phone" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_PHONE">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_email" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_EMAIL">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_yandex" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_YANDEX">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_sber" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_SBER">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_mts" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_MTS">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_vk" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_VK">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-    </fieldset>
-    <fieldset name="delivery" label="COM_MINIMARKET_CONFIG_DELIVERY">
+        <field name="checkout_delivery_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_DELIVERY" description="COM_MINIMARKET_CHECKOUT_DELIVERY_NOTE"/>
+
         <field name="delivery_pickup_enabled" type="radio" default="1" filter="int"
                label="COM_MINIMARKET_DELIVERY_PICKUP_ENABLED">
             <option value="1">JYES</option><option value="0">JNO</option>
@@ -257,8 +237,8 @@
                label="COM_MINIMARKET_DELIVERY_CITY_RATES"
                description="COM_MINIMARKET_DELIVERY_CITY_RATES_DESC"
                showon="delivery_courier_enabled:1[AND]delivery_rate_source:directory" />
-    </fieldset>
-    <fieldset name="payment" label="COM_MINIMARKET_CONFIG_PAYMENT">
+
+        <field name="checkout_payment_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_PAYMENT" description="COM_MINIMARKET_CHECKOUT_PAYMENT_NOTE"/>
         <field name="payment_on_receipt_enabled" type="radio" default="1" filter="int"
                label="COM_MINIMARKET_PAYMENT_ON_RECEIPT"
                description="COM_MINIMARKET_PAYMENT_ON_RECEIPT_DESC">
@@ -270,7 +250,29 @@
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
     </fieldset>
+    <fieldset name="registration" label="COM_MINIMARKET_CONFIG_REGISTRATION">
+        <field name="registration_note" type="note" class="alert alert-info" label="COM_MINIMARKET_REGISTRATION_FUTURE" description="COM_MINIMARKET_REGISTRATION_DESC" />
+        <field name="registration_phone" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_PHONE">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="registration_email" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_EMAIL">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="registration_yandex" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_YANDEX">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="registration_sber" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_SBER">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="registration_mts" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_MTS">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="registration_vk" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_VK">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+    </fieldset>
     <fieldset name="reviews" label="COM_MINIMARKET_CONFIG_REVIEWS">
+        <field name="reviews_help" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_REVIEWS" description="COM_MINIMARKET_REVIEWS_SECTION_HELP"/>
         <field name="reviews_enabled" type="radio" default="0" filter="int"
                label="COM_MINIMARKET_REVIEWS_ENABLED" description="COM_MINIMARKET_REVIEWS_ENABLED_DESC">
             <option value="1">JYES</option><option value="0">JNO</option>

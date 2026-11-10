@@ -24,11 +24,11 @@
       if(!visible.some(Boolean))visible[0]=true;
 
       const toolbar=document.createElement('div');
-      toolbar.className='mm-columns-toolbar d-flex justify-content-end mb-2';
+      toolbar.className='mm-columns-toolbar d-flex justify-content-end mb-1';
       const dropdown=document.createElement('details');
       dropdown.className='mm-columns-picker';
       const toggle=document.createElement('summary');
-      toggle.className='btn btn-primary btn-sm';
+      toggle.className='btn btn-primary btn-sm p-1';
       dropdown.appendChild(toggle);
       const menu=document.createElement('div');
       menu.className='mm-columns-picker__menu';

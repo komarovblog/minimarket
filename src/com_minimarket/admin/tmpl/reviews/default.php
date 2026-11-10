@@ -6,7 +6,7 @@ use Joomla\CMS\Router\Route;
 $states=[0=>'COM_MINIMARKET_REVIEWS_PENDING',1=>'COM_MINIMARKET_REVIEWS_PUBLISHED',2=>'COM_MINIMARKET_REVIEWS_REJECTED'];
 $colors=[0=>'warning',1=>'success',2=>'secondary'];
 ?>
-<section class="mm-admin-panel card card-body">
+<section class="mm-admin-panel mm-admin-list-panel">
  <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
   <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_REVIEWS_TITLE'); ?></h2>
   <?php if($this->canCreate) : ?><a class="btn btn-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=review&layout=create',false)); ?>"><span class="icon-plus"></span> <?php echo Text::_('COM_MINIMARKET_REVIEW_NEW'); ?></a><?php endif; ?>
