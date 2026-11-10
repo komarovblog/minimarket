@@ -43,8 +43,10 @@ try {
     $sql=file_get_contents(dirname(__DIR__).'/src/com_minimarket/admin/sql/updates/mysql/0.5.77.sql');
     if (!is_string($sql)) throw new RuntimeException('MM77_SQL_MISSING');
     $sql=str_replace('#__minimarket_',$prefix,$sql);
+    // Remove SQL comments BEFORE splitting: comments can contain semicolons.
+    $sql=(string)preg_replace('/^[ \t]*--[^\r\n]*$/m','',$sql);
     foreach (explode(';',$sql) as $statement) {
-        $statement=trim((string)preg_replace('/^\s*--[^\n]*$/m','',$statement));
+        $statement=trim($statement);
         if ($statement==='') continue;
         // All schema statements must be acceptable via Joomla's prepared driver.
         $query=$db->prepare($statement);
