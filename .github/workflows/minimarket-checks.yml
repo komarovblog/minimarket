@@ -179,6 +179,7 @@ jobs:
           php scripts/test-0-5-77-mysql84.php
           php scripts/test-0-5-78-orders-mysql84.php
           php scripts/test-0-5-81-orders-mysql84.php
+          php scripts/test-0-5-82-schema-mysql84.php
 
   windows-package:
     name: Windows component ZIP
