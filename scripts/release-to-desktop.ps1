@@ -21,14 +21,12 @@ if (-not $SkipPull) {
 
 # Avoid hardcoded OSPanel/PHP paths. Build and inspect within the current
 # PowerShell process so Windows does not need to locate a second interpreter.
+$global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'build.ps1')
-if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -is [int]) {
-    throw 'MINIMARKET_BUILD_FAILED'
-}
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_BUILD_FAILED' }
+$global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'inspect-package.ps1')
-if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -is [int]) {
-    throw 'MINIMARKET_PACKAGE_INSPECTION_FAILED'
-}
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_PACKAGE_INSPECTION_FAILED' }
 
 [xml]$manifest = Get-Content -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -Raw -Encoding UTF8
 $version = [string]$manifest.extension.version
