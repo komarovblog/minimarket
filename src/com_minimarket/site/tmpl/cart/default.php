@@ -6,7 +6,7 @@ use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CartState;
 ?>
-<section class="mm-cart">
+<section class="mm-cart" data-mm-cart-page>
     <h1><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></h1>
     <p><a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_CONTINUE'); ?></a></p>
     <?php if (!$this->cart['lines']) : ?>
@@ -16,9 +16,11 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
             <div class="alert alert-warning" role="alert"><?php echo Text::_(
                 $this->cart['error'] ?: 'COM_MINIMARKET_CART_NOT_AVAILABLE'); ?></div>
         <?php endif; ?>
-        <ul class="mm-cart__lines list-unstyled">
+        <p class="alert alert-warning" role="status" data-mm-cart-feedback hidden></p>
+        <p data-mm-cart-empty hidden><?php echo Text::_('COM_MINIMARKET_CART_EMPTY'); ?></p>
+        <ul class="mm-cart__lines list-unstyled" data-mm-cart-lines>
         <?php foreach ($this->cart['lines'] as $line) : ?>
-            <li class="mm-cart__line">
+            <li class="mm-cart__line" data-mm-cart-line data-mm-cart-key="<?php echo (int)$line['product_id']; ?>:<?php echo (int)$line['variant_id']; ?>">
                 <?php if ($line['image']) : ?>
                     <img src="<?php echo $this->escape(Uri::root().$line['image']); ?>" alt=""
                          width="96" height="96" loading="lazy">
@@ -48,7 +50,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
                             <?php echo HTMLHelper::_('form.token'); ?>
                             <noscript><button class="btn btn-outline-primary" type="submit"><?php echo Text::_('COM_MINIMARKET_CART_UPDATE'); ?></button></noscript>
                         </form>
-                        <form action="<?php echo $this->escape(RouteHelper::cartAction('remove')); ?>" method="post">
+                        <form action="<?php echo $this->escape(RouteHelper::cartAction('remove')); ?>" method="post" data-mm-cart-remove-form>
                             <input type="hidden" name="product_id" value="<?php echo (int)$line['product_id']; ?>">
                             <input type="hidden" name="variant_id" value="<?php echo (int)$line['variant_id']; ?>">
                             <?php echo HTMLHelper::_('form.token'); ?>
@@ -56,16 +58,17 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
                         </form>
                     </div>
                 </div>
-                <strong><?php echo CartState::format($line['line_cents']); ?>
+                <strong data-mm-line-total><?php echo CartState::format($line['line_cents']); ?>
                     <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong>
             </li>
         <?php endforeach; ?>
         </ul>
         <p class="mm-cart__total"><strong><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?>:
-            <?php echo CartState::format($this->cart['total_cents']); ?>
-            <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></p>
+            <span data-mm-cart-units class="visually-hidden"><?php echo (int)$this->cart['units']; ?></span>
+            <span data-mm-cart-total><?php echo CartState::format($this->cart['total_cents']); ?>
+            <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></span></strong></p>
         <?php if ($this->cart['available']) : ?>
-        <p><a class="btn btn-primary" href="<?php echo $this->escape(RouteHelper::checkout()); ?>">
+        <p data-mm-cart-checkout><a class="btn btn-primary" href="<?php echo $this->escape(RouteHelper::checkout()); ?>">
             <?php echo Text::_('COM_MINIMARKET_CHECKOUT_TITLE'); ?></a></p>
         <?php endif; ?>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CART_CHECKOUT_NEXT'); ?></p>

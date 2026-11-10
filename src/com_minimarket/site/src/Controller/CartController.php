@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Session\Session;
+use Joomla\CMS\Response\JsonResponse;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CartCatalog;
@@ -25,11 +26,15 @@ final class CartController extends BaseController
         if ($app->input->getMethod() !== 'POST' || !Session::checkToken('post')) {
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
         }
+        $ajax = $app->input->server->getString('HTTP_X_REQUESTED_WITH','')==='XMLHttpRequest'
+            && str_contains((string)$app->input->server->getString('HTTP_ACCEPT',''), 'application/json');
         $session = $app->getSession();
         $cart = CartState::normalize($session->get(CartState::SESSION_KEY,[]));
         $productId = $app->input->post->getInt('product_id');
         $variantId = $app->input->post->getInt('variant_id',0);
         $quantity = $mode === 'remove' ? 0 : $app->input->post->getInt('quantity',1);
+        $message='';
+        $success=true;
         try {
             if ($mode !== 'remove') {
                 $requested=max(1,(int)$quantity);
@@ -43,7 +48,7 @@ final class CartController extends BaseController
                     :$requested;
                 if ($target>$max) {
                     $quantity=$mode==='add'?$max-($cart[CartState::key($productId,$variantId)]??0):$max;
-                    $app->enqueueMessage(Text::sprintf('COM_MINIMARKET_CART_CLAMPED',$max),'warning');
+                    $message=Text::sprintf('COM_MINIMARKET_CART_CLAMPED',$max);
                 } else $quantity=$requested;
                 // Existing line was already at its available maximum.
                 if ($mode==='add' && $quantity<=0) {
@@ -67,12 +72,46 @@ final class CartController extends BaseController
                 $catalog->assertAvailable($next,$inventory);
             }
             $session->set(CartState::SESSION_KEY,$next);
-            $app->enqueueMessage(Text::_($mode === 'add'
-                ? 'COM_MINIMARKET_CART_ADDED' : 'COM_MINIMARKET_CART_UPDATED'));
+            if ($message==='') $message=Text::_($mode === 'add'
+                ? 'COM_MINIMARKET_CART_ADDED' : 'COM_MINIMARKET_CART_UPDATED');
         } catch (\DomainException $exception) {
+            $success=false;
             // Never persist the invalid attempted mutation.
-            $app->enqueueMessage(Text::_($exception->getMessage()),'warning');
+            $message=Text::_($exception->getMessage());
         }
+        if ($ajax && in_array($mode,['update','remove'],true)) {
+            try {
+                $catalog=new CartCatalog(Factory::getContainer()->get(DatabaseInterface::class));
+                $inventory=(int)ComponentHelper::getParams('com_minimarket')
+                    ->get('inventory_enabled',1)===1;
+                $state=CartState::normalize($session->get(CartState::SESSION_KEY,[]));
+                $details=$catalog->details($state,$inventory);
+                $lines=[];
+                foreach ($details['lines'] as $line) {
+                    $lines[$line['key']]=[
+                        'quantity'=>(int)$line['quantity'],
+                        'line_cents'=>(int)$line['line_cents'],
+                        'unit_cents'=>(int)$line['unit_cents'],
+                        'max_quantity'=>(int)$line['max_quantity'],
+                        'valid'=>(bool)$line['valid'],
+                    ];
+                }
+                $data=['lines'=>$lines,'total_cents'=>(int)$details['total_cents'],
+                    'units'=>(int)$details['units'],'available'=>(bool)$details['available'],
+                    'empty'=>!$state,'message'=>$message];
+                $app->setHeader('Cache-Control','private, no-store',true);
+                $app->setHeader('Content-Type','application/json; charset=utf-8',true);
+                echo new JsonResponse($data,$message,!$success);
+                $app->close();
+            } catch (\Throwable $e) {
+                // A failed quote is never turned into a false success.
+                $app->setHeader('Content-Type','application/json; charset=utf-8',true);
+                echo new JsonResponse(null,Text::_('COM_MINIMARKET_CART_NOT_AVAILABLE'),true);
+                $app->close();
+            }
+            return;
+        }
+        $app->enqueueMessage($message,$success?'message':'warning');
         $this->setRedirect(RouteHelper::cart());
     }
 }
