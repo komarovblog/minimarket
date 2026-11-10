@@ -255,6 +255,29 @@
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
     </fieldset>
+    <fieldset name="reviews" label="COM_MINIMARKET_CONFIG_REVIEWS">
+        <field name="reviews_enabled" type="radio" default="0" filter="int"
+               label="COM_MINIMARKET_REVIEWS_ENABLED" description="COM_MINIMARKET_REVIEWS_ENABLED_DESC">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="reviews_author_mode" type="list" default="registered" filter="cmd"
+               label="COM_MINIMARKET_REVIEWS_WHO">
+            <option value="registered">COM_MINIMARKET_REVIEWS_REGISTERED</option>
+            <option value="all">COM_MINIMARKET_REVIEWS_EVERYONE</option>
+        </field>
+        <field name="reviews_moderation" type="radio" default="1" filter="int"
+               label="COM_MINIMARKET_REVIEWS_MODERATE" description="COM_MINIMARKET_REVIEWS_MODERATE_DESC">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="reviews_media_photo" type="radio" default="1" filter="int"
+               label="COM_MINIMARKET_REVIEWS_PHOTO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="reviews_media_video" type="radio" default="1" filter="int"
+               label="COM_MINIMARKET_REVIEWS_VIDEO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+    </fieldset>
     <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
         <field
             name="rules"
