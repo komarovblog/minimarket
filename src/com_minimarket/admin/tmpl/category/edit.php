@@ -6,7 +6,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=category&layout=edit&id=' . (int) $this->item->id); ?>"
-      method="post" name="adminForm" id="adminForm" class="form-validate">
+      method="post" name="adminForm" id="adminForm" class="form-validate"
+      data-mm-inherited="<?php echo htmlspecialchars(json_encode($this->inheritedDefaults, JSON_UNESCAPED_UNICODE|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP),ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8'); ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-category', ['active' => 'details']); ?>
     <?php foreach ([
         'details' => 'COM_MINIMARKET_CATEGORY_TAB_DETAILS',
