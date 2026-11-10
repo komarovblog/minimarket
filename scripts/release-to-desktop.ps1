@@ -39,4 +39,15 @@ if (Test-Path -LiteralPath $manualSqlPath -PathType Leaf) {
     }
     Write-Output "DESKTOP_SQL_UPGRADE_OK: $targetSql"
 }
+$extraDemo=Join-Path $root 'sample-data\minimarket_demo_gallery_filters_0_5_75.sql'
+if ($version -eq '0.5.75' -and (Test-Path -LiteralPath $extraDemo -PathType Leaf)) {
+    $name='minimarket_demo_gallery_filters_0_5_75.sql'
+    $destination=Join-Path $DesktopPath $name
+    Copy-Item -LiteralPath $extraDemo -Destination $destination -Force
+    if ((Get-FileHash -LiteralPath $extraDemo -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash) {
+        throw 'MINIMARKET_DEMO75_DESKTOP_HASH_MISMATCH'
+    }
+    Write-Output "MINIMARKET_DEMO_SQL_DESKTOP_OK: $destination"
+}
 Write-Output "MINIMARKET_DESKTOP_RELEASE_OK: $version"

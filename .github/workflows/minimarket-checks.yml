@@ -286,6 +286,13 @@ jobs:
       - name: MiniMarket cart 0.5.74 state, bundles and UI contract
         run: php scripts/test-0-5-74-cart.php
 
+      - name: MiniMarket 0.5.75 stock-aware filters, sorting and cart
+        run: |
+          php scripts/test-0-5-75-storefront.php
+          node --check src/com_minimarket/media/js/faceted-catalog.js
+          node --check src/com_minimarket/media/js/cart.js
+          node scripts/test-0-5-75-cart-js.js
+
       - name: Router regression tests
         run: php scripts/test-router.php
 
