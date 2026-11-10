@@ -31,9 +31,11 @@ checkUi(str_contains($reverseField, "str_repeat('— '"),
     'category hierarchy uses a text prefix rather than custom table padding');
 $attributeSettingsJs=file_get_contents($base.'media/js/attribute-settings.js');
 checkUi(str_contains($attributeSettingsJs,'const filters =')
-    && str_contains($attributeSettingsJs,'filter.replaceChildren(')
+    && str_contains($attributeSettingsJs,'display.replaceChildren(')
+    && str_contains($attributeSettingsJs,"['filter_multiple',multipleAllowed]")
+    && str_contains($attributeSettingsJs,"['filter_search',searchAllowed]")
     && !str_contains($attributeSettingsJs,'input_mode'),
-    'only canonical filter modes are offered for each characteristic type');
+    'canonical filter modes, selection count and search are independent controls');
 $ruUi=file_get_contents($base.'admin/language/ru-RU/com_minimarket.ini');
 $enUi=file_get_contents($base.'admin/language/en-GB/com_minimarket.ini');
 checkUi(str_contains($ruUi, 'COM_MINIMARKET_MODE_PRESETS="Выбор из заданных значений"')
