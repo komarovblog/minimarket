@@ -193,7 +193,8 @@ echo "MM73_JOOMLA_SQL_HISTORY_READONLY_GUARD_MYSQL84_PASS\n";
 // 0.5.75 optional DEMO is additive: gallery photos and diverse filter attributes
 // must import twice without changing other published products.
 $gallerySql=file_get_contents(dirname(__DIR__).'/sample-data/minimarket_demo_gallery_filters_0_5_75.sql');
-if (!is_string($gallerySql) || str_contains($gallerySql,'sample-11.png')) {
+if (!is_string($gallerySql) || !str_contains($gallerySql,'sample-01.png')
+    || !str_contains($gallerySql,'sample-10.png')) {
     throw new RuntimeException('MM75_DEMO_SQL_MISSING_OR_UNSHIPPED_IMAGE_PATH');
 }
 $gallerySql=str_replace('USE `minimarket`;', 'USE `minimarket_ci_canonical73`;', $gallerySql);
