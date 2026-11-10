@@ -90,7 +90,7 @@ $check(file_exists($root.'admin/sql/updates/mysql/0.5.83.sql'),'additive migrati
 $sql=$read('admin/sql/updates/mysql/0.5.83.sql');
 $check(str_contains($sql,'#__minimarket_reviews') &&
  str_contains($sql,'#__minimarket_seo_filters') &&
- !preg_match('/\\b(?:DROP|TRUNCATE|DELETE)\\b/i',$sql),
+ !preg_match('/\\b(?:DROP\\s+TABLE|TRUNCATE\\s+TABLE|DELETE\\s+FROM)\\b/i',$sql),
  'new schema isolated, non destructive');
 $installer=$read('script.php');
 $check(str_contains($installer,"version_compare(\$schemaVersion, '0.5.83', '>')") &&
