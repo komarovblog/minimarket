@@ -26,7 +26,12 @@ foreach($mirrors as $global=>$local) {
 }
 foreach(['badge_sale_display','badge_benefit_display'] as $name)
  audit(count($p->xpath("//field[@name='$name']"))===1,'missing badge format '.$name);
-audit(count($v->xpath("//field[@name='is_promo']"))===1,'video promo form missing');
+$promo=simplexml_load_file($r.'admin/forms/product_promo_video.xml');
+audit($promo!==false
+ && count($v->xpath("//field[@name='is_promo']"))===0
+ && count($p->xpath("//field[@name='promo_video']"))===1
+ && count($promo->xpath("//field[@name='media_path']"))===1,
+ 'dedicated promo editor and ordinary video editor must be separate');
 $edit=file_get_contents($r.'admin/tmpl/product/edit.php');
 audit(str_contains($edit,"renderField('badge_sale_display')")
  && str_contains($edit,"renderField('badge_benefit_display')"),
