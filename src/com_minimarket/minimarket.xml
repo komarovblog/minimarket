@@ -82,6 +82,7 @@
             <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE</menu>
             <menu type="separator" alias="mm-separator-settings">-</menu>
             <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
+            <menu link="option=com_minimarket&amp;view=integrations">COM_MINIMARKET_INTEGRATIONS_TITLE</menu>
         </submenu>
     </administration>
     <dashboards>
