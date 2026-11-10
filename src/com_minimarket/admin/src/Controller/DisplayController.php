@@ -18,6 +18,12 @@ final class DisplayController extends BaseController
             ->registerAndUseStyle(
                 'com_minimarket.admin-ui',
                 'media/com_minimarket/css/admin-ui.css'
+            )
+            ->registerAndUseScript(
+                'com_minimarket.admin-columns',
+                'media/com_minimarket/js/admin-columns.js',
+                [],
+                ['defer'=>true]
             );
 
         if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order'], true)) {

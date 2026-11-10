@@ -788,3 +788,15 @@
   cursor: not-allowed;
   background-color: var(--body-bg, #20272e);
 }
+
+/* Browser-local, per-view MiniMarket table column visibility. */
+.mm-columns-picker{position:relative;width:max-content;max-width:100%;}
+.mm-columns-picker>summary{list-style:none;cursor:pointer;user-select:none;}
+.mm-columns-picker>summary::-webkit-details-marker{display:none;}
+.mm-columns-picker__menu{position:absolute;z-index:1050;top:calc(100% + 4px);inset-inline-start:0;
+ min-width:14rem;max-width:min(85vw,22rem);max-height:22rem;overflow:auto;
+ padding:.75rem;border:1px solid var(--border-color,#6a7684);
+ border-radius:.5rem;background:var(--body-bg,#fff);color:var(--body-color,inherit);
+ box-shadow:0 .4rem 1rem rgba(0,0,0,.16);}
+.mm-columns-picker__item{display:block;padding:.25rem .125rem;font-size:.9rem;cursor:pointer;}
+.mm-columns-picker__item input{margin-inline-end:.3rem;}
