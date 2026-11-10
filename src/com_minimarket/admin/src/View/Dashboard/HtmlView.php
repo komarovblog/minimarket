@@ -29,7 +29,7 @@ final class HtmlView extends BaseHtmlView
             'orderoptions' => ['order_options', '1=1'],
             'feeds'        => ['feeds', '1=1'],
             'orders'       => ['orders', 'deleted_at IS NULL'],
-            'deliveries'   => ['orders', "deleted_at IS NULL AND delivery_method='courier' AND status IN ('new','confirmed')"],
+            'deliveries'   => ['shipments', "status IN ('new','in_transit')"],
             'reviews'      => ['reviews', 'state=0'],
             'seofilters'   => ['seo_filters','1=1'],
         ] as $key=>[$table,$predicate]) {

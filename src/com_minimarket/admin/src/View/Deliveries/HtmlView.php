@@ -7,7 +7,7 @@ use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\Database\DatabaseInterface;
 
-/** Real courier queue, separate from Orders, with owner/admin authorization. */
+/** Shipments are separate records linked to real MiniMarket orders. */
 final class HtmlView extends BaseHtmlView
 {
     public array $deliveries=[];
@@ -15,28 +15,32 @@ final class HtmlView extends BaseHtmlView
     public int $offset=0;
     public int $total=0;
     public int $pageSize=50;
-
+    public bool $canCreate=false;
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
-        if (!$app->getIdentity()->authorise('core.manage','com_minimarket')) {
+        $user=$app->getIdentity();
+        if(!$user->authorise('core.manage','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
-        }
+        $this->canCreate=$user->authorise('core.create','com_minimarket');
         $requested=$app->input->getCmd('filter_status','');
-        $this->status=in_array($requested,['new','confirmed','completed','cancelled'],true)?$requested:'';
+        $this->status=in_array($requested,['new','in_transit','delivered','cancelled'],true)?$requested:'';
         $this->offset=max(0,min(1000000,$app->input->getInt('limitstart',0)));
         $db=Factory::getContainer()->get(DatabaseInterface::class);
-        $where=$db->quoteName('delivery_method').'='.$db->quote('courier');
-        $count=$db->getQuery(true)->select('COUNT(*)')->from($db->quoteName('#__minimarket_orders'))->where($where);
-        if($this->status!=='')$count->where($db->quoteName('status').'='.$db->quote($this->status));
-        $db->setQuery($count);
-        $this->total=(int)$db->loadResult();
-        $query=$db->getQuery(true)
-            ->select(['id','customer_name','phone','delivery_city','delivery_address',
-                      'delivery_fee_cents','status','created_at'])
-            ->from($db->quoteName('#__minimarket_orders'))->where($where)->order('id DESC');
-        if($this->status!=='')$query->where($db->quoteName('status').'='.$db->quote($this->status));
-        $db->setQuery($query,$this->offset,$this->pageSize);
+        $count=$db->getQuery(true)->select('COUNT(*)')
+            ->from($db->quoteName('#__minimarket_shipments','s'))
+            ->join('INNER',$db->quoteName('#__minimarket_orders','o').' ON o.id=s.order_id')
+            ->where('o.deleted_at IS NULL');
+        if($this->status!=='')$count->where('s.status='.$db->quote($this->status));
+        $db->setQuery($count);$this->total=(int)$db->loadResult();
+        $q=$db->getQuery(true)->select(['s.id','s.order_id','s.carrier','s.tracking_number',
+            's.status','s.created_at','o.customer_name','o.phone','o.delivery_city',
+            'o.delivery_address','o.delivery_fee_cents'])
+            ->from($db->quoteName('#__minimarket_shipments','s'))
+            ->join('INNER',$db->quoteName('#__minimarket_orders','o').' ON o.id=s.order_id')
+            ->where('o.deleted_at IS NULL')->order('s.id DESC');
+        if($this->status!=='')$q->where('s.status='.$db->quote($this->status));
+        $db->setQuery($q,$this->offset,$this->pageSize);
         $this->deliveries=(array)$db->loadObjectList();
         ToolbarHelper::title(Text::_('COM_MINIMARKET_DASHBOARD_DELIVERIES'));
         parent::display($tpl);

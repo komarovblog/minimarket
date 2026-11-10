@@ -8,7 +8,14 @@ $order=$this->order;
 <section class="mm-admin-panel card card-body">
     <p><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>">
         <?php echo Text::_('COM_MINIMARKET_ORDERS_TITLE'); ?></a></p>
-    <h2><?php echo Text::sprintf('COM_MINIMARKET_ORDER_HEADING',(int)$order->id); ?></h2>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <h2><?php echo Text::sprintf('COM_MINIMARKET_ORDER_HEADING',(int)$order->id); ?></h2>
+      <?php if ($this->shipmentId!==null): ?>
+       <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=delivery&id='.$this->shipmentId,false)); ?>"><?php echo Text::_('COM_MINIMARKET_DELIVERY_OPEN'); ?></a>
+      <?php elseif($this->canCreateDelivery && ($order->delivery_method??'')==='courier' && ($order->status??'')!=='cancelled' && empty($order->deleted_at)): ?>
+       <a class="btn btn-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=delivery&layout=create&order_id='.(int)$order->id,false)); ?>"><span class="icon-plus" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_DELIVERY_NEW'); ?></a>
+      <?php endif; ?>
+    </div>
     <dl class="row">
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE'); ?></dt>
         <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE_'.strtoupper((string)($order->order_source??'site'))); ?></dd>

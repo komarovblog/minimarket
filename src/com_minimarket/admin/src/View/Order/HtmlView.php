@@ -14,6 +14,8 @@ final class HtmlView extends BaseHtmlView
     public array $items=[];
     public bool $canUpdate=false;
     public bool $canDelete=false;
+    public bool $canCreateDelivery=false;
+    public ?int $shipmentId=null;
     public bool $isCreate=false;
     public array $productChoices=[];
     public array $deliveryMethods=[];
@@ -29,6 +31,7 @@ final class HtmlView extends BaseHtmlView
         }
         $this->canUpdate=$identity->authorise('core.edit.state','com_minimarket');
         $this->canDelete=$identity->authorise('core.delete','com_minimarket');
+        $this->canCreateDelivery=$identity->authorise('core.create','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {
             if (!$identity->authorise('core.create','com_minimarket')) {
@@ -65,6 +68,12 @@ final class HtmlView extends BaseHtmlView
             ->order('id ASC');
         $db->setQuery($q);
         $this->items=(array)$db->loadObjectList();
+        $q=$db->getQuery(true)->select('id')
+            ->from($db->quoteName('#__minimarket_shipments'))
+            ->where('order_id='.(int)$id);
+        $db->setQuery($q);
+        $existing=$db->loadResult();
+        $this->shipmentId=$existing!==null?(int)$existing:null;
         ToolbarHelper::title(Text::sprintf('COM_MINIMARKET_ORDER_HEADING',$id));
         parent::display($tpl);
     }

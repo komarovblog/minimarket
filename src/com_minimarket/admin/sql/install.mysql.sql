@@ -627,6 +627,25 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     KEY idx_mm_order_user_created (user_id, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Shipment fulfillment is independent of order payment and catalog records.
+CREATE TABLE IF NOT EXISTS #__minimarket_shipments (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    order_id INT UNSIGNED NOT NULL,
+    carrier VARCHAR(16) NOT NULL DEFAULT 'own',
+    tracking_number VARCHAR(120) NOT NULL DEFAULT '',
+    status VARCHAR(16) NOT NULL DEFAULT 'new',
+    note TEXT NULL,
+    created_by INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NULL,
+    PRIMARY KEY(id),
+    UNIQUE KEY idx_mm_shipment_one_per_order(order_id),
+    KEY idx_mm_shipment_status(status,created_at),
+    CONSTRAINT fk_mm_shipment_order FOREIGN KEY(order_id)
+        REFERENCES #__minimarket_orders(id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS #__minimarket_order_items (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     order_id INT UNSIGNED NOT NULL,
