@@ -11,6 +11,64 @@ use Joomla\Database\DatabaseInterface;
 /** Operators may change order status, never line snapshots or prices. */
 final class OrderController extends BaseController
 {
+
+    public function add(): void
+    {
+        if (!Factory::getApplication()->getIdentity()->authorise('core.create','com_minimarket')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=order&layout=create');
+    }
+
+    /** Create an order entered by phone. Never accept a posted price or SKU. */
+    public function create(): void
+    {
+        $app=Factory::getApplication();
+        if ($app->input->getMethod()!=='POST' || !Session::checkToken('post')) {
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        }
+        if (!$app->getIdentity()->authorise('core.create','com_minimarket')) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        }
+        $redirect='index.php?option=com_minimarket&view=order&layout=create';
+        // Site service classes are installed by this same component; using
+        // their validated order writer prevents two price/persistence paths.
+        foreach (['CartState','CartStock','CheckoutData','CheckoutSettings',
+            'CheckoutDelivery','OrderStorage'] as $name) {
+            require_once JPATH_SITE.'/components/com_minimarket/src/Service/'.$name.'.php';
+        }
+        try {
+            $params=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
+            $contact=\MiniMarket\Component\Minimarket\Site\Service\CheckoutData::normalize([
+                'name'=>$app->input->post->get('customer_name','','string'),
+                'phone'=>$app->input->post->get('phone','','string'),
+                'email'=>$app->input->post->get('email','','string'),
+                'comment'=>$app->input->post->get('comment','','string'),
+            ]);
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $items=$app->input->post->get('items',[],'array');
+            $quote=\MiniMarket\Component\Minimarket\Administrator\Service\ManualOrderCatalog::quote(
+                $db,is_array($items)?$items:[],
+                (int)$params->get('inventory_enabled',1)===1);
+            $delivery=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::quote($params,[
+                'delivery_method'=>$app->input->post->get('delivery_method','','string'),
+                'delivery_city'=>$app->input->post->get('delivery_city','','string'),
+                'delivery_address'=>$app->input->post->get('delivery_address','','string'),
+                'payment_method'=>$app->input->post->get('payment_method','','string'),
+            ]);
+            $id=\MiniMarket\Component\Minimarket\Site\Service\OrderStorage::create(
+                $db,$contact,$quote,bin2hex(random_bytes(16)),0,$delivery,'manual');
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_MANUAL_ORDER_CREATED'));
+            $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
+        } catch (\DomainException $e) {
+            $app->enqueueMessage(Text::_($e->getMessage()),'warning');
+            $this->setRedirect($redirect);
+        } catch (\Throwable $e) {
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_CHECKOUT_SAVE_ERROR'),'error');
+            $this->setRedirect($redirect);
+        }
+    }
+
     public function status(): void
     {
         $app=Factory::getApplication();

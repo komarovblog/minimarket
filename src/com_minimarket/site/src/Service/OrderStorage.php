@@ -16,8 +16,12 @@ final class OrderStorage
         array $quote,
         string $checkoutKey,
         int $userId,
-        array $delivery=[]
+        array $delivery=[],
+        string $source='site'
     ): int {
+        if (!in_array($source,['site','manual','integration'],true)) {
+            throw new \DomainException('COM_MINIMARKET_CHECKOUT_INVALID');
+        }
         // Contact-only orders may have user_id=0 during UX development.
         if ($userId<0) throw new \DomainException('COM_MINIMARKET_CHECKOUT_INVALID');
         if (!preg_match('/^[a-f0-9]{32}$/D',$checkoutKey)
@@ -74,7 +78,7 @@ final class OrderStorage
             $columns=['checkout_key','user_id','customer_name','phone','email',
                 'customer_comment','delivery_method','delivery_city','delivery_address',
                 'delivery_rate_source','delivery_fee_cents','payment_method',
-                'status','currency','items_total_cents','total_cents','item_count','created_at'];
+                'order_source','status','currency','items_total_cents','total_cents','item_count','created_at'];
             $values=[
                 $db->quote($checkoutKey),(string)$userId,
                 $db->quote($contact['name']),$db->quote($contact['phone']),
@@ -82,7 +86,7 @@ final class OrderStorage
                 $db->quote($delivery['method']),$db->quote($delivery['city']),
                 $db->quote($delivery['address']),$db->quote($delivery['rate_source']),
                 (string)$delivery['fee_cents'],$db->quote($delivery['payment_method']),
-                $db->quote('new'),$db->quote('RUB'),(string)$total,
+                $db->quote($source),$db->quote('new'),$db->quote('RUB'),(string)$total,
                 (string)($total+$delivery['fee_cents']),
                 (string)$units,$db->quote(gmdate('Y-m-d H:i:s'))
             ];

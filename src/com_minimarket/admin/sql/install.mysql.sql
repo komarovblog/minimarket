@@ -611,6 +611,7 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     delivery_rate_source VARCHAR(16) NOT NULL DEFAULT 'none',
     delivery_fee_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     payment_method VARCHAR(24) NOT NULL DEFAULT 'on_receipt',
+    order_source VARCHAR(16) NOT NULL DEFAULT 'site',
     status VARCHAR(20) NOT NULL DEFAULT 'new',
     currency CHAR(3) NOT NULL DEFAULT 'RUB',
     items_total_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
