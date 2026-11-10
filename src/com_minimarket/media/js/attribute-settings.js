@@ -1,42 +1,57 @@
-/* MiniMarket: six canonical attribute types, manual or dictionary values. */
+/* MiniMarket attribute editor: filter presentation, selection cardinality and
+ * search-in-values are THREE independent settings. Joomla showon provides the
+ * baseline; this script limits modes to the selected canonical value type.
+ */
 (() => {
   'use strict';
   const filters = {
-    text: ['none','text','values','checkboxes','dropdown'],
-    number: ['none','range','slider','checkboxes','dropdown'],
-    editor: ['none'], boolean: ['none'], document: ['none'],
-    color: ['none','swatches','checkboxes','radio','dropdown']
+    text: ['none','dropdown','checkboxes'],
+    number: ['none','range','slider','dropdown','checkboxes'],
+    editor: ['none'],
+    boolean: ['none','dropdown','checkboxes'],
+    document: ['none'],
+    color: ['none','dropdown','checkboxes']
   };
-  const setup = () => {
-    const type = document.getElementById('jform_input_type');
-    const source = document.getElementById('jform_value_source');
-    const filter = document.getElementById('jform_filter_mode');
-    const multiple = document.getElementById('jform_is_multiple');
-    if (!type || !source || !filter) return;
-    const choices = Array.from(filter.options, option => option.cloneNode(true));
-    const refresh = () => {
-      const t = type.value;
-      const allowed = filters[t] || ['none'];
-      const old = filter.value;
-      filter.replaceChildren(...choices.filter(option => allowed.includes(option.value))
-        .map(option => option.cloneNode(true)));
-      filter.value = allowed.includes(old) ? old : 'none';
-      if (filter.value !== old) filter.dispatchEvent(new Event('change', {bubbles:true}));
-      if (t === 'boolean') {
-        source.value = 'manual';
-        if (multiple) multiple.value = '0';
+  const setup=()=>{
+    const type=document.getElementById('jform_input_type');
+    const source=document.getElementById('jform_value_source');
+    const display=document.getElementById('jform_filter_mode');
+    const productMultiple=document.getElementById('jform_is_multiple');
+    if (!type || !display) return;
+    const options=Array.from(display.options,o=>o.cloneNode(true));
+    const radios=name=>Array.from(document.querySelectorAll('[name="jform['+name+']"]'));
+    const setRadio=(name,value)=>{
+      for (const radio of radios(name)) radio.checked=radio.value===value;
+    };
+    const refresh=()=>{
+      const t=type.value,allowed=filters[t]||['none'],previous=display.value;
+      display.replaceChildren(...options.filter(o=>allowed.includes(o.value))
+        .map(o=>o.cloneNode(true)));
+      display.value=allowed.includes(previous)?previous:'none';
+      if (t==='boolean') {
+        if (source) source.value='manual';
+        if (productMultiple) productMultiple.value='0';
       }
-      const selectedMulti = document.querySelector('[name="jform[filter_multiple]"][value="1"]');
-      const selectedSingle = document.querySelector('[name="jform[filter_multiple]"][value="0"]');
-      if (selectedMulti && selectedSingle) {
-        if (['checkboxes','swatches'].includes(filter.value)) selectedMulti.checked=true;
-        else if (!['values','dropdown'].includes(filter.value)) selectedSingle.checked=true;
+      const multipleAllowed=['dropdown','checkboxes'].includes(display.value)
+        && t!=='boolean';
+      const searchAllowed=['text','color'].includes(t)
+        && ['dropdown','checkboxes'].includes(display.value);
+      if (!multipleAllowed) setRadio('filter_multiple','0');
+      if (!searchAllowed) setRadio('filter_search','0');
+      for (const [field,visible] of [
+        ['filter_multiple',multipleAllowed],['filter_search',searchAllowed]
+      ]) {
+        const element=radios(field)[0];
+        const control=element?.closest('.control-group');
+        if (control) control.hidden=!visible;
       }
+      if (display.value!==previous) display.dispatchEvent(
+        new Event('change',{bubbles:true}));
     };
     type.addEventListener('change',refresh);
-    filter.addEventListener('change',refresh);
+    display.addEventListener('change',refresh);
     refresh();
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',setup,{once:true});
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',setup,{once:true});
   else setup();
 })();
