@@ -32,7 +32,7 @@ namespace MiniMarket\Regression55 {
   && $indexes[0]<$indexes[1] && $indexes[1]<$indexes[2]
   && $indexes[2]<$indexes[3] && $indexes[3]<$indexes[4],
   'bundle price method appears directly after SKU');
- $f=array_map(static fn($v)=>strpos($edit,"$renderFlag('badge_".$v."',"),
+ $f=array_map(static fn($v)=>strpos($edit,"\$renderFlag('badge_".$v."',"),
   ['benefit','sale','new','popular']);
  check(!in_array(false,$f,true) && $f[0]<$f[1] && $f[1]<$f[2] && $f[2]<$f[3],
   'Savings Sale New Popular order');
