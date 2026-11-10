@@ -19,7 +19,7 @@ $groups=[
  <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
   <h2 class="h4 mb-0"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_TITLE'); ?></h2>
   <?php if($this->canManagePlugins): ?>
-   <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_plugins&view=plugins',false)); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_MANAGE_PLUGINS'); ?></a>
+   <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_plugins',false)); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_MANAGE_PLUGINS'); ?></a>
   <?php endif; ?>
  </div>
  <div class="alert alert-info" role="note"><span class="icon-info-circle" aria-hidden="true"></span>
