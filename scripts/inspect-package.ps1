@@ -222,8 +222,14 @@ try {
             exit 1
         }
     }
-    if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple' and @type='list' and @showon='input_type!:boolean']")) {
-        Write-Output 'PACKAGE_FAIL: VALUE_CARDINALITY_FORM_MISSING'
+    # 0.5.77: product characteristics have exactly one value; only
+    # filter_multiple may offer multiple catalog filter choices.
+    if ($null -ne $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='is_multiple']")) {
+        Write-Output 'PACKAGE_FAIL: LEGACY_PRODUCT_MULTIPLE_CHOICE_VISIBLE'
+        exit 1
+    }
+    if ($null -eq $archive.GetEntry('admin/sql/updates/mysql/0.5.77.sql')) {
+        Write-Output 'PACKAGE_FAIL: ONE_VALUE_DB_MIGRATION_MISSING'
         exit 1
     }
     if ($null -eq $attrXml.SelectSingleNode("/form/fieldset[@name='details']/field[@name='value_source' and @type='list']") -or
