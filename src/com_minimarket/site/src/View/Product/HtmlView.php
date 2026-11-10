@@ -16,6 +16,9 @@ final class HtmlView extends BaseHtmlView
 {
     public object $product;
     public array $gallery = [];
+    public array $reviews = [];
+    public bool $reviewsEnabled = false;
+    public bool $reviewsCanSubmit = false;
     public array $videos = [];
     public array $attributes = [];
     public array $variants = ['axes'=>[], 'items'=>[]];
@@ -44,6 +47,21 @@ final class HtmlView extends BaseHtmlView
         $this->inventoryEnabled = (int)ComponentHelper::getParams('com_minimarket')
             ->get('inventory_enabled', 1) === 1;
         $this->product = $product;
+        $params=ComponentHelper::getParams('com_minimarket');
+        $this->reviewsEnabled=(int)$params->get('reviews_enabled',0)===1;
+        if ($this->reviewsEnabled) {
+            $user=Factory::getApplication()->getIdentity();
+            $this->reviewsCanSubmit=(string)$params->get('reviews_author_mode','registered')==='all'
+                || ((int)$user->id>0 && empty($user->block));
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $q=$db->getQuery(true)->select(['id','author_name','rating','title',
+                'body','photo_path','video_url','created_at'])
+                ->from($db->quoteName('#__minimarket_reviews'))
+                ->where('product_id='.(int)$id)->where('state=1')
+                ->order('id DESC');
+            $db->setQuery($q,0,30);
+            $this->reviews=(array)$db->loadObjectList();
+        }
         $this->gallery = $repo->getProductGallery($id);
         $this->videos = $repo->getProductVideos($id);
         $this->attributes = $repo->getProductAttributes($id, (int) $product->category_id);

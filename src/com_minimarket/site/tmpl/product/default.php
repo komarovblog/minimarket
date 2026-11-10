@@ -456,4 +456,75 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
             </section>
         <?php endif; ?>
     <?php endif; ?>
+
+    <?php if ($this->reviewsEnabled) : ?>
+    <section class="mm-product-reviews mt-4" id="mm-product-reviews">
+        <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_REVIEWS_TITLE'); ?></h2>
+        <?php if (!$this->reviews) : ?>
+            <p><?php echo Text::_('COM_MINIMARKET_REVIEWS_EMPTY'); ?></p>
+        <?php endif; ?>
+        <?php foreach ($this->reviews as $review) :
+            $photo=explode('#',(string)($review->photo_path??''),2)[0];
+            $photoOk=str_starts_with($photo,'images/') && !str_contains($photo,'..')
+                && preg_match('~\.(?:jpg|jpeg|png|webp|avif)$~iD',$photo);
+            $video=(string)($review->video_url??'');
+            $videoSafe=(str_starts_with($video,'https://') || preg_match('~^(images|media)/~',$video))
+                && !str_contains($video,'..') && !preg_match('/[<>"\\x00-\\x1f]/',$video);
+        ?>
+        <article class="border rounded p-3 mb-3">
+            <div class="d-flex align-items-center justify-content-between gap-3">
+                <strong><?php echo $this->escape($review->author_name); ?></strong>
+                <span aria-label="<?php echo Text::_('COM_MINIMARKET_REVIEW_RATING'); ?>">
+                    <?php echo str_repeat('★',max(0,min(5,(int)$review->rating))); ?>
+                    <?php echo str_repeat('☆',5-max(0,min(5,(int)$review->rating))); ?>
+                </span>
+            </div>
+            <?php if((string)$review->title!=='') : ?><h3 class="h6 mt-2"><?php echo $this->escape($review->title); ?></h3><?php endif; ?>
+            <p><?php echo nl2br($this->escape($review->body)); ?></p>
+            <?php if ($photoOk) : ?>
+                <img loading="lazy" src="<?php echo $this->escape(Uri::root().$photo); ?>"
+                     class="img-fluid rounded" style="max-height:260px" alt="">
+            <?php endif; ?>
+            <?php if ($videoSafe) : ?>
+                <p><a href="<?php echo $this->escape(str_starts_with($video,'https://')?$video:Uri::root().$video); ?>"
+                    target="_blank" rel="noopener noreferrer"><?php echo Text::_('COM_MINIMARKET_REVIEW_WATCH_VIDEO'); ?></a></p>
+            <?php endif; ?>
+        </article>
+        <?php endforeach; ?>
+        <?php if ($this->reviewsCanSubmit) : ?>
+            <form method="post" action="<?php echo $this->escape(RouteHelper::reviewAction()); ?>"
+                  class="border rounded p-3 mt-3">
+                <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_REVIEW_ADD'); ?></h3>
+                <input type="hidden" name="product_id" value="<?php echo (int)$this->product->id; ?>">
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="mm-review-author"><?php echo Text::_('COM_MINIMARKET_REVIEW_AUTHOR'); ?> *</label>
+                        <input id="mm-review-author" class="form-control" name="author_name" required minlength="2"
+                               maxlength="120" value="<?php echo $this->escape((string)(\Joomla\CMS\Factory::getApplication()->getIdentity()->name??'')); ?>">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="mm-review-rating"><?php echo Text::_('COM_MINIMARKET_REVIEW_RATING'); ?> *</label>
+                        <select id="mm-review-rating" class="form-select" name="rating" required>
+                            <?php foreach([5,4,3,2,1] as $rating) : ?><option value="<?php echo $rating; ?>"><?php echo $rating; ?> / 5</option><?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="mm-review-title"><?php echo Text::_('COM_MINIMARKET_REVIEW_HEADLINE'); ?></label>
+                        <input id="mm-review-title" class="form-control" name="title" maxlength="140">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="mm-review-body"><?php echo Text::_('COM_MINIMARKET_REVIEW_BODY'); ?> *</label>
+                        <textarea id="mm-review-body" name="body" class="form-control" rows="4" minlength="10" maxlength="5000" required></textarea>
+                    </div>
+                </div>
+                <input type="text" name="website" tabindex="-1" autocomplete="off" hidden>
+                <?php echo HTMLHelper::_('form.token'); ?>
+                <button class="btn btn-primary mt-3" type="submit"><?php echo Text::_('COM_MINIMARKET_REVIEW_SEND'); ?></button>
+                <p class="small text-muted"><?php echo Text::_('COM_MINIMARKET_REVIEW_MODERATION_NOTE'); ?></p>
+            </form>
+        <?php else : ?>
+            <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_REVIEWS_SIGNIN'); ?></p>
+        <?php endif; ?>
+    </section>
+    <?php endif; ?>
 </article>

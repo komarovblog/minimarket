@@ -55,6 +55,11 @@ final class RouteHelper
         return Route::_('index.php?option=com_minimarket&view=ordercomplete', false);
     }
 
+    public static function reviewAction():string
+    {
+        return Route::_('index.php?option=com_minimarket&task=review.submit',false);
+    }
+
     public static function cartAction(string $action): string
     {
         if (!\in_array($action,['add','update','remove'],true)) {
