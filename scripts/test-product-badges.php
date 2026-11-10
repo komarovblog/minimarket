@@ -108,6 +108,21 @@ namespace MiniMarket\ProductBadgeSmoke {
     ok(str_contains(BadgeHelper::oldPrice($sale),'<del') &&
         str_contains(BadgeHelper::oldPrice($sale),'1990.00'),'old price marked as comparison');
     $base=__DIR__.'/../src/com_minimarket/';
+    $adminTemplate=file_get_contents($base.'admin/tmpl/product/edit.php');
+    ok(str_contains($adminTemplate,"getInput($field)")
+        && str_contains($adminTemplate,'COM_MINIMARKET_BADGE_SHOW_FLAG')
+        && str_contains($adminTemplate,'COM_MINIMARKET_BADGE_SALE_NAME')
+        && str_contains($adminTemplate,'COM_MINIMARKET_BADGE_BENEFIT_NAME')
+        && str_contains($adminTemplate,"renderField('badge_sale_display')")
+        && str_contains($adminTemplate,"renderField('badge_benefit_display')"),
+        'flag names are below Show flag; money and percent remain independent');
+    $badgeJs=file_get_contents($base.'media/js/product-badges.js');
+    ok(str_contains($badgeJs,'sale.disabled=discounted')
+        && !str_contains($badgeJs,'sale.disabled=!eligible')
+        && str_contains($badgeJs,'row(saleDisplay).hidden=discounted')
+        && str_contains($badgeJs,'row(benefitDisplay).hidden=!discounted'),
+        'manual sale toggle enabled even before price comparison; units accessible');
+
     $form=simplexml_load_file($base.'admin/forms/product.xml');
     ok($form!==false,'product form parses');
     ok(count($form->xpath("//fieldset[@name='details']/field[@name='old_price']"))===1,
