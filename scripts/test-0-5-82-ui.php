@@ -8,6 +8,12 @@ $ok=static function(bool $pass,string $what) use (&$n):void {
     ++$n;if(!$pass)throw new RuntimeException('MM82_UI_FAIL: '.$what);
 };
 $xml=simplexml_load_file($root.'minimarket.xml');
+$sysLang=$xml->xpath('//administration/languages/language');
+$ok(count($sysLang)===2
+ && in_array('ru-RU/com_minimarket.sys.ini',array_map('strval',$sysLang),true)
+ && in_array('en-GB/com_minimarket.sys.ini',array_map('strval',$sysLang),true),
+ 'administrator menu language files installed globally');
+
 $ok($xml!==false && (string)$xml->version==='0.5.83','manifest');
 $menus=$xml->xpath('//administration/submenu/menu');
 $links=[];

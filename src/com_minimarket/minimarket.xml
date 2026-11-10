@@ -22,6 +22,12 @@
     </media>
 
     <administration>
+        <!-- System translations must be available before the component is
+             opened: Joomla builds the administrator menu globally. -->
+        <languages folder="admin/language">
+            <language tag="ru-RU">ru-RU/com_minimarket.sys.ini</language>
+            <language tag="en-GB">en-GB/com_minimarket.sys.ini</language>
+        </languages>
         <files folder="admin">
             <filename>config.xml</filename>
             <folder>services</folder>
