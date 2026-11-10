@@ -125,7 +125,7 @@ foreach([$paths[7],$paths[8]] as $languagePath) {
     'localized stock errors '.$languagePath);
 }
 $manifest=file_get_contents($root.'/src/com_minimarket/minimarket.xml');
-check74(str_contains($manifest,'<version>0.5.77</version>'),'component version');
+check74(str_contains($manifest,'<version>0.5.78</version>'),'component version');
 $marker=file_get_contents($root.'/src/com_minimarket/admin/sql/updates/mysql/0.5.75.sql');
 check74(str_contains($marker,'SELECT 1;'),'no-DDL update marker');
 echo "MM74_CART_PASS: $count checks\n";
