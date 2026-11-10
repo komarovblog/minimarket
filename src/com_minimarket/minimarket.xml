@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.5.77</version>
+    <version>0.5.78</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -37,6 +37,7 @@
             <params><dashboard>minimarket</dashboard></params>
         </menu>
         <submenu>
+            <menu link="option=com_minimarket&amp;view=orders">COM_MINIMARKET_ORDERS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=dashboard">COM_MINIMARKET_DASHBOARD_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=category.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>

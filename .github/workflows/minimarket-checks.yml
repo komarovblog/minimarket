@@ -177,6 +177,7 @@ jobs:
           php scripts/test-0-5-73-clean-mysql84.php ./clean-ci-73.sql
           php scripts/test-0-5-75-stock-mysql84.php
           php scripts/test-0-5-77-mysql84.php
+          php scripts/test-0-5-78-orders-mysql84.php
 
   windows-package:
     name: Windows component ZIP
@@ -199,7 +200,7 @@ jobs:
           & .\scripts\release-to-desktop.ps1 -SkipPull -DesktopPath $dest
           if ($LASTEXITCODE -ne 0) { throw 'MM75_DESKTOP_RELEASE_FAILED' }
           $actual = @(Get-ChildItem -LiteralPath $dest -File | Select-Object -ExpandProperty Name | Sort-Object)
-          $expected = @('com_minimarket-0.5.77.zip', 'minimarket_demo_gallery_filters_0_5_77.sql', 'mod_minimarket_toolbar-0.5.77.zip')
+          $expected = @('com_minimarket-0.5.78.zip', 'minimarket_demo_gallery_filters_0_5_78.sql', 'mod_minimarket_toolbar-0.5.78.zip')
           if (($actual -join '|') -ne ($expected -join '|')) {
             throw ("MM75_DESKTOP_RELEASE_EXPECTED_THREE: " + ($actual -join ','))
           }
@@ -300,6 +301,14 @@ jobs:
 
       - name: MiniMarket cart 0.5.74 state, bundles and UI contract
         run: php scripts/test-0-5-74-cart.php
+
+      - name: MiniMarket checkout order request and administrator views
+        run: |
+          php scripts/test-0-5-78-checkout.php
+          php -l src/com_minimarket/site/src/Service/CheckoutData.php
+          php -l src/com_minimarket/site/src/Service/OrderStorage.php
+          php -l src/com_minimarket/site/src/Controller/CheckoutController.php
+          php -l src/com_minimarket/admin/src/Controller/OrderController.php
 
       - name: MiniMarket 0.5.77 one product value, multi-select facet and bundle UI
         run: |

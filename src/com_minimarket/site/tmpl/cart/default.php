@@ -64,6 +64,10 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
         <p class="mm-cart__total"><strong><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?>:
             <?php echo CartState::format($this->cart['total_cents']); ?>
             <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></p>
+        <?php if ($this->cart['available']) : ?>
+        <p><a class="btn btn-primary" href="<?php echo $this->escape(RouteHelper::checkout()); ?>">
+            <?php echo Text::_('COM_MINIMARKET_CHECKOUT_TITLE'); ?></a></p>
+        <?php endif; ?>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CART_CHECKOUT_NEXT'); ?></p>
     <?php endif; ?>
 </section>

@@ -65,6 +65,14 @@ final class Router implements RouterInterface
             unset($query['view']);
             return ['cart'];
         }
+        if ($view === 'checkout') {
+            unset($query['view']);
+            return ['checkout'];
+        }
+        if ($view === 'ordercomplete') {
+            unset($query['view']);
+            return ['order-complete'];
+        }
 
         if (!\in_array($view, ['category', 'product'], true) || empty($query['id'])) {
             return [];
@@ -109,6 +117,14 @@ final class Router implements RouterInterface
             if ((string)$segments[0] === 'cart') {
                 $segments = [];
                 return ['view'=>'cart'];
+            }
+            if ((string)$segments[0] === 'checkout') {
+                $segments = [];
+                return ['view'=>'checkout'];
+            }
+            if ((string)$segments[0] === 'order-complete') {
+                $segments = [];
+                return ['view'=>'ordercomplete'];
             }
             // Temporary legacy compatibility; 301 redirects need separate tests.
             $matches = [];

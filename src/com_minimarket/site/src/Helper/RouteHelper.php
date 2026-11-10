@@ -42,6 +42,19 @@ final class RouteHelper
         return Route::_('index.php?option=com_minimarket&view=cart', false);
     }
 
+    public static function checkout(): string
+    {
+        return Route::_('index.php?option=com_minimarket&view=checkout', false);
+    }
+    public static function checkoutAction(): string
+    {
+        return Route::_('index.php?option=com_minimarket&task=checkout.submit', false);
+    }
+    public static function orderComplete(): string
+    {
+        return Route::_('index.php?option=com_minimarket&view=ordercomplete', false);
+    }
+
     public static function cartAction(string $action): string
     {
         if (!\in_array($action,['add','update','remove'],true)) {

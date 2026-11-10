@@ -8,7 +8,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 /**
  * Three full-width stacked Atum dashboard sections; each uses a responsive
  * tile grid. The native #wrapper.closed class switches 4 to 6 desktop tiles.
- * No vertical section menus and no fake Orders navigation.
+ * No vertical section menus; Orders links to real stored requests.
  */
 $sections = [
     [
@@ -16,8 +16,8 @@ $sections = [
         'type' => 'management',
         'icon' => 'icon-cog',
         'items' => [
-            ['view' => null, 'label' => 'COM_MINIMARKET_DASHBOARD_ORDERS',
-                'icon' => 'icon-cart', 'pending' => true, 'count' => null],
+            ['view' => 'orders', 'label' => 'COM_MINIMARKET_DASHBOARD_ORDERS',
+                'icon' => 'icon-cart', 'count' => 'orders'],
         ],
     ],
     [
