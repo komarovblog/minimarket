@@ -300,6 +300,12 @@ jobs:
       - name: MiniMarket cart 0.5.74 state, bundles and UI contract
         run: php scripts/test-0-5-74-cart.php
 
+      - name: MiniMarket catalog AJAX sort and global page size
+        run: |
+          php scripts/test-0-5-76-catalog-live.php
+          node --check src/com_minimarket/media/js/catalog-live.js
+          node scripts/test-0-5-76-catalog-live.js
+
       - name: MiniMarket 0.5.76 filter settings and persistence
         run: php scripts/test-0-5-76-filter-settings.php
 

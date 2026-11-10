@@ -30,11 +30,11 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <?php endif; ?>
 
     <?php if ($this->showProducts) : ?>
-        <section class="com-minimarket-catalog__products">
+        <section class="com-minimarket-catalog__products" data-mm-root-content>
             <h2><?php echo Text::_('COM_MINIMARKET_PRODUCTS_ALL'); ?></h2>
-            <form method="get" class="mm-sort-bar d-flex align-items-center gap-2 flex-wrap my-3" action="<?php echo $this->escape(RouteHelper::catalogPage(1,$this->shopItemId)); ?>">
+            <form method="get" data-mm-root-sort-form class="mm-sort-bar d-flex align-items-center gap-2 flex-wrap my-3" action="<?php echo $this->escape(RouteHelper::catalogPage(1,$this->shopItemId)); ?>">
                 <label for="mm-root-sort"><?php echo Text::_('COM_MINIMARKET_SORT_LABEL'); ?></label>
-                <select class="form-select form-select-sm" id="mm-root-sort" name="mm_order">
+                <select class="form-select form-select-sm" id="mm-root-sort" name="mm_order" data-mm-root-sort>
                     <?php foreach ([
                         'newest'=>'COM_MINIMARKET_SORT_NEWEST',
                         'name'=>'COM_MINIMARKET_SORT_NAME',
@@ -47,7 +47,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                 <button class="btn btn-outline-secondary btn-sm" type="submit"><?php echo Text::_('COM_MINIMARKET_FILTER_APPLY'); ?></button>
             </form>
             <?php if ($this->products) : ?>
-                <ul class="list-unstyled">
+                <ul class="list-unstyled" data-mm-root-list>
                     <?php foreach ($this->products as $product) : ?>
                         <li>
                             <?php
@@ -73,7 +73,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
             <?php endif; ?>
 
             <?php if ($this->productPageCount > 1) : ?>
-                <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PAGINATION_LABEL')); ?>">
+                <nav data-mm-root-pages aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PAGINATION_LABEL')); ?>">
                     <span>
                         <?php echo $this->escape(Text::sprintf(
                             'COM_MINIMARKET_PAGINATION_STATUS',
@@ -82,14 +82,14 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                         )); ?>
                     </span>
                     <?php if ($this->productPage > 1) : ?>
-                        <a rel="prev" href="<?php echo $this->escape(RouteHelper::catalogPage(
+                        <a data-mm-root-page rel="prev" href="<?php echo $this->escape(RouteHelper::catalogPage(
                             $this->productPage - 1,
                             $this->shopItemId,
                             $this->sortOrder
                         )); ?>"><?php echo Text::_('JPREV'); ?></a>
                     <?php endif; ?>
                     <?php if ($this->productPage < $this->productPageCount) : ?>
-                        <a rel="next" href="<?php echo $this->escape(RouteHelper::catalogPage(
+                        <a data-mm-root-page data-mm-root-next rel="next" href="<?php echo $this->escape(RouteHelper::catalogPage(
                             $this->productPage + 1,
                             $this->shopItemId,
                             $this->sortOrder

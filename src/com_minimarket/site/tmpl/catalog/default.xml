@@ -35,11 +35,13 @@
                 showon="show_products:1"
                 label="COM_MINIMARKET_MENU_PRODUCTS_LIMIT"
                 description="COM_MINIMARKET_MENU_PRODUCTS_LIMIT_DESC"
-                default="12"
+                default="0"
             >
-                <option value="12">12</option>
-                <option value="24">24</option>
-                <option value="48">48</option>
+                <option value="0">COM_MINIMARKET_CATEGORY_INHERIT</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
             </field>
             <field
                 name="products_order"

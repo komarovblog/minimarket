@@ -18,7 +18,7 @@ final class HtmlView extends BaseHtmlView
     public bool $showProducts = false;
     public array $products = [];
     public int $productPage = 1;
-    public int $productsPerPage = 12;
+    public int $productsPerPage = 10;
     public int $productPageCount = 1;
     public int $productTotal = 0;
     public int $shopItemId = 0;
@@ -27,8 +27,8 @@ final class HtmlView extends BaseHtmlView
     public function display($tpl = null)
     {
         $app = Factory::getApplication();
-        $this->catalogTitle = (string) ComponentHelper::getParams('com_minimarket')
-            ->get('catalog_title', 'MiniMarket');
+        $global = ComponentHelper::getParams('com_minimarket');
+        $this->catalogTitle = (string) $global->get('catalog_title', 'MiniMarket');
 
         // Parameters belong to the actual ordinary menu item that was opened.
         // This allows '/', '/catalog' and '/shop' to show different blocks.
@@ -53,9 +53,13 @@ final class HtmlView extends BaseHtmlView
             }
 
             if ($this->showProducts) {
-                $allowedLimits = [12, 24, 48];
-                $limit = (int) ($params?->get('products_per_page', 12) ?? 12);
-                $this->productsPerPage = \in_array($limit, $allowedLimits, true) ? $limit : 12;
+                $allowedLimits = [10, 20, 30, 50];
+                $globalLimit = (int) $global->get('category_products_per_page', 10);
+                if (!\in_array($globalLimit, $allowedLimits, true)) $globalLimit = 10;
+                $menuLimit = (int) ($params?->get('products_per_page', 0) ?? 0);
+                // Legacy 12/24/48 choices now inherit the global setting.
+                $this->productsPerPage = \in_array($menuLimit, $allowedLimits, true)
+                    ? $menuLimit : $globalLimit;
 
                 $sort = Factory::getApplication()->input->getCmd('mm_order',
                     (string)($params?->get('products_order','newest')??'newest'));
@@ -85,7 +89,9 @@ final class HtmlView extends BaseHtmlView
 
         $this->getDocument()->getWebAssetManager()
             ->registerAndUseStyle('com_minimarket.badges',
-                'media/com_minimarket/css/badges.css');
+                'media/com_minimarket/css/badges.css')
+            ->registerAndUseScript('com_minimarket.catalog-live',
+                'media/com_minimarket/js/catalog-live.js', [], ['defer' => true]);
 
         parent::display($tpl);
     }
