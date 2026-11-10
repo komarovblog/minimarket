@@ -43,23 +43,23 @@ valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID',
 $f->number_min='0';$f->number_step='0';
 valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_NUMERIC_INVALID',
     'zero step rejected');
-$f=field('number','preset','checkboxes');
+$f=field('number','preset','checkboxes');$f->filter_multiple=1;
 valid(S::normalize($f)===null && $f->filter_multiple===1,
-    'numeric presets can use multiple checkbox filtering');
+    'numeric presets allow multiple checkbox filtering when explicitly selected');
 $f=field('number','manual','radio');
-valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
-    'number radio filter unsupported');
+valid(S::normalize($f)===null && $f->filter_mode==='checkboxes',
+    'legacy radio facet is normalized to independent checkbox presentation');
 $f=field('text','preset','dropdown');$f->is_multiple=1;
 $f->filter_multiple=0;
 valid(S::normalize($f)===null && $f->filter_multiple===0,
     'multi product choices and single filter dropdown independent');
 $f=field('text','manual','values');$f->filter_multiple=1;
 valid(S::normalize($f)===null,'text can filter by available values');
-$f=field('color','preset','swatches');
+$f=field('color','preset','swatches');$f->filter_multiple=1;
 valid(S::normalize($f)===null && $f->filter_multiple===1,
-    'color swatches imply multi-choice facet');
+    'legacy color swatches keep independently selected multiple values');
 foreach(['editor','document'] as $type){
-    $f=field($type);$f->is_filterable=1;
+    $f=field($type,'manual','checkboxes');
     valid(S::normalize($f)==='COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID',
         'non-faceted '.$type);
 }
