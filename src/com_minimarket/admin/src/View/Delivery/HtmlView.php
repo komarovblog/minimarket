@@ -18,6 +18,7 @@ final class HtmlView extends BaseHtmlView
         if(!$u->authorise('core.manage','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
+        $this->setLayout($this->isCreate?'create':'default');
         if($this->isCreate && !$u->authorise('core.create','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         if(!$this->isCreate && !$u->authorise('core.edit.state','com_minimarket'))

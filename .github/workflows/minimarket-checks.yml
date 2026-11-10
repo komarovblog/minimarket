@@ -181,6 +181,7 @@ jobs:
           php scripts/test-0-5-81-orders-mysql84.php
           php scripts/test-0-5-82-schema-mysql84.php
           php scripts/test-0-5-83-schema-mysql84.php
+          php scripts/test-0-5-84-schema-mysql84.php
 
   windows-package:
     name: Windows component ZIP
@@ -203,7 +204,7 @@ jobs:
           & .\scripts\release-to-desktop.ps1 -SkipPull -DesktopPath $dest
           if ($LASTEXITCODE -ne 0) { throw 'MM75_DESKTOP_RELEASE_FAILED' }
           $actual = @(Get-ChildItem -LiteralPath $dest -File | Select-Object -ExpandProperty Name | Sort-Object)
-          $expected = @('com_minimarket-0.5.83.zip', 'minimarket_demo_gallery_filters_0_5_83.sql', 'mod_minimarket_toolbar-0.5.83.zip')
+          $expected = @('com_minimarket-0.5.84.zip', 'minimarket_demo_gallery_filters_0_5_84.sql', 'mod_minimarket_toolbar-0.5.84.zip')
           if (($actual -join '|') -ne ($expected -join '|')) {
             throw ("MM75_DESKTOP_RELEASE_EXPECTED_THREE: " + ($actual -join ','))
           }
@@ -313,10 +314,14 @@ jobs:
           php scripts/test-0-5-81-checkout.php
           php scripts/test-0-5-82-ui.php
           php scripts/test-0-5-83-features.php
+          php scripts/test-0-5-84-features.php
           node --check src/com_minimarket/media/js/admin-display-groups.js
           node --check src/com_minimarket/media/js/category-card-gallery.js
           node --check src/com_minimarket/media/js/promo-video-editor.js
           node --check src/com_minimarket/media/js/admin-columns.js
+          php -l src/com_minimarket/admin/src/Controller/DeliveryController.php
+          php -l src/com_minimarket/admin/src/Controller/PromocodeController.php
+          php -l src/com_minimarket/admin/src/View/Delivery/HtmlView.php
           node --check src/com_minimarket/media/js/manual-order.js
           node --check src/com_minimarket/media/js/inherited-options.js
           node --check src/com_minimarket/media/js/category-actions.js

@@ -12,6 +12,7 @@ final class HtmlView extends BaseHtmlView
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
+        $this->setLayout('create');
         if(!$app->getIdentity()->authorise('core.create','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
