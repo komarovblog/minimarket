@@ -13,7 +13,7 @@ final class AdminEntityLinks
 {
     private const ENTITIES = ['attribute', 'orderoption', 'category', 'product', 'group', 'value', 'brand', 'collection'];
     private const VIEWS = ['dashboard', 'categories', 'products', 'groups', 'attributes',
-        'orderoptions', 'import', 'feeds', 'brands', 'collections', 'bundles', 'bundlegroups','orders','deliveries','settings'];
+        'orderoptions', 'import', 'feeds', 'brands', 'collections', 'bundles', 'bundlegroups','orders','deliveries','reviews','settings'];
 
     public static function edit(string $entity, int $id): string
     {
@@ -41,6 +41,9 @@ final class AdminEntityLinks
 
         if ($view==='settings') {
             return self::htmlUrl('index.php?option=com_config&view=component&component=com_minimarket');
+        }
+        if ($view==='reviews') {
+            return self::htmlUrl('index.php?option=com_minimarket&view=reviews&filter_status=pending');
         }
         if ($view==='deliveries') {
             return self::htmlUrl('index.php?option=com_minimarket&view=deliveries');

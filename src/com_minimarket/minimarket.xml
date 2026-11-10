@@ -41,6 +41,9 @@
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=order&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu link="option=com_minimarket&amp;view=deliveries">COM_MINIMARKET_DASHBOARD_DELIVERIES</menu>
+            <menu link="option=com_minimarket&amp;view=reviews">COM_MINIMARKET_REVIEWS_TITLE
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=review&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
             <menu type="separator" alias="mm-separator-orders">-</menu>
             <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=category.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>

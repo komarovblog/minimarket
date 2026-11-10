@@ -30,6 +30,7 @@ final class HtmlView extends BaseHtmlView
             'feeds'        => ['feeds', '1=1'],
             'orders'       => ['orders', '1=1'],
             'deliveries'   => ['orders', "delivery_method='courier' AND status IN ('new','confirmed')"],
+            'reviews'      => ['reviews', 'state=0'],
         ] as $key=>[$table,$predicate]) {
             $db->setQuery('SELECT COUNT(*) FROM '
                 .$db->quoteName('#__minimarket_'.$table).' WHERE '.$predicate);
