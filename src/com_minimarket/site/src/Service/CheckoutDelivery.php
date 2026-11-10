@@ -8,7 +8,7 @@ namespace MiniMarket\Component\Minimarket\Site\Service;
  */
 final class CheckoutDelivery
 {
-    /** @return array<string,int> city => price in minor units */
+    /** @return array<string,array{city:string,fee_cents:int}> normalized city => tariff */
     public static function rates(object $params): array
     {
         $source=trim((string)$params->get('delivery_city_rates',''));

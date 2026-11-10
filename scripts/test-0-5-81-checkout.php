@@ -77,6 +77,7 @@ $reject(fn()=>CheckoutSettings::fields(new Params81([
 ])),'both contact methods cannot be hidden');
 $root=dirname(__DIR__).'/src/com_minimarket/';
 $config=(string)file_get_contents($root.'admin/config.xml');
+$ok(simplexml_load_string($config)!==false,'global Joomla options XML is well formed');
 $ok(str_contains($config,'name="checkout_auth_mode"')
  && str_contains($config,'name="checkout_name_mode"')
  && str_contains($config,'name="checkout_phone_mode"')

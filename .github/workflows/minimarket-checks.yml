@@ -309,6 +309,7 @@ jobs:
           php scripts/test-0-5-79-auth.php
           php scripts/test-0-5-80-checkout-phase.php
           php scripts/test-0-5-81-checkout.php
+          node --check src/com_minimarket/media/js/checkout.js
           php -l src/com_minimarket/site/src/Service/CheckoutData.php
           php -l src/com_minimarket/site/src/Service/OrderStorage.php
           php -l src/com_minimarket/site/src/Controller/CheckoutController.php
