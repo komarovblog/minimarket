@@ -48,6 +48,15 @@
         <field name="category_show_descendant_bundles" type="radio" label="COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES" default="0" filter="int">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
+        <field name="category_show_image" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_IMAGE">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_show_introtext" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_INTRO">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_show_description" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_DESCRIPTION">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
         <field name="mm_display_products_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCTS_SECTION" />
         <field name="category_product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="list" filter="cmd">
             <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
@@ -122,6 +131,12 @@
             <option value="20">20</option>
             <option value="30">30</option>
             <option value="50">50</option>
+        </field>
+        <field name="category_product_gallery_enabled" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="category_product_gallery_limit" type="list" default="5" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY_LIMIT" showon="category_product_gallery_enabled:1">
+            <option value="3">3</option><option value="5">5</option><option value="8">8</option>
         </field>
         <field name="mm_display_card_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCT_CARD_SECTION" />
         <field name="attribute_display_location" type="list" default="both" filter="cmd" label="COM_MINIMARKET_DISPLAY_ATTRIBUTES_LOCATION">

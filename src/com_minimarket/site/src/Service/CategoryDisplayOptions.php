@@ -20,6 +20,12 @@ final class CategoryDisplayOptions
             && (string)$global->get('shop_type','physical')==='physical';
         $result['quick_view']=(int)$global->get('category_quick_view',0)===1;
         $result['show_badges']=(int)$global->get('category_show_badges',1)===1;
+        $result['category_image']=(int)$global->get('category_show_image',1)===1;
+        $result['category_intro']=(int)$global->get('category_show_introtext',1)===1;
+        $result['category_description']=(int)$global->get('category_show_description',1)===1;
+        $result['product_gallery_enabled']=(int)$global->get('category_product_gallery_enabled',1)===1;
+        $limit=(int)$global->get('category_product_gallery_limit',5);
+        $result['product_gallery_limit']=in_array($limit,[3,5,8],true)?$limit:5;
         foreach (['attribute_display_location','option_display_location','system_display_location'] as $key) {
             $location=(string)$global->get($key,'both');
             $result[$key]=in_array($location,['product','category','both'],true)?$location:'both';

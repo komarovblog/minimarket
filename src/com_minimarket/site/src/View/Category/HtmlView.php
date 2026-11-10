@@ -20,6 +20,7 @@ final class HtmlView extends BaseHtmlView
     public array $products = [];
     public array $categoryAttributeRows = [];
     public array $categoryVariantOptions = [];
+    public array $categoryGalleries = [];
     public array $variantsInProducts = [];
     public array $children = [];
     public bool $displayProducts = true;
@@ -144,6 +145,18 @@ final class HtmlView extends BaseHtmlView
                 ->where('product_id IN ('.implode(',',$ids).')');
             $db->setQuery($q);
             $this->variantsInProducts=array_fill_keys(array_map('intval',(array)$db->loadColumn()),true);
+            if ($this->productListOptions['product_gallery_enabled']) {
+                $gq=$db->getQuery(true)->select(['product_id','path','alt'])
+                    ->from($db->quoteName('#__minimarket_product_images'))
+                    ->where('product_id IN ('.implode(',',$ids).')')
+                    ->order('product_id ASC, sort_order ASC, id ASC');
+                $db->setQuery($gq,0,count($ids)*30);
+                foreach ((array)$db->loadAssocList() as $photo) {
+                    $pid=(int)$photo['product_id'];
+                    if (count($this->categoryGalleries[$pid]??[])>=8) continue;
+                    $this->categoryGalleries[$pid][]=$photo;
+                }
+            }
             $optionLocations=[];
             $q=$db->getQuery(true)->select(['code','display_location'])
                 ->from($db->quoteName('#__minimarket_order_options'))
@@ -221,7 +234,9 @@ final class HtmlView extends BaseHtmlView
             ->registerAndUseScript('com_minimarket.faceted-catalog',
                 'media/com_minimarket/js/faceted-catalog.js',[],['defer'=>true])
             ->registerAndUseScript('com_minimarket.category-actions',
-                'media/com_minimarket/js/category-actions.js',[],['defer'=>true]);
+                'media/com_minimarket/js/category-actions.js',[],['defer'=>true])
+            ->registerAndUseScript('com_minimarket.category-card-gallery',
+                'media/com_minimarket/js/category-card-gallery.js',[],['defer'=>true]);
 
         parent::display($tpl);
     }

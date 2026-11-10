@@ -29,6 +29,11 @@ final class GridcardsField extends ListField
                     'com_minimarket.category-grid-settings',
                     'media/com_minimarket/css/category-grid-settings.css'
                 );
+            Factory::getApplication()->getDocument()->getWebAssetManager()
+                ->registerAndUseScript('com_minimarket.display-groups',
+                    'media/com_minimarket/js/admin-display-groups.js',[],['defer'=>true])
+                ->registerAndUseStyle('com_minimarket.display-groups',
+                    'media/com_minimarket/css/admin-display-groups.css');
             self::$registered=true;
         }
         return parent::getInput();

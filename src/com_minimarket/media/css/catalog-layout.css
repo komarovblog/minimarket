@@ -155,3 +155,16 @@
 .com-minimarket-category[aria-busy="true"] [data-mm-ajax-content] {
   opacity:.7;
 }
+
+/* Product cards: gallery controls operate independently of product link. */
+.mm-product-card__gallery{position:relative;overflow:hidden;border-radius:.35rem;}
+.mm-product-card__gallery .mm-product-card__media{display:block;}
+.mm-product-card__gallery .mm-product-card__image{width:100%;object-fit:contain;}
+.mm-gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);
+  border:1px solid rgba(127,127,127,.5);border-radius:.35rem;
+  background:var(--bs-body-bg,rgba(255,255,255,.9));color:var(--bs-body-color,#222);
+  min-height:2.4rem;min-width:2.1rem;cursor:pointer;}
+.mm-gallery-arrow--prev{left:.2rem}.mm-gallery-arrow--next{right:.2rem}
+.mm-gallery-indicator{position:absolute;right:.5rem;bottom:.35rem;
+  background:var(--bs-body-bg,rgba(255,255,255,.9));color:var(--bs-body-color,#222);
+  border-radius:.3rem;padding:.1rem .35rem;font-size:.7rem;}

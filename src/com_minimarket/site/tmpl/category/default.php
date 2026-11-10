@@ -19,15 +19,17 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     $safeImage = str_starts_with($image, 'images/') && !str_contains($image, '..')
         && !preg_match('/[\x00-\x1f<>]/', $image);
     ?>
-    <?php if ($safeImage) : ?>
+    <?php if ($safeImage && $this->productListOptions['category_image']) : ?>
         <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
              alt="<?php echo $this->escape((string) ($this->category->image_alt ?: $this->category->title)); ?>"
              loading="lazy" class="com-minimarket-category__image">
     <?php endif; ?>
-    <?php if (trim((string) ($this->category->introtext ?? '')) !== '') : ?>
+    <?php if ($this->productListOptions['category_intro'] &&
+        trim((string) ($this->category->introtext ?? '')) !== '') : ?>
         <div class="com-minimarket-category__intro"><?php echo InputFilter::getInstance()->clean((string) $this->category->introtext, 'HTML'); ?></div>
     <?php endif; ?>
-    <?php if ((string) $this->category->description !== '') : ?>
+    <?php if ($this->productListOptions['category_description'] &&
+        (string) $this->category->description !== '') : ?>
         <div class="com-minimarket-category__description"><?php echo InputFilter::getInstance()->clean((string) $this->category->description, 'HTML'); ?></div>
     <?php endif; ?>
 
@@ -98,12 +100,39 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                     $hasPhoto = str_starts_with($photo, 'images/') && !str_contains($photo, '..')
                         && !preg_match('/[\x00-\x1f<>]/', $photo);
                     ?>
-                    <?php if ($hasPhoto) : ?>
-                        <a class="mm-product-card__media" href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
-                            <img src="<?php echo $this->escape(Uri::root() . $photo); ?>"
-                                alt="<?php echo $this->escape((string) ($product->image_alt ?: $product->title)); ?>"
-                                loading="lazy" class="mm-product-card__image">
-                        </a>
+                    <?php
+                    $slides=[];
+                    if ($hasPhoto) $slides[]=['url'=>Uri::root().$photo,
+                        'alt'=>(string)($product->image_alt?:$product->title)];
+                    if ($this->productListOptions['product_gallery_enabled']) {
+                        foreach ($this->categoryGalleries[(int)$product->id]??[] as $galleryPhoto) {
+                            $path=explode('#',(string)($galleryPhoto['path']??''),2)[0];
+                            if (!str_starts_with($path,'images/') || str_contains($path,'..')
+                                || preg_match('/[\\x00-\\x1f<>]/',$path)) continue;
+                            $url=Uri::root().$path;
+                            if (in_array($url,array_column($slides,'url'),true)) continue;
+                            $slides[]=['url'=>$url,
+                                'alt'=>(string)($galleryPhoto['alt']?:$product->title)];
+                            if (count($slides)>=$this->productListOptions['product_gallery_limit']) break;
+                        }
+                    }
+                    ?>
+                    <?php if ($slides) : ?>
+                        <div class="mm-product-card__gallery" data-mm-card-gallery
+                             data-mm-gallery-photos="<?php echo $this->escape(json_encode($slides,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT)); ?>">
+                            <a class="mm-product-card__media" href="<?php echo $this->escape(RouteHelper::product((int)$product->id)); ?>">
+                                <img src="<?php echo $this->escape($slides[0]['url']); ?>"
+                                     alt="<?php echo $this->escape($slides[0]['alt']); ?>"
+                                     loading="lazy" class="mm-product-card__image" data-mm-card-gallery-image>
+                            </a>
+                            <?php if (count($slides)>1) : ?>
+                                <button type="button" class="mm-gallery-arrow mm-gallery-arrow--prev"
+                                    data-mm-card-gallery-step="-1" aria-label="<?php echo Text::_('COM_MINIMARKET_GALLERY_PREVIOUS'); ?>">‹</button>
+                                <button type="button" class="mm-gallery-arrow mm-gallery-arrow--next"
+                                    data-mm-card-gallery-step="1" aria-label="<?php echo Text::_('COM_MINIMARKET_GALLERY_NEXT'); ?>">›</button>
+                                <span class="mm-gallery-indicator" data-mm-card-gallery-indicator>1 / <?php echo count($slides); ?></span>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
                     <div class="mm-product-card__info">
                         <a href="<?php echo $this->escape(RouteHelper::product((int) $product->id)); ?>">
