@@ -78,8 +78,11 @@ $badge=(string)file_get_contents($root.'admin/src/Service/ProductBadges.php');
 audit60(str_contains($badge,'$saleDisplay = (string)') &&
  str_contains($badge,'$benefitDisplay = (string)'),
  'old products must get safe badge display defaults');
-audit60(count($video->xpath("//field[@name='is_promo']"))===1,
- 'video editor must expose promo checkbox');
+$promoForm=simplexml_load_file($root.'admin/forms/product_promo_video.xml');
+audit60($promoForm!==false &&
+ count($video->xpath("//field[@name='is_promo']"))===0 &&
+ count($product->xpath("//field[@name='promo_video']"))===1,
+ 'dedicated promo video editor sits above ordinary videos');
 $promoJs=(string)file_get_contents($root.'media/js/promo-video.js');
 $promoTpl=(string)file_get_contents($root.'site/tmpl/product/default.php');
 audit60(str_contains($promoJs,"player.addEventListener('click',toggle)") &&
