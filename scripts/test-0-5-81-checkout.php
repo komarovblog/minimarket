@@ -102,5 +102,5 @@ $ok(str_contains($view,'name="delivery_method"')
  && str_contains($view,'name="payment_method"')
  && str_contains($view,'data-fee-cents'),'single page checkout form');
 $xml=(string)file_get_contents($root.'minimarket.xml');
-$ok(str_contains($xml,'<version>0.5.82</version>'),'version 0.5.82');
+$ok(str_contains($xml,'<version>0.5.83</version>'),'version 0.5.83');
 echo "MM81_CHECKOUT_PASS: $n checks\n";
