@@ -77,17 +77,46 @@ use Joomla\CMS\Component\ComponentHelper;
                 ?>
             <?php elseif ($section === 'badges') : ?>
                 <?php
-                  // Explicit order is part of the admin UI contract.
-                  if ($isBundle) {
-                      echo $this->form->renderField('badge_benefit');
-                      echo $this->form->renderField('badge_benefit_display');
-                  }
-                  echo $this->form->renderField('badge_sale');
-                  echo $this->form->renderField('badge_sale_display');
-                  echo $this->form->renderField('badge_new');
-                  echo $this->form->renderField('badge_new_days');
-                  echo $this->form->renderField('badge_popular');
-                  echo $this->form->renderField('badge_popular_days');
+                // A flag's generic heading is followed by its own name next
+                // to the native Joomla checkbox. Display units are independent.
+                $renderFlag = function (string $field, string $name, string $help = ''): void {
+                    $id = 'jform_' . $field;
+                    ?>
+                    <div class="control-group mm-badge-flag" data-mm-badge-flag="<?php echo $this->escape($field); ?>">
+                        <div class="control-label">
+                            <span class="form-label"><?php echo Text::_('COM_MINIMARKET_BADGE_SHOW_FLAG'); ?></span>
+                        </div>
+                        <div class="controls">
+                            <div class="d-flex align-items-center gap-2">
+                                <?php echo $this->form->getInput($field); ?>
+                                <label for="<?php echo $this->escape($id); ?>" class="form-check-label">
+                                    <?php echo Text::_($name); ?>
+                                </label>
+                            </div>
+                            <?php if ($help !== '') : ?>
+                                <div class="form-text"><?php echo Text::_($help); ?></div>
+                                <?php if ($field === 'badge_sale') : ?>
+                                    <div class="text-warning small" data-mm-badge-sale-hint hidden>
+                                        <?php echo Text::_('COM_MINIMARKET_BADGE_SALE_NEEDS_PRICE'); ?>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php
+                };
+                if ($isBundle) {
+                    $renderFlag('badge_benefit', 'COM_MINIMARKET_BADGE_BENEFIT_NAME',
+                        'COM_MINIMARKET_BADGE_BENEFIT_HELP');
+                    echo $this->form->renderField('badge_benefit_display');
+                }
+                $renderFlag('badge_sale', 'COM_MINIMARKET_BADGE_SALE_NAME',
+                    'COM_MINIMARKET_BADGE_SALE_HELP');
+                echo $this->form->renderField('badge_sale_display');
+                $renderFlag('badge_new', 'COM_MINIMARKET_BADGE_NEW_NAME');
+                echo $this->form->renderField('badge_new_days');
+                $renderFlag('badge_popular', 'COM_MINIMARKET_BADGE_POPULAR_NAME');
+                echo $this->form->renderField('badge_popular_days');
                 ?>
             <?php elseif ($section === 'variants') : ?>
                 <?php echo $this->form->renderField('variants_present'); ?>

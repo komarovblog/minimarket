@@ -36,21 +36,28 @@
         price.required=!discounted;
       }
       if(sale) {
-        const present=!!old&&old.value.trim()!==''&&Number(old.value)>0;
-        const hasPrice=!!price && Number(price.value)>=0;
-        const eligible=!discounted&&present&&hasPrice&&Number(old.value)>Number(price.value);
-        sale.disabled=!eligible;
-        if(!eligible)sale.checked=false;
-        row(sale)?.classList.toggle('mm-unavailable-setting',!eligible);
-        // Keep the label and its explanatory description in place.
+        // Do not disable the checkbox just because the old price is edited
+        // on another tab. The user can activate Sale before saving; the
+        // server validates that old price is greater than the selling price.
+        // Only automatically priced bundles must use Benefit instead.
+        sale.disabled=discounted;
+        if(discounted)sale.checked=false;
+        row(sale)?.classList.toggle('mm-unavailable-setting',discounted);
+        const present=!!old && old.value.trim()!=='';
+        const valid=present&&!!price&&Number(old.value)>Number(price.value);
+        const hint=row(sale)?.querySelector('[data-mm-badge-sale-hint]');
+        if (hint) hint.hidden=valid||!sale.checked;
       }
       if(benefit) {
         benefit.disabled=!discounted;
         if(!discounted)benefit.checked=false;
         row(benefit)?.classList.toggle('mm-unavailable-setting',!discounted);
       }
-      if (saleDisplay && row(saleDisplay)) row(saleDisplay).hidden=!(sale?.checked && !sale.disabled);
-      if (benefitDisplay && row(benefitDisplay)) row(benefitDisplay).hidden=!(benefit?.checked && !benefit.disabled);
+      // Units are configurable independently of the flag being checked.
+      // They should always be visible whenever the respective flag is valid
+      // for this product type; do not hide the only control behind a toggle.
+      if (saleDisplay && row(saleDisplay)) row(saleDisplay).hidden=discounted;
+      if (benefitDisplay && row(benefitDisplay)) row(benefitDisplay).hidden=!discounted;
       for(const [toggle,days] of [[fresh,daysNew],[popular,daysPopular]]){
         const wrap=row(days);if(toggle&&wrap)wrap.hidden=!toggle.checked;
       }
