@@ -16,6 +16,9 @@ try {
     $sql=file_get_contents(dirname(__DIR__).'/src/com_minimarket/admin/sql/updates/mysql/0.5.78.sql');
     if (!$sql) throw new RuntimeException('MM78_SCHEMA_MISSING');
     $sql=str_replace('#__minimarket_','mm78_',$sql);
+    // MySQL foreign key constraint names are schema-global. The canonical
+    // fresh install already has this name; use a distinct shadow test name.
+    $sql=str_replace('fk_mm_order_line_parent','fk_mm78_order_line_parent',$sql);
     $sql=(string)preg_replace('/^[ \t]*--[^\r\n]*$/m','',$sql);
     foreach(explode(';',$sql) as $statement){
         $statement=trim($statement);
