@@ -15,8 +15,9 @@ final class OrderStorage
         array $contact,
         array $quote,
         string $checkoutKey,
-        int $userId = 0
+        int $userId
     ): int {
+        if ($userId<1) throw new \DomainException('COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED');
         if (!preg_match('/^[a-f0-9]{32}$/D',$checkoutKey)
             || empty($quote['available']) || empty($quote['lines'])
             || count($quote['lines'])>CartState::MAX_LINES) {
@@ -56,7 +57,7 @@ final class OrderStorage
             $columns=['checkout_key','user_id','customer_name','phone','email',
                 'customer_comment','status','currency','total_cents','item_count','created_at'];
             $values=[
-                $db->quote($checkoutKey),(string)max(0,$userId),
+                $db->quote($checkoutKey),(string)$userId,
                 $db->quote($contact['name']),$db->quote($contact['phone']),
                 $db->quote($contact['email']),$db->quote($contact['comment']),
                 $db->quote('new'),$db->quote('RUB'),(string)$total,

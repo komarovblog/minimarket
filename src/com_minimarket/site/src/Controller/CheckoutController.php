@@ -27,6 +27,13 @@ final class CheckoutController extends BaseController
         if ((string)ComponentHelper::getParams('com_minimarket')->get('shop_type','physical')!=='physical') {
             throw new \RuntimeException(Text::_('COM_MINIMARKET_CART_NOT_AVAILABLE'),403);
         }
+        // Guest orders must never be persisted, even via a direct POST.
+        $identity=$app->getIdentity();
+        if ((int)$identity->id<1 || !empty($identity->block)) {
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED'),'warning');
+            $this->setRedirect(RouteHelper::checkout());
+            return;
+        }
         $expected=(string)$session->get('com_minimarket.checkout.key','');
         $provided=(string)$app->input->post->get('checkout_key','','string');
         if (!preg_match('/^[a-f0-9]{32}$/D',$expected) || !hash_equals($expected,$provided)) {
@@ -55,7 +62,7 @@ final class CheckoutController extends BaseController
             $inventory=(int)ComponentHelper::getParams('com_minimarket')->get('inventory_enabled',1)===1;
             $quote=(new CartCatalog($db))->details($cart,$inventory);
             if (!$quote['available']) throw new \DomainException($quote['error']?:'COM_MINIMARKET_CHECKOUT_CART_INVALID');
-            $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$app->getIdentity()->id);
+            $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id);
             $session->set('com_minimarket.checkout.key','');
             $session->set(CartState::SESSION_KEY,[]);
             $session->set('com_minimarket.checkout.last_order',$id);

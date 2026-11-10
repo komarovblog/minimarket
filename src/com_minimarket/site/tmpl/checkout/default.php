@@ -13,6 +13,10 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
     <?php elseif (!$this->cart['available']) : ?>
         <div class="alert alert-warning" role="alert"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_CART_INVALID'); ?></div>
         <p><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BACK'); ?></a></p>
+    <?php elseif (!$this->authenticated) : ?>
+        <div class="alert alert-info" role="status"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED'); ?></div>
+        <p><?php echo Text::_('COM_MINIMARKET_CHECKOUT_LOGIN_PENDING'); ?></p>
+        <a class="btn btn-outline-secondary" href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BACK'); ?></a>
     <?php else : ?>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_NOTICE'); ?></p>
         <ul class="list-unstyled">

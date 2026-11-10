@@ -66,7 +66,9 @@ namespace MiniMarket\CheckoutSmoke {
          'valid'=>true,'type'=>'bundle','title'=>'Комплект','sku'=>'SET-8']
     ]];
     $db=new FakeDb();
-    $id=OrderStorage::create($db,$good,$quote,'00112233445566778899aabbccddeeff',0);
+    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$quote,'00112233445566778899aabbccddeeff',0),
+        'anonymous order rejected');
+    $id=OrderStorage::create($db,$good,$quote,'00112233445566778899aabbccddeeff',77);
     chk($id===123,'returns database-generated order id');
     chk($db->steps===['begin','commit'],'saves order and all lines in one transaction');
     chk(count($db->saved)===2 && count($db->saved[1]['entries'])===2,
@@ -76,23 +78,23 @@ namespace MiniMarket\CheckoutSmoke {
         'total and SKU come from server quote');
     $db=new FakeDb();$db->failItems=true;
     try {
-        OrderStorage::create($db,$good,$quote,'00112233445566778899aabbccddeeff');
+        OrderStorage::create($db,$good,$quote,'00112233445566778899aabbccddeeff',77);
         chk(false,'rollback on failed line insert');
     } catch (\RuntimeException) {
         chk($db->steps===['begin','rollback'],'rollback if order items fail');
     }
     $broken=$quote;$broken['total_cents']=123;
-    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$broken,'00112233445566778899aabbccddeeff'),
+    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$broken,'00112233445566778899aabbccddeeff',77),
         'never trust a mismatching total');
     $broken=$quote;$broken['lines'][0]['valid']=false;
-    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$broken,'00112233445566778899aabbccddeeff'),
+    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$broken,'00112233445566778899aabbccddeeff',77),
         'unavailable item rejected');
-    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$quote,'invalid'),
+    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$quote,'invalid',77),
         'checkout nonce must be 128-bit hex');
 
     $root=dirname(__DIR__).'/src/com_minimarket/';
     $manifest=simplexml_load_file($root.'minimarket.xml');
-    chk($manifest!==false && (string)$manifest->version==='0.5.78','0.5.78 release');
+    chk($manifest!==false && (string)$manifest->version==='0.5.79','0.5.79 owner-bound release');
     chk(count($manifest->xpath("//submenu/menu[@link='option=com_minimarket&view=orders']"))===1,
         'native Joomla admin Orders menu');
     $route=file_get_contents($root.'site/src/Service/Router.php');
@@ -102,6 +104,7 @@ namespace MiniMarket\CheckoutSmoke {
     $controller=file_get_contents($root.'site/src/Controller/CheckoutController.php');
     chk(str_contains($controller,"Session::checkToken('post')")
         && str_contains($controller,'hash_equals($expected,$provided)')
+        && str_contains($controller,'COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED')
         && str_contains($controller,'CartCatalog($db)')
         && str_contains($controller,'OrderStorage::create')
         && str_contains($controller,'CartState::SESSION_KEY,[]'),

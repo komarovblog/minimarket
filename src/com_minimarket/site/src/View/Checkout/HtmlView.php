@@ -17,6 +17,7 @@ final class HtmlView extends BaseHtmlView
     public string $customerName='';
     public string $customerEmail='';
     public bool $enabled=false;
+    public bool $authenticated=false;
 
     public function display($tpl=null)
     {
@@ -37,6 +38,7 @@ final class HtmlView extends BaseHtmlView
         }
         $this->checkoutKey=$key;
         $identity=$app->getIdentity();
+        $this->authenticated=(int)$identity->id>0 && empty($identity->block);
         $this->customerName=(int)$identity->id>0?(string)$identity->name:'';
         $this->customerEmail=(int)$identity->id>0?(string)$identity->email:'';
         $document=$this->getDocument();
