@@ -32,7 +32,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <?php if ($this->showProducts) : ?>
         <section class="com-minimarket-catalog__products">
             <h2><?php echo Text::_('COM_MINIMARKET_PRODUCTS_ALL'); ?></h2>
-            <form method="get" class="mm-sort-bar" action="<?php echo $this->escape(RouteHelper::catalogPage(1,$this->shopItemId)); ?>">
+            <form method="get" class="mm-sort-bar d-flex align-items-center gap-2 flex-wrap my-3" action="<?php echo $this->escape(RouteHelper::catalogPage(1,$this->shopItemId)); ?>">
                 <label for="mm-root-sort"><?php echo Text::_('COM_MINIMARKET_SORT_LABEL'); ?></label>
                 <select class="form-select form-select-sm" id="mm-root-sort" name="mm_order">
                     <?php foreach ([
