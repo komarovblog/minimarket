@@ -22,6 +22,7 @@ final class HtmlView extends BaseHtmlView
     public int $productPageCount = 1;
     public int $productTotal = 0;
     public int $shopItemId = 0;
+    public string $sortOrder = 'newest';
 
     public function display($tpl = null)
     {
@@ -56,7 +57,10 @@ final class HtmlView extends BaseHtmlView
                 $limit = (int) ($params?->get('products_per_page', 12) ?? 12);
                 $this->productsPerPage = \in_array($limit, $allowedLimits, true) ? $limit : 12;
 
-                $sort = (string) ($params?->get('products_order', 'newest') ?? 'newest');
+                $sort = Factory::getApplication()->input->getCmd('mm_order',
+                    (string)($params?->get('products_order','newest')??'newest'));
+                $this->sortOrder=in_array($sort,['newest','name','price_asc','price_desc'],true)
+                    ?$sort:'newest';
 
                 $this->productTotal = $repo->countAllProducts();
                 $this->productPageCount = max(1, (int) ceil($this->productTotal / $this->productsPerPage));
@@ -66,7 +70,7 @@ final class HtmlView extends BaseHtmlView
                 $this->products = $repo->getAllProductsPage(
                     ($this->productPage - 1) * $this->productsPerPage,
                     $this->productsPerPage,
-                    $sort
+                    $this->sortOrder
                 );
             }
         }

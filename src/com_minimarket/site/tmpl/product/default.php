@@ -428,4 +428,29 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
         </section>
     <?php endif; ?>
     <p class="mm-cart__nav"><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></a></p>
+    <?php if ($this->outOfStock) : ?>
+        <p class="alert alert-secondary" role="status"><?php echo Text::_('COM_MINIMARKET_OUT_OF_STOCK'); ?></p>
+        <?php if ($this->alternatives) : ?>
+            <section class="mm-alternatives">
+                <h2><?php echo Text::_('COM_MINIMARKET_ALTERNATIVES'); ?></h2>
+                <ul class="list-unstyled d-flex flex-wrap gap-3">
+                    <?php foreach ($this->alternatives as $alternative) :
+                        $thumb=explode('#',(string)($alternative->image??''),2)[0];
+                        $safeThumb=str_starts_with($thumb,'images/')
+                            && !str_contains($thumb,'..') && !str_contains($thumb,'//');
+                    ?>
+                        <li class="border rounded p-2" style="max-width:160px">
+                            <a href="<?php echo $this->escape(RouteHelper::product((int)$alternative->id)); ?>">
+                                <?php if ($safeThumb) : ?>
+                                    <img src="<?php echo $this->escape(Uri::root().$thumb); ?>"
+                                         alt="" loading="lazy" style="width:100%;max-height:110px;object-fit:contain">
+                                <?php endif; ?>
+                                <span><?php echo $this->escape($alternative->title); ?></span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </section>
+        <?php endif; ?>
+    <?php endif; ?>
 </article>

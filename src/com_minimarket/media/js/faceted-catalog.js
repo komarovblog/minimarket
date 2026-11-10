@@ -15,6 +15,8 @@
     const empty=layout.querySelector('[data-mm-facet-empty]');
     const counter=form.querySelector('[data-mm-facet-count]');
     const groups=Array.from(form.querySelectorAll('[data-mm-facet]'));
+    const sortControl=document.querySelector('[data-mm-sort]');
+    if (sortControl) sortControl.addEventListener('change',()=>sortControl.form?.requestSubmit());
     // The filter value search changes only the option list, not the catalog.
     for (const search of form.querySelectorAll('[data-mm-choice-search]')) {
       search.addEventListener('input',()=>{
@@ -92,8 +94,19 @@
       // multi-select OR inside the group and AND against all other groups.
       for (const group of groups) {
         const id=group.dataset.mmFacet, facet=facets[id];
-        if (!facet || ['text','range','slider'].includes(facet.mode)) continue;
+        if (!facet) continue;
         const other={...selected};delete other[id];
+        const groupCount=group.querySelector('[data-mm-facet-group-count]');
+        if (groupCount) groupCount.textContent=String(rows.reduce((n,row)=>
+          n+(matches(row.dataset.mmFacetProduct,other)?1:0),0));
+        if (['text','range','slider'].includes(facet.mode)) continue;
+        const summary=group.querySelector('.mm-facet-dropdown summary');
+        if (summary) {
+          const labels=Array.from(group.querySelectorAll('[data-mm-facet-value]:checked'))
+            .map(input=>input.closest('[data-mm-facet-choice-row]')?.querySelector('label')?.textContent?.trim())
+            .filter(Boolean);
+          summary.textContent=labels.join(', ')||'–';
+        }
         for (const control of group.querySelectorAll('[data-mm-facet-value]')) {
           const candidate={...other,[id]:{values:[control.value]}};
           const count=rows.reduce((total,row)=>
@@ -111,6 +124,8 @@
         for (const [key,value] of new FormData(form)) {
           if (String(value).trim()!=='') url.searchParams.append(key,String(value));
         }
+        if (sortControl && sortControl.value !== 'newest')
+          url.searchParams.set('mm_order',sortControl.value);
         history.replaceState(null,'',url);
       }
     };

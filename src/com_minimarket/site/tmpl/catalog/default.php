@@ -32,6 +32,20 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <?php if ($this->showProducts) : ?>
         <section class="com-minimarket-catalog__products">
             <h2><?php echo Text::_('COM_MINIMARKET_PRODUCTS_ALL'); ?></h2>
+            <form method="get" class="mm-sort-bar" action="<?php echo $this->escape(RouteHelper::catalogPage(1,$this->shopItemId)); ?>">
+                <label for="mm-root-sort"><?php echo Text::_('COM_MINIMARKET_SORT_LABEL'); ?></label>
+                <select class="form-select form-select-sm" id="mm-root-sort" name="mm_order">
+                    <?php foreach ([
+                        'newest'=>'COM_MINIMARKET_SORT_NEWEST',
+                        'name'=>'COM_MINIMARKET_SORT_NAME',
+                        'price_asc'=>'COM_MINIMARKET_SORT_PRICE_ASC',
+                        'price_desc'=>'COM_MINIMARKET_SORT_PRICE_DESC'
+                    ] as $key=>$label): ?>
+                        <option value="<?php echo $this->escape($key); ?>"<?php echo $this->sortOrder===$key?' selected':''; ?>><?php echo Text::_($label); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button class="btn btn-outline-secondary btn-sm" type="submit"><?php echo Text::_('COM_MINIMARKET_FILTER_APPLY'); ?></button>
+            </form>
             <?php if ($this->products) : ?>
                 <ul class="list-unstyled">
                     <?php foreach ($this->products as $product) : ?>
@@ -70,13 +84,15 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                     <?php if ($this->productPage > 1) : ?>
                         <a rel="prev" href="<?php echo $this->escape(RouteHelper::catalogPage(
                             $this->productPage - 1,
-                            $this->shopItemId
+                            $this->shopItemId,
+                            $this->sortOrder
                         )); ?>"><?php echo Text::_('JPREV'); ?></a>
                     <?php endif; ?>
                     <?php if ($this->productPage < $this->productPageCount) : ?>
                         <a rel="next" href="<?php echo $this->escape(RouteHelper::catalogPage(
                             $this->productPage + 1,
-                            $this->shopItemId
+                            $this->shopItemId,
+                            $this->sortOrder
                         )); ?>"><?php echo Text::_('JNEXT'); ?></a>
                     <?php endif; ?>
                 </nav>

@@ -19,7 +19,7 @@ final class RouteHelper
      * Storefront pagination retains the currently opened public Shop menu item
      * rather than silently switching to the canonical product/category route.
      */
-    public static function catalogPage(int $page, int $itemId): string
+    public static function catalogPage(int $page, int $itemId, string $order = ''): string
     {
         $route = 'index.php?option=com_minimarket&view=catalog';
 
@@ -31,6 +31,9 @@ final class RouteHelper
             $route .= '&mm_page=' . $page;
         }
 
+        if (in_array($order,['name','price_asc','price_desc'],true)) {
+            $route .= '&mm_order=' . $order;
+        }
         return Route::_($route, false);
     }
 

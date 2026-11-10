@@ -22,12 +22,15 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
     <?php foreach ($facets as $id=>$facet):
         $mode=$facet['mode'];$selection=$selected[$id]??[];
         $chosen=$selection['values']??[];$name='mmf['.$id.']';
-        $caption=$facet['title'].($facet['unit']!==''?' ('.$facet['unit'].')':'');
+        $caption=($id==='price'?Text::_('COM_MINIMARKET_FILTER_PRICE'):$facet['title'])
+            .($facet['unit']!==''?' ('.$facet['unit'].')':'');
     ?>
         <fieldset class="mm-facet-group" data-mm-facet="<?php echo $escape($id); ?>"
                   data-mm-facet-mode="<?php echo $escape($mode); ?>"
                   data-mm-facet-type="<?php echo $escape($facet['type']); ?>">
-            <legend><?php echo $escape($caption); ?></legend>
+            <legend><?php echo $escape($caption); ?>
+                <small class="mm-facet-count" data-mm-facet-group-count></small>
+            </legend>
             <?php if ($mode==='text'): ?>
                 <input type="search" class="form-control form-control-sm"
                        data-mm-facet-text name="<?php echo $escape($name); ?>"
@@ -71,7 +74,7 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
                 <?php endif; ?>
                 <input type="search" class="form-control form-control-sm mm-facet-search"
                        data-mm-choice-search autocomplete="off"
-                       placeholder="<?php echo $escape(Text::_('COM_MINIMARKET_FILTER_SEARCH')); ?>"
+                       placeholder="<?php echo $escape(Text::_('COM_MINIMARKET_FILTER_VALUE_SEARCH')); ?>"
                        aria-label="<?php echo $escape($caption.' '.Text::_('COM_MINIMARKET_FILTER_SEARCH')); ?>">
                 <?php foreach ($facet['choices'] as $i=>$choice):
                     $checked=in_array($choice['value'],$chosen,true);

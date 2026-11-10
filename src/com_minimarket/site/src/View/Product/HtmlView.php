@@ -23,6 +23,8 @@ final class HtmlView extends BaseHtmlView
     public array $relatedGroups = [];
     public array $collections = [];
     public array $bundleComponents = [];
+    public array $alternatives = [];
+    public bool $outOfStock = false;
 
     public function display($tpl = null)
     {
@@ -52,6 +54,31 @@ final class HtmlView extends BaseHtmlView
         }
         unset($variant);
         $this->relatedGroups = $repo->getRelatedGroups($id);
+        if ($this->inventoryEnabled) {
+            $baseStock = (int)($product->stock??0);
+            $variantStock = $this->variants['items'] !== []
+                && (int)($product->option_stock_mode??1) !== 0;
+            $sellable = $variantStock
+                ? count(array_filter($this->variants['items'],
+                    static fn($item):bool=>(int)($item['stock']??0)>0))>0
+                : $baseStock>0;
+            $this->outOfStock = !$sellable;
+            if ($this->outOfStock) {
+                // A direct SEO link remains available; offer published in-stock items.
+                $similar = $repo->getProductsForCategory(
+                    (int)$product->category_id,true,true,false,false);
+                $candidates = array_merge($similar,
+                    $repo->getAllProductsPage(0,24,'newest'));
+                $seen = [];
+                foreach ($candidates as $candidate) {
+                    $pid=(int)$candidate->id;
+                    if ($pid===$id || isset($seen[$pid])) continue;
+                    $seen[$pid]=true;
+                    $this->alternatives[]=$candidate;
+                    if (count($this->alternatives)>=6) break;
+                }
+            }
+        }
         $this->collections = $repo->getProductCollections($id);
         if (($product->product_type ?? 'simple') === 'bundle') {
             $this->bundleComponents = $repo->getBundleComponents($id);
