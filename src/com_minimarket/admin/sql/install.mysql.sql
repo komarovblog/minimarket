@@ -250,6 +250,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_attribute_options` (
     `attribute_id` INT UNSIGNED NOT NULL,
     `value_id` INT UNSIGNED NOT NULL,
     PRIMARY KEY (`product_id`, `attribute_id`, `value_id`),
+    UNIQUE KEY `idx_mm_pa_one_value` (`product_id`, `attribute_id`),
     KEY `idx_mm_pa_option_value_product` (`value_id`, `product_id`),
     KEY `idx_mm_pa_option_attribute` (`attribute_id`, `value_id`),
     CONSTRAINT `fk_mm_pa_option_product` FOREIGN KEY (`product_id`)
@@ -272,12 +273,29 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_product_attribute_free_values` (
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`),
     KEY `idx_mm_free_product_attr` (`product_id`, `attribute_id`, `sort_order`),
+    UNIQUE KEY `idx_mm_free_one_value` (`product_id`, `attribute_id`),
     KEY `idx_mm_free_attr` (`attribute_id`),
     CONSTRAINT `fk_mm_free_product` FOREIGN KEY (`product_id`)
       REFERENCES `#__minimarket_products` (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_mm_free_attribute` FOREIGN KEY (`attribute_id`)
       REFERENCES `#__minimarket_attributes` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 0.5.77: archive of legacy multi-value selections for migrated stores.
+-- New stores will never populate this table.
+CREATE TABLE IF NOT EXISTS #__minimarket_attribute_multivalue_archive (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    product_id INT UNSIGNED NOT NULL,
+    attribute_id INT UNSIGNED NOT NULL,
+    source_kind VARCHAR(16) NOT NULL,
+    value_id INT UNSIGNED NULL,
+    value_text MEDIUMTEXT NULL,
+    previous_sort_order INT UNSIGNED NULL,
+    PRIMARY KEY (id),
+    KEY idx_mm_attr_archive_product (product_id, attribute_id),
+    KEY idx_mm_attr_archive_kind (source_kind, attribute_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 -- 0.5.17: real variant SKUs under ONE product URL; additive, no product records rewritten.
 CREATE TABLE IF NOT EXISTS `#__minimarket_product_variants` (

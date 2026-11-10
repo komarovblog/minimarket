@@ -74,12 +74,12 @@ namespace MiniMarket\ProductAttributesSmoke {
     check($map[2]===[10,11,13,14,15],'child disables inherited attribute');
     check($map[3]===[16,17,18,19,20,21],'draft characteristics remain administrable');
     $normalized=ProductAttributes::normalize([
-        '10'=>['100','101'],'11'=>'110','12'=>['120','121'],
+        '10'=>'100','11'=>'110','12'=>'120',
         '13'=>'-12.5','14'=>'Cotton','15'=>'0'
     ],1,$definitions,$map);
-    check($normalized['options'][10]===[100,101],'multi predefined colors by ID');
+    check($normalized['options'][10]===[100],'single predefined color by stable ID');
     check($normalized['options'][11]===[110],'one material by ID');
-    check($normalized['options'][12]===[120,121],'multi skills by ID');
+    check($normalized['options'][12]===[120],'single skill by stable ID');
     check($normalized['scalars'][13]['value']==='-12.5','number typed scalar');
     check($normalized['scalars'][15]['value']==='0','false boolean kept');
     check(ProductAttributes::normalize([],1,$definitions,$map)===
@@ -87,11 +87,12 @@ namespace MiniMarket\ProductAttributesSmoke {
     check(ProductAttributes::normalize(['12'=>''],2,$definitions,$map)===
        ['scalars'=>[],'options'=>[],'free_values'=>[]],'cleared disallowed field ignored');
     $other=ProductAttributes::normalize([
-        '16'=>'160','17'=>['5','10'],'18'=>'files/catalog/manual.pdf',
+        '16'=>'160','17'=>'5','18'=>'files/catalog/manual.pdf',
         '19'=>'#ABCDEF','21'=>'<b>Works</b>'
     ],3,$definitions,$map);
     check($other['options'][16]===[160],'numeric presets store value IDs');
-    check($other['free_values'][17]===['5','10'],'manual multiple numbers use ordered free values');
+    check($other['scalars'][17]['value']==='5' && $other['free_values']===[],
+        'manual numeric characteristic stores exactly one scalar');
     check($other['scalars'][18]['value']==='files/catalog/manual.pdf',
         'manual document path');
     check($other['scalars'][19]['value']==='#ABCDEF','manual color normalizes uppercase');
@@ -109,7 +110,7 @@ namespace MiniMarket\ProductAttributesSmoke {
     foreach([
         [2,['12'=>['120']]], [1,['20'=>'no']], [1,['10'=>['999']]],
         [1,['10'=>['110']]], [1,['11'=>['110','111']]],
-        [1,['10'=>['100','100']]], [1,['13'=>'1e9']],
+        [1,['10'=>['100','101']]], [1,['13'=>'1e9']],
         [1,['13'=>'12.12345']], [1,['13'=>'12.3']],
         [1,['13'=>'201']], [1,['14'=>str_repeat('x',1025)]],
         [1,['14'=>['forged']]], [1,['15'=>'yes']],
@@ -160,14 +161,14 @@ namespace MiniMarket\ProductAttributesSmoke {
     $db=new Db();
     $loadedDefs=ProductAttributes::definitions($db);
     check($loadedDefs[10]['values'][100]['title']==='Red','definition value IDs loaded');
-    check($loadedDefs[10]['is_multiple']===true,'cardinality persisted');
+    check($loadedDefs[10]['is_multiple']===false,'product cardinality always single');
     check(ProductAttributes::load($db,0)===[],'empty unsaved product');
     $loaded=ProductAttributes::load($db,1001);
-    check($loaded[15]==='0' && $loaded[10]===[100], 'typed false and preset selected IDs');
+    check($loaded[15]==='0' && $loaded[10]==='100', 'typed false and one preset ID');
     ProductAttributes::replace($db,1001,$normalized);
     check(count($db->calls)===5,'three canonical tables cleared and two inserted');
-    check(count($db->calls[3][2])===3 && count($db->calls[4][2])===5,
-       'three scalar rows and five dictionary links inserted');
+    check(count($db->calls[3][2])===3 && count($db->calls[4][2])===3,
+       'three scalar rows and three single dictionary links inserted');
     $db->calls=[];
     ProductAttributes::replace($db,1001,['scalars'=>[],'options'=>[],'free_values'=>[]]);
     check(count($db->calls)===3,'clearing values touches three canonical tables only');

@@ -97,10 +97,12 @@ namespace MiniMarket\Tests\CanonicalAttributes {
     check($item->check()===true,'predefined text characteristic');
     check($item->title==='Материал'&&$item->code==='material','name and code normalized');
     check($item->columnAliases['published']==='state','native publish alias');
-    $item->is_multiple=0;$db->hasMultiple=true;
-    check($item->check()===false,'one-value restriction cannot hide saved selections');
+    $db->hasMultiple=true;
+    check($item->check()===true && $item->is_multiple===0,
+        'legacy multi rows do not block fixed single-value definition');
     $db->hasMultiple=false;$item->is_multiple=1;
-    check($item->check()===true,'multi-value setting restored');
+    check($item->check()===true && $item->is_multiple===0,
+        'legacy multiple form values are normalized to zero');
     $item->is_multiple=3;
     check($item->check()===false,'invalid multiplicity rejected');
     $item->is_multiple=1;

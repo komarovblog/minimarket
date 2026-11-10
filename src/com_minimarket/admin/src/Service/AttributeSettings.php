@@ -41,9 +41,11 @@ final class AttributeSettings
         if (!in_array($source, ['manual','preset'], true)) {
             return 'COM_MINIMARKET_ATTRIBUTE_PRESENTATION_INVALID';
         }
+        // A product has one value per characteristic. Only filtering may
+        // use multiple choices through the separate filter_multiple setting.
+        $attribute->is_multiple = 0;
         if ($type === 'boolean') {
             $source = 'manual';
-            $attribute->is_multiple = 0;
         }
         $attribute->value_source = $source;
         $attribute->color_display = (string) ($attribute->color_display ?? 'both');

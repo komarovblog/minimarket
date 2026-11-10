@@ -24,8 +24,8 @@ namespace MiniMarket\UnifiedAttributeSmoke {
         'number_unit'=>'Вт','number_min'=>'0',
         'number_max'=>'15','number_step'=>'5'
     ];
-    ok(S::normalize($number)===null && $number->is_multiple===1,
-        'multiple numbers survive normalization');
+    ok(S::normalize($number)===null && $number->is_multiple===0,
+        'all product characteristics normalize to one value');
     ok(!property_exists($number,'input_mode'),'no obsolete input mode in the attribute model');
     $defs=[
         1=>['id'=>1,'title'=>'Мощность','type'=>'number','value_source'=>'manual',
@@ -40,15 +40,15 @@ namespace MiniMarket\UnifiedAttributeSmoke {
     ];
     $map=[10=>[1,2,3]];
     $data=Products::normalize([
-        '1'=>['5','10','15'],'2'=>['201','202'],'3'=>'#00aaff'
+        '1'=>'5','2'=>'201','3'=>'#00aaff'
     ],10,$defs,$map,[1,2,3]);
-    ok(($data['free_values'][1] ?? [])===['5','10','15'],
-        'three distinct numeric values stored as ordered manual rows');
-    ok($data['options'][2]===[201,202],'numeric presets use stable value IDs');
+    ok($data['scalars'][1]['value']==='5' && $data['free_values']===[],
+        'numeric characteristic stores one scalar, not free multi rows');
+    ok($data['options'][2]===[201],'numeric preset stores one stable value ID');
     ok($data['scalars'][3]['value']==='#00AAFF','manual HEX is canonical');
     foreach ([
         ['1'=>['5','5']], ['1'=>['5','100']], ['1'=>['3','5']],
-        ['2'=>['201','201']], ['3'=>'invalid'],
+        ['2'=>['201','201']], ['2'=>['201','202']], ['3'=>'invalid'],
     ] as $i=>$invalid) {
         try {
             Products::normalize($invalid,10,$defs,$map);

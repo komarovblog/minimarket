@@ -77,9 +77,7 @@ namespace MiniMarket\PublicAttributeSmoke {
                 ],
                 '#__minimarket_product_attribute_options AS o'=>[
                     ['attribute_id'=>1,'title'=>'Камень','color_hex'=>'','sample_image'=>'images/samples/stone.webp','value_payload'=>null],
-                    ['attribute_id'=>1,'title'=>'Металл','color_hex'=>'','sample_image'=>'','value_payload'=>null],
                     ['attribute_id'=>2,'title'=>'Красный','color_hex'=>'#EE0000','sample_image'=>'','value_payload'=>null],
-                    ['attribute_id'=>2,'title'=>'Камень','color_hex'=>'','sample_image'=>'images/samples/marble.webp','value_payload'=>null],
                 ],
                 '#__minimarket_product_attribute_free_values'=>[],
                 default=>throw new \RuntimeException('Unexpected query table: '.$table),
@@ -108,14 +106,14 @@ namespace MiniMarket\PublicAttributeSmoke {
     check(array_keys($attrs)===[1,2,3,4,5,6,10], 'all and only enabled populated attributes shown');
     check(!isset($attrs[9]),'child category overrides inherited enabled attribute');
     check($attrs[1]['values'][0]['text']==='Камень'
-        && $attrs[1]['values'][1]['text']==='Металл',
-        'multiple preset materials use separate dictionary IDs');
+        && count($attrs[1]['values'])===1,
+        'product displays only one dictionary material value');
     check($attrs[1]['values'][0]['image']==='images/samples/stone.webp',
         'dictionary image resolved from selected stable value ID');
     check($attrs[2]['values'][0]['hex']==='#EE0000',
         'color has validated HEX swatch');
-    check($attrs[2]['values'][1]['image']==='images/samples/marble.webp',
-        'color/texture image resolves from dictionary');
+    check(count($attrs[2]['values'])===1,
+        'product has exactly one color characteristic value');
     check($attrs[3]['unit']==='Вт' && $attrs[3]['values'][0]['text']==='1400.0000',
         'number retains unit and precision for template');
     check($attrs[4]['values'][0]['text']==='0','No/false is displayed and never treated as empty');

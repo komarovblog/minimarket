@@ -64,7 +64,6 @@ $labels=[
             'error'=>Text::_('COM_MINIMARKET_PICKER_ERROR'),
             'remove'=>Text::_('COM_MINIMARKET_PICKER_REMOVE'),
             'quantity'=>Text::_('COM_MINIMARKET_BUNDLE_QUANTITY'),
-            'unit'=>Text::_('COM_MINIMARKET_BUNDLE_UNIT_PRICE'),
         ];
         $labelsJson=htmlspecialchars(json_encode($labels,JSON_THROW_ON_ERROR|
             JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT),
@@ -89,8 +88,7 @@ $labels=[
                 .'<div class="mm-bundle-product"><a href="index.php?option=com_minimarket&amp;task=product.edit&amp;id='.(int)$data['product'].'">'
                 .$esc($data['title']).'</a>'
                 .'<small>'.$esc($data['sku']).'</small></div>'
-                .'<span class="mm-bundle-unit-price">'.$esc(Text::_('COM_MINIMARKET_BUNDLE_UNIT_PRICE'))
-                .': '.$esc($data['price']).'</span>'
+                .'<span class="mm-bundle-unit-price">'.$esc($data['price']).'</span>'
                 .'<input type="hidden" name="'.$name.'['.$index.'][component]" value="'.$esc($key).'">'
                 .'<label class="mm-bundle-quantity"><span class="visually-hidden">'.$esc(Text::_('COM_MINIMARKET_BUNDLE_QUANTITY')).'</span>'
                 .'<input type="number" class="form-control form-control-sm" min="1" max="1000" step="1" required'

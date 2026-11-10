@@ -102,8 +102,7 @@
        const prefix=inputName+'[row'+next+++']';
        hidden.name=prefix+'[component]';hidden.value=item.key;
        row.dataset.mmUnitPrice=String(item.price||'0.00');
-       row.append(el('span','mm-bundle-unit-price',
-         (words.unit||'Price')+': '+String(item.price||'0.00')));
+       row.append(el('span','mm-bundle-unit-price',String(item.price||'0.00')));
        row.append(hidden);
        const quantityLabel=el('label','mm-bundle-quantity');
        quantityLabel.append(el('span','visually-hidden',words.quantity||'Quantity'));

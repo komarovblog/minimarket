@@ -75,20 +75,7 @@ final class AttributeTable extends Table
                     }
                 }
             }
-            if ($this->is_multiple===0) {
-                foreach(['#__minimarket_product_attribute_options',
-                    '#__minimarket_product_attribute_free_values'] as $table) {
-                    $q=$db->getQuery(true)->select('COUNT(*)')
-                        ->from($db->quoteName($table))
-                        ->where($db->quoteName('attribute_id').' = '.(int)$this->id)
-                        ->group($db->quoteName('product_id'))->having('COUNT(*) > 1');
-                    $db->setQuery($q);
-                    if ((int)$db->loadResult()>0) {
-                        $this->setError(Text::_('COM_MINIMARKET_ATTRIBUTE_MULTIPLE_IN_USE'));
-                        return false;
-                    }
-                }
-            }
+
         }
         return parent::check();
     }

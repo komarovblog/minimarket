@@ -15,7 +15,7 @@ final class ProductAttributes
     public static function definitions(DatabaseInterface $db): array
     {
         $q = $db->getQuery(true)
-            ->select(['id','title','input_type','number_unit','number_min','number_max','number_step','is_multiple','value_source','color_display','state'])
+            ->select(['id','title','input_type','number_unit','number_min','number_max','number_step','value_source','color_display','state'])
             ->from($db->quoteName('#__minimarket_attributes'))
             ->order('sort_order ASC, id ASC');
         $db->setQuery($q);
@@ -26,7 +26,7 @@ final class ProductAttributes
                 'id' => $id,
                 'title' => (string) $row['title'],
                 'type' => (string) $row['input_type'],
-                'is_multiple' => (int) $row['is_multiple'] === 1,
+                'is_multiple' => false, // compatibility key; always single-valued
                 'value_source' => (string) ($row['value_source'] ?? 'manual'),
                 'color_display' => (string) ($row['color_display'] ?? 'both'),
                 'number_unit' => (string) ($row['number_unit'] ?? ''),
@@ -80,7 +80,7 @@ final class ProductAttributes
         return $map;
     }
 
-    /** @return array<int,mixed> attr ID => value IDs[] / string / number-string / boolean-string */
+    /** @return array<int,string> attr ID => one dictionary value ID or scalar */
     public static function load(DatabaseInterface $db, int $productId): array
     {
         if ($productId < 1) {
@@ -105,9 +105,11 @@ final class ProductAttributes
             ->order($db->quoteName('attribute_id') . ' ASC, ' . $db->quoteName('value_id') . ' ASC');
         $db->setQuery($q);
         foreach ((array) $db->loadAssocList() as $row) {
-            $result[(int) $row['attribute_id']][] = (int) $row['value_id'];
+            // Migration keeps the earliest prior choice; never expose arrays.
+            $id = (int) $row['attribute_id'];
+            if (!isset($result[$id])) $result[$id] = (string) (int) $row['value_id'];
         }
-        // Ordered manual multiple values use the canonical free-values table.
+        // A pre-upgrade free value may remain before migration runs.
         $q = $db->getQuery(true)
             ->select(['attribute_id','value_text'])
             ->from($db->quoteName('#__minimarket_product_attribute_free_values'))
@@ -116,10 +118,7 @@ final class ProductAttributes
         $db->setQuery($q);
         foreach ((array) $db->loadAssocList() as $row) {
             $id = (int) $row['attribute_id'];
-            if (!is_array($result[$id] ?? null)) {
-                $result[$id] = isset($result[$id]) ? [(string) $result[$id]] : [];
-            }
-            $result[$id][] = (string) $row['value_text'];
+            if (!isset($result[$id])) $result[$id] = (string) $row['value_text'];
         }
         return $result;
     }
@@ -156,48 +155,18 @@ final class ProductAttributes
                 throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
             }
             if ($source === 'preset') {
-                $items = is_array($value) ? $value : [$value];
-                if (!$def['is_multiple'] && count($items) > 1) {
-                    throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                }
-                $chosen = [];
-                foreach ($items as $candidate) {
-                    if (!is_scalar($candidate) || !ctype_digit((string) $candidate)
-                        || (int) $candidate < 1 || isset($chosen[(int) $candidate])
-                        || !isset($def['values'][(int) $candidate])) {
+                // One value per product, including requests from stale forms.
+                if (is_array($value)) {
+                    if (count($value) !== 1) {
                         throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                     }
-                    $chosen[(int) $candidate] = (int) $candidate;
+                    $value = reset($value);
                 }
-                if ($chosen) $out['options'][$id] = array_values($chosen);
-                continue;
-            }
-            if ($source === 'manual' && !empty($def['is_multiple'])) {
-                $items = is_array($value) ? $value : [$value];
-                if (count($items) > 100) {
+                if (!is_scalar($value) || !ctype_digit((string) $value)
+                    || (int) $value < 1 || !isset($def['values'][(int)$value])) {
                     throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
                 }
-                $unique = [];
-                $singleDefinition = $def;
-                $singleDefinition['is_multiple'] = false;
-                foreach ($items as $item) {
-                    if ($item === '' || $item === null) continue;
-                    if (!is_scalar($item)) {
-                        throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                    }
-                    $validated = self::normalize(
-                        [$id => (string) $item], $categoryId,
-                        [$id => $singleDefinition], [$categoryId => [$id]]
-                    );
-                    $validatedValue = $validated['scalars'][$id]['value'] ?? null;
-                    if ($validatedValue !== null) {
-                        if (isset($unique[$validatedValue])) {
-                            throw new \InvalidArgumentException('COM_MINIMARKET_PRODUCT_ATTRIBUTES_INVALID');
-                        }
-                        $unique[$validatedValue] = $validatedValue;
-                    }
-                }
-                if ($unique) $out['free_values'][$id] = array_values($unique);
+                $out['options'][$id] = [(int)$value];
                 continue;
             }
             if (!is_scalar($value)) {
@@ -294,21 +263,6 @@ final class ProductAttributes
                     $type === 'number' ? $db->quote($value) : 'NULL',
                     $type === 'boolean' ? (string) (int) $value : 'NULL',
                 ]));
-            }
-            $db->setQuery($q);
-            $db->execute();
-        }
-        if (!empty($normalized['free_values'])) {
-            $q = $db->getQuery(true)
-                ->insert($db->quoteName('#__minimarket_product_attribute_free_values'))
-                ->columns($db->quoteName(['product_id','attribute_id','value_text','sort_order']));
-            foreach ($normalized['free_values'] as $id => $values) {
-                foreach ($values as $position => $value) {
-                    $q->values(implode(',', [
-                        (string) $productId, (string) (int) $id,
-                        $db->quote((string) $value), (string) (int) $position,
-                    ]));
-                }
             }
             $db->setQuery($q);
             $db->execute();
