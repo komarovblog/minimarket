@@ -1,78 +1,76 @@
-/* List-column preferences for EVERY MiniMarket admin list, including orders.
- * Columns are stored per view in the admin's browser and never affect SQL. */
+/* Native Joomla-style, per-list visible columns dropdown. No SQL changes. */
 (() => {
   'use strict';
-  const init=()=>{
-    const isRu=(document.documentElement.lang||'').toLowerCase().startsWith('ru');
-    const label=isRu?'Столбцы':'Columns';
-    const all=isRu?'Показать все':'Show all';
-    for (const [index,table] of [...document.querySelectorAll('table.mm-admin-list')].entries()) {
-      const head=table.tHead?.rows?.[0];
-      if(!head || !head.cells || head.cells.length<3)continue;
-      const columns=[...head.cells];
-      if(columns.some(cell=>cell.colSpan>1 || cell.rowSpan>1))continue;
-      const id=table.id||('table-'+index);
+  const ready=()=>{
+    const ru=(document.documentElement.lang||'').toLowerCase().startsWith('ru');
+    const noun=ru?'Столбцов':'Columns';
+    const showAll=ru?'Показать все':'Show all';
+    const list=[...document.querySelectorAll('table.mm-admin-list')];
+    for(const [index,table] of list.entries()) {
+      if(!table.tHead?.rows?.[0])continue;
+      const columns=[...table.tHead.rows[0].cells];
+      if(columns.length<2 || columns.some(c=>c.colSpan>1||c.rowSpan>1))continue;
       const view=new URLSearchParams(location.search).get('view')||'dashboard';
-      const key='minimarket.admin.columns.v1.'+view+'.'+id;
-      const locked=columns.map((cell,i)=>i===0 && !!cell.querySelector('input[type="checkbox"]'));
-      const text=columns.map((cell,i)=>(cell.textContent||'').trim()||('#'+(i+1)));
-      let visibility=columns.map(()=>true);
+      const key='minimarket.admin.columns.v2.'+view+'.'+(table.id||index);
+      const labels=columns.map((c,i)=>(c.textContent||'').trim()||('#'+(i+1)));
+      const locked=columns.map((c,i)=>i===0 && !!c.querySelector('input[type="checkbox"]'));
+      let visible=columns.map(()=>true);
       try{
         const saved=JSON.parse(localStorage.getItem(key)||'null');
-        if(Array.isArray(saved) && saved.length===columns.length)
-          visibility=visibility.map((_,i)=>locked[i]?true:saved[i]!==false);
+        if(Array.isArray(saved)&&saved.length===visible.length) {
+          visible=visible.map((_,i)=>locked[i]||saved[i]!==false);
+        }
       }catch(_){}
-      if(!visibility.some(Boolean))visibility[0]=true;
+      if(!visible.some(Boolean))visible[0]=true;
 
-      const details=document.createElement('details');
-      details.className='mm-columns-picker mb-2';
+      const toolbar=document.createElement('div');
+      toolbar.className='mm-columns-toolbar d-flex justify-content-end mb-2';
+      const dropdown=document.createElement('details');
+      dropdown.className='mm-columns-picker';
       const toggle=document.createElement('summary');
-      toggle.className='btn btn-outline-secondary btn-sm';
-      toggle.textContent=label;
-      details.appendChild(toggle);
+      toggle.className='btn btn-primary btn-sm';
+      dropdown.appendChild(toggle);
       const menu=document.createElement('div');
       menu.className='mm-columns-picker__menu';
-      details.appendChild(menu);
+      dropdown.appendChild(menu);
+      const inputs=[];
       const apply=()=>{
-        const visibleRows=[...table.rows];
-        for(const row of visibleRows) {
+        for(const row of table.rows){
           if(row.cells.length!==columns.length)continue;
           [...row.cells].forEach((cell,i)=>{
-            cell.hidden=!visibility[i];
-            cell.style.display=visibility[i]?'':'none';
+            cell.hidden=!visible[i];cell.style.display=visible[i]?'':'none';
           });
         }
-        try{localStorage.setItem(key,JSON.stringify(visibility));}catch(_){}
+        toggle.textContent=visible.filter(Boolean).length+'/'+columns.length+' '+noun+' ▾';
+        inputs.forEach((checkbox,i)=>checkbox.checked=visible[i]);
+        try{localStorage.setItem(key,JSON.stringify(visible));}catch(_){}
       };
       columns.forEach((column,i)=>{
         const item=document.createElement('label');
         item.className='mm-columns-picker__item';
-        const input=document.createElement('input');
-        input.type='checkbox';
-        input.checked=visibility[i];
-        input.disabled=locked[i];
-        input.addEventListener('change',()=>{
-          visibility[i]=input.checked;
-          if(!visibility.some(Boolean)){visibility[i]=true;input.checked=true;}
+        const checkbox=document.createElement('input');
+        checkbox.type='checkbox';checkbox.checked=visible[i];checkbox.disabled=locked[i];
+        checkbox.addEventListener('change',()=>{
+          visible[i]=checkbox.checked;
+          if(!visible.some(Boolean)){visible[i]=true;checkbox.checked=true;}
           apply();
         });
-        item.append(input,document.createTextNode(' '+text[i]));
+        inputs.push(checkbox);
+        item.append(checkbox,document.createTextNode(' '+labels[i]));
         menu.appendChild(item);
       });
       const reset=document.createElement('button');
-      reset.type='button';
-      reset.className='btn btn-outline-secondary btn-sm mt-2';
-      reset.textContent=all;
-      reset.addEventListener('click',()=>{
-        visibility=columns.map(()=>true);
-        for(const checkbox of menu.querySelectorAll('input[type="checkbox"]'))checkbox.checked=true;
-        apply();
-      });
+      reset.type='button';reset.className='btn btn-outline-secondary btn-sm mt-2 w-100';
+      reset.textContent=showAll;
+      reset.addEventListener('click',()=>{visible=columns.map(()=>true);apply();});
       menu.appendChild(reset);
-      table.parentElement?.insertBefore(details,table);
+      toolbar.appendChild(dropdown);
+      const parent=table.closest('.table-responsive')||table;
+      parent.parentElement?.insertBefore(toolbar,parent);
+      document.addEventListener('click',e=>{if(!dropdown.contains(e.target))dropdown.open=false;});
       apply();
     }
   };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});
+  else ready();
 })();
