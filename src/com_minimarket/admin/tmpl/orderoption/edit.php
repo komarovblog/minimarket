@@ -6,7 +6,17 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Language\Text;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=orderoption&layout=edit&id=' . (int) ($this->item->id ?? 0)); ?>"
-      method="post" name="adminForm" id="adminForm" class="form-validate">
+      method="post" name="adminForm" id="adminForm" class="form-validate"
+      data-mm-inherited="<?php
+      $global=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
+      $current=(string)$global->get('option_display_location','both');
+      $label=['product'=>'COM_MINIMARKET_VISIBILITY_PRODUCT',
+              'category'=>'COM_MINIMARKET_VISIBILITY_CATEGORY',
+              'both'=>'COM_MINIMARKET_VISIBILITY_BOTH'][$current]??'COM_MINIMARKET_VISIBILITY_BOTH';
+      echo htmlspecialchars(json_encode(['display_location'=>Text::_($label)],
+          JSON_UNESCAPED_UNICODE|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP),
+          ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
+      ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-orderoption', ['active' => 'details']); ?>
     <?php foreach ([
         'details' => 'COM_MINIMARKET_ORDER_OPTION_EDIT',
