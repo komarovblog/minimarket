@@ -49,7 +49,7 @@ final class ManualOrderCatalog
             if (!is_array($row)) throw new \DomainException('COM_MINIMARKET_MANUAL_ORDER_ITEMS_INVALID');
             $key=(string)($row['key']??'');
             $qty=(string)($row['quantity']??'');
-            if ($key==='' && ($qty==='' || $qty==='0'))continue;
+            if ($key==='')continue;
             if (!preg_match('/^([1-9][0-9]{0,9}):(0|[1-9][0-9]{0,9})$/D',$key,$part)
                 || !preg_match('/^[1-9][0-9]{0,1}$/D',$qty)) {
                 throw new \DomainException('COM_MINIMARKET_MANUAL_ORDER_ITEMS_INVALID');

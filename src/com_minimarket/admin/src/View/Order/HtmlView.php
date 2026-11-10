@@ -13,6 +13,11 @@ final class HtmlView extends BaseHtmlView
     public ?object $order=null;
     public array $items=[];
     public bool $canUpdate=false;
+    public bool $isCreate=false;
+    public array $productChoices=[];
+    public array $deliveryMethods=[];
+    public array $paymentMethods=[];
+    public array $cityRates=[];
 
     public function display($tpl=null)
     {
@@ -22,6 +27,27 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }
         $this->canUpdate=$identity->authorise('core.edit.state','com_minimarket');
+        $this->isCreate=$app->input->getCmd('layout','default')==='create';
+        if ($this->isCreate) {
+            if (!$identity->authorise('core.create','com_minimarket')) {
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+            }
+            foreach (['CartState','CartStock','CheckoutDelivery'] as $name) {
+                require_once JPATH_SITE.'/components/com_minimarket/src/Service/'.$name.'.php';
+            }
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $params=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
+            $this->productChoices=\MiniMarket\Component\Minimarket\Administrator\Service\ManualOrderCatalog::choices($db);
+            $this->deliveryMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::methods($params);
+            $this->paymentMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::payments($params);
+            $this->cityRates=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::rates($params);
+            $app->getDocument()->getWebAssetManager()
+                ->registerAndUseScript('com_minimarket.manual-order',
+                    'media/com_minimarket/js/manual-order.js',[],['defer'=>true]);
+            ToolbarHelper::title(Text::_('COM_MINIMARKET_MANUAL_ORDER_TITLE'));
+            parent::display($tpl);
+            return;
+        }
         $id=$app->input->getInt('id',0);
         if ($id<1) throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
