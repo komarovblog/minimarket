@@ -94,8 +94,14 @@ $manifest=simplexml_load_file($root.'minimarket.xml');
 check61($manifest!==false && version_compare((string)$manifest->version,'0.5.61','>='),'manifest version >= 0.5.61');
 check61((string)$manifest->administration->menu->params->dashboard==='minimarket'
  && count($manifest->dashboards->dashboard)===1,'native Joomla dashboard icon declared');
-check61((string)$manifest->administration->submenu->menu[count($manifest->administration->submenu->menu)-1]
- ==='COM_MINIMARKET_FEEDS_TITLE','Feeds added at end of import/export menu');
+$submenu=$manifest->administration->submenu->menu;
+$feedIndex=-1;$settingsIndex=-1;
+foreach($submenu as $pos=>$item) {
+  if((string)$item==='COM_MINIMARKET_FEEDS_TITLE')$feedIndex=$pos;
+  if((string)$item==='COM_MINIMARKET_CONFIG_SETTINGS_MENU')$settingsIndex=$pos;
+}
+check61($feedIndex>0 && $settingsIndex>$feedIndex,
+ 'Feeds stays beside Import, before final Settings menu');
 check61(is_file($root.'script.php') && is_file($root.'admin/presets/minimarket.xml'),
  'Joomla native dashboard preset and installer present');
 $admin=(string)file_get_contents($root.'admin/src/Controller/FeedController.php');
