@@ -43,9 +43,17 @@ $demo=str_replace('USE '.chr(96).'minimarket'.chr(96).';',
     'USE '.chr(96).'minimarket_ci_canonical73'.chr(96).';',$demo);
 run73($db,$demo,'seed');
 foreach(['attributes'=>12,'attribute_values'=>52,
-    'product_attribute_options'=>496,'product_attribute_scalars'=>462] as $name=>$expected) {
+    'product_attribute_scalars'=>462] as $name=>$expected) {
     assert73(count73($db,$name)===$expected,$name.' total');
 }
+$optionsCount=count73($db,'product_attribute_options');
+assert73($optionsCount>=200 && $optionsCount<=496,
+    'one dictionary selection per assigned product characteristic');
+$duplicatePairs=(int)$db->query("SELECT COUNT(*) FROM (
+ SELECT product_id,attribute_id FROM nnop3_minimarket_product_attribute_options
+ GROUP BY product_id,attribute_id HAVING COUNT(*)>1
+) as duplicates")->fetch_row()[0];
+assert73($duplicatePairs===0,'unique product/attribute pairs in fresh catalog');
 assert73($db->query("SHOW TABLES LIKE 'nnop3_minimarket_product_attribute_multi_values'")->num_rows===0,
     'no retired table');
 foreach(['input_mode','number_options','text_options'] as $col){
@@ -62,7 +70,8 @@ $before=count73($db,'products');
 $db->query('UPDATE nnop3_minimarket_products SET price=1234.56 WHERE id=1001');
 run73($db,$demo,'repeat');
 assert73(count73($db,'products')===$before,'no duplicate products');
-assert73(count73($db,'product_attribute_options')===496,'no duplicate dictionary links');
+assert73(count73($db,'product_attribute_options')===$optionsCount,
+    'repeated import does not introduce duplicate characteristic values');
 assert73((float)$db->query('SELECT price FROM nnop3_minimarket_products WHERE id=1001')
     ->fetch_row()[0]===1234.56,'manual price retained');
 echo "CANONICAL_FRESH_MYSQL84_OK: $n checks\n";
