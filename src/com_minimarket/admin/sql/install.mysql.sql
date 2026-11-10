@@ -737,3 +737,17 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_seo_filters` (
     CONSTRAINT `fk_mm_seofilter_category` FOREIGN KEY (`category_id`)
         REFERENCES `#__minimarket_categories` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Discount codes are an admin catalog only until the checkout promotion
+-- rules are agreed. Never invent a discount or mark any order as redeemed.
+CREATE TABLE IF NOT EXISTS #__minimarket_promo_codes (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    amount_cents BIGINT UNSIGNED NOT NULL,
+    state TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    created_by INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY(id),
+    UNIQUE KEY idx_mm_promo_code(code),
+    KEY idx_mm_promo_state(state)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

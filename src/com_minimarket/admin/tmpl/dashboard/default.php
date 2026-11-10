@@ -54,6 +54,8 @@ $sections = [
         'type' => 'tools',
         'icon' => 'icon-wrench',
         'items' => [
+            ['view' => 'promocodes', 'label' => 'COM_MINIMARKET_PROMOCODES_TITLE',
+                'icon' => 'icon-tag', 'count' => 'promocodes'],
             ['view' => 'seofilters', 'label' => 'COM_MINIMARKET_SEOFILTERS_TITLE',
                 'icon' => 'icon-filter', 'count' => 'seofilters'],
             ['view' => 'import', 'label' => 'COM_MINIMARKET_IMPORT_TITLE',
