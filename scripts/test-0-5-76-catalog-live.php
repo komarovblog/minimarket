@@ -42,7 +42,7 @@ mm76Catalog(str_contains($js,'new DOMParser()')
 mm76Catalog(str_contains($js,"window.location.assign(url.toString())"),
     'navigation fallback on fetch failure');
 $attrs=(string)file_get_contents($root.'admin/src/Field/ProductattributesField.php');
-mm76Catalog(strpos($attrs,'$source = (string)')<strpos($attrs,"if ($source ==="),
+mm76Catalog(strpos($attrs,'$source = (string)')<strpos($attrs,"if (\$source ==="),
     'legacy undefined source warning is fixed');
 $filters=(string)file_get_contents($root.'site/tmpl/category/filters.php');
 mm76Catalog(str_contains($filters,'data-mm-dual-range')
