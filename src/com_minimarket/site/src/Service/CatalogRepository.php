@@ -180,7 +180,7 @@ final class CatalogRepository
             default:
                 usort($rows,static fn($a,$b):int=>(int)$b->id<=>(int)$a->id);
         }
-        return array_slice($rows,max(0,$offset),max(1,min(48,$limit)));
+        return array_slice($rows,max(0,$offset),max(1,min(50,$limit)));
     }
 
     public function getCategory(int $id): ?object
@@ -190,7 +190,9 @@ final class CatalogRepository
         }
 
         $q = $this->db->getQuery(true)
-            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'show_descendant_products', 'show_descendant_bundles', 'product_layout', 'cards_xs', 'cards_sm', 'cards_md', 'cards_lg', 'cards_xl', 'cards_xxl', 'meta_title', 'meta_description',
+            ->select(array_map([$this->db, 'quoteName'], ['id', 'title', 'introtext', 'description', 'image', 'image_alt', 'show_children', 'show_products', 'show_bundles', 'show_descendant_products', 'show_descendant_bundles', 'product_layout', 'cards_xs', 'cards_sm', 'cards_md', 'cards_lg', 'cards_xl', 'cards_xxl',
+                'products_per_page', 'filter_price_mode', 'filter_sku_mode',
+                'filter_stock_mode', 'meta_title', 'meta_description',
                 'meta_robots', 'og_title', 'og_description', 'og_image', 'og_image_alt']))
             ->from($this->db->quoteName('#__minimarket_categories'))
             ->where($this->db->quoteName('id') . ' = ' . $id)
