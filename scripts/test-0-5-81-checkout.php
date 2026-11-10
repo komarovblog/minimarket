@@ -1,5 +1,5 @@
 <?php
-/** 0.5.81 checkout: configurable fields, free pickup and server city rates. */
+/** 0.5.82 checkout: configurable fields, free pickup and server city rates. */
 declare(strict_types=1);
 \define('_JEXEC',1);
 require __DIR__.'/../src/com_minimarket/site/src/Service/CheckoutSettings.php';
@@ -91,7 +91,7 @@ $ok(str_contains($config,'name="delivery_rate_source"')
  && str_contains($config,'name="delivery_city_rates"')
  && str_contains($config,'name="payment_on_receipt_enabled"'),'delivery and payment settings');
 $controller=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
-$ok(str_contains($controller,"CheckoutSettings::mode(\$params)==='sms' && (int)\$app->getIdentity()->id<1"),
+$ok(str_contains($controller,"CheckoutSettings::mode(\$params)!=='guest' && (int)\$app->getIdentity()->id<1"),
  'SMS mode blocks only guests until SMS service is connected');
 $ok(str_contains($controller,'CheckoutDelivery::quote')
  && str_contains($controller,'CheckoutSettings::mode')
@@ -101,5 +101,5 @@ $ok(str_contains($view,'name="delivery_method"')
  && str_contains($view,'name="payment_method"')
  && str_contains($view,'data-fee-cents'),'single page checkout form');
 $xml=(string)file_get_contents($root.'minimarket.xml');
-$ok(str_contains($xml,'<version>0.5.81</version>'),'version 0.5.81');
+$ok(str_contains($xml,'<version>0.5.82</version>'),'version 0.5.82');
 echo "MM81_CHECKOUT_PASS: $n checks\n";
