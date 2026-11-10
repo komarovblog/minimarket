@@ -14,6 +14,9 @@ $json=json_encode(['facets'=>$facets,'facts'=>$this->facetData['facts'],
 <form id="mm-facet-form" class="mm-facet-form" data-mm-facet-form method="get"
       action="<?php echo $escape(RouteHelper::category((int)$this->category->id)); ?>">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_FILTER_TITLE'); ?></h2>
+    <?php if ($this->sortOrder!=='newest'): ?>
+        <input type="hidden" name="mm_order" value="<?php echo $escape($this->sortOrder); ?>">
+    <?php endif; ?>
     <p class="small text-muted" role="status" data-mm-facet-count
        data-mm-facet-label="<?php echo $escape(Text::sprintf('COM_MINIMARKET_FILTER_RESULTS','{count}')); ?>">
         <?php echo Text::sprintf('COM_MINIMARKET_FILTER_RESULTS',
