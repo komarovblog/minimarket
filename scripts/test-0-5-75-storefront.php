@@ -53,8 +53,10 @@ $cartPage=$read('site/tmpl/cart/default.php');
 v75(str_contains($cartPage,'data-mm-cart-quantity-form')
   && str_contains($cartPage,'<noscript>'),'auto quantity update has no-JS fallback');
 $cartScript=$read('media/js/cart.js');
-v75(str_contains($cartScript,'requestSubmit()') && str_contains($cartScript,'Math.min(limit'),
-  'automatic quantity update clamps client input');
+v75(str_contains($cartScript,'fetch(form.action') &&
+    str_contains($cartScript,'Math.min(Number(input.max)') &&
+    str_contains($cartScript,'[data-mm-cart-total]'),
+  'AJAX quantity update clamps stock and updates totals without navigation');
 $ru=parse_ini_file($root.'site/language/ru-RU/com_minimarket.ini');
 $en=parse_ini_file($root.'site/language/en-GB/com_minimarket.ini');
 foreach ([$ru,$en] as $lang) {
