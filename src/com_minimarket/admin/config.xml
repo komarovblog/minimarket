@@ -132,6 +132,67 @@
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
     </fieldset>
+
+    <!-- Checkout is deliberately separated from authentication integrations. -->
+    <fieldset name="checkout" label="COM_MINIMARKET_CONFIG_CHECKOUT">
+        <field name="checkout_auth_mode" type="list" default="guest" filter="cmd"
+               label="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH"
+               description="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH_DESC">
+            <option value="guest">COM_MINIMARKET_CHECKOUT_AUTH_GUEST</option>
+            <option value="sms">COM_MINIMARKET_CHECKOUT_AUTH_SMS</option>
+        </field>
+        <field name="checkout_name_mode" type="list" default="required" filter="cmd"
+               label="COM_MINIMARKET_CONFIG_FIELD_NAME" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
+            <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
+        </field>
+        <field name="checkout_phone_mode" type="list" default="required" filter="cmd"
+               label="COM_MINIMARKET_CONFIG_FIELD_PHONE" description="COM_MINIMARKET_CONFIG_CONTACT_DESC">
+            <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
+        </field>
+        <field name="checkout_email_mode" type="list" default="optional" filter="cmd"
+               label="COM_MINIMARKET_CONFIG_FIELD_EMAIL" description="COM_MINIMARKET_CONFIG_CONTACT_DESC">
+            <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
+        </field>
+        <field name="checkout_comment_mode" type="list" default="optional" filter="cmd"
+               label="COM_MINIMARKET_CONFIG_FIELD_COMMENT" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
+            <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
+        </field>
+    </fieldset>
+    <fieldset name="delivery" label="COM_MINIMARKET_CONFIG_DELIVERY">
+        <field name="delivery_pickup_enabled" type="radio" default="1" filter="int"
+               label="COM_MINIMARKET_DELIVERY_PICKUP_ENABLED">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="delivery_pickup_address" type="textarea" rows="2" cols="60" default="" filter="string"
+               label="COM_MINIMARKET_DELIVERY_PICKUP_ADDRESS"
+               description="COM_MINIMARKET_DELIVERY_PICKUP_ADDRESS_DESC" showon="delivery_pickup_enabled:1" />
+        <field name="delivery_courier_enabled" type="radio" default="0" filter="int"
+               label="COM_MINIMARKET_DELIVERY_COURIER_ENABLED">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="delivery_rate_source" type="list" default="directory" filter="cmd"
+               label="COM_MINIMARKET_DELIVERY_RATE_SOURCE"
+               description="COM_MINIMARKET_DELIVERY_RATE_SOURCE_DESC" showon="delivery_courier_enabled:1">
+            <option value="directory">COM_MINIMARKET_DELIVERY_DIRECTORY</option>
+            <option value="cdek">COM_MINIMARKET_DELIVERY_CDEK</option>
+        </field>
+        <field name="delivery_city_rates" type="textarea" rows="8" cols="70" default=""
+               label="COM_MINIMARKET_DELIVERY_CITY_RATES"
+               description="COM_MINIMARKET_DELIVERY_CITY_RATES_DESC"
+               showon="delivery_courier_enabled:1[AND]delivery_rate_source:directory" />
+    </fieldset>
+    <fieldset name="payment" label="COM_MINIMARKET_CONFIG_PAYMENT">
+        <field name="payment_on_receipt_enabled" type="radio" default="1" filter="int"
+               label="COM_MINIMARKET_PAYMENT_ON_RECEIPT"
+               description="COM_MINIMARKET_PAYMENT_ON_RECEIPT_DESC">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+        <field name="payment_bank_transfer_enabled" type="radio" default="0" filter="int"
+               label="COM_MINIMARKET_PAYMENT_BANK_TRANSFER"
+               description="COM_MINIMARKET_PAYMENT_BANK_TRANSFER_DESC">
+            <option value="1">JYES</option><option value="0">JNO</option>
+        </field>
+    </fieldset>
     <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
         <field
             name="rules"
