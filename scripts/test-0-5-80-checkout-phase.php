@@ -15,5 +15,5 @@ $a(str_contains($c,"Session::checkToken('post')") && str_contains($c,'hash_equal
 $a(str_contains($s,'$userId<0') && !str_contains($s,'$userId<1'),'owner 0 supported for interim orders');
 $a(!str_contains($t,'!$this->authenticated') && str_contains($t,'name="phone"') && str_contains($t,"HTMLHelper::_('form.token')"),'guest form enabled');
 $a(str_contains($v,'$owner!==false') && str_contains($v,'(int)$owner===0 && (int)$identity->id===0') && str_contains($v,'com_minimarket.checkout.last_order'),'anonymous confirmation is session scoped');
-$a(file_exists($root.'admin/sql/updates/mysql/0.5.80.sql'),'schema version marker');
+$a(file_exists($root.'admin/sql/updates/mysql/0.5.81.sql'),'schema version marker');
 echo "MM80_CHECKOUT_PHASE_PASS\n";

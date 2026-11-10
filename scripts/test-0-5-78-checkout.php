@@ -96,7 +96,7 @@ namespace MiniMarket\CheckoutSmoke {
 
     $root=dirname(__DIR__).'/src/com_minimarket/';
     $manifest=simplexml_load_file($root.'minimarket.xml');
-    chk($manifest!==false && (string)$manifest->version==='0.5.80','0.5.80 contact-only interim checkout');
+    chk($manifest!==false && (string)$manifest->version==='0.5.81','0.5.81 contact-only interim checkout');
     chk(count($manifest->xpath("//submenu/menu[@link='option=com_minimarket&view=orders']"))===1,
         'native Joomla admin Orders menu');
     $route=file_get_contents($root.'site/src/Service/Router.php');

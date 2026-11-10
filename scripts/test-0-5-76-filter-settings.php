@@ -59,7 +59,7 @@ check76($overridden['products_per_page']===50 &&
  $overridden['filter_price_mode']==='slider','per-category page and price override');
 $root=dirname(__DIR__);
 $manifest=file_get_contents($root.'/src/com_minimarket/minimarket.xml');
-check76(str_contains((string)$manifest,'<version>0.5.80</version>'),'correct version');
+check76(str_contains((string)$manifest,'<version>0.5.81</version>'),'correct version');
 $migration=file_get_contents($root.'/src/com_minimarket/admin/sql/updates/mysql/0.5.76.sql');
 check76(str_contains((string)$migration,'ADD COLUMN filter_search') &&
  str_contains((string)$migration,'ADD COLUMN products_per_page')
