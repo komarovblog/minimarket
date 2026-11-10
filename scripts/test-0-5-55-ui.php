@@ -32,7 +32,7 @@ namespace MiniMarket\Regression55 {
   && $indexes[0]<$indexes[1] && $indexes[1]<$indexes[2]
   && $indexes[2]<$indexes[3] && $indexes[3]<$indexes[4],
   'bundle price method appears directly after SKU');
- $f=array_map(static fn($v)=>strpos($edit,"renderField('badge_".$v."')"),
+ $f=array_map(static fn($v)=>strpos($edit,"$renderFlag('badge_".$v."',"),
   ['benefit','sale','new','popular']);
  check(!in_array(false,$f,true) && $f[0]<$f[1] && $f[1]<$f[2] && $f[2]<$f[3],
   'Savings Sale New Popular order');
@@ -54,8 +54,9 @@ namespace MiniMarket\Regression55 {
   'search uses fetched rows');
  $js=file_get_contents($dir.'media/js/product-badges.js');
  check(str_contains($js,"[[price,!discounted],[old,!discounted],[pct,discounted]]")
-  && str_contains($js,'sale.disabled=!eligible')
-  && str_contains($js,'benefit.disabled=!discounted'),
+  && str_contains($js,'sale.disabled=discounted')
+  && str_contains($js,'benefit.disabled=!discounted')
+  && str_contains($js,'row(saleDisplay).hidden=discounted'),
   'fixed price and auto discounts mutually exclusive');
  $table=file_get_contents($dir.'admin/src/Table/ProductTable.php');
  check(str_contains($table,"['physical','digital']") &&
