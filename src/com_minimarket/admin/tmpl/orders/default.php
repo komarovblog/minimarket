@@ -34,7 +34,7 @@ $statuses=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelle
         <div class="col-12 col-md-2">
             <label class="form-label" for="mm-order-filter-status"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?></label>
             <select id="mm-order-filter-status" name="filter_status" class="form-select">
-                <option value=""><?php echo Text::_('JOPTION_SELECT'); ?></option>
+                <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
                 <?php foreach ($statuses as $status=>$color) : ?>
                     <option value="<?php echo $status; ?>"<?php echo $this->statusFilter===$status?' selected':''; ?>>
                         <?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper($status)); ?></option>
@@ -44,7 +44,7 @@ $statuses=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelle
         <div class="col-12 col-md-2">
             <label class="form-label" for="mm-order-filter-delivery"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></label>
             <select id="mm-order-filter-delivery" name="filter_delivery" class="form-select">
-                <option value=""><?php echo Text::_('JOPTION_SELECT'); ?></option>
+                <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
                 <?php foreach (['pickup','courier'] as $delivery) : ?>
                     <option value="<?php echo $delivery; ?>"<?php echo $this->deliveryFilter===$delivery?' selected':''; ?>>
                         <?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_'.strtoupper($delivery)); ?></option>

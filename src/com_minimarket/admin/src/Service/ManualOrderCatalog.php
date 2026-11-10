@@ -23,9 +23,11 @@ final class ManualOrderCatalog
           ->where("p.delivery_type='physical'")
           ->order('p.title ASC, v.sort_order ASC, v.id ASC');
         $db->setQuery($q,0,5000);
+        // BundleStock runs further database queries; consume the result first.
+        $rows=(array)$db->loadAssocList();
         $options=[];
         $snapshot=BundleStock::snapshot($db);
-        foreach((array)$db->loadAssocList() as $r) {
+        foreach($rows as $r) {
             $pid=(int)$r['product_id'];
             if (!empty($snapshot['hasVariants'][$pid]) && !$r['variant_id']) continue;
             $vid=(int)($r['variant_id']??0);

@@ -43,7 +43,7 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <div class="col-12 col-lg-9">
                             <label class="form-label" for="mm-manual-product-<?php echo $i; ?>"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_PRODUCT'); ?></label>
                             <select name="items[<?php echo $i; ?>][key]" id="mm-manual-product-<?php echo $i; ?>" class="form-select">
-                                <option value=""><?php echo Text::_('JOPTION_SELECT'); ?></option>
+                                <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
                                 <?php foreach ($this->productChoices as $item) : ?>
                                     <option value="<?php echo $this->escape($item['key']); ?>"><?php echo $this->escape($item['label']); ?></option>
                                 <?php endforeach; ?>
@@ -84,7 +84,7 @@ $firstPayment=array_key_first($this->paymentMethods);
                 <div class="col-12 col-md-5">
                     <label class="form-label" for="mm-manual-city"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_CITY'); ?></label>
                     <select id="mm-manual-city" name="delivery_city" class="form-select">
-                        <option value=""><?php echo Text::_('JOPTION_SELECT'); ?></option>
+                        <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
                         <?php foreach ($this->cityRates as $rate) : ?>
                             <option value="<?php echo $this->escape($rate['city']); ?>"><?php echo $this->escape($rate['city']); ?></option>
                         <?php endforeach; ?>
