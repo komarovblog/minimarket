@@ -32,7 +32,7 @@ $schema=(string)file_get_contents($root.'admin/sql/install.mysql.sql');
 $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.58.sql');
 $table=(string)file_get_contents($root.'admin/src/Table/CategoryTable.php');
 foreach($global as $configName=>$local) {
-    audit60(count($config->xpath("//fieldset[@name='categories']/field[@name='$configName']"))===1,
+    audit60(count($config->xpath("//fieldset[@name='display']/field[@name='$configName']"))===1,
         'global Categories must declare '.$configName);
     audit60(count($category->xpath("//fieldset[@name='display']/field[@name='$local']"))===1,
         'local category must override '.$local);
