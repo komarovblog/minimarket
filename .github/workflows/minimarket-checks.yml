@@ -303,6 +303,9 @@ jobs:
       - name: MiniMarket 0.5.76 filter settings and persistence
         run: php scripts/test-0-5-76-filter-settings.php
 
+      - name: MiniMarket badge checkbox and percent/ruble interactions
+        run: node scripts/test-0-5-76-badges-ui.js
+
       - name: MiniMarket 0.5.75 stock-aware filters, sorting and cart
         run: |
           php scripts/test-0-5-75-storefront.php
