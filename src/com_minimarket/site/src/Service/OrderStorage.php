@@ -17,7 +17,8 @@ final class OrderStorage
         string $checkoutKey,
         int $userId
     ): int {
-        if ($userId<1) throw new \DomainException('COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED');
+        // Contact-only orders may have user_id=0 during UX development.
+        if ($userId<0) throw new \DomainException('COM_MINIMARKET_CHECKOUT_INVALID');
         if (!preg_match('/^[a-f0-9]{32}$/D',$checkoutKey)
             || empty($quote['available']) || empty($quote['lines'])
             || count($quote['lines'])>CartState::MAX_LINES) {

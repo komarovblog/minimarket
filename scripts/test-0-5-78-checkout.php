@@ -66,8 +66,10 @@ namespace MiniMarket\CheckoutSmoke {
          'valid'=>true,'type'=>'bundle','title'=>'Комплект','sku'=>'SET-8']
     ]];
     $db=new FakeDb();
-    rejects(fn()=>OrderStorage::create(new FakeDb(),$good,$quote,'00112233445566778899aabbccddeeff',0),
-        'anonymous order rejected');
+    $guestDb=new FakeDb();
+    $guestId=OrderStorage::create($guestDb,$good,$quote,'00112233445566778899aabbccddeeff',0);
+    chk($guestId===123 && str_contains($guestDb->saved[0]['entries'][0],",0,"),
+        'contact-only order can be stored with user_id zero');
     $id=OrderStorage::create($db,$good,$quote,'00112233445566778899aabbccddeeff',77);
     chk($id===123,'returns database-generated order id');
     chk($db->steps===['begin','commit'],'saves order and all lines in one transaction');
@@ -94,7 +96,7 @@ namespace MiniMarket\CheckoutSmoke {
 
     $root=dirname(__DIR__).'/src/com_minimarket/';
     $manifest=simplexml_load_file($root.'minimarket.xml');
-    chk($manifest!==false && (string)$manifest->version==='0.5.79','0.5.79 owner-bound release');
+    chk($manifest!==false && (string)$manifest->version==='0.5.79','0.5.79 contact-only interim checkout');
     chk(count($manifest->xpath("//submenu/menu[@link='option=com_minimarket&view=orders']"))===1,
         'native Joomla admin Orders menu');
     $route=file_get_contents($root.'site/src/Service/Router.php');
@@ -104,7 +106,6 @@ namespace MiniMarket\CheckoutSmoke {
     $controller=file_get_contents($root.'site/src/Controller/CheckoutController.php');
     chk(str_contains($controller,"Session::checkToken('post')")
         && str_contains($controller,'hash_equals($expected,$provided)')
-        && str_contains($controller,'COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED')
         && str_contains($controller,'CartCatalog($db)')
         && str_contains($controller,'OrderStorage::create')
         && str_contains($controller,'CartState::SESSION_KEY,[]'),

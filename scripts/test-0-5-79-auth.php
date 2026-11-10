@@ -44,10 +44,12 @@ $root=dirname(__DIR__).'/src/com_minimarket/';
 $xml=(string)file_get_contents($root.'minimarket.xml');
 $ok(str_contains($xml,'<version>0.5.79</version>'),'manifest version');
 $storage=(string)file_get_contents($root.'site/src/Service/OrderStorage.php');
-$ok(str_contains($storage,'$userId<1') && !str_contains($storage,'int $userId = 0'),
-    'order persist requires bound user');
+$ok(str_contains($storage,'$userId<0') && !str_contains($storage,'$userId<1'),
+    'interim orders allow anonymous contact-only requests');
 $ctrl=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
-$ok(str_contains($ctrl,'$identity->id<1'),'direct POST guest denied');
+$ok(!str_contains($ctrl,'$identity->id<1')
+    && str_contains($ctrl,'OrderStorage::create'),
+    'interim order controller permits guests');
 $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.79.sql');
 $ok(str_contains($migration,'#__minimarket_user_phones')
     && str_contains($migration,'#__minimarket_phone_challenges'),'additive schema');

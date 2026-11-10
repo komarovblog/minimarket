@@ -27,12 +27,11 @@ final class CheckoutController extends BaseController
         if ((string)ComponentHelper::getParams('com_minimarket')->get('shop_type','physical')!=='physical') {
             throw new \RuntimeException(Text::_('COM_MINIMARKET_CART_NOT_AVAILABLE'),403);
         }
-        // Guest orders must never be persisted, even via a direct POST.
+        // Current phase: contact-only checkout. SMS verification and user
+        // creation are reserved for a later, explicitly enabled integration.
         $identity=$app->getIdentity();
-        if ((int)$identity->id<1 || !empty($identity->block)) {
-            $app->enqueueMessage(Text::_('COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED'),'warning');
-            $this->setRedirect(RouteHelper::checkout());
-            return;
+        if ((int)$identity->id>0 && !empty($identity->block)) {
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }
         $expected=(string)$session->get('com_minimarket.checkout.key','');
         $provided=(string)$app->input->post->get('checkout_key','','string');
