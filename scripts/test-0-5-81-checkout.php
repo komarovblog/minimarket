@@ -22,6 +22,10 @@ $reject=function(callable $callback,string $reason)use($ok):void{
 $default=new Params81();
 $ok(CheckoutSettings::mode($default)==='guest','guest is the default');
 $ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'sms']))==='sms','SMS mode is explicit');
+$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'email']))==='email',
+    'email mode never silently becomes guest');
+$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'invalid']))==='sms',
+    'unknown login mode fails closed');
 $policy=CheckoutSettings::fields($default);
 $ok($policy['name']==='required' && $policy['email']==='optional','default contact field policy');
 $ok(array_keys(CheckoutDelivery::methods($default))===['pickup'],'free pickup is default');

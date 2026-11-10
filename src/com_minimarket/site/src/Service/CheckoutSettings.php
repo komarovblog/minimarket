@@ -14,7 +14,8 @@ final class CheckoutSettings
 
     public static function mode(object $params): string
     {
-        return (string)$params->get('checkout_auth_mode','guest')==='sms' ? 'sms' : 'guest';
+        $mode=(string)$params->get('checkout_auth_mode','guest');
+        return in_array($mode,['guest','sms','email'],true)?$mode:'sms';
     }
 
     /** @return array<string,string> */

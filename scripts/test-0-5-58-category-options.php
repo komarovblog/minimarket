@@ -73,13 +73,14 @@ $root=__DIR__.'/../src/com_minimarket/';
 $config=simplexml_load_file($root.'admin/config.xml');
 $form=simplexml_load_file($root.'admin/forms/category.xml');
 check58($config!==false && $form!==false,'config and category XML parse');
-check58(count($config->xpath('//fieldset[@name="categories"]'))===1
-    && count($config->xpath('//fieldset[@name="basic"]'))===1,
-    'exact General and Categories settings tabs');
+check58(count($config->xpath('//fieldset[@name="display"]'))===1
+    && count($config->xpath('//fieldset[@name="basic"]'))===1
+    && count($config->xpath('//fieldset[@name="registration"]'))===1,
+    'display, general and registration settings tabs');
 foreach(['category_show_children','category_show_products','category_show_bundles',
  'category_show_descendant_products','category_show_descendant_bundles','category_product_layout',
  'category_cards_xs','category_cards_sm','category_cards_md','category_cards_lg','category_cards_xl','category_cards_xxl'] as $key){
- check58(count($config->xpath('//fieldset[@name="categories"]/field[@name="'.$key.'"]'))===1,
+ check58(count($config->xpath('//fieldset[@name="display"]/field[@name="'.$key.'"]'))===1,
   'global category field '.$key);
 }
 foreach(['show_descendant_products','show_descendant_bundles','product_layout',
