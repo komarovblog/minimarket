@@ -96,7 +96,8 @@ check61((string)$manifest->administration->menu->params->dashboard==='minimarket
  && count($manifest->dashboards->dashboard)===1,'native Joomla dashboard icon declared');
 $submenu=$manifest->administration->submenu->menu;
 $feedIndex=-1;$settingsIndex=-1;
-foreach($submenu as $pos=>$item) {
+for($pos=0;$pos<count($submenu);$pos++) {
+  $item=$submenu[$pos];
   if((string)$item==='COM_MINIMARKET_FEEDS_TITLE')$feedIndex=$pos;
   if((string)$item==='COM_MINIMARKET_CONFIG_SETTINGS_MENU')$settingsIndex=$pos;
 }
