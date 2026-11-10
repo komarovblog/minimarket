@@ -10,6 +10,8 @@ $order=$this->order;
         <?php echo Text::_('COM_MINIMARKET_ORDERS_TITLE'); ?></a></p>
     <h2><?php echo Text::sprintf('COM_MINIMARKET_ORDER_HEADING',(int)$order->id); ?></h2>
     <dl class="row">
+        <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE'); ?></dt>
+        <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE_'.strtoupper((string)($order->order_source??'site'))); ?></dd>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_CREATED'); ?></dt>
         <dd class="col-sm-9"><?php echo $this->escape($order->created_at); ?></dd>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_CUSTOMER'); ?></dt>
@@ -58,6 +60,9 @@ $order=$this->order;
     <p><strong><?php echo Text::_('COM_MINIMARKET_ORDER_AMOUNT'); ?>:
         <?php echo number_format((int)$order->total_cents/100,2,'.',' '); ?> ₽</strong></p>
     <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_ORDER_NO_PAYMENT'); ?></p>
+    <?php $statusColors=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelled'=>'secondary']; ?>
+    <p><span class="badge bg-<?php echo $statusColors[(string)$order->status]??'secondary'; ?>">
+        <?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$order->status)); ?></span></p>
     <?php if ($this->canUpdate) : ?>
         <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>">
             <input type="hidden" name="id" value="<?php echo (int)$order->id; ?>">

@@ -39,9 +39,11 @@ final class AdminEntityLinks
             throw new \InvalidArgumentException('Invalid MiniMarket list target');
         }
 
-        if ($view==='settings' || $view==='deliveries') {
-            return self::htmlUrl('index.php?option=com_config&view=component&component=com_minimarket'
-                .($view==='deliveries'?'#delivery':''));
+        if ($view==='settings') {
+            return self::htmlUrl('index.php?option=com_config&view=component&component=com_minimarket');
+        }
+        if ($view==='deliveries') {
+            return self::htmlUrl('index.php?option=com_minimarket&view=orders&filter_delivery=courier');
         }
         return self::htmlUrl('index.php?option=com_minimarket&view=' . $view);
     }

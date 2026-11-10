@@ -19,7 +19,7 @@ $sections = [
             ['view' => 'orders', 'label' => 'COM_MINIMARKET_DASHBOARD_ORDERS',
                 'icon' => 'icon-cart', 'count' => 'orders'],
             ['view' => 'deliveries', 'label' => 'COM_MINIMARKET_DASHBOARD_DELIVERIES',
-                'icon' => 'icon-truck', 'count' => null],
+                'icon' => 'icon-truck', 'count' => 'deliveries'],
         ],
     ],
     [
