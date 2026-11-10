@@ -190,6 +190,19 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
+      - name: Verify one-command Desktop delivery has exactly 3 files
+        shell: powershell
+        run: |
+          $dest = Join-Path (Get-Location) 'dist\desktop-ci'
+          New-Item -ItemType Directory -Path $dest -Force | Out-Null
+          & .\scripts\release-to-desktop.ps1 -SkipPull -DesktopPath $dest
+          if ($LASTEXITCODE -ne 0) { throw 'MM75_DESKTOP_RELEASE_FAILED' }
+          $actual = @(Get-ChildItem -LiteralPath $dest -File | Select-Object -ExpandProperty Name | Sort-Object)
+          $expected = @('com_minimarket-0.5.75.zip', 'minimarket_demo_gallery_filters_0_5_75.sql', 'mod_minimarket_toolbar-0.5.75.zip')
+          if (($actual -join '|') -ne ($expected -join '|')) {
+            throw ("MM75_DESKTOP_RELEASE_EXPECTED_THREE: " + ($actual -join ','))
+          }
+          Write-Output 'MM75_DESKTOP_THREE_FILES_WINDOWS_PASS'
       - name: Verify clean catalog SQL generator on Windows PowerShell
         shell: powershell
         run: |
