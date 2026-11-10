@@ -57,6 +57,35 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
             ? \MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions::bootstrapGridClasses($this->productListOptions)
             : 'list-unstyled mm-product-list';
         ?>
+        <form method="get" class="mm-sort-bar" action="<?php echo $this->escape(RouteHelper::category((int)$this->category->id)); ?>">
+            <label for="mm-category-sort"><?php echo Text::_('COM_MINIMARKET_SORT_LABEL'); ?></label>
+            <select name="mm_order" id="mm-category-sort" class="form-select form-select-sm" data-mm-sort>
+                <?php foreach ([
+                    'newest'=>'COM_MINIMARKET_SORT_NEWEST',
+                    'name'=>'COM_MINIMARKET_SORT_NAME',
+                    'price_asc'=>'COM_MINIMARKET_SORT_PRICE_ASC',
+                    'price_desc'=>'COM_MINIMARKET_SORT_PRICE_DESC'
+                ] as $order=>$label): ?>
+                    <option value="<?php echo $this->escape($order); ?>"<?php echo $this->sortOrder===$order?' selected':''; ?>>
+                        <?php echo Text::_($label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <?php foreach ($this->facetSelection as $fid=>$choice):
+                foreach ($choice['values']??[] as $value): ?>
+                    <input type="hidden" name="mmf[<?php echo $this->escape($fid); ?>][]"
+                           value="<?php echo $this->escape($value); ?>">
+                <?php endforeach;
+                if (isset($choice['text'])): ?>
+                    <input type="hidden" name="mmf[<?php echo $this->escape($fid); ?>]"
+                           value="<?php echo $this->escape($choice['text']); ?>">
+                <?php endif;
+                foreach (['min','max'] as $boundary): if (isset($choice[$boundary])): ?>
+                    <input type="hidden" name="mmf[<?php echo $this->escape($fid); ?>][<?php echo $boundary; ?>]"
+                           value="<?php echo $this->escape($choice[$boundary]); ?>">
+                <?php endif; endforeach; endforeach; ?>
+            <button type="submit" class="btn btn-outline-secondary btn-sm"><?php echo Text::_('COM_MINIMARKET_FILTER_APPLY'); ?></button>
+        </form>
         <ul class="<?php echo $this->escape($gridClasses); ?> list-unstyled mm-category-products" data-mm-category-layout="<?php echo $grid ? 'grid' : 'list'; ?>">
         <?php foreach ($this->products as $product) : ?>
             <li class="<?php echo $grid ? 'col' : 'mm-product-list__item'; ?>"
