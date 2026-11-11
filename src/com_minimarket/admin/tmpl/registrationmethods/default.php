@@ -49,7 +49,7 @@ $esc=static fn($value):string=>htmlspecialchars((string)$value, ENT_QUOTES|ENT_S
     <label class="form-check mb-2">
      <input class="form-check-input" type="checkbox" name="primary" value="1"
         <?php echo (string)$this->shopParams->get('checkout_verification_method','email')==='email'?'checked':''; ?>
-        <?php echo $this->canEdit?'':'disabled'; ?>>
+        <?php echo ($this->canEdit && (int)$this->params->get('allowUserRegistration',0)===1)?'':'disabled'; ?>>
      <span class="form-check-label"><?php echo Text::_('COM_MINIMARKET_REGISTRATION_PRIMARY_CHECKOUT'); ?></span>
     </label>
     <p class="form-text"><?php echo Text::_('COM_MINIMARKET_REGISTRATION_PRIMARY_HELP'); ?></p>
