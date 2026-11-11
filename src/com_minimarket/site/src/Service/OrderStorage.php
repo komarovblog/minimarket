@@ -17,7 +17,8 @@ final class OrderStorage
         string $checkoutKey,
         int $userId,
         array $delivery=[],
-        string $source='site'
+        string $source='site',
+        string $promoCode=''
     ): int {
         if (!in_array($source,['site','manual','integration'],true)) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_INVALID');
@@ -31,11 +32,11 @@ final class OrderStorage
         }
         $delivery=array_merge([
             'method'=>'pickup','city'=>'','address'=>'','fee_cents'=>0,
-            'rate_source'=>'none','payment_method'=>'on_receipt'
+            'rate_source'=>'none','payment_method'=>'on_receipt','zone_id'=>null
         ],$delivery);
         if (!in_array($delivery['method'],['pickup','courier'],true)
             || !in_array($delivery['payment_method'],['on_receipt','bank_transfer'],true)
-            || !in_array($delivery['rate_source'],['none','directory'],true)
+            || !in_array($delivery['rate_source'],['none','directory','zones'],true)
             || !is_int($delivery['fee_cents']) || $delivery['fee_cents']<0
             || $delivery['fee_cents']>99999999999
             || !is_string($delivery['city']) || !is_string($delivery['address'])
@@ -75,19 +76,26 @@ final class OrderStorage
 
         $db->transactionStart();
         try {
+            // Row lock serializes promotion usage-limit checks across checkouts.
+            $promo=PromotionService::quote($db,$promoCode,$lines,$total,$userId,$contact,true);
+            $discount=(int)($promo['discount_cents']??0);
+            if($discount>$total)throw new \DomainException('COM_MINIMARKET_PROMO_INVALID');
             $columns=['checkout_key','user_id','customer_name','phone','email',
                 'customer_comment','delivery_method','delivery_city','delivery_address',
-                'delivery_rate_source','delivery_fee_cents','payment_method',
-                'order_source','status','currency','items_total_cents','total_cents','item_count','created_at'];
+                'delivery_rate_source','delivery_zone_id','delivery_fee_cents','payment_method',
+                'order_source','status','currency','items_total_cents','promo_code_id',
+                'promo_code','discount_cents','total_cents','item_count','created_at'];
             $values=[
                 $db->quote($checkoutKey),(string)$userId,
                 $db->quote($contact['name']),$db->quote($contact['phone']),
                 $db->quote($contact['email']),$db->quote($contact['comment']),
                 $db->quote($delivery['method']),$db->quote($delivery['city']),
                 $db->quote($delivery['address']),$db->quote($delivery['rate_source']),
+                $delivery['zone_id']===null?'NULL':(string)(int)$delivery['zone_id'],
                 (string)$delivery['fee_cents'],$db->quote($delivery['payment_method']),
                 $db->quote($source),$db->quote('new'),$db->quote('RUB'),(string)$total,
-                (string)($total+$delivery['fee_cents']),
+                $promo===null?'NULL':(string)$promo['id'],$db->quote($promo['code']??''),
+                (string)$discount,(string)($total+$delivery['fee_cents']-$discount),
                 (string)$units,$db->quote(gmdate('Y-m-d H:i:s'))
             ];
             $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_orders'))
@@ -107,6 +115,7 @@ final class OrderStorage
                 ]));
             }
             $db->setQuery($q);$db->execute();
+            if($promo!==null)PromotionService::redeem($db,$promo,$orderId);
             $db->transactionCommit();
             return $orderId;
         } catch (\Throwable $e) {
