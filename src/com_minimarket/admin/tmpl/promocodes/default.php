@@ -57,9 +57,9 @@ $href='index.php?option=com_minimarket&view=promocodes&'.http_build_query([
        <td data-label="<?php echo Text::_('COM_MINIMARKET_PROMOCODES_STATUS'); ?>"><span class="badge bg-<?php echo (int)$code->state===1?'success':'secondary'; ?>"><?php echo Text::_((int)$code->state===1?'COM_MINIMARKET_PROMOCODES_ACTIVE':'COM_MINIMARKET_PROMOCODES_INACTIVE'); ?></span></td>
       </tr>
      <?php endforeach; ?>
-     <?php if(!$this->codes): ?><tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_PROMOCODES_EMPTY'); ?></td></tr><?php endif; ?>
      </tbody>
     </table>
+<?php if (!$this->codes): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_PROMOCODES_EMPTY'); ?></div><?php endif; ?>
    </div>
    <input type="hidden" name="boxchecked" value="0">
    <input type="hidden" name="task" value="">
