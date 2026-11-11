@@ -12,6 +12,7 @@ final class HtmlView extends BaseHtmlView
 {
     public array $reviews=[];
     public string $statusFilter='pending', $search='', $sort='newest';
+    public int $ratingFilter=0;
     public int $offset=0, $total=0, $pageSize=20;
     public bool $canCreate=false, $canModerate=false;
     public function display($tpl=null)
@@ -29,7 +30,10 @@ final class HtmlView extends BaseHtmlView
         $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
         $this->offset=max(0,min(1000000,$app->input->getInt('limitstart',0)));
         $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $requestedRating=$app->input->getInt('filter_rating',0);
+        $this->ratingFilter=$requestedRating>=1&&$requestedRating<=5?$requestedRating:0;
         $conditions=[];
+        if($this->ratingFilter>0)$conditions[]='r.rating='.(int)$this->ratingFilter;
         $states=['pending'=>0,'published'=>1,'rejected'=>2];
         if(isset($states[$this->statusFilter]))$conditions[]='r.state='.(int)$states[$this->statusFilter];
         if($this->search!==''){
