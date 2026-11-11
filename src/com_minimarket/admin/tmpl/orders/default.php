@@ -65,9 +65,9 @@ $href='index.php?option=com_minimarket&view=orders&'.http_build_query($params,''
               <td data-label="<?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE'); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE_'.strtoupper((string)$order->order_source)); ?></td>
             </tr>
           <?php endforeach; ?>
-          <?php if(!$this->orders): ?><tr><td colspan="9"><?php echo Text::_('COM_MINIMARKET_ORDERS_EMPTY'); ?></td></tr><?php endif; ?>
           </tbody>
         </table>
+<?php if (!$this->orders): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_ORDERS_EMPTY'); ?></div><?php endif; ?>
       </div>
       <input type="hidden" name="boxchecked" value="0">
       <input type="hidden" name="task" value="">
