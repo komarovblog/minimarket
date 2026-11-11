@@ -25,12 +25,14 @@ final class MethodsettingsController extends BaseController
         $scope=$post->getCmd('scope','');
         $method=$post->getCmd('method','');
         $valid=($scope==='delivery'&&in_array($method,['pickup','courier'],true))
-            ||($scope==='payment'&&in_array($method,['on_receipt','bank_transfer'],true));
+            ||($scope==='payment'&&in_array($method,['on_receipt','bank_transfer'],true))
+            ||($scope==='registration'&&$method==='email');
         if(!$valid)throw new \RuntimeException(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),400);
-        $view=$scope==='delivery'?'deliverymethods':'paymentmethods';
+        $view=match($scope){'delivery'=>'deliverymethods','registration'=>'registrationmethods',default=>'paymentmethods'};
         try {
             $changes=MethodSettings::normalize($scope,$method,[
                 'enabled'=>$post->getString('enabled','0'),
+                'primary'=>$post->getString('primary','0'),
                 'address'=>$post->getString('address',''),
                 'fee'=>$post->getString('fee','0'),
                 'schedule'=>$post->get('schedule','','raw'),

@@ -45,6 +45,12 @@ final class MethodSettings
             return ['delivery_courier_enabled'=>(int)$enabled,
                 'delivery_rate_source'=>$source,'delivery_city_rates'=>$rates];
         }
+        if($scope==='registration' && $method==='email'){
+            $primary=(string)($input['primary']??'0');
+            if(!in_array($primary,['0','1'],true))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            return ['checkout_verification_method'=>$primary==='1'?'email':''];
+        }
         if($scope==='payment' && $method==='on_receipt'){
             return ['payment_on_receipt_enabled'=>(int)$enabled];
         }
@@ -63,7 +69,7 @@ final class MethodSettings
             'delivery_pickup_fee_cents','delivery_pickup_schedule','delivery_pickup_map_url',
             'delivery_courier_enabled','delivery_rate_source','delivery_city_rates',
             'payment_on_receipt_enabled','payment_bank_transfer_enabled',
-            'payment_bank_instructions'
+            'payment_bank_instructions','checkout_verification_method'
         ];
         foreach($changes as $key=>$value){
             if(!in_array($key,$allowed,true))throw new \LogicException('Unrecognized method option');
