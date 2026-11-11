@@ -22,7 +22,7 @@ $v=Grid::resolve($category,$params);
 foreach ($defaults as $size=>$default) {
     check71($v['cards_'.$size]===$default,'default '.$size);
 }
-check71($v['layout']==='list','global list default');
+check71($v['layout']==='grid','global grid default');
 check71(Grid::bootstrapGridClasses($v)==='row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-4 g-3',
     'all six native bootstrap row-cols class names');
 $params->values=['category_product_layout'=>'grid',
@@ -75,7 +75,7 @@ foreach ($defaults as $size=>$default) {
 $js=file_get_contents($root.'media/js/category-grid-settings.js');
 check71(str_contains($js,"['list','inherit']") &&
     str_contains($js,"configure('category_','category_product_layout',['list'])"),
-    'disabled category default/list and global list conditions');
+    'disabled category list and conditional global grid controls');
 check71(str_contains($js,'input.disabled=disabled') &&
     str_contains($js,"mirror.type='hidden'") &&
     str_contains($js,'mirror.value=input.value'),
