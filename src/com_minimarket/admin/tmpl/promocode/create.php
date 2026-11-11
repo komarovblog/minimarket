@@ -63,6 +63,19 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
     </div>
    </div>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab','minimarket-promocode','publishing',Text::_('COM_MINIMARKET_CATEGORY_TAB_PUBLISHING')); ?>
+ <div class="card card-body mm-admin-panel">
+  <label class="form-label" for="mm-promo-state"><?php echo Text::_('JSTATUS'); ?></label>
+  <?php if($this->canPublish): ?>
+   <select class="form-select" style="max-width:25rem" name="state" id="mm-promo-state">
+    <option value="0"<?php echo (int)$v('state')===0?' selected':''; ?>><?php echo Text::_('JUNPUBLISHED'); ?></option>
+    <option value="1"<?php echo (int)$v('state')===1?' selected':''; ?>><?php echo Text::_('JPUBLISHED'); ?></option>
+   </select>
+  <?php else: ?>
+   <p class="form-text"><?php echo Text::_('JERROR_ALERTNOAUTHOR'); ?></p>
+  <?php endif; ?>
+ </div>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
 <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </form>
 <script>

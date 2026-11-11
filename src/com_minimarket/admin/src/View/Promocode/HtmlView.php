@@ -11,11 +11,13 @@ use Joomla\Database\DatabaseInterface;
 final class HtmlView extends BaseHtmlView
 {
     public ?object $promo=null;
+    public bool $canPublish=false;
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
         $id=$app->input->getInt('id',0);
         $acl=$id>0?'core.edit':'core.create';
+        $this->canPublish=$app->getIdentity()->authorise('core.edit.state','com_minimarket');
         if (!$app->getIdentity()->authorise($acl,'com_minimarket')) {
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }

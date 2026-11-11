@@ -47,6 +47,13 @@ final class PromocodeController extends BaseController
                 'target_ids'=>'',
                 'combinable'=>0
             ]);
+            if ($app->getIdentity()->authorise('core.edit.state','com_minimarket')) {
+                $postedState=$post->getInt('state',0);
+                if(!in_array($postedState,[0,1],true)){
+                    throw new \DomainException('COM_MINIMARKET_PROMOCODES_INVALID');
+                }
+                $data['state']=$postedState;
+            }
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             // Do not accept arbitrary IDs as scope targets.
             if ($data['applies_to'] !== 'all') {
@@ -73,9 +80,11 @@ final class PromocodeController extends BaseController
                 }
                 $q->set('updated_at=UTC_TIMESTAMP()')->where('id='.(int)$id);
             } else {
-                $columns[]='state';$columns[]='created_by';$columns[]='created_at';
+                if (!array_key_exists('state',$data))$columns[]='state';
+                $columns[]='created_by';$columns[]='created_at';
                 $values=array_map($quote,array_values($data));
-                $values[]='0';$values[]=(string)(int)$app->getIdentity()->id;$values[]='UTC_TIMESTAMP()';
+                if(!array_key_exists('state',$data))$values[]='0';
+                $values[]=(string)(int)$app->getIdentity()->id;$values[]='UTC_TIMESTAMP()';
                 $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_promo_codes'))
                     ->columns($db->quoteName($columns))->values(implode(',',$values));
             }
