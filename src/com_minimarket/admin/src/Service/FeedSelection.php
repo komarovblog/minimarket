@@ -76,7 +76,7 @@ final class FeedSelection
     ): array {
         $effective = array_fill_keys(self::selectedCategoryIds(
             $categories, self::ids($settings['category_ids']??[]),
-            (int)($settings['include_descendants']??1)===1
+            false // selected feed categories only; browsing filter is separate
         ),true);
         $visible = array_fill_keys(self::visibleCategories($categories),true);
         $included = array_fill_keys(self::ids($settings['include_product_ids']??[]),true);

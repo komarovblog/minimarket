@@ -38,14 +38,14 @@ check61(Selection::selectedCategoryIds($categories,[1],true)===[1,2,3],
  'descendant inclusion across three levels');
 check61(Selection::selectedCategoryIds($categories,[1],false)===[1],
  'category descendants switch off');
-$base=['category_ids'=>[1],'include_descendants'=>1,'include_bundles'=>1,
+$base=['category_ids'=>[1],'include_descendants'=>0,'include_bundles'=>1,
  'selection_mode'=>'auto','include_product_ids'=>[],'exclude_product_ids'=>[]];
-check61(Selection::productIds($categories,$products,$base)===[10,11,12],
- 'auto includes all products in selected published subtree');
+check61(Selection::productIds($categories,$products,$base)===[10],
+ 'auto includes direct category products only');
 $base['exclude_product_ids']=[11];
 $base['include_product_ids']=[16];
-check61(Selection::productIds($categories,$products,$base)===[10,12,16],
- 'per-product exclude + explicitly include outside categories');
+check61(Selection::productIds($categories,$products,$base)===[10,16],
+ 'per-product inclusion outside selected categories works');
 $base['include_bundles']=0;
 check61(Selection::productIds($categories,$products,$base)===[10,16],
  'bundle toggle cannot be overridden by manual inclusion');

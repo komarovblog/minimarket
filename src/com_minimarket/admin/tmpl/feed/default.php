@@ -70,10 +70,6 @@ $depth=static function(int $id) use($map):int {
                 </div>
                 <div class="col-md-7 d-flex gap-3 align-items-end flex-wrap">
                     <label class="form-check"><input class="form-check-input" type="checkbox"
-                        name="feed[include_descendants]" value="1" data-mm-feed-descendants
-                        <?php echo (int)$cfg['include_descendants']===1?'checked':''; ?>>
-                        <span class="form-check-label"><?php echo Text::_('COM_MINIMARKET_FEED_DESCENDANTS'); ?></span></label>
-                    <label class="form-check"><input class="form-check-input" type="checkbox"
                         name="feed[include_bundles]" value="1" data-mm-feed-bundles
                         <?php echo (int)$cfg['include_bundles']===1?'checked':''; ?>>
                         <span class="form-check-label"><?php echo Text::_('COM_MINIMARKET_FEED_BUNDLES'); ?></span></label>
@@ -81,13 +77,24 @@ $depth=static function(int $id) use($map):int {
             </div>
             <div class="row g-3">
                 <div class="col-xl-5">
-                    <h4 class="h6"><?php echo Text::_('COM_MINIMARKET_FEED_CATEGORIES'); ?></h4>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <h4 class="h6 mb-0"><?php echo Text::_('COM_MINIMARKET_FEED_CATEGORIES'); ?></h4>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary" data-mm-feed-cats-all><?php echo Text::_('COM_MINIMARKET_FEED_SELECT_ALL'); ?></button>
+                            <button type="button" class="btn btn-outline-secondary" data-mm-feed-cats-none><?php echo Text::_('COM_MINIMARKET_FEED_SELECT_NONE'); ?></button>
+                        </div>
+                    </div>
+                    <input type="search" class="form-control form-control-sm my-2" data-mm-feed-category-search
+                        aria-label="<?php echo $e(Text::_('COM_MINIMARKET_FEED_CATEGORIES')); ?>"
+                        placeholder="<?php echo $e(Text::_('COM_MINIMARKET_FEED_CATEGORY_SEARCH')); ?>">
                     <div class="border rounded p-3 mm-feed-picker">
                         <?php foreach($this->categories as $cat):
                             $id=(int)$cat['id'];
                             if(!isset($visible[$id]))continue;
                         ?>
-                        <label class="form-check d-block" style="margin-inline-start:<?php echo min(10,$depth($id))*14; ?>px">
+                        <label class="form-check d-block" data-mm-feed-category-row
+                            data-search="<?php echo $e(mb_strtolower((string)$cat['title'])); ?>"
+                            style="margin-inline-start:<?php echo min(10,$depth($id))*14; ?>px">
                             <input class="form-check-input" type="checkbox" name="feed[categories][]"
                                 data-mm-feed-category data-id="<?php echo $id; ?>"
                                 data-parent="<?php echo (int)$cat['parent_id']; ?>" value="<?php echo $id; ?>"
@@ -108,6 +115,17 @@ $depth=static function(int $id) use($map):int {
                     <input type="search" class="form-control form-control-sm my-2" data-mm-feed-search
                         aria-label="<?php echo $e(Text::_('JSEARCH_FILTER')); ?>"
                         placeholder="<?php echo $e(Text::_('COM_MINIMARKET_FEED_SEARCH')); ?>">
+                    <label class="form-label" for="mm-feed-product-filter"><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_PRODUCT_CATEGORIES'); ?></label>
+                    <select class="form-select form-select-sm mb-2" id="mm-feed-product-filter"
+                            data-mm-feed-product-filter multiple size="3"
+                            aria-describedby="mm-feed-filter-hint">
+                        <?php foreach ($this->categories as $cat): $cid=(int)$cat['id'];
+                           if(!isset($visible[$cid]))continue; ?>
+                        <option value="<?php echo $cid; ?>"><?php echo $e($cat['title']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p id="mm-feed-filter-hint" class="form-text"><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_PRODUCT_CATEGORIES_HINT'); ?></p>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mb-2" data-mm-feed-product-filter-reset><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_ALL_CATEGORIES'); ?></button>
                     <div class="border rounded p-3 mm-feed-picker">
                         <?php foreach($this->products as $product):
                             $id=(int)$product['id'];
@@ -149,6 +167,14 @@ $depth=static function(int $id) use($map):int {
         </div></div>
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
         <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
+        <?php if ((int)$this->feed['id']>0 && (int)$this->feed['state']===1): ?>
+          <?php $feedUrl=\Joomla\CMS\Uri\Uri::root().'index.php?option=com_minimarket&task=feed.xml&id='
+              .(int)$this->feed['id'].'&key='.rawurlencode((string)$this->feed['access_key']); ?>
+          <div class="mb-3">
+            <label class="form-label" for="mm-feed-public-url"><?php echo Text::_('COM_MINIMARKET_FEED_URL'); ?></label>
+            <input class="form-control" id="mm-feed-public-url" type="text" readonly onclick="this.select()" value="<?php echo $e($feedUrl); ?>">
+          </div>
+        <?php endif; ?>
         <div class="d-flex gap-2 flex-wrap">
             <button type="submit" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
             <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>

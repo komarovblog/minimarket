@@ -50,13 +50,16 @@ final class FeedConfig
     {
         if (!$feed) return [
             'category_ids'=>[], 'include_product_ids'=>[], 'exclude_product_ids'=>[],
-            'selection_mode'=>'auto','include_descendants'=>1,'include_bundles'=>1
+            'selection_mode'=>'auto','include_descendants'=>0,'include_bundles'=>1
         ];
         $result=$feed;
         foreach(['category_ids','include_product_ids','exclude_product_ids'] as $field){
             $value=json_decode((string)($feed[$field.'_json']??'[]'),true);
             $result[$field]=FeedSelection::ids($value);
         }
+        // Older feeds may have stored an implicit descendants flag.
+        // It is retired: only checked categories determine the automatic set.
+        $result['include_descendants']=0;
         return $result;
     }
 
@@ -81,7 +84,7 @@ final class FeedConfig
         if(!in_array($mode,['auto','manual'],true)) {
             throw new \InvalidArgumentException('COM_MINIMARKET_FEED_INVALID');
         }
-        $descendants=(int)($input['include_descendants']??0)===1?1:0;
+        $descendants=0; // Retired: only explicitly checked categories participate.
         $bundles=(int)($input['include_bundles']??0)===1?1:0;
         $checked=FeedSelection::ids($input['products']??[]);
         $present=array_fill_keys(array_map(

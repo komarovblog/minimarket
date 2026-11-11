@@ -48,14 +48,14 @@ namespace MiniMarket\FeedDbTest {
     $visible=FeedSelection::visibleCategories($categories);
     verify(count($visible)>=8,'demo category tree present');
     $defaults=FeedSelection::productIds($categories,$products,[
-        'category_ids'=>$visible,'include_descendants'=>1,
+        'category_ids'=>$visible,'include_descendants'=>0,
         'include_bundles'=>1,'selection_mode'=>'auto'
     ]);
     verify(count($defaults)>=70,'all published demo products available for feeds');
     $chosen=array_slice($defaults,0,3);
     $values=[
         'title'=>'CI feed — promotion','company'=>'CI demo','provider'=>'vk_yml',
-        'state'=>1,'sort_order'=>12,'selection_mode'=>'auto','include_descendants'=>1,'include_bundles'=>1,
+        'state'=>1,'sort_order'=>12,'selection_mode'=>'auto','include_descendants'=>0,'include_bundles'=>1,
         'categories'=>$visible,'products'=>$chosen,
     ];
     $id=FeedConfig::save($db,$values,$categories,$products);

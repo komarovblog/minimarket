@@ -1,58 +1,76 @@
-/* Progressive-enhancement for the native Joomla feed selection form. */
+/* MiniMarket feed editor: selection and browsing are independent. */
 (() => {
  'use strict';
  const root=document.querySelector('#mm-feed-editor');
  if(!root)return;
  const categories=Array.from(root.querySelectorAll('[data-mm-feed-category]'));
  const products=Array.from(root.querySelectorAll('[data-mm-feed-product]'));
+ const rows=Array.from(root.querySelectorAll('[data-mm-feed-row]'));
+ const categoryRows=Array.from(root.querySelectorAll('[data-mm-feed-category-row]'));
  const mode=root.querySelector('#mm-feed-mode');
- const descendants=root.querySelector('[data-mm-feed-descendants]');
  const bundles=root.querySelector('[data-mm-feed-bundles]');
  const count=root.querySelector('[data-mm-feed-count]');
  const search=root.querySelector('[data-mm-feed-search]');
- const parents=new Map(categories.map(c=>[Number(c.dataset.id),Number(c.dataset.parent)]));
- const categorySet=()=>{
-   const chosen=new Set(categories.filter(c=>c.checked).map(c=>Number(c.value)));
-   if(!descendants.checked)return chosen;
-   for(const id of parents.keys()){
-     const visited=new Set([id]);let parent=parents.get(id);
-     while(parent && !visited.has(parent)){
-       if(chosen.has(parent)){chosen.add(id);break;}
-       visited.add(parent);parent=parents.get(parent);
-     }
-   }
-   return chosen;
- };
+ const categorySearch=root.querySelector('[data-mm-feed-category-search]');
+ const productFilter=root.querySelector('[data-mm-feed-product-filter]');
+ const selectedCategories=()=>new Set(categories.filter(c=>c.checked).map(c=>Number(c.value)));
  const updateCount=()=>{
    if(count)count.textContent=String(products.filter(p=>p.checked).length);
  };
+ const applyBrowseFilter=()=>{
+   const text=(search?.value||'').trim().toLowerCase();
+   const filter=new Set(Array.from(productFilter?.selectedOptions||[]).map(x=>Number(x.value)));
+   for(const row of rows){
+     const product=row.querySelector?.('[data-mm-feed-product]');
+     const matchText=(row.dataset.search||'').includes(text);
+     const matchCategory=!filter.size||Boolean(product && filter.has(Number(product.dataset.category)));
+     row.hidden=!(matchText&&matchCategory);
+   }
+ };
+ const applyCategorySearch=()=>{
+   const term=(categorySearch?.value||'').trim().toLowerCase();
+   for(const row of categoryRows)row.hidden=!(row.dataset.search||'').includes(term);
+ };
  const updateAuto=()=>{
-   if(mode.value!=='auto'){updateCount();return;}
-   const selected=categorySet();
-   products.forEach(p=>{
-     p.checked=selected.has(Number(p.dataset.category))
-       && (bundles.checked||p.dataset.bundle!=='1');
-   });
+   if(mode?.value!=='auto'){updateCount();return;}
+   const selected=selectedCategories();
+   for(const p of products){
+     p.checked=selected.has(Number(p.dataset.category)) && (bundles?.checked||p.dataset.bundle!=='1');
+   }
    updateCount();
  };
  for(const c of categories)c.addEventListener('change',updateAuto);
- descendants.addEventListener('change',updateAuto);
- bundles.addEventListener('change',updateAuto);
- mode.addEventListener('change',()=>{
-   if(mode.value==='auto')updateAuto();else updateCount();
- });
- root.querySelector('[data-mm-feed-all]')?.addEventListener('click',()=>{
-   mode.value='manual';products.forEach(p=>p.checked=true);updateCount();
- });
- root.querySelector('[data-mm-feed-none]')?.addEventListener('click',()=>{
-   mode.value='manual';products.forEach(p=>p.checked=false);updateCount();
- });
- for(const p of products)p.addEventListener('change',updateCount);
- search?.addEventListener('input',()=>{
-   const text=search.value.trim().toLowerCase();
-   for(const row of root.querySelectorAll('[data-mm-feed-row]')){
-     row.hidden=!row.dataset.search.includes(text);
+ bundles?.addEventListener('change',updateAuto);
+ mode?.addEventListener('change',updateAuto);
+ const categoryToggle=checked=>{
+   for(const c of categories){
+     const row=c.closest?.('[data-mm-feed-category-row]');
+     if(!row||!row.hidden)c.checked=checked;
    }
+   updateAuto();
+ };
+ root.querySelector('[data-mm-feed-cats-all]')?.addEventListener('click',()=>categoryToggle(true));
+ root.querySelector('[data-mm-feed-cats-none]')?.addEventListener('click',()=>categoryToggle(false));
+ const productToggle=checked=>{
+   if(mode)mode.value='manual';
+   for(let i=0;i<products.length;i++){
+     const row=products[i].closest?.('[data-mm-feed-row]')||rows[i];
+     if(!row||!row.hidden)products[i].checked=checked;
+   }
+   updateCount();
+ };
+ root.querySelector('[data-mm-feed-all]')?.addEventListener('click',()=>productToggle(true));
+ root.querySelector('[data-mm-feed-none]')?.addEventListener('click',()=>productToggle(false));
+ for(const p of products)p.addEventListener('change',()=>{
+   if(mode)mode.value='manual';
+   updateCount();
  });
- updateCount();
+ search?.addEventListener('input',applyBrowseFilter);
+ productFilter?.addEventListener('change',applyBrowseFilter);
+ root.querySelector('[data-mm-feed-product-filter-reset]')?.addEventListener('click',()=>{
+   for(const option of Array.from(productFilter?.options||[]))option.selected=false;
+   applyBrowseFilter();
+ });
+ categorySearch?.addEventListener('input',applyCategorySearch);
+ applyBrowseFilter();applyCategorySearch();updateCount();
 })();
