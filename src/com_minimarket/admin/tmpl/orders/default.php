@@ -30,11 +30,10 @@ $params=[
 ];
 $href='index.php?option=com_minimarket&view=orders&'.http_build_query($params,'','&',PHP_QUERY_RFC3986);
 ?>
-<div class="mm-native-entity-list">
-  <div id="j-main-container" class="j-main-container">
-    
-    <form action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>"
+<form action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>"
           method="post" name="adminForm" id="adminForm" class="mm-list-form">
+ <div id="j-main-container" class="j-main-container">
+
     <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
 
       <div class="table-responsive mm-native-list-viewport">
@@ -74,7 +73,5 @@ $href='index.php?option=com_minimarket&view=orders&'.http_build_query($params,''
       <?php echo HTMLHelper::_('form.token'); ?>
      <input type="hidden" name="limitstart" value="<?php echo (int)$this->offset; ?>">
  <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
- </form>
-    
   </div>
-</div>
+</form>
