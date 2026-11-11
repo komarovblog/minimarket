@@ -759,6 +759,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_seo_filters` (
     `category_id` INT UNSIGNED NOT NULL,
     `alias` VARCHAR(190) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     `title` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) NOT NULL DEFAULT '',
     `heading` VARCHAR(255) NOT NULL,
     `introtext` TEXT NULL,
     `description` MEDIUMTEXT NULL,

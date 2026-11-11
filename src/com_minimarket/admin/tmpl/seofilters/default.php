@@ -46,7 +46,7 @@ $href='index.php?option=com_minimarket&view=seofilters&'.http_build_query([
       <tr>
        <td class="text-center" data-label="<?php echo Text::_('JSELECT'); ?>"><?php echo HTMLHelper::_('grid.id',$i,(int)$page->id); ?></td>
        <td data-label="ID"><?php echo (int)$page->id; ?></td>
-       <td data-label="<?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?>"><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilter&id='.(int)$page->id,false)); ?>"><?php echo $this->escape($page->title); ?></a></td>
+       <td data-label="<?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?>"><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilter&id='.(int)$page->id,false)); ?>"><?php echo $this->escape((string)(($page->name??'')?:$page->title)); ?></a></td>
        <td data-label="<?php echo Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'); ?>"><?php echo $this->escape($page->category_title); ?></td>
        <td data-label="<?php echo Text::_('COM_MINIMARKET_SEOFILTER_ALIAS'); ?>">
         <a href="<?php echo $this->escape(Uri::root().'index.php?option=com_minimarket&view=seofilter&id='.(int)$page->id); ?>" target="_blank" rel="noopener noreferrer">/seo/<?php echo $this->escape($page->alias); ?>-<?php echo (int)$page->id; ?></a></td>

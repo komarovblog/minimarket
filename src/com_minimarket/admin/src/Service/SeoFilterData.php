@@ -11,19 +11,21 @@ final class SeoFilterData
     public static function normalize(array $input):array
     {
         foreach (['alias','title','heading','introtext','description',
-                  'meta_description','meta_robots','filter_query',
+                  'meta_description','meta_robots','filter_query','name',
                   'image','image_alt','og_title','og_description','og_image'] as $field) {
             if (!is_scalar($input[$field]??'')) throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         }
         $category=(int)($input['category_id']??0);
         $alias=trim((string)($input['alias']??''));
         $title=trim(strip_tags((string)($input['title']??'')));
+        $name=trim(strip_tags((string)($input['name']??$title)));
         $heading=trim(strip_tags((string)($input['heading']??'')));
         $meta=trim(strip_tags((string)($input['meta_description']??'')));
         $robots=(string)($input['meta_robots']??'index,follow');
         if($category<1 || !preg_match('/^[a-z0-9][a-z0-9-]{0,189}$/D',$alias)
            || mb_strlen($title)<3 || mb_strlen($title)>255
            || mb_strlen($heading)<3 || mb_strlen($heading)>255
+           || mb_strlen($name)<2 || mb_strlen($name)>255
            || mb_strlen($meta)>320
            || !in_array($robots,['index,follow','noindex,follow','noindex,nofollow'],true)) {
             throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
@@ -62,7 +64,7 @@ final class SeoFilterData
         };
         $validate($parsed['mmf']);
         if($flat<1||$flat>40)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-        return ['category_id'=>$category,'alias'=>$alias,'title'=>$title,'heading'=>$heading,
+        return ['category_id'=>$category,'alias'=>$alias,'name'=>$name,'title'=>$title,'heading'=>$heading,
             'introtext'=>$intro,'description'=>$description,'meta_description'=>$meta,
             'meta_robots'=>$robots,'image'=>$image,'image_alt'=>$imageAlt,
             'og_title'=>$ogTitle,'og_description'=>$ogDescription,'og_image'=>$ogImage,
