@@ -1,95 +1,111 @@
 param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-
-$root = Split-Path -Parent $PSScriptRoot
-$admin = Join-Path $root 'src\com_minimarket\admin'
-$media = Join-Path $root 'src\com_minimarket\media'
-$native = @('products','categories','brands','collections','attributes','bundles',
+$root=Split-Path -Parent $PSScriptRoot
+$component=Join-Path $root 'src\com_minimarket'
+$admin=Join-Path $component 'admin'
+$native=@('products','categories','brands','collections','attributes','bundles',
     'groups','bundlegroups','orderoptions','values')
-$custom = @('orders','deliveries','reviews','promocodes','seofilters','feeds','integrations','deliveryzones')
-$bulk = @('orders','deliveries','reviews','promocodes','seofilters')
-$errors = New-Object System.Collections.Generic.List[string]
+$unified=@('orders','deliveries','reviews','promocodes','seofilters','feeds',
+    'integrations','deliveryzones','deliverymethods','paymentmethods')
+$bulk=@('orders','deliveries','reviews','promocodes','seofilters')
+$errors=New-Object System.Collections.Generic.List[string]
 
-function Check([bool]$condition, [string]$message) {
-    if (-not $condition) { $script:errors.Add($message) }
+function Check([bool]$condition,[string]$message) {
+    if(-not $condition){$script:errors.Add($message)}
 }
-foreach ($view in $native) {
-    $path = Join-Path $admin "tmpl\$view\default.php"
-    Check (Test-Path -LiteralPath $path -PathType Leaf) "Missing native list: $view"
-    if (Test-Path -LiteralPath $path -PathType Leaf) {
-        $source = Get-Content -LiteralPath $path -Raw -Encoding UTF8
-        Check ($source.Contains('mm-admin-list')) "Missing table: $view"
-        Check ($source.Contains('mm-native-list-viewport')) "Missing scroll container: $view"
+
+function ReadFile([string]$path) {
+    Check (Test-Path -LiteralPath $path -PathType Leaf) "Missing $path"
+    if(Test-Path -LiteralPath $path -PathType Leaf){
+        return Get-Content -LiteralPath $path -Raw -Encoding UTF8
     }
+    return ''
 }
-foreach ($view in $custom) {
-    $name = $view.Substring(0,1).ToUpper() + $view.Substring(1)
-    $template = Join-Path $admin "tmpl\$view\default.php"
-    $viewFile = Join-Path $admin ('src\View\' + $name + '\HtmlView.php')
-    Check (Test-Path -LiteralPath $template -PathType Leaf) "Missing template: $view"
-    Check (Test-Path -LiteralPath $viewFile -PathType Leaf) "Missing view: $view"
-    if (Test-Path -LiteralPath $template -PathType Leaf) {
-        $source = Get-Content -LiteralPath $template -Raw -Encoding UTF8
-        Check ($source.Contains('mm-unified-list')) "Missing list wrapper: $view"
-        Check ($source.Contains('shared/searchtools.php')) "Missing shared searchtools: $view"
-        Check ($source.Contains('table-responsive')) "Missing table viewport: $view"
-        Check ($source.Contains('mm-admin-list')) "Missing native table class: $view"
-        Check (-not $source.Contains('<h2')) "Duplicate title: $view"
-    }
-    if (Test-Path -LiteralPath $viewFile -PathType Leaf) {
-        $source = Get-Content -LiteralPath $viewFile -Raw -Encoding UTF8
-        $expectedNamespace = 'namespace MiniMarket\Component\Minimarket\Administrator\View\' + $name + ';'
-        Check ($source.Contains($expectedNamespace)) "Invalid view namespace: $view"
-    }
+$phpFiles=New-Object System.Collections.Generic.List[string]
+foreach($view in $native){
+    $template=Join-Path $admin "tmpl\$view\default.php"
+    $source=ReadFile $template
+    Check ($source.Contains("joomla.searchtools.default")) "Not native Joomla SearchTools: $view"
+    Check ($source.Contains('mm-native-list-viewport')) "Missing local table scroll: $view"
+    Check ($source.Contains('mm-admin-list')) "Missing native table class: $view"
+    Check ($source.Contains('id="adminForm"')) "Missing standard POST adminForm: $view"
+    Check (-not $source.Contains('mm-unified-list')) "Legacy list container: $view"
+    $phpFiles.Add($template)
 }
-foreach ($view in $bulk) {
-    $name = $view.Substring(0,1).ToUpper() + $view.Substring(1)
-    $controller = Join-Path $admin ('src\Controller\' + $name + 'Controller.php')
-    $template = Join-Path $admin "tmpl\$view\default.php"
+foreach($view in $unified){
+    $template=Join-Path $admin "tmpl\$view\default.php"
+    $source=ReadFile $template
+    $name=$view.Substring(0,1).ToUpper()+$view.Substring(1)
+    $viewFile=Join-Path $admin ('src\View\'+$name+'\HtmlView.php')
+    $viewSource=ReadFile $viewFile
+    $expectedNamespace='namespace MiniMarket\Component\Minimarket\Administrator\View\'+$name+';'
+    Check ($viewSource.Contains($expectedNamespace)) "Incorrect namespace: $view"
+    Check (-not $source.Contains('mm-unified-list')) "Legacy page wrapper: $view"
+    Check (-not $source.Contains('mm-native-pagination')) "Handmade pager: $view"
+    if($view -in @('deliverymethods','paymentmethods')){
+        Check ($source.Contains("shared/method-list.php")) "Shared method list missing: $view"
+        Check ($viewSource.Contains('MethodListRows::collect')) "Method list filtering missing: $view"
+    }else{
+        Check ($source.Contains('shared/searchtools.php')) "Joomla SearchTools bridge missing: $view"
+        Check ($source.Contains('mm-native-list-viewport')) "Missing local table viewport: $view"
+        Check ($source.Contains('id="adminForm"')) "Missing adminForm: $view"
+        Check ($source.Contains('NativeListTools::pagination')) "Core pagination missing: $view"
+    }
+    $phpFiles.Add($template)
+    $phpFiles.Add($viewFile)
+}
+foreach($view in $bulk){
+    $name=$view.Substring(0,1).ToUpper()+$view.Substring(1)
+    $controller=Join-Path $admin ('src\Controller\'+$name+'Controller.php')
+    $source=ReadFile (Join-Path $admin "tmpl\$view\default.php")
     Check (Test-Path -LiteralPath $controller -PathType Leaf) "Missing bulk controller: $view"
-    if (Test-Path -LiteralPath $template -PathType Leaf) {
-        $source = Get-Content -LiteralPath $template -Raw -Encoding UTF8
-        Check ($source.Contains('grid.checkall')) "Missing select-all: $view"
-        Check ($source.Contains('grid.id')) "Missing row checkboxes: $view"
-        Check ($source.Contains('form.token')) "Missing CSRF token: $view"
-    }
+    Check ($source.Contains('grid.checkall')) "Missing select-all: $view"
+    Check ($source.Contains('grid.id')) "Missing row checkboxes: $view"
+    Check ($source.Contains('form.token')) "Missing CSRF token: $view"
+    $phpFiles.Add($controller)
 }
-$required = @(
-    (Join-Path $admin 'tmpl\shared\searchtools.php'),
+$required=@(
+    (Join-Path $admin 'src\Service\NativeListTools.php'),
+    (Join-Path $admin 'src\Service\MethodListRows.php'),
     (Join-Path $admin 'src\Service\ListBulkActions.php'),
-    (Join-Path $media 'js\admin-list-tools.js'),
-    (Join-Path $media 'css\admin-ui.css')
+    (Join-Path $admin 'src\Model\ValuesModel.php'),
+    (Join-Path $admin 'tmpl\shared\searchtools.php'),
+    (Join-Path $admin 'tmpl\shared\method-list.php')
 )
-foreach ($path in $required) {
-    Check (Test-Path -LiteralPath $path -PathType Leaf) "Missing shared asset: $path"
+foreach($path in $required){
+    $source=ReadFile $path
+    Check ($source.StartsWith('<?php')) "Invalid PHP shared file: $path"
+    $phpFiles.Add($path)
 }
-if ($errors.Count -gt 0) {
-    foreach ($problem in $errors) { Write-Output "ADMIN_LIST_FAIL: $problem" }
-    throw "ADMIN_LIST_STRUCTURE_FAILED: $($errors.Count) problems"
-}
-Write-Output "ADMIN_LIST_STRUCTURE_PASS: native=$($native.Count) unified=$($custom.Count) bulk=$($bulk.Count)"
+$filter=ReadFile (Join-Path $admin 'forms\filter_values.xml')
+Check ($filter.Contains('name="attribute_id"')) 'Native attribute filter missing'
+$controller=ReadFile (Join-Path $admin 'src\Controller\DisplayController.php')
+Check ($controller.Contains("useScript('table.columns')")) 'Joomla core column switcher missing'
+Check (-not $controller.Contains("'com_minimarket.admin-columns'")) 'Legacy custom columns still loaded'
+Check (-not $controller.Contains("'com_minimarket.admin-list-tools'")) 'Legacy custom search script still loaded'
+Check ($controller.Contains('NativeListTools::importRequest')) 'Native filters not received by custom views'
+$css=ReadFile (Join-Path $component 'media\css\admin-ui.css')
+Check (-not $css.Contains('@container (max-width: 900px)')) 'Non-native card mode remains'
+Check (-not $css.Contains('.mm-columns-picker')) 'Custom column CSS remains'
 
-$php = Get-Command php -ErrorAction SilentlyContinue
-if ($null -ne $php) {
-    $phpFiles = @($required[0],$required[1])
-    foreach ($view in $custom) {
-        $name = $view.Substring(0,1).ToUpper() + $view.Substring(1)
-        $phpFiles += Join-Path $admin "tmpl\$view\default.php"
-        $phpFiles += Join-Path $admin ('src\View\' + $name + '\HtmlView.php')
-    }
-    foreach ($view in $bulk) {
-        $name = $view.Substring(0,1).ToUpper() + $view.Substring(1)
-        $phpFiles += Join-Path $admin ('src\Controller\' + $name + 'Controller.php')
-    }
-    foreach ($file in $phpFiles) {
-        $result = & $php.Source -l $file
-        if ($LASTEXITCODE -ne 0) {
+if($errors.Count -gt 0){
+    foreach($item in $errors){Write-Output "ADMIN_LIST_FAIL: $item"}
+    throw "ADMIN_LIST_STRUCTURE_FAILED: $($errors.Count) issue(s)"
+}
+Write-Output "ADMIN_LIST_STRUCTURE_PASS: native=$($native.Count) unified=$($unified.Count) bulk=$($bulk.Count)"
+
+$php=Get-Command php -ErrorAction SilentlyContinue
+if($null -ne $php){
+    $unique=@($phpFiles | Sort-Object -Unique)
+    foreach($path in $unique){
+        $result=& $php.Source -l $path 2>&1
+        if($LASTEXITCODE -ne 0){
             Write-Output $result
-            throw "ADMIN_LIST_PHP_LINT_FAIL: $file"
+            throw "ADMIN_LIST_PHP_LINT_FAIL: $path"
         }
     }
-    Write-Output "ADMIN_LIST_PHP_LINT_PASS: files=$($phpFiles.Count)"
-} else {
+    Write-Output "ADMIN_LIST_PHP_LINT_PASS: files=$($unique.Count)"
+}else{
     Write-Output 'ADMIN_LIST_PHP_LINT_SKIPPED: PHP not on PATH'
 }
