@@ -88,6 +88,13 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label for="mm-delivery-city" class="form-label"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CITY'); ?> *</label>
+                                <?php if($this->zonesMode): ?>
+                                <input id="mm-delivery-city" name="delivery_city" class="form-control"
+                                       list="mm-zone-city-list" maxlength="120" autocomplete="address-level2" required>
+                                <datalist id="mm-zone-city-list">
+                                 <?php foreach($this->zoneCities as $name): ?><option value="<?php echo $this->escape($name); ?>"></option><?php endforeach; ?>
+                                </datalist>
+                                <?php else: ?>
                                 <select id="mm-delivery-city" name="delivery_city" class="form-select">
                                     <option value=""><?php echo Text::_('COM_MINIMARKET_DELIVERY_CHOOSE_CITY'); ?></option>
                                     <?php foreach ($this->cityRates as $rate) : ?>
@@ -98,7 +105,25 @@ $firstPayment=array_key_first($this->paymentMethods);
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
+                                <?php endif; ?>
                             </div>
+                            <?php if($this->zonesMode): ?>
+                            <div class="col-12 col-md-6">
+                             <label for="mm-delivery-country" class="form-label"><?php echo Text::_('COM_MINIMARKET_ZONE_COUNTRY'); ?></label>
+                             <input id="mm-delivery-country" name="delivery_country" class="form-control"
+                                    maxlength="2" pattern="[A-Za-z]{2}" value="RU" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                             <label for="mm-delivery-region" class="form-label"><?php echo Text::_('COM_MINIMARKET_ZONE_REGION'); ?></label>
+                             <input id="mm-delivery-region" name="delivery_region" class="form-control" maxlength="120"
+                                    autocomplete="address-level1">
+                            </div>
+                            <div class="col-12 col-md-6">
+                             <label for="mm-delivery-postcode" class="form-label"><?php echo Text::_('COM_MINIMARKET_ZONE_POSTCODE'); ?></label>
+                             <input id="mm-delivery-postcode" name="delivery_postcode" class="form-control"
+                                    maxlength="16" autocomplete="postal-code">
+                            </div>
+                            <?php endif; ?>
                             <div class="col-12">
                                 <label for="mm-delivery-address" class="form-label"><?php echo Text::_('COM_MINIMARKET_DELIVERY_ADDRESS'); ?> *</label>
                                 <textarea id="mm-delivery-address" name="delivery_address" class="form-control"
