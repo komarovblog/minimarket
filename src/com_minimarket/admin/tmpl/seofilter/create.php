@@ -28,8 +28,6 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
    <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'main', Text::_('COM_MINIMARKET_SEO_TAB_MAIN')); ?>
  <div class="card card-body mm-admin-panel">
     <div class="row g-3">
-     <div class="col-md-6"><label class="form-label" for="mm-seo-title"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?> *</label>
-      <input id="mm-seo-title" class="form-control" name="title" maxlength="255" required value="<?php echo $this->escape($get('title')); ?>"></div>
      <div class="col-md-6"><label class="form-label" for="mm-seo-alias"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_ALIAS'); ?> *</label>
       <input id="mm-seo-alias" class="form-control" name="alias" maxlength="190" pattern="[a-z0-9][a-z0-9-]*" required value="<?php echo $this->escape($get('alias')); ?>"></div>
      <div class="col-12">
@@ -133,6 +131,8 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
    <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'meta', Text::_('COM_MINIMARKET_SEO_TAB_META')); ?>
  <div class="card card-body mm-admin-panel">
     <div class="row g-3">
+     <div class="col-12"><label class="form-label" for="mm-seo-title"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?> *</label>
+      <input id="mm-seo-title" class="form-control" name="title" maxlength="255" required value="<?php echo $this->escape($get('title')); ?>"></div>
      <div class="col-12"><label for="mm-meta" class="form-label"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_META_DESC'); ?></label>
       <textarea id="mm-meta" name="meta_description" class="form-control" rows="3" maxlength="320"><?php echo $this->escape($get('meta_description')); ?></textarea></div>
      <div class="col-12"><label for="mm-og-title" class="form-label"><?php echo Text::_('COM_MINIMARKET_SEO_OG_TITLE'); ?></label>

@@ -44,27 +44,7 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
     <div class="row g-3">
      <div class="col-md-6"><label for="mm-min-cart" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMO_MIN_CART'); ?></label>
       <input id="mm-min-cart" name="min_cart" type="number" min="0" step="0.01" class="form-control" value="<?php echo $this->escape($money('min_cart_cents')); ?>"></div>
-     <div class="col-md-6"><label for="mm-scope" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMO_SCOPE'); ?></label>
-      <select id="mm-scope" name="applies_to" class="form-select">
-       <?php foreach(['all','category','product'] as $scope): ?><option value="<?php echo $scope; ?>"<?php echo $scope===$v('applies_to','all')?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_PROMO_SCOPE_'.strtoupper($scope)); ?></option><?php endforeach; ?>
-      </select></div>
-     <?php foreach(['category'=>'categories','product'=>'search'] as $scope=>$endpoint):
-       $selected=[];
-       if($v('applies_to','all')===$scope && is_array($ids))
-           foreach($ids as $id)if((int)$id>0)$selected[(int)$id]='#'.(int)$id;
-       $mmReference=[
-         'title'=>Text::_('COM_MINIMARKET_PROMO_SCOPE_'.strtoupper($scope)),
-         'input'=>'target_ids_'.$scope,'endpoint'=>$endpoint,'multiple'=>true,
-         'selected'=>$selected,'placeholder'=>Text::_('COM_MINIMARKET_REF_SEARCH')
-       ];
-     ?>
-      <div class="col-12" data-promo-targets="<?php echo $scope; ?>">
-       <?php require dirname(__DIR__).'/shared/reference-picker.php'; ?>
-      </div>
-     <?php endforeach; ?>
-     <div class="col-12"><input type="hidden" name="combinable" value="0">
-      <label class="form-check"><input type="checkbox" class="form-check-input" name="combinable" value="1"<?php echo (int)$v('combinable')===1?' checked':''; ?>>
-       <span class="form-check-label"><?php echo Text::_('COM_MINIMARKET_PROMO_COMBINABLE'); ?></span></label></div>
+     <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PROMO_CART_WIDE_HELP'); ?></p>
     </div>
    </div>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
@@ -87,17 +67,14 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
 </form>
 <script>
 (() => {
- const kind=document.getElementById('mm-kind'),scope=document.getElementById('mm-scope');
+ const kind=document.getElementById('mm-kind');
  const refresh=()=>{
   const fixed=kind.value==='fixed';
   for(const field of document.querySelectorAll('[data-promo-fixed]'))field.hidden=!fixed;
   for(const field of document.querySelectorAll('[data-promo-percent]'))field.hidden=fixed;
   document.getElementById('mm-amount').required=fixed;
   document.getElementById('mm-percent').required=!fixed;
-  for(const panel of document.querySelectorAll('[data-promo-targets]')){
-   panel.hidden=panel.dataset.promoTargets!==scope.value;
-  }
  };
- kind.addEventListener('change',refresh);scope.addEventListener('change',refresh);refresh();
+ kind.addEventListener('change',refresh);refresh();
 })();
 </script>

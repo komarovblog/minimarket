@@ -42,13 +42,10 @@ final class PromocodeController extends BaseController
                 'min_cart'=>$post->get('min_cart','0','string'),
                 'usage_limit'=>$post->get('usage_limit','','string'),
                 'per_customer_limit'=>$post->get('per_customer_limit','','string'),
-                'applies_to'=>$post->get('applies_to','all','cmd'),
-                'target_ids'=>$post->get('applies_to','all','cmd')==='category'
-                    ?$post->get('target_ids_category','','string')
-                    :($post->get('applies_to','all','cmd')==='product'
-                      ?$post->get('target_ids_product','','string'):''),
-
-                'combinable'=>$post->getInt('combinable',0)
+                // Use the entire cart subtotal for newly created or edited coupons.
+                'applies_to'=>'all',
+                'target_ids'=>'',
+                'combinable'=>0
             ]);
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             // Do not accept arbitrary IDs as scope targets.
