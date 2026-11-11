@@ -38,6 +38,7 @@ $order=$this->order;
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_METHOD'); ?></dt>
         <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_'.strtoupper((string)($order->payment_method??'on_receipt'))); ?></dd>
     </dl>
+    <div class="table-responsive mm-editor-table-viewport">
     <table class="table table-striped mm-admin-list">
         <thead><tr>
             <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
@@ -58,6 +59,7 @@ $order=$this->order;
         <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
     <dl class="row">
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_ITEMS_TOTAL'); ?></dt>
         <dd class="col-sm-9"><?php echo number_format((int)($order->items_total_cents??$order->total_cents)/100,2,'.',' '); ?> ₽</dd>
