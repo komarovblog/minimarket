@@ -89,6 +89,7 @@ namespace MiniMarket\DashboardCountsTest {
             'feeds|1=1'=>3,
             'orders|deleted_at IS NULL'=>2,
             "shipments|status IN ('new','in_transit')"=>1,
+            'delivery_zones|1=1'=>6,
             'reviews|state=0'=>2,
             'seo_filters|1=1'=>3,
             'promo_codes|1=1'=>4,
@@ -126,14 +127,20 @@ namespace MiniMarket\DashboardCountsTest {
     $expected=[
         'categories'=>27,'products'=>78,'bundles'=>3,'brands'=>5,
         'collections'=>6,'groups'=>4,'bundlegroups'=>2,'attributes'=>12,
-        'orderoptions'=>7,'feeds'=>3,'orders'=>2,'deliveries'=>1,'reviews'=>2,'seofilters'=>3,'promocodes'=>4
+        'orderoptions'=>7,'feeds'=>3,'orders'=>2,'deliveries'=>1,'deliveryzones'=>6,
+        'reviews'=>2,'seofilters'=>3,'promocodes'=>4
     ];
-    verify($view->stats===$expected,'all fifteen counters use actual database entities and filters');
-    verify(count(Factory::$database->queries)===15,'exactly fifteen count queries including delivery requests');
-    verify(count(array_unique(Factory::$database->queries))===15,
+    verify($view->stats===$expected,'all sixteen server counters use actual entities, including delivery zones');
+    verify(count(Factory::$database->queries)===16,'exactly sixteen count queries including delivery zones');
+    verify(count(array_unique(Factory::$database->queries))===16,
         'each entity/filter has its own distinct count query');
     $html=(new Renderer($view->stats))->html();
     foreach($expected as $key=>$count){
+        if($key==='deliveryzones'){
+            verify(!str_contains($html,'data-mm-stat="deliveryzones"'),
+                'delivery-zone count does not reintroduce removed dashboard tile');
+            continue;
+        }
         verify((bool)preg_match('/data-mm-stat="'.preg_quote($key,'/').'"[^>]*>\\s*'.(int)$count.'\\s*<\\/span>/u',$html),
             'real server-rendered number for '.$key);
     }
