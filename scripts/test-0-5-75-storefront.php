@@ -66,7 +66,8 @@ foreach ([$ru,$en] as $lang) {
     }
 }
 $manifest=$read('minimarket.xml');
-v75(str_contains($manifest,'<version>0.5.84</version>'),'version 0.5.75');
+v75((bool)preg_match('~<version>([0-9]+\.[0-9]+\.[0-9]+)</version>~', $manifest, $versionMatch)
+    && version_compare($versionMatch[1], '0.5.75', '>='), 'storefront version >= 0.5.75');
 $update=$read('admin/sql/updates/mysql/0.5.75.sql');
 v75(str_contains($update,'SELECT 1;') && !str_contains($update,'DROP TABLE'),'no destructive schema SQL');
 $demo=file_get_contents(dirname(__DIR__).'/sample-data/minimarket_demo_gallery_filters_0_5_75.sql');
