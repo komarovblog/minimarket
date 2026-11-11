@@ -220,13 +220,8 @@
             <option value="guest">COM_MINIMARKET_CHECKOUT_AUTH_GUEST</option>
                 <option value="email">COM_MINIMARKET_CHECKOUT_AUTH_EMAIL</option>
         </field>
-        <field name="checkout_verification_method" type="list" default="email" filter="cmd"
-               label="COM_MINIMARKET_CHECKOUT_CONFIRMATION_METHOD"
-               description="COM_MINIMARKET_CHECKOUT_CONFIRMATION_HELP"
-               showon="checkout_auth_mode:email">
-            <option value="">COM_MINIMARKET_MODE_NONE</option>
-            <option value="email">COM_MINIMARKET_REGISTRATION_EMAIL_METHOD</option>
-        </field>
+        <!-- Managed by Registration Methods, not a second global dropdown. -->
+        <field name="checkout_verification_method" type="hidden" default="email" filter="cmd" />
         <field name="checkout_name_mode" type="list" default="required" filter="cmd"
                label="COM_MINIMARKET_CONFIG_FIELD_NAME" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
