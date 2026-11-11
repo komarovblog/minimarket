@@ -22,7 +22,7 @@ if (-not $SkipPull) {
 # Parse all release scripts before any build step. PowerShell 5.1's
 # parser catches an unmatched bracket before it reaches a runtime check.
 foreach ($scriptName in @('release-to-desktop.ps1', 'verify-admin-lists.ps1',
-    'verify-0.5.87.ps1', 'verify-0.5.88.ps1', 'verify-0.5.89.ps1',
+    'verify-0.5.87.ps1', 'verify-0.5.88.ps1', 'verify-0.5.89.ps1', 'verify-0.5.90.ps1',
     'verify-translations.ps1',
     'build.ps1', 'inspect-package.ps1')) {
     $scriptPath = Join-Path $PSScriptRoot $scriptName
@@ -54,6 +54,9 @@ if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_088_VALIDATION_FAILED' }
 $global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'verify-0.5.89.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_089_VALIDATION_FAILED' }
+$global:LASTEXITCODE = 0
+& (Join-Path $PSScriptRoot 'verify-0.5.90.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_090_NATIVE_LIST_VALIDATION_FAILED' }
 $global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'verify-translations.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_TRANSLATION_AUDIT_FAILED' }
