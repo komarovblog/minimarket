@@ -31,6 +31,11 @@ final class SeofilterController extends BaseController
                 'introtext'=>$post->get('introtext','','raw'),
                 'description'=>$post->get('description','','raw'),
                 'meta_description'=>$post->get('meta_description','','string'),
+                'image'=>$post->get('image','','string'),
+                'image_alt'=>$post->get('image_alt','','string'),
+                'og_title'=>$post->get('og_title','','string'),
+                'og_description'=>$post->get('og_description','','string'),
+                'og_image'=>$post->get('og_image','','string'),
                 'meta_robots'=>$post->get('meta_robots','index,follow','string'),
                 'filter_query'=>$post->get('filter_query','','string')
             ]);
