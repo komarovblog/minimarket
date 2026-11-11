@@ -13,7 +13,8 @@
   const locale=document.documentElement.lang||'ru-RU';
   const money=cents=>new Intl.NumberFormat(locale,{minimumFractionDigits:2,maximumFractionDigits:2})
     .format(cents/100)+' ₽';
-  let discount=0,fee=0,needsQuote=false,previewController=null;
+  const zones=!!form.querySelector('[name="delivery_city"][list]');
+  let discount=0,fee=0,serverFee=null,needsQuote=false,controller=null;
   function update(){
    const method=form.querySelector('input[name="delivery_method"]:checked')?.value||'pickup';
    for(const panel of panels){
@@ -25,17 +26,19 @@
    if(address)address.required=method==='courier';
    fee=0;needsQuote=false;
    if(method==='courier'){
-    const option=city?.selectedOptions?.[0];
-    if(option && option.value){
-     const mode=option.dataset.rateMode||'fixed';
-     if(mode!=='fixed')needsQuote=true;
-     else {
+    if(zones)needsQuote=true;
+    else {
+     const option=city?.selectedOptions?.[0];
+     if(option?.value){
       fee=Number.parseInt(option.dataset.feeCents||'0',10);
       const free=Number.parseInt(option.dataset.freeFromCents||'0',10);
       if(!Number.isSafeInteger(fee)||fee<0)fee=0;
       if(free>0&&items>=free)fee=0;
-     }
-    }else needsQuote=true;
+     }else needsQuote=true;
+    }
+   }
+   if(needsQuote&&Number.isSafeInteger(serverFee)&&serverFee>=0){
+    fee=serverFee;needsQuote=false;
    }
    if(shipping)shipping.textContent=needsQuote?'—':money(fee);
    if(discountBox)discountBox.textContent=money(discount);
@@ -43,30 +46,35 @@
   }
   async function preview(){
    const code=(promo?.value||'').trim();
-   previewController?.abort();
-   discount=0;
-   if(!code){if(feedback)feedback.textContent='';update();return;}
-   previewController=new AbortController();
+   controller?.abort();serverFee=null;discount=0;update();
+   if(!code&&!zones){if(feedback)feedback.textContent='';return;}
+   controller=new AbortController();
    try{
-    const payload=new FormData(form);
-    const response=await fetch(form.dataset.promoPreviewUrl,{
-      method:'POST',body:payload,credentials:'same-origin',
-      headers:{Accept:'application/json'},signal:previewController.signal
+    const result=await fetch(form.dataset.promoPreviewUrl,{
+      method:'POST',body:new FormData(form),credentials:'same-origin',
+      headers:{Accept:'application/json'},signal:controller.signal
     });
-    if(!response.ok)throw Error(String(response.status));
-    const result=await response.json();
-    if(result.success) discount=Math.max(0,Number(result.discount_cents)||0);
-    if(feedback)feedback.textContent=result.message||'';
+    if(!result.ok)throw Error(String(result.status));
+    const data=await result.json();
+    if(data.success){
+      discount=Math.max(0,Number(data.discount_cents)||0);
+      serverFee=Number(data.shipping_cents);
+    }
+    if(feedback)feedback.textContent=code?(data.message||''):'';
    }catch(error){
     if(error.name==='AbortError')return;
-    discount=0;if(feedback)feedback.textContent='—';
+    if(feedback)feedback.textContent='—';
    }
    update();
   }
-  form.querySelectorAll('input[name="delivery_method"]').forEach(r=>r.addEventListener('change',update));
-  city?.addEventListener('change',update);
+  function invalidate(){serverFee=null;update();void preview();}
+  form.querySelectorAll('input[name="delivery_method"]').forEach(r=>r.addEventListener('change',invalidate));
+  for(const name of ['delivery_city','delivery_country','delivery_region','delivery_postcode','delivery_address','payment_method']){
+   form.querySelectorAll('[name="'+name+'"]').forEach(el=>el.addEventListener('change',invalidate));
+  }
   promo?.addEventListener('change',preview);
   for(const name of ['phone','email'])form.querySelector('[name="'+name+'"]')?.addEventListener('change',preview);
-  update();if(promo?.value.trim())void preview();
+  update();
+  if(zones||promo?.value.trim())void preview();
  }
 })();
