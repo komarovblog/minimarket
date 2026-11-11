@@ -24,16 +24,17 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
-<div class="mm-unified-list">
+<div class="mm-native-entity-list">
  <div id="j-main-container" class="j-main-container">
-  <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+  
   <form id="adminForm" name="adminForm" class="mm-list-form" method="post"
         action="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>">
    <input type="hidden" name="task" value="">
    <input type="hidden" name="boxchecked" value="0">
    <?php echo HTMLHelper::_('form.token'); ?>
-  </form>
-  <div class="table-responsive">
+   <input type="hidden" name="limitstart" value="<?php echo (int)$this->offset; ?>">
+   <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+  <div class="table-responsive mm-native-list-viewport">
    <table id="mm-feeds-list" class="table table-striped mm-admin-list">
     <thead><tr>
      <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
@@ -62,12 +63,8 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
         <?php if((int)$feed['state']===1): ?>
          <a class="btn btn-sm btn-outline-secondary" href="<?php echo $e($url); ?>" target="_blank" rel="noopener noreferrer"><?php echo Text::_('COM_MINIMARKET_FEED_VIEW_XML'); ?></a>
         <?php endif; ?>
-        <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=feed.delete',false)); ?>"
-              onsubmit="return confirm(this.dataset.confirm)" data-confirm="<?php echo $e(Text::_('COM_MINIMARKET_FEED_CONFIRM_DELETE')); ?>">
-         <input type="hidden" name="id" value="<?php echo (int)$feed['id']; ?>">
-         <?php echo HTMLHelper::_('form.token'); ?>
-         <button class="btn btn-sm btn-outline-danger" type="submit"><?php echo Text::_('JACTION_DELETE'); ?></button>
-        </form>
+        <button class="btn btn-sm btn-outline-danger" type="submit"
+                form="mm-feed-delete-<?php echo (int)$feed['id']; ?>"><?php echo Text::_('JACTION_DELETE'); ?></button>
        </div>
       </td>
      </tr>
@@ -76,13 +73,17 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
     </tbody>
    </table>
   </div>
-  <?php if($this->total>$this->pageSize): ?>
-   <nav class="mm-native-pagination">
-    <?php if($this->offset>0): ?><a href="<?php echo $e(Route::_($href.'&limitstart='.max(0,$this->offset-$this->pageSize),false)); ?>"><?php echo Text::_('JPREV'); ?></a><?php endif; ?>
-    <span><?php echo $this->offset+1; ?>–<?php echo min($this->total,$this->offset+$this->pageSize); ?> / <?php echo $this->total; ?></span>
-    <?php if($this->offset+$this->pageSize<$this->total): ?><a href="<?php echo $e(Route::_($href.'&limitstart='.($this->offset+$this->pageSize),false)); ?>"><?php echo Text::_('JNEXT'); ?></a><?php endif; ?>
-   </nav>
-  <?php endif; ?>
+  <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
+  </form>
+  <?php foreach($this->feeds as $feed): ?>
+   <form id="mm-feed-delete-<?php echo (int)$feed['id']; ?>" method="post"
+         action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=feed.delete',false)); ?>"
+         onsubmit="return confirm(this.dataset.confirm)"
+         data-confirm="<?php echo $e(Text::_('COM_MINIMARKET_FEED_CONFIRM_DELETE')); ?>">
+     <input type="hidden" name="id" value="<?php echo (int)$feed['id']; ?>">
+     <?php echo HTMLHelper::_('form.token'); ?>
+   </form>
+  <?php endforeach; ?>
   <p class="text-muted small mt-3"><?php echo Text::_('COM_MINIMARKET_FEED_LIMITATIONS'); ?></p>
  </div>
 </div>
