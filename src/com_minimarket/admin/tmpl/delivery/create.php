@@ -10,11 +10,27 @@ use Joomla\CMS\Router\Route;
  <?php echo Text::_('COM_MINIMARKET_DELIVERY_CREATE_HINT'); ?></div>
  <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.create',false)); ?>" class="row g-3">
   <div class="col-12">
+    <div class="row g-2 mb-2">
+      <div class="col-12 col-md-6">
+        <label for="mm-delivery-order-search" class="form-label">Поиск заказа</label>
+        <input id="mm-delivery-order-search" class="form-control" type="search" placeholder="Номер, покупатель или город">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="mm-delivery-date-from" class="form-label">Дата от</label>
+        <input id="mm-delivery-date-from" class="form-control" type="date">
+      </div>
+      <div class="col-6 col-md-3">
+        <label for="mm-delivery-date-to" class="form-label">Дата до</label>
+        <input id="mm-delivery-date-to" class="form-control" type="date">
+      </div>
+    </div>
     <label class="form-label" for="mm-shipment-order"><?php echo Text::_('COM_MINIMARKET_DELIVERY_ORDER'); ?> *</label>
     <select class="form-select" id="mm-shipment-order" name="order_id" required>
      <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
-     <?php foreach($this->orders as $o): ?><option value="<?php echo (int)$o->id; ?>" <?php echo (int)$o->id===$this->preselectedOrder?'selected':''; ?>>#<?php echo (int)$o->id; ?> — <?php echo $this->escape($o->customer_name.' / '.$o->delivery_city); ?></option><?php endforeach; ?>
+     <?php foreach($this->orders as $o): ?><option value="<?php echo (int)$o->id; ?>" <?php echo (int)$o->id===$this->preselectedOrder?'selected':''; ?>>#<?php echo (int)$o->id; ?> — <?php echo $this->escape($o->customer_name.' / '.$o->delivery_city.' / '.$o->created_at); ?></option><?php endforeach; ?>
     </select>
+    <div class="form-text">Показаны только курьерские заказы без отправления, кроме отменённых и удалённых.</div>
+    <?php if (!$this->orders): ?><div class="alert alert-warning mt-2">Подходящих заказов нет. Проверьте способ доставки у заказов.</div><?php endif; ?>
   </div>
   <div class="col-12 col-md-6">
     <label class="form-label" for="mm-shipment-carrier"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CARRIER'); ?></label>
@@ -37,4 +53,25 @@ use Joomla\CMS\Router\Route;
    <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
   </div>
  </form>
+<script>
+(() => {
+  const select = document.getElementById('mm-shipment-order');
+  const search = document.getElementById('mm-delivery-order-search');
+  const from = document.getElementById('mm-delivery-date-from');
+  const to = document.getElementById('mm-delivery-date-to');
+  if (!select || !search || !from || !to) return;
+  const options = [...select.options].slice(1).map(option => ({
+    option, name: option.textContent.toLocaleLowerCase(), date: (option.textContent.match(/\\d{4}-\\d{2}-\\d{2}/) || [''])[0]
+  }));
+  const update = () => {
+    const term = search.value.trim().toLocaleLowerCase();
+    for (const row of options) {
+      row.option.hidden = !(row.name.includes(term) && (!from.value || row.date >= from.value) && (!to.value || row.date <= to.value));
+      row.option.disabled = row.option.hidden;
+    }
+    if (select.selectedOptions[0]?.disabled) select.value = '';
+  };
+  for (const field of [search, from, to]) field.addEventListener('input', update);
+})();
+</script>
 </section>
