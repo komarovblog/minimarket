@@ -39,6 +39,11 @@ function init(root) {
     remove.textContent='−';remove.setAttribute('aria-label',labels.remove||'Remove');
     remove.addEventListener('click',()=>{row.remove();sync();});
     row.append(remove);selected.append(row);sync();
+    if(!multiple){
+      const panel=root.querySelector('[data-mm-ref-panel]');
+      if(panel)panel.hidden=true;
+      root.querySelector('[data-mm-ref-toggle]')?.focus();
+    }
   }
   async function run() {
     if(controller)controller.abort();
@@ -65,7 +70,10 @@ function init(root) {
         addButton.textContent='+';
         addButton.disabled=value().includes(String(item.key||item.id));
         addButton.setAttribute('aria-label',(labels.add||'Add')+' '+item.title);
-        addButton.addEventListener('click',()=>{add(item);addButton.disabled=true;});
+        addButton.addEventListener('click',()=>{
+          add(item);
+          addButton.disabled=value().includes(String(item.key||item.id));
+        });
         row.append(addButton);results.append(row);
       }
       if(!results.children.length)results.textContent=labels.empty||'No results';
