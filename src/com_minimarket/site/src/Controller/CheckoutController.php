@@ -111,12 +111,20 @@ final class CheckoutController extends BaseController
             $inventory=(int)$params->get('inventory_enabled',1)===1;
             $quote=(new CartCatalog($db))->details($cart,$inventory);
             if (!$quote['available']) throw new \DomainException($quote['error']?:'COM_MINIMARKET_CHECKOUT_CART_INVALID');
+            $grams=0;$volume=0;
+            foreach($quote['lines'] as $line){
+                $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
+                $volume+=(int)($line['shipping_volume_cm3']??0)*(int)$line['quantity'];
+            }
             $delivery=CheckoutDelivery::quote($params,[
                 'delivery_method'=>$app->input->post->get('delivery_method','','string'),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
+                'delivery_country'=>$app->input->post->get('delivery_country','RU','string'),
+                'delivery_region'=>$app->input->post->get('delivery_region','','string'),
+                'delivery_postcode'=>$app->input->post->get('delivery_postcode','','string'),
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
                 'payment_method'=>$app->input->post->get('payment_method','','string'),
-            ],(int)$quote['total_cents']);
+            ],(int)$quote['total_cents'],$grams,$volume);
             $promoCode=strtoupper(trim((string)$app->input->post->get('promo_code',
                 (string)$session->get('com_minimarket.promo_code',''),'string')));
             $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery,'site',$promoCode);
