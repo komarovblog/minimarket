@@ -104,6 +104,8 @@ final class CartCatalog
             'product_id'=>$productId, 'variant_id'=>$variantId,
             'title'=>$title, 'sku'=>$sku, 'image'=>$image, 'stock'=>$stock,
             'type'=>$type, 'unit_cents'=>CartState::cents((string)$product->price),
+            'shipping_weight_grams'=>(int)($product->shipping_weight_grams??0),
+            'shipping_volume_cm3'=>(int)($product->shipping_volume_cm3??0),
         ];
     }
 
