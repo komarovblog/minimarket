@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+ <fields name="filter">
+  <field name="search" type="text" inputmode="search" hint="JSEARCH_FILTER"
+         label="COM_MINIMARKET_CATEGORY_FILTER_SEARCH"/>
+  <field name="published" type="list" label="JSTATUS" class="js-select-submit-on-change">
+   <option value="">COM_MINIMARKET_CATEGORY_ALL_STATUSES</option>
+   <option value="1">JPUBLISHED</option>
+   <option value="0">JUNPUBLISHED</option>
+  </field>
+  <field name="attribute_id" type="sql" label="COM_MINIMARKET_VALUE_ATTRIBUTE"
+         query="SELECT id,title FROM #__minimarket_attributes ORDER BY title"
+         key_field="id" value_field="title" class="js-select-submit-on-change">
+   <option value="">COM_MINIMARKET_FILTER_ANY</option>
+  </field>
+ </fields>
+ <fields name="list">
+  <field name="fullordering" type="list" label="JGLOBAL_SORT_BY"
+         default="v.sort_order ASC" validate="options" class="js-select-submit-on-change">
+   <option value="v.sort_order ASC">JGRID_HEADING_ORDERING_ASC</option>
+   <option value="v.sort_order DESC">JGRID_HEADING_ORDERING_DESC</option>
+   <option value="v.title ASC">JGLOBAL_TITLE_ASC</option>
+   <option value="v.title DESC">JGLOBAL_TITLE_DESC</option>
+   <option value="v.id ASC">JGRID_HEADING_ID_ASC</option>
+   <option value="v.id DESC">JGRID_HEADING_ID_DESC</option>
+  </field>
+  <field name="limit" type="limitbox" class="js-select-submit-on-change"
+         label="JGLOBAL_LIST_LIMIT" default="20"/>
+ </fields>
+</form>
