@@ -20,6 +20,7 @@ use MiniMarket\Component\Minimarket\Site\Service\OrderStorage;
 final class CheckoutController extends BaseController
 {
     /** Non-mutating preview; checkout.submit always recalculates under lock. */
+    /** Non-mutating preview; checkout.submit always recalculates under lock. */
     public function preview(): void
     {
         $app=Factory::getApplication();
@@ -27,7 +28,7 @@ final class CheckoutController extends BaseController
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
         $app->setHeader('Cache-Control','private, no-store',true);
         $app->setHeader('Content-Type','application/json; charset=utf-8',true);
-        $result=['success'=>false,'discount_cents'=>0,'message'=>''];
+        $result=['success'=>false,'discount_cents'=>0,'shipping_cents'=>null,'message'=>''];
         try{
             $params=ComponentHelper::getParams('com_minimarket');
             $session=$app->getSession();
@@ -45,7 +46,23 @@ final class CheckoutController extends BaseController
                 $db,$code,$quote['lines'],(int)$quote['total_cents'],
                 (int)$app->getIdentity()->id,$contact,false
             );
+            $grams=0;$volume=0;
+            foreach($quote['lines'] as $line){
+                $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
+                $volume+=(int)($line['shipping_volume_cm3']??0)*(int)$line['quantity'];
+            }
+            $input=$app->input->post;
+            $delivery=CheckoutDelivery::quote($params,[
+                'delivery_method'=>$input->getString('delivery_method',''),
+                'delivery_city'=>$input->getString('delivery_city',''),
+                'delivery_country'=>$input->getString('delivery_country','RU'),
+                'delivery_region'=>$input->getString('delivery_region',''),
+                'delivery_postcode'=>$input->getString('delivery_postcode',''),
+                'delivery_address'=>$input->getString('delivery_address',''),
+                'payment_method'=>$input->getString('payment_method','')
+            ],(int)$quote['total_cents'],$grams,$volume);
             $result=['success'=>true,'discount_cents'=>(int)($promo['discount_cents']??0),
+                'shipping_cents'=>(int)$delivery['fee_cents'],
                 'message'=>Text::_('COM_MINIMARKET_PROMO_PREVIEW')];
         }catch(\DomainException $error){
             $result['message']=Text::_($error->getMessage());
