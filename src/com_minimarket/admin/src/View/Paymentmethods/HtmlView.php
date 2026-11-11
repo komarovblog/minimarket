@@ -10,11 +10,14 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\InstalledMethodPlugins;
 use MiniMarket\Component\Minimarket\Administrator\Service\MethodListRows;
+use MiniMarket\Component\Minimarket\Administrator\Service\PluginMethodSettings;
 
 final class HtmlView extends BaseHtmlView
 {
     public $params;
     public array $plugins=[];
+    public ?object $pluginMethod=null;
+    public $pluginForm=null;
     public array $methodRows=[];
     public string $search='', $typeFilter='', $statusFilter='all', $sort='name_asc';
     public int $total=0, $offset=0, $pageSize=20;
@@ -38,6 +41,13 @@ final class HtmlView extends BaseHtmlView
         $this->params=ComponentHelper::getParams('com_minimarket');
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $this->plugins=InstalledMethodPlugins::list($db,'payment');
+        if(preg_match('/^plugin_([1-9][0-9]*)$/D',($raw??''),$m)){
+            $detail=PluginMethodSettings::load($db,'payment',(int)$m[1]);
+            if($detail===null)throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
+            $this->pluginMethod=$detail['plugin'];
+            $this->pluginForm=$this->canEditPlugins?$detail['form']:null;
+            $this->method=$raw;
+        }
         if($this->method===''){
             $this->search=mb_substr(trim($app->input->getString('filter_search','')),0,100);
             $type=$app->input->getCmd('filter_type','');

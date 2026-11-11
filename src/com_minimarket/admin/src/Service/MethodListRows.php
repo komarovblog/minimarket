@@ -62,10 +62,11 @@ final class MethodListRows
                 'code' => (string) $plugin->element,
                 'type' => 'plugin',
                 'enabled' => (int) $plugin->enabled === 1,
-                'url' => $canEditPlugins
+                'url' => Route::_('index.php?option=com_minimarket&view='.$view
+                    .'&method=plugin_'.(int)$plugin->extension_id,false),
+                'plugin_info_url' => $canEditPlugins
                     ? Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='
-                        . (int) $plugin->extension_id, false)
-                    : '',
+                        . (int)$plugin->extension_id,false) : '',
             ];
         }
 
