@@ -71,7 +71,12 @@ foreach($key in @('per_kg','per_liter','free_from_cents','postcode_prefixes')) {
         throw "MINIMARKET_088_SHIPPING_CHECK_MISSING: $key"
     }
 }
-foreach($key in @('mm-seo-publication','COM_MINIMARKET_CATEGORY_TAB_PUBLISHING')) {
+# 0.5.88 used Bootstrap tab id mm-seo-publication. In 0.5.89
+# publication moved to Joomla's native uitab, just like the product editor.
+# Assert the real feature and translated label, not the removed DOM id.
+foreach($key in @("uitab.addTab', 'minimarket-seofilter', 'publication'",
+                  'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
+                  'name="state"')) {
     if(-not $text['seo'].Contains($key)) {
         throw "MINIMARKET_088_SEO_PUBLICATION_MISSING: $key"
     }
