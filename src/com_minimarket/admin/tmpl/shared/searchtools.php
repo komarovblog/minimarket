@@ -43,6 +43,12 @@ $searchId = 'mm-search-' . $view;
                 <?php foreach ($fields as $i => $field): ?>
                 <label class="mm-native-searchtools__filter" for="<?php echo $esc('mm-filter-' . $view . '-' . $i); ?>">
                     <span class="visually-hidden"><?php echo $esc($field['label']); ?></span>
+                    <?php if (($field['type'] ?? 'select') === 'text'): ?>
+                    <input class="form-control" type="search" id="<?php echo $esc('mm-filter-' . $view . '-' . $i); ?>"
+                           name="<?php echo $esc($field['name']); ?>" maxlength="100"
+                           placeholder="<?php echo $esc($field['label']); ?>"
+                           value="<?php echo $esc($field['value'] ?? ''); ?>">
+                    <?php else: ?>
                     <select class="form-select" id="<?php echo $esc('mm-filter-' . $view . '-' . $i); ?>"
                             name="<?php echo $esc($field['name']); ?>"
                             aria-label="<?php echo $esc($field['label']); ?>">
@@ -52,6 +58,7 @@ $searchId = 'mm-search-' . $view;
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <?php endif; ?>
                 </label>
                 <?php endforeach; ?>
                 <button class="btn btn-primary" type="submit"><?php echo Text::_('JSEARCH_FILTER_SUBMIT'); ?></button>
