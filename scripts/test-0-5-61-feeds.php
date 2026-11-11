@@ -122,6 +122,21 @@ check61(str_contains($editor,'feed[categories][]') &&
  str_contains($editor,'data-mm-feed-all') &&
  str_contains($editor,'data-mm-feed-none'),
  'editor supports bulk and per-item selection');
+check61(str_contains($editor,'data-mm-feed-category-search') &&
+ str_contains($editor,'data-mm-feed-search') &&
+ str_contains($editor,'data-mm-feed-product-toolbar') &&
+ str_contains($editor,'data-mm-feed-product-filter-option') &&
+ str_contains($editor,'data-mm-feed-product-filter-count'),
+ 'two aligned list searches, compact multi-category product browsing filter');
+$toolbarStart=strpos($editor,'data-mm-feed-product-toolbar');
+$searchAt=strpos($editor,'data-mm-feed-search',$toolbarStart);
+$filterAt=strpos($editor,'data-mm-feed-product-filter',$searchAt);
+$listAt=strpos($editor,'data-mm-feed-row',$filterAt);
+check61($toolbarStart!==false && $searchAt!==false && $filterAt!==false && $listAt!==false
+ && $toolbarStart<$searchAt && $searchAt<$filterAt && $filterAt<$listAt,
+ 'product filter is beside the search and above its product list, not an extra stacked row');
+check61(!str_contains($editor,'data-mm-feed-product-filter multiple size='),
+ 'obsolete tall category selector removed');
 $schema=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.61.sql');
 check61(str_contains($schema,'CREATE TABLE IF NOT EXISTS') &&
  str_contains($schema,'#__minimarket_feeds') &&

@@ -17,6 +17,8 @@
  const count=root.querySelector('[data-mm-feed-count]');
  const search=root.querySelector('[data-mm-feed-search]');
  const categorySearch=root.querySelector('[data-mm-feed-category-search]');
+ const productFilterOptions=Array.from(root.querySelectorAll('[data-mm-feed-product-filter-option]'));
+ const productFilterCount=root.querySelector('[data-mm-feed-product-filter-count]');
  const productFilter=root.querySelector('[data-mm-feed-product-filter]');
  const selectedCategories=()=>new Set(categories.filter(c=>c.checked).map(c=>Number(c.value)));
  const updateCount=()=>{
@@ -24,7 +26,11 @@
  };
  const applyBrowseFilter=()=>{
    const text=(search?.value||'').trim().toLowerCase();
-   const filter=new Set(Array.from(productFilter?.selectedOptions||[]).map(x=>Number(x.value)));
+   const filter=new Set(productFilterOptions.filter(option=>option.checked).map(option=>Number(option.value)));
+   if(productFilterCount){
+     productFilterCount.textContent=String(filter.size);
+     productFilterCount.hidden=filter.size===0;
+   }
    for(const row of rows){
      const product=row.querySelector?.('[data-mm-feed-product]');
      const matchText=(row.dataset.search||'').includes(text);
@@ -71,10 +77,15 @@
    updateCount();
  });
  search?.addEventListener('input',applyBrowseFilter);
- productFilter?.addEventListener('change',applyBrowseFilter);
+ for(const option of productFilterOptions)option.addEventListener('change',applyBrowseFilter);
  root.querySelector('[data-mm-feed-product-filter-reset]')?.addEventListener('click',()=>{
-   for(const option of Array.from(productFilter?.options||[]))option.selected=false;
+   for(const option of productFilterOptions)option.checked=false;
    applyBrowseFilter();
+ });
+ // The compact filter is only a browsing control; never change checked
+ // feed categories or selected products when its menu opens or closes.
+ productFilter?.addEventListener('keydown',event=>{
+   if(event.key==='Escape'){productFilter.open=false;productFilter.querySelector('summary')?.focus();}
  });
  categorySearch?.addEventListener('input',applyCategorySearch);
  applyBrowseFilter();applyCategorySearch();updateCount();

@@ -115,20 +115,36 @@ $depth=static function(int $id) use($map):int {
                             <button type="button" class="btn btn-outline-secondary" data-mm-feed-none><?php echo Text::_('COM_MINIMARKET_FEED_SELECT_NONE'); ?></button>
                         </div>
                     </div>
-                    <input type="search" class="form-control form-control-sm my-2" data-mm-feed-search
-                        aria-label="<?php echo $e(Text::_('JSEARCH_FILTER')); ?>"
-                        placeholder="<?php echo $e(Text::_('COM_MINIMARKET_FEED_SEARCH')); ?>">
-                    <label class="form-label" for="mm-feed-product-filter"><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_PRODUCT_CATEGORIES'); ?></label>
-                    <select class="form-select form-select-sm mb-2" id="mm-feed-product-filter"
-                            data-mm-feed-product-filter multiple size="3"
-                            aria-describedby="mm-feed-filter-hint">
-                        <?php foreach ($this->categories as $cat): $cid=(int)$cat['id'];
-                           if(!isset($visible[$cid]))continue; ?>
-                        <option value="<?php echo $cid; ?>"><?php echo $e($cat['title']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <p id="mm-feed-filter-hint" class="form-text"><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_PRODUCT_CATEGORIES_HINT'); ?></p>
-                    <button type="button" class="btn btn-outline-secondary btn-sm mb-2" data-mm-feed-product-filter-reset><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_ALL_CATEGORIES'); ?></button>
+                    <div class="d-flex align-items-stretch gap-2 my-2" data-mm-feed-product-toolbar>
+                        <input type="search" class="form-control form-control-sm mm-feed-product-search" data-mm-feed-search
+                            aria-label="<?php echo $e(Text::_('JSEARCH_FILTER')); ?>"
+                            placeholder="<?php echo $e(Text::_('COM_MINIMARKET_FEED_SEARCH')); ?>">
+                        <details class="mm-feed-product-category-filter flex-shrink-0" data-mm-feed-product-filter>
+                            <summary class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 h-100">
+                                <span class="icon-filter" aria-hidden="true"></span>
+                                <span><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_PRODUCT_CATEGORIES'); ?></span>
+                                <span class="badge text-bg-secondary" data-mm-feed-product-filter-count hidden></span>
+                            </summary>
+                            <div class="dropdown-menu show p-3 shadow-sm mm-feed-product-category-filter-menu">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                    <strong class="small"><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_PRODUCT_CATEGORIES'); ?></strong>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        data-mm-feed-product-filter-reset><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_ALL_CATEGORIES'); ?></button>
+                                </div>
+                                <p class="form-text mt-0 mb-2"><?php echo Text::_('COM_MINIMARKET_FEED_FILTER_PRODUCT_CATEGORIES_HINT'); ?></p>
+                                <div class="mm-feed-product-category-options">
+                                    <?php foreach ($this->categories as $cat): $cid=(int)$cat['id'];
+                                        if(!isset($visible[$cid]))continue; ?>
+                                    <label class="form-check d-block">
+                                        <input type="checkbox" class="form-check-input"
+                                            data-mm-feed-product-filter-option value="<?php echo $cid; ?>">
+                                        <span class="form-check-label"><?php echo $e($cat['title']); ?></span>
+                                    </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
                     <div class="border rounded p-3 mm-feed-picker">
                         <?php foreach($this->products as $product):
                             $id=(int)$product['id'];
