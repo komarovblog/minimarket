@@ -12,7 +12,8 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
       method="post" name="adminForm" id="adminForm" class="mm-list-form">
     <div id="j-main-container" class="j-main-container">
         <?php echo LayoutHelper::render('joomla.searchtools.default',['view'=>$this]); ?>
-        <table class="table table-striped mm-admin-list" id="mm-collections-list">
+        <div class="table-responsive mm-native-list-viewport">
+<table class="table table-striped mm-admin-list" id="mm-collections-list">
             <thead><tr>
                 <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
                 <th class="w-1 text-center"><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
@@ -56,6 +57,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
                 <?php endif; ?>
             </tbody>
         </table>
+</div>
         <?php if (is_object($this->pagination) && method_exists($this->pagination,'getListFooter')) : ?>
             <?php echo $this->pagination->getListFooter(); ?>
         <?php endif; ?>
