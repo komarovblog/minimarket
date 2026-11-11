@@ -323,7 +323,7 @@ final class CatalogRepository
         $global=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
         return ProductAttributeCatalog::load(
             $this->db,$productId,$this->categoryTree()->ancestorIds($categoryId),
-            $context,(string)$global->get('attribute_display_location','product')
+            $context,'product'
         );
     }
 

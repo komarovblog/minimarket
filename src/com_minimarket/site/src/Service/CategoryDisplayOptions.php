@@ -35,10 +35,11 @@ final class CategoryDisplayOptions
         $result['product_gallery_limit']=in_array($limit,[3,5,8],true)?$limit:5;
         // Custom information properties default to the full product page.
         // Each system property has its own location, independent of custom attributes.
-        foreach (['attribute_display_location','option_display_location'] as $key) {
-            $location=(string)$global->get($key,'product');
-            $result[$key]=in_array($location,['product','category','both'],true)?$location:'product';
-        }
+        // Information attributes and SKU options have their own placement.
+        // Obsolete component-wide custom-property settings must not override
+        // individual display_location or its product-page default.
+        $result['attribute_display_location']='product';
+        $result['option_display_location']='product';
         $legacy=(string)$global->get('system_display_location','both');
         if(!in_array($legacy,['product','category','both'],true))$legacy='both';
         foreach(['price','sku','stock'] as $name){
