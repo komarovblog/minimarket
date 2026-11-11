@@ -41,30 +41,32 @@ $firstPayment=array_key_first($this->paymentMethods);
         </fieldset>
         <fieldset class="mb-4">
             <legend class="h5"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_ITEMS'); ?></legend>
-            <div id="mm-manual-order-lines">
-                <?php for ($i=0;$i<3;$i++) : ?>
-                    <div class="row g-2 mb-2 align-items-end" data-mm-manual-line>
-                        <div class="col-12 col-lg-9">
-                            <label class="form-label" for="mm-manual-product-<?php echo $i; ?>"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_PRODUCT'); ?></label>
-                            <select name="items[<?php echo $i; ?>][key]" id="mm-manual-product-<?php echo $i; ?>" class="form-select">
-                                <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
-                                <?php foreach ($this->productChoices as $item) : ?>
-                                    <option value="<?php echo $this->escape($item['key']); ?>"><?php echo $this->escape($item['label']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
+            <div id="mm-manual-order-lines" data-mm-manual-picker-url="<?php echo $this->escape('index.php?option=com_minimarket&task=productpicker.manualItems&'.\Joomla\CMS\Session\Session::getFormToken().'=1'); ?>">
+                <div class="row g-2 mb-2 align-items-start" data-mm-manual-line>
+                    <div class="col-12 col-lg-9">
+                        <label class="form-label" for="mm-manual-search-0"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_PRODUCT'); ?></label>
+                        <div class="input-group">
+                          <input id="mm-manual-search-0" type="search" class="form-control" data-mm-manual-search
+                                 maxlength="100" placeholder="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_SEARCH')); ?>">
+                          <button type="button" class="btn btn-primary" data-mm-manual-query><?php echo Text::_('JSEARCH_FILTER_SUBMIT'); ?></button>
                         </div>
-                        <div class="col-6 col-lg-2">
-                            <label class="form-label"><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></label>
-                            <input type="number" name="items[<?php echo $i; ?>][quantity]" class="form-control" min="1" max="99" value="1">
-                        </div>
-                        <div class="col-6 col-lg-1">
-                            <button type="button" class="btn btn-outline-danger w-100" data-mm-manual-remove aria-label="<?php echo $this->escape(Text::_('JREMOVE')); ?>">×</button>
-                        </div>
+                        <input type="hidden" name="items[0][key]" value="" data-mm-manual-key>
+                        <div class="small mt-2" data-mm-manual-selected></div>
+                        <div class="mm-manual-results mt-2" data-mm-manual-results></div>
                     </div>
-                <?php endfor; ?>
+                    <div class="col-6 col-lg-2">
+                        <label class="form-label" for="mm-manual-qty-0"><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></label>
+                        <input id="mm-manual-qty-0" type="number" name="items[0][quantity]" class="form-control"
+                               min="1" max="99" value="1">
+                    </div>
+                    <div class="col-6 col-lg-1">
+                        <button type="button" class="btn btn-danger w-100" data-mm-manual-remove
+                                aria-label="<?php echo $this->escape(Text::_('JREMOVE')); ?>">×</button>
+                    </div>
+                </div>
             </div>
-            <button type="button" class="btn btn-outline-primary btn-sm" id="mm-manual-add-line">
-                <?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_ADD_LINE'); ?></button>
+            <button type="button" class="btn btn-success btn-sm" id="mm-manual-add-line">
+                + <?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_ADD_LINE'); ?></button>
         </fieldset>
         <fieldset class="mb-4">
             <legend class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></legend>
