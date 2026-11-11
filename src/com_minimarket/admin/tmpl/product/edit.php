@@ -75,6 +75,9 @@ use Joomla\CMS\Component\ComponentHelper;
                     echo $this->form->renderField('option_stock_mode');
                     echo $this->form->renderField('stock');
                 }
+                // Delivery zone tariffs use these physical measurements.
+                echo $this->form->renderField('shipping_weight_grams');
+                echo $this->form->renderField('shipping_volume_cm3');
                 ?>
             <?php elseif ($section === 'badges') : ?>
                 <?php
