@@ -33,7 +33,7 @@ $filterId='mm-filters-'.$view;
    <button class="btn btn-primary mm-native-searchtools__toggle" type="button"
            data-mm-filter-toggle aria-controls="<?php echo $esc($filterId); ?>"
            aria-expanded="<?php echo $expanded?'true':'false'; ?>">
-    <?php echo Text::_('JSEARCH_FILTER_OPTIONS'); ?>
+    <?php echo Text::_('COM_MINIMARKET_SEARCH_FILTER_OPTIONS'); ?>
     <span class="icon-chevron-down" aria-hidden="true"></span>
    </button>
   <?php endif; ?>
