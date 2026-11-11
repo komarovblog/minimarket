@@ -205,8 +205,13 @@
                label="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH"
                description="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH_DESC">
             <option value="guest">COM_MINIMARKET_CHECKOUT_AUTH_GUEST</option>
-            <option value="sms">COM_MINIMARKET_CHECKOUT_AUTH_SMS</option>
-            <option value="email">COM_MINIMARKET_CHECKOUT_AUTH_EMAIL</option>
+                <option value="email">COM_MINIMARKET_CHECKOUT_AUTH_EMAIL</option>
+        </field>
+        <field name="checkout_verification_method" type="list" default="email" filter="cmd"
+               label="COM_MINIMARKET_CHECKOUT_CONFIRMATION_METHOD"
+               description="COM_MINIMARKET_CHECKOUT_CONFIRMATION_HELP"
+               showon="checkout_auth_mode:email">
+            <option value="email">COM_MINIMARKET_REGISTRATION_EMAIL_METHOD</option>
         </field>
         <field name="checkout_name_mode" type="list" default="required" filter="cmd"
                label="COM_MINIMARKET_CONFIG_FIELD_NAME" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
@@ -227,71 +232,6 @@
         <field name="checkout_methods_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_METHODS_CHECKOUT_NOTE"
                description="COM_MINIMARKET_METHODS_CHECKOUT_NOTE_DESC" />
-    </fieldset>
-    <fieldset name="delivery_methods" label="COM_MINIMARKET_DELIVERY_METHODS_TITLE">
-        <field name="checkout_delivery_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_DELIVERY" description="COM_MINIMARKET_CHECKOUT_DELIVERY_NOTE"/>
-
-        <field name="delivery_pickup_enabled" type="radio" default="1" filter="int"
-               label="COM_MINIMARKET_DELIVERY_PICKUP_ENABLED">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="delivery_pickup_address" type="textarea" rows="2" cols="60" default="" filter="string"
-               label="COM_MINIMARKET_DELIVERY_PICKUP_ADDRESS"
-               description="COM_MINIMARKET_DELIVERY_PICKUP_ADDRESS_DESC" showon="delivery_pickup_enabled:1" />
-        <field name="delivery_courier_enabled" type="radio" default="0" filter="int"
-               label="COM_MINIMARKET_DELIVERY_COURIER_ENABLED">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="delivery_rate_source" type="list" default="directory" filter="cmd"
-               label="COM_MINIMARKET_DELIVERY_RATE_SOURCE"
-               description="COM_MINIMARKET_DELIVERY_RATE_SOURCE_DESC" showon="delivery_courier_enabled:1">
-            <option value="directory">COM_MINIMARKET_DELIVERY_DIRECTORY</option>
-            <option value="zones">COM_MINIMARKET_DELIVERY_ZONES</option>
-        </field>
-        <field name="delivery_city_rates" type="textarea" rows="8" cols="70" default=""
-               label="COM_MINIMARKET_DELIVERY_CITY_RATES"
-               description="COM_MINIMARKET_DELIVERY_CITY_RATES_DESC"
-               showon="delivery_courier_enabled:1[AND]delivery_rate_source:directory" />
-
-    </fieldset>
-    <fieldset name="payment_methods" label="COM_MINIMARKET_PAYMENT_METHODS_TITLE">
-        <field name="checkout_payment_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_PAYMENT" description="COM_MINIMARKET_CHECKOUT_PAYMENT_NOTE"/>
-        <field name="payment_on_receipt_enabled" type="radio" default="1" filter="int"
-               label="COM_MINIMARKET_PAYMENT_ON_RECEIPT"
-               description="COM_MINIMARKET_PAYMENT_ON_RECEIPT_DESC">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="payment_bank_transfer_enabled" type="radio" default="0" filter="int"
-               label="COM_MINIMARKET_PAYMENT_BANK_TRANSFER"
-               description="COM_MINIMARKET_PAYMENT_BANK_TRANSFER_DESC">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="payment_bank_instructions" type="textarea" rows="5" cols="70"
-               label="COM_MINIMARKET_METHOD_BANK_INSTRUCTIONS"
-               description="COM_MINIMARKET_METHOD_BANK_HELP" default="" filter="string"
-               showon="payment_bank_transfer_enabled:1" />
-    </fieldset>
-
-    <fieldset name="registration" label="COM_MINIMARKET_CONFIG_REGISTRATION">
-        <field name="registration_note" type="note" class="alert alert-info" label="COM_MINIMARKET_REGISTRATION_FUTURE" description="COM_MINIMARKET_REGISTRATION_DESC" />
-        <field name="registration_phone" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_PHONE">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_email" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_EMAIL">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_yandex" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_YANDEX">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_sber" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_SBER">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_mts" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_MTS">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
-        <field name="registration_vk" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_VK">
-            <option value="1">JYES</option><option value="0">JNO</option>
-        </field>
     </fieldset>
     <fieldset name="reviews" label="COM_MINIMARKET_CONFIG_REVIEWS">
         <field name="reviews_help" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_REVIEWS" description="COM_MINIMARKET_REVIEWS_SECTION_HELP"/>

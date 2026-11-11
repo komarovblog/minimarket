@@ -34,16 +34,12 @@ $xml=simplexml_load_file($root.'minimarket.xml');
 $check($xml!==false && version_compare((string)$xml->version, '0.5.84', '>='), 'manifest version');
 $cfg=simplexml_load_file($root.'admin/config.xml');
 $check($cfg!==false && count($cfg->xpath('//fieldset[@name="checkout"]'))===1 &&
- count($cfg->xpath('//fieldset[@name="delivery_methods"]'))===1 &&
- count($cfg->xpath('//fieldset[@name="payment_methods"]'))===1 &&
- count($cfg->xpath('//fieldset[@name="delivery"]'))===0 &&
- count($cfg->xpath('//fieldset[@name="payment"]'))===0,
- 'checkout, delivery and payment use separate native tabs');
-foreach(['checkout'=>'checkout_buyer_note','delivery_methods'=>'checkout_delivery_note',
-         'payment_methods'=>'checkout_payment_note'] as $section=>$field){
- $check(count($cfg->xpath('//fieldset[@name="'.$section.'"]/field[@name="'.$field.'" and @type="note" and @class="alert alert-info"]'))===1,
-  'native informative subsection '.$field);
-}
+ count($cfg->xpath('//fieldset[@name="delivery_methods"]'))===0 &&
+ count($cfg->xpath('//fieldset[@name="payment_methods"]'))===0 &&
+ count($cfg->xpath('//fieldset[@name="registration"]'))===0,
+ 'no duplicated delivery, payment, or registration config tabs');
+$check(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="checkout_buyer_note" and @type="note"]'))===1,
+ 'checkout buyer subsection remains native');
 $manifest=(string)$xml->administration->submenu->asXML();
 foreach(['view=delivery','view=registrationmethods','view=promocodes'] as $target)
  $check(str_contains($manifest,$target),'sidebar '.$target);

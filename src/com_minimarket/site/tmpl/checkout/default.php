@@ -19,6 +19,14 @@ $firstPayment=array_key_first($this->paymentMethods);
         <p><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BACK'); ?></a></p>
     <?php elseif ($this->blockedMessage!=='') : ?>
         <div class="alert alert-warning" role="alert"><?php echo $this->escape($this->blockedMessage); ?></div>
+        <?php if ((int)\Joomla\CMS\Factory::getApplication()->getIdentity()->id<1): ?>
+          <p class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary" href="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_users&view=login',false)); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_JOOMLA_LOGIN'); ?></a>
+            <?php if((int)\Joomla\CMS\Component\ComponentHelper::getParams('com_users')->get('allowUserRegistration',0)===1): ?>
+              <a class="btn btn-outline-primary" href="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_users&view=registration',false)); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_JOOMLA_REGISTER'); ?></a>
+            <?php endif; ?>
+          </p>
+        <?php endif; ?>
         <p><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BACK'); ?></a></p>
     <?php else : ?>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_NOTICE'); ?></p>

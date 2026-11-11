@@ -25,35 +25,30 @@ $order=$xml->xpath('//administration/submenu/menu[@link="option=com_minimarket&v
 $ok(count($order)===1 && count($order[0]->xpath('./params/menu-quicktask'))===1,'Orders quicktask');
 $cfg=simplexml_load_file($root.'admin/config.xml');
 $ok($cfg!==false,'global options parse');
-foreach(['basic','display','checkout','registration','reviews'] as $section){
+foreach(['basic','display','checkout','reviews'] as $section){
     $ok(count($cfg->xpath('//fieldset[@name="'.$section.'"]'))===1,
-        'options tab '.$section);
+        'native options tab '.$section);
 }
-// Delivery/payment settings were moved into dedicated Joomla tabs.
-$ok(count($cfg->xpath('//fieldset[@name="delivery_methods"]/field[@name="delivery_city_rates"]'))===1
-    && count($cfg->xpath('//fieldset[@name="payment_methods"]/field[@name="payment_on_receipt_enabled"]'))===1,
-    'delivery/payment fields available in dedicated settings tabs');
-$ok(count($cfg->xpath('//fieldset[@name="inventory"]'))===0
-    && count($cfg->xpath('//fieldset[@name="filters"]'))===0,
-    'inventory moved to Basic and filters moved to Display');
-foreach(['inventory_enabled'] as $key){
-    $ok(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="'.$key.'"]'))===1,'inventory key');
+foreach(['delivery_methods','payment_methods','registration'] as $removed){
+    $ok(count($cfg->xpath('//fieldset[@name="'.$removed.'"]'))===0,
+        'dedicated methods list, not duplicate settings tab '.$removed);
 }
-foreach(['category_products_per_page','filter_price_mode','filter_sku_mode',
- 'attribute_display_location','option_display_location','system_display_location',
- 'category_show_add_to_cart','category_quick_view'] as $key) {
+foreach(['inventory_enabled','filter_price_mode','filter_sku_mode','filter_stock_enabled','system_display_location'] as $key){
+    $ok(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="'.$key.'"]'))===1,
+        'general option '.$key);
+}
+foreach(['category_products_per_page','category_show_add_to_cart','category_quick_view',
+    'category_show_sort','category_lazy_loading','category_allow_layout_switch',
+    'category_children_per_page','category_list_show_attributes','category_list_show_options'] as $key){
     $ok(count($cfg->xpath('//fieldset[@name="display"]/field[@name="'.$key.'"]'))===1,
         'display option '.$key);
 }
 $auth=$cfg->xpath('//field[@name="checkout_auth_mode"]/option');
 $values=array_map(static fn($x)=>(string)$x['value'],$auth);
 sort($values);
-$ok($values===['email','guest','sms'],'guest/SMS/email modes');
-foreach(['registration_phone','registration_email','registration_yandex',
-    'registration_sber','registration_mts','registration_vk'] as $field){
-    $ok(count($cfg->xpath('//fieldset[@name="registration"]/field[@name="'.$field.'"]'))===1,
-        'future auth '.$field);
-}
+$ok($values===['email','guest'],'only usable guest or Joomla email registration modes');
+$ok(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="checkout_verification_method"]'))===1,
+    'email verification selected under checkout');
 $dash=(string)file_get_contents($root.'admin/tmpl/dashboard/default.php');
 $ok(str_contains($dash,"'type' => 'settings'") &&
  str_contains($dash,"'view' => 'deliveries'"),'settings and deliveries tiles');
