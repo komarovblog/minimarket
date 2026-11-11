@@ -4,7 +4,7 @@ $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 $component=Join-Path $root 'src\com_minimarket'
 [xml]$manifest=Get-Content -LiteralPath (Join-Path $component 'minimarket.xml') -Raw -Encoding UTF8
-if([string]$manifest.extension.version -ne '0.5.88') {
+if([version]([string]$manifest.extension.version) -lt [version]'0.5.88') {
     throw 'MINIMARKET_088_VERSION_MISMATCH'
 }
 $source=@{
