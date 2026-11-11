@@ -11,7 +11,8 @@ final class SeoFilterData
     public static function normalize(array $input):array
     {
         foreach (['alias','title','heading','introtext','description',
-                  'meta_description','meta_robots','filter_query'] as $field) {
+                  'meta_description','meta_robots','filter_query',
+                  'image','image_alt','og_title','og_description','og_image'] as $field) {
             if (!is_scalar($input[$field]??'')) throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         }
         $category=(int)($input['category_id']??0);
@@ -31,6 +32,14 @@ final class SeoFilterData
         $intro=trim((string)$filter->clean((string)($input['introtext']??''),'HTML'));
         $description=trim((string)$filter->clean((string)($input['description']??''),'HTML'));
         if(mb_strlen($intro)>10000 || mb_strlen($description)>20000)
+            throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+        $image=MediaPath::normalize((string)($input['image']??''));
+        $ogImage=MediaPath::normalize((string)($input['og_image']??''));
+        $imageAlt=trim(strip_tags((string)($input['image_alt']??'')));
+        $ogTitle=trim(strip_tags((string)($input['og_title']??'')));
+        $ogDescription=trim(strip_tags((string)($input['og_description']??'')));
+        if($image===null||$ogImage===null||mb_strlen($imageAlt)>255
+            ||mb_strlen($ogTitle)>255||mb_strlen($ogDescription)>320)
             throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         $query=trim((string)($input['filter_query']??''));
         if(strlen($query)>4000)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
@@ -55,6 +64,8 @@ final class SeoFilterData
         if($flat<1||$flat>40)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         return ['category_id'=>$category,'alias'=>$alias,'title'=>$title,'heading'=>$heading,
             'introtext'=>$intro,'description'=>$description,'meta_description'=>$meta,
-            'meta_robots'=>$robots,'filters_json'=>json_encode($parsed['mmf'],JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE)];
+            'meta_robots'=>$robots,'image'=>$image,'image_alt'=>$imageAlt,
+            'og_title'=>$ogTitle,'og_description'=>$ogDescription,'og_image'=>$ogImage,
+            'filters_json'=>json_encode($parsed['mmf'],JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE)];
     }
 }
