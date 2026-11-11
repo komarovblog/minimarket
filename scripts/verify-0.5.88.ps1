@@ -14,6 +14,10 @@ $source=@{
  'manual_js'='media\js\manual-order.js'
  'columns_js'='media\js\admin-columns.js'
  'promo'='site\src\Service\PromotionService.php'
+ 'cart_view'='site\src\View\Cart\HtmlView.php'
+ 'cart_tmpl'='site\tmpl\cart\default.php'
+ 'cart_js'='media\js\cart.js'
+ 'storage'='site\src\Service\OrderStorage.php'
  'shipping'='site\src\Service\DeliveryZones.php'
  'checkout'='site\src\Controller\CheckoutController.php'
  'seo'='admin\tmpl\seofilter\create.php'
@@ -52,6 +56,16 @@ foreach($key in @('usage_limit','per_customer_limit','FOR UPDATE','discount_cent
         throw "MINIMARKET_088_PROMO_CHECK_MISSING: $key"
     }
 }
+foreach($part in @(
+  @('cart_view','promoPreview'),@('cart_tmpl','data-mm-cart-promo-preview'),
+  @('cart_tmpl','COM_MINIMARKET_PROMO_ESTIMATED_TOTAL'),
+  @('cart_js',"window.location.reload()"),
+  @('promo','checkoutKey'),@('storage','true,$checkoutKey')
+)) {
+  if(-not $text[$part[0]].Contains([string]$part[1])){
+    throw "MINIMARKET_088_CART_PROMO_MISSING: $($part[0]) $($part[1])"
+  }
+}
 foreach($key in @('per_kg','per_liter','free_from_cents','postcode_prefixes')) {
     if(-not $text['shipping'].Contains($key)){
         throw "MINIMARKET_088_SHIPPING_CHECK_MISSING: $key"
@@ -81,7 +95,7 @@ $php=Get-Command php -ErrorAction SilentlyContinue
 if($null -eq $php){
     Write-Output 'MINIMARKET_088_PHP_TEST_SKIPPED: php executable not on PATH'
 }else{
-    foreach($key in @('product','manual_order','manual_api','promo','shipping','checkout','seo')){
+    foreach($key in @('product','manual_order','manual_api','promo','shipping','checkout','seo','cart_view','cart_tmpl','storage')){
         $file=Join-Path $component $source[$key]
         $result=& $php.Source -l $file 2>&1
         if($LASTEXITCODE -ne 0){Write-Output $result;throw "MINIMARKET_088_PHP_LINT_FAIL: $file"}
