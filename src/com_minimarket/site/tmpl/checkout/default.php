@@ -24,7 +24,8 @@ $firstPayment=array_key_first($this->paymentMethods);
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_NOTICE'); ?></p>
         <form action="<?php echo $this->escape(RouteHelper::checkoutAction()); ?>" method="post"
               class="mm-checkout-form row g-4" autocomplete="on"
-              data-items-cents="<?php echo (int)$this->cart['total_cents']; ?>">
+              data-items-cents="<?php echo (int)$this->cart['total_cents']; ?>"
+              data-promo-preview-url="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.preview',false)); ?>">
             <div class="col-12 col-lg-8">
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-buyer">
                     <h2 id="mm-checkout-buyer" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BUYER'); ?></h2>
