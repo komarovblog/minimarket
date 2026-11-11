@@ -12,6 +12,8 @@ use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\FeedConfig;
 use MiniMarket\Component\Minimarket\Administrator\Service\FeedSelection;
 use MiniMarket\Component\Minimarket\Administrator\Service\FeedYml;
+use MiniMarket\Component\Minimarket\Administrator\Service\SitemapFeed;
+use Joomla\CMS\Router\Route;
 use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 
@@ -34,6 +36,39 @@ final class FeedController extends BaseController
         $ids=FeedSelection::productIds($categories,$productRows,$settings);
         if(count($ids)>5000)throw new \RuntimeException('Feed exceeds 5000 items',413);
         $repo=new CatalogRepository($db);
+        if ((string)$feed['provider']==='sitemap') {
+            $urls=[];
+            foreach($ids as $pid) {
+                // Product publication and visible category ancestry are already
+                // checked by FeedSelection; never index an excluded product.
+                $loc=SitemapFeed::absolute(RouteHelper::product($pid),Uri::root());
+                if($loc!==null)$urls[]=['loc'=>$loc];
+            }
+            foreach(SitemapFeed::publicArticles($db) as $row) {
+                $articleId=(int)($row['id']??0);
+                $categoryId=(int)($row['catid']??0);
+                if($articleId<1 || $categoryId<1)continue;
+                $route=Route::_('index.php?option=com_content&view=article&id='
+                    .$articleId.'&catid='.$categoryId,false);
+                $loc=SitemapFeed::absolute($route,Uri::root());
+                if($loc===null)continue;
+                $urls[]=['loc'=>$loc,'lastmod'=>
+                    SitemapFeed::lastModified((string)($row['modified']??''),
+                        (string)($row['created']??''))];
+            }
+            if(count($urls)>SitemapFeed::MAX_URLS)
+                throw new \RuntimeException('Sitemap exceeds 5000 URLs',413);
+            $xml=SitemapFeed::render($urls);
+            $app->setHeader('Content-Type','application/xml; charset=UTF-8',true);
+            $app->setHeader('X-Content-Type-Options','nosniff',true);
+            $app->setHeader('Cache-Control','no-store,max-age=0',true);
+            $app->setHeader('Referrer-Policy','no-referrer',true);
+            $app->sendHeaders();
+            echo $xml;
+            $app->close();
+            return;
+        }
+
         $productById=[];
         foreach($productRows as $row)$productById[(int)$row['id']]=$row;
         $base=Uri::root();

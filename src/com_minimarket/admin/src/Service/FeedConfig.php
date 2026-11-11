@@ -13,6 +13,7 @@ final class FeedConfig
         'yandex_market' => 'COM_MINIMARKET_FEED_YANDEX_MARKET',
         'yandex_business' => 'COM_MINIMARKET_FEED_YANDEX_BUSINESS',
         'vk_yml' => 'COM_MINIMARKET_FEED_VK',
+        'sitemap' => 'COM_MINIMARKET_FEED_SITEMAP',
     ];
 
     private static function table(DatabaseInterface $db): string

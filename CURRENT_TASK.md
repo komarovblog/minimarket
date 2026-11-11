@@ -1,3 +1,10 @@
+# MiniMarket 0.5.92 — XML Sitemap для выбранных товаров и публичных материалов Joomla
+
+**Компонент:** 0.5.92. Новый поставщик фида `sitemap`: товары MiniMarket через существующий выбор + опубликованные публичные статьи Joomla; без модулей/плагинов, без новой таблицы и без изменения старого YML. Новый `SitemapFeed`, публичный route `feed.xml`, тест `test-sitemap-feed.php`. Ожидаются PASS GitHub CI и локальная браузерная приемка. Другие несделанные пожелания подробно в `docs/RELEASE_0_5_91.md`.
+
+**Версия и выпуск:** компонент + standalone toolbar 0.5.92, обновлённый опциональный cumulative demo SQL; на рабочей Joomla импорт SQL для UI не нужен. Backup БД перед обновлением, Blank не менять.
+
+---
 # MiniMarket 0.5.91 — автоматические проверки PASS, локальная приёмка ожидается
 
 **GitHub Actions:** https://github.com/komarovblog/minimarket/actions/runs/43080877881 . **Все 6 jobs PASS**: Windows component ZIP/inspect, PHP 8.4, PHP 8.5, MySQL category editor upgrade, MySQL 8.4 canonical fresh schema, full demo import. Проверка соответствует исходному коммиту `3b624d0f8594092f58f6beefeb47cc67de4f0463`. Этот документальный коммит не меняет код.

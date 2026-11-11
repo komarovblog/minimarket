@@ -358,6 +358,9 @@ jobs:
           node --check src/com_minimarket/media/js/cart.js
           node scripts/test-0-5-75-cart-js.js
 
+      - name: Sitemap feed XML and public Joomla article regression
+        run: php scripts/test-sitemap-feed.php
+
       - name: Router regression tests
         run: php scripts/test-router.php
 
