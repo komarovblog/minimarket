@@ -8,14 +8,20 @@ $mmSearch=[
  'view'=>'promocodes','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
  'searchLabel'=>Text::_('COM_MINIMARKET_PROMOCODES_CODE'),
  'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
- 'filters'=>[['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_PROMOCODES_STATUS'),
+ 'filters'=>[
+ ['name'=>'filter_discount','label'=>Text::_('COM_MINIMARKET_PROMO_DISCOUNT_TYPE'),
+  'value'=>$this->discountFilter,
+  'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+   'fixed'=>Text::_('COM_MINIMARKET_PROMO_FIXED'),
+   'percent'=>Text::_('COM_MINIMARKET_PROMO_PERCENT')]],
+ ['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_PROMOCODES_STATUS'),
   'value'=>$this->statusFilter,'default'=>'all',
   'options'=>['all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),
    'published'=>Text::_('COM_MINIMARKET_PROMOCODES_ACTIVE'),
    'unpublished'=>Text::_('COM_MINIMARKET_PROMOCODES_INACTIVE')]]]
 ];
 $href='index.php?option=com_minimarket&view=promocodes&'.http_build_query([
- 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,
+ 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,'filter_discount'=>$this->discountFilter,
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
