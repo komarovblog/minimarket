@@ -27,8 +27,9 @@ final class SeoFilterData
            || !in_array($robots,['index,follow','noindex,follow','noindex,nofollow'],true)) {
             throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         }
-        $intro=trim(strip_tags((string)($input['introtext']??'')));
-        $description=trim(strip_tags((string)($input['description']??'')));
+        $filter=\Joomla\CMS\Filter\InputFilter::getInstance();
+        $intro=trim((string)$filter->clean((string)($input['introtext']??''),'HTML'));
+        $description=trim((string)$filter->clean((string)($input['description']??''),'HTML'));
         if(mb_strlen($intro)>10000 || mb_strlen($description)>20000)
             throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         $query=trim((string)($input['filter_query']??''));
