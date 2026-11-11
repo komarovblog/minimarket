@@ -109,6 +109,8 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `badge_popular_since` DATETIME NULL DEFAULT NULL,
     `stock` INT UNSIGNED NOT NULL DEFAULT 0,
     `option_stock_mode` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    `shipping_weight_grams` INT UNSIGNED NOT NULL DEFAULT 0,
+    `shipping_volume_cm3` INT UNSIGNED NOT NULL DEFAULT 0,
     `introtext` TEXT NULL,
     `description` TEXT NULL,
     `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -611,12 +613,16 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     delivery_city VARCHAR(120) NOT NULL DEFAULT '',
     delivery_address VARCHAR(512) NOT NULL DEFAULT '',
     delivery_rate_source VARCHAR(16) NOT NULL DEFAULT 'none',
+    delivery_zone_id INT UNSIGNED NULL,
     delivery_fee_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     payment_method VARCHAR(24) NOT NULL DEFAULT 'on_receipt',
     order_source VARCHAR(16) NOT NULL DEFAULT 'site',
     status VARCHAR(20) NOT NULL DEFAULT 'new',
     currency CHAR(3) NOT NULL DEFAULT 'RUB',
     items_total_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    promo_code_id INT UNSIGNED NULL,
+    promo_code VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
+    discount_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     total_cents BIGINT UNSIGNED NOT NULL,
     item_count INT UNSIGNED NOT NULL,
     deleted_at DATETIME NULL DEFAULT NULL,
@@ -625,6 +631,31 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     UNIQUE KEY idx_mm_order_checkout_key (checkout_key),
     KEY idx_mm_order_status_created (status, created_at),
     KEY idx_mm_order_user_created (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Native courier delivery zones; plugins remain independent of these tariffs.
+CREATE TABLE IF NOT EXISTS #__minimarket_delivery_zones (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title VARCHAR(160) NOT NULL,
+  country_code CHAR(2) NOT NULL DEFAULT 'RU',
+  region VARCHAR(120) NOT NULL DEFAULT '',
+  cities TEXT NOT NULL,
+  postcode_prefixes TEXT NOT NULL,
+  rate_mode VARCHAR(16) NOT NULL DEFAULT 'fixed',
+  base_fee_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  rate_per_unit_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  free_from_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  min_cart_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  max_weight_grams BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  max_volume_cm3 BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  estimated_days_min SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  estimated_days_max SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  priority SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  state TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NULL,
+  PRIMARY KEY (id),
+  KEY idx_mm_zone_active_priority (state,priority,id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Shipment fulfillment is independent of order payment and catalog records.
@@ -726,7 +757,12 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_seo_filters` (
     `heading` VARCHAR(255) NOT NULL,
     `introtext` TEXT NULL,
     `description` MEDIUMTEXT NULL,
+    `image` VARCHAR(1024) NOT NULL DEFAULT '',
+    `image_alt` VARCHAR(255) NOT NULL DEFAULT '',
     `meta_description` VARCHAR(320) NOT NULL DEFAULT '',
+    `og_title` VARCHAR(255) NOT NULL DEFAULT '',
+    `og_description` VARCHAR(320) NOT NULL DEFAULT '',
+    `og_image` VARCHAR(1024) NOT NULL DEFAULT '',
     `meta_robots` VARCHAR(32) NOT NULL DEFAULT 'index,follow',
     `filters_json` TEXT NOT NULL,
     `state` TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -762,4 +798,21 @@ CREATE TABLE IF NOT EXISTS #__minimarket_promo_codes (
     PRIMARY KEY(id),
     UNIQUE KEY idx_mm_promo_code(code),
     KEY idx_mm_promo_state(state)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Immutable, one-per-order promo redemption: all updates share the order transaction.
+CREATE TABLE IF NOT EXISTS #__minimarket_promo_redemptions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  promo_code_id INT UNSIGNED NOT NULL,
+  order_id INT UNSIGNED NOT NULL,
+  customer_key CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  discount_cents BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_mm_redemption_order (order_id),
+  KEY idx_mm_redemption_customer (promo_code_id,customer_key),
+  CONSTRAINT fk_mm_promo_redemption_order FOREIGN KEY (order_id)
+    REFERENCES #__minimarket_orders(id) ON DELETE RESTRICT,
+  CONSTRAINT fk_mm_promo_redemption_code FOREIGN KEY (promo_code_id)
+    REFERENCES #__minimarket_promo_codes(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
