@@ -13,7 +13,7 @@ final class HtmlView extends BaseHtmlView
 {
     public array $plugins=[];
     public bool $canManagePlugins=false;
-    public string $search='', $statusFilter='all', $sort='newest';
+    public string $search='', $statusFilter='all', $typeFilter='', $sort='newest';
     public int $total=0, $offset=0, $pageSize=20;
 
     public function display($tpl=null)
@@ -25,6 +25,8 @@ final class HtmlView extends BaseHtmlView
         $this->search=mb_substr(trim($app->input->getString('filter_search','')),0,100);
         $requested=$app->input->getCmd('filter_status','all');
         $this->statusFilter=in_array($requested,['all','enabled','disabled'],true)?$requested:'all';
+        $kind=$app->input->getCmd('filter_type','');
+        $this->typeFilter=in_array($kind,['delivery','payment','sms','email','auth','bot','crm','feed','analytics','other'],true)?$kind:'';
         $this->sort=$app->input->getCmd('filter_sort','newest')==='oldest'?'oldest':'newest';
         $limit=$app->input->getInt('limit',20);
         $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
@@ -32,6 +34,14 @@ final class HtmlView extends BaseHtmlView
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $where=['type='.$db->quote('plugin'),'folder='.$db->quote('minimarket')];
         if($this->statusFilter!=='all')$where[]='enabled='.($this->statusFilter==='enabled'?1:0);
+        $prefix="SUBSTRING_INDEX(element, '_', 1)";
+        if($this->typeFilter==='delivery'){
+            $where[]=$prefix." IN ('delivery','shipping')";
+        }elseif($this->typeFilter==='other'){
+            $where[]=$prefix." NOT IN ('delivery','shipping','payment','sms','email','auth','bot','crm','feed','analytics')";
+        }elseif($this->typeFilter!==''){
+            $where[]=$prefix.'='.$db->quote($this->typeFilter);
+        }
         if($this->search!==''){
             $like=$db->quote('%'.$db->escape($this->search,true).'%',false);
             $where[]='(name LIKE '.$like.' OR element LIKE '.$like.')';
