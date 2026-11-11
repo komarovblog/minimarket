@@ -3,10 +3,24 @@
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 $mmSearch=['view'=>'deliveryzones','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
- 'searchLabel'=>Text::_('COM_MINIMARKET_ZONES_TITLE'),'filters'=>[],
+ 'searchLabel'=>Text::_('COM_MINIMARKET_ZONES_TITLE'),
+ 'filters'=>[
+ ['name'=>'filter_rate','label'=>Text::_('COM_MINIMARKET_ZONE_RATE_MODE'),
+  'value'=>$this->rateFilter,'options'=>[
+   ''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+   'fixed'=>Text::_('COM_MINIMARKET_ZONE_RATE_FIXED'),
+   'per_kg'=>Text::_('COM_MINIMARKET_ZONE_RATE_PER_KG'),
+   'per_liter'=>Text::_('COM_MINIMARKET_ZONE_RATE_PER_LITER')]],
+ ['name'=>'filter_status','label'=>Text::_('JSTATUS'),
+  'value'=>$this->statusFilter,'options'=>[
+   'all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+   'published'=>Text::_('JPUBLISHED'),
+   'unpublished'=>Text::_('JUNPUBLISHED')]]
+ ],
  'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')]];
 $href='index.php?option=com_minimarket&view=deliveryzones&'.http_build_query([
- 'filter_search'=>$this->search,'filter_sort'=>$this->sort,'limit'=>$this->pageSize
+ 'filter_search'=>$this->search,'filter_sort'=>$this->sort,'limit'=>$this->pageSize,
+ 'filter_rate'=>$this->rateFilter,'filter_status'=>$this->statusFilter
 ],'','&',PHP_QUERY_RFC3986);
 ?>
 <div class="mm-unified-list"><div id="j-main-container" class="j-main-container">
