@@ -20,6 +20,33 @@ final class CartController extends BaseController
     public function update(): void { $this->change('update'); }
     public function remove(): void { $this->change('remove'); }
 
+    /** Remember a code from cart; actual eligibility is repriced on checkout. */
+    public function promo(): void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        $code=strtoupper(trim($app->input->post->getString('promo_code','')));
+        $session=$app->getSession();
+        if($code==='') {
+            $session->set('com_minimarket.promo_code','');
+        }elseif(preg_match('/^[A-Z0-9-]{3,64}$/D',$code)){
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $db->setQuery($db->getQuery(true)->select('id')
+                ->from($db->quoteName('#__minimarket_promo_codes'))
+                ->where('code='.$db->quote($code))->where('state=1'));
+            if((int)$db->loadResult()<1){
+                $app->enqueueMessage(Text::_('COM_MINIMARKET_PROMO_INVALID'),'warning');
+                $this->setRedirect(RouteHelper::cart());return;
+            }
+            $session->set('com_minimarket.promo_code',$code);
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_PROMO_SAVED'));
+        }else{
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_PROMO_INVALID'),'warning');
+        }
+        $this->setRedirect(RouteHelper::cart());
+    }
+
     private function change(string $mode): void
     {
         $app = Factory::getApplication();
