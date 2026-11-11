@@ -10,6 +10,12 @@ on:
 permissions:
   contents: read
 
+# Only the newest push to development needs the full PHP/MySQL suite.
+# Cancel queued or running obsolete revisions to avoid wasting Actions time.
+concurrency:
+  group: minimarket-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   mysql-category:
     name: MySQL 8 category editor upgrade
