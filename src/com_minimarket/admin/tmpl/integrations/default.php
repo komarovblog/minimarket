@@ -2,6 +2,7 @@
 \defined('_JEXEC') or die;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\HTML\HTMLHelper;
 
 $pluginType=static function(string $element):string {
     $prefix=strtolower(explode('_',$element,2)[0]);
@@ -31,10 +32,12 @@ $href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
-<div class="mm-unified-list">
+<div class="mm-native-entity-list">
  <div id="j-main-container" class="j-main-container">
-  <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
-  <div class="table-responsive">
+  <form method="post" id="adminForm" name="adminForm" class="mm-list-form"
+       action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=integrations',false)); ?>">
+    <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+  <div class="table-responsive mm-native-list-viewport">
    <table id="mm-integrations-list" class="table table-striped mm-admin-list">
     <thead><tr>
      <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_PROVIDER'); ?></th>
@@ -64,12 +67,11 @@ $href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
     </tbody>
    </table>
   </div>
-  <?php if($this->total>$this->pageSize): ?>
-   <nav class="mm-native-pagination">
-    <?php if($this->offset>0): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.max(0,$this->offset-$this->pageSize),false)); ?>"><?php echo Text::_('JPREV'); ?></a><?php endif; ?>
-    <span><?php echo $this->offset+1; ?>–<?php echo min($this->total,$this->offset+$this->pageSize); ?> / <?php echo $this->total; ?></span>
-    <?php if($this->offset+$this->pageSize<$this->total): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.($this->offset+$this->pageSize),false)); ?>"><?php echo Text::_('JNEXT'); ?></a><?php endif; ?>
-   </nav>
-  <?php endif; ?>
+  <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
+  <input type="hidden" name="limitstart" value="<?php echo (int)$this->offset; ?>">
+  <input type="hidden" name="boxchecked" value="0">
+  <input type="hidden" name="task" value="">
+  <?php echo HTMLHelper::_('form.token'); ?>
+ </form>
  </div>
 </div>
