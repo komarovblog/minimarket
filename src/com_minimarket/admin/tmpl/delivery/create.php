@@ -61,7 +61,7 @@ use Joomla\CMS\Router\Route;
   const to = document.getElementById('mm-delivery-date-to');
   if (!select || !search || !from || !to) return;
   const options = [...select.options].slice(1).map(option => ({
-    option, name: option.textContent.toLocaleLowerCase(), date: (option.textContent.match(/\\d{4}-\\d{2}-\\d{2}/) || [''])[0]
+    option, name: option.textContent.toLocaleLowerCase(), date: (option.textContent.match(/\d{4}-\d{2}-\d{2}/) || [''])[0]
   }));
   const update = () => {
     const term = search.value.trim().toLocaleLowerCase();
