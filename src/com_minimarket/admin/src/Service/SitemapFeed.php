@@ -27,7 +27,7 @@ final class SitemapFeed
             .' AND NOT EXISTS (SELECT 1 FROM '.$categories.' AS ancestor'
             .' WHERE ancestor.lft<=c.lft AND ancestor.rgt>=c.rgt'
             .' AND ancestor.extension='.$db->quote('com_content')
-            .' AND (ancestor.published<>1 OR ancestor.access<>1))
+            .' AND (ancestor.published<>1 OR ancestor.access<>1))'
             .' AND (a.publish_up IS NULL OR a.publish_up='
             .$db->quote('0000-00-00 00:00:00').' OR a.publish_up<=UTC_TIMESTAMP())'
             .' AND (a.publish_down IS NULL OR a.publish_down='
