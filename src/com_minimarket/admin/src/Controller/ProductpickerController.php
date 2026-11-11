@@ -263,4 +263,38 @@ final class ProductpickerController extends BaseController
         $this->respond(['items'=>$items]);
     }
 
+    /** Product or SKU variant lookup for operator-entered order lines. */
+    public function manualItems(): void
+    {
+        $this->ensureAllowed();
+        $term=mb_substr(trim((string)Factory::getApplication()->input->getString('q','')),0,100);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $query=$db->getQuery(true)->select([
+                'p.id AS product_id','p.title','p.sku','p.product_type',
+                'v.id AS variant_id','v.sku AS variant_sku'
+            ])
+            ->from($db->quoteName('#__minimarket_products','p'))
+            ->join('INNER',$db->quoteName('#__minimarket_categories','c').' ON c.id=p.category_id')
+            ->join('LEFT',$db->quoteName('#__minimarket_product_variants','v')
+                .' ON v.product_id=p.id AND v.state=1')
+            ->where('p.state=1')->where('c.state=1')
+            ->where("p.delivery_type='physical'")
+            ->order('p.title ASC,p.id ASC,v.id ASC');
+        if($term!==''){
+            $like=$db->quote('%'.$db->escape($term,true).'%',false);
+            $query->where('(p.title LIKE '.$like.' OR p.sku LIKE '.$like
+                .' OR v.sku LIKE '.$like.(ctype_digit($term)?' OR p.id='.(int)$term:'').')');
+        }
+        $db->setQuery($query,0,25);
+        $result=[];
+        foreach((array)$db->loadAssocList() as $row){
+            $pid=(int)$row['product_id'];$vid=(int)($row['variant_id']??0);
+            $sku=$vid>0?(string)$row['variant_sku']:(string)$row['sku'];
+            $result[]=['id'=>$pid,'key'=>$pid.':'.$vid,
+                'title'=>(string)$row['title'],
+                'subtitle'=>$sku.($vid>0?' · SKU #'.$vid:'')];
+        }
+        $this->respond(['items'=>$result]);
+    }
+
 }
