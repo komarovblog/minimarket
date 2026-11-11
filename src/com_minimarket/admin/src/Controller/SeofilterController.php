@@ -7,9 +7,30 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Session\Session;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\SeoFilterData;
+use MiniMarket\Component\Minimarket\Administrator\Service\SeoCategoryChoices;
 final class SeofilterController extends BaseController
 {
     public function create():void { $this->save(); }
+
+    /** Only published category-bound choices. No store-wide dictionary leak. */
+    public function choices():void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='GET'||!Session::checkToken('get'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        $user=$app->getIdentity();
+        if(!$user->authorise('core.edit','com_minimarket')
+            && !$user->authorise('core.create','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $category=$app->input->getInt('category_id',0);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $groups=SeoCategoryChoices::groups($db,$category);
+        $app->setHeader('Content-Type','application/json; charset=UTF-8',true);
+        $app->setHeader('Cache-Control','no-store',true);
+        $app->sendHeaders();
+        echo json_encode(['groups'=>$groups],JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
+        $app->close();
+    }
 
     public function save():void
     {
@@ -26,6 +47,7 @@ final class SeofilterController extends BaseController
             $data=SeoFilterData::normalize([
                 'category_id'=>$post->getInt('category_id',0),
                 'alias'=>$post->get('alias','','string'),
+                'name'=>$post->get('name','','string'),
                 'title'=>$post->get('title','','string'),
                 'heading'=>$post->get('heading','','string'),
                 'introtext'=>$post->get('introtext','','raw'),
@@ -53,6 +75,7 @@ final class SeofilterController extends BaseController
             $db->setQuery($q);
             if((int)$db->loadResult()!==(int)$data['category_id'])
                 throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            SeoCategoryChoices::validate($db,(int)$data['category_id'],(string)$data['filters_json']);
             if($id>0){
                 $db->setQuery($db->getQuery(true)->select('id')
                     ->from($db->quoteName('#__minimarket_seo_filters'))->where('id='.(int)$id));
