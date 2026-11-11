@@ -48,6 +48,17 @@ final class DisplayController extends BaseController
             throw new \RuntimeException('Unknown MiniMarket view', 404);
         }
 
+        // Normalize Joomla's native filter[...]/list[...] POST fields before
+        // legacy no-ListModel views read the request. This is intentionally
+        // limited to entity lists and never alters edit/save actions.
+        if (in_array($viewName, [
+            'orders', 'deliveries', 'reviews', 'promocodes', 'seofilters',
+            'feeds', 'integrations', 'deliveryzones',
+            'deliverymethods', 'paymentmethods'
+        ], true)) {
+            \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::importRequest();
+        }
+
         // Keep the proven M0 dashboard without introducing a dummy Model.
         if (in_array($viewName, ['dashboard','import','feeds','feed','orders','order','deliveries','delivery','deliveryzones','deliveryzone','deliverymethods','paymentmethods','integrations','reviews','review','seofilters','seofilter','promocodes','promocode'],true)) {
             if(in_array($viewName,['feeds','feed'],true)) {
