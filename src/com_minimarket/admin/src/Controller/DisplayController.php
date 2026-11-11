@@ -20,20 +20,8 @@ final class DisplayController extends BaseController
                 'media/com_minimarket/css/admin-ui.css'
             )
             ->registerAndUseScript(
-                'com_minimarket.admin-columns',
-                'media/com_minimarket/js/admin-columns.js',
-                [],
-                ['defer'=>true]
-            )
-            ->registerAndUseScript(
                 'com_minimarket.admin-reference-picker',
                 'media/com_minimarket/js/admin-reference-picker.js',
-                [],
-                ['defer'=>true]
-            )
-            ->registerAndUseScript(
-                'com_minimarket.admin-list-tools',
-                'media/com_minimarket/js/admin-list-tools.js',
                 [],
                 ['defer'=>true]
             )
@@ -43,6 +31,19 @@ final class DisplayController extends BaseController
                 [],
                 ['defer'=>true]
             );
+
+        // Joomla's own table-columns menu is the sole column selector.
+        // No MiniMarket DOM enhancer, duplicate style or localStorage logic.
+        if (in_array($viewName, [
+            'attributes', 'brands', 'bundlegroups', 'bundles', 'categories',
+            'collections', 'groups', 'orderoptions', 'products', 'values',
+            'orders', 'deliveries', 'deliveryzones', 'reviews', 'promocodes',
+            'seofilters', 'feeds', 'integrations', 'deliverymethods', 'paymentmethods'
+        ], true)) {
+            \Joomla\CMS\Factory::getApplication()->getDocument()
+                ->getWebAssetManager()->useScript('table.columns')
+                ->useScript('multiselect');
+        }
 
         if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order', 'deliveries', 'delivery', 'deliveryzones', 'deliveryzone', 'deliverymethods', 'paymentmethods', 'integrations', 'reviews', 'review', 'seofilters', 'seofilter', 'promocodes','promocode'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);
