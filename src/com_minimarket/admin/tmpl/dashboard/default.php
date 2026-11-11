@@ -20,6 +20,8 @@ $sections = [
                 'icon' => 'icon-cart', 'count' => 'orders'],
             ['view' => 'deliveries', 'label' => 'COM_MINIMARKET_DASHBOARD_DELIVERIES',
                 'icon' => 'icon-truck', 'count' => 'deliveries'],
+            ['view' => 'deliveryzones', 'label' => 'COM_MINIMARKET_ZONES_TITLE',
+                'icon' => 'icon-map-marker', 'count' => 'deliveryzones'],
             ['view' => 'reviews', 'label' => 'COM_MINIMARKET_REVIEWS_TITLE',
                 'icon' => 'icon-star', 'count' => 'reviews'],
         ],
