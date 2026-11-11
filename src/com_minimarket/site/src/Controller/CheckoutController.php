@@ -19,6 +19,43 @@ use MiniMarket\Component\Minimarket\Site\Service\OrderStorage;
 /** Customer POST only: validate nonce, CSRF, inventory and fresh server prices. */
 final class CheckoutController extends BaseController
 {
+    /** Non-mutating preview; checkout.submit always recalculates under lock. */
+    public function preview(): void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        $app->setHeader('Cache-Control','private, no-store',true);
+        $app->setHeader('Content-Type','application/json; charset=utf-8',true);
+        $result=['success'=>false,'discount_cents'=>0,'message'=>''];
+        try{
+            $params=ComponentHelper::getParams('com_minimarket');
+            $session=$app->getSession();
+            $cart=CartState::normalize($session->get(CartState::SESSION_KEY,[]));
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $quote=(new CartCatalog($db))->details($cart,(int)$params->get('inventory_enabled',1)===1);
+            if(!$quote['available']||!$quote['lines'])
+                throw new \DomainException('COM_MINIMARKET_CHECKOUT_CART_INVALID');
+            $code=trim($app->input->post->getString('promo_code',''));
+            $contact=[
+                'phone'=>$app->input->post->getString('phone',''),
+                'email'=>$app->input->post->getString('email','')
+            ];
+            $promo=\MiniMarket\Component\Minimarket\Site\Service\PromotionService::quote(
+                $db,$code,$quote['lines'],(int)$quote['total_cents'],
+                (int)$app->getIdentity()->id,$contact,false
+            );
+            $result=['success'=>true,'discount_cents'=>(int)($promo['discount_cents']??0),
+                'message'=>Text::_('COM_MINIMARKET_PROMO_PREVIEW')];
+        }catch(\DomainException $error){
+            $result['message']=Text::_($error->getMessage());
+        }catch(\Throwable $error){
+            $result['message']=Text::_('COM_MINIMARKET_PROMO_INVALID');
+        }
+        echo json_encode($result,JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);
+        $app->close();
+    }
+
     public function submit(): void
     {
         $app=Factory::getApplication();
