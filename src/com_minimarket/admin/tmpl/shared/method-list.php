@@ -53,11 +53,12 @@ $viewName = (string) $mmSearch['view'];
      </td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$this->methodRows): ?>
-     <tr><td colspan="4"><?php echo Text::_('COM_MINIMARKET_REF_EMPTY'); ?></td></tr>
-    <?php endif; ?>
+
    </tbody>
   </table>
+<?php if (!$this->methodRows): ?>
+ <div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_REF_EMPTY'); ?></div>
+<?php endif; ?>
  </div>
  <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination(
      $this->total, $this->offset, $this->pageSize
