@@ -4,9 +4,13 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 ?>
+<div class="d-flex gap-2 flex-wrap mb-3">
+ <button type="submit" form="mm-review-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
+ <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=reviews',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+</div>
 <section class="mm-admin-panel card card-body">
  <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_REVIEW_NEW'); ?></h2>
- <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=review.create',false)); ?>" class="row g-3">
+ <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=review.create',false)); ?>" id="mm-review-form" class="row g-3">
   <div class="col-12">
    <label class="form-label" for="mm-review-product"><?php echo Text::_('COM_MINIMARKET_REVIEW_PRODUCT'); ?> *</label>
    <select class="form-select" name="product_id" id="mm-review-product" required>
