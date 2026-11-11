@@ -32,6 +32,9 @@ final class MethodsettingsController extends BaseController
             $changes=MethodSettings::normalize($scope,$method,[
                 'enabled'=>$post->getString('enabled','0'),
                 'address'=>$post->getString('address',''),
+                'fee'=>$post->getString('fee','0'),
+                'schedule'=>$post->get('schedule','','raw'),
+                'map_url'=>$post->getString('map_url',''),
                 'rate_source'=>$post->getCmd('rate_source','directory'),
                 'city_rates'=>$post->get('city_rates','','raw'),
                 'instructions'=>$post->get('instructions','','raw')

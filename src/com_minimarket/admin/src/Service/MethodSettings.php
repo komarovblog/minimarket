@@ -18,8 +18,19 @@ final class MethodSettings
         }
         if($scope==='delivery' && $method==='pickup'){
             $address=self::cleanText((string)($input['address']??''),512);
+            $price=self::amountCents((string)($input['fee']??'0'));
+            $schedule=self::cleanText((string)($input['schedule']??''),2000);
+            $map=trim((string)($input['map_url']??''));
+            if($map!=='' && (strlen($map)>1024 || !filter_var($map,FILTER_VALIDATE_URL)
+                || strtolower((string)parse_url($map,PHP_URL_SCHEME))!=='https'
+                || parse_url($map,PHP_URL_USER)!==null
+                || parse_url($map,PHP_URL_PASS)!==null))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
             return ['delivery_pickup_enabled'=>(int)$enabled,
-                'delivery_pickup_address'=>$address];
+                'delivery_pickup_address'=>$address,
+                'delivery_pickup_fee_cents'=>$price,
+                'delivery_pickup_schedule'=>$schedule,
+                'delivery_pickup_map_url'=>$map];
         }
         if($scope==='delivery' && $method==='courier'){
             $source=(string)($input['rate_source']??'directory');
@@ -49,6 +60,7 @@ final class MethodSettings
     {
         $allowed=[
             'delivery_pickup_enabled','delivery_pickup_address',
+            'delivery_pickup_fee_cents','delivery_pickup_schedule','delivery_pickup_map_url',
             'delivery_courier_enabled','delivery_rate_source','delivery_city_rates',
             'payment_on_receipt_enabled','payment_bank_transfer_enabled',
             'payment_bank_instructions'
@@ -77,6 +89,18 @@ final class MethodSettings
             $db->transactionRollback();
             throw $e;
         }
+    }
+
+    private static function amountCents(string $raw): int
+    {
+        $raw=trim($raw);
+        if(!preg_match('/^(0|[1-9][0-9]{0,8})(?:[.,][0-9]{1,2})?$/D',$raw))
+            throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        $parts=explode('.',str_replace(',','.',$raw),2);
+        $cents=(int)$parts[0]*100+(int)str_pad($parts[1]??'',2,'0');
+        if($cents<0||$cents>99999999999)
+            throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        return $cents;
     }
 
     private static function cleanText(string $text,int $limit): string
