@@ -10,13 +10,17 @@ $mmSearch=[
  'view'=>'reviews','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
  'searchLabel'=>Text::_('COM_MINIMARKET_REVIEW_AUTHOR'),
  'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
- 'filters'=>[['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_ORDER_STATUS'),
+ 'filters'=>[
+ ['name'=>'filter_rating','label'=>Text::_('COM_MINIMARKET_REVIEW_RATING'),
+  'value'=>$this->ratingFilter,
+  'options'=>[0=>Text::_('COM_MINIMARKET_FILTER_ANY'),1=>'1',2=>'2',3=>'3',4=>'4',5=>'5']],
+ ['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_ORDER_STATUS'),
   'value'=>$this->statusFilter,'default'=>'pending',
   'options'=>['all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),'pending'=>Text::_($states[0]),
    'published'=>Text::_($states[1]),'rejected'=>Text::_($states[2])]]]
 ];
 $href='index.php?option=com_minimarket&view=reviews&'.http_build_query([
- 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,
+ 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,'filter_rating'=>$this->ratingFilter,
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
