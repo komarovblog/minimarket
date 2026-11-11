@@ -49,7 +49,6 @@
             <menu link="option=com_minimarket&amp;view=deliveries">COM_MINIMARKET_DASHBOARD_DELIVERIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=delivery&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=deliveryzones">COM_MINIMARKET_ZONES_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=reviews">COM_MINIMARKET_REVIEWS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=review&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
@@ -87,6 +86,8 @@
             <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE</menu>
             <menu type="separator" alias="mm-separator-settings">-</menu>
             <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
+            <menu link="option=com_minimarket&amp;view=deliverymethods">COM_MINIMARKET_DELIVERY_METHODS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=paymentmethods">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=integrations">COM_MINIMARKET_INTEGRATIONS_TITLE</menu>
         </submenu>
     </administration>
