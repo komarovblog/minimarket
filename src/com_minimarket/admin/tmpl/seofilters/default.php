@@ -3,38 +3,64 @@
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Uri\Uri;
+
+$mmSearch=[
+ 'view'=>'seofilters','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
+ 'searchLabel'=>Text::_('COM_MINIMARKET_SEOFILTER_TITLE'),
+ 'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
+ 'filters'=>[['name'=>'filter_status','label'=>Text::_('JSTATUS'),
+  'value'=>$this->statusFilter,'default'=>'all',
+  'options'=>['all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+   'published'=>Text::_('COM_MINIMARKET_SEOFILTER_PUBLISHED'),
+   'unpublished'=>Text::_('COM_MINIMARKET_SEOFILTER_UNPUBLISHED')]]]
+];
+$href='index.php?option=com_minimarket&view=seofilters&'.http_build_query([
+ 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,
+ 'filter_sort'=>$this->sort,'limit'=>$this->pageSize
+],'','&',PHP_QUERY_RFC3986);
 ?>
-<section class="mm-admin-panel mm-admin-list-panel">
- <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-  <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_SEOFILTERS_TITLE'); ?></h2>
-  <?php if($this->canCreate): ?><a class="btn btn-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilter&layout=create',false)); ?>"><span class="icon-plus"></span> <?php echo Text::_('COM_MINIMARKET_SEOFILTER_CREATE'); ?></a><?php endif; ?>
+<div class="mm-unified-list">
+ <div id="j-main-container" class="j-main-container">
+  <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+  <form action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilters',false)); ?>"
+        method="post" name="adminForm" id="adminForm" class="mm-list-form">
+   <div class="table-responsive">
+    <table id="mm-seofilters-list" class="table table-striped mm-admin-list">
+     <thead><tr>
+      <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
+      <th>ID</th>
+      <th><?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?></th>
+      <th><?php echo Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'); ?></th>
+      <th><?php echo Text::_('COM_MINIMARKET_SEOFILTER_ALIAS'); ?></th>
+      <th><?php echo Text::_('JSTATUS'); ?></th>
+     </tr></thead>
+     <tbody>
+     <?php foreach($this->pages as $i=>$page): ?>
+      <tr>
+       <td class="text-center" data-label="<?php echo Text::_('JSELECT'); ?>"><?php echo HTMLHelper::_('grid.id',$i,(int)$page->id); ?></td>
+       <td data-label="ID"><?php echo (int)$page->id; ?></td>
+       <td data-label="<?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?>"><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilter&id='.(int)$page->id,false)); ?>"><?php echo $this->escape($page->title); ?></a></td>
+       <td data-label="<?php echo Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'); ?>"><?php echo $this->escape($page->category_title); ?></td>
+       <td data-label="<?php echo Text::_('COM_MINIMARKET_SEOFILTER_ALIAS'); ?>">
+        <a href="<?php echo $this->escape(Uri::root().'index.php?option=com_minimarket&view=seofilter&id='.(int)$page->id); ?>" target="_blank" rel="noopener noreferrer">/seo/<?php echo $this->escape($page->alias); ?>-<?php echo (int)$page->id; ?></a></td>
+       <td data-label="<?php echo Text::_('JSTATUS'); ?>"><span class="badge bg-<?php echo (int)$page->state===1?'success':'secondary'; ?>"><?php echo Text::_((int)$page->state===1?'COM_MINIMARKET_SEOFILTER_PUBLISHED':'COM_MINIMARKET_SEOFILTER_UNPUBLISHED'); ?></span></td>
+      </tr>
+     <?php endforeach; ?>
+     <?php if(!$this->pages): ?><tr><td colspan="6"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_EMPTY'); ?></td></tr><?php endif; ?>
+     </tbody>
+    </table>
+   </div>
+   <input type="hidden" name="boxchecked" value="0">
+   <input type="hidden" name="task" value="">
+   <?php echo HTMLHelper::_('form.token'); ?>
+  </form>
+  <?php if($this->total>$this->pageSize): ?>
+   <nav class="mm-native-pagination">
+    <?php if($this->offset>0): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.max(0,$this->offset-$this->pageSize),false)); ?>"><?php echo Text::_('JPREV'); ?></a><?php endif; ?>
+    <span><?php echo $this->offset+1; ?>–<?php echo min($this->total,$this->offset+$this->pageSize); ?> / <?php echo $this->total; ?></span>
+    <?php if($this->offset+$this->pageSize<$this->total): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.($this->offset+$this->pageSize),false)); ?>"><?php echo Text::_('JNEXT'); ?></a><?php endif; ?>
+   </nav>
+  <?php endif; ?>
  </div>
- <div class="table-responsive">
- <table class="table table-striped mm-admin-list">
-  <thead><tr><th>ID</th><th><?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?></th><th><?php echo Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'); ?></th><th><?php echo Text::_('COM_MINIMARKET_SEOFILTER_ALIAS'); ?></th><th><?php echo Text::_('JSTATUS'); ?></th></tr></thead>
-  <tbody>
-  <?php foreach($this->pages as $row): ?>
-   <tr>
-    <td><?php echo (int)$row->id; ?></td>
-    <td><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilter&id='.(int)$row->id,false)); ?>"><?php echo $this->escape($row->title); ?></a></td>
-    <td><?php echo $this->escape($row->category_title); ?></td>
-    <td><a href="<?php echo $this->escape(\Joomla\CMS\Uri\Uri::root().'index.php?option=com_minimarket&view=seofilter&id='.(int)$row->id); ?>" target="_blank" rel="noopener noreferrer">/seo/<?php echo $this->escape($row->alias); ?>-<?php echo (int)$row->id; ?></a></td>
-    <td>
-     <span class="badge bg-<?php echo (int)$row->state===1?'success':'secondary'; ?>"><?php echo Text::_((int)$row->state===1?'COM_MINIMARKET_SEOFILTER_PUBLISHED':'COM_MINIMARKET_SEOFILTER_UNPUBLISHED'); ?></span>
-     <?php if($this->canPublish): ?>
-      <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.state',false)); ?>" class="d-flex align-items-center gap-1 mt-1">
-       <input type="hidden" name="id" value="<?php echo (int)$row->id; ?>">
-       <select class="form-select form-select-sm" name="state" aria-label="<?php echo Text::_('JSTATUS'); ?>">
-        <option value="0"<?php echo (int)$row->state===0?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_SEOFILTER_UNPUBLISHED'); ?></option>
-        <option value="1"<?php echo (int)$row->state===1?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_SEOFILTER_PUBLISHED'); ?></option>
-       </select>
-       <?php echo HTMLHelper::_('form.token'); ?><button type="submit" class="btn btn-outline-primary btn-sm"><?php echo Text::_('JSAVE'); ?></button>
-      </form>
-     <?php endif; ?>
-    </td>
-   </tr>
-  <?php endforeach; ?>
-  <?php if(!$this->pages): ?><tr><td colspan="5"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_EMPTY'); ?></td></tr><?php endif; ?>
-  </tbody>
- </table></div>
-</section>
+</div>
