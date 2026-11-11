@@ -1,3 +1,15 @@
+# MiniMarket 0.5.91 — автоматические проверки PASS, локальная приёмка ожидается
+
+**GitHub Actions:** https://github.com/komarovblog/minimarket/actions/runs/43080877881 . **Все 6 jobs PASS**: Windows component ZIP/inspect, PHP 8.4, PHP 8.5, MySQL category editor upgrade, MySQL 8.4 canonical fresh schema, full demo import. Проверка соответствует исходному коммиту `3b624d0f8594092f58f6beefeb47cc67de4f0463`. Этот документальный коммит не меняет код.
+
+**Версия:** 0.5.91 (компонент + отдельно устанавливаемый модуль). Схема БД не менялась (последняя миграция 0.5.87), демоданные SQL опциональны. Рабочая Joomla на компьютере пользователя ещё не обновлена и в браузере не проверена. Не объявлять реальное использование и визуальную приёмку подтверждёнными.
+
+**Сделано и не сделано:** см. `docs/RELEASE_0_5_91.md` и `docs/SETTINGS_REGISTRY.md`; план по остальным требованиям — карта `docs/MASTER_PLAN.md`. В частности, Sitemap, SKU export v2, per-category visibility опций/характеристик, конструктор сочетаний, новые поля оформления пока НЕ реализованы.
+
+**Установка:** сохранить резерв БД; `cd /d C:\OSPanel\home\minimarket.local && git pull --ff-only origin development && powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\release-to-desktop.ps1 -SkipPull`; установить `com_minimarket-0.5.91.zip` через Joomla. Никаких SQL импортов для UI. Проверить 20 списков, главную, фиды, переключение сетки, редакторы способов, промокоды и гостевой заказ. DB Maintenance не исправлять без отдельной диагностики. Blank отложен.
+
+---
+
 # MiniMarket 0.5.91 — UI/фиды/способы/настройки, незавершённая браузерная приёмка
 
 **Область:** новый релиз без изменения схемы и торговой корзины. Сводка выполненного/оставшегося: [docs/RELEASE_0_5_91.md](docs/RELEASE_0_5_91.md). Источник истины для общих правил: MASTER_PLAN, ITERATION_RULES, SETTINGS_REGISTRY. Blank отложен. Ветка development.
