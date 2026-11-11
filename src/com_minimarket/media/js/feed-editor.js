@@ -8,6 +8,11 @@
  const rows=Array.from(root.querySelectorAll('[data-mm-feed-row]'));
  const categoryRows=Array.from(root.querySelectorAll('[data-mm-feed-category-row]'));
  const mode=root.querySelector('#mm-feed-mode');
+ const provider=root.querySelector('#mm-feed-provider');
+ const sitemapHelp=root.querySelector('[data-mm-feed-sitemap-help]');
+ const updateProvider=()=>{if(sitemapHelp)sitemapHelp.hidden=provider?.value!=='sitemap';};
+ provider?.addEventListener('change',updateProvider);
+ updateProvider();
  const bundles=root.querySelector('[data-mm-feed-bundles]');
  const count=root.querySelector('[data-mm-feed-count]');
  const search=root.querySelector('[data-mm-feed-search]');

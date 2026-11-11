@@ -33,7 +33,9 @@ $check(str_contains($controller,"SitemapFeed::publicArticles(\$db)")
  && str_contains($controller,"SitemapFeed::absolute")
  && str_contains($controller,"SitemapFeed::render"),'published products and Joomla articles');
 $service=(string)file_get_contents($root.'admin/src/Service/SitemapFeed.php');
-foreach(['a.state=1','a.access=1','c.published=1','c.access=1','a.publish_up','a.publish_down','com_content'] as $filter) {
+foreach(['a.state=1','a.access=1','c.published=1','c.access=1',
+ 'ancestor.lft<=c.lft','ancestor.rgt>=c.rgt','ancestor.published<>1',
+ 'ancestor.access<>1','a.publish_up','a.publish_down','com_content'] as $filter) {
  $check(str_contains($service,$filter),'anonymous content constraint '.$filter);
 }
 $check(SitemapFeed::MAX_URLS===5000,'bounded sitemap');

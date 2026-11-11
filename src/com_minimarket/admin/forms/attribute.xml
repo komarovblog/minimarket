@@ -7,7 +7,7 @@
         <field name="display_location" type="list" default="inherit" filter="cmd"
                label="COM_MINIMARKET_ENTITY_DISPLAY_LOCATION"
                description="COM_MINIMARKET_ENTITY_DISPLAY_LOCATION_DESC">
-            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="inherit">COM_MINIMARKET_VISIBILITY_DEFAULT</option>
             <option value="product">COM_MINIMARKET_VISIBILITY_PRODUCT</option>
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>

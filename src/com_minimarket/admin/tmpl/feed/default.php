@@ -55,6 +55,9 @@ $depth=static function(int $id) use($map):int {
                         <?php endforeach; ?>
                     </select>
                     <div class="form-text"><?php echo Text::_('COM_MINIMARKET_FEED_PROVIDER_HELP'); ?></div>
+                    <div class="form-text" data-mm-feed-sitemap-help<?php echo $this->feed['provider']==='sitemap'?'':' hidden'; ?>>
+                        <?php echo Text::_('COM_MINIMARKET_FEED_SITEMAP_HELP'); ?>
+                    </div>
                 </div>
             </div>
         </div></div>
