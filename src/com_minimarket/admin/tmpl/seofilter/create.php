@@ -8,12 +8,6 @@ $p=$this->page;
 $get=static fn(string $key,string $default='')=>$p===null?$default:(string)($p->$key??$default);
 $saved=$p?json_decode((string)$p->filters_json,true):[];
 if(!is_array($saved))$saved=[];
-$groups=[];
-foreach($this->facets as $choice){
- $id=(int)$choice->attribute_id;
- $groups[$id]['title']=$choice->attribute_title;
- $groups[$id]['choices'][]=$choice;
-}
 $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplication()->get('editor','tinymce'));
 ?>
 <form method="post" id="mm-seo-editor" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.save',false)); ?>">
@@ -28,27 +22,11 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
    <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'main', Text::_('COM_MINIMARKET_SEO_TAB_MAIN')); ?>
  <div class="card card-body mm-admin-panel">
     <div class="row g-3">
+     <div class="col-md-6"><label class="form-label" for="mm-seo-name"><?php echo Text::_('COM_MINIMARKET_SEO_LANDING_NAME'); ?> *</label>
+      <input id="mm-seo-name" class="form-control" name="name" maxlength="255" required
+             value="<?php echo $this->escape($get('name',$get('title'))); ?>"></div>
      <div class="col-md-6"><label class="form-label" for="mm-seo-alias"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_ALIAS'); ?> *</label>
       <input id="mm-seo-alias" class="form-control" name="alias" maxlength="190" pattern="[a-z0-9][a-z0-9-]*" required value="<?php echo $this->escape($get('alias')); ?>"></div>
-     <div class="col-12">
-      <?php
-       $categorySelected=[];
-       if((int)$get('category_id')>0){
-        foreach($this->categories as $cat){
-         if((int)$cat->id===(int)$get('category_id')){
-          $categorySelected[(int)$cat->id]=$cat->title;
-          break;
-         }
-        }
-       }
-       $mmReference=[
-        'title'=>Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'),
-        'input'=>'category_id','endpoint'=>'categories','multiple'=>false,
-        'selected'=>$categorySelected,'placeholder'=>Text::_('COM_MINIMARKET_CATEGORY_FILTER_SEARCH')
-       ];
-       require dirname(__DIR__).'/shared/reference-picker.php';
-      ?>
-     </div>
      <div class="col-12"><label class="form-label" for="mm-seo-heading"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_HEADING'); ?> *</label>
       <input id="mm-seo-heading" class="form-control" name="heading" maxlength="255" required value="<?php echo $this->escape($get('heading')); ?>"></div>
      <div class="col-12 col-lg-6">
@@ -68,42 +46,29 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
    <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'filters', Text::_('COM_MINIMARKET_SEO_TAB_FILTERS')); ?>
  <div class="card card-body mm-admin-panel">
     <div class="alert alert-info"><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CHOICE_HELP'); ?></div>
-    <?php foreach($groups as $aid=>$group): ?>
-     <fieldset class="border rounded p-3 mb-3">
-      <legend class="float-none w-auto px-2 fs-6"><?php echo $this->escape($group['title']); ?></legend>
-      <div class="row g-2">
-       <?php foreach($group['choices'] as $choice): $token='v:'.(int)$choice->value_id;
-       $checked=in_array($token,(array)($saved['a'.$aid]??[]),true); ?>
-        <label class="col-12 col-md-6 col-lg-4 form-check ms-2">
-         <input class="form-check-input" type="checkbox" data-mm-seo-facet="a<?php echo $aid; ?>" value="<?php echo $this->escape($token); ?>"<?php echo $checked?' checked':''; ?>>
-         <span class="form-check-label"><?php echo $this->escape($choice->value_title); ?></span>
-        </label>
-       <?php endforeach; ?>
-      </div>
-     </fieldset>
-    <?php endforeach; ?>
-    <?php
-     $optionGroups=[];
-     foreach($this->skuChoices as $choice){
-      $id=(int)$choice->option_id;
-      $optionGroups[$id]['title']=$choice->option_title;
-      $optionGroups[$id]['values'][]=$choice;
-     }
-    ?>
-    <?php foreach($optionGroups as $oid=>$group): ?>
-     <fieldset class="border rounded p-3 mb-3">
-      <legend class="float-none w-auto px-2 fs-6"><?php echo Text::_('COM_MINIMARKET_SEO_SKU_OPTION'); ?>: <?php echo $this->escape($group['title']); ?></legend>
-      <div class="row g-2">
-       <?php foreach($group['values'] as $choice): $token='v:'.(int)$choice->value_id; ?>
-        <label class="col-12 col-md-6 col-lg-4 form-check ms-2">
-         <input type="checkbox" class="form-check-input" data-mm-seo-facet="s<?php echo $oid; ?>"
-                value="<?php echo $token; ?>"<?php echo in_array($token,(array)($saved['s'.$oid]??[]),true)?' checked':''; ?>>
-         <span class="form-check-label"><?php echo $this->escape($choice->value_title); ?></span>
-        </label>
-       <?php endforeach; ?>
-      </div>
-     </fieldset>
-    <?php endforeach; ?>
+     <div class="col-12">
+      <?php
+       $categorySelected=[];
+       if((int)$get('category_id')>0){
+        foreach($this->categories as $cat){
+         if((int)$cat->id===(int)$get('category_id')){
+          $categorySelected[(int)$cat->id]=$cat->title;
+          break;
+         }
+        }
+       }
+       $mmReference=[
+        'title'=>Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'),
+        'input'=>'category_id','endpoint'=>'categories','multiple'=>false,
+        'selected'=>$categorySelected,'placeholder'=>Text::_('COM_MINIMARKET_CATEGORY_FILTER_SEARCH')
+       ];
+       require dirname(__DIR__).'/shared/reference-picker.php';
+      ?>
+     </div>
+    <div id="mm-seo-category-choices" data-mm-seo-choices-url="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.choices&'.\Joomla\CMS\Session\Session::getFormToken().'=1',false)); ?>"
+         aria-live="polite">
+      <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SEO_PICK_CATEGORY_FIRST'); ?></p>
+    </div>
     <fieldset class="border rounded p-3 mb-3">
      <legend class="float-none w-auto px-2 fs-6"><?php echo Text::_('COM_MINIMARKET_SEO_SYSTEM_FILTERS'); ?></legend>
      <div class="row g-3">
