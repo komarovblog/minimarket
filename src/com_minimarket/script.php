@@ -150,8 +150,7 @@ class com_minimarketInstallerScript extends InstallerScript
                 ->where('e.element=' . $db->quote('com_minimarket'))
         );
         $schemaVersion = (string)($db->loadResult() ?? '');
-        if (version_compare($schemaVersion, '0.5.73', '<')
-            || version_compare($schemaVersion, '0.5.83', '>')) {
+        if (version_compare($schemaVersion, '0.5.73', '<')) {
             return;
         }
 
