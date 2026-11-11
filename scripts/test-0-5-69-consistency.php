@@ -63,9 +63,11 @@ ok69(str_contains($picker,'root.insertBefore(finder,chosen)') &&
 ok69(str_contains($read('src/com_minimarket/admin/tmpl/import/default.php'),'<th>XLSX</th>') &&
     !str_contains($read('src/com_minimarket/admin/tmpl/import/default.php'),'<th>Excel (XLSX)</th>'),
     'official format name XLSX only');
-ok69(str_contains($read('src/com_minimarket/admin/tmpl/feeds/default.php'),'COM_MINIMARKET_FEED_CREATE') &&
+// Joomla now owns the list toolbar; creation is not a custom button in the template.
+ok69(str_contains($read('src/com_minimarket/admin/src/View/Feeds/HtmlView.php'),"ToolbarHelper::addNew('feed.add')") &&
+    str_contains($read('src/com_minimarket/admin/tmpl/feeds/default.php'),'shared/searchtools.php') &&
     str_contains($read('src/com_minimarket/admin/tmpl/feed/default.php'),"'publishing'"),
-    'feed translated create button and publication tab');
+    'feed uses native Joomla Create toolbar, SearchTools and publication tab');
 foreach(['ru-RU','en-GB'] as $lang){
     $ini=parse_ini_file($root.'/src/com_minimarket/admin/language/'.$lang.'/com_minimarket.ini');
     foreach(['ATTRIBUTE_FILTER_TAB','CONFIG_INVENTORY','CONFIG_INVENTORY_ENABLED',
