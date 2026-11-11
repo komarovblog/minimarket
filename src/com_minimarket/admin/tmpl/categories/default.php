@@ -77,11 +77,11 @@ use Joomla\CMS\Button\PublishedButton;
                     <td data-label="<?php echo $this->escape(Text::_('JGRID_HEADING_ID')); ?>"><?php echo $id; ?></td>
                 </tr>
             <?php endforeach; ?>
-            <?php if (!$this->rows) : ?>
-                <tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_NO_CATEGORIES'); ?></td></tr>
-            <?php endif; ?>
             </tbody>
         </table>
+ <?php if (!$this->rows): ?>
+  <div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_NO_CATEGORIES'); ?></div>
+ <?php endif; ?>
 </div>
     </div>
     <input type="hidden" name="boxchecked" value="0">
