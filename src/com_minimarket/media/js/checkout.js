@@ -25,6 +25,11 @@
    if(city)city.required=method==='courier';
    if(address)address.required=method==='courier';
    fee=0;needsQuote=false;
+   if(method==='pickup'){
+     const input=form.querySelector('input[name="delivery_method"]:checked');
+     const configured=Number.parseInt(input?.dataset.feeCents||'0',10);
+     fee=Number.isSafeInteger(configured)&&configured>=0?configured:0;
+   }
    if(method==='courier'){
     if(zones)needsQuote=true;
     else {

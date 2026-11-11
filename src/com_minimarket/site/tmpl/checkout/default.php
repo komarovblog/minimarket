@@ -76,7 +76,8 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <?php foreach ($this->deliveryMethods as $method=>$settings) : ?>
                         <div class="form-check mm-checkout-option">
                             <input class="form-check-input" type="radio" name="delivery_method" id="mm-delivery-<?php echo $method; ?>"
-                                   value="<?php echo $method; ?>" <?php echo $method===$firstDelivery?'checked':''; ?> required>
+                                   value="<?php echo $method; ?>" data-fee-cents="<?php echo (int)($settings['fee_cents']??0); ?>"
+                                   <?php echo $method===$firstDelivery?'checked':''; ?> required>
                             <label class="form-check-label" for="mm-delivery-<?php echo $method; ?>">
                                 <?php echo Text::_('COM_MINIMARKET_DELIVERY_'.strtoupper($method)); ?>
                             </label>
@@ -85,9 +86,18 @@ $firstPayment=array_key_first($this->paymentMethods);
                     </div>
                     <?php if (isset($this->deliveryMethods['pickup'])) : ?>
                     <div class="mm-delivery-details mt-3" data-delivery-panel="pickup">
-                        <p class="mb-1"><?php echo Text::_('COM_MINIMARKET_DELIVERY_PICKUP_FREE'); ?></p>
+                        <p class="mb-1"><?php echo (int)($this->deliveryMethods['pickup']['fee_cents']??0)>0
+                         ?Text::_('COM_MINIMARKET_PICKUP_FEE').': '.\MiniMarket\Component\Minimarket\Site\Service\CartState::format((int)$this->deliveryMethods['pickup']['fee_cents']).' '.Text::_('COM_MINIMARKET_CURRENCY_SYMBOL')
+                         :Text::_('COM_MINIMARKET_DELIVERY_PICKUP_FREE'); ?></p>
                         <?php if ($this->pickupAddress!=='') : ?>
                             <p class="text-muted mb-0"><?php echo $this->escape($this->pickupAddress); ?></p>
+                        <?php endif; ?>
+                        <?php if($this->pickupSchedule!==''): ?>
+                         <p class="text-muted mb-0"><?php echo $this->escape($this->pickupSchedule); ?></p>
+                        <?php endif; ?>
+                        <?php if($this->pickupMapUrl!==''): ?>
+                         <a target="_blank" rel="noopener noreferrer" href="<?php echo $this->escape($this->pickupMapUrl); ?>">
+                           <?php echo Text::_('COM_MINIMARKET_PICKUP_SHOW_MAP'); ?></a>
                         <?php endif; ?>
                     </div>
                     <?php endif; ?>

@@ -54,8 +54,13 @@ final class CheckoutDelivery
     {
         $methods=[];
         if ((int)$params->get('delivery_pickup_enabled',1)===1) {
-            $methods['pickup']=['fee_cents'=>0,
-                'address'=>trim((string)$params->get('delivery_pickup_address',''))];
+            $fee=(int)$params->get('delivery_pickup_fee_cents',0);
+            if($fee<0||$fee>99999999999)
+                throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
+            $methods['pickup']=['fee_cents'=>$fee,
+                'address'=>trim((string)$params->get('delivery_pickup_address','')),
+                'schedule'=>trim((string)$params->get('delivery_pickup_schedule','')),
+                'map_url'=>trim((string)$params->get('delivery_pickup_map_url',''))];
         }
         if ((int)$params->get('delivery_courier_enabled',0)===1) {
             $source=(string)$params->get('delivery_rate_source','directory');
@@ -102,7 +107,7 @@ final class CheckoutDelivery
             }
             return ['method'=>'pickup','city'=>'','address'=>$address,
                 'country'=>'RU','region'=>'','postcode'=>'','zone_id'=>null,
-                'fee_cents'=>0,'rate_source'=>'none','payment_method'=>$payment];
+                'fee_cents'=>$methods['pickup']['fee_cents'],'rate_source'=>'none','payment_method'=>$payment];
         }
 
         $city=trim((string)($input['delivery_city']??''));

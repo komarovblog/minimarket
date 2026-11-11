@@ -24,6 +24,8 @@ final class HtmlView extends BaseHtmlView
     public array $paymentMethods=[];
     public array $cityRates=[];
     public string $pickupAddress='';
+    public string $pickupSchedule='';
+    public string $pickupMapUrl='';
     public string $blockedMessage='';
     public bool $cdekPending=false;
     public string $promoCode='';
@@ -48,6 +50,8 @@ final class HtmlView extends BaseHtmlView
             $this->paymentMethods=CheckoutDelivery::payments($params);
             $this->cityRates=CheckoutDelivery::rates($params);
             $this->pickupAddress=(string)($this->deliveryMethods['pickup']['address']??'');
+            $this->pickupSchedule=(string)($this->deliveryMethods['pickup']['schedule']??'');
+            $this->pickupMapUrl=(string)($this->deliveryMethods['pickup']['map_url']??'');
             if (in_array(CheckoutSettings::mode($params),['email','sms'],true)
                 && (int)$app->getIdentity()->id<1) {
                 $pending=CheckoutSettings::mode($params)==='email'

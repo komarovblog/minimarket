@@ -46,7 +46,7 @@ final class OrderStorage
             || !preg_match('/^[A-Z]{2}$/D',(string)$delivery['country'])
             || mb_strlen((string)$delivery['region'])>120
             || strlen((string)$delivery['postcode'])>16
-            || ($delivery['method']==='pickup' && $delivery['fee_cents']!==0)) {
+            || ($delivery['method']==='pickup' && $delivery['rate_source']!=='none')) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
         }
         $total=0;$units=0;$lines=[];
