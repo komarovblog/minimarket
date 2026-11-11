@@ -11,6 +11,8 @@ use Joomla\Database\DatabaseInterface;
 final class HtmlView extends BaseHtmlView
 {
     public array $pages=[];
+    public array $categories=[];
+    public int $categoryFilter=0;
     public string $search='', $statusFilter='all', $sort='newest';
     public int $total=0, $offset=0, $pageSize=20;
     public bool $canCreate=false, $canPublish=false;
@@ -30,7 +32,13 @@ final class HtmlView extends BaseHtmlView
         $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
         $this->offset=max(0,min(1000000,$app->input->getInt('limitstart',0)));
         $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $this->categoryFilter=max(0,$app->input->getInt('filter_category',0));
+        $cats=$db->getQuery(true)->select(['id','title'])
+            ->from($db->quoteName('#__minimarket_categories'))
+            ->order('title ASC,id ASC');
+        $db->setQuery($cats,0,5000);$this->categories=(array)$db->loadObjectList();
         $conditions=[];
+        if($this->categoryFilter>0)$conditions[]='s.category_id='.(int)$this->categoryFilter;
         if($this->statusFilter!=='all')
             $conditions[]='s.state='.($this->statusFilter==='published'?1:0);
         if($this->search!==''){
