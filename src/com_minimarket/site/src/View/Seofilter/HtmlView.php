@@ -18,7 +18,8 @@ final class HtmlView extends CategoryView
         if($seoId<1)throw new \RuntimeException(Text::_('JERROR_LAYOUT_PAGE_NOT_FOUND'),404);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $q=$db->getQuery(true)->select(['s.id','s.category_id','s.title',
-            's.heading','s.introtext','s.description','s.meta_description',
+            's.heading','s.introtext','s.description','s.image','s.image_alt',
+            's.og_title','s.og_description','s.og_image','s.meta_description',
             's.meta_robots','s.filters_json'])
             ->from($db->quoteName('#__minimarket_seo_filters','s'))
             ->join('INNER',$db->quoteName('#__minimarket_categories','c').' ON c.id=s.category_id')
@@ -32,6 +33,8 @@ final class HtmlView extends CategoryView
         $this->seoHeading=(string)$seo->heading;
         $this->seoIntro=(string)$seo->introtext;
         $this->seoDescription=(string)$seo->description;
+        $this->seoImage=(string)$seo->image;
+        $this->seoImageAlt=(string)$seo->image_alt;
         $app->input->set('id',(int)$seo->category_id);
         $app->input->set('mmf',$filters);
         parent::display($tpl);
@@ -43,8 +46,13 @@ final class HtmlView extends CategoryView
         $robots=FacetedCatalog::active($this->facetSelection)
             ?(string)$seo->meta_robots:'noindex,follow';
         $document->setMetaData('robots',$robots);
-        $document->setMetaData('og:title',(string)$seo->title,'property');
-        if(trim((string)$seo->meta_description)!=='') {
+        $document->setMetaData('og:title',(string)($seo->og_title?:$seo->title),'property');
+        if(trim((string)$seo->og_description)!=='')
+            $document->setMetaData('og:description',(string)$seo->og_description,'property');
+        $ogImage=(string)($seo->og_image?:$seo->image);
+        if($ogImage!==''&&str_starts_with($ogImage,'images/')&&!str_contains($ogImage,'..'))
+            $document->setMetaData('og:image',\Joomla\CMS\Uri\Uri::root().$ogImage,'property');
+        if(trim((string)$seo->og_description)==='' && trim((string)$seo->meta_description)!=='') {
             $document->setMetaData('og:description',(string)$seo->meta_description,'property');
         }
         SeoHelper::setCanonical($document,'seofilter',$seoId);
