@@ -32,7 +32,7 @@ $labels=[
    + <?php echo Text::_('COM_MINIMARKET_REF_ADD'); ?>
   </button>
  </div>
- <div data-mm-ref-panel hidden class="border rounded p-2 mb-2">
+ <div data-mm-ref-panel hidden class="py-2 mb-2">
   <div class="d-flex gap-2 flex-wrap">
    <input type="search" data-mm-ref-search class="form-control flex-grow-1"
           style="min-width:12rem" maxlength="100"
