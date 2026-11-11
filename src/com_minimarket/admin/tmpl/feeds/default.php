@@ -6,16 +6,21 @@ use Joomla\CMS\HTML\HTMLHelper;
 use MiniMarket\Component\Minimarket\Administrator\Service\FeedConfig;
 
 $e=static fn($value):string=>htmlspecialchars((string)$value,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
+$providerOptions=[''=>Text::_('COM_MINIMARKET_FILTER_ANY')];
+foreach(FeedConfig::PROVIDERS as $key=>$label)$providerOptions[$key]=Text::_($label);
 $mmSearch=[
  'view'=>'feeds','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
  'searchLabel'=>Text::_('COM_MINIMARKET_FEEDS_TITLE'),
  'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
- 'filters'=>[['name'=>'filter_status','label'=>Text::_('JSTATUS'),'value'=>$this->statusFilter,'default'=>'all',
+ 'filters'=>[
+ ['name'=>'filter_provider','label'=>Text::_('COM_MINIMARKET_FEED_PROVIDER'),
+  'value'=>$this->providerFilter,'options'=>$providerOptions],
+ ['name'=>'filter_status','label'=>Text::_('JSTATUS'),'value'=>$this->statusFilter,'default'=>'all',
   'options'=>['all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),'published'=>Text::_('JPUBLISHED'),
    'unpublished'=>Text::_('JUNPUBLISHED')]]]
 ];
 $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
- 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,
+ 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,'filter_provider'=>$this->providerFilter,
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
