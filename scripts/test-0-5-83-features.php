@@ -2,8 +2,23 @@
 /** 0.5.83: new review and SEO systems, admin fixes and secure defaults. */
 declare(strict_types=1);
 define('_JEXEC',1);
+// This CLI smoke does not bootstrap Joomla. Only the empty HTML inputs tested
+// here use a fixture; actual Joomla InputFilter security is an integration test.
+if (!class_exists(\\Joomla\\CMS\\Filter\\InputFilter::class)) {
+    final class EmptyHtmlInputFilterFixture {
+        public static function getInstance(): self { return new self(); }
+        public function clean(string $html,string $type): string {
+            if ($html!=='' || $type!=='HTML') {
+                throw new LogicException('HTML filtering requires a real Joomla runtime');
+            }
+            return '';
+        }
+    }
+    class_alias(EmptyHtmlInputFilterFixture::class, \\Joomla\\CMS\\Filter\\InputFilter::class);
+}
 $root=dirname(__DIR__).'/src/com_minimarket/';
 require $root.'site/src/Service/ReviewData.php';
+require $root.'admin/src/Service/MediaPath.php';
 require $root.'admin/src/Service/SeoFilterData.php';
 use MiniMarket\Component\Minimarket\Site\Service\ReviewData;
 use MiniMarket\Component\Minimarket\Administrator\Service\SeoFilterData;
