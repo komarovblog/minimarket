@@ -36,6 +36,8 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
 ?>
 <?php else: ?>
 <div id="j-main-container" class="j-main-container">
+ <?php echo HTMLHelper::_('uitab.startTabSet','mm-delivery-method',['active'=>($this->method==='courier' && $this->embeddedZoneEditor)?'zones':(\Joomla\CMS\Factory::getApplication()->input->getCmd('tab','main')==='zones'?'zones':'main')]); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-method','main',Text::_('COM_MINIMARKET_ZONE_TAB_MAIN')); ?>
  <form method="post" id="mm-method-form" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
   <input type="hidden" name="scope" value="delivery">
   <input type="hidden" name="method" value="<?php echo $esc($this->method); ?>">
@@ -88,16 +90,44 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
       <textarea class="form-control" name="city_rates" id="mm-city-rates" rows="8" maxlength="15000" placeholder="Санкт-Петербург|350|5000"><?php echo $esc($p->get('delivery_city_rates','')); ?></textarea>
       <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CITY_RATES_DESC'); ?></p>
      </div>
-     <div class="col-12">
-      <a class="btn btn-outline-primary" href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliveryzones',false)); ?>">
-       <?php echo Text::_('COM_MINIMARKET_METHOD_EDIT_ZONES'); ?> (<?php echo (int)$this->zones; ?>)
-      </a>
-      <p class="form-text"><?php echo Text::_('COM_MINIMARKET_METHOD_ZONES_NOTE'); ?></p>
-     </div>
+
     <?php endif; ?>
    </div>
   </div>
  </form>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php if($this->method==='courier'): ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-method','zones',Text::_('COM_MINIMARKET_DELIVERY_ZONES')); ?>
+ <div class="py-3">
+  <?php if($this->embeddedZoneEditor): ?>
+   <?php require dirname(__DIR__).'/deliveryzone/edit.php'; ?>
+  <?php else: ?>
+   <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="h5 mb-0"><?php echo Text::_('COM_MINIMARKET_DELIVERY_ZONES'); ?> (<?php echo (int)$this->zones; ?>)</h3>
+    <?php if($this->canEdit): ?>
+     <a class="btn btn-success btn-sm" href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliverymethods&method=courier&tab=zones&zone_new=1',false)); ?>">
+      <?php echo Text::_('JTOOLBAR_NEW'); ?></a>
+    <?php endif; ?>
+   </div>
+   <div class="table-responsive mm-native-list-viewport">
+    <table class="table table-striped">
+     <thead><tr><th><?php echo Text::_('JGLOBAL_TITLE'); ?></th><th><?php echo Text::_('COM_MINIMARKET_ZONE_CITIES'); ?></th><th><?php echo Text::_('COM_MINIMARKET_ZONE_BASE_FEE'); ?></th><th><?php echo Text::_('JSTATUS'); ?></th></tr></thead>
+     <tbody>
+      <?php foreach($this->zoneRows as $z): ?>
+       <tr><td>
+        <a href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliverymethods&method=courier&tab=zones&zone_id='.(int)$z->id,false)); ?>"><?php echo $esc($z->title); ?></a>
+       </td><td><?php echo $esc(mb_substr(str_replace("\n",', ',(string)$z->cities),0,120)); ?></td>
+       <td><?php echo number_format((int)$z->base_fee_cents/100,2,'.',' '); ?></td>
+       <td><?php echo Text::_((int)$z->state===1?'JPUBLISHED':'JUNPUBLISHED'); ?></td></tr>
+      <?php endforeach; ?>
+     </tbody>
+    </table>
+   </div>
+  <?php endif; ?>
+ </div>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php endif; ?>
+ <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
  <?php if($this->method==='courier'): ?>
  <script>
  (()=>{const source=document.getElementById('mm-rate-source'),rates=document.getElementById('mm-directory-rates');

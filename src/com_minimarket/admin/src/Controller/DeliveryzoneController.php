@@ -47,12 +47,21 @@ final class DeliveryzoneController extends BaseController
             $db->setQuery($q);$db->execute();
             if($id===0)$id=(int)$db->insertid();
             $app->enqueueMessage(Text::_('COM_MINIMARKET_ZONE_SAVED'));
-            $this->setRedirect($post->getInt('save_close',0)
-                ?'index.php?option=com_minimarket&view=deliveryzones'
-                :'index.php?option=com_minimarket&view=deliveryzone&id='.$id);
+            $embedded=$post->getCmd('return_to','')==='deliverymethods';
+            if($embedded){
+                $base='index.php?option=com_minimarket&view=deliverymethods&method=courier&tab=zones';
+                $this->setRedirect($post->getInt('save_close',0)?$base:$base.'&zone_id='.$id);
+            }else{
+                $this->setRedirect($post->getInt('save_close',0)
+                    ?'index.php?option=com_minimarket&view=deliveryzones'
+                    :'index.php?option=com_minimarket&view=deliveryzone&id='.$id);
+            }
         }catch(\DomainException $e){
             $app->enqueueMessage(Text::_('COM_MINIMARKET_ZONE_INVALID'),'warning');
-            $this->setRedirect($back);
+            if($post->getCmd('return_to','')==='deliverymethods'){
+                $base='index.php?option=com_minimarket&view=deliverymethods&method=courier&tab=zones';
+                $this->setRedirect($base.($id>0?'&zone_id='.$id:'&zone_new=1'));
+            }else{$this->setRedirect($back);}
         }
     }
 }

@@ -4,16 +4,21 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 $z=$this->zone;
+$embedded=!empty($this->embeddedZoneEditor);
+$back=$embedded
+ ?'index.php?option=com_minimarket&view=deliverymethods&method=courier&tab=zones'
+ :'index.php?option=com_minimarket&view=deliveryzones';
 $get=static fn($key,$default='')=>$z?(string)($z->$key??$default):$default;
 $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00';
 ?>
 <div class="d-flex gap-2 flex-wrap mb-3">
  <button type="submit" form="mm-zone-form" name="save_close" value="0" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
  <button type="submit" form="mm-zone-form" name="save_close" value="1" class="btn btn-success"><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
- <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveryzones',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+ <a class="btn btn-danger" href="<?php echo $this->escape(Route::_($back,false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
 <form id="mm-zone-form" method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=deliveryzone.save',false)); ?>">
  <input type="hidden" name="id" value="<?php echo (int)($z->id??0); ?>">
+ <?php if($embedded): ?><input type="hidden" name="return_to" value="deliverymethods"><?php endif; ?>
  <?php echo HTMLHelper::_('form.token'); ?>
  <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-deliveryzone', ['active' => 'basic']); ?>
    <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-deliveryzone', 'basic', Text::_('COM_MINIMARKET_ZONE_TAB_MAIN')); ?>

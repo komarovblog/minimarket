@@ -21,6 +21,9 @@ final class HtmlView extends BaseHtmlView
     public bool $canEdit=false,$canEditPlugins=false;
     public string $method='';
     public int $zones=0;
+    public array $zoneRows=[];
+    public ?object $zone=null;
+    public bool $embeddedZoneEditor=false;
 
     public function display($tpl=null)
     {
@@ -59,6 +62,28 @@ final class HtmlView extends BaseHtmlView
         }
         $db->setQuery('SELECT COUNT(*) FROM '.$db->quoteName('#__minimarket_delivery_zones'));
         $this->zones=(int)$db->loadResult();
+        if($this->method==='courier') {
+            $q=$db->getQuery(true)->select(['id','title','cities','rate_mode','base_fee_cents',
+                'free_from_cents','state'])
+                ->from($db->quoteName('#__minimarket_delivery_zones'))
+                ->order('priority ASC,id ASC');
+            $db->setQuery($q,0,500);
+            $this->zoneRows=(array)$db->loadObjectList();
+            $editingId=max(0,$app->input->getInt('zone_id',0));
+            $new=$app->input->getInt('zone_new',0)===1;
+            if($editingId>0 || $new) {
+                if(!$user->authorise($editingId?'core.edit':'core.create','com_minimarket'))
+                    throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+                $this->embeddedZoneEditor=true;
+                if($editingId>0){
+                    $db->setQuery($db->getQuery(true)->select('*')
+                        ->from($db->quoteName('#__minimarket_delivery_zones'))
+                        ->where('id='.(int)$editingId));
+                    $this->zone=$db->loadObject()?:null;
+                    if($this->zone===null)throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
+                }
+            }
+        }
         ToolbarHelper::title(Text::_('COM_MINIMARKET_DELIVERY_METHODS_TITLE'));
         if($this->canEdit)ToolbarHelper::preferences('com_minimarket');
         parent::display($tpl);
