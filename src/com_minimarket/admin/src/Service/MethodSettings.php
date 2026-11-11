@@ -1,0 +1,115 @@
+<?php
+namespace MiniMarket\Component\Minimarket\Administrator\Service;
+\defined('_JEXEC') or die;
+
+use Joomla\Database\DatabaseInterface;
+
+/**
+ * Built-in delivery/payment method settings, stored in the existing Joomla
+ * component options. No duplicate method tables and no core modifications.
+ */
+final class MethodSettings
+{
+    public static function normalize(string $scope,string $method,array $input): array
+    {
+        $enabled=(string)($input['enabled']??'0');
+        if(!in_array($enabled,['0','1'],true)) {
+            throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        }
+        if($scope==='delivery' && $method==='pickup'){
+            $address=self::cleanText((string)($input['address']??''),512);
+            return ['delivery_pickup_enabled'=>(int)$enabled,
+                'delivery_pickup_address'=>$address];
+        }
+        if($scope==='delivery' && $method==='courier'){
+            $source=(string)($input['rate_source']??'directory');
+            if(!in_array($source,['directory','zones'],true)) {
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            }
+            $rates=trim(str_replace(["\r\n","\r"],"\n",(string)($input['city_rates']??'')));
+            if(mb_strlen($rates)>15000) {
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            }
+            self::checkCityRates($rates);
+            return ['delivery_courier_enabled'=>(int)$enabled,
+                'delivery_rate_source'=>$source,'delivery_city_rates'=>$rates];
+        }
+        if($scope==='payment' && $method==='on_receipt'){
+            return ['payment_on_receipt_enabled'=>(int)$enabled];
+        }
+        if($scope==='payment' && $method==='bank_transfer'){
+            $instructions=self::cleanText((string)($input['instructions']??''),2000);
+            return ['payment_bank_transfer_enabled'=>(int)$enabled,
+                'payment_bank_instructions'=>$instructions];
+        }
+        throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+    }
+
+    public static function save(DatabaseInterface $db,array $changes): void
+    {
+        $allowed=[
+            'delivery_pickup_enabled','delivery_pickup_address',
+            'delivery_courier_enabled','delivery_rate_source','delivery_city_rates',
+            'payment_on_receipt_enabled','payment_bank_transfer_enabled',
+            'payment_bank_instructions'
+        ];
+        foreach($changes as $key=>$value){
+            if(!in_array($key,$allowed,true))throw new \LogicException('Unrecognized method option');
+        }
+        $db->transactionStart();
+        try {
+            $db->setQuery('SELECT extension_id, params FROM '
+                .$db->quoteName('#__extensions')
+                .' WHERE type='.$db->quote('component')
+                .' AND element='.$db->quote('com_minimarket').' FOR UPDATE');
+            $row=$db->loadAssoc();
+            if(!$row)throw new \RuntimeException('MiniMarket extension missing');
+            $params=json_decode((string)$row['params'],true);
+            if(!is_array($params))$params=[];
+            foreach($changes as $key=>$value)$params[$key]=$value;
+            $json=json_encode($params,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
+            $query=$db->getQuery(true)->update($db->quoteName('#__extensions'))
+                ->set($db->quoteName('params').'='.$db->quote($json))
+                ->where($db->quoteName('extension_id').'='.(int)$row['extension_id']);
+            $db->setQuery($query);$db->execute();
+            $db->transactionCommit();
+        } catch(\Throwable $e) {
+            $db->transactionRollback();
+            throw $e;
+        }
+    }
+
+    private static function cleanText(string $text,int $limit): string
+    {
+        $text=trim(strip_tags($text));
+        if(mb_strlen($text)>$limit || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u',$text)){
+            throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        }
+        return $text;
+    }
+
+    private static function checkCityRates(string $rates): void
+    {
+        if($rates==='')return;
+        $lines=explode("\n",$rates);
+        if(count($lines)>300)throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        $seen=[];
+        foreach($lines as $line){
+            if(trim($line)==='')continue;
+            $parts=explode('|',$line);
+            if(count($parts)<2||count($parts)>3)throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            $city=trim($parts[0]);
+            $price=trim($parts[1]);
+            $free=trim($parts[2]??'');
+            if($city===''||mb_strlen($city)>120
+                ||!preg_match('/^[\p{L}\p{N} .\-()]+$/uD',$city)
+                ||!preg_match('/^[0-9]{1,8}(?:[.,][0-9]{1,2})?$/D',$price)
+                ||($free!==''&&!preg_match('/^[0-9]{1,8}(?:[.,][0-9]{1,2})?$/D',$free))){
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            }
+            $key=mb_strtolower($city);
+            if(isset($seen[$key]))throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            $seen[$key]=true;
+        }
+    }
+}
