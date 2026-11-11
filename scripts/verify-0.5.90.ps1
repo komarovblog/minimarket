@@ -41,6 +41,9 @@ Assert (-not $css.Contains('.mm-columns-picker')) 'bespoke column CSS remains'
 Assert (-not $css.Contains('.mm-native-searchtools')) 'bespoke search CSS remains'
 Assert (-not $css.Contains('@container (max-width: 900px)')) 'table converted to cards'
 Assert ($css.Contains('.mm-native-list-viewport')) 'local horizontal scroll missing'
+Assert (-not $css.Contains('#adminForm .mm-admin-list {')) 'legacy MiniMarket border forces non-native table appearance'
+Assert (-not $css.Contains('border-collapse: separate;')) 'separate table borders conflict with native Atum lists'
+
 
 foreach($view in $native){
     $template=Source "admin\tmpl\$view\default.php"
