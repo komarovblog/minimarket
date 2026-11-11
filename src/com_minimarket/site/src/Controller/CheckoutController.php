@@ -80,9 +80,12 @@ final class CheckoutController extends BaseController
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
                 'payment_method'=>$app->input->post->get('payment_method','','string'),
             ],(int)$quote['total_cents']);
-            $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery);
+            $promoCode=strtoupper(trim((string)$app->input->post->get('promo_code',
+                (string)$session->get('com_minimarket.promo_code',''),'string')));
+            $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery,'site',$promoCode);
             $session->set('com_minimarket.checkout.key','');
             $session->set(CartState::SESSION_KEY,[]);
+            $session->set('com_minimarket.promo_code','');
             $session->set('com_minimarket.checkout.last_order',$id);
             $this->setRedirect(RouteHelper::orderComplete());
         } catch (\DomainException $e) {
