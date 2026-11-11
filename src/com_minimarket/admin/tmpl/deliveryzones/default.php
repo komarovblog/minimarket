@@ -49,8 +49,8 @@ $href='index.php?option=com_minimarket&view=deliveryzones&'.http_build_query([
      <td><span class="badge bg-<?php echo (int)$z->state===1?'success':'secondary'; ?>"><?php echo Text::_((int)$z->state===1?'JPUBLISHED':'JUNPUBLISHED'); ?></span></td>
     </tr>
    <?php endforeach; ?>
-   <?php if(!$this->zones): ?><tr><td colspan="7"><?php echo Text::_('COM_MINIMARKET_REF_EMPTY'); ?></td></tr><?php endif; ?>
    </tbody></table>
+<?php if (!$this->zones): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_REF_EMPTY'); ?></div><?php endif; ?>
  </div>
  <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
   <input type="hidden" name="limitstart" value="<?php echo (int)$this->offset; ?>">
