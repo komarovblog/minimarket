@@ -24,15 +24,14 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
-<div class="mm-native-entity-list">
- <div id="j-main-container" class="j-main-container">
-  
-  <form id="adminForm" name="adminForm" class="mm-list-form" method="post"
+<form id="adminForm" name="adminForm" class="mm-list-form" method="post"
         action="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>">
    <input type="hidden" name="task" value="">
    <input type="hidden" name="boxchecked" value="0">
    <?php echo HTMLHelper::_('form.token'); ?>
    <input type="hidden" name="limitstart" value="<?php echo (int)$this->offset; ?>">
+ <div id="j-main-container" class="j-main-container">
+
    <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
   <div class="table-responsive mm-native-list-viewport">
    <table id="mm-feeds-list" class="table table-striped mm-admin-list">
@@ -74,7 +73,8 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
 <?php if (!$this->feeds): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_FEED_EMPTY'); ?></div><?php endif; ?>
   </div>
   <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
-  </form>
+   </div>
+</form>
   <?php foreach($this->feeds as $feed): ?>
    <form id="mm-feed-delete-<?php echo (int)$feed['id']; ?>" method="post"
          action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=feed.delete',false)); ?>"
@@ -85,5 +85,3 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
    </form>
   <?php endforeach; ?>
   <p class="text-muted small mt-3"><?php echo Text::_('COM_MINIMARKET_FEED_LIMITATIONS'); ?></p>
- </div>
-</div>
