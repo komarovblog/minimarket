@@ -12,11 +12,12 @@ use Joomla\CMS\Router\Route;
  <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_REVIEW_NEW'); ?></h2>
  <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=review.create',false)); ?>" id="mm-review-form" class="row g-3">
   <div class="col-12">
-   <label class="form-label" for="mm-review-product"><?php echo Text::_('COM_MINIMARKET_REVIEW_PRODUCT'); ?> *</label>
-   <select class="form-select" name="product_id" id="mm-review-product" required>
-    <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
-    <?php foreach($this->products as $p): ?><option value="<?php echo (int)$p->id; ?>"><?php echo $this->escape($p->title); ?> (#<?php echo (int)$p->id; ?>)</option><?php endforeach; ?>
-   </select>
+   <?php $mmReference=[
+     'title'=>Text::_('COM_MINIMARKET_REVIEW_PRODUCT'),
+     'endpoint'=>'search','input'=>'product_id','selected'=>[],
+     'placeholder'=>Text::_('COM_MINIMARKET_PRODUCT_SEARCH'),
+     'multiple'=>false,
+   ]; require dirname(__DIR__).'/shared/reference-picker.php'; ?>
   </div>
   <div class="col-12 col-md-6">
    <label for="mm-review-name" class="form-label"><?php echo Text::_('COM_MINIMARKET_REVIEW_AUTHOR'); ?> *</label>
