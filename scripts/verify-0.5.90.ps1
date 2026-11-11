@@ -18,7 +18,7 @@ function Source([string]$relative){
     return Get-Content -LiteralPath $path -Raw -Encoding UTF8
 }
 [xml]$manifest=Source 'minimarket.xml'
-Assert ([string]$manifest.extension.version -eq '0.5.90') 'version'
+Assert ([version]([string]$manifest.extension.version) -ge [version]'0.5.90') 'native list contract minimum version'
 $display=Source 'admin\src\Controller\DisplayController.php'
 Assert ($display.Contains("useScript('table.columns')")) 'Joomla columns web asset'
 Assert ($display.Contains("useScript('multiselect')")) 'Joomla multiselect web asset'

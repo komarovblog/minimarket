@@ -1,3 +1,11 @@
+# MiniMarket 0.5.91 — UI/фиды/способы/настройки, незавершённая браузерная приёмка
+
+**Область:** новый релиз без изменения схемы и торговой корзины. Сводка выполненного/оставшегося: [docs/RELEASE_0_5_91.md](docs/RELEASE_0_5_91.md). Источник истины для общих правил: MASTER_PLAN, ITERATION_RULES, SETTINGS_REGISTRY. Blank отложен. Ветка development.
+**Ожидания:** обязательно CI PHP8.4/8.5 Windows ZIP + MySQL PASS на SHA этого релиза; затем локальная установка и проверка 20 native списков, формы фидов, способов регистрации, оформления, настроек и промокодов. До браузерной приёмки не объявлять 0.5.91 принятым.
+**Следующие задачи:** дополнять только сквозными вертикальными срезами по несделанным пунктам — sitemap, SKU export/import v2, per-category flags, option-combinations, расширенные фильтры/чекаут. Никогда не добавлять только пустые настройки. Схему менять только с fresh/install и миграциями.
+**Выпуск на Windows:** `cd /d C:\OSPanel\home\minimarket.local && git pull --ff-only origin development && powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\release-to-desktop.ps1 -SkipPull`. Установить только `com_minimarket-0.5.91.zip`, SQL для UI не нужен. Backup базы перед установкой.
+---
+
 # 11.11.2026 — MiniMarket 0.5.90: исходники стабилизированы, ожидается локальная приёмка
 
 **Проверенный код:** коммит `40c35cb04102e4e293b36b90ffd04fce52a6a6e7`. [GitHub Actions run 43064459970](https://github.com/komarovblog/minimarket/actions/runs/43064459970) — **SUCCESS**: PHP 8.4 PASS, PHP 8.5 PASS, Windows component ZIP/inspection/Desktop delivery contract PASS, MySQL 8.4 canonical fresh PASS, full demo import PASS, MySQL category upgrade PASS. Результаты подтверждены 11.11.2026.
