@@ -12,7 +12,7 @@ $source=@{
  'manual_order'='admin\tmpl\order\create.php'
  'manual_api'='admin\src\Controller\ProductpickerController.php'
  'manual_js'='media\js\manual-order.js'
- 'columns_js'='media\js\admin-columns.js'
+ 'display'='admin\src\Controller\DisplayController.php'
  'promo'='site\src\Service\PromotionService.php'
  'cart_view'='site\src\View\Cart\HtmlView.php'
  'cart_tmpl'='site\tmpl\cart\default.php'
@@ -47,9 +47,11 @@ if(-not $text['manual_api'].Contains('category_id') -or
    -not $text['manual_js'].Contains("root.searchParams.set('category_id'")){
     throw 'MINIMARKET_088_CATEGORY_LOOKUP_MISSING'
 }
-if(-not $text['columns_js'].Contains("minimarket.admin.columns.v3.") -or
-   -not $text['columns_js'].Contains("view==='bundles'")){
-    throw 'MINIMARKET_088_RESPONSIVE_COLUMN_DEFAULT_MISSING'
+# 0.5.90 uses Joomla's own columns Web Asset and native searchtools.
+# The former custom column code was removed rather than duplicated.
+if(-not $text['display'].Contains("useScript('table.columns')")
+   -or $text['display'].Contains("'com_minimarket.admin-columns'")){
+    throw 'MINIMARKET_088_NATIVE_COLUMNS_MISSING'
 }
 foreach($key in @('usage_limit','per_customer_limit','FOR UPDATE','discount_cents')) {
     if(-not $text['promo'].Contains($key)) {
