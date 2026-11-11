@@ -65,7 +65,11 @@ final class ValuesModel extends ListModel
         parent::populateState($ordering, $direction);
         // Keep old links from a characteristic's Values button functional.
         $legacyId = Factory::getApplication()->input->getInt('attribute_id', 0);
-        if ($legacyId > 0 && (int) $this->getState('filter.attribute_id') === 0) {
+        $postedFilters = Factory::getApplication()->input->post->get('filter', [], 'array');
+        if ($legacyId > 0
+            && !array_key_exists('attribute_id', is_array($postedFilters) ? $postedFilters : [])
+            && (int) $this->getState('filter.attribute_id') === 0
+        ) {
             $this->setState('filter.attribute_id', $legacyId);
         }
     }
