@@ -12,11 +12,13 @@ final class HtmlView extends BaseHtmlView
     public ?object $page=null;
     public array $facets=[];
     public array $skuChoices=[];
+    public bool $canPublish=false;
     public $mediaForm=null;
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
         $id=$app->input->getInt('id',0);
+        $this->canPublish=$app->getIdentity()->authorise('core.edit.state','com_minimarket');
         $this->setLayout('create');
         if(!$app->getIdentity()->authorise($id>0?'core.edit':'core.create','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
