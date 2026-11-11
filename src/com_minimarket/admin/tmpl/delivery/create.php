@@ -4,11 +4,15 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 ?>
+<div class="d-flex gap-2 flex-wrap mb-3">
+ <button type="submit" form="mm-delivery-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
+ <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+</div>
 <section class="mm-admin-panel mm-admin-list-panel">
  <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_DELIVERY_NEW'); ?></h2>
  <div class="alert alert-info" role="note"><span class="icon-info-circle" aria-hidden="true"></span>
  <?php echo Text::_('COM_MINIMARKET_DELIVERY_CREATE_HINT'); ?></div>
- <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.create',false)); ?>" class="row g-3">
+ <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.create',false)); ?>" id="mm-delivery-form" class="row g-3">
   <div class="col-12">
     <div class="row g-2 mb-2">
       <div class="col-12 col-md-6">
