@@ -1,51 +1,75 @@
 <?php
 \defined('_JEXEC') or die;
-
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
-// Only actually installed MiniMarket plugins are listed. Category is a separate column.
-$pluginType = static function (string $element): string {
-    $prefix = strtolower(explode('_', $element, 2)[0]);
-    $types = [
-        'delivery' => 'Доставка', 'shipping' => 'Доставка',
-        'payment' => 'Оплата', 'sms' => 'SMS',
-        'email' => 'Почта', 'auth' => 'Авторизация',
-        'bot' => 'Боты', 'crm' => 'CRM',
-        'feed' => 'Фиды', 'analytics' => 'Аналитика',
-    ];
-    return $types[$prefix] ?? 'Другое';
+$pluginType=static function(string $element):string {
+    $prefix=strtolower(explode('_',$element,2)[0]);
+    $types=['shipping'=>'DELIVERY','delivery'=>'DELIVERY','payment'=>'PAYMENT',
+        'sms'=>'SMS','email'=>'EMAIL','auth'=>'AUTH','bot'=>'BOT','crm'=>'CRM',
+        'feed'=>'FEED','analytics'=>'ANALYTICS'];
+    return Text::_('COM_MINIMARKET_INTEGRATIONS_TYPE_'.($types[$prefix]??'OTHER'));
 };
+$mmSearch=[
+ 'view'=>'integrations','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
+ 'searchLabel'=>Text::_('COM_MINIMARKET_INTEGRATIONS_PROVIDER'),
+ 'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
+ 'filters'=>[['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_INTEGRATIONS_STATUS'),
+  'value'=>$this->statusFilter,'default'=>'all',
+  'options'=>['all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+   'enabled'=>Text::_('COM_MINIMARKET_INTEGRATIONS_PLUGIN_ENABLED'),
+   'disabled'=>Text::_('COM_MINIMARKET_INTEGRATIONS_PLUGIN_DISABLED')]]]
+];
+$href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
+ 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,
+ 'filter_sort'=>$this->sort,'limit'=>$this->pageSize
+],'','&',PHP_QUERY_RFC3986);
 ?>
-<section class="mm-admin-panel mm-admin-list-panel">
- <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
-  <h2 class="h4 mb-0"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_TITLE'); ?></h2>
-  <?php if ($this->canManagePlugins): ?>
-   <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_plugins', false)); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_MANAGE_PLUGINS'); ?></a>
+<div class="mm-unified-list">
+ <div id="j-main-container" class="j-main-container">
+  <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+  <?php if($this->canManagePlugins): ?>
+   <p class="mb-2">
+    <a class="btn btn-outline-primary btn-sm" href="<?php echo $this->escape(Route::_('index.php?option=com_plugins',false)); ?>">
+     <?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_MANAGE_PLUGINS'); ?></a>
+   </p>
+  <?php endif; ?>
+  <div class="table-responsive">
+   <table id="mm-integrations-list" class="table table-striped mm-admin-list">
+    <thead><tr>
+     <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_PROVIDER'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_TYPE'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_STATUS'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></th>
+    </tr></thead>
+    <tbody>
+    <?php foreach($this->plugins as $plugin): ?>
+     <tr>
+      <td data-label="<?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_PROVIDER'); ?>">
+       <?php echo $this->escape(Text::_((string)$plugin->name)); ?>
+       <small class="d-block text-muted"><?php echo $this->escape((string)$plugin->element); ?></small></td>
+      <td data-label="<?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_TYPE'); ?>"><?php echo $this->escape($pluginType((string)$plugin->element)); ?></td>
+      <td data-label="<?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_STATUS'); ?>">
+       <span class="badge bg-<?php echo (int)$plugin->enabled===1?'success':'secondary'; ?>">
+       <?php echo Text::_((int)$plugin->enabled===1?'COM_MINIMARKET_INTEGRATIONS_PLUGIN_ENABLED':'COM_MINIMARKET_INTEGRATIONS_PLUGIN_DISABLED'); ?></span></td>
+      <td data-label="<?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?>">
+       <?php if($this->canManagePlugins): ?>
+        <a href="<?php echo $this->escape(Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='.(int)$plugin->extension_id,false)); ?>">
+         <?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></a>
+       <?php else: ?>—<?php endif; ?>
+      </td>
+     </tr>
+    <?php endforeach; ?>
+    <?php if(!$this->plugins): ?><tr><td colspan="4"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_NO_PLUGINS'); ?></td></tr><?php endif; ?>
+    </tbody>
+   </table>
+  </div>
+  <?php if($this->total>$this->pageSize): ?>
+   <nav class="mm-native-pagination">
+    <?php if($this->offset>0): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.max(0,$this->offset-$this->pageSize),false)); ?>"><?php echo Text::_('JPREV'); ?></a><?php endif; ?>
+    <span><?php echo $this->offset+1; ?>–<?php echo min($this->total,$this->offset+$this->pageSize); ?> / <?php echo $this->total; ?></span>
+    <?php if($this->offset+$this->pageSize<$this->total): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.($this->offset+$this->pageSize),false)); ?>"><?php echo Text::_('JNEXT'); ?></a><?php endif; ?>
+   </nav>
   <?php endif; ?>
  </div>
- <div class="table-responsive">
-  <table class="table table-striped mm-admin-list">
-   <thead><tr>
-    <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_PROVIDER'); ?></th>
-    <th>Тип</th>
-    <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_STATUS'); ?></th>
-    <th>Настройки</th>
-   </tr></thead>
-   <tbody>
-   <?php foreach ($this->plugins as $plugin): ?>
-    <tr>
-     <td><?php echo $this->escape(Text::_((string) $plugin->name)); ?>
-      <small class="d-block text-muted"><?php echo $this->escape((string) $plugin->element); ?></small></td>
-     <td><?php echo $this->escape($pluginType((string) $plugin->element)); ?></td>
-     <td><span class="badge bg-<?php echo (int) $plugin->enabled === 1 ? 'info' : 'secondary'; ?>"><?php echo Text::_((int) $plugin->enabled === 1 ? 'COM_MINIMARKET_INTEGRATIONS_PLUGIN_ENABLED' : 'COM_MINIMARKET_INTEGRATIONS_PLUGIN_DISABLED'); ?></span></td>
-     <td><?php if ($this->canManagePlugins): ?>
-      <a href="<?php echo $this->escape(Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id=' . (int) $plugin->extension_id, false)); ?>">Настроить</a>
-     <?php else: ?>&mdash;<?php endif; ?></td>
-    </tr>
-   <?php endforeach; ?>
-   <?php if (!$this->plugins): ?><tr><td colspan="4"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_NO_PLUGINS'); ?></td></tr><?php endif; ?>
-   </tbody>
-  </table>
- </div>
-</section>
+</div>
