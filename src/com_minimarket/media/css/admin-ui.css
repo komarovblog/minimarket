@@ -927,3 +927,10 @@
   overflow-x:auto; overscroll-behavior-x:contain;
 }
 .mm-editor-table-viewport > table {min-width:100%; margin-bottom:0;}
+
+/* Remove spare vertical space between Joomla SearchTools, column picker and table. */
+#adminForm.mm-list-form .js-stools-container-filters {margin-bottom:.45rem;}
+#adminForm.mm-list-form .mm-columns-toolbar {margin:0 0 .2rem!important;padding:0!important;min-height:0;}
+#adminForm.mm-list-form .mm-columns-toolbar + .mm-native-list-viewport,
+#adminForm.mm-list-form .mm-columns-toolbar + .table-responsive {margin-top:0!important;}
+#adminForm.mm-list-form .mm-native-list-viewport>.mm-admin-list {margin-top:0!important;}
