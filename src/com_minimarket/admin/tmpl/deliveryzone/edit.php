@@ -9,20 +9,15 @@ $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00'
 ?>
 <div class="d-flex gap-2 flex-wrap mb-3">
  <button type="submit" form="mm-zone-form" name="save_close" value="0" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
- <button type="submit" form="mm-zone-form" name="save_close" value="1" class="btn btn-success"><?php echo Text::_('JSAVEANDCLOSE'); ?></button>
+ <button type="submit" form="mm-zone-form" name="save_close" value="1" class="btn btn-success"><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
  <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveryzones',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
 <form id="mm-zone-form" method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=deliveryzone.save',false)); ?>">
  <input type="hidden" name="id" value="<?php echo (int)($z->id??0); ?>">
  <?php echo HTMLHelper::_('form.token'); ?>
- <div class="mm-admin-panel">
-  <ul class="nav nav-tabs" role="tablist">
-   <?php foreach(['basic'=>'COM_MINIMARKET_ZONE_TAB_MAIN','tariff'=>'COM_MINIMARKET_ZONE_TAB_TARIFF','limits'=>'COM_MINIMARKET_ZONE_TAB_LIMITS'] as $tab=>$label): ?>
-    <li class="nav-item"><button class="nav-link<?php echo $tab==='basic'?' active':''; ?>" data-bs-toggle="tab" data-bs-target="#mm-zone-<?php echo $tab; ?>" type="button"><?php echo Text::_($label); ?></button></li>
-   <?php endforeach; ?>
-  </ul>
-  <div class="tab-content p-3">
-   <div class="tab-pane fade show active" id="mm-zone-basic">
+ <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-deliveryzone', ['active' => 'basic']); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-deliveryzone', 'basic', Text::_('COM_MINIMARKET_ZONE_TAB_MAIN')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label for="z-title" class="form-label"><?php echo Text::_('JGLOBAL_TITLE'); ?> *</label>
       <input id="z-title" name="title" maxlength="160" class="form-control" required value="<?php echo $this->escape($get('title')); ?>"></div>
@@ -38,7 +33,9 @@ $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00'
       <p class="form-text"><?php echo Text::_('COM_MINIMARKET_ZONE_POSTCODES_HELP'); ?></p></div>
     </div>
    </div>
-   <div class="tab-pane fade" id="mm-zone-tariff">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-deliveryzone', 'tariff', Text::_('COM_MINIMARKET_ZONE_TAB_TARIFF')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label for="z-mode" class="form-label"><?php echo Text::_('COM_MINIMARKET_ZONE_RATE_MODE'); ?></label>
       <select id="z-mode" name="rate_mode" class="form-select">
@@ -56,7 +53,9 @@ $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00'
      <?php endforeach; ?>
     </div>
    </div>
-   <div class="tab-pane fade" id="mm-zone-limits">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-deliveryzone', 'limits', Text::_('COM_MINIMARKET_ZONE_TAB_LIMITS')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <?php foreach([
        'max_weight_grams'=>'COM_MINIMARKET_ZONE_MAX_WEIGHT',
@@ -73,6 +72,6 @@ $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00'
        <span class="form-check-label"><?php echo Text::_('JPUBLISHED'); ?></span></label></div>
     </div>
    </div>
-  </div>
- </div>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+<?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </form>
