@@ -9,11 +9,15 @@ use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\InstalledMethodPlugins;
+use MiniMarket\Component\Minimarket\Administrator\Service\MethodListRows;
 
 final class HtmlView extends BaseHtmlView
 {
     public $params;
     public array $plugins=[];
+    public array $methodRows=[];
+    public string $search='', $typeFilter='', $statusFilter='all', $sort='name_asc';
+    public int $total=0, $offset=0, $pageSize=20;
     public bool $canEdit=false,$canEditPlugins=false;
     public string $method='';
     public int $zones=0;
@@ -34,6 +38,25 @@ final class HtmlView extends BaseHtmlView
         $this->params=ComponentHelper::getParams('com_minimarket');
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $this->plugins=InstalledMethodPlugins::list($db,'delivery');
+        if($this->method===''){
+            $this->search=mb_substr(trim($app->input->getString('filter_search','')),0,100);
+            $type=$app->input->getCmd('filter_type','');
+            $this->typeFilter=in_array($type,['builtin','plugin'],true)?$type:'';
+            $status=$app->input->getCmd('filter_status','all');
+            $this->statusFilter=in_array($status,['all','enabled','disabled'],true)?$status:'all';
+            $sort=$app->input->getCmd('filter_sort','name_asc');
+            $this->sort=in_array($sort,['name_asc','name_desc'],true)?$sort:'name_asc';
+            $limit=$app->input->getInt('limit',20);
+            $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
+            $this->offset=max(0,min(1000000,$app->input->getInt('limitstart',0)));
+            $list=MethodListRows::collect('delivery',$this->params,$this->plugins,
+                $this->canEdit,$this->canEditPlugins,$this->search,
+                $this->typeFilter,$this->statusFilter,$this->sort,
+                $this->pageSize,$this->offset);
+            $this->methodRows=$list['rows'];
+            $this->total=$list['total'];
+            $this->offset=$list['offset'];
+        }
         $db->setQuery('SELECT COUNT(*) FROM '.$db->quoteName('#__minimarket_delivery_zones'));
         $this->zones=(int)$db->loadResult();
         ToolbarHelper::title(Text::_('COM_MINIMARKET_DELIVERY_METHODS_TITLE'));
