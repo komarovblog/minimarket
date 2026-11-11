@@ -81,7 +81,7 @@ final class OrderStorage
         $db->transactionStart();
         try {
             // Row lock serializes promotion usage-limit checks across checkouts.
-            $promo=PromotionService::quote($db,$promoCode,$lines,$total,$userId,$contact,true);
+            $promo=PromotionService::quote($db,$promoCode,$lines,$total,$userId,$contact,true,$checkoutKey);
             $discount=(int)($promo['discount_cents']??0);
             if($discount>$total)throw new \DomainException('COM_MINIMARKET_PROMO_INVALID');
             $columns=['checkout_key','user_id','customer_name','phone','email',
