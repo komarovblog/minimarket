@@ -906,3 +906,17 @@
  .mm-native-searchtools__filters {padding:.5rem;}
  .mm-native-searchtools__filter {max-width:none;}
 }
+
+/* Native Joomla lists also scroll inside their own table viewport. */
+#adminForm.mm-list-form,
+#adminForm.mm-list-form .j-main-container,
+#adminForm.mm-list-form .mm-native-list-viewport {
+  width:100%; min-width:0; max-width:100%;
+}
+#adminForm.mm-list-form .mm-native-list-viewport {
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+}
+#adminForm.mm-list-form .mm-native-list-viewport .mm-admin-list {
+  margin-bottom:0;
+}
