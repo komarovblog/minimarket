@@ -13,6 +13,7 @@ $viewName = (string) $mmSearch['view'];
 ?>
 <form id="adminForm" name="adminForm" class="mm-list-form" method="post"
       action="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=' . $viewName, false)); ?>">
+ <div id="j-main-container" class="j-main-container">
  <?php require __DIR__ . '/searchtools.php'; ?>
  <div class="table-responsive mm-native-list-viewport">
   <table id="mm-<?php echo $esc($viewName); ?>-list"
@@ -67,5 +68,6 @@ $viewName = (string) $mmSearch['view'];
  <input type="hidden" name="boxchecked" value="0">
  <input type="hidden" name="task" value="">
  <?php echo HTMLHelper::_('form.token'); ?>
+ </div>
 </form>
 <p class="form-text"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_NOTE'); ?></p>
