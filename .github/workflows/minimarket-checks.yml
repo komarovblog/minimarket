@@ -363,6 +363,9 @@ jobs:
       - name: Sitemap feed XML and public Joomla article regression
         run: php scripts/test-sitemap-feed.php
 
+      - name: MiniMarket 0.5.95 method settings and category SEO regression
+        run: php scripts/test-0-5-95-methods-seo.php
+
       - name: Router regression tests
         run: php scripts/test-router.php
 
