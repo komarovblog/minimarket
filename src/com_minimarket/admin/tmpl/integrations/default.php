@@ -10,18 +10,24 @@ $pluginType=static function(string $element):string {
         'feed'=>'FEED','analytics'=>'ANALYTICS'];
     return Text::_('COM_MINIMARKET_INTEGRATIONS_TYPE_'.($types[$prefix]??'OTHER'));
 };
+$kindOptions=[''=>Text::_('COM_MINIMARKET_FILTER_ANY')];
+foreach(['delivery','payment','sms','email','auth','bot','crm','feed','analytics','other'] as $type){
+    $kindOptions[$type]=Text::_('COM_MINIMARKET_INTEGRATIONS_TYPE_'.strtoupper($type));
+}
 $mmSearch=[
  'view'=>'integrations','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
  'searchLabel'=>Text::_('COM_MINIMARKET_INTEGRATIONS_PROVIDER'),
  'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
- 'filters'=>[['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_INTEGRATIONS_STATUS'),
+ 'filters'=>[
+ ['name'=>'filter_type','label'=>Text::_('COM_MINIMARKET_INTEGRATIONS_TYPE'),'value'=>$this->typeFilter,'options'=>$kindOptions],
+ ['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_INTEGRATIONS_STATUS'),
   'value'=>$this->statusFilter,'default'=>'all',
   'options'=>['all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),
    'enabled'=>Text::_('COM_MINIMARKET_INTEGRATIONS_PLUGIN_ENABLED'),
    'disabled'=>Text::_('COM_MINIMARKET_INTEGRATIONS_PLUGIN_DISABLED')]]]
 ];
 $href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
- 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,
+ 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,'filter_type'=>$this->typeFilter,
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
