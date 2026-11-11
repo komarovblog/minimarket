@@ -71,6 +71,11 @@ foreach($key in @('per_kg','per_liter','free_from_cents','postcode_prefixes')) {
         throw "MINIMARKET_088_SHIPPING_CHECK_MISSING: $key"
     }
 }
+foreach($key in @('mm-seo-publication','COM_MINIMARKET_CATEGORY_TAB_PUBLISHING')) {
+    if(-not $text['seo'].Contains($key)) {
+        throw "MINIMARKET_088_SEO_PUBLICATION_MISSING: $key"
+    }
+}
 foreach($key in @('data-mm-seo-facet','data-mm-seo-stock','og_image','mm-seo-price-min')) {
     if(-not $text['seo'].Contains($key)){
         throw "MINIMARKET_088_SEO_CHECK_MISSING: $key"
