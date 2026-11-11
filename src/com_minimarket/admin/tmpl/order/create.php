@@ -53,6 +53,12 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <div class="input-group">
                           <input id="mm-manual-search-0" type="search" class="form-control" data-mm-manual-search
                                  maxlength="100" placeholder="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_SEARCH')); ?>">
+                          <select class="form-select mm-manual-category-filter" data-mm-manual-category aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_CATEGORY')); ?>">
+                            <option value=""><?php echo Text::_('COM_MINIMARKET_PRODUCT_ALL_CATEGORIES'); ?></option>
+                            <?php foreach($this->pickerCategories as $category): ?>
+                              <option value="<?php echo (int)$category->id; ?>"><?php echo $this->escape($category->title); ?></option>
+                            <?php endforeach; ?>
+                          </select>
                           <button type="button" class="btn btn-primary" data-mm-manual-query><?php echo Text::_('JSEARCH_FILTER_SUBMIT'); ?></button>
                         </div>
                         <input type="hidden" name="items[0][key]" value="" data-mm-manual-key>
