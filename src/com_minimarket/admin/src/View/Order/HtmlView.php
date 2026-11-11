@@ -43,7 +43,7 @@ final class HtmlView extends BaseHtmlView
             }
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             $params=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
-            $this->productChoices=\MiniMarket\Component\Minimarket\Administrator\Service\ManualOrderCatalog::choices($db);
+            $this->productChoices=[]; // AJAX SKU picker, no catalog preload.
             $this->deliveryMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::methods($params);
             $this->paymentMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::payments($params);
             $this->cityRates=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::rates($params);
