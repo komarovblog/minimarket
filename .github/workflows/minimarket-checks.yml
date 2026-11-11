@@ -320,7 +320,7 @@ jobs:
           node --check src/com_minimarket/media/js/admin-display-groups.js
           node --check src/com_minimarket/media/js/category-card-gallery.js
           node --check src/com_minimarket/media/js/promo-video-editor.js
-          node --check src/com_minimarket/media/js/admin-columns.js
+          test ! -f src/com_minimarket/media/js/admin-columns.js  # Native Joomla table.columns replaces retired custom JS
           php -l src/com_minimarket/admin/src/Controller/DeliveryController.php
           php -l src/com_minimarket/admin/src/Controller/PromocodeController.php
           php -l src/com_minimarket/admin/src/View/Delivery/HtmlView.php
