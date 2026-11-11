@@ -15,20 +15,15 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
 <form id="mm-promo-form" method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=promocode.save',false)); ?>">
  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
   <button type="submit" class="btn btn-success" name="save_close" value="0"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
-  <button type="submit" class="btn btn-success" name="save_close" value="1"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVEANDCLOSE'); ?></button>
+  <button type="submit" class="btn btn-success" name="save_close" value="1"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
   <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=promocodes',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
  </div>
  <input type="hidden" name="id" value="<?php echo (int)($p->id??0); ?>">
  <?php echo HTMLHelper::_('form.token'); ?>
  <div class="alert alert-info"><?php echo Text::_('COM_MINIMARKET_PROMOCODES_HELP'); ?></div>
- <section class="mm-admin-panel card card-body">
-  <ul class="nav nav-tabs" role="tablist">
-   <li class="nav-item" role="presentation"><button class="nav-link active" type="button" data-bs-toggle="tab" data-bs-target="#mm-promo-general" role="tab"><?php echo Text::_('COM_MINIMARKET_PROMO_TAB_GENERAL'); ?></button></li>
-   <li class="nav-item" role="presentation"><button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#mm-promo-conditions" role="tab"><?php echo Text::_('COM_MINIMARKET_PROMO_TAB_CONDITIONS'); ?></button></li>
-   <li class="nav-item" role="presentation"><button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#mm-promo-limits" role="tab"><?php echo Text::_('COM_MINIMARKET_PROMO_TAB_LIMITS'); ?></button></li>
-  </ul>
-  <div class="tab-content pt-3">
-   <div id="mm-promo-general" class="tab-pane fade show active" role="tabpanel">
+ <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-promocode', ['active' => 'general']); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-promocode', 'general', Text::_('COM_MINIMARKET_PROMO_TAB_GENERAL')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label for="mm-code" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMOCODES_CODE'); ?> *</label>
       <input id="mm-code" name="code" class="form-control" required pattern="[A-Za-z0-9-]{3,64}" maxlength="64" value="<?php echo $this->escape($v('code')); ?>"></div>
@@ -43,7 +38,9 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
       <input id="mm-percent" name="percent_value" class="form-control" type="number" min="0.01" max="100" step="0.01" value="<?php echo $this->escape($v('percent_value','10')); ?>"></div>
     </div>
    </div>
-   <div id="mm-promo-conditions" class="tab-pane fade" role="tabpanel">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-promocode', 'conditions', Text::_('COM_MINIMARKET_PROMO_TAB_CONDITIONS')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label for="mm-min-cart" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMO_MIN_CART'); ?></label>
       <input id="mm-min-cart" name="min_cart" type="number" min="0" step="0.01" class="form-control" value="<?php echo $this->escape($money('min_cart_cents')); ?>"></div>
@@ -70,7 +67,9 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
        <span class="form-check-label"><?php echo Text::_('COM_MINIMARKET_PROMO_COMBINABLE'); ?></span></label></div>
     </div>
    </div>
-   <div id="mm-promo-limits" class="tab-pane fade" role="tabpanel">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-promocode', 'limits', Text::_('COM_MINIMARKET_PROMO_TAB_LIMITS')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label for="mm-start" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMO_START'); ?> (UTC)</label>
       <input id="mm-start" type="datetime-local" name="starts_at" class="form-control" value="<?php echo $this->escape($date('starts_at')); ?>"></div>
@@ -83,8 +82,8 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
      <div class="col-12"><div class="alert alert-secondary"><?php echo Text::_('COM_MINIMARKET_PROMO_NO_REDEMPTION'); ?></div></div>
     </div>
    </div>
-  </div>
- </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+<?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </form>
 <script>
 (() => {
