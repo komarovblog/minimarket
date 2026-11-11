@@ -29,6 +29,7 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
    <li class="nav-item"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#mm-seo-main"><?php echo Text::_('COM_MINIMARKET_SEO_TAB_MAIN'); ?></button></li>
    <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#mm-seo-filters"><?php echo Text::_('COM_MINIMARKET_SEO_TAB_FILTERS'); ?></button></li>
    <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#mm-seo-meta"><?php echo Text::_('COM_MINIMARKET_SEO_TAB_META'); ?></button></li>
+   <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#mm-seo-publication"><?php echo Text::_('COM_MINIMARKET_CATEGORY_TAB_PUBLISHING'); ?></button></li>
   </ul>
   <div class="tab-content pt-3">
    <div id="mm-seo-main" class="tab-pane fade show active">
@@ -147,6 +148,21 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
       <select id="mm-robots" class="form-select" name="meta_robots">
        <?php foreach(['index,follow','noindex,follow','noindex,nofollow'] as $robots): ?><option value="<?php echo $robots; ?>"<?php echo $get('meta_robots','index,follow')===$robots?' selected':''; ?>><?php echo $robots; ?></option><?php endforeach; ?>
       </select></div>
+    </div>
+   </div>
+   <div id="mm-seo-publication" class="tab-pane fade">
+    <div class="row g-3">
+     <div class="col-12">
+      <label class="form-label"><?php echo Text::_('JSTATUS'); ?></label>
+      <?php if($this->canPublish): ?>
+       <select name="state" class="form-select" style="max-width:25rem">
+        <option value="0"<?php echo (int)$get('state')===0?' selected':''; ?>><?php echo Text::_('JUNPUBLISHED'); ?></option>
+        <option value="1"<?php echo (int)$get('state')===1?' selected':''; ?>><?php echo Text::_('JPUBLISHED'); ?></option>
+       </select>
+      <?php else: ?>
+       <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SEO_PUBLISH_PERMISSION'); ?></p>
+      <?php endif; ?>
+     </div>
     </div>
    </div>
   </div>
