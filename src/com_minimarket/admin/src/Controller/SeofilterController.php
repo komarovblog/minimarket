@@ -39,6 +39,14 @@ final class SeofilterController extends BaseController
                 'meta_robots'=>$post->get('meta_robots','index,follow','string'),
                 'filter_query'=>$post->get('filter_query','','string')
             ]);
+            if($app->getIdentity()->authorise('core.edit.state','com_minimarket')){
+                $postedState=$post->getInt('state',-1);
+                if($postedState!==-1){
+                    if(!in_array($postedState,[0,1],true))
+                        throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+                    $data['state']=$postedState;
+                }
+            }
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             $q=$db->getQuery(true)->select('id')->from($db->quoteName('#__minimarket_categories'))
                 ->where('id='.(int)$data['category_id'])->where('state=1');
@@ -60,8 +68,10 @@ final class SeofilterController extends BaseController
                 foreach($data as $column=>$value){
                     $values[]=$column==='category_id'?(string)(int)$value:$db->quote((string)$value);
                 }
-                $columns[]='state';$columns[]='created_at';
-                $values[]='0';$values[]='UTC_TIMESTAMP()';
+                if(!array_key_exists('state',$data)){
+                    $columns[]='state';$values[]='0';
+                }
+                $columns[]='created_at';$values[]='UTC_TIMESTAMP()';
                 $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_seo_filters'))
                     ->columns($db->quoteName($columns))->values(implode(',',$values));
             }
