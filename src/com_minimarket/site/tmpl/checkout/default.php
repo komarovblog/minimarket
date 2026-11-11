@@ -95,7 +95,10 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <?php if($this->pickupSchedule!==''): ?>
                          <p class="text-muted mb-0"><?php echo $this->escape($this->pickupSchedule); ?></p>
                         <?php endif; ?>
-                        <?php if($this->pickupMapUrl!==''): ?>
+                        <?php if($this->pickupMapUrl!=='' && filter_var($this->pickupMapUrl,FILTER_VALIDATE_URL)
+                          && strtolower((string)parse_url($this->pickupMapUrl,PHP_URL_SCHEME))==='https'
+                          && parse_url($this->pickupMapUrl,PHP_URL_USER)===null
+                          && parse_url($this->pickupMapUrl,PHP_URL_PASS)===null): ?>
                          <a target="_blank" rel="noopener noreferrer" href="<?php echo $this->escape($this->pickupMapUrl); ?>">
                            <?php echo Text::_('COM_MINIMARKET_PICKUP_SHOW_MAP'); ?></a>
                         <?php endif; ?>
