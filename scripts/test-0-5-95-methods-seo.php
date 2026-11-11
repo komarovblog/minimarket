@@ -110,5 +110,35 @@ namespace MiniMarket\Smoke95 {
   'SEO category choices are validated server-side');
  $mig=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.95.sql');
  check95(str_contains($mig,'ADD COLUMN name'),'SEO name migrated');
+ $pluginList=(string)file_get_contents($root.'admin/src/Service/MethodListRows.php');
+ $pluginService=(string)file_get_contents($root.'admin/src/Service/PluginMethodSettings.php');
+ $pluginController=(string)file_get_contents($root.'admin/src/Controller/PluginmethodController.php');
+ $pluginTpl=(string)file_get_contents($root.'admin/tmpl/shared/plugin-method.php');
+ check95(str_contains($pluginList,"'plugin_info_url'")
+   && str_contains($pluginList,'&method=plugin_'),
+   'installed plugin enters MiniMarket card while retaining Joomla info link');
+ check95(str_contains($pluginService,'FormFactoryInterface::class')
+   && str_contains($pluginService,'$form->filter(')
+   && str_contains($pluginService,'$form->validate(')
+   && str_contains($pluginService,'transactionStart()')
+   && str_contains($pluginService,'transactionRollback()'),
+   'installed plugin form uses Joomla validation and atomic saving');
+ check95(str_contains($pluginController,"Session::checkToken('post')")
+   && str_contains($pluginController,"'core.edit','com_plugins'"),
+   'plugin settings save guarded by Joomla ACL and CSRF');
+ check95(str_contains($pluginTpl,'$this->pluginForm->renderFieldset')
+   && str_contains($pluginTpl,'COM_MINIMARKET_METHOD_PLUGIN_INFO'),
+   'plugin card renders own manifest settings and separate info link');
+ $pickupTpl=(string)file_get_contents($root.'admin/tmpl/deliverymethods/default.php');
+ check95(str_contains($pickupTpl,'mm-delivery-method')
+   && str_contains($pickupTpl,'deliveryzone/edit.php')
+   && str_contains($pickupTpl,'mm-pickup-fee')
+   && str_contains($pickupTpl,'mm-pickup-schedule')
+   && str_contains($pickupTpl,'mm-pickup-map'),
+   'courier zones tab and configured pickup fields are in method details');
+ $regTpl=(string)file_get_contents($root.'admin/tmpl/registrationmethods/default.php');
+ check95(str_contains($regTpl,'COM_MINIMARKET_REGISTRATION_PRIMARY_CHECKOUT')
+   && str_contains($regTpl,'name="primary"'),
+   'registration card has primary checkout confirmation selector');
  echo 'MM95_METHODS_SEO_PASS: '.$n." checks\n";
 }
