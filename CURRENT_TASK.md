@@ -1,3 +1,15 @@
+# 11.11.2026 — MiniMarket 0.5.92: CI PASS, локальная приёмка ожидается
+
+**Проверен исходный коммит:** `db3ece49bf57498613ffa086ebfd44f3c06c5292`. [GitHub Actions #43087126299](https://github.com/komarovblog/minimarket/actions/runs/43087126299) — **SUCCESS все 6 jobs**: PHP 8.4/8.5, Windows ZIP, MySQL 8.4 fresh/upgrade и demo. Последующие коммиты — только документация, исходники не менялись.
+
+**Сделано в 0.5.92 поверх 0.5.91:** XML Sitemap (товары MiniMarket + общедоступные Joomla com_content), защита от закрытых предков категорий, понятный выбор «По настройке магазина» для характеристик/опций, RU/EN, тесты и отдельный ZIP-манифест. Полная матрица выполнения и требования к недостающим сквозным функциям: [docs/ACCEPTANCE_2026_11_11.md](docs/ACCEPTANCE_2026_11_11.md).
+
+**Не объявлять завершённым:** SKU export/import v2, per-category флаги видимости характеристик и опций, конструктор сочетаний, per-field system filters, новые checkout поля/маски и OTP/автосоздание учетной записи. Нельзя создавать пустые настройки. Blank отложен.
+
+**Для локальной проверки:** backup БД, `git pull --ff-only origin development`, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\release-to-desktop.ps1 -SkipPull`; установить `com_minimarket-0.5.92.zip`. Импорт demo SQL не требуется для UI, 20 списков и новые фиды проверить в реальной Joomla 6, включая SEF статей, RU/EN и темы. Ошибку Database Maintenance не исправлять автоматически.
+
+---
+
 # MiniMarket 0.5.92 — XML Sitemap для выбранных товаров и публичных материалов Joomla
 
 **Компонент:** 0.5.92. Новый поставщик фида `sitemap`: товары MiniMarket через существующий выбор + опубликованные публичные статьи Joomla; без модулей/плагинов, без новой таблицы и без изменения старого YML. Новый `SitemapFeed`, публичный route `feed.xml`, тест `test-sitemap-feed.php`. Ожидаются PASS GitHub CI и локальная браузерная приемка. Другие несделанные пожелания подробно в `docs/RELEASE_0_5_91.md`.
