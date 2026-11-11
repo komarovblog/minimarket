@@ -1009,3 +1009,77 @@
  #mm-manual-order-lines .input-group>[data-mm-manual-search],
  #mm-manual-order-lines .mm-manual-category-filter {flex-basis:100%;}
 }
+
+
+/* 0.5.89 — inherit Joomla Atum list surfaces instead of adding a second frame.
+   These rules are scoped to MiniMarket and do not alter Joomla core. */
+.mm-unified-list .table-responsive,
+.mm-admin-list-panel .table-responsive,
+#adminForm.mm-list-form .mm-native-list-viewport,
+#adminForm .mm-native-list-viewport {
+  border:0!important;
+  outline:0;
+  border-radius:0!important;
+  padding:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+.mm-admin-list-panel {border:0!important;padding:0!important;background:transparent!important;}
+.mm-unified-list .table-responsive>.mm-admin-list,
+.mm-admin-list-panel table.mm-admin-list {
+  border:0!important;
+  border-collapse:collapse;
+  border-radius:0!important;
+}
+.mm-unified-list .mm-native-searchtools {margin:0!important;}
+.mm-native-searchtools__filters {
+  background:transparent!important;
+  border:0!important;
+  padding:.35rem 0 0!important;
+  margin:.25rem 0 0!important;
+  border-radius:0!important;
+}
+.mm-native-searchtools__filters[hidden]{display:none!important;}
+.mm-native-searchtools__line {gap:.4rem!important;}
+.mm-native-searchtools__filter {margin:0!important;}
+.mm-unified-list .mm-columns-toolbar,
+#adminForm.mm-list-form .mm-columns-toolbar {
+  min-height:0!important;
+  padding:0!important;
+  margin:.25rem 0 .15rem!important;
+}
+.mm-unified-list .table-responsive,
+#adminForm.mm-list-form .mm-native-list-viewport {margin-top:0!important;}
+/* Shared reference picker: works equally in the native product adminForm,
+   SEO editor, promotion editor and shipping editor. */
+.mm-reference-picker {display:flex;flex-direction:column;min-width:0;max-width:100%;}
+.mm-reference-picker>[data-mm-ref-selected] {order:1;min-width:0;}
+.mm-reference-picker>[data-mm-ref-panel] {order:2;min-width:0;}
+.mm-reference-picker>[data-mm-ref-input] {order:3;}
+.mm-reference-picker>.form-text {order:4;}
+.mm-reference-picker .mm-entity-picker__row,
+.mm-reference-picker .mm-entity-picker__result {
+  display:flex!important;
+  align-items:center;
+  gap:.6rem;
+  padding:.4rem .1rem;
+  border-bottom:1px solid var(--border-color,var(--bs-border-color,rgba(128,128,128,.25)));
+  min-width:0;
+}
+.mm-reference-picker .mm-entity-picker__row>span,
+.mm-reference-picker .mm-entity-picker__result>span {
+  flex:1 1 auto;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.mm-reference-picker .mm-entity-picker__row>button,
+.mm-reference-picker .mm-entity-picker__result>button {
+  flex:0 0 auto;
+  margin-left:auto;
+  min-width:2rem;
+  text-align:center;
+}
+.mm-reference-picker [data-mm-ref-results] {max-height:18rem;overflow:auto;}
+.mm-reference-picker [data-mm-ref-panel] .form-control[type="search"] {
+  min-width:0!important;flex:1 1 12rem;
+}
