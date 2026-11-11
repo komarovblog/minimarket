@@ -49,8 +49,9 @@ if(-not $text['manual_api'].Contains('category_id') -or
 }
 # 0.5.90 uses Joomla's own columns Web Asset and native searchtools.
 # The former custom column code was removed rather than duplicated.
-if(-not $text['display'].Contains("useScript('table.columns')")
-   -or $text['display'].Contains("'com_minimarket.admin-columns'")){
+$hasNativeColumns = $text['display'].Contains("useScript('table.columns')")
+$hasLegacyColumns = $text['display'].Contains("'com_minimarket.admin-columns'")
+if(-not $hasNativeColumns -or $hasLegacyColumns){
     throw 'MINIMARKET_088_NATIVE_COLUMNS_MISSING'
 }
 foreach($key in @('usage_limit','per_customer_limit','FOR UPDATE','discount_cents')) {
