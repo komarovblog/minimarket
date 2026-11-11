@@ -1,17 +1,15 @@
-/* Accordion cards inside existing Joomla global Options/Display tab.
- * Does not alter field names, submissions or saved component parameters. */
+/* Non-collapsible groups in the Joomla global Options/Display tab. */
 (() => {
  'use strict';
- const start=()=>{
-  const groups=[
+ const start = () => {
+  const groups = [
    ['category_show_children','category_show_description','mm_display_categories_note'],
    ['category_product_layout','category_product_gallery_limit','mm_display_products_note'],
    ['attribute_display_location','system_display_location','mm_display_card_note'],
    ['filter_price_mode','filter_stock_enabled','mm_system_filters_note'],
   ];
-  for(const [first,last,note] of groups){
-   const from=document.getElementById('jform_'+first);
-   const to=document.getElementById('jform_'+last);
+  for (const [first,last,note] of groups) {
+   const from=document.getElementById('jform_'+first), to=document.getElementById('jform_'+last);
    if(!from||!to)continue;
    const a=from.closest('.control-group')||from.closest('.form-group');
    const b=to.closest('.control-group')||to.closest('.form-group');
@@ -26,9 +24,9 @@
       attribute_display_location:'Карточка товара',filter_price_mode:'Системные атрибуты в фильтре'}[first]||'Настройки'):
       ({category_show_children:'Categories',category_product_layout:'Products in category',
       attribute_display_location:'Product card',filter_price_mode:'System filter attributes'}[first]||'Settings'));
-   const panel=document.createElement('details');
-   panel.className='mm-settings-group card mb-3';panel.open=true;
-   const heading=document.createElement('summary');
+   const panel=document.createElement('section');
+   panel.className='mm-settings-group card mb-3';
+   const heading=document.createElement('div');
    heading.className='card-header';heading.textContent=title;
    const body=document.createElement('div');body.className='card-body';
    panel.append(heading,body);parent.insertBefore(panel,a);
