@@ -22,6 +22,9 @@ if (-not $SkipPull) {
 # Avoid hardcoded OSPanel/PHP paths. Build and inspect within the current
 # PowerShell process so Windows does not need to locate a second interpreter.
 $global:LASTEXITCODE = 0
+& (Join-Path $PSScriptRoot 'verify-admin-lists.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_ADMIN_LIST_CHECK_FAILED' }
+$global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'build.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_BUILD_FAILED' }
 $global:LASTEXITCODE = 0
@@ -33,7 +36,8 @@ $version = [string]$manifest.extension.version
 if ($version -notmatch '^\d+\.\d+\.\d+$') {
     throw "MINIMARKET_INVALID_VERSION: $version"
 }
-$demo = Join-Path $root 'sample-data\minimarket_demo_gallery_filters_0_5_84.sql'
+$demoName = "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql"
+$demo = Join-Path (Join-Path $root 'sample-data') $demoName
 if (-not (Test-Path -LiteralPath $demo -PathType Leaf)) {
     throw "MINIMARKET_DEMO_SQL_NOT_READY_FOR_VERSION: $version"
 }
@@ -51,7 +55,7 @@ if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
 $deliverables = @(
     @{ Source = Join-Path $root "dist\com_minimarket-$version.zip"; Name = "com_minimarket-$version.zip" },
     @{ Source = Join-Path $root "dist\mod_minimarket_toolbar-$version.zip"; Name = "mod_minimarket_toolbar-$version.zip" },
-    @{ Source = $demo; Name = 'minimarket_demo_gallery_filters_0_5_84.sql' }
+    @{ Source = $demo; Name = $demoName }
 )
 foreach ($item in $deliverables) {
     if (-not (Test-Path -LiteralPath $item.Source -PathType Leaf)) {
@@ -69,4 +73,4 @@ foreach ($item in $deliverables) {
     Write-Output "DESKTOP_FILE_OK: $dst"
 }
 Write-Output "MINIMARKET_DESKTOP_3_FILES_OK: version=$version"
-Write-Output 'SQL_IS_OPTIONAL: import ONLY to add demo galleries/filters; do not import cumulative or clean SQL.'
+Write-Output 'SQL_IS_OPTIONAL: import ONLY to refresh optional demo catalog data; do not import cumulative or clean SQL.'
