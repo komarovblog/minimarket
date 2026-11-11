@@ -65,6 +65,12 @@
           throw Error('Invalid cart reply');
         refresh(json.data);
         if (!json.success) fail(json.message || json.data.message);
+        // A saved promotion depends on current quantities. Re-render its
+        // server-priced estimate after any successful cart mutation.
+        if (json.success && page.querySelector('#mm-cart-promo')?.value.trim()) {
+          window.location.reload();
+          return;
+        }
       } catch(error) {
         // On a transport error, use the native form so the order is not lost.
         fail('Не удалось обновить корзину без перезагрузки');
