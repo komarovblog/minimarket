@@ -6,6 +6,10 @@ use Joomla\CMS\Router\Route;
 $firstDelivery=array_key_first($this->deliveryMethods);
 $firstPayment=array_key_first($this->paymentMethods);
 ?>
+<div class="d-flex gap-2 flex-wrap mb-3">
+ <button type="submit" form="mm-manual-order-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
+ <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+</div>
 <section class="mm-admin-panel card card-body">
     <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_TITLE'); ?></h2>
     <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_HELP'); ?></p>
