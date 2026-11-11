@@ -7,7 +7,7 @@ $admin=Join-Path $component 'admin'
 $native=@('products','categories','brands','collections','attributes','bundles',
     'groups','bundlegroups','orderoptions','values')
 $bridged=@('orders','deliveries','reviews','promocodes','seofilters','feeds',
-    'integrations','deliveryzones','deliverymethods','paymentmethods')
+    'registrationmethods','deliveryzones','deliverymethods','paymentmethods')
 
 function Assert([bool]$condition,[string]$label){
     if(-not $condition){throw "MINIMARKET_090_NATIVE_LIST_FAIL: $label"}
@@ -57,7 +57,7 @@ foreach($view in $bridged){
     Assert (-not $template.Contains('mm-unified-list')) "$view old wrapper"
     Assert (-not $template.Contains('colspan=')) "$view incompatible empty row"
     Assert (-not $template.Contains('mm-native-pagination')) "$view bespoke pagination"
-    if($view -in @('deliverymethods','paymentmethods')){
+    if($view -in @('deliverymethods','paymentmethods','registrationmethods')){
         Assert ($template.Contains('shared/method-list.php')) "$view method list partial"
     }else{
         Assert ($template.Contains('shared/searchtools.php')) "$view native SearchTools bridge"

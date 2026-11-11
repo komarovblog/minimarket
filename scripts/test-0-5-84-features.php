@@ -45,7 +45,7 @@ foreach(['checkout'=>'checkout_buyer_note','delivery_methods'=>'checkout_deliver
   'native informative subsection '.$field);
 }
 $manifest=(string)$xml->administration->submenu->asXML();
-foreach(['view=delivery','view=integrations','view=promocodes'] as $target)
+foreach(['view=delivery','view=registrationmethods','view=promocodes'] as $target)
  $check(str_contains($manifest,$target),'sidebar '.$target);
 $orders=$read('admin/src/Controller/OrderController.php');
 $check(str_contains($orders,"authorise('core.delete'") &&
@@ -66,11 +66,11 @@ $check(str_contains($promo,"$"."this->guard(") &&
  str_contains($promo,'PromoCodeData::normalize') &&
  str_contains($read('admin/src/Service/PromoCodeData.php'),'[A-Z0-9-]{3,64}'),
  'promo code validation, CSRF and permission guards');
-$integrations=$read('admin/tmpl/integrations/default.php');
-$check(str_contains($integrations,'$this->plugins') &&
- str_contains($integrations,'com_plugins&task=plugin.edit') &&
- str_contains($integrations,'filter_type'),
- 'integrations display real installed plugins and Joomla settings links');
+$registration=$read('admin/tmpl/registrationmethods/default.php');
+$check(str_contains($registration,'shared/method-list.php') &&
+ str_contains($registration,'com_config&view=component&component=com_users') &&
+ str_contains($read('admin/src/Service/InstalledMethodPlugins.php'),"'registration'"),
+ 'registration methods use Joomla accounts and installed plugin registry');
 $display=$read('admin/src/Controller/DisplayController.php');
 $check(str_contains($display,"useScript('table.columns')") &&
  !file_exists($root.'media/js/admin-columns.js'),

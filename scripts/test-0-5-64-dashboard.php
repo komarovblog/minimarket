@@ -17,7 +17,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
                 'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','reviews','seofilters','promocodes','settings',
-                'deliverymethods','paymentmethods','integrations'
+                'deliverymethods','paymentmethods','registrationmethods'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
             if ($name==='deliveries') return 'index.php?option=com_minimarket&amp;view=deliveries';
             if ($name==='reviews') return 'index.php?option=com_minimarket&amp;view=reviews&amp;filter_status=pending';
@@ -69,7 +69,7 @@ namespace MiniMarket\DashboardTest {
         'Orders opens a real administrator list');
     foreach(['categories','products','bundles','brands','collections','groups',
         'bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries',
-        'seofilters','promocodes','deliverymethods','paymentmethods','integrations'] as $view) {
+        'seofilters','promocodes','deliverymethods','paymentmethods','registrationmethods'] as $view) {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
     }

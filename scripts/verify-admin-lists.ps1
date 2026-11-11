@@ -7,7 +7,7 @@ $admin=Join-Path $component 'admin'
 $native=@('products','categories','brands','collections','attributes','bundles',
     'groups','bundlegroups','orderoptions','values')
 $unified=@('orders','deliveries','reviews','promocodes','seofilters','feeds',
-    'integrations','deliveryzones','deliverymethods','paymentmethods')
+    'registrationmethods','deliveryzones','deliverymethods','paymentmethods')
 $bulk=@('orders','deliveries','reviews','promocodes','seofilters')
 $errors=New-Object System.Collections.Generic.List[string]
 
@@ -43,7 +43,7 @@ foreach($view in $unified){
     Check ($viewSource.Contains($expectedNamespace)) "Incorrect namespace: $view"
     Check (-not $source.Contains('mm-unified-list')) "Legacy page wrapper: $view"
     Check (-not $source.Contains('mm-native-pagination')) "Handmade pager: $view"
-    if($view -in @('deliverymethods','paymentmethods')){
+    if($view -in @('deliverymethods','paymentmethods','registrationmethods')){
         Check ($source.Contains("shared/method-list.php")) "Shared method list missing: $view"
         Check ($viewSource.Contains('MethodListRows::collect')) "Method list filtering missing: $view"
     }else{

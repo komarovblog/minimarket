@@ -42,9 +42,10 @@ foreach($relative in @(
 }
 $import=Source 'admin\tmpl\import\default.php'
 Check (-not $import.Contains('COM_MINIMARKET_EXCHANGE_FULL_TITLE')) 'remove full JSON block'
-$integration=Source 'admin\tmpl\integrations\default.php'
-Check (-not $integration.Contains('COM_MINIMARKET_INTEGRATIONS_MANAGE_PLUGINS')) 'remove global plugin link'
-Check ($integration.Contains('filter_type')) 'plugin purpose filter'
+$registration=Source 'admin\tmpl\registrationmethods\default.php'
+Check ($registration.Contains('shared/method-list.php')) 'Joomla registration methods list'
+Check ($registration.Contains('com_config&view=component&component=com_users')) 'native Joomla user registration settings'
+Check (-not $manifest.Contains('view=integrations')) 'obsolete integrations menu removed'
 $search=Source 'admin\tmpl\shared\searchtools.php'
 Check ($search.Contains('NativeListTools::render')) 'native Joomla SearchTools'
 Check (-not $search.Contains('mm-native-searchtools__line')) 'no hand-built filter bar'
@@ -66,7 +67,7 @@ $phpFiles=@(
     'admin\tmpl\deliveryzone\edit.php',
     'admin\tmpl\shared\reference-picker.php',
     'admin\tmpl\shared\searchtools.php',
-    'admin\tmpl\integrations\default.php',
+    'admin\tmpl\registrationmethods\default.php',
     'admin\tmpl\feeds\default.php',
     'admin\tmpl\import\default.php',
     'site\src\View\Ordercomplete\HtmlView.php',

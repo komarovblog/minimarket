@@ -145,7 +145,7 @@ namespace MiniMarket\DashboardCountsTest {
             'real server-rendered number for '.$key);
     }
     verify(substr_count($html,'data-mm-stat="none"')===5,
-        'Import, Settings, Delivery Methods, Payment Methods and Integrations have non-numeric counters');
+        'Import, Settings, Delivery Methods, Payment Methods and Registration have non-numeric counters');
     verify(substr_count($html,'<span aria-hidden="true">—</span>')===5,
         'All five settings/tool tiles without counts show dashes, never zero');
     verify(str_contains($html,'data-mm-stat="orders"')
