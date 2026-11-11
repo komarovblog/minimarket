@@ -115,7 +115,9 @@ final class ManualOrderCatalog
             $total+=$cents*$qty;
             $lines[]=['product_id'=>$pid,'variant_id'=>$vid,'title'=>(string)$p['title'],
                 'sku'=>$sku,'type'=>(string)$p['product_type'],'valid'=>true,
-                'quantity'=>$qty,'unit_cents'=>$cents,'line_cents'=>$cents*$qty];
+                'quantity'=>$qty,'unit_cents'=>$cents,'line_cents'=>$cents*$qty,
+                'shipping_weight_grams'=>(int)($p['shipping_weight_grams']??0),
+                'shipping_volume_cm3'=>(int)($p['shipping_volume_cm3']??0)];
         }
         return ['lines'=>$lines,'total_cents'=>$total,'units'=>array_sum($cart),
             'available'=>true,'error'=>''];
