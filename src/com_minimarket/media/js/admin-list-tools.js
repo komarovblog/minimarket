@@ -4,7 +4,7 @@
  const init=()=>{
   // Custom status actions retain Joomla submit handling, but use the
   // same success/danger palette as native Publish/Unpublish buttons.
-  const green=['orders.confirm','deliveries.deliver','reviews.publish',
+  const green=['orders.confirm','orders.restore','deliveries.deliver','reviews.publish',
                'promocodes.publish','seofilters.publish'];
   const red=['orders.cancel','orders.trash','deliveries.cancel','reviews.reject',
              'promocodes.unpublish','seofilters.unpublish'];
