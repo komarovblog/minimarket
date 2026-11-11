@@ -1,6 +1,8 @@
 <?php
 namespace MiniMarket\Component\Minimarket\Site\Service;
 \defined('_JEXEC') or die;
+use Joomla\CMS\Factory;
+use Joomla\Database\DatabaseInterface;
 
 /**
  * Local deterministic tariffs only. The CDEK selection remains fail-closed
@@ -55,10 +57,16 @@ final class CheckoutDelivery
             $methods['pickup']=['fee_cents'=>0,
                 'address'=>trim((string)$params->get('delivery_pickup_address',''))];
         }
-        if ((int)$params->get('delivery_courier_enabled',0)===1
-            && (string)$params->get('delivery_rate_source','directory')==='directory') {
-            $rates=self::rates($params);
-            if ($rates) $methods['courier']=['rates'=>$rates];
+        if ((int)$params->get('delivery_courier_enabled',0)===1) {
+            $source=(string)$params->get('delivery_rate_source','directory');
+            if($source==='directory'){
+                $rates=self::rates($params);
+                if($rates)$methods['courier']=['rates'=>$rates,'source'=>'directory'];
+            }elseif($source==='zones'){
+                $db=Factory::getContainer()->get(DatabaseInterface::class);
+                if(DeliveryZones::all($db))$methods['courier']=['source'=>'zones'];
+            }
+            // External carrier plugins may register their own rates later.
         }
         return $methods;
     }
@@ -77,7 +85,7 @@ final class CheckoutDelivery
     }
 
     /** Server-validated order snapshot; never accept any browser-supplied fee. */
-    public static function quote(object $params,array $input,int $itemsTotalCents=0): array
+    public static function quote(object $params,array $input,int $itemsTotalCents=0,int $weightGrams=0,int $volumeCm3=0): array
     {
         $methods=self::methods($params);
         $payments=self::payments($params);
@@ -93,6 +101,7 @@ final class CheckoutDelivery
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
             }
             return ['method'=>'pickup','city'=>'','address'=>$address,
+                'country'=>'RU','region'=>'','postcode'=>'','zone_id'=>null,
                 'fee_cents'=>0,'rate_source'=>'none','payment_method'=>$payment];
         }
 
@@ -101,6 +110,15 @@ final class CheckoutDelivery
         if ($city==='' || mb_strlen($city)>120 || mb_strlen($address)<5
             || mb_strlen($address)>512 || preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u',$address)) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_ADDRESS_INVALID');
+        }
+        if(($methods['courier']['source']??'')==='zones'){
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $zone=DeliveryZones::quote($db,$input,$itemsTotalCents,$weightGrams,$volumeCm3);
+            return ['method'=>'courier','city'=>$zone['city'],
+                'country'=>$zone['country'],'region'=>$zone['region'],
+                'postcode'=>$zone['postcode'],'zone_id'=>$zone['zone_id'],
+                'address'=>$address,'fee_cents'=>$zone['fee_cents'],
+                'rate_source'=>'zones','payment_method'=>$payment];
         }
         $key=mb_strtolower($city,'UTF-8');
         if (!isset($methods['courier']['rates'][$key])) {
@@ -111,6 +129,7 @@ final class CheckoutDelivery
         $fee=$selected['fee_cents'];
         if($selected['free_from_cents']>0 && $itemsTotalCents>=$selected['free_from_cents'])$fee=0;
         return ['method'=>'courier','city'=>$selected['city'],'address'=>$address,
+            'country'=>'RU','region'=>'','postcode'=>'','zone_id'=>null,
             'fee_cents'=>$fee,'rate_source'=>'directory',
             'payment_method'=>$payment];
     }
