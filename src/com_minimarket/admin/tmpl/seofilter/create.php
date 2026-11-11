@@ -19,20 +19,14 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
 <form method="post" id="mm-seo-editor" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.save',false)); ?>">
  <div class="d-flex gap-2 flex-wrap mb-3">
   <button type="submit" class="btn btn-success" name="save_close" value="0"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
-  <button type="submit" class="btn btn-success" name="save_close" value="1"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVEANDCLOSE'); ?></button>
+  <button type="submit" class="btn btn-success" name="save_close" value="1"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
   <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilters',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
  </div>
  <input type="hidden" name="id" value="<?php echo (int)($p->id??0); ?>">
  <?php echo HTMLHelper::_('form.token'); ?>
- <section class="mm-admin-panel card card-body">
-  <ul class="nav nav-tabs" role="tablist">
-   <li class="nav-item"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#mm-seo-main"><?php echo Text::_('COM_MINIMARKET_SEO_TAB_MAIN'); ?></button></li>
-   <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#mm-seo-filters"><?php echo Text::_('COM_MINIMARKET_SEO_TAB_FILTERS'); ?></button></li>
-   <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#mm-seo-meta"><?php echo Text::_('COM_MINIMARKET_SEO_TAB_META'); ?></button></li>
-   <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#mm-seo-publication"><?php echo Text::_('COM_MINIMARKET_CATEGORY_TAB_PUBLISHING'); ?></button></li>
-  </ul>
-  <div class="tab-content pt-3">
-   <div id="mm-seo-main" class="tab-pane fade show active">
+ <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-seofilter', ['active' => 'main']); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'main', Text::_('COM_MINIMARKET_SEO_TAB_MAIN')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label class="form-label" for="mm-seo-title"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_TITLE'); ?> *</label>
       <input id="mm-seo-title" class="form-control" name="title" maxlength="255" required value="<?php echo $this->escape($get('title')); ?>"></div>
@@ -72,7 +66,9 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
       <?php echo $seoEditor->display('description',$get('description'),'100%','350','65','18',false); ?></div>
     </div>
    </div>
-   <div id="mm-seo-filters" class="tab-pane fade">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'filters', Text::_('COM_MINIMARKET_SEO_TAB_FILTERS')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="alert alert-info"><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CHOICE_HELP'); ?></div>
     <?php foreach($groups as $aid=>$group): ?>
      <fieldset class="border rounded p-3 mb-3">
@@ -133,7 +129,9 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
     <div class="alert alert-secondary"><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CATEGORY_NOTICE'); ?></div>
     <input type="hidden" id="mm-seo-query" name="filter_query" value="">
    </div>
-   <div id="mm-seo-meta" class="tab-pane fade">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'meta', Text::_('COM_MINIMARKET_SEO_TAB_META')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-12"><label for="mm-meta" class="form-label"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_META_DESC'); ?></label>
       <textarea id="mm-meta" name="meta_description" class="form-control" rows="3" maxlength="320"><?php echo $this->escape($get('meta_description')); ?></textarea></div>
@@ -150,7 +148,9 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
       </select></div>
     </div>
    </div>
-   <div id="mm-seo-publication" class="tab-pane fade">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'publication', Text::_('COM_MINIMARKET_CATEGORY_TAB_PUBLISHING')); ?>
+ <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-12">
       <label class="form-label"><?php echo Text::_('JSTATUS'); ?></label>
@@ -165,8 +165,8 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
      </div>
     </div>
    </div>
-  </div>
- </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+<?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </form>
 <script>
 (() => {
