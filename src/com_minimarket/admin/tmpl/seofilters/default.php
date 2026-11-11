@@ -54,9 +54,9 @@ $href='index.php?option=com_minimarket&view=seofilters&'.http_build_query([
        <td data-label="<?php echo Text::_('JSTATUS'); ?>"><span class="badge bg-<?php echo (int)$page->state===1?'success':'secondary'; ?>"><?php echo Text::_((int)$page->state===1?'COM_MINIMARKET_SEOFILTER_PUBLISHED':'COM_MINIMARKET_SEOFILTER_UNPUBLISHED'); ?></span></td>
       </tr>
      <?php endforeach; ?>
-     <?php if(!$this->pages): ?><tr><td colspan="6"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_EMPTY'); ?></td></tr><?php endif; ?>
      </tbody>
     </table>
+<?php if (!$this->pages): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_EMPTY'); ?></div><?php endif; ?>
    </div>
    <input type="hidden" name="boxchecked" value="0">
    <input type="hidden" name="task" value="">
