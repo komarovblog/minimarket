@@ -31,7 +31,7 @@
    selected.append(label);
    const remove=document.createElement('button');
    remove.type='button';remove.className='btn btn-danger btn-sm ms-2';remove.textContent='−';
-   remove.setAttribute('aria-label','Remove selection');
+   remove.setAttribute('aria-label',list.dataset.mmManualPickerRemove||'−');
    remove.addEventListener('click',()=>{
     row.querySelector('[data-mm-manual-key]').value='';
     selected.replaceChildren();
@@ -65,12 +65,12 @@
      const chooseButton=document.createElement('button');
      chooseButton.className='btn btn-success btn-sm';chooseButton.type='button';
      chooseButton.textContent='+';
-     chooseButton.setAttribute('aria-label','Add '+name.textContent);
+     chooseButton.setAttribute('aria-label',(list.dataset.mmManualPickerAdd||'+')+' '+name.textContent);
      chooseButton.addEventListener('click',()=>choose(row,item));
      wrapper.append(name,chooseButton);results.append(wrapper);
     }
-    if(!results.children.length)results.textContent='—';
-   }catch(error){if(error.name!=='AbortError')results.textContent='—';}
+    if(!results.children.length)results.textContent=list.dataset.mmManualPickerEmpty||'—';
+   }catch(error){if(error.name!=='AbortError')results.textContent=list.dataset.mmManualPickerError||'—';}
   }
   addButton?.addEventListener('click',()=>{
    if(seq>=20)return;
