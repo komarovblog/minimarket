@@ -384,14 +384,7 @@
   }
 }
 
-/* Lists share the same understated border as edit-tab rule tables. */
-#adminForm .mm-admin-list {
-  border: 1px solid var(--border-color, rgba(128,128,128,.35));
-  border-radius: .4rem;
-  border-collapse: separate;
-  border-spacing: 0;
-  overflow: hidden;
-}
+/* Entity lists use Joomla's native table borders and spacing. */
 
 
 /* 0.5.43 — category rules: title/code stack and separate status column. */
