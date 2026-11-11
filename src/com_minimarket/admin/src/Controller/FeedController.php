@@ -23,6 +23,12 @@ final class FeedController extends BaseController
         }
     }
 
+    public function add(): void
+    {
+        $this->permitted();
+        $this->setRedirect('index.php?option=com_minimarket&view=feed');
+    }
+
     public function save(): void
     {
         Session::checkToken('post') or die(Text::_('JINVALID_TOKEN'));
