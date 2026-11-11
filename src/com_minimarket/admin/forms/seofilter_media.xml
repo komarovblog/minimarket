@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+ <fieldset name="media">
+  <field name="image" type="media" directory="images" label="COM_MINIMARKET_SEO_IMAGE" filter="string"/>
+  <field name="og_image" type="media" directory="images" label="COM_MINIMARKET_SEO_OG_IMAGE" filter="string"/>
+ </fieldset>
+</form>
