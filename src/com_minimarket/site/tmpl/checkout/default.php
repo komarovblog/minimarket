@@ -146,11 +146,19 @@ $firstPayment=array_key_first($this->paymentMethods);
                     <dl class="mm-checkout-totals">
                         <dt><?php echo Text::_('COM_MINIMARKET_CHECKOUT_ITEMS_TOTAL'); ?></dt>
                         <dd><?php echo CartState::format($this->cart['total_cents']); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></dd>
+                        <dt><?php echo Text::_('COM_MINIMARKET_PROMO_DISCOUNT'); ?></dt>
+                        <dd data-promo-discount aria-live="polite">0 <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></dd>
                         <dt><?php echo Text::_('COM_MINIMARKET_CHECKOUT_DELIVERY_TOTAL'); ?></dt>
                         <dd data-shipping-total aria-live="polite">0 <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></dd>
                         <dt><strong><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?></strong></dt>
                         <dd><strong data-order-total aria-live="polite"><?php echo CartState::format($this->cart['total_cents']); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></dd>
                     </dl>
+                    <div class="mb-3">
+                      <label class="form-label" for="mm-checkout-promo"><?php echo Text::_('COM_MINIMARKET_PROMO_CODE'); ?></label>
+                      <input id="mm-checkout-promo" name="promo_code" class="form-control" maxlength="64"
+                             pattern="[A-Za-z0-9-]{3,64}" value="<?php echo $this->escape($this->promoCode); ?>">
+                      <p class="form-text" data-promo-feedback role="status"><?php echo Text::_('COM_MINIMARKET_PROMO_CART_NOTE'); ?></p>
+                    </div>
                     <div style="position:absolute;left:-9999px" aria-hidden="true">
                         <label for="mm-customer-website">Website</label>
                         <input id="mm-customer-website" name="website" tabindex="-1" autocomplete="off">
