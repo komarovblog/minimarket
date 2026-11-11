@@ -5,11 +5,15 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 $s=$this->shipment;
 ?>
+<div class="d-flex gap-2 flex-wrap mb-3">
+ <button type="submit" form="mm-delivery-update-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
+ <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+</div>
 <section class="mm-admin-panel mm-admin-list-panel">
  <h2 class="h4">#<?php echo (int)$s->id; ?> — <?php echo Text::_('COM_MINIMARKET_DASHBOARD_DELIVERIES'); ?></h2>
  <p><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$s->order_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?> #<?php echo (int)$s->order_id; ?></a> — <?php echo $this->escape((string)$s->customer_name); ?></p>
  <p><?php echo $this->escape($s->delivery_city.' / '.$s->delivery_address); ?></p>
- <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.update',false)); ?>" class="row g-3">
+ <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.update',false)); ?>" id="mm-delivery-update-form" class="row g-3">
   <input type="hidden" name="id" value="<?php echo (int)$s->id; ?>">
   <div class="col-12 col-md-6">
     <label class="form-label" for="mm-carrier"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CARRIER'); ?></label>
