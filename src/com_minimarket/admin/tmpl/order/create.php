@@ -41,7 +41,10 @@ $firstPayment=array_key_first($this->paymentMethods);
         </fieldset>
         <fieldset class="mb-4">
             <legend class="h5"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_ITEMS'); ?></legend>
-            <div id="mm-manual-order-lines" data-mm-manual-picker-url="<?php echo $this->escape('index.php?option=com_minimarket&task=productpicker.manualItems&'.\Joomla\CMS\Session\Session::getFormToken().'=1'); ?>">
+            <div id="mm-manual-order-lines" data-mm-manual-picker-url="<?php echo $this- data-mm-manual-picker-add="<?php echo $this->escape(Text::_('COM_MINIMARKET_REF_ADD')); ?>"
+                 data-mm-manual-picker-remove="<?php echo $this->escape(Text::_('COM_MINIMARKET_REF_REMOVE')); ?>"
+                 data-mm-manual-picker-empty="<?php echo $this->escape(Text::_('COM_MINIMARKET_REF_EMPTY')); ?>"
+                 data-mm-manual-picker-error="<?php echo $this->escape(Text::_('COM_MINIMARKET_REF_ERROR')); ?>">escape('index.php?option=com_minimarket&task=productpicker.manualItems&'.\Joomla\CMS\Session\Session::getFormToken().'=1'); ?>">
                 <div class="row g-2 mb-2 align-items-start" data-mm-manual-line>
                     <div class="col-12 col-lg-9">
                         <label class="form-label" for="mm-manual-search-0"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_PRODUCT'); ?></label>
