@@ -11,10 +11,18 @@
       const columns=[...table.tHead.rows[0].cells];
       if(columns.length<2 || columns.some(c=>c.colSpan>1||c.rowSpan>1))continue;
       const view=new URLSearchParams(location.search).get('view')||'dashboard';
-      const key='minimarket.admin.columns.v2.'+view+'.'+(table.id||index);
+      const key='minimarket.admin.columns.v3.'+view+'.'+(table.id||index);
       const labels=columns.map((c,i)=>(c.textContent||'').trim()||('#'+(i+1)));
       const locked=columns.map((c,i)=>i===0 && !!c.querySelector('input[type="checkbox"]'));
       let visible=columns.map(()=>true);
+      // Products and bundles have twelve columns, while categories have eight.
+      // Reduce the initial visible set at narrower administrator widths;
+      // all fields remain available in the per-list column selector.
+      if((view==='products'||view==='bundles')&&columns.length===12){
+        const width=table.closest('.table-responsive')?.getBoundingClientRect().width||window.innerWidth;
+        const optional=width<1050?[4,8,10,11]:width<1250?[4,10,11]:width<1450?[10,11]:[];
+        for(const i of optional)visible[i]=false;
+      }
       try{
         const saved=JSON.parse(localStorage.getItem(key)||'null');
         if(Array.isArray(saved)&&saved.length===visible.length) {
