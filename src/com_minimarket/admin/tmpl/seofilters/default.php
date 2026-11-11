@@ -5,18 +5,23 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
 
+$categoryOptions=[''=>Text::_('COM_MINIMARKET_FILTER_ANY')];
+foreach($this->categories as $category)$categoryOptions[(string)(int)$category->id]=(string)$category->title;
 $mmSearch=[
  'view'=>'seofilters','query'=>$this->search,'sort'=>$this->sort,'limit'=>$this->pageSize,
  'searchLabel'=>Text::_('COM_MINIMARKET_SEOFILTER_TITLE'),
  'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
- 'filters'=>[['name'=>'filter_status','label'=>Text::_('JSTATUS'),
+ 'filters'=>[
+ ['name'=>'filter_category','label'=>Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'),
+  'value'=>$this->categoryFilter,'options'=>$categoryOptions],
+ ['name'=>'filter_status','label'=>Text::_('JSTATUS'),
   'value'=>$this->statusFilter,'default'=>'all',
   'options'=>['all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),
    'published'=>Text::_('COM_MINIMARKET_SEOFILTER_PUBLISHED'),
    'unpublished'=>Text::_('COM_MINIMARKET_SEOFILTER_UNPUBLISHED')]]]
 ];
 $href='index.php?option=com_minimarket&view=seofilters&'.http_build_query([
- 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,
+ 'filter_search'=>$this->search,'filter_status'=>$this->statusFilter,'filter_category'=>$this->categoryFilter,
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
