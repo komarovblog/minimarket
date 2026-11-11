@@ -64,9 +64,14 @@ namespace MiniMarket\AttributeListRegression {
     }
     preg_match_all('~<th\b~',$view,$heads);
     preg_match_all('~<td\b~',$view,$cells);
-    if (count($heads[0]) !== 7 || count($cells[0]) !== 8
-        || !str_contains($view,'colspan="7"')) {
-        throw new \RuntimeException('ATTRIBUTE_LIST_QUERY_FAIL: table columns inconsistent');
+    // Joomla-native 0.5.90 list has seven columns on both sides. The old
+    // ad-hoc empty-row colspan/extra cell was deliberately removed.
+    if (count($heads[0]) !== 7 || count($cells[0]) !== 7
+        || str_contains($view,'colspan="7"')
+        || !str_contains($view,"joomla.searchtools.default")
+        || !str_contains($view,'table table-striped')
+        || !str_contains($view,'PublishedButton')) {
+        throw new \RuntimeException('ATTRIBUTE_LIST_QUERY_FAIL: native Joomla table structure inconsistent');
     }
     echo "ATTRIBUTE_LIST_QUERY_PASS: model selects 7 existing columns, template matches\n";
 }
