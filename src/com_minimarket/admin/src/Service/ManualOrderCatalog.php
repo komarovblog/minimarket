@@ -74,7 +74,8 @@ final class ManualOrderCatalog
         }
         $snap=BundleStock::snapshot($db);
         CartStock::assertAvailable($rows,$snap,$inventoryEnabled);
-        $q=$db->getQuery(true)->select(['id','title','sku','price','product_type','delivery_type'])
+        $q=$db->getQuery(true)->select(['id','title','sku','price','product_type','delivery_type',
+                'shipping_weight_grams','shipping_volume_cm3'])
             ->from($db->quoteName('#__minimarket_products'))
             ->where('id IN ('.implode(',',$ids).')');
         $db->setQuery($q);
