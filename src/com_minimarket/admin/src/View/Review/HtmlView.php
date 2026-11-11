@@ -18,6 +18,7 @@ final class HtmlView extends BaseHtmlView
         $q=$db->getQuery(true)->select(['id','title'])->from($db->quoteName('#__minimarket_products'))
             ->where('state=1')->order('title ASC,id ASC');
         $db->setQuery($q,0,5000);$this->products=(array)$db->loadObjectList();
+        $this->setLayout('create');
         ToolbarHelper::title(Text::_('COM_MINIMARKET_REVIEW_NEW'));
         parent::display($tpl);
     }
