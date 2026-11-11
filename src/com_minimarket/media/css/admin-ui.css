@@ -829,3 +829,26 @@
 .mm-columns-toolbar>.mm-columns-picker {background:transparent!important;box-shadow:none!important;border:0!important;padding:0!important;}
 .mm-columns-picker>summary.btn {font-size:.75rem!important;line-height:1.1!important;padding:.28rem .45rem!important;border-radius:.15rem!important;min-height:0!important;}
 .mm-columns-picker__menu {font-size:.85rem;border-radius:0!important;}
+
+/* Keep wide admin lists inside the component at browser zoom levels. */
+#adminForm.mm-list-form,
+#adminForm .mm-admin-list-panel,
+#adminForm .table-responsive,
+.mm-admin-list-panel .table-responsive {
+  min-width: 0;
+  max-width: 100%;
+}
+#adminForm .table-responsive,
+.mm-admin-list-panel .table-responsive {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+#adminForm .mm-columns-toolbar,
+.mm-admin-list-panel .mm-columns-toolbar {
+  margin-bottom: .125rem !important;
+  padding-bottom: 0;
+}
+#adminForm .mm-columns-toolbar + .table-responsive,
+.mm-admin-list-panel .mm-columns-toolbar + .table-responsive {
+  margin-top: 0;
+}
