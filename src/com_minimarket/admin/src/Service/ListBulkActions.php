@@ -37,6 +37,31 @@ final class ListBulkActions
         return $ids;
     }
 
+    /** Restore selected orders from the reversible trash. */
+    public static function restoreOrders(): int
+    {
+        $ids=self::selected('core.delete');
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $db->transactionStart();
+        try {
+            $table=$db->quoteName('#__minimarket_orders');
+            $where='id IN ('.implode(',',$ids).') AND deleted_at IS NOT NULL';
+            $db->setQuery('SELECT id FROM '.$table.' WHERE '.$where.' FOR UPDATE');
+            $rows=(array)$db->loadColumn();
+            if(count($rows)!==count($ids)) {
+                throw new \DomainException('COM_MINIMARKET_LIST_INVALID_TRANSITION');
+            }
+            $query=$db->getQuery(true)->update($table)->set('deleted_at=NULL')
+                ->where($where);
+            $db->setQuery($query);$db->execute();
+            $db->transactionCommit();
+            return count($ids);
+        } catch(\Throwable $e) {
+            $db->transactionRollback();
+            throw $e;
+        }
+    }
+
     public static function apply(
         string $table,
         string $field,
