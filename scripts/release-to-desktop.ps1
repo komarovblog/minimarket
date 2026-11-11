@@ -19,6 +19,26 @@ if (-not $SkipPull) {
     if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_GIT_PULL_FAILED' }
 }
 
+# Parse all release scripts before any build step. PowerShell 5.1's
+# parser catches an unmatched bracket before it reaches a runtime check.
+foreach ($scriptName in @('release-to-desktop.ps1', 'verify-admin-lists.ps1',
+    'verify-0.5.87.ps1', 'verify-0.5.88.ps1', 'verify-translations.ps1',
+    'build.ps1', 'inspect-package.ps1')) {
+    $scriptPath = Join-Path $PSScriptRoot $scriptName
+    $tokens = $null
+    $parseErrors = $null
+    [void][System.Management.Automation.Language.Parser]::ParseFile(
+        $scriptPath, [ref]$tokens, [ref]$parseErrors)
+    if ($parseErrors.Count -gt 0) {
+        foreach ($issue in $parseErrors) {
+            Write-Output ("MINIMARKET_POWERSHELL_SYNTAX_ERROR: {0}:{1}: {2}" -f
+                $scriptName, $issue.Extent.StartLineNumber, $issue.Message)
+        }
+        throw "MINIMARKET_POWERSHELL_SYNTAX_FAILED: $scriptName"
+    }
+}
+Write-Output 'MINIMARKET_POWERSHELL_SYNTAX_PASS'
+
 # Avoid hardcoded OSPanel/PHP paths. Build and inspect within the current
 # PowerShell process so Windows does not need to locate a second interpreter.
 $global:LASTEXITCODE = 0
