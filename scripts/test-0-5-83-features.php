@@ -108,7 +108,7 @@ $check(str_contains($sql,'#__minimarket_reviews') &&
  !preg_match('/\\b(?:DROP\\s+TABLE|TRUNCATE\\s+TABLE|DELETE\\s+FROM)\\b/i',$sql),
  'new schema isolated, non destructive');
 $installer=$read('script.php');
-$check(str_contains($installer,"version_compare(\$schemaVersion, '0.5.83', '>')") &&
+$check(str_contains($installer,"version_compare(\$schemaVersion, '0.5.73', '<')") &&
  str_contains($installer,'archived-updates/mysql') &&
  str_contains($installer,"hash_file('sha256'"),
  'old SQL maintenance history may be retired only after verification/backup');

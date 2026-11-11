@@ -34,11 +34,15 @@ $xml=simplexml_load_file($root.'minimarket.xml');
 $check($xml!==false && version_compare((string)$xml->version, '0.5.84', '>='), 'manifest version');
 $cfg=simplexml_load_file($root.'admin/config.xml');
 $check($cfg!==false && count($cfg->xpath('//fieldset[@name="checkout"]'))===1 &&
+ count($cfg->xpath('//fieldset[@name="delivery_methods"]'))===1 &&
+ count($cfg->xpath('//fieldset[@name="payment_methods"]'))===1 &&
  count($cfg->xpath('//fieldset[@name="delivery"]'))===0 &&
- count($cfg->xpath('//fieldset[@name="payment"]'))===0,'single checkout tab');
-foreach(['checkout_buyer_note','checkout_delivery_note','checkout_payment_note'] as $field){
- $check(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="'.$field.'" and @type="note" and @class="alert alert-info"]'))===1,
-  'native, noncollapsible informative subsection '.$field);
+ count($cfg->xpath('//fieldset[@name="payment"]'))===0,
+ 'checkout, delivery and payment use separate native tabs');
+foreach(['checkout'=>'checkout_buyer_note','delivery_methods'=>'checkout_delivery_note',
+         'payment_methods'=>'checkout_payment_note'] as $section=>$field){
+ $check(count($cfg->xpath('//fieldset[@name="'.$section.'"]/field[@name="'.$field.'" and @type="note" and @class="alert alert-info"]'))===1,
+  'native informative subsection '.$field);
 }
 $manifest=(string)$xml->administration->submenu->asXML();
 foreach(['view=delivery','view=integrations','view=promocodes'] as $target)
@@ -56,13 +60,21 @@ $check(str_contains($ship,"delivery_method='courier'") &&
 $check(file_exists($root.'admin/tmpl/delivery/create.php') &&
  file_exists($root.'admin/tmpl/delivery/default.php'),'shipment editor');
 $promo=$read('admin/src/Controller/PromocodeController.php');
-$check(str_contains($promo,"$"."this->guard('core.create')") &&
+$check(str_contains($promo,"$"."this->guard(") &&
+ str_contains($promo,"'core.create'") &&
  str_contains($promo,"Session::checkToken('post')") &&
- str_contains($promo,'[A-Z0-9-]{3,64}'),'promo code validation');
-$check(str_contains($read('admin/tmpl/integrations/default.php'),'COM_MINIMARKET_INTEGRATIONS_NOT_CONNECTED'),
- 'no fake provider connection');
-$check(str_contains($read('media/js/admin-columns.js'),'mm-columns-toolbar'),
- 'compact columns selector');
+ str_contains($promo,'PromoCodeData::normalize') &&
+ str_contains($read('admin/src/Service/PromoCodeData.php'),'[A-Z0-9-]{3,64}'),
+ 'promo code validation, CSRF and permission guards');
+$integrations=$read('admin/tmpl/integrations/default.php');
+$check(str_contains($integrations,'$this->plugins') &&
+ str_contains($integrations,'com_plugins&task=plugin.edit') &&
+ str_contains($integrations,'filter_type'),
+ 'integrations display real installed plugins and Joomla settings links');
+$display=$read('admin/src/Controller/DisplayController.php');
+$check(str_contains($display,"useScript('table.columns')") &&
+ !file_exists($root.'media/js/admin-columns.js'),
+ 'native Joomla columns control replaces custom asset');
 $sql=$read('admin/sql/updates/mysql/0.5.84.sql');
 $check(str_contains($sql,'#__minimarket_shipments') &&
  str_contains($sql,'#__minimarket_promo_codes') &&
