@@ -18,7 +18,7 @@ check58($v['show_children'] && $v['show_products'] && $v['show_bundles'],
  'legacy own-category behavior stays visible by default');
 check58(!$v['show_descendant_products'] && !$v['show_descendant_bundles'],
  'legacy descendants stay excluded by default');
-check58($v['layout']==='list','legacy listing is the default');
+check58($v['layout']==='grid','new default uses the responsive product grid');
 check58(Options::bootstrapGridClasses($v)==='row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-4 g-3',
  'bootstrap grid has safe mobile to xl defaults');
 $global->values=['category_show_children'=>0,'category_show_products'=>0,
@@ -55,7 +55,7 @@ $v=Options::resolve($category,$global);
 check58($v['layout']==='grid' && $v['cards_lg']===6,'global unsafe number clamped');
 $global->values['category_product_layout']='unsupported';
 $v=Options::resolve($category,$global);
-check58($v['layout']==='list','unexpected global layout safely falls back to list');
+check58($v['layout']==='grid','unexpected global layout safely falls back to grid');
 $tree=new CategoryTree([
  (object)['id'=>1,'parent_id'=>0,'state'=>1],
  (object)['id'=>2,'parent_id'=>1,'state'=>1],
@@ -75,8 +75,8 @@ $form=simplexml_load_file($root.'admin/forms/category.xml');
 check58($config!==false && $form!==false,'config and category XML parse');
 check58(count($config->xpath('//fieldset[@name="display"]'))===1
     && count($config->xpath('//fieldset[@name="basic"]'))===1
-    && count($config->xpath('//fieldset[@name="registration"]'))===1,
-    'display, general and registration settings tabs');
+    && count($config->xpath('//fieldset[@name="registration"]'))===0,
+    'display and general settings without duplicate registration tab');
 foreach(['category_show_children','category_show_products','category_show_bundles',
  'category_show_descendant_products','category_show_descendant_bundles','category_product_layout',
  'category_cards_xs','category_cards_sm','category_cards_md','category_cards_lg','category_cards_xl','category_cards_xxl'] as $key){
