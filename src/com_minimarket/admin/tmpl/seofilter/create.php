@@ -37,11 +37,25 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
       <input id="mm-seo-title" class="form-control" name="title" maxlength="255" required value="<?php echo $this->escape($get('title')); ?>"></div>
      <div class="col-md-6"><label class="form-label" for="mm-seo-alias"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_ALIAS'); ?> *</label>
       <input id="mm-seo-alias" class="form-control" name="alias" maxlength="190" pattern="[a-z0-9][a-z0-9-]*" required value="<?php echo $this->escape($get('alias')); ?>"></div>
-     <div class="col-md-6"><label class="form-label" for="mm-seo-category"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'); ?> *</label>
-      <select class="form-select" id="mm-seo-category" name="category_id" required>
-       <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
-       <?php foreach($this->categories as $cat): ?><option value="<?php echo (int)$cat->id; ?>"<?php echo (int)$get('category_id')===(int)$cat->id?' selected':''; ?>><?php echo $this->escape($cat->title); ?> (#<?php echo (int)$cat->id; ?>)</option><?php endforeach; ?>
-      </select></div>
+     <div class="col-12">
+      <?php
+       $categorySelected=[];
+       if((int)$get('category_id')>0){
+        foreach($this->categories as $cat){
+         if((int)$cat->id===(int)$get('category_id')){
+          $categorySelected[(int)$cat->id]=$cat->title;
+          break;
+         }
+        }
+       }
+       $mmReference=[
+        'title'=>Text::_('COM_MINIMARKET_SEOFILTER_CATEGORY'),
+        'input'=>'category_id','endpoint'=>'categories','multiple'=>false,
+        'selected'=>$categorySelected,'placeholder'=>Text::_('COM_MINIMARKET_CATEGORY_FILTER_SEARCH')
+       ];
+       require dirname(__DIR__).'/shared/reference-picker.php';
+      ?>
+     </div>
      <div class="col-12"><label class="form-label" for="mm-seo-heading"><?php echo Text::_('COM_MINIMARKET_SEOFILTER_HEADING'); ?> *</label>
       <input id="mm-seo-heading" class="form-control" name="heading" maxlength="255" required value="<?php echo $this->escape($get('heading')); ?>"></div>
      <div class="col-12 col-lg-6">
