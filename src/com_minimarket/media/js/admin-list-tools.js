@@ -19,6 +19,36 @@
     button.classList.add(color==='success'?'btn-success':'btn-danger');
    }
   }
+  // Atum flex containers can be wider than the viewport because table cells
+  // have intrinsic min-content width. Clamp component lists to the actual
+  // available viewport after sidebar layout, then scroll only the table.
+  const listHosts=[...document.querySelectorAll(
+    '#adminForm.mm-list-form, .mm-unified-list'
+  )];
+  const fitLists=()=>{
+   for(const host of listHosts){
+    const left=host.getBoundingClientRect().left;
+    const available=Math.max(100,Math.floor(window.innerWidth-left-12));
+    host.style.maxWidth=available+'px';
+    host.style.minWidth='0';
+    for(const viewport of host.querySelectorAll('.mm-native-list-viewport,.table-responsive')){
+      viewport.style.maxWidth=available+'px';
+      viewport.style.minWidth='0';
+    }
+   }
+  };
+  fitLists();
+  window.addEventListener('resize',fitLists,{passive:true});
+  if(typeof ResizeObserver!=='undefined'){
+    const ro=new ResizeObserver(fitLists);
+    const frame=document.querySelector('.main-card,.container-main,#wrapper');
+    if(frame)ro.observe(frame);
+  }
+  const sidebar=document.querySelector('#sidebar-wrapper,#wrapper');
+  if(sidebar && typeof MutationObserver!=='undefined'){
+    const observer=new MutationObserver(()=>requestAnimationFrame(fitLists));
+    observer.observe(sidebar,{attributes:true,attributeFilter:['class','style']});
+  }
   document.querySelectorAll('.mm-native-searchtools').forEach(form=>{
    const button=form.querySelector('[data-mm-filter-toggle]');
    if(button){
