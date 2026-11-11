@@ -36,7 +36,8 @@ final class HtmlView extends BaseHtmlView
                     (int)$app->getIdentity()->id,[],false
                 );
             } catch(\DomainException $error) {
-                $this->promoMessage=Text::_($error->getMessage());
+                $this->promoMessage=Text::_($error->getMessage()==='COM_MINIMARKET_PROMO_CUSTOMER_INVALID'
+                    ?'COM_MINIMARKET_PROMO_ESTIMATE_DEFERRED':$error->getMessage());
             } catch(\Throwable $error) {
                 $this->promoMessage=Text::_('COM_MINIMARKET_PROMO_INVALID');
             }
