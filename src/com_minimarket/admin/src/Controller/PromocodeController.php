@@ -43,7 +43,11 @@ final class PromocodeController extends BaseController
                 'usage_limit'=>$post->get('usage_limit','','string'),
                 'per_customer_limit'=>$post->get('per_customer_limit','','string'),
                 'applies_to'=>$post->get('applies_to','all','cmd'),
-                'target_ids'=>$post->get('target_ids','','string'),
+                'target_ids'=>$post->get('applies_to','all','cmd')==='category'
+                    ?$post->get('target_ids_category','','string')
+                    :($post->get('applies_to','all','cmd')==='product'
+                      ?$post->get('target_ids_product','','string'):''),
+
                 'combinable'=>$post->getInt('combinable',0)
             ]);
             $db=Factory::getContainer()->get(DatabaseInterface::class);
