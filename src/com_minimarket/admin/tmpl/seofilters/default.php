@@ -16,7 +16,7 @@ use Joomla\CMS\Router\Route;
   <?php foreach($this->pages as $row): ?>
    <tr>
     <td><?php echo (int)$row->id; ?></td>
-    <td><?php echo $this->escape($row->title); ?></td>
+    <td><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilter&id='.(int)$row->id,false)); ?>"><?php echo $this->escape($row->title); ?></a></td>
     <td><?php echo $this->escape($row->category_title); ?></td>
     <td><a href="<?php echo $this->escape(\Joomla\CMS\Uri\Uri::root().'index.php?option=com_minimarket&view=seofilter&id='.(int)$row->id); ?>" target="_blank" rel="noopener noreferrer">/seo/<?php echo $this->escape($row->alias); ?>-<?php echo (int)$row->id; ?></a></td>
     <td>
