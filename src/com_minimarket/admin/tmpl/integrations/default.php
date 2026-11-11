@@ -32,10 +32,10 @@ $href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
-<div class="mm-native-entity-list">
- <div id="j-main-container" class="j-main-container">
-  <form method="post" id="adminForm" name="adminForm" class="mm-list-form"
+<form method="post" id="adminForm" name="adminForm" class="mm-list-form"
        action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=integrations',false)); ?>">
+ <div id="j-main-container" class="j-main-container">
+
     <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
   <div class="table-responsive mm-native-list-viewport">
    <table id="mm-integrations-list" class="table table-striped mm-admin-list">
@@ -72,6 +72,5 @@ $href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
   <input type="hidden" name="boxchecked" value="0">
   <input type="hidden" name="task" value="">
   <?php echo HTMLHelper::_('form.token'); ?>
- </form>
- </div>
-</div>
+  </div>
+</form>
