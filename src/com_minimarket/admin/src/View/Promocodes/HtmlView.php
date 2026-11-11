@@ -19,7 +19,7 @@ final class HtmlView extends BaseHtmlView
         $this->canCreate=$user->authorise('core.create','com_minimarket');
         $this->canUpdate=$user->authorise('core.edit.state','com_minimarket');
         $db=Factory::getContainer()->get(DatabaseInterface::class);
-        $q=$db->getQuery(true)->select(['id','code','amount_cents','state','created_at'])
+        $q=$db->getQuery(true)->select(['id','code','amount_cents','discount_type','percent_value','starts_at','ends_at','usage_limit','used_count','state','created_at'])
             ->from($db->quoteName('#__minimarket_promo_codes'))->order('id DESC');
         $db->setQuery($q,0,5000);$this->codes=(array)$db->loadObjectList();
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PROMOCODES_TITLE'));
