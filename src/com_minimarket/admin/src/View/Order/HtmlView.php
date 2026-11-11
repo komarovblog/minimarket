@@ -18,6 +18,7 @@ final class HtmlView extends BaseHtmlView
     public ?int $shipmentId=null;
     public bool $isCreate=false;
     public array $productChoices=[];
+    public array $pickerCategories=[];
     public array $deliveryMethods=[];
     public array $paymentMethods=[];
     public array $cityRates=[];
@@ -46,6 +47,11 @@ final class HtmlView extends BaseHtmlView
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             $params=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
             $this->productChoices=[]; // AJAX SKU picker, no catalog preload.
+            $cats=$db->getQuery(true)->select(['id','title'])
+                ->from($db->quoteName('#__minimarket_categories'))
+                ->where('state=1')->order('title ASC,id ASC');
+            $db->setQuery($cats,0,1000);
+            $this->pickerCategories=(array)$db->loadObjectList();
             $this->deliveryMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::methods($params);
             $this->paymentMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::payments($params);
             $this->cityRates=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::rates($params);
