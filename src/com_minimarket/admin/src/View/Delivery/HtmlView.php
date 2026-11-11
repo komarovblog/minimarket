@@ -31,7 +31,7 @@ final class HtmlView extends BaseHtmlView
                 ->join('LEFT',$db->quoteName('#__minimarket_shipments','s').' ON s.order_id=o.id')
                 ->where('o.deleted_at IS NULL')->where("o.delivery_method='courier'")
                 ->where("o.status<>'cancelled'")->where('s.id IS NULL')->order('o.id DESC');
-            $db->setQuery($q,0,5000);$this->orders=(array)$db->loadObjectList();
+            if($this->preselectedOrder>0){$q->where('o.id='.(int)$this->preselectedOrder);$db->setQuery($q,0,1);$this->orders=(array)$db->loadObjectList();}
         }else{
             $id=$app->input->getInt('id',0);
             $q=$db->getQuery(true)->select(['s.*','o.customer_name','o.delivery_city','o.delivery_address'])
