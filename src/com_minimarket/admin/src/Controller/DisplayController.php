@@ -26,6 +26,12 @@ final class DisplayController extends BaseController
                 ['defer'=>true]
             )
             ->registerAndUseScript(
+                'com_minimarket.admin-list-tools',
+                'media/com_minimarket/js/admin-list-tools.js',
+                [],
+                ['defer'=>true]
+            )
+            ->registerAndUseScript(
                 'com_minimarket.inherited-options',
                 'media/com_minimarket/js/inherited-options.js',
                 [],
