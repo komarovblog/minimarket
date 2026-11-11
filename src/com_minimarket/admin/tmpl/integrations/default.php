@@ -28,12 +28,6 @@ $href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
 <div class="mm-unified-list">
  <div id="j-main-container" class="j-main-container">
   <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
-  <?php if($this->canManagePlugins): ?>
-   <p class="mb-2">
-    <a class="btn btn-outline-primary btn-sm" href="<?php echo $this->escape(Route::_('index.php?option=com_plugins',false)); ?>">
-     <?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_MANAGE_PLUGINS'); ?></a>
-   </p>
-  <?php endif; ?>
   <div class="table-responsive">
    <table id="mm-integrations-list" class="table table-striped mm-admin-list">
     <thead><tr>
