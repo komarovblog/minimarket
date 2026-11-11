@@ -65,6 +65,8 @@ $needed = @(
     'admin\sql\updates\mysql\0.5.82.sql',
     'admin\sql\updates\mysql\0.5.83.sql',
     'admin\sql\updates\mysql\0.5.84.sql',
+    'admin\sql\updates\mysql\0.5.85.sql',
+    'admin\src\Service\PromoCodeData.php',
     'admin\src\Controller\DeliveryController.php',
     'admin\src\Controller\PromocodeController.php',
     'admin\src\View\Delivery\HtmlView.php',
