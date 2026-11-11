@@ -26,6 +26,7 @@ final class HtmlView extends BaseHtmlView
     public string $pickupAddress='';
     public string $blockedMessage='';
     public bool $cdekPending=false;
+    public string $promoCode='';
 
     public function display($tpl=null)
     {
@@ -52,6 +53,7 @@ final class HtmlView extends BaseHtmlView
             $this->blockedMessage=Text::_($e->getMessage());
         }
         $session=$app->getSession();
+        $this->promoCode=(string)$session->get('com_minimarket.promo_code','');
         $state=CartState::normalize($session->get(CartState::SESSION_KEY,[]));
         if ($this->enabled && $state) {
             $this->cart=(new CartCatalog(Factory::getContainer()->get(DatabaseInterface::class)))
