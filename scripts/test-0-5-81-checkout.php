@@ -87,9 +87,13 @@ $ok(str_contains($config,'name="checkout_auth_mode"')
  && str_contains($config,'name="checkout_phone_mode"')
  && str_contains($config,'name="checkout_email_mode"')
  && str_contains($config,'name="checkout_comment_mode"'),'native checkout fields');
-$ok(str_contains($config,'name="delivery_rate_source"')
- && str_contains($config,'name="delivery_city_rates"')
- && str_contains($config,'name="payment_on_receipt_enabled"'),'delivery and payment settings');
+$methods=(string)file_get_contents($root.'admin/src/Service/MethodSettings.php');
+$ok(str_contains($methods,'delivery_rate_source')
+ && str_contains($methods,'delivery_city_rates')
+ && str_contains($methods,'payment_on_receipt_enabled')
+ && !str_contains($config,'<fieldset name="delivery_methods"')
+ && !str_contains($config,'<fieldset name="payment_methods"'),
+ 'delivery/payment settings live in dedicated method editors');
 $controller=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
 $ok(str_contains($controller,"in_array(CheckoutSettings::mode(\$params),['email','sms'],true)")
     && str_contains($controller,"(int)\$app->getIdentity()->id<1"),
