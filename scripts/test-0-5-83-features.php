@@ -4,7 +4,7 @@ declare(strict_types=1);
 define('_JEXEC',1);
 // This CLI smoke does not bootstrap Joomla. Only the empty HTML inputs tested
 // here use a fixture; actual Joomla InputFilter security is an integration test.
-if (!class_exists(\\Joomla\\CMS\\Filter\\InputFilter::class)) {
+if (!class_exists(\Joomla\CMS\Filter\InputFilter::class)) {
     final class EmptyHtmlInputFilterFixture {
         public static function getInstance(): self { return new self(); }
         public function clean(string $html,string $type): string {
@@ -14,7 +14,7 @@ if (!class_exists(\\Joomla\\CMS\\Filter\\InputFilter::class)) {
             return '';
         }
     }
-    class_alias(EmptyHtmlInputFilterFixture::class, \\Joomla\\CMS\\Filter\\InputFilter::class);
+    class_alias(EmptyHtmlInputFilterFixture::class, \Joomla\CMS\Filter\InputFilter::class);
 }
 $root=dirname(__DIR__).'/src/com_minimarket/';
 require $root.'site/src/Service/ReviewData.php';
