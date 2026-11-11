@@ -34,6 +34,7 @@ final class HtmlView extends BaseHtmlView
         $this->canCreateDelivery=$identity->authorise('core.create','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {
+            $this->setLayout('create');
             if (!$identity->authorise('core.create','com_minimarket')) {
                 throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
             }
