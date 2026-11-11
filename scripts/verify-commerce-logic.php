@@ -65,4 +65,4 @@ $fixed=PromoCodeData::normalize(array_replace($promo,[
     'applies_to'=>'all','target_ids'=>''
 ]));
 ensure($fixed['amount_cents']===5050,'fixed amount');
-echo "MINIMARKET_COMMERCE_NORMALIZATION_PASS: zones=8 promo=12\n";
+echo "MINIMARKET_COMMERCE_NORMALIZATION_PASS\n";
