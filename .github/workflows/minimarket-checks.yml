@@ -327,6 +327,7 @@ jobs:
           node --check src/com_minimarket/media/js/manual-order.js
           node --check src/com_minimarket/media/js/inherited-options.js
           node --check src/com_minimarket/media/js/category-actions.js
+          node --check src/com_minimarket/media/js/category-list-visibility.js
           node --check src/com_minimarket/media/js/checkout.js
           php -l src/com_minimarket/site/src/Service/CheckoutData.php
           php -l src/com_minimarket/site/src/Service/OrderStorage.php

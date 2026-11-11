@@ -85,7 +85,7 @@ final class CategoryattributesField extends FormField
                     ? '<small class="d-block text-muted">' . $escape($inherited) . '</small>'
                     : '')
                 . '</th><td><select class="form-select form-select-sm" id="' . $inputId
-                . '" name="' . $inputName . '">';
+                . '" name="' . $inputName . '" data-mm-category-list-mode>';
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',
                  1 => 'COM_MINIMARKET_CATATTR_MODE_ENABLE',
@@ -101,7 +101,7 @@ final class CategoryattributesField extends FormField
             $flagId=$escape($this->id.'_v'.$id);
             $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
                 . '<input type="checkbox" class="form-check-input" name="'.$flagName
-                . '" id="'.$flagId.'" value="1"'.($listVisible?' checked':'').'>'
+                . '" id="'.$flagId.'" data-mm-category-list-flag value="1"'.($listVisible?' checked':'').'>'
                 . '<label class="visually-hidden" for="'.$flagId.'">'
                 . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'</label>'
                 . '</td><td class="mm-rules-state"><span class="'

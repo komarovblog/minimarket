@@ -63,6 +63,11 @@ final class HtmlView extends BaseHtmlView
                 ['defer' => true]
             );
 
+        // Switch only meaningful for direct enabled category assignments.
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript('com_minimarket.category-list-visibility',
+                'media/com_minimarket/js/category-list-visibility.js',[],['defer'=>true]);
+
         ToolbarHelper::title(Text::_('COM_MINIMARKET_CATEGORY_EDIT_TITLE'));
         ToolbarHelper::apply('category.apply');
         ToolbarHelper::save('category.save');

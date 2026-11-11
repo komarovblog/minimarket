@@ -67,7 +67,7 @@ final class CategoryorderoptionsField extends FormField
             }
             $published = (int) $option['state'] === 1;
             $html .= '</th><td><select class="form-select form-select-sm" name="' . $name
-                . '" id="' . $fieldId . '">';
+                . '" id="' . $fieldId . '" data-mm-category-list-mode>';
             foreach ([
                 -1 => 'COM_MINIMARKET_CATATTR_MODE_INHERIT',
                  0 => 'COM_MINIMARKET_CATATTR_MODE_DISABLE',
@@ -82,7 +82,7 @@ final class CategoryorderoptionsField extends FormField
             $flagId=$esc($this->id.'_v'.$id);
             $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
                 . '<input type="checkbox" class="form-check-input" name="'.$flagName
-                . '" id="'.$flagId.'" value="1"'.($listVisible?' checked':'').'>'
+                . '" id="'.$flagId.'" data-mm-category-list-flag value="1"'.($listVisible?' checked':'').'>'
                 . '<label class="visually-hidden" for="'.$flagId.'">'
                 . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'</label>'
                 . '</td><td class="mm-rules-state"><span class="'
