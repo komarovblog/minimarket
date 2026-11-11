@@ -934,3 +934,54 @@
 #adminForm.mm-list-form .mm-columns-toolbar + .mm-native-list-viewport,
 #adminForm.mm-list-form .mm-columns-toolbar + .table-responsive {margin-top:0!important;}
 #adminForm.mm-list-form .mm-native-list-viewport>.mm-admin-list {margin-top:0!important;}
+
+
+/* 0.5.87: a single table viewport regardless of open/collapsed Joomla menu. */
+#adminForm.mm-list-form,
+#adminForm.mm-list-form .j-main-container,
+.mm-unified-list,
+.mm-unified-list .j-main-container {
+  box-sizing:border-box;
+  min-width:0!important;
+  max-width:100%;
+  overflow:visible;
+}
+#adminForm.mm-list-form .mm-native-list-viewport,
+.mm-unified-list .table-responsive {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0!important;
+  max-width:100%;
+  display:block;
+  overflow-x:auto!important;
+  overscroll-behavior-x:contain;
+}
+#adminForm.mm-list-form .mm-native-list-viewport table.mm-admin-list,
+.mm-unified-list .table-responsive table.mm-admin-list {
+  width:100%;
+  min-width:44rem;
+  margin:0;
+}
+#adminForm.mm-list-form .js-stools-container-bar,
+#adminForm.mm-list-form .js-stools-container-filters {
+  min-width:0;
+  max-width:100%;
+  flex-wrap:wrap;
+}
+#adminForm.mm-list-form .js-stools-container-filters > * {
+  min-width:min(100%,12rem);
+  max-width:100%;
+}
+#adminForm.mm-list-form .mm-columns-toolbar {
+  height:auto!important;
+  min-height:0!important;
+  margin:.12rem 0 .12rem!important;
+  padding:0!important;
+}
+.mm-unified-list .mm-native-searchtools {
+  margin-bottom:.45rem;
+}
+.mm-unified-list .mm-native-searchtools + #adminForm,
+.mm-unified-list .mm-native-searchtools + .table-responsive {
+  margin-top:0;
+}
