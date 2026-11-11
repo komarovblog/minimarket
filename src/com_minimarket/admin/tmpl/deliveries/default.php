@@ -26,12 +26,14 @@ $href='index.php?option=com_minimarket&view=deliveries&'.http_build_query([
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
-<div class="mm-unified-list">
+<div class="mm-native-entity-list">
  <div id="j-main-container" class="j-main-container">
-  <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+  
   <form action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"
         method="post" name="adminForm" id="adminForm" class="mm-list-form">
-   <div class="table-responsive">
+    <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+
+   <div class="table-responsive mm-native-list-viewport">
     <table id="mm-deliveries-list" class="table table-striped mm-admin-list">
      <thead><tr>
       <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
@@ -65,13 +67,9 @@ $href='index.php?option=com_minimarket&view=deliveries&'.http_build_query([
    <input type="hidden" name="boxchecked" value="0">
    <input type="hidden" name="task" value="">
    <?php echo HTMLHelper::_('form.token'); ?>
-  </form>
-  <?php if($this->total>$this->pageSize): ?>
-   <nav class="mm-native-pagination">
-    <?php if($this->offset>0): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.max(0,$this->offset-$this->pageSize),false)); ?>"><?php echo Text::_('JPREV'); ?></a><?php endif; ?>
-    <span><?php echo $this->offset+1; ?>–<?php echo min($this->total,$this->offset+$this->pageSize); ?> / <?php echo $this->total; ?></span>
-    <?php if($this->offset+$this->pageSize<$this->total): ?><a href="<?php echo $this->escape(Route::_($href.'&limitstart='.($this->offset+$this->pageSize),false)); ?>"><?php echo Text::_('JNEXT'); ?></a><?php endif; ?>
-   </nav>
-  <?php endif; ?>
+   <input type="hidden" name="limitstart" value="<?php echo (int)$this->offset; ?>">
+ <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
+ </form>
+  
  </div>
 </div>
