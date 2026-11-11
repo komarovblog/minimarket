@@ -14,12 +14,14 @@ final class HtmlView extends BaseHtmlView
 {
     public array $cart = [];
     public bool $inventoryEnabled = true;
+    public string $promoCode='';
 
     public function display($tpl = null)
     {
         $app = Factory::getApplication();
         $this->inventoryEnabled = (int)ComponentHelper::getParams('com_minimarket')
             ->get('inventory_enabled',1) === 1;
+        $this->promoCode=(string)$app->getSession()->get('com_minimarket.promo_code','');
         $state = CartState::normalize($app->getSession()->get(CartState::SESSION_KEY,[]));
         $catalog = new CartCatalog(Factory::getContainer()->get(DatabaseInterface::class));
         $this->cart = $catalog->details($state,$this->inventoryEnabled);
