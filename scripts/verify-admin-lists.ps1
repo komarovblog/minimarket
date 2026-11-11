@@ -7,7 +7,7 @@ $admin = Join-Path $root 'src\com_minimarket\admin'
 $media = Join-Path $root 'src\com_minimarket\media'
 $native = @('products','categories','brands','collections','attributes','bundles',
     'groups','bundlegroups','orderoptions','values')
-$custom = @('orders','deliveries','reviews','promocodes','seofilters','feeds','integrations')
+$custom = @('orders','deliveries','reviews','promocodes','seofilters','feeds','integrations','deliveryzones')
 $bulk = @('orders','deliveries','reviews','promocodes','seofilters')
 $errors = New-Object System.Collections.Generic.List[string]
 
