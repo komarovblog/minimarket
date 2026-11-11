@@ -8,6 +8,12 @@ use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
     <?php if ($this->orderId > 0) : ?>
         <p><?php echo Text::sprintf('COM_MINIMARKET_ORDER_COMPLETE_MESSAGE', (int)$this->orderId); ?></p>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_ORDER_COMPLETE_NEXT'); ?></p>
+        <?php if($this->bankInstructions!==''): ?>
+         <section class="mt-3">
+          <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_BANK_TRANSFER_INSTRUCTIONS_TITLE'); ?></h2>
+          <p><?php echo nl2br($this->escape($this->bankInstructions),false); ?></p>
+         </section>
+        <?php endif; ?>
     <?php else : ?>
         <p><?php echo Text::_('COM_MINIMARKET_ORDER_COMPLETE_NO_SESSION'); ?></p>
     <?php endif; ?>
