@@ -10,6 +10,7 @@ use Joomla\Database\DatabaseInterface;
 final class HtmlView extends BaseHtmlView
 {
     public int $orderId=0;
+    public string $bankInstructions='';
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
@@ -20,16 +21,21 @@ final class HtmlView extends BaseHtmlView
         if ($id>0) {
             $identity=$app->getIdentity();
             $db=Factory::getContainer()->get(DatabaseInterface::class);
-            $q=$db->getQuery(true)->select($db->quoteName('user_id'))
+            $q=$db->getQuery(true)->select($db->quoteName(['user_id','payment_method']))
                 ->from($db->quoteName('#__minimarket_orders'))
                 ->where($db->quoteName('id').'='.(int)$id);
             $db->setQuery($q);
-            $owner=$db->loadResult();
+            $order=$db->loadObject();
+            $owner=$order->user_id??null;
             if ($owner!==null && $owner!==false
                 && (((int)$owner===0 && (int)$identity->id===0)
                     || ((int)$identity->id>0 && empty($identity->block)
                     && (int)$owner===(int)$identity->id))) {
                 $this->orderId=$id;
+                if((string)($order->payment_method??'')==='bank_transfer'){
+                    $params=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
+                    $this->bankInstructions=trim(strip_tags((string)$params->get('payment_bank_instructions','')));
+                }
             }
         }
         $document=$this->getDocument();
