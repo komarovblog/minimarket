@@ -222,6 +222,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_category_attributes` (
     `attribute_id` INT UNSIGNED NOT NULL,
     `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
     `required` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `show_in_list` TINYINT UNSIGNED NOT NULL DEFAULT 1,
     PRIMARY KEY (`category_id`, `attribute_id`),
     KEY `idx_mm_category_attribute_reverse` (`attribute_id`, `enabled`),
     CONSTRAINT `fk_mm_catattr_category` FOREIGN KEY (`category_id`)
@@ -519,6 +520,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_category_order_options` (
   `category_id` INT UNSIGNED NOT NULL,
   `option_id` INT UNSIGNED NOT NULL,
   `mode` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  `show_in_list` TINYINT UNSIGNED NOT NULL DEFAULT 1,
   PRIMARY KEY (`category_id`, `option_id`),
   KEY `idx_mm_cat_order_options_option` (`option_id`),
   CONSTRAINT `fk_mm_cat_order_options_category` FOREIGN KEY (`category_id`)

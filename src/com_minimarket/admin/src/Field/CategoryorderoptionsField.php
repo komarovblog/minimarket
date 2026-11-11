@@ -36,14 +36,17 @@ final class CategoryorderoptionsField extends FormField
         $hierarchy = CategoryOrderOptions::hierarchy($db);
         $inherited = CategoryOrderOptions::resolveModes($parentId,
             $hierarchy['parents'], $hierarchy['rules']);
+        $inheritedList = CategoryListVisibility::resolve($parentId,
+            $hierarchy['parents'], $hierarchy['rules'], $hierarchy['list_flags']??[]);
         $own = is_array($this->value)
-            ? $this->value : CategoryOrderOptions::direct($db, $categoryId);
+            ? $this->value : CategoryOrderOptions::directWithVisibility($db, $categoryId);
         $esc = static fn(string $s): string =>
             htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $html = '<p class="text-muted">' . $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_HELP')) .
             '</p><table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state"><thead><tr><th>' .
             $esc(Text::_('COM_MINIMARKET_ORDER_OPTIONS')) . '</th><th>' .
             $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTION_RULE')) .
+            '</th><th>' . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')) .
             '</th><th>' . $esc(Text::_('JSTATUS')) .
             '</th></tr></thead><tbody>';
         foreach ($options as $option) {
@@ -74,7 +77,15 @@ final class CategoryorderoptionsField extends FormField
                 $html .= '<option value="' . $value . '"' . ($mode === $value ? ' selected' : '')
                     . '>' . $esc(Text::_($key)) . '</option>';
             }
-            $html .= '</select></td><td class="mm-rules-state"><span class="'
+            $listVisible=(int)($own['v'.$id]??($inheritedList[$id]??true))===1;
+            $flagName=$esc($this->name.'[v'.$id.']');
+            $flagId=$esc($this->id.'_v'.$id);
+            $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
+                . '<input type="checkbox" class="form-check-input" name="'.$flagName
+                . '" id="'.$flagId.'" value="1"'.($listVisible?' checked':'').'>'
+                . '<label class="visually-hidden" for="'.$flagId.'">'
+                . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'</label>'
+                . '</td><td class="mm-rules-state"><span class="'
                 . ($published ? 'text-success' : 'text-muted') . '">'
                 . $esc(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))
                 . '</span></td></tr>';

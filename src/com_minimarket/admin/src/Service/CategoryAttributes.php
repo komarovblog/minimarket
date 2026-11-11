@@ -140,6 +140,23 @@ final class CategoryAttributes
         return $rules;
     }
 
+    /** Composite form state for category mode and independent card toggle. */
+    public static function loadDirectWithVisibility(DatabaseInterface $db,int $categoryId): array
+    {
+        if($categoryId<1)return [];
+        $q=$db->getQuery(true)->select(['attribute_id','enabled','required','show_in_list'])
+            ->from($db->quoteName('#__minimarket_category_attributes'))
+            ->where('category_id = '.(int)$categoryId);
+        $db->setQuery($q);
+        $modes=[];$flags=[];
+        foreach((array)$db->loadAssocList() as $row){
+            $id=(int)$row['attribute_id'];
+            $modes[$id]=self::rowMode($row);
+            $flags[$id]=(int)($row['show_in_list']??1);
+        }
+        return CategoryListVisibility::formValues($modes,$flags);
+    }
+
     /** @return int[] IDs of all known attributes, including unpublished records. */
     public static function allowedIds(DatabaseInterface $db): array
     {
@@ -176,14 +193,16 @@ final class CategoryAttributes
         }
 
         $q = $db->getQuery(true)
-            ->select([$db->quoteName('category_id'), $db->quoteName('attribute_id'), $db->quoteName('enabled'), $db->quoteName('required')])
+            ->select([$db->quoteName('category_id'), $db->quoteName('attribute_id'), $db->quoteName('enabled'), $db->quoteName('required'), $db->quoteName('show_in_list')])
             ->from($db->quoteName('#__minimarket_category_attributes'));
         $db->setQuery($q);
-        $rules = [];
+        $rules = [];$listFlags=[];
         foreach ((array) $db->loadAssocList() as $row) {
-            $rules[(int) $row['category_id']][(int) $row['attribute_id']] = self::rowMode($row);
+            $categoryId=(int)$row['category_id'];$attributeId=(int)$row['attribute_id'];
+            $rules[$categoryId][$attributeId] = self::rowMode($row);
+            $listFlags[$categoryId][$attributeId]=(int)($row['show_in_list']??1);
         }
-        return ['parents' => $parents, 'rules' => $rules];
+        return ['parents' => $parents, 'rules' => $rules, 'list_flags'=>$listFlags];
     }
 
     /** @return array<int,int> Direct category ID=>mode for one attribute. */
@@ -213,6 +232,14 @@ final class CategoryAttributes
         if ($attributeId < 1) {
             throw new \InvalidArgumentException('COM_MINIMARKET_CATATTR_INVALID');
         }
+        // Reverse editing must never reset card visibility set in a category.
+        $old=$db->getQuery(true)->select(['category_id','show_in_list'])
+            ->from($db->quoteName('#__minimarket_category_attributes'))
+            ->where('attribute_id = '.(int)$attributeId);
+        $db->setQuery($old);
+        $existing=[];
+        foreach((array)$db->loadAssocList() as $row)
+            $existing[(int)$row['category_id']]=(int)($row['show_in_list']??1);
         $q = $db->getQuery(true)
             ->delete($db->quoteName('#__minimarket_category_attributes'))
             ->where($db->quoteName('attribute_id') . ' = ' . $attributeId);
@@ -223,9 +250,9 @@ final class CategoryAttributes
         }
         $q = $db->getQuery(true)
             ->insert($db->quoteName('#__minimarket_category_attributes'))
-            ->columns($db->quoteName(['category_id','attribute_id','enabled','required']));
+            ->columns($db->quoteName(['category_id','attribute_id','enabled','required','show_in_list']));
         foreach ($rules as $categoryId => $mode) {
-            $q->values(implode(',', [(int) $categoryId, $attributeId, (int) $mode > 0 ? 1 : 0, (int) $mode === 2 ? 1 : 0]));
+            $q->values(implode(',', [(int) $categoryId, $attributeId, (int) $mode > 0 ? 1 : 0, (int) $mode === 2 ? 1 : 0, (int)($existing[(int)$categoryId]??1)]));
         }
         $db->setQuery($q);
         $db->execute();
@@ -236,7 +263,7 @@ final class CategoryAttributes
      * category save. Deleting a rule reverts to inheritance, never deletes
      * the shared attribute or a saved product value.
      */
-    public static function replaceDirect(DatabaseInterface $db, int $categoryId, array $rules): void
+    public static function replaceDirect(DatabaseInterface $db, int $categoryId, array $rules, array $listFlags=[]): void
     {
         if ($categoryId < 1) {
             throw new \InvalidArgumentException('COM_MINIMARKET_CATATTR_INVALID');
@@ -251,9 +278,9 @@ final class CategoryAttributes
         }
         $q = $db->getQuery(true)
             ->insert($db->quoteName('#__minimarket_category_attributes'))
-            ->columns($db->quoteName(['category_id', 'attribute_id', 'enabled', 'required']));
+            ->columns($db->quoteName(['category_id', 'attribute_id', 'enabled', 'required', 'show_in_list']));
         foreach ($rules as $attributeId => $enabled) {
-            $q->values(implode(',', [$categoryId, (int) $attributeId, (int) $enabled > 0 ? 1 : 0, (int) $enabled === 2 ? 1 : 0]));
+            $q->values(implode(',', [$categoryId, (int) $attributeId, (int) $enabled > 0 ? 1 : 0, (int) $enabled === 2 ? 1 : 0, (int)($listFlags[(int)$attributeId]??1)]));
         }
         $db->setQuery($q);
         $db->execute();

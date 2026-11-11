@@ -24,22 +24,29 @@ final class ProductAttributeCatalog
         }
         $ids = implode(',', array_map('intval', $ancestors));
         $q = $db->getQuery(true)
-            ->select(['category_id', 'attribute_id', 'enabled'])
+            ->select(['category_id', 'attribute_id', 'enabled', 'show_in_list'])
             ->from($db->quoteName('#__minimarket_category_attributes'))
             ->where($db->quoteName('category_id') . ' IN (' . $ids . ')');
         $db->setQuery($q);
         $byCategory = [];
         foreach ((array) $db->loadObjectList() as $rule) {
-            $byCategory[(int) $rule->category_id][(int) $rule->attribute_id] =
-                (int) $rule->enabled === 1;
+            $byCategory[(int)$rule->category_id][(int)$rule->attribute_id] = [
+                'enabled'=>(int)$rule->enabled===1,
+                'list'=>(int)($rule->show_in_list??1)===1,
+            ];
         }
         $enabled = [];
         foreach ($ancestors as $categoryId) {
-            foreach ($byCategory[(int) $categoryId] ?? [] as $attributeId => $active) {
-                $enabled[$attributeId] = $active;
+            foreach ($byCategory[(int)$categoryId]??[] as $attributeId=>$assignment) {
+                $enabled[$attributeId]=$assignment;
             }
         }
-        $allowed = array_keys(array_filter($enabled));
+        $allowed=[];
+        foreach($enabled as $id=>$assignment) {
+            if(!$assignment['enabled'])continue;
+            if($context==='category' && !$assignment['list'])continue;
+            $allowed[]=(int)$id;
+        }
         if ($allowed === []) {
             return [];
         }
@@ -54,7 +61,7 @@ final class ProductAttributeCatalog
         $attributes = [];
         foreach ((array) $db->loadObjectList() as $row) {
             $id = (int) $row->id;
-            if (!isset($enabled[$id]) || !$enabled[$id]) {
+            if (!in_array($id,$allowed,true)) {
                 continue;
             }
             $location=(string)($row->display_location??'inherit');

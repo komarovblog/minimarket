@@ -41,12 +41,14 @@ final class CategoryattributesField extends FormField
         $hierarchy = CategoryAttributes::loadHierarchy($db);
         $parentRules = CategoryAttributes::resolve($parentId, $hierarchy['parents'], $hierarchy['rules']);
         $parentModes = CategoryAttributes::resolveModes($parentId, $hierarchy['parents'], $hierarchy['rules']);
+        $parentListFlags = CategoryListVisibility::resolve($parentId, $hierarchy['parents'],
+            $hierarchy['rules'], $hierarchy['list_flags']??[]);
 
         // On validation failure, honor posted form values instead of silently
         // restoring the last persisted rule selection.
         $ownRules = is_array($this->value)
             ? $this->value
-            : CategoryAttributes::loadDirect($db, $categoryId);
+            : CategoryAttributes::loadDirectWithVisibility($db, $categoryId);
 
         $escape = static fn (string $text): string =>
             htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -55,6 +57,7 @@ final class CategoryattributesField extends FormField
             . '<table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state">'
             . '<thead><tr><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_ATTRIBUTE'))
             . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
+            . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST'))
             . '</th><th scope="col">' . $escape(Text::_('JSTATUS'))
             . '</th></tr></thead><tbody>';
 
@@ -93,7 +96,15 @@ final class CategoryattributesField extends FormField
                     . ($mode === (int) $value ? ' selected' : '')
                     . '>' . $escape(Text::_($languageKey)) . '</option>';
             }
-            $html .= '</select></td><td class="mm-rules-state"><span class="'
+            $listVisible=(int)($ownRules['v'.$id]??($parentListFlags[$id]??true))===1;
+            $flagName=$escape($this->name.'[v'.$id.']');
+            $flagId=$escape($this->id.'_v'.$id);
+            $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
+                . '<input type="checkbox" class="form-check-input" name="'.$flagName
+                . '" id="'.$flagId.'" value="1"'.($listVisible?' checked':'').'>'
+                . '<label class="visually-hidden" for="'.$flagId.'">'
+                . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'</label>'
+                . '</td><td class="mm-rules-state"><span class="'
                 . ($published ? 'text-success' : 'text-muted') . '">'
                 . $escape(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))
                 . '</span></td></tr>';

@@ -8,6 +8,7 @@ use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryListVisibility;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
 
 final class CategoryModel extends AdminModel
@@ -25,10 +26,10 @@ final class CategoryModel extends AdminModel
     {
         $item = parent::getItem($pk);
         if ($item) {
-            $item->attribute_rules = CategoryAttributes::loadDirect(
+            $item->attribute_rules = CategoryAttributes::loadDirectWithVisibility(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
-            $item->order_option_rules = CategoryOrderOptions::direct(
+            $item->order_option_rules = CategoryOrderOptions::directWithVisibility(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
         }
@@ -48,22 +49,28 @@ final class CategoryModel extends AdminModel
         $db = $this->getDatabase();
 
         try {
+            $allowedAttributes=$hasAttributes?CategoryAttributes::allowedIds($db):[];
             $rules = $hasAttributes
                 ? CategoryAttributes::normalizeRules(
-                    $data['attribute_rules'] ?? [],
-                    CategoryAttributes::allowedIds($db)
+                    CategoryListVisibility::modesOnly($data['attribute_rules'] ?? []),
+                    $allowedAttributes
                 ) : [];
+            $attributeListFlags=$hasAttributes
+                ? CategoryListVisibility::flags($data['attribute_rules']??[],$allowedAttributes):[];
         } catch (\InvalidArgumentException $error) {
             $this->setError(Text::_('COM_MINIMARKET_CATATTR_INVALID'));
             return false;
         }
 
         try {
+            $allowedOptions=$hasOrderOptions?CategoryOrderOptions::allowedIds($db):[];
             $orderOptionRules = $hasOrderOptions
                 ? CategoryOrderOptions::normalize(
-                    $data['order_option_rules'] ?? [],
-                    CategoryOrderOptions::allowedIds($db)
+                    CategoryListVisibility::modesOnly($data['order_option_rules']??[]),
+                    $allowedOptions
                 ) : [];
+            $optionListFlags=$hasOrderOptions
+                ? CategoryListVisibility::flags($data['order_option_rules']??[],$allowedOptions):[];
         } catch (\InvalidArgumentException $error) {
             $this->setError(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_INVALID'));
             return false;
@@ -79,10 +86,10 @@ final class CategoryModel extends AdminModel
             }
             $categoryId = (int) $this->getState($this->getName() . '.id');
             if ($hasAttributes) {
-                CategoryAttributes::replaceDirect($db, $categoryId, $rules);
+                CategoryAttributes::replaceDirect($db, $categoryId, $rules, $attributeListFlags);
             }
             if ($hasOrderOptions) {
-                CategoryOrderOptions::replace($db, $categoryId, $orderOptionRules);
+                CategoryOrderOptions::replace($db, $categoryId, $orderOptionRules, $optionListFlags);
             }
             $db->transactionCommit();
             return true;

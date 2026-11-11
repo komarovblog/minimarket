@@ -13,6 +13,8 @@ use MiniMarket\Component\Minimarket\Site\Helper\SeoHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 use MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions;
 use MiniMarket\Component\Minimarket\Site\Service\FacetedCatalog;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryListVisibility;
 
 class HtmlView extends BaseHtmlView
 {
@@ -177,21 +179,34 @@ class HtmlView extends BaseHtmlView
                     $this->categoryGalleries[$pid][]=$photo;
                 }
             }
-            $optionLocations=[];
-            $q=$db->getQuery(true)->select(['code','display_location'])
+            $optionLocations=[];$optionIds=[];
+            $optionHierarchy=CategoryOrderOptions::hierarchy($db);
+            $optionFlagsByCategory=[];
+            $q=$db->getQuery(true)->select(['id','code','display_location'])
                 ->from($db->quoteName('#__minimarket_order_options'))
                 ->where('state=1');
             $db->setQuery($q);
             foreach((array)$db->loadAssocList() as $row) {
-                $optionLocations[(string)$row['code']]=(string)$row['display_location'];
+                $code=(string)$row['code'];
+                $optionLocations[$code]=(string)$row['display_location'];
+                $optionIds[$code]=(int)$row['id'];
             }
             foreach($this->products as $product) {
                 $pid=(int)$product->id;
                 $this->categoryAttributeRows[$pid]=$repo->getProductAttributes(
                     $pid,(int)$product->category_id,'category');
                 if (isset($this->variantsInProducts[$pid])) {
-                    $variants=$repo->getProductVariants($pid,(int)$product->category_id);
+                    $categoryId=(int)$product->category_id;
+                    if(!isset($optionFlagsByCategory[$categoryId])){
+                        $optionFlagsByCategory[$categoryId]=CategoryListVisibility::resolve(
+                            $categoryId,$optionHierarchy['parents'],$optionHierarchy['rules'],
+                            $optionHierarchy['list_flags']??[]);
+                    }
+                    $visibleOptions=$optionFlagsByCategory[$categoryId];
+                    $variants=$repo->getProductVariants($pid,$categoryId);
                     foreach($variants['axes']??[] as $code=>$axis) {
+                        $linkedOptionId=$optionIds[(string)$code]??0;
+                        if($linkedOptionId>0 && !($visibleOptions[$linkedOptionId]??false))continue;
                         $location=$optionLocations[(string)$code]??'inherit';
                         if ($location==='inherit') {
                             $location=$this->productListOptions['option_display_location'];
