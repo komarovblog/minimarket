@@ -920,3 +920,10 @@
 #adminForm.mm-list-form .mm-native-list-viewport .mm-admin-list {
   margin-bottom:0;
 }
+
+/* Detail and import result tables should never widen the whole administrator. */
+.mm-editor-table-viewport {
+  width:100%; min-width:0; max-width:100%;
+  overflow-x:auto; overscroll-behavior-x:contain;
+}
+.mm-editor-table-viewport > table {min-width:100%; margin-bottom:0;}
