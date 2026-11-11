@@ -26,7 +26,7 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=payment
    <tr>
     <td><?php echo Text::_($info[0]); ?></td>
     <td><?php echo Text::_('COM_MINIMARKET_METHOD_BUILTIN'); ?></td>
-    <td><span class="badge bg-<?php echo $info[1]?'success':'secondary'; ?>"><?php echo Text::_($info[1]?'JENABLED':'JDISABLED'); ?></span></td>
+    <td><span class="badge bg-<?php echo $info[1]?'success':'secondary'; ?>"><?php echo Text::_($info[1]?'COM_MINIMARKET_METHOD_ACTIVE':'COM_MINIMARKET_METHOD_INACTIVE'); ?></span></td>
     <td><?php if($this->canEdit): ?><a href="<?php echo $esc($edit($method)); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></a><?php else: ?>—<?php endif; ?></td>
    </tr>
   <?php endforeach; ?>
@@ -34,7 +34,7 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=payment
    <tr>
     <td><?php echo $esc(Text::_((string)$plugin->name)); ?><small class="d-block text-muted"><?php echo $esc($plugin->element); ?></small></td>
     <td><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN'); ?></td>
-    <td><span class="badge bg-<?php echo (int)$plugin->enabled===1?'success':'secondary'; ?>"><?php echo Text::_((int)$plugin->enabled===1?'JENABLED':'JDISABLED'); ?></span></td>
+    <td><span class="badge bg-<?php echo (int)$plugin->enabled===1?'success':'secondary'; ?>"><?php echo Text::_((int)$plugin->enabled===1?'COM_MINIMARKET_METHOD_ACTIVE':'COM_MINIMARKET_METHOD_INACTIVE'); ?></span></td>
     <td><?php if($this->canEditPlugins): ?><a href="<?php echo $esc(Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='.(int)$plugin->extension_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></a><?php else: ?>—<?php endif; ?></td>
    </tr>
   <?php endforeach; ?>
