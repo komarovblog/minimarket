@@ -67,6 +67,17 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
             <span data-mm-cart-units class="visually-hidden"><?php echo (int)$this->cart['units']; ?></span>
             <span data-mm-cart-total><?php echo CartState::format($this->cart['total_cents']); ?>
             <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></span></strong></p>
+        <form class="mm-cart-promo my-3" action="<?php echo $this->escape(RouteHelper::cartAction('promo')); ?>" method="post">
+            <label for="mm-cart-promo" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMO_CODE'); ?></label>
+            <div class="input-group">
+                <input id="mm-cart-promo" class="form-control" name="promo_code"
+                    pattern="[A-Za-z0-9-]{3,64}" maxlength="64"
+                    value="<?php echo $this->escape($this->promoCode); ?>">
+                <button class="btn btn-primary" type="submit"><?php echo Text::_('COM_MINIMARKET_PROMO_APPLY'); ?></button>
+            </div>
+            <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PROMO_CART_NOTE'); ?></p>
+            <?php echo HTMLHelper::_('form.token'); ?>
+        </form>
         <?php if ($this->cart['available']) : ?>
         <p data-mm-cart-checkout><a class="btn btn-primary" href="<?php echo $this->escape(RouteHelper::checkout()); ?>">
             <?php echo Text::_('COM_MINIMARKET_CHECKOUT_TITLE'); ?></a></p>
