@@ -13,7 +13,8 @@ use Joomla\CMS\Button\PublishedButton;
 <?php endif; ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=values&attribute_id=' . (int) $this->attributeId); ?>"
       method="post" name="adminForm" id="adminForm" class="mm-list-form">
-    <table class="table table-striped mm-admin-list">
+    <div class="table-responsive mm-native-list-viewport">
+<table class="table table-striped mm-admin-list">
         <thead><tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
             <th class="w-1 text-center"><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
@@ -49,6 +50,7 @@ use Joomla\CMS\Button\PublishedButton;
         <?php endif; ?>
         </tbody>
     </table>
+</div>
     <?php if ($this->attributeId > 0) : ?>
         <input type="hidden" name="attribute_id" value="<?php echo (int) $this->attributeId; ?>">
         <input type="hidden" name="return" value="<?php echo htmlspecialchars(
