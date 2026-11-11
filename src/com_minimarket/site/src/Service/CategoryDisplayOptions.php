@@ -24,6 +24,13 @@ final class CategoryDisplayOptions
         $result['category_intro']=(int)$global->get('category_show_introtext',1)===1;
         $result['category_description']=(int)$global->get('category_show_description',1)===1;
         $result['product_gallery_enabled']=(int)$global->get('category_product_gallery_enabled',1)===1;
+        $result['show_sort']=(int)$global->get('category_show_sort',1)===1;
+        $result['lazy_loading']=(int)$global->get('category_lazy_loading',1)===1;
+        $result['allow_layout_switch']=(int)$global->get('category_allow_layout_switch',1)===1;
+        $result['show_list_attributes']=(int)$global->get('category_list_show_attributes',1)===1;
+        $result['show_list_options']=(int)$global->get('category_list_show_options',1)===1;
+        $childLimit=(int)$global->get('category_children_per_page',10);
+        $result['children_per_page']=in_array($childLimit,[0,10,20,50],true)?$childLimit:10;
         $limit=(int)$global->get('category_product_gallery_limit',5);
         $result['product_gallery_limit']=in_array($limit,[3,5,8],true)?$limit:5;
         foreach (['attribute_display_location','option_display_location','system_display_location'] as $key) {
@@ -38,9 +45,9 @@ final class CategoryDisplayOptions
         }
         $layout = (string) ($category->product_layout ?? 'inherit');
         if (!in_array($layout, ['list', 'grid'], true)) {
-            $layout = (string) $global->get('category_product_layout', 'list');
+            $layout = (string) $global->get('category_product_layout', 'grid');
         }
-        $result['layout'] = in_array($layout, ['list', 'grid'], true) ? $layout : 'list';
+        $result['layout'] = in_array($layout, ['list', 'grid'], true) ? $layout : 'grid';
         // All six Bootstrap 5 viewport breakpoints have independent column
         // counts; -1 is always the global component setting.
         $categoryOwnsGrid = (string)($category->product_layout ?? 'inherit') === 'grid';

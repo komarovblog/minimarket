@@ -22,7 +22,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <?php if ($safeImage && ($this->productListOptions['category_image'] || !empty($this->seoImage))) : ?>
         <img src="<?php echo $this->escape(Uri::root() . $image); ?>"
              alt="<?php echo $this->escape((string) (($this->seoImageAlt ?? '') ?: $this->category->image_alt ?: $this->category->title)); ?>"
-             loading="lazy" class="com-minimarket-category__image">
+             loading="<?php echo $this->productListOptions['lazy_loading']?'lazy':'eager'; ?>" class="com-minimarket-category__image">
     <?php endif; ?>
     <?php
         $categoryIntro=$this->seoIntro??(string)($this->category->introtext??'');
@@ -45,6 +45,22 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                     </a></li>
                 <?php endforeach; ?>
             </ul>
+            <?php if($this->childPageCount>1):
+                $childUrl=RouteHelper::category((int)$this->category->id);
+                $childHref=static function(int $page) use($childUrl):string {
+                    return $childUrl.(str_contains($childUrl,'?')?'&':'?').'mm_child_page='.$page;
+                };
+            ?>
+             <nav class="d-flex align-items-center gap-2" aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CHILD_CATEGORIES')); ?>">
+              <?php if($this->childPage>1): ?>
+               <a href="<?php echo $this->escape($childHref($this->childPage-1)); ?>" class="btn btn-outline-secondary btn-sm"><?php echo Text::_('JPREV'); ?></a>
+              <?php endif; ?>
+              <span><?php echo $this->childPage; ?> / <?php echo $this->childPageCount; ?></span>
+              <?php if($this->childPage<$this->childPageCount): ?>
+               <a href="<?php echo $this->escape($childHref($this->childPage+1)); ?>" class="btn btn-outline-secondary btn-sm"><?php echo Text::_('JNEXT'); ?></a>
+              <?php endif; ?>
+             </nav>
+            <?php endif; ?>
         </section>
     <?php endif; ?>
 
@@ -63,7 +79,22 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
             ? \MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions::bootstrapGridClasses($this->productListOptions)
             : 'list-unstyled mm-product-list';
         ?>
+        <?php if($this->productListOptions['allow_layout_switch']): ?>
+         <div class="d-flex gap-2 align-items-center mb-2">
+          <?php foreach(['grid'=>'COM_MINIMARKET_LAYOUT_GRID','list'=>'COM_MINIMARKET_LAYOUT_LIST'] as $layoutKey=>$label):
+            $layoutLink=RouteHelper::category((int)$this->category->id);
+            $layoutQuery=http_build_query(['mm_layout'=>$layoutKey,'mm_order'=>$this->sortOrder,'mmf'=>$this->facetSelection],
+              '','&',PHP_QUERY_RFC3986);
+          ?>
+           <a class="btn btn-sm <?php echo $grid===$layoutKey?'btn-primary':'btn-outline-secondary'; ?>"
+              href="<?php echo $this->escape($layoutLink.(str_contains($layoutLink,'?')?'&':'?').$layoutQuery); ?>"
+              aria-current="<?php echo $grid===$layoutKey?'page':'false'; ?>"><?php echo Text::_($label); ?></a>
+          <?php endforeach; ?>
+         </div>
+        <?php endif; ?>
+        <?php if($this->productListOptions['show_sort']): ?>
         <form method="get" class="mm-sort-bar" action="<?php echo $this->escape(RouteHelper::category((int)$this->category->id)); ?>">
+            <?php if($this->productListOptions['allow_layout_switch']): ?><input type="hidden" name="mm_layout" value="<?php echo $grid?'grid':'list'; ?>"><?php endif; ?>
             <label for="mm-category-sort"><?php echo Text::_('COM_MINIMARKET_SORT_LABEL'); ?></label>
             <select name="mm_order" id="mm-category-sort" class="form-select form-select-sm" data-mm-sort>
                 <?php foreach ([
@@ -92,6 +123,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                 <?php endif; endforeach; endforeach; ?>
             <button type="submit" class="btn btn-outline-secondary btn-sm"><?php echo Text::_('COM_MINIMARKET_FILTER_APPLY'); ?></button>
         </form>
+        <?php endif; ?>
         <ul class="<?php echo $this->escape($gridClasses); ?> list-unstyled mm-category-products" data-mm-category-layout="<?php echo $grid ? 'grid' : 'list'; ?>">
         <?php foreach ($this->products as $product) : ?>
             <li class="<?php echo $grid ? 'col' : 'mm-product-list__item'; ?>"
@@ -125,7 +157,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                             <a class="mm-product-card__media" href="<?php echo $this->escape(RouteHelper::product((int)$product->id)); ?>">
                                 <img src="<?php echo $this->escape($slides[0]['url']); ?>"
                                      alt="<?php echo $this->escape($slides[0]['alt']); ?>"
-                                     loading="lazy" class="mm-product-card__image" data-mm-card-gallery-image>
+                                     loading="<?php echo $this->productListOptions['lazy_loading']?'lazy':'eager'; ?>" class="mm-product-card__image" data-mm-card-gallery-image>
                             </a>
                             <?php if (count($slides)>1) : ?>
                                 <button type="button" class="mm-gallery-arrow mm-gallery-arrow--prev"
@@ -155,7 +187,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                                 <dd><?php echo (int)$product->stock; ?></dd>
                             </dl>
                         <?php endif; ?>
-                        <?php if (!empty($this->categoryAttributeRows[(int)$product->id])) : ?>
+                        <?php if ($this->productListOptions['show_list_attributes'] && !empty($this->categoryAttributeRows[(int)$product->id])) : ?>
                             <dl class="mm-product-card__attributes small mb-2">
                                 <?php foreach (array_slice($this->categoryAttributeRows[(int)$product->id],0,5) as $attr) : ?>
                                 <dt><?php echo $this->escape((string)$attr['title']); ?></dt>
@@ -165,7 +197,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                                 <?php endforeach; ?>
                             </dl>
                         <?php endif; ?>
-                        <?php if (!empty($this->categoryVariantOptions[(int)$product->id])) : ?>
+                        <?php if ($this->productListOptions['show_list_options'] && !empty($this->categoryVariantOptions[(int)$product->id])) : ?>
                             <dl class="mm-product-card__attributes small mb-2">
                                 <?php foreach (array_slice($this->categoryVariantOptions[(int)$product->id],0,4) as $axis) : ?>
                                     <dt><?php echo $this->escape($axis['title']); ?></dt>
@@ -201,7 +233,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                                     class="mm-category-preview p-3 rounded">
                                 <h3 class="h5"><?php echo $this->escape($product->title); ?></h3>
                                 <?php if ($hasPhoto) : ?>
-                                    <img loading="lazy" class="img-fluid rounded mb-2"
+                                    <img loading="<?php echo $this->productListOptions['lazy_loading']?'lazy':'eager'; ?>" class="img-fluid rounded mb-2"
                                          src="<?php echo $this->escape(Uri::root().$photo); ?>"
                                          alt="<?php echo $this->escape((string)($product->image_alt?:$product->title)); ?>">
                                 <?php endif; ?>

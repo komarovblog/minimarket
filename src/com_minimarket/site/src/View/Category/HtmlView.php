@@ -35,6 +35,8 @@ class HtmlView extends BaseHtmlView
     public string $sortOrder = 'newest';
     public int $productPage = 1;
     public int $productsPerPage = 10;
+    public int $childPage = 1;
+    public int $childPageCount = 1;
     public int $productTotal = 0;
     public int $productPageCount = 1;
 
@@ -58,7 +60,22 @@ class HtmlView extends BaseHtmlView
         $this->productListOptions = CategoryDisplayOptions::resolve($category, $options);
         $this->productsPerPage = $this->productListOptions['products_per_page'];
         $display = $this->productListOptions;
-        $this->children = $display['show_children'] ? $repo->getChildCategories($id) : [];
+        $children=$display['show_children'] ? $repo->getChildCategories($id) : [];
+        $childLimit=$display['children_per_page'];
+        if($childLimit>0 && count($children)>$childLimit){
+            $this->childPageCount=(int)ceil(count($children)/$childLimit);
+            $this->childPage=max(1,min($this->childPageCount,
+                Factory::getApplication()->input->getInt('mm_child_page',1)));
+            $this->children=array_slice($children,($this->childPage-1)*$childLimit,$childLimit);
+        }else{
+            $this->children=$children;
+        }
+        if($display['allow_layout_switch']){
+            $requestedLayout=Factory::getApplication()->input->getCmd('mm_layout','');
+            if(in_array($requestedLayout,['grid','list'],true)){
+                $this->productListOptions['layout']=$requestedLayout;
+            }
+        }
         $this->displayProducts = $display['show_products'] || $display['show_bundles']
             || $display['show_descendant_products'] || $display['show_descendant_bundles'];
         $this->products = $this->displayProducts
