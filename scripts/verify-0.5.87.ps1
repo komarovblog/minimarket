@@ -43,7 +43,7 @@ foreach($file in $files){
  }
 }
 [xml]$xml=Get-Content -LiteralPath (Join-Path $component 'minimarket.xml') -Raw -Encoding UTF8
-if([string]$xml.extension.version -ne '0.5.87'){throw 'MINIMARKET_087_VERSION_FAIL'}
+if([version]([string]$xml.extension.version) -lt [version]'0.5.87'){throw 'MINIMARKET_087_VERSION_TOO_OLD'}
 $sql=Get-Content -LiteralPath (Join-Path $component 'admin\sql\updates\mysql\0.5.87.sql') -Raw -Encoding UTF8
 $install=Get-Content -LiteralPath (Join-Path $component 'admin\sql\install.mysql.sql') -Raw -Encoding UTF8
 foreach($name in @('delivery_zones','promo_redemptions','shipping_weight_grams',
