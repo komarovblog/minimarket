@@ -21,6 +21,8 @@ final class HtmlView extends BaseHtmlView
     public array $deliveryMethods=[];
     public array $paymentMethods=[];
     public array $cityRates=[];
+    public bool $zonesMode=false;
+    public array $zoneCities=[];
 
     public function display($tpl=null)
     {
