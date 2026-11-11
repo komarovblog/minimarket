@@ -49,7 +49,6 @@ ok(!products[2].checked&&products[1].checked,'bundle toggle works');
 categorySearch.value='category 3';categorySearch.emit('input');
 ok(categoryRows[0].hidden && !categoryRows[2].hidden,'category search is independent');
 catsAll.emit('click');ok(cats[2].checked&&cats[0].checked,'select visible categories only; preserve hidden selections');
-categorySearch.value='';categorySearch.emit('input');
 catsNone.emit('click');ok(!cats[2].checked&&cats[0].checked,'clear only visible category selections');
 categorySearch.value='';categorySearch.emit('input');
 catsNone.emit('click');ok(cats.every(c=>!c.checked),'clear all categories when filter reset');
