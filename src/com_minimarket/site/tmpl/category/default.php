@@ -15,7 +15,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <h1><?php echo $this->escape($this->seoHeading??$this->category->title); ?></h1>
     <p class="mm-cart__nav"><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></a></p>
     <?php
-    $image = explode('#', (string) ($this->seoImage ?: ($this->category->image ?? '')), 2)[0];
+    $image = explode('#', (string) (($this->seoImage ?? '') ?: ($this->category->image ?? '')), 2)[0];
     $safeImage = str_starts_with($image, 'images/') && !str_contains($image, '..')
         && !preg_match('/[\x00-\x1f<>]/', $image);
     ?>
