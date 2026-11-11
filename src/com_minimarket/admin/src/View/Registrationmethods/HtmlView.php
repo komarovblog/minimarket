@@ -14,6 +14,8 @@ use MiniMarket\Component\Minimarket\Administrator\Service\MethodListRows;
 final class HtmlView extends BaseHtmlView
 {
     public $params;
+    public $shopParams;
+    public bool $canEditUsers=false;
     public array $plugins=[];
     public array $methodRows=[];
     public string $search='', $typeFilter='', $statusFilter='all', $sort='name_asc', $method='';
@@ -28,12 +30,15 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }
         $this->method=$app->input->getCmd('method','')==='email'?'email':'';
-        $this->canEdit=$user->authorise('core.options','com_users')
+        $this->canEdit=$user->authorise('core.options','com_minimarket')
+            || $user->authorise('core.admin','com_minimarket');
+        $this->canEditUsers=$user->authorise('core.options','com_users')
             || $user->authorise('core.admin','com_users');
         $this->canEditPlugins=$user->authorise('core.edit','com_plugins')
             || $user->authorise('core.admin','com_plugins');
         // Joomla is the only owner of user accounts and email verification.
         $this->params=ComponentHelper::getParams('com_users');
+        $this->shopParams=ComponentHelper::getParams('com_minimarket');
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $this->plugins=InstalledMethodPlugins::list($db,'registration');
         if($this->method==='') {

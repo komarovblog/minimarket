@@ -15,7 +15,10 @@ final class CheckoutSettings
     public static function mode(object $params): string
     {
         $mode=(string)$params->get('checkout_auth_mode','guest');
-        return in_array($mode,['guest','sms','email'],true)?$mode:'sms';
+        $mode=in_array($mode,['guest','sms','email'],true)?$mode:'guest';
+        if($mode==='email' && (string)$params->get('checkout_verification_method','email')!=='email')
+            throw new \DomainException('COM_MINIMARKET_CHECKOUT_AUTH_NOT_CONFIGURED');
+        return $mode;
     }
 
     /** @return array<string,string> */

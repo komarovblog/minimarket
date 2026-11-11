@@ -40,8 +40,22 @@ $esc=static fn($value):string=>htmlspecialchars((string)$value, ENT_QUOTES|ENT_S
            :'COM_MINIMARKET_REGISTRATION_ACTIVATION_NONE'));
     ?></dd>
    </dl>
-   <?php if($this->canEdit): ?>
-    <div><a class="btn btn-primary" href="<?php echo $esc(Route::_('index.php?option=com_config&view=component&component=com_users',false)); ?>">
+   <form method="post" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
+    <input type="hidden" name="scope" value="registration">
+    <input type="hidden" name="method" value="email">
+    <input type="hidden" name="primary" value="0">
+    <label class="form-check mb-2">
+     <input class="form-check-input" type="checkbox" name="primary" value="1"
+        <?php echo (string)$this->shopParams->get('checkout_verification_method','email')==='email'?'checked':''; ?>
+        <?php echo $this->canEdit?'':'disabled'; ?>>
+     <span class="form-check-label"><?php echo Text::_('COM_MINIMARKET_REGISTRATION_PRIMARY_CHECKOUT'); ?></span>
+    </label>
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_REGISTRATION_PRIMARY_HELP'); ?></p>
+    <?php echo \Joomla\CMS\HTML\HTMLHelper::_('form.token'); ?>
+    <?php if($this->canEdit): ?><button class="btn btn-success" type="submit"><?php echo Text::_('JSAVE'); ?></button><?php endif; ?>
+   </form>
+   <?php if($this->canEditUsers): ?>
+    <div><a class="btn btn-outline-secondary mt-3" href="<?php echo $esc(Route::_('index.php?option=com_config&view=component&component=com_users',false)); ?>">
        <?php echo Text::_('COM_MINIMARKET_REGISTRATION_JOOMLA_SETTINGS'); ?></a></div>
    <?php endif; ?>
   </div>

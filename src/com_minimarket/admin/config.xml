@@ -224,6 +224,7 @@
                label="COM_MINIMARKET_CHECKOUT_CONFIRMATION_METHOD"
                description="COM_MINIMARKET_CHECKOUT_CONFIRMATION_HELP"
                showon="checkout_auth_mode:email">
+            <option value="">COM_MINIMARKET_MODE_NONE</option>
             <option value="email">COM_MINIMARKET_REGISTRATION_EMAIL_METHOD</option>
         </field>
         <field name="checkout_name_mode" type="list" default="required" filter="cmd"
