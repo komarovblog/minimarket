@@ -73,6 +73,10 @@ function init(root) {
       if(error.name!=='AbortError'&&feedback)feedback.textContent=labels.error||'Search failed';
     }
   }
+  selected.addEventListener('click',event=>{
+    const button=event.target.closest('[data-mm-ref-remove]');
+    if(button){button.closest('[data-mm-ref-key]')?.remove();sync();}
+  });
   root.querySelector('[data-mm-ref-toggle]')?.addEventListener('click',()=>{
     const panel=root.querySelector('[data-mm-ref-panel]');
     if(panel){panel.hidden=!panel.hidden;if(!panel.hidden){search.focus();void run();}}
