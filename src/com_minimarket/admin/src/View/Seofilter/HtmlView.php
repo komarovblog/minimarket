@@ -11,6 +11,8 @@ final class HtmlView extends BaseHtmlView
     public array $categories=[];
     public ?object $page=null;
     public array $facets=[];
+    public array $skuChoices=[];
+    public $mediaForm=null;
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
@@ -36,6 +38,22 @@ final class HtmlView extends BaseHtmlView
             ->where('a.state=1')->where('a.is_filterable=1')->where('v.state=1')
             ->order('a.title ASC,v.sort_order ASC,v.id ASC');
         $db->setQuery($q,0,5000);$this->facets=(array)$db->loadObjectList();
+        $q=$db->getQuery(true)->select([
+                'o.id AS option_id','o.title AS option_title',
+                'v.id AS value_id','v.title AS value_title'
+            ])->from($db->quoteName('#__minimarket_order_options','o'))
+            ->join('INNER',$db->quoteName('#__minimarket_order_option_values','v').' ON v.option_id=o.id')
+            ->where('o.state=1')->where('v.state=1')
+            ->order('o.title ASC,v.sort_order ASC,v.id ASC');
+        $db->setQuery($q,0,5000);$this->skuChoices=(array)$db->loadObjectList();
+        // Joomla's native media manager (never construct a private file picker).
+        \Joomla\CMS\Form\Form::addFormPath(JPATH_ADMINISTRATOR.'/components/com_minimarket/forms');
+        $this->mediaForm=\Joomla\CMS\Form\Form::getInstance(
+            'com_minimarket.seofilter_media','seofilter_media',['control'=>'']);
+        $this->mediaForm->bind([
+            'image'=>(string)($this->page->image??''),
+            'og_image'=>(string)($this->page->og_image??'')
+        ]);
         ToolbarHelper::title(Text::_('COM_MINIMARKET_SEOFILTER_CREATE'));
         parent::display($tpl);
     }
