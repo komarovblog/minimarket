@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 
 # One command => EXACTLY three deliverables on the user's Windows Desktop:
 # 1) component ZIP, 2) standalone toolbar module ZIP,
-# 3) additive demo-gallery/filters SQL. Never modifies the database.
+# 3) versioned optional cumulative demo SQL. Never modifies the database.
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -PathType Leaf)) {
     throw "MINIMARKET_PROJECT_ROOT_NOT_FOUND: $root"
@@ -73,4 +73,4 @@ foreach ($item in $deliverables) {
     Write-Output "DESKTOP_FILE_OK: $dst"
 }
 Write-Output "MINIMARKET_DESKTOP_3_FILES_OK: version=$version"
-Write-Output 'SQL_IS_OPTIONAL: import ONLY to refresh optional demo catalog data; do not import cumulative or clean SQL.'
+Write-Output 'SQL_IS_OPTIONAL: for the local demo catalog only; not required for Joomla UI changes. Back up before importing.'
