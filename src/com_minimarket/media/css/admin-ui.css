@@ -985,3 +985,27 @@
 .mm-unified-list .mm-native-searchtools + .table-responsive {
   margin-top:0;
 }
+
+
+/* 0.5.88: searchable SKU selector and bounded product/bundle lists. */
+#mm-manual-order-lines .input-group {flex-wrap:wrap;gap:.35rem;}
+#mm-manual-order-lines .input-group>[data-mm-manual-search] {
+  flex:2 1 14rem;min-width:0;border-radius:var(--bs-border-radius,.25rem);
+}
+#mm-manual-order-lines .mm-manual-category-filter {
+  flex:1 1 11rem;width:auto;max-width:100%;min-width:0;
+  border-radius:var(--bs-border-radius,.25rem);
+}
+#mm-manual-order-lines .input-group>[data-mm-manual-query] {
+  flex:0 0 auto;border-radius:var(--bs-border-radius,.25rem);
+}
+#adminForm.mm-list-form .mm-native-list-viewport,
+.mm-unified-list .table-responsive,
+#j-main-container .mm-native-list-viewport {
+  max-inline-size:100%;overflow-x:auto!important;
+  -webkit-overflow-scrolling:touch;
+}
+@media (max-width:991.98px) {
+ #mm-manual-order-lines .input-group>[data-mm-manual-search],
+ #mm-manual-order-lines .mm-manual-category-filter {flex-basis:100%;}
+}
