@@ -79,7 +79,7 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
       <input id="mm-limit" name="usage_limit" class="form-control" type="number" min="1" step="1" placeholder="∞" value="<?php echo $this->escape($v('usage_limit')); ?>"></div>
      <div class="col-md-6"><label for="mm-limit-customer" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMO_CUSTOMER_LIMIT'); ?></label>
       <input id="mm-limit-customer" name="per_customer_limit" class="form-control" type="number" min="1" step="1" placeholder="∞" value="<?php echo $this->escape($v('per_customer_limit')); ?>"></div>
-     <div class="col-12"><div class="alert alert-secondary"><?php echo Text::_('COM_MINIMARKET_PROMO_NO_REDEMPTION'); ?></div></div>
+     <div class="col-12"><div class="alert alert-secondary"><?php echo Text::_('COM_MINIMARKET_PROMO_CHECKOUT_INFO'); ?></div></div>
     </div>
    </div>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
