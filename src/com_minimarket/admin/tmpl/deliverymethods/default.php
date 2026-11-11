@@ -8,40 +8,33 @@ $esc=static fn($v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE
 $bool=static fn($name,$default=0)=>(int)$p->get($name,$default)===1;
 $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliverymethods&method='.$method,false);
 ?>
-<div id="j-main-container" class="j-main-container mm-unified-list">
-<?php if($this->method===''): ?>
- <div class="table-responsive">
- <table id="mm-delivery-methods-list" class="table table-striped mm-admin-list">
-  <thead><tr>
-   <th><?php echo Text::_('COM_MINIMARKET_METHOD_NAME'); ?></th>
-   <th><?php echo Text::_('COM_MINIMARKET_METHOD_TYPE'); ?></th>
-   <th><?php echo Text::_('JSTATUS'); ?></th>
-   <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></th>
-  </tr></thead>
-  <tbody>
-  <?php foreach([
-    'pickup'=>['COM_MINIMARKET_ORDER_DELIVERY_PICKUP',$bool('delivery_pickup_enabled',1)],
-    'courier'=>['COM_MINIMARKET_ORDER_DELIVERY_COURIER',$bool('delivery_courier_enabled',0)]
-    ] as $method=>$info): ?>
-   <tr>
-    <td><?php echo Text::_($info[0]); ?></td>
-    <td><?php echo Text::_('COM_MINIMARKET_METHOD_BUILTIN'); ?></td>
-    <td><span class="badge bg-<?php echo $info[1]?'success':'secondary'; ?>"><?php echo Text::_($info[1]?'COM_MINIMARKET_METHOD_ACTIVE':'COM_MINIMARKET_METHOD_INACTIVE'); ?></span></td>
-    <td><?php if($this->canEdit): ?><a href="<?php echo $esc($edit($method)); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></a><?php else: ?>—<?php endif; ?></td>
-   </tr>
-  <?php endforeach; ?>
-  <?php foreach($this->plugins as $plugin): ?>
-   <tr>
-    <td><?php echo $esc(Text::_((string)$plugin->name)); ?><small class="d-block text-muted"><?php echo $esc($plugin->element); ?></small></td>
-    <td><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN'); ?></td>
-    <td><span class="badge bg-<?php echo (int)$plugin->enabled===1?'success':'secondary'; ?>"><?php echo Text::_((int)$plugin->enabled===1?'COM_MINIMARKET_METHOD_ACTIVE':'COM_MINIMARKET_METHOD_INACTIVE'); ?></span></td>
-    <td><?php if($this->canEditPlugins): ?><a href="<?php echo $esc(Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='.(int)$plugin->extension_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></a><?php else: ?>—<?php endif; ?></td>
-   </tr>
-  <?php endforeach; ?>
-  </tbody>
- </table>
- </div>
- <p class="form-text"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_NOTE'); ?></p>
+<div id="j-main-container" class="j-main-container">
+<?php if($this->method===''):
+ $mmSearch=[
+  'view'=>'deliverymethods','query'=>$this->search,
+  'searchLabel'=>Text::_('COM_MINIMARKET_METHOD_NAME'),
+  'sort'=>$this->sort,'limit'=>$this->pageSize,
+  'sortOptions'=>[
+   'name_asc'=>Text::_('JGLOBAL_TITLE_ASC'),
+   'name_desc'=>Text::_('JGLOBAL_TITLE_DESC')
+  ],
+  'filters'=>[
+   ['name'=>'filter_type','label'=>Text::_('COM_MINIMARKET_METHOD_TYPE'),
+    'value'=>$this->typeFilter,
+    'options'=>[
+     ''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+     'builtin'=>Text::_('COM_MINIMARKET_METHOD_BUILTIN'),
+     'plugin'=>Text::_('COM_MINIMARKET_METHOD_PLUGIN')]],
+   ['name'=>'filter_status','label'=>Text::_('JSTATUS'),
+    'value'=>$this->statusFilter,'default'=>'all',
+    'options'=>[
+     'all'=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+     'enabled'=>Text::_('COM_MINIMARKET_METHOD_ACTIVE'),
+     'disabled'=>Text::_('COM_MINIMARKET_METHOD_INACTIVE')]]
+  ]
+ ];
+ require dirname(__DIR__).'/shared/method-list.php';
+?>
 <?php else: ?>
  <form method="post" id="mm-method-form" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
   <input type="hidden" name="scope" value="delivery">
