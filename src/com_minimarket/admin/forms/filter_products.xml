@@ -10,7 +10,7 @@
         </field>
         <field name="product_type" type="list" label="COM_MINIMARKET_PRODUCT_TYPE"
                class="js-select-submit-on-change">
-            <option value="">COM_MINIMARKET_FILTER_ANY</option>
+            <option value="">COM_MINIMARKET_PRODUCT_ALL_TYPES</option>
             <option value="simple">COM_MINIMARKET_PRODUCT_TYPE_SIMPLE</option>
             <option value="bundle">COM_MINIMARKET_PRODUCT_TYPE_BUNDLE</option>
         </field>
