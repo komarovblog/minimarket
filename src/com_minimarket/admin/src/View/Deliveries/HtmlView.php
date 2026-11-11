@@ -11,7 +11,7 @@ use Joomla\Database\DatabaseInterface;
 final class HtmlView extends BaseHtmlView
 {
     public array $deliveries=[];
-    public string $status='', $search='', $sort='newest';
+    public string $status='', $search='', $carrierFilter='', $sort='newest';
     public int $offset=0, $total=0, $pageSize=20;
     public bool $canCreate=false;
 
@@ -24,6 +24,8 @@ final class HtmlView extends BaseHtmlView
         $requested=$app->input->getCmd('filter_status','');
         $this->status=in_array($requested,['new','in_transit','delivered','cancelled'],true)?$requested:'';
         $this->search=mb_substr(trim($app->input->getString('filter_search','')),0,100);
+        $carrier=$app->input->getCmd('filter_carrier','');
+        $this->carrierFilter=in_array($carrier,['own','cdek','other'],true)?$carrier:'';
         $this->sort=$app->input->getCmd('filter_sort','newest')==='oldest'?'oldest':'newest';
         $limit=$app->input->getInt('limit',20);
         $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
@@ -31,6 +33,7 @@ final class HtmlView extends BaseHtmlView
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $where=['o.deleted_at IS NULL'];
         if($this->status!=='')$where[]='s.status='.$db->quote($this->status);
+        if($this->carrierFilter!=='')$where[]='s.carrier='.$db->quote($this->carrierFilter);
         if($this->search!==''){
             $like=$db->quote('%'.$db->escape($this->search,true).'%',false);
             $terms=['o.customer_name LIKE '.$like,'o.phone LIKE '.$like,
