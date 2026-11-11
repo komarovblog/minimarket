@@ -51,9 +51,20 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
       <select id="mm-scope" name="applies_to" class="form-select">
        <?php foreach(['all','category','product'] as $scope): ?><option value="<?php echo $scope; ?>"<?php echo $scope===$v('applies_to','all')?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_PROMO_SCOPE_'.strtoupper($scope)); ?></option><?php endforeach; ?>
       </select></div>
-     <div class="col-12" data-promo-targets><label for="mm-targets" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMO_TARGET_IDS'); ?></label>
-      <input id="mm-targets" name="target_ids" class="form-control" placeholder="12, 15, 18" value="<?php echo $this->escape($targets); ?>">
-      <div class="form-text"><?php echo Text::_('COM_MINIMARKET_PROMO_TARGET_IDS_HELP'); ?></div></div>
+     <?php foreach(['category'=>'categories','product'=>'search'] as $scope=>$endpoint):
+       $selected=[];
+       if($v('applies_to','all')===$scope && is_array($ids))
+           foreach($ids as $id)if((int)$id>0)$selected[(int)$id]='#'.(int)$id;
+       $mmReference=[
+         'title'=>Text::_('COM_MINIMARKET_PROMO_SCOPE_'.strtoupper($scope)),
+         'input'=>'target_ids_'.$scope,'endpoint'=>$endpoint,'multiple'=>true,
+         'selected'=>$selected,'placeholder'=>Text::_('COM_MINIMARKET_REF_SEARCH')
+       ];
+     ?>
+      <div class="col-12" data-promo-targets="<?php echo $scope; ?>">
+       <?php require dirname(__DIR__).'/shared/reference-picker.php'; ?>
+      </div>
+     <?php endforeach; ?>
      <div class="col-12"><input type="hidden" name="combinable" value="0">
       <label class="form-check"><input type="checkbox" class="form-check-input" name="combinable" value="1"<?php echo (int)$v('combinable')===1?' checked':''; ?>>
        <span class="form-check-label"><?php echo Text::_('COM_MINIMARKET_PROMO_COMBINABLE'); ?></span></label></div>
@@ -84,8 +95,9 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
   for(const field of document.querySelectorAll('[data-promo-percent]'))field.hidden=fixed;
   document.getElementById('mm-amount').required=fixed;
   document.getElementById('mm-percent').required=!fixed;
-  document.querySelector('[data-promo-targets]').hidden=scope.value==='all';
-  document.getElementById('mm-targets').required=scope.value!=='all';
+  for(const panel of document.querySelectorAll('[data-promo-targets]')){
+   panel.hidden=panel.dataset.promoTargets!==scope.value;
+  }
  };
  kind.addEventListener('change',refresh);scope.addEventListener('change',refresh);refresh();
 })();
