@@ -231,6 +231,7 @@
                label="COM_MINIMARKET_DELIVERY_RATE_SOURCE"
                description="COM_MINIMARKET_DELIVERY_RATE_SOURCE_DESC" showon="delivery_courier_enabled:1">
             <option value="directory">COM_MINIMARKET_DELIVERY_DIRECTORY</option>
+            <option value="zones">COM_MINIMARKET_DELIVERY_ZONES</option>
             <option value="cdek">COM_MINIMARKET_DELIVERY_CDEK</option>
         </field>
         <field name="delivery_city_rates" type="textarea" rows="8" cols="70" default=""
