@@ -1,5 +1,5 @@
 <?php
-namespace MiniMarket\Component\Minimarket\Administrator\View\${d.n};
+namespace MiniMarket\Component\Minimarket\Administrator\View\Promocodes;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
