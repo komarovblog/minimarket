@@ -52,11 +52,9 @@ use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
                             <?php echo (int)$item->id; ?></td>
                     </tr>
                 <?php endforeach; ?>
-                <?php if (!$this->items) : ?>
-                    <tr><td colspan="6"><?php echo Text::_('COM_MINIMARKET_BRANDS_EMPTY'); ?></td></tr>
-                <?php endif; ?>
             </tbody>
         </table>
+<?php if (!$this->items): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_BRANDS_EMPTY'); ?></div><?php endif; ?>
 </div>
         <?php if (is_object($this->pagination) && method_exists($this->pagination,'getListFooter')) : ?>
             <?php echo $this->pagination->getListFooter(); ?>
