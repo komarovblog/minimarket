@@ -27,12 +27,19 @@ final class HtmlView extends BaseHtmlView
     public string $blockedMessage='';
     public bool $cdekPending=false;
     public string $promoCode='';
+    public bool $zonesMode=false;
+    public array $zoneCities=[];
 
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
         $params=ComponentHelper::getParams('com_minimarket');
         $this->enabled=(string)$params->get('shop_type','physical')==='physical';
+        $this->zonesMode=(string)$params->get('delivery_rate_source','directory')==='zones';
+        if($this->zonesMode){
+            $this->zoneCities=\MiniMarket\Component\Minimarket\Site\Service\DeliveryZones::cities(
+                Factory::getContainer()->get(DatabaseInterface::class));
+        }
         $this->cdekPending=(int)$params->get('delivery_courier_enabled',0)===1
             && (string)$params->get('delivery_rate_source','directory')==='cdek';
         try {
