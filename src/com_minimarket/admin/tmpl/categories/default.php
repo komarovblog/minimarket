@@ -12,7 +12,8 @@ use Joomla\CMS\Button\PublishedButton;
       method="post" name="adminForm" id="adminForm" class="mm-list-form">
     <div id="j-main-container" class="j-main-container">
         <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
-        <table class="table table-striped mm-admin-list" id="mm-category-tree">
+        <div class="table-responsive mm-native-list-viewport">
+<table class="table table-striped mm-admin-list" id="mm-category-tree">
             <thead>
             <tr>
                 <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
@@ -81,6 +82,7 @@ use Joomla\CMS\Button\PublishedButton;
             <?php endif; ?>
             </tbody>
         </table>
+</div>
     </div>
     <input type="hidden" name="boxchecked" value="0">
     <input type="hidden" name="task" value="">
