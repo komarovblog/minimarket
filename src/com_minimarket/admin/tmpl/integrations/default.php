@@ -63,9 +63,9 @@ $href='index.php?option=com_minimarket&view=integrations&'.http_build_query([
       </td>
      </tr>
     <?php endforeach; ?>
-    <?php if(!$this->plugins): ?><tr><td colspan="4"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_NO_PLUGINS'); ?></td></tr><?php endif; ?>
     </tbody>
    </table>
+<?php if (!$this->plugins): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_NO_PLUGINS'); ?></div><?php endif; ?>
   </div>
   <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
   <input type="hidden" name="limitstart" value="<?php echo (int)$this->offset; ?>">
