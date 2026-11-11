@@ -47,6 +47,8 @@
    requests.set(row,controller);
    const root=new URL(list.dataset.mmManualPickerUrl,location.href);
    root.searchParams.set('q',row.querySelector('[data-mm-manual-search]').value.slice(0,100));
+   const category=row.querySelector('[data-mm-manual-category]')?.value||'';
+   if(category)root.searchParams.set('category_id',category);
    const results=row.querySelector('[data-mm-manual-results]');
    results.textContent='…';
    try{
@@ -86,6 +88,8 @@
    for(const label of copy.querySelectorAll('label[for]')){
     label.htmlFor=label.htmlFor.replace(/\d+$/,String(seq));
    }
+   const filter=copy.querySelector('[data-mm-manual-category]');
+   if(filter)filter.value='';
    copy.querySelector('[data-mm-manual-selected]')?.replaceChildren();
    copy.querySelector('[data-mm-manual-results]')?.replaceChildren();
    list.append(copy);seq++;
@@ -102,6 +106,11 @@
      remove.closest('[data-mm-manual-line]').remove();
      if(addButton)addButton.disabled=false;
     }
+   }
+  });
+  list.addEventListener('change',event=>{
+   if(event.target.matches('[data-mm-manual-category]')){
+    void search(event.target.closest('[data-mm-manual-line]'));
    }
   });
   list.addEventListener('keydown',event=>{
