@@ -49,6 +49,10 @@ final class HtmlView extends BaseHtmlView
             $this->deliveryMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::methods($params);
             $this->paymentMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::payments($params);
             $this->cityRates=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::rates($params);
+            $this->zonesMode=(string)$params->get('delivery_rate_source','directory')==='zones';
+            if($this->zonesMode){
+                $this->zoneCities=\MiniMarket\Component\Minimarket\Site\Service\DeliveryZones::cities($db);
+            }
             $app->getDocument()->getWebAssetManager()
                 ->registerAndUseScript('com_minimarket.manual-order',
                     'media/com_minimarket/js/manual-order.js',[],['defer'=>true]);
