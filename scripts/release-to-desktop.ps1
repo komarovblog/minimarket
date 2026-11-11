@@ -34,7 +34,7 @@ if ($version -notmatch '^\d+\.\d+\.\d+$') {
     throw "MINIMARKET_INVALID_VERSION: $version"
 }
 $demo = Join-Path $root 'sample-data\minimarket_demo_gallery_filters_0_5_84.sql'
-if ($version -ne '0.5.84' -or -not (Test-Path -LiteralPath $demo -PathType Leaf)) {
+if (-not (Test-Path -LiteralPath $demo -PathType Leaf)) {
     throw "MINIMARKET_DEMO_SQL_NOT_READY_FOR_VERSION: $version"
 }
 # Desktop may be redirected to OneDrive. Windows supplies the actual location.
