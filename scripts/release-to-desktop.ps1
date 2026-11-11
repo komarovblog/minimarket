@@ -28,6 +28,9 @@ $global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'verify-0.5.87.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_087_VALIDATION_FAILED' }
 $global:LASTEXITCODE = 0
+& (Join-Path $PSScriptRoot 'verify-translations.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_TRANSLATION_AUDIT_FAILED' }
+$global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'build.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_BUILD_FAILED' }
 $global:LASTEXITCODE = 0
