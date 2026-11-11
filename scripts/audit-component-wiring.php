@@ -49,6 +49,10 @@ foreach(glob($root.'admin/tmpl/*/*.php') ?: [] as $path) {
     }
     preg_match_all('/view=([a-z][a-z0-9_]*)/i',$source,$vm);
     foreach($vm[1] as $name) {
+        // The registration settings screen links to Joomla's com_config.
+        // It must not be mistaken for a MiniMarket component view.
+        if ($name==='component' && basename(dirname($path))==='registrationmethods'
+            && str_contains($source,'option=com_config&view=component&component=com_users'))continue;
         $view=ucfirst(strtolower($name));
         if(!is_file($root.'admin/src/View/'.$view.'/HtmlView.php') &&
           !is_file($root.'site/src/View/'.$view.'/HtmlView.php')) {
