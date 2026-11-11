@@ -30,6 +30,11 @@ final class MethodsettingsController extends BaseController
         if(!$valid)throw new \RuntimeException(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),400);
         $view=match($scope){'delivery'=>'deliverymethods','registration'=>'registrationmethods',default=>'paymentmethods'};
         try {
+            if($scope==='registration'&&$method==='email'
+                &&$post->getString('primary','0')==='1'
+                &&(int)\Joomla\CMS\Component\ComponentHelper::getParams('com_users')
+                    ->get('allowUserRegistration',0)!==1)
+                throw new \DomainException('COM_MINIMARKET_REGISTRATION_EMAIL_DISABLED');
             $changes=MethodSettings::normalize($scope,$method,[
                 'enabled'=>$post->getString('enabled','0'),
                 'primary'=>$post->getString('primary','0'),
