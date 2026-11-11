@@ -193,4 +193,74 @@ final class ProductpickerController extends BaseController
             'title'=>(string)$group['title'],'state'=>(int)$group['state'],
             'members'=>$members]]);
     }
+
+    /** The shipment picker shows only eligible courier orders and searches on the server. */
+    public function orders(): void
+    {
+        $this->ensureAllowed();
+        $input=Factory::getApplication()->input;
+        $term=mb_substr(trim((string)$input->getString('q','')),0,100);
+        $from=(string)$input->getString('date_from','');
+        $to=(string)$input->getString('date_to','');
+        foreach ([$from,$to] as $date) {
+            if ($date!=='' && (!preg_match('/^\d{4}-\d{2}-\d{2}$/D',$date)
+                || !\DateTimeImmutable::createFromFormat('!Y-m-d',$date))) {
+                throw new \RuntimeException('Invalid date',400);
+            }
+        }
+        if ($from!=='' && $to!=='' && $from>$to) {
+            throw new \RuntimeException('Invalid date range',400);
+        }
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $q=$db->getQuery(true)->select(['o.id','o.customer_name','o.delivery_city','o.created_at'])
+            ->from($db->quoteName('#__minimarket_orders','o'))
+            ->join('LEFT',$db->quoteName('#__minimarket_shipments','s').' ON s.order_id=o.id')
+            ->where('o.deleted_at IS NULL')
+            ->where("o.delivery_method='courier'")
+            ->where("o.status<>'cancelled'")
+            ->where('s.id IS NULL')->order('o.id DESC');
+        if ($from!=='')$q->where('o.created_at >= '.$db->quote($from.' 00:00:00'));
+        if ($to!=='')$q->where('o.created_at <= '.$db->quote($to.' 23:59:59'));
+        if ($term!=='') {
+            $like=$db->quote('%'.$db->escape($term,true).'%',false);
+            $conditions=['o.customer_name LIKE '.$like,'o.phone LIKE '.$like,
+                'o.delivery_city LIKE '.$like];
+            if(ctype_digit($term))$conditions[]='o.id='.(int)$term;
+            $q->where('('.implode(' OR ',$conditions).')');
+        }
+        $db->setQuery($q,0,25);
+        $items=[];
+        foreach((array)$db->loadAssocList() as $row) {
+            $id=(int)$row['id'];
+            $items[]=['id'=>$id,'key'=>(string)$id,
+                'title'=>'#'.$id.' — '.$row['customer_name'],
+                'subtitle'=>$row['delivery_city'].' · '.$row['created_at']];
+        }
+        $this->respond(['items'=>$items]);
+    }
+
+    /** Shared picker for published categories (SEO and promotion rules). */
+    public function categories(): void
+    {
+        $this->ensureAllowed();
+        $term=mb_substr(trim((string)Factory::getApplication()->input->getString('q','')),0,100);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $q=$db->getQuery(true)->select(['id','title','alias'])
+            ->from($db->quoteName('#__minimarket_categories'))
+            ->where('state=1')->order('title ASC,id ASC');
+        if($term!=='') {
+            $like=$db->quote('%'.$db->escape($term,true).'%',false);
+            $where=['title LIKE '.$like,'alias LIKE '.$like];
+            if(ctype_digit($term))$where[]='id='.(int)$term;
+            $q->where('('.implode(' OR ',$where).')');
+        }
+        $db->setQuery($q,0,25);
+        $items=[];
+        foreach((array)$db->loadAssocList() as $row) {
+            $items[]=['id'=>(int)$row['id'],'key'=>(string)(int)$row['id'],
+                'title'=>(string)$row['title'],'subtitle'=>(string)$row['alias']];
+        }
+        $this->respond(['items'=>$items]);
+    }
+
 }
