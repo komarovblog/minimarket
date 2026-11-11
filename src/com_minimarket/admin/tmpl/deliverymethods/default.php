@@ -8,7 +8,6 @@ $esc=static fn($v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE
 $bool=static fn($name,$default=0)=>(int)$p->get($name,$default)===1;
 $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliverymethods&method='.$method,false);
 ?>
-<div id="j-main-container" class="j-main-container">
 <?php if($this->method===''):
  $mmSearch=[
   'view'=>'deliverymethods','query'=>$this->search,
@@ -36,6 +35,7 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
  require dirname(__DIR__).'/shared/method-list.php';
 ?>
 <?php else: ?>
+<div id="j-main-container" class="j-main-container">
  <form method="post" id="mm-method-form" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
   <input type="hidden" name="scope" value="delivery">
   <input type="hidden" name="method" value="<?php echo $esc($this->method); ?>">
@@ -92,5 +92,5 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
  })();
  </script>
  <?php endif; ?>
-<?php endif; ?>
 </div>
+<?php endif; ?>
