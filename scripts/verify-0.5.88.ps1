@@ -44,7 +44,7 @@ if($text['manual_order'].Contains('echo $this- data-mm-manual-picker')) {
     throw 'MINIMARKET_088_MALFORMED_SKU_PICKER'
 }
 if(-not $text['manual_api'].Contains('category_id') -or
-   -not $text['manual_js'].Contains("root.searchParams.set('category_id'"))){
+   -not $text['manual_js'].Contains("root.searchParams.set('category_id'")){
     throw 'MINIMARKET_088_CATEGORY_LOOKUP_MISSING'
 }
 if(-not $text['columns_js'].Contains("minimarket.admin.columns.v3.") -or
