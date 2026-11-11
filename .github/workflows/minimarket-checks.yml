@@ -551,7 +551,9 @@ jobs:
         run: php scripts/test-admin-bulk.php
 
       - name: Category attribute inheritance and update regression
-        run: php scripts/test-category-attributes.php
+        run: |
+          php scripts/test-category-attributes.php
+          php scripts/test-category-list-visibility.php
 
       - name: Product gallery JavaScript syntax
         run: node --check src/com_minimarket/media/js/gallery.js

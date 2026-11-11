@@ -1115,7 +1115,7 @@ foreach (['id','attribute_id','title','code','color_hex','sample_image','value_p
 }
 $freshAssignmentColumns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_category_attributes')
     ->fetchAll(PDO::FETCH_COLUMN);
-foreach (['category_id','attribute_id','enabled','required'] as $col) {
+foreach (['category_id','attribute_id','enabled','required','show_in_list'] as $col) {
     verify(in_array($col, $freshAssignmentColumns, true), 'fresh 0.5.5 assignment column ' . $col);
 }
 $freshVideos = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_product_videos')
@@ -1165,5 +1165,11 @@ foreach (['show_descendant_products','show_descendant_bundles','product_layout',
 foreach (['cards_mobile','cards_tablet','cards_desktop','cards_wide'] as $oldField) {
     verify(!in_array($oldField,$freshDisplay,true),
         'fresh install does not retain old responsive column '.$oldField);
+}
+foreach (['category_attributes','category_order_options'] as $table) {
+    $columns=$pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_'.$table)
+        ->fetchAll(PDO::FETCH_COLUMN);
+    verify(in_array('show_in_list',$columns,true),
+        'fresh category assignment supports per-category card flag '.$table);
 }
 echo 'CATEGORY_SCHEMA_OK: ' . $checks . " cases\n";

@@ -49,7 +49,7 @@ namespace MiniMarket\PublicAttributeSmoke {
             $rows=match($table){
                 '#__minimarket_category_attributes'=>[
                     ['category_id'=>1,'attribute_id'=>1,'enabled'=>1],
-                    ['category_id'=>1,'attribute_id'=>2,'enabled'=>1],
+                    ['category_id'=>1,'attribute_id'=>2,'enabled'=>1,'show_in_list'=>0],
                     ['category_id'=>1,'attribute_id'=>3,'enabled'=>1],
                     ['category_id'=>1,'attribute_id'=>4,'enabled'=>1],
                     ['category_id'=>1,'attribute_id'=>5,'enabled'=>1],
@@ -103,6 +103,10 @@ namespace MiniMarket\PublicAttributeSmoke {
     $db=new FakeDb();
     $attrs=S::load($db,50,$tree->ancestorIds(2));
     check(count($db->queries)===5,'five queries regardless of attribute count');
+    $card=S::load($db,50,$tree->ancestorIds(2),'category');
+    check(!isset($card[2]) && isset($card[1]) && isset($card[10]),
+        'per-category flag hides color only in list card and retains other attributes');
+    check(isset($attrs[2]),'color remains present on the product detail despite hidden list flag');
     check(array_keys($attrs)===[1,2,3,4,5,6,10], 'all and only enabled populated attributes shown');
     check(!isset($attrs[9]),'child category overrides inherited enabled attribute');
     check($attrs[1]['values'][0]['text']==='Камень'

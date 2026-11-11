@@ -125,7 +125,7 @@ namespace MiniMarket\CategoryAttributeSmoke {
     verify($db->writes[0][0]==='delete' && $db->writes[1][0]==='insert',
         'writes delete and replace only direct links');
     verify(count($db->writes[1][2])===3, 'only three direct rules inserted');
-    verify(str_ends_with($db->writes[1][2][2], ',1,1'),
+    verify(str_ends_with($db->writes[1][2][2], ',1,1,1'),
         'required mode is persisted as enabled=1 required=1');
     $db->writes = [];
     CategoryAttributes::replaceDirect($db,2,[]);
