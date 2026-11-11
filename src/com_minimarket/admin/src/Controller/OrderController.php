@@ -50,12 +50,20 @@ final class OrderController extends BaseController
             $quote=\MiniMarket\Component\Minimarket\Administrator\Service\ManualOrderCatalog::quote(
                 $db,is_array($items)?$items:[],
                 (int)$params->get('inventory_enabled',1)===1);
+            $grams=0;$volume=0;
+            foreach($quote['lines'] as $line){
+                $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
+                $volume+=(int)($line['shipping_volume_cm3']??0)*(int)$line['quantity'];
+            }
             $delivery=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::quote($params,[
                 'delivery_method'=>$app->input->post->get('delivery_method','','string'),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
+                'delivery_country'=>$app->input->post->get('delivery_country','RU','string'),
+                'delivery_region'=>$app->input->post->get('delivery_region','','string'),
+                'delivery_postcode'=>$app->input->post->get('delivery_postcode','','string'),
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
                 'payment_method'=>$app->input->post->get('payment_method','','string'),
-            ],(int)$quote['total_cents']);
+            ],(int)$quote['total_cents'],$grams,$volume);
             $id=\MiniMarket\Component\Minimarket\Site\Service\OrderStorage::create(
                 $db,$contact,$quote,bin2hex(random_bytes(16)),0,$delivery,'manual');
             $app->enqueueMessage(Text::_('COM_MINIMARKET_MANUAL_ORDER_CREATED'));
