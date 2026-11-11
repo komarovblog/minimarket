@@ -155,6 +155,15 @@ final class ProductTable extends Table
             return false;
         }
         $this->option_stock_mode = (int)$stockMode;
+        foreach(['shipping_weight_grams','shipping_volume_cm3'] as $field) {
+            $raw=trim((string)($this->$field??'0'));
+            if(!preg_match('/^(0|[1-9][0-9]{0,9})$/D',$raw)
+                || (strlen($raw)===10&&strcmp($raw,'4294967295')>0)){
+                $this->setError(Text::_('COM_MINIMARKET_SHIPPING_METRICS_INVALID'));
+                return false;
+            }
+            $this->$field=(int)$raw;
+        }
         $this->category_id = (int) $this->category_id;
         $brandId = (int)($this->brand_id ?? 0);
         if ($brandId < 0) {
