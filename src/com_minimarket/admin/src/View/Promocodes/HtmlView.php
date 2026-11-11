@@ -11,7 +11,7 @@ use Joomla\Database\DatabaseInterface;
 final class HtmlView extends BaseHtmlView
 {
     public array $codes=[];
-    public string $search='', $statusFilter='all', $sort='newest';
+    public string $search='', $statusFilter='all', $discountFilter='', $sort='newest';
     public int $total=0, $offset=0, $pageSize=20;
     public bool $canCreate=false, $canUpdate=false;
 
@@ -30,7 +30,10 @@ final class HtmlView extends BaseHtmlView
         $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
         $this->offset=max(0,min(1000000,$app->input->getInt('limitstart',0)));
         $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $type=$app->input->getCmd('filter_discount','');
+        $this->discountFilter=in_array($type,['fixed','percent'],true)?$type:'';
         $conditions=[];
+        if($this->discountFilter!=='')$conditions[]='p.discount_type='.$db->quote($this->discountFilter);
         if($this->statusFilter!=='all')
             $conditions[]='p.state='.($this->statusFilter==='published'?1:0);
         if($this->search!==''){
