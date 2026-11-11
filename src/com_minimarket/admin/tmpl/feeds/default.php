@@ -69,9 +69,9 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
       </td>
      </tr>
     <?php endforeach; ?>
-    <?php if(!$this->feeds): ?><tr><td colspan="5"><?php echo Text::_('COM_MINIMARKET_FEED_EMPTY'); ?></td></tr><?php endif; ?>
     </tbody>
    </table>
+<?php if (!$this->feeds): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_FEED_EMPTY'); ?></div><?php endif; ?>
   </div>
   <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination($this->total,$this->offset,$this->pageSize); ?>
   </form>
