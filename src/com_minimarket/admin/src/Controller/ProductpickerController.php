@@ -268,6 +268,7 @@ final class ProductpickerController extends BaseController
     {
         $this->ensureAllowed();
         $term=mb_substr(trim((string)Factory::getApplication()->input->getString('q','')),0,100);
+        $category=(int)Factory::getApplication()->input->getInt('category_id',0);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $query=$db->getQuery(true)->select([
                 'p.id AS product_id','p.title','p.sku','p.product_type',
@@ -279,6 +280,7 @@ final class ProductpickerController extends BaseController
                 .' ON v.product_id=p.id AND v.state=1')
             ->where('p.state=1')->where('c.state=1')
             ->where("p.delivery_type='physical'")
+            ->where($category>0?'p.category_id='.(int)$category:'1=1')
             ->order('p.title ASC,p.id ASC,v.id ASC');
         if($term!==''){
             $like=$db->quote('%'.$db->escape($term,true).'%',false);
