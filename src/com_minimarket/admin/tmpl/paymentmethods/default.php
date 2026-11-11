@@ -34,6 +34,8 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=payment
  ];
  require dirname(__DIR__).'/shared/method-list.php';
 ?>
+<?php elseif($this->pluginMethod!==null): ?>
+ <?php $mmPluginScope='payment';require dirname(__DIR__).'/shared/plugin-method.php'; ?>
 <?php else: ?>
 <div id="j-main-container" class="j-main-container">
  <form id="mm-payment-method-form" method="post" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">

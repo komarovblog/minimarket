@@ -23,7 +23,7 @@ $viewName = (string) $mmSearch['view'];
      <th><?php echo Text::_('COM_MINIMARKET_METHOD_NAME'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_METHOD_TYPE'); ?></th>
      <th><?php echo Text::_('JSTATUS'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_INFO'); ?></th>
     </tr>
    </thead>
    <tbody>
@@ -47,9 +47,9 @@ $viewName = (string) $mmSearch['view'];
            ? 'COM_MINIMARKET_METHOD_ACTIVE' : 'COM_MINIMARKET_METHOD_INACTIVE'); ?>
       </span>
      </td>
-     <td data-label="<?php echo $esc(Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS')); ?>">
-      <?php if ($row['url'] !== ''): ?>
-       <a href="<?php echo $esc($row['url']); ?>"><?php echo Text::_('COM_MINIMARKET_INTEGRATIONS_SETTINGS'); ?></a>
+     <td data-label="<?php echo $esc(Text::_('COM_MINIMARKET_METHOD_PLUGIN_INFO')); ?>">
+      <?php if (($row['plugin_info_url']??'') !== ''): ?>
+       <a href="<?php echo $esc($row['plugin_info_url']); ?>"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_INFO'); ?></a>
       <?php else: ?>—<?php endif; ?>
      </td>
     </tr>

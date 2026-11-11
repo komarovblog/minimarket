@@ -24,6 +24,8 @@ $esc=static fn($value):string=>htmlspecialchars((string)$value, ENT_QUOTES|ENT_S
  ];
  require dirname(__DIR__).'/shared/method-list.php';
 ?>
+<?php elseif($this->pluginMethod!==null): ?>
+ <?php $mmPluginScope='registration';require dirname(__DIR__).'/shared/plugin-method.php'; ?>
 <?php else: ?>
  <div id="j-main-container" class="j-main-container">
   <div class="alert alert-info"><?php echo Text::_('COM_MINIMARKET_REGISTRATION_JOOMLA_HELP'); ?></div>

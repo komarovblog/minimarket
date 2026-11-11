@@ -34,6 +34,8 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
  ];
  require dirname(__DIR__).'/shared/method-list.php';
 ?>
+<?php elseif($this->pluginMethod!==null): ?>
+ <?php $mmPluginScope='delivery';require dirname(__DIR__).'/shared/plugin-method.php'; ?>
 <?php else: ?>
 <div id="j-main-container" class="j-main-container">
  <?php echo HTMLHelper::_('uitab.startTabSet','mm-delivery-method',['active'=>($this->method==='courier' && $this->embeddedZoneEditor)?'zones':(\Joomla\CMS\Factory::getApplication()->input->getCmd('tab','main')==='zones'?'zones':'main')]); ?>
