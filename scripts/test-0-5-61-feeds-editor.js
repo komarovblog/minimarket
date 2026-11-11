@@ -16,6 +16,7 @@ const rows=['alpha','beta','charlie','delta'].map((name,i)=>({
 }));
 products.forEach((p,i)=>p.row=rows[i]);
 const categoryRows=cats.map((c,i)=>({dataset:{search:'category '+(i+1)},hidden:false}));
+cats.forEach((c,i)=>c.row=categoryRows[i]);
 const mode=element();mode.value='auto';
 const bundles=element();bundles.checked=true;
 const counter={textContent:'0'},search=element(),categorySearch=element();
