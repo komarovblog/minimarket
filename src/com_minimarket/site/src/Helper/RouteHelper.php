@@ -62,7 +62,7 @@ final class RouteHelper
 
     public static function cartAction(string $action): string
     {
-        if (!\in_array($action,['add','update','remove'],true)) {
+        if (!\in_array($action,['add','update','remove','promo'],true)) {
             throw new \InvalidArgumentException('Invalid cart action');
         }
         return Route::_('index.php?option=com_minimarket&task=cart.'.$action, false);
