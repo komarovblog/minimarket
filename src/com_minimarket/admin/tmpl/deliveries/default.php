@@ -11,11 +11,18 @@ $mmSearch=[
  'view'=>'deliveries','query'=>$this->search,'searchLabel'=>Text::_('COM_MINIMARKET_DELIVERY_ORDER'),
  'sort'=>$this->sort,'limit'=>$this->pageSize,
  'sortOptions'=>['newest'=>Text::_('COM_MINIMARKET_LIST_NEWEST'),'oldest'=>Text::_('COM_MINIMARKET_LIST_OLDEST')],
- 'filters'=>[['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_DELIVERY_STATUS'),
+ 'filters'=>[
+ ['name'=>'filter_carrier','label'=>Text::_('COM_MINIMARKET_DELIVERY_CARRIER'),
+  'value'=>$this->carrierFilter,
+  'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+   'own'=>Text::_('COM_MINIMARKET_DELIVERY_CARRIER_OWN'),
+   'cdek'=>Text::_('COM_MINIMARKET_DELIVERY_CARRIER_CDEK'),
+   'other'=>Text::_('COM_MINIMARKET_DELIVERY_CARRIER_OTHER')]],
+ ['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_DELIVERY_STATUS'),
    'value'=>$this->status,'options'=>$statusOptions]]
 ];
 $href='index.php?option=com_minimarket&view=deliveries&'.http_build_query([
- 'filter_search'=>$this->search,'filter_status'=>$this->status,
+ 'filter_search'=>$this->search,'filter_status'=>$this->status,'filter_carrier'=>$this->carrierFilter,
  'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
