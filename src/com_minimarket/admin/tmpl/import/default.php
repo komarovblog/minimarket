@@ -87,7 +87,8 @@ use Joomla\CMS\Session\Session;
               $fullRows = $fullReport ?? $fullLast;
             ?>
             <?php if ($fullRows !== null) : ?>
-                <table class="table table-sm table-striped mt-3 align-middle">
+                <div class="table-responsive mm-editor-table-viewport">
+        <table class="table table-sm table-striped mt-3 align-middle">
                     <thead><tr>
                         <th><?php echo Text::_('COM_MINIMARKET_IMPORT_SECTION'); ?></th>
                         <th><?php echo Text::_('COM_MINIMARKET_IMPORT_CREATED'); ?></th>
@@ -103,6 +104,7 @@ use Joomla\CMS\Session\Session;
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+        </div>
             <?php endif; ?>
             <?php if ($fullReport !== null) : ?>
                 <div class="d-flex gap-2 mt-3">
@@ -130,6 +132,7 @@ use Joomla\CMS\Session\Session;
     <?php if ($active !== null) : ?>
         <h2 class="h4"><?php echo Text::_($report !== null
             ? 'COM_MINIMARKET_IMPORT_PREVIEW_RESULT' : 'COM_MINIMARKET_IMPORT_LAST_RESULT'); ?></h2>
+        <div class="table-responsive mm-editor-table-viewport">
         <table class="table table-striped align-middle">
             <thead><tr>
                 <th><?php echo Text::_('COM_MINIMARKET_IMPORT_SECTION'); ?></th>
@@ -148,6 +151,7 @@ use Joomla\CMS\Session\Session;
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
     <?php if ($report !== null) : ?>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_IMPORT_PREVIEW_NOTE'); ?></p>
