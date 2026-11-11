@@ -29,6 +29,9 @@ CREATE TABLE IF NOT EXISTS #__minimarket_delivery_zones (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE #__minimarket_orders
+  ADD COLUMN delivery_country CHAR(2) NOT NULL DEFAULT 'RU' AFTER delivery_city,
+  ADD COLUMN delivery_region VARCHAR(120) NOT NULL DEFAULT '' AFTER delivery_country,
+  ADD COLUMN delivery_postcode VARCHAR(16) NOT NULL DEFAULT '' AFTER delivery_region,
   ADD COLUMN delivery_zone_id INT UNSIGNED NULL AFTER delivery_rate_source,
   ADD COLUMN promo_code_id INT UNSIGNED NULL AFTER items_total_cents,
   ADD COLUMN promo_code VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '' AFTER promo_code_id,
