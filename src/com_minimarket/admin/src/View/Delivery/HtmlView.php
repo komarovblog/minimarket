@@ -26,7 +26,7 @@ final class HtmlView extends BaseHtmlView
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         if($this->isCreate){
             $this->preselectedOrder=$app->input->getInt('order_id',0);
-            $q=$db->getQuery(true)->select(['o.id','o.customer_name','o.delivery_city'])
+            $q=$db->getQuery(true)->select(['o.id','o.customer_name','o.delivery_city','o.created_at'])
                 ->from($db->quoteName('#__minimarket_orders','o'))
                 ->join('LEFT',$db->quoteName('#__minimarket_shipments','s').' ON s.order_id=o.id')
                 ->where('o.deleted_at IS NULL')->where("o.delivery_method='courier'")
