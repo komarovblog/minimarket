@@ -78,6 +78,20 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
             <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PROMO_CART_NOTE'); ?></p>
             <?php echo HTMLHelper::_('form.token'); ?>
         </form>
+        <?php if($this->promoPreview!==null): 
+            $discount=(int)$this->promoPreview['discount_cents'];
+            $estimated=max(0,(int)$this->cart['total_cents']-$discount);
+        ?>
+        <div data-mm-cart-promo-preview class="mm-cart-promo-preview my-3">
+            <p class="mb-1"><?php echo Text::_('COM_MINIMARKET_PROMO_DISCOUNT'); ?>:
+                <strong>−<?php echo CartState::format($discount); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></p>
+            <p class="mb-1"><?php echo Text::_('COM_MINIMARKET_PROMO_ESTIMATED_TOTAL'); ?>:
+                <strong><?php echo CartState::format($estimated); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></p>
+            <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PROMO_ESTIMATED_NOTE'); ?></p>
+        </div>
+        <?php elseif($this->promoMessage!==''): ?>
+          <p class="alert alert-warning" role="status"><?php echo $this->escape($this->promoMessage); ?></p>
+        <?php endif; ?>
         <?php if ($this->cart['available']) : ?>
         <p data-mm-cart-checkout><a class="btn btn-primary" href="<?php echo $this->escape(RouteHelper::checkout()); ?>">
             <?php echo Text::_('COM_MINIMARKET_CHECKOUT_TITLE'); ?></a></p>
