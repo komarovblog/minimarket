@@ -25,7 +25,7 @@ final class PromotionService
      */
     public static function quote(
         DatabaseInterface $db,string $code,array $lines,int $subtotal,
-        int $userId,array $contact,bool $lock=false
+        int $userId,array $contact,bool $lock=false,string $checkoutKey=''
     ): ?array {
         $code=strtoupper(trim($code));
         if($code==='')return null;
@@ -46,7 +46,19 @@ final class PromotionService
         if($promo['usage_limit']!==null && (int)$promo['used_count']>=(int)$promo['usage_limit'])
             throw new \DomainException('COM_MINIMARKET_PROMO_EXHAUSTED');
 
-        $identity=self::customerKey($userId,$contact);
+        // The cart may preview a code without customer details. A code with
+        // a per-customer limit still requires a stable customer identity.
+        // For a guest order with no such limit, the single-use checkout key
+        // gives the transaction a non-personal redemption identifier.
+        try {
+            $identity=self::customerKey($userId,$contact);
+        } catch (\DomainException $e) {
+            if ($promo['per_customer_limit']!==null)throw $e;
+            if (!$lock)$identity='';
+            elseif(preg_match('/^[a-f0-9]{32}$/D',$checkoutKey))
+                $identity=hash('sha256','checkout:'.$checkoutKey);
+            else throw $e;
+        }
         if($promo['per_customer_limit']!==null){
             $q=$db->getQuery(true)->select('COUNT(*)')
                 ->from($db->quoteName('#__minimarket_promo_redemptions'))
@@ -107,6 +119,9 @@ final class PromotionService
     /** Call only inside the same open transaction that writes the order. */
     public static function redeem(DatabaseInterface $db,array $promo,int $orderId): void
     {
+        if (!preg_match('/^[a-f0-9]{64}$/D',(string)($promo['customer_key']??''))) {
+            throw new \DomainException('COM_MINIMARKET_PROMO_CUSTOMER_INVALID');
+        }
         $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_promo_redemptions'))
             ->columns($db->quoteName(['promo_code_id','order_id','customer_key','discount_cents','created_at']))
             ->values(implode(',',[(int)$promo['id'],$orderId,
