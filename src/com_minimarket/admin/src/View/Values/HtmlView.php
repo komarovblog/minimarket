@@ -17,10 +17,12 @@ final class HtmlView extends BaseHtmlView
 
     public function display($tpl = null)
     {
-        $this->attributeId = Factory::getApplication()->input->getInt('attribute_id', 0);
-        $this->sort = Factory::getApplication()->input->getCmd('sort', 'order');
-        $this->direction = Factory::getApplication()->input->getCmd('direction', 'asc');
         $this->items = $this->get('Items');
+        $this->filterForm = $this->get('FilterForm');
+        $this->activeFilters = $this->get('ActiveFilters');
+        $this->state = $this->get('State');
+        $this->pagination = $this->get('Pagination');
+        $this->attributeId = (int) $this->state->get('filter.attribute_id', 0);
         ToolbarHelper::title(Text::_('COM_MINIMARKET_VALUES'));
 
         if (Factory::getApplication()->getIdentity()->authorise('core.create', 'com_minimarket')) {
