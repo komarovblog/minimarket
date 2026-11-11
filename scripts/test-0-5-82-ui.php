@@ -29,9 +29,10 @@ foreach(['basic','display','checkout','registration','reviews'] as $section){
     $ok(count($cfg->xpath('//fieldset[@name="'.$section.'"]'))===1,
         'options tab '.$section);
 }
-$ok(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="delivery_city_rates"]'))===1
-    && count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="payment_on_receipt_enabled"]'))===1,
-    'checkout fields include delivery and payment');
+// Delivery/payment settings were moved into dedicated Joomla tabs.
+$ok(count($cfg->xpath('//fieldset[@name="delivery_methods"]/field[@name="delivery_city_rates"]'))===1
+    && count($cfg->xpath('//fieldset[@name="payment_methods"]/field[@name="payment_on_receipt_enabled"]'))===1,
+    'delivery/payment fields available in dedicated settings tabs');
 $ok(count($cfg->xpath('//fieldset[@name="inventory"]'))===0
     && count($cfg->xpath('//fieldset[@name="filters"]'))===0,
     'inventory moved to Basic and filters moved to Display');
@@ -61,7 +62,8 @@ $ok(str_contains($orders,'filter_product') &&
  str_contains($orders,'filter_status') &&
  str_contains($orders,'filter_delivery') &&
  str_contains($orders,'badge bg-') &&
- str_contains($orders,'layout=create'),'order list filters and native status colors');
+ str_contains($orders,'NativeListTools::pagination') &&
+ str_contains($orders,'shared/searchtools.php'),'order filters, native pagination and status colors');
 $catalog=(string)file_get_contents($root.'admin/src/Service/ManualOrderCatalog.php');
 $ok(str_contains($catalog,'CartStock::assertAvailable') &&
  str_contains($catalog,'BundlePrice::calculate') &&
@@ -93,9 +95,12 @@ $ok(str_contains($cartJs,'fetch(form.action') &&
  str_contains($cartPHP,"Session::checkToken('post')") &&
  str_contains($cartPHP,'JsonResponse'),'async cart still CSRF guarded');
 $admin=(string)file_get_contents($root.'admin/src/Controller/DisplayController.php');
-$ok(str_contains($admin,'admin-columns.js') &&
- str_contains($admin,'inherited-options.js'),'admin universal enhancements registered');
-foreach(['admin-columns.js','category-actions.js','inherited-options.js','manual-order.js'] as $file){
+$ok(str_contains($admin,"useScript('table.columns')") &&
+ str_contains($admin,"useScript('multiselect')") &&
+ str_contains($admin,'inherited-options.js') &&
+ !str_contains($admin,'admin-columns.js'),'native Joomla columns replace custom picker');
+$ok(!is_file($root.'media/js/admin-columns.js'),'obsolete column picker removed');
+foreach(['category-actions.js','inherited-options.js','manual-order.js'] as $file){
     $ok(is_file($root.'media/js/'.$file),'new Javascript '.$file);
 }
 $schema=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.82.sql');
