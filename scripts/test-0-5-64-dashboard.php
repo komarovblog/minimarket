@@ -16,7 +16,8 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
         public static function view(string $name):string{
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
-                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','reviews','seofilters','promocodes','settings','integrations'
+                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','reviews','seofilters','promocodes','settings',
+                'deliverymethods','paymentmethods','integrations'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
             if ($name==='deliveries') return 'index.php?option=com_minimarket&amp;view=deliveries';
             if ($name==='reviews') return 'index.php?option=com_minimarket&amp;view=reviews&amp;filter_status=pending';
@@ -47,9 +48,9 @@ namespace MiniMarket\DashboardTest {
     $html=(new View())->output();
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===4,
         'four independent native dashboard panels including settings');
-    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===18 &&
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===20 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
-        'eighteen working management/store/tools/settings tiles');
+        'twenty working management/store/tools/settings tiles');
     verify(substr_count($html,'mm-dashboard-tiles')===4,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
@@ -67,7 +68,8 @@ namespace MiniMarket\DashboardTest {
         && str_contains($html,'href="index.php?option=com_minimarket&amp;view=orders"'),
         'Orders opens a real administrator list');
     foreach(['categories','products','bundles','brands','collections','groups',
-        'bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','seofilters','promocodes','integrations'] as $view) {
+        'bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries',
+        'seofilters','promocodes','deliverymethods','paymentmethods','integrations'] as $view) {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
     }
