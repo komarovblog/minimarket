@@ -995,6 +995,24 @@ $pdo->exec('DROP TABLE catci_minimarket_products');
 $pdo->exec('DROP TABLE catci_minimarket_brands');
 $pdo->exec('DROP TABLE catci_minimarket_collections');
 $pdo->exec('DROP TABLE catci_minimarket_categories');
+// 0.5.93 additive upgrade: previously saved assignments retain visibility.
+$attributeBefore=$pdo->query('SELECT category_id,attribute_id,enabled,required FROM catci_minimarket_category_attributes ORDER BY category_id,attribute_id')
+    ->fetchAll(PDO::FETCH_ASSOC);
+$optionBefore=$pdo->query('SELECT category_id,option_id,mode FROM catci_minimarket_category_order_options ORDER BY category_id,option_id')
+    ->fetchAll(PDO::FETCH_ASSOC);
+runSql($pdo, $dir . 'updates/mysql/0.5.93.sql', 'catci_');
+foreach (['category_attributes','category_order_options'] as $table){
+    $cols=$pdo->query('SHOW COLUMNS FROM catci_minimarket_'.$table)
+        ->fetchAll(PDO::FETCH_COLUMN);
+    verify(in_array('show_in_list',$cols,true),'upgrade 0.5.93 list flag '.$table);
+    $notVisible=(int)$pdo->query('SELECT COUNT(*) FROM catci_minimarket_'.$table.' WHERE show_in_list<>1')
+        ->fetchColumn();
+    verify($notVisible===0,'upgrade preserves the old visible-by-default behavior '.$table);
+}
+verify($attributeBefore===$pdo->query('SELECT category_id,attribute_id,enabled,required FROM catci_minimarket_category_attributes ORDER BY category_id,attribute_id')
+    ->fetchAll(PDO::FETCH_ASSOC),'upgrade preserves attribute modes');
+verify($optionBefore===$pdo->query('SELECT category_id,option_id,mode FROM catci_minimarket_category_order_options ORDER BY category_id,option_id')
+    ->fetchAll(PDO::FETCH_ASSOC),'upgrade preserves option modes');
 runSql($pdo, $dir . 'install.mysql.sql', 'freshcatci_');
 $columns = $pdo->query('SHOW COLUMNS FROM freshcatci_minimarket_categories')
     ->fetchAll(PDO::FETCH_COLUMN);
