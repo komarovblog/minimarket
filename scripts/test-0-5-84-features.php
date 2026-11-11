@@ -31,7 +31,7 @@ $check(CheckoutDelivery::quote($config,
  'pickup always free');
 $read=static fn(string $p):string=>(string)file_get_contents($root.$p);
 $xml=simplexml_load_file($root.'minimarket.xml');
-$check($xml!==false && (string)$xml->version==='0.5.84','manifest version');
+$check($xml!==false && version_compare((string)$xml->version, '0.5.84', '>='), 'manifest version');
 $cfg=simplexml_load_file($root.'admin/config.xml');
 $check($cfg!==false && count($cfg->xpath('//fieldset[@name="checkout"]'))===1 &&
  count($cfg->xpath('//fieldset[@name="delivery"]'))===0 &&

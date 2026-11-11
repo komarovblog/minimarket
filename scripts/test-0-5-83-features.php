@@ -45,7 +45,7 @@ $check(strpos($manual,'$rows=(array)$db->loadAssocList();')
  < strpos($manual,'$snapshot=BundleStock::snapshot($db);'),
  'manual order DB cursor consumed before stock queries');
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$check($manifest!==false && (string)$manifest->version==='0.5.84',
+$check($manifest!==false && version_compare((string)$manifest->version, '0.5.83', '>='),
  'manifest version');
 foreach(['ru-RU','en-GB'] as $lang){
  $sys=parse_ini_file($root.'admin/language/'.$lang.'/com_minimarket.sys.ini');

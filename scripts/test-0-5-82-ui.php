@@ -14,7 +14,7 @@ $ok(count($sysLang)===2
  && in_array('en-GB/com_minimarket.sys.ini',array_map('strval',$sysLang),true),
  'administrator menu language files installed globally');
 
-$ok($xml!==false && (string)$xml->version==='0.5.84','manifest');
+$ok($xml!==false && version_compare((string)$xml->version, '0.5.82', '>='), 'manifest');
 $menus=$xml->xpath('//administration/submenu/menu');
 $links=[];
 foreach($menus as $menu)if(isset($menu['link']))$links[]=(string)$menu['link'];

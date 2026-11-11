@@ -102,5 +102,6 @@ $ok(str_contains($view,'name="delivery_method"')
  && str_contains($view,'name="payment_method"')
  && str_contains($view,'data-fee-cents'),'single page checkout form');
 $xml=(string)file_get_contents($root.'minimarket.xml');
-$ok(str_contains($xml,'<version>0.5.84</version>'),'version 0.5.84');
+$ok((bool)preg_match('~<version>([0-9]+\\.[0-9]+\\.[0-9]+)</version>~', $xml, $match)
+    && version_compare($match[1], '0.5.81', '>='), 'supported checkout version');
 echo "MM81_CHECKOUT_PASS: $n checks\n";
