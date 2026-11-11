@@ -33,9 +33,18 @@ final class CategoryDisplayOptions
         $result['children_per_page']=in_array($childLimit,[0,10,20,50],true)?$childLimit:10;
         $limit=(int)$global->get('category_product_gallery_limit',5);
         $result['product_gallery_limit']=in_array($limit,[3,5,8],true)?$limit:5;
-        foreach (['attribute_display_location','option_display_location','system_display_location'] as $key) {
-            $location=(string)$global->get($key,'both');
-            $result[$key]=in_array($location,['product','category','both'],true)?$location:'both';
+        // Custom information properties default to the full product page.
+        // Each system property has its own location, independent of custom attributes.
+        foreach (['attribute_display_location','option_display_location'] as $key) {
+            $location=(string)$global->get($key,'product');
+            $result[$key]=in_array($location,['product','category','both'],true)?$location:'product';
+        }
+        $legacy=(string)$global->get('system_display_location','both');
+        if(!in_array($legacy,['product','category','both'],true))$legacy='both';
+        foreach(['price','sku','stock'] as $name){
+            $key='system_'.$name.'_display_location';
+            $location=(string)$global->get($key,$legacy);
+            $result[$key]=in_array($location,['product','category','both'],true)?$location:$legacy;
         }
         foreach ($flags as $field => [$key, $default]) {
             $local = (int) ($category->$field ?? -1);

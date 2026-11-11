@@ -17,7 +17,7 @@ final class ProductAttributeCatalog
      * @return array<int,array{title:string,type:string,unit:string,values:array<int,array{text:string,hex:string,image:string}>}>
      */
     public static function load(DatabaseInterface $db, int $productId, array $ancestors,
-        string $context='product', string $globalLocation='both'): array
+        string $context='product', string $globalLocation='product'): array
     {
         if ($productId < 1 || $ancestors === []) {
             return [];
@@ -66,7 +66,7 @@ final class ProductAttributeCatalog
             }
             $location=(string)($row->display_location??'inherit');
             if ($location==='inherit')$location=$globalLocation;
-            if (!in_array($location,['product','category','both'],true))$location='both';
+            if (!in_array($location,['product','category','both'],true))$location='product';
             if ($location!==$context && $location!=='both')continue;
             $type = (string) $row->input_type;
             $attributes[$id] = [

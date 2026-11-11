@@ -173,18 +173,24 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                             <?php echo $this->escape($product->title); ?>
                         </a>
                         <?php if ($this->productListOptions['show_badges']) echo BadgeHelper::render($product); ?>
-                        <div class="mm-product-card__price">
-                            <span><?php echo $this->escape((string) $product->price); ?></span>
-                            <?php echo BadgeHelper::oldPrice($product); ?>
-                        </div>
-                        <?php if (in_array($this->productListOptions['system_display_location'],['category','both'],true)) : ?>
+                        <?php if (in_array($this->productListOptions['system_price_display_location'],['category','both'],true)) : ?>
+                            <div class="mm-product-card__price">
+                                <span><?php echo $this->escape((string) $product->price); ?></span>
+                                <?php echo BadgeHelper::oldPrice($product); ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (in_array($this->productListOptions['system_sku_display_location'],['category','both'],true)
+                                  || in_array($this->productListOptions['system_stock_display_location'],['category','both'],true)) : ?>
                             <dl class="mm-product-card__attributes small mb-2">
-                                <?php if (empty($this->variantsInProducts[(int)$product->id])) : ?>
+                                <?php if (in_array($this->productListOptions['system_sku_display_location'],['category','both'],true)
+                                          && empty($this->variantsInProducts[(int)$product->id])) : ?>
                                 <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></dt>
                                 <dd><?php echo $this->escape((string)$product->sku); ?></dd>
                                 <?php endif; ?>
+                                <?php if (in_array($this->productListOptions['system_stock_display_location'],['category','both'],true)) : ?>
                                 <dt><?php echo Text::_('COM_MINIMARKET_PRODUCT_STOCK'); ?></dt>
                                 <dd><?php echo (int)$product->stock; ?></dd>
+                                <?php endif; ?>
                             </dl>
                         <?php endif; ?>
                         <?php if ($this->productListOptions['show_list_attributes'] && !empty($this->categoryAttributeRows[(int)$product->id])) : ?>
@@ -239,7 +245,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                                 <?php endif; ?>
                                 <p><?php echo $this->escape((string)$product->price); ?>
                                     <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></p>
-                                <?php if (in_array($this->productListOptions['system_display_location'],['category','both'],true)
+                                <?php if (in_array($this->productListOptions['system_sku_display_location'],['category','both'],true)
                                         && empty($this->variantsInProducts[(int)$product->id])) : ?>
                                 <p class="small"><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?>:
                                     <?php echo $this->escape((string)$product->sku); ?></p>
