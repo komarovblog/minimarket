@@ -32,8 +32,8 @@ ok69(count($a->xpath('/form/fieldset[@name="details"]/field[@name="value_source_
     'hidden compatibility field fully removed');
 $cfg=$read('src/com_minimarket/admin/config.xml');
 ok69(str_contains($cfg,'name="inventory_enabled"') &&
-    !str_contains($cfg,'showon="category_product_layout:grid"'),
-    'inventory toggle plus visible global device card counts');
+    str_contains($cfg,'showon="category_product_layout:grid"'),
+    'inventory toggle and grid columns shown only for grid layout');
 $editor=$read('src/com_minimarket/admin/tmpl/product/edit.php');
 ok69(strpos($editor,"renderField('option_stock_mode')") <
     strpos($editor,"renderField('stock')",strpos($editor,'} else {')),
