@@ -8,7 +8,6 @@ $esc=static fn($v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE
 $bool=static fn($name,$default=0)=>(int)$p->get($name,$default)===1;
 $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=paymentmethods&method='.$method,false);
 ?>
-<div id="j-main-container" class="j-main-container">
 <?php if($this->method===''):
  $mmSearch=[
   'view'=>'paymentmethods','query'=>$this->search,
@@ -36,6 +35,7 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=payment
  require dirname(__DIR__).'/shared/method-list.php';
 ?>
 <?php else: ?>
+<div id="j-main-container" class="j-main-container">
  <form id="mm-payment-method-form" method="post" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
   <input type="hidden" name="scope" value="payment">
   <input type="hidden" name="method" value="<?php echo $esc($this->method); ?>">
@@ -67,5 +67,5 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=payment
    </div>
   </div>
  </form>
-<?php endif; ?>
 </div>
+<?php endif; ?>
