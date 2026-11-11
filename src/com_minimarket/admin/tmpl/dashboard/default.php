@@ -75,8 +75,8 @@ $sections = [
                 'icon' => 'icon-truck', 'count' => null],
             ['view' => 'paymentmethods', 'label' => 'COM_MINIMARKET_PAYMENT_METHODS_TITLE',
                 'icon' => 'icon-credit-card', 'count' => null],
-            ['view' => 'integrations', 'label' => 'COM_MINIMARKET_INTEGRATIONS_TITLE',
-                'icon' => 'icon-plug', 'count' => null],
+            ['view' => 'registrationmethods', 'label' => 'COM_MINIMARKET_REGISTRATION_METHODS_TITLE',
+                'icon' => 'icon-user', 'count' => null],
         ],
     ],
 ];
@@ -124,10 +124,18 @@ $sections = [
                                         <svg class="mm-dashboard-icon mm-dashboard-icon--delivery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="<?php echo htmlspecialchars(Text::_('COM_MINIMARKET_DASHBOARD_DELIVERIES'),ENT_QUOTES,'UTF-8'); ?>">
                                             <path d="M3 6h11v12H3zM14 10h4l3 4v4h-7M5 18a2 2 0 1 0 4 0M16 18a2 2 0 1 0 4 0M3 10h11"/>
                                         </svg>
-                                    <?php elseif ($item['view'] === 'integrations') : ?>
-                                        <svg class="mm-dashboard-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                          stroke-width="1.8" stroke-linecap="round" role="img" aria-label="<?php echo htmlspecialchars(Text::_('COM_MINIMARKET_INTEGRATIONS_TITLE'),ENT_QUOTES,'UTF-8'); ?>">
-                                          <path d="M8 3v5M16 3v5M5 8h14v4a7 7 0 0 1-14 0V8Zm7 11v3M3 12h2M19 12h2"/>
+                                    <?php elseif ($item['view'] === 'deliverymethods') : ?>
+                                        <svg class="mm-dashboard-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <rect x="2" y="6" width="12" height="12" rx="1"/><path d="M14 10h4l4 4v4h-8"/>
+                                            <circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>
+                                        </svg>
+                                    <?php elseif ($item['view'] === 'paymentmethods') : ?>
+                                        <svg class="mm-dashboard-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h5"/>
+                                        </svg>
+                                    <?php elseif ($item['view'] === 'registrationmethods') : ?>
+                                        <svg class="mm-dashboard-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <circle cx="9" cy="8" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M18 9v6M15 12h6"/>
                                         </svg>
                                     <?php elseif ($item['view'] === 'bundles') : ?>
                                         <svg class="mm-dashboard-icon mm-dashboard-icon--bundle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">

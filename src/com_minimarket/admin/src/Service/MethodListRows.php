@@ -23,17 +23,25 @@ final class MethodListRows
         int $limit,
         int $offset
     ): array {
-        $methods = $kind === 'delivery'
-            ? [
+        $methods = match ($kind) {
+            'delivery' => [
                 'pickup' => ['COM_MINIMARKET_ORDER_DELIVERY_PICKUP', 'delivery_pickup_enabled', 1],
                 'courier' => ['COM_MINIMARKET_ORDER_DELIVERY_COURIER', 'delivery_courier_enabled', 0],
-            ]
-            : [
+            ],
+            'registration' => [
+                'email' => ['COM_MINIMARKET_REGISTRATION_EMAIL_METHOD', 'allowUserRegistration', 0],
+            ],
+            default => [
                 'on_receipt' => ['COM_MINIMARKET_PAYMENT_ON_RECEIPT', 'payment_on_receipt_enabled', 1],
                 'bank_transfer' => ['COM_MINIMARKET_PAYMENT_BANK_TRANSFER', 'payment_bank_transfer_enabled', 0],
-            ];
+            ],
+        };
 
-        $view = $kind === 'delivery' ? 'deliverymethods' : 'paymentmethods';
+        $view = match ($kind) {
+            'delivery' => 'deliverymethods',
+            'registration' => 'registrationmethods',
+            default => 'paymentmethods',
+        };
         $rows = [];
 
         foreach ($methods as $method => [$label, $param, $default]) {
