@@ -9,6 +9,9 @@ $get=static fn(string $key,string $default='')=>$p===null?$default:(string)($p->
 $saved=$p?json_decode((string)$p->filters_json,true):[];
 if(!is_array($saved))$saved=[];
 $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplication()->get('editor','tinymce'));
+Factory::getApplication()->getDocument()->getWebAssetManager()
+    ->registerAndUseScript('com_minimarket.seo-category-editor',
+        'media/com_minimarket/js/seo-category-editor.js',[],['defer'=>true]);
 ?>
 <form method="post" id="mm-seo-editor" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.save',false)); ?>">
  <div class="d-flex gap-2 flex-wrap mb-3">
@@ -66,6 +69,12 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
       ?>
      </div>
     <div id="mm-seo-category-choices" data-mm-seo-choices-url="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.choices&'.\Joomla\CMS\Session\Session::getFormToken().'=1',false)); ?>"
+         data-mm-seo-saved="<?php echo $this->escape(json_encode($saved,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE)); ?>"
+         data-mm-seo-original-category="<?php echo (int)$get('category_id'); ?>"
+         data-mm-seo-choose="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_PICK_CATEGORY_FIRST')); ?>"
+         data-mm-seo-none="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_NO_CATEGORY_CHOICES')); ?>"
+         data-mm-seo-loading="<?php echo $this->escape(Text::_('COM_MINIMARKET_REF_LOADING')); ?>"
+         data-mm-seo-error="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_CHOICE_LOAD_FAILED')); ?>"
          aria-live="polite">
       <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SEO_PICK_CATEGORY_FIRST'); ?></p>
     </div>
@@ -133,44 +142,3 @@ $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplicatio
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
 <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </form>
-<script>
-(() => {
- const form=document.getElementById('mm-seo-editor'),hidden=document.getElementById('mm-seo-query');
- const original=<?php echo json_encode($saved,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE); ?>;
- const build=()=>{
-   const current=structuredClone(original),found={};
-   for(const checkbox of form.querySelectorAll('[data-mm-seo-facet]')){
-     const key=checkbox.dataset.mmSeoFacet;
-     if(!found[key]){found[key]=[];delete current[key];}
-     if(checkbox.checked)found[key].push(checkbox.value);
-   }
-   for(const [key,values] of Object.entries(found))if(values.length)current[key]=values;
-   // Explicit system fields replace the previously stored system rules.
-   delete current.price;delete current.stock;delete current.sku;
-   const range={};
-   for(const field of form.querySelectorAll('[data-mm-seo-range="price"]')){
-     const v=field.value.trim();
-     if(v!=='')range[field.dataset.mmBound]=v;
-   }
-   if(Object.keys(range).length)current.price=range;
-   const stock=form.querySelector('[data-mm-seo-stock]')?.value||'';
-   if(stock)current.stock=[stock];
-   const sku=form.querySelector('[data-mm-seo-sku]')?.value.trim()||'';
-   if(sku)current.sku=sku;
-   const params=new URLSearchParams();
-   for(const [key,values] of Object.entries(current)){
-     if(!/^(?:a|s)[0-9]+$|^(?:price|stock|sku)$/.test(key))continue;
-     if(Array.isArray(values))for(const v of values)params.append('mmf['+key+'][]',String(v));
-     else if(values && typeof values==='object')
-       for(const [sub,val] of Object.entries(values)){
-         if(Array.isArray(val))for(const v of val)params.append('mmf['+key+']['+sub+'][]',String(v));
-         else params.append('mmf['+key+']['+sub+']',String(val));
-       }
-     else if(values!==null)params.append('mmf['+key+']',String(values));
-   }
-   hidden.value=params.toString();
- };
- form.addEventListener('submit',build);
- build();
-})();
-</script>
