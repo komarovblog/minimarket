@@ -86,9 +86,9 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
             $layoutQuery=http_build_query(['mm_layout'=>$layoutKey,'mm_order'=>$this->sortOrder,'mmf'=>$this->facetSelection],
               '','&',PHP_QUERY_RFC3986);
           ?>
-           <a class="btn btn-sm <?php echo $grid===$layoutKey?'btn-primary':'btn-outline-secondary'; ?>"
+           <a class="btn btn-sm <?php echo ($grid?'grid':'list')===$layoutKey?'btn-primary':'btn-outline-secondary'; ?>"
               href="<?php echo $this->escape($layoutLink.(str_contains($layoutLink,'?')?'&':'?').$layoutQuery); ?>"
-              aria-current="<?php echo $grid===$layoutKey?'page':'false'; ?>"><?php echo Text::_($label); ?></a>
+              aria-current="<?php echo ($grid?'grid':'list')===$layoutKey?'page':'false'; ?>"><?php echo Text::_($label); ?></a>
           <?php endforeach; ?>
          </div>
         <?php endif; ?>
