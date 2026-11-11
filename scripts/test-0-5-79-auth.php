@@ -42,7 +42,8 @@ $ok(!PhoneOtp::verify('+79991234567','checkout',$session,$secret,$otp['nonce'],
 $reject(fn()=>PhoneOtp::issue('+79991234567','checkout',$session,'too short'));
 $root=dirname(__DIR__).'/src/com_minimarket/';
 $xml=(string)file_get_contents($root.'minimarket.xml');
-$ok(str_contains($xml,'<version>0.5.84</version>'),'manifest version');
+$ok((bool) preg_match('~<version>([0-9]+\\.[0-9]+\\.[0-9]+)</version>~', $xml, $versionMatch)
+    && version_compare($versionMatch[1], '0.5.79', '>='), 'manifest version');
 $storage=(string)file_get_contents($root.'site/src/Service/OrderStorage.php');
 $ok(str_contains($storage,'$userId<0') && !str_contains($storage,'$userId<1'),
     'interim orders allow anonymous contact-only requests');

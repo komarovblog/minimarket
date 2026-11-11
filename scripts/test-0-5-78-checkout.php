@@ -12,6 +12,8 @@ namespace MiniMarket\CheckoutSmoke {
     \define('_JEXEC', 1);
     require __DIR__.'/../src/com_minimarket/site/src/Service/CheckoutData.php';
     require __DIR__.'/../src/com_minimarket/site/src/Service/CartState.php';
+    // OrderStorage delegates promotion pricing even when no promo code was supplied.
+    require __DIR__.'/../src/com_minimarket/site/src/Service/PromotionService.php';
     require __DIR__.'/../src/com_minimarket/site/src/Service/OrderStorage.php';
     $n=0;
     function chk(bool $valid,string $msg):void {
@@ -96,7 +98,8 @@ namespace MiniMarket\CheckoutSmoke {
 
     $root=dirname(__DIR__).'/src/com_minimarket/';
     $manifest=simplexml_load_file($root.'minimarket.xml');
-    chk($manifest!==false && (string)$manifest->version==='0.5.84','0.5.84 contact-only interim checkout');
+    chk($manifest!==false && version_compare((string)$manifest->version, '0.5.78', '>='),
+        'checkout remains available in current component version');
     chk(count($manifest->xpath("//submenu/menu[@link='option=com_minimarket&view=orders']"))===1,
         'native Joomla admin Orders menu');
     $route=file_get_contents($root.'site/src/Service/Router.php');
