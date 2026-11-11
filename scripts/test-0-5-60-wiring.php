@@ -93,12 +93,19 @@ audit60(str_contains($promoTpl,'data-mm-variant-axis') &&
  'SKU options have server HTML and JS change handler');
 $importController=(string)file_get_contents($root.'admin/src/Controller/ImportController.php');
 $importTpl=(string)file_get_contents($root.'admin/tmpl/import/default.php');
-$archive=(string)file_get_contents($root.'admin/src/Service/CatalogArchiveV2.php');
-audit60(str_contains($importController,'CatalogArchiveV2::') &&
- str_contains($importTpl,'import.applyFull') &&
- str_contains($importTpl,'import.cancelFull') &&
- str_contains($archive,'transactionRollback()'),
- 'v2 archive preview/apply/cancel and atomic rollback are wired');
+$importService=(string)file_get_contents($root.'admin/src/Service/CatalogImport.php');
+// The full-catalog v2 archive screen was intentionally removed from the UI.
+// The ordinary JSON/CSV/XLSX import still must preview, apply, cancel and roll back.
+audit60(str_contains($importController,'CatalogImport::run') &&
+ str_contains($importTpl,'import.preview') &&
+ str_contains($importTpl,'import.apply') &&
+ str_contains($importTpl,'import.cancel') &&
+ !str_contains($importTpl,'import.previewFull') &&
+ !str_contains($importTpl,'import.applyFull') &&
+ str_contains($importService,'transactionStart()') &&
+ str_contains($importService,'transactionCommit()') &&
+ str_contains($importService,'transactionRollback()'),
+ 'current tabular import preview/apply/cancel and atomic rollback are wired');
 foreach(['ru-RU','en-GB'] as $lang) {
  $ini=parse_ini_file($root.'admin/language/'.$lang.'/com_minimarket.ini');
  foreach(['COM_MINIMARKET_CONFIG_CATEGORIES','COM_MINIMARKET_VIDEO_PROMO',
