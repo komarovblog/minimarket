@@ -46,19 +46,19 @@ ok(str_contains($tree,"COM_MINIMARKET_CATEGORY_COUNT_BRANCH"),
 $css=file_get_contents(__DIR__.'/../src/com_minimarket/media/css/admin-ui.css');
 ok(!preg_match('/#adminForm\\s+\\.table\\s*\\{/',$css),
    'global #adminForm .table selector must never set fixed layout');
-ok(str_contains($css,'#adminForm .mm-admin-list')
-    && str_contains($css,'table-layout: auto;'),
-   'admin lists use natural column width, not table-layout fixed');
-ok(str_contains($css,'#adminForm .mm-admin-list thead th')
-    && str_contains($css,'overflow-wrap: normal;')
-    && str_contains($css,'word-break: normal;')
-    && str_contains($css,'min-width: 7rem;'),
-   'published column has readable minimum width; headings wrap at words, not letters');
-ok(str_contains($css,'#adminForm .mm-rules-table')
-    && str_contains($css,'table-layout: fixed;'),
-   'fixed layout remains scoped to compact two-column rule editors');
-ok(str_contains($css,'@container (max-width: 900px)'),
-   'small container rows become cards instead of scrolling horizontally');
+// Native Joomla table styling introduced in 0.5.90 must not be replaced
+// by a custom framed list or by small-screen cards. Scroll stays local.
+ok(!str_contains($css,'#adminForm .mm-admin-list') &&
+   str_contains($css,'.mm-native-list-viewport {') &&
+   str_contains($css,'overflow-x: auto;') &&
+   str_contains($css,'.mm-native-list-viewport > table'),
+   'native Joomla lists use their own horizontal viewport without custom frames');
+ok(!str_contains($css,'@container (max-width: 900px)') &&
+   !str_contains($css,'.mm-columns-picker'),
+   'legacy cardification and custom column-picker CSS stay removed');
+ok(str_contains($css,'#adminForm .mm-rules-table') &&
+   str_contains($css,'table-layout: fixed;'),
+   'fixed table layout remains scoped to rule editors only');
 foreach ([
  'products'=>12, 'bundles'=>12, 'groups'=>5, 'bundlegroups'=>5, 'categories'=>8, 'attributes'=>7,
  'brands'=>6, 'collections'=>6,
