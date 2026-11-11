@@ -60,9 +60,9 @@ $href='index.php?option=com_minimarket&view=deliveries&'.http_build_query([
        <td data-label="<?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS'); ?>"><span class="badge bg-<?php echo $colors[(string)$delivery->status]??'secondary'; ?>"><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS_'.strtoupper((string)$delivery->status)); ?></span></td>
       </tr>
      <?php endforeach; ?>
-     <?php if(!$this->deliveries): ?><tr><td colspan="9"><?php echo Text::_('COM_MINIMARKET_DELIVERIES_NONE'); ?></td></tr><?php endif; ?>
      </tbody>
     </table>
+<?php if (!$this->deliveries): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_DELIVERIES_NONE'); ?></div><?php endif; ?>
    </div>
    <input type="hidden" name="boxchecked" value="0">
    <input type="hidden" name="task" value="">
