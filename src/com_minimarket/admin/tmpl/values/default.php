@@ -5,6 +5,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Button\PublishedButton;
+use Joomla\CMS\Layout\LayoutHelper;
 ?>
 <?php if ($this->attributeId > 0) : ?>
 <p><a href="<?php echo Route::_(
@@ -13,22 +14,21 @@ use Joomla\CMS\Button\PublishedButton;
 <?php endif; ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=values&attribute_id=' . (int) $this->attributeId); ?>"
       method="post" name="adminForm" id="adminForm" class="mm-list-form">
-    <div class="table-responsive mm-native-list-viewport">
+    <div id="j-main-container" class="j-main-container">
+        <?php echo LayoutHelper::render('joomla.searchtools.default', ['view' => $this]); ?>
+        <div class="table-responsive mm-native-list-viewport">
 <table class="table table-striped mm-admin-list">
         <thead><tr>
             <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
             <th class="w-1 text-center"><?php echo Text::_('COM_MINIMARKET_BULK_PUBLISHED'); ?></th>
-            <th><a href="<?php echo Route::_(
-                'index.php?option=com_minimarket&view=values&attribute_id=' . (int) $this->attributeId
-                . '&sort=title&direction=' . ($this->sort === 'title' && $this->direction === 'asc' ? 'desc' : 'asc')
-            ); ?>"><?php echo Text::_('JGLOBAL_TITLE'); ?></a></th>
+            <th><?php echo HTMLHelper::_('searchtools.sort', 'JGLOBAL_TITLE', 'v.title',
+                    $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_VALUE_ATTRIBUTE'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_VALUE_CODE'); ?></th>
-            <th><a href="<?php echo Route::_(
-                'index.php?option=com_minimarket&view=values&attribute_id=' . (int) $this->attributeId
-                . '&sort=order&direction=' . ($this->sort === 'order' && $this->direction === 'asc' ? 'desc' : 'asc')
-            ); ?>"><?php echo Text::_('JGRID_HEADING_ORDERING'); ?></a></th>
-            <th>ID</th>
+            <th><?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ORDERING', 'v.sort_order',
+                    $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
+            <th><?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ID', 'v.id',
+                    $this->state->get('list.direction'), $this->state->get('list.ordering')); ?></th>
         </tr></thead>
         <tbody>
         <?php foreach ($this->items as $i => $item) : ?>
@@ -51,6 +51,10 @@ use Joomla\CMS\Button\PublishedButton;
         </tbody>
     </table>
 </div>
+        <?php if (is_object($this->pagination) && method_exists($this->pagination, 'getListFooter')) : ?>
+            <?php echo $this->pagination->getListFooter(); ?>
+        <?php endif; ?>
+    </div>
     <?php if ($this->attributeId > 0) : ?>
         <input type="hidden" name="attribute_id" value="<?php echo (int) $this->attributeId; ?>">
         <input type="hidden" name="return" value="<?php echo htmlspecialchars(
