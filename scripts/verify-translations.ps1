@@ -37,7 +37,9 @@ foreach($area in @('admin','site')) {
         $tokens=@([regex]::Matches($text,'COM_MINIMARKET_[A-Z0-9_]+') |
             ForEach-Object {$_.Value} | Sort-Object -Unique)
         foreach($token in $tokens) {
-            if($token.EndsWith('_')) {continue}
+            # Joomla admin controllers use COM_MINIMARKET_BULK as a text-prefix,
+            # not as a translated message.
+            if($token.EndsWith('_') -or $token -eq 'COM_MINIMARKET_BULK') {continue}
             if(-not $known.ContainsKey($token)) {
                 $missing.Add("$area : $token : $($f.Name)")
             }
