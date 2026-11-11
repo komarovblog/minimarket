@@ -214,6 +214,11 @@
                label="COM_MINIMARKET_CONFIG_FIELD_COMMENT" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
+        <field name="checkout_methods_note" type="note" class="alert alert-info"
+               label="COM_MINIMARKET_METHODS_CHECKOUT_NOTE"
+               description="COM_MINIMARKET_METHODS_CHECKOUT_NOTE_DESC" />
+    </fieldset>
+    <fieldset name="delivery_methods" label="COM_MINIMARKET_DELIVERY_METHODS_TITLE">
         <field name="checkout_delivery_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_DELIVERY" description="COM_MINIMARKET_CHECKOUT_DELIVERY_NOTE"/>
 
         <field name="delivery_pickup_enabled" type="radio" default="1" filter="int"
@@ -232,13 +237,14 @@
                description="COM_MINIMARKET_DELIVERY_RATE_SOURCE_DESC" showon="delivery_courier_enabled:1">
             <option value="directory">COM_MINIMARKET_DELIVERY_DIRECTORY</option>
             <option value="zones">COM_MINIMARKET_DELIVERY_ZONES</option>
-            <option value="cdek">COM_MINIMARKET_DELIVERY_CDEK</option>
         </field>
         <field name="delivery_city_rates" type="textarea" rows="8" cols="70" default=""
                label="COM_MINIMARKET_DELIVERY_CITY_RATES"
                description="COM_MINIMARKET_DELIVERY_CITY_RATES_DESC"
                showon="delivery_courier_enabled:1[AND]delivery_rate_source:directory" />
 
+    </fieldset>
+    <fieldset name="payment_methods" label="COM_MINIMARKET_PAYMENT_METHODS_TITLE">
         <field name="checkout_payment_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_PAYMENT" description="COM_MINIMARKET_CHECKOUT_PAYMENT_NOTE"/>
         <field name="payment_on_receipt_enabled" type="radio" default="1" filter="int"
                label="COM_MINIMARKET_PAYMENT_ON_RECEIPT"
@@ -250,7 +256,12 @@
                description="COM_MINIMARKET_PAYMENT_BANK_TRANSFER_DESC">
             <option value="1">JYES</option><option value="0">JNO</option>
         </field>
+        <field name="payment_bank_instructions" type="textarea" rows="5" cols="70"
+               label="COM_MINIMARKET_METHOD_BANK_INSTRUCTIONS"
+               description="COM_MINIMARKET_METHOD_BANK_HELP" default="" filter="string"
+               showon="payment_bank_transfer_enabled:1" />
     </fieldset>
+
     <fieldset name="registration" label="COM_MINIMARKET_CONFIG_REGISTRATION">
         <field name="registration_note" type="note" class="alert alert-info" label="COM_MINIMARKET_REGISTRATION_FUTURE" description="COM_MINIMARKET_REGISTRATION_DESC" />
         <field name="registration_phone" type="radio" default="0" filter="int" label="COM_MINIMARKET_REGISTRATION_PHONE">
