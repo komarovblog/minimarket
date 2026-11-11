@@ -72,6 +72,9 @@ final class HtmlView extends BaseHtmlView
             ToolbarHelper::custom('orders.confirm','publish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CONFIRMED'),true);
             ToolbarHelper::custom('orders.cancel','unpublish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CANCELLED'),true);
         }
+        if($this->showTrash && $user->authorise('core.delete','com_minimarket')){
+            ToolbarHelper::custom('orders.restore','publish','',Text::_('COM_MINIMARKET_ORDER_RESTORE'),true);
+        }
         if(!$this->showTrash && $user->authorise('core.delete','com_minimarket')){
             ToolbarHelper::deleteList(Text::_('COM_MINIMARKET_ORDER_TRASH_CONFIRM'),'orders.trash');
         }
