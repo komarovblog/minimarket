@@ -38,6 +38,10 @@ foreach(glob($root.'admin/tmpl/*/*.php') ?: [] as $path) {
         $name=strtolower($found[1]);$method=$found[2];
         $id=$name.'.'.$method;
         $links[$id]=($links[$id]??0)+1;
+        // The Integrations screen links to Joomla's com_plugins, not our own
+        // controller. Only this explicit core component route is exempt.
+        if($id==='plugin.edit' && basename(dirname($path))==='integrations'
+            && str_contains($source,'option=com_plugins&task=plugin.edit'))continue;
         if(!isset($controllers[$name])) $mismatches[]='No controller for '.$id;
         elseif(!isset($controllers[$name][$method])&&!isset($inherit[$method])
             && !isset($siteControllers[$name][$method]))
