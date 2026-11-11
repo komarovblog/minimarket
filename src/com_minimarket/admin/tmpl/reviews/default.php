@@ -56,9 +56,9 @@ $href='index.php?option=com_minimarket&view=reviews&'.http_build_query([
        <td data-label="<?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?>"><span class="badge bg-<?php echo $colors[(int)$review->state]??'secondary'; ?>"><?php echo Text::_($states[(int)$review->state]??$states[2]); ?></span></td>
       </tr>
      <?php endforeach; ?>
-     <?php if(!$this->reviews): ?><tr><td colspan="8"><?php echo Text::_('COM_MINIMARKET_REVIEW_NO_ROWS'); ?></td></tr><?php endif; ?>
      </tbody>
     </table>
+<?php if (!$this->reviews): ?><div class="alert alert-info mt-2" role="status"><?php echo Text::_('COM_MINIMARKET_REVIEW_NO_ROWS'); ?></div><?php endif; ?>
    </div>
    <input type="hidden" name="boxchecked" value="0">
    <input type="hidden" name="task" value="">
