@@ -66,7 +66,7 @@ namespace MiniMarket\PublicAttributeSmoke {
                     ['id'=>4,'title'=>'Bluetooth','input_type'=>'boolean','value_source'=>'manual','number_unit'=>''],
                     ['id'=>5,'title'=>'Описание свойства','input_type'=>'editor','value_source'=>'manual','number_unit'=>''],
                     ['id'=>6,'title'=>'Инструкция','input_type'=>'document','value_source'=>'manual','number_unit'=>''],
-                    ['id'=>10,'title'=>'Особенность','input_type'=>'text','value_source'=>'manual','number_unit'=>'','display_location'=>'category'],
+                    ['id'=>10,'title'=>'Особенность','input_type'=>'text','value_source'=>'manual','number_unit'=>'','display_location'=>'both'],
                 ],
                 '#__minimarket_product_attribute_scalars'=>[
                     ['attribute_id'=>3,'value_text'=>null,'value_number'=>'1400.0000','value_boolean'=>null],
