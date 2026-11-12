@@ -15,6 +15,10 @@
 
 `admin/config.xml` → параметры `com_minimarket` → `CheckoutSettings::step` / `CheckoutDelivery::checkoutQuote` / `CheckoutData::normalize` → `CheckoutController::preview/submit` → `OrderStorage` → запись `pending` / `unpaid` → карточка заказа. Согласие: `checkout_consent_text` → `View/Checkout/HtmlView` → `site/tmpl/checkout/default.php`. Код покупки: только `CheckoutSettings::requiresPurchaseCode`, не отключается вместе со шагами.
 
+## Итог автоматических проверок
+
+**GitHub Actions #43209381185: 6/6 PASS** — PHP 8.4/8.5, MySQL 8.0/8.4, Windows installer archive. Новый контракт `MM061_CHECKOUT_PASS: 37 checks`. Архив `com_minimarket-0.6.1.zip` доступен в [артефакте CI](https://github.com/komarovblog/minimarket/actions/runs/43209381185). Это **не** браузерная проверка Joomla или SMTP.
+
 ## Тесты и приемка
 
 Тест `scripts/test-0-6-1.php` проверяет пропуск всех четырёх шагов даже при отсутствующих методах/обязательных полях, гостевой пустой контакт, отсутствие фиктивной доставки/оплаты, обычный включённый checkout, поле Joomla editor и отсутствие checkbox, связь с OTP, RU/EN. Полный GitHub Actions: PHP 8.4/8.5, Windows ZIP, MySQL 8.0/8.4. **CI не равен браузерной приемке Joomla/SMTP.**

@@ -1,6 +1,6 @@
 # MiniMarket 0.6.1 — безусловное отключение шагов, согласие перед кнопкой
 
-**База:** 0.6.0, commit `d0c67dfb5cc234d5845185c51aa8a9042af3cef8`. **Статус:** опубликовано в `development`; CI и browser acceptance отражать только после фактической проверки. **Контракт и проверка:** [docs/RELEASE_0_6_1.md](docs/RELEASE_0_6_1.md).
+**База:** 0.6.0, commit `d0c67dfb5cc234d5845185c51aa8a9042af3cef8`. **Статус:** `development`, **CI 6/6 PASS** ([GitHub Actions #43209381185](https://github.com/komarovblog/minimarket/actions/runs/43209381185)), `MM061_CHECKOUT_PASS: 37 checks`, архив `com_minimarket-0.6.1.zip` собран (artifact `com_minimarket-0.6.1`). **Browser acceptance Joomla/SMTP не проводилась.** **Контракт и проверка:** [docs/RELEASE_0_6_1.md](docs/RELEASE_0_6_1.md).
 
 Четыре checkout-шага безусловно включаются/выключаются. Если выключена доставка или оплата, в заказе `pending`, `unpaid`, без фиктивных данных. Код покупки зависит от `guest/guests/all`, не от шагов. Текст согласия — один HTML-редактор над «Оформить заказ», без checkbox и отдельного этапа. SQL-миграция не нужна. `main`, Joomla core и `blank` не трогать.
 
