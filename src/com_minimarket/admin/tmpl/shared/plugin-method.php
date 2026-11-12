@@ -12,6 +12,7 @@ $viewName=match($mmPluginScope){
 };
 $esc=static fn($v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
 $canEdit=!empty($this->canEditPlugins);
+$canState=!empty($this->canEditPluginState);
 $info=Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='.$pluginId,false);
 ?>
 <div id="j-main-container" class="j-main-container">
@@ -27,18 +28,29 @@ $info=Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='.$pl
  <p class="text-muted small"><?php echo $esc((string)$plugin->element); ?> ·
   <?php echo Text::_((int)$plugin->enabled===1
    ?'COM_MINIMARKET_METHOD_ACTIVE':'COM_MINIMARKET_METHOD_INACTIVE'); ?></p>
- <?php if($this->pluginForm!==null && $canEdit): ?>
+ <?php if($canEdit || $canState): ?>
  <form method="post" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=pluginmethod.save',false)); ?>"
        id="mm-plugin-method-form">
   <input type="hidden" name="scope" value="<?php echo $esc($mmPluginScope); ?>">
   <input type="hidden" name="plugin_id" value="<?php echo $pluginId; ?>">
   <?php echo HTMLHelper::_('form.token'); ?>
+  <?php if($canState): ?>
+  <div class="mb-3">
+   <label for="mm-plugin-enabled" class="form-label"><?php echo Text::_('JSTATUS'); ?></label>
+   <select id="mm-plugin-enabled" name="enabled" class="form-select">
+    <option value="1"<?php echo (int)$plugin->enabled===1?' selected':''; ?>><?php echo Text::_('JENABLED'); ?></option>
+    <option value="0"<?php echo (int)$plugin->enabled===0?' selected':''; ?>><?php echo Text::_('JDISABLED'); ?></option>
+   </select>
+  </div>
+  <?php endif; ?>
+  <?php if($this->pluginForm!==null && $canEdit): ?>
   <?php foreach($this->pluginForm->getFieldsets('params') as $fieldset): ?>
    <div class="mb-3">
     <h3 class="h6"><?php echo $esc(Text::_((string)($fieldset->label??$fieldset->name))); ?></h3>
     <?php echo $this->pluginForm->renderFieldset($fieldset->name); ?>
    </div>
   <?php endforeach; ?>
+  <?php endif; ?>
   <div class="d-flex flex-wrap gap-2">
    <button class="btn btn-success" name="save_close" value="0" type="submit"><?php echo Text::_('JSAVE'); ?></button>
    <button class="btn btn-success" name="save_close" value="1" type="submit"><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>

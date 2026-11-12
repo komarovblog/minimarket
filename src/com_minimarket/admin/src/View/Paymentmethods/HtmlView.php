@@ -21,7 +21,7 @@ final class HtmlView extends BaseHtmlView
     public array $methodRows=[];
     public string $search='', $typeFilter='', $statusFilter='all', $sort='name_asc';
     public int $total=0, $offset=0, $pageSize=20;
-    public bool $canEdit=false,$canEditPlugins=false;
+    public bool $canEdit=false,$canEditPlugins=false,$canEditPluginState=false;
     public string $method='';
     public int $zones=0;
 
@@ -36,6 +36,8 @@ final class HtmlView extends BaseHtmlView
         $this->method=in_array($raw,['on_receipt','bank_transfer'],true)?$raw:'';
         $this->canEdit=$user->authorise('core.options','com_minimarket')
             || $user->authorise('core.admin','com_minimarket');
+        $this->canEditPluginState=$user->authorise('core.edit.state','com_plugins')
+            || $user->authorise('core.admin','com_plugins');
         $this->canEditPlugins=$user->authorise('core.edit','com_plugins')
             || $user->authorise('core.admin','com_plugins');
         $this->params=ComponentHelper::getParams('com_minimarket');

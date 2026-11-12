@@ -48,27 +48,33 @@ final class PluginMethodSettings
         return $form;
     }
 
-    public static function save(DatabaseInterface $db,string $kind,int $id,array $posted):void
+    public static function save(DatabaseInterface $db,string $kind,int $id,array $posted,?int $enabled=null):void
     {
         $db->transactionStart();
         try {
             $data=self::load($db,$kind,$id);
-            if($data===null||$data['form']===null)
+            if($data===null||($posted===[]&&$enabled===null))
                 throw new \DomainException('COM_MINIMARKET_PLUGIN_METHOD_NOT_CONFIGURABLE');
-            $form=$data['form'];
-            if(!is_array($posted['params']??null))
+            if($enabled!==null&&!in_array($enabled,[0,1],true))
                 throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
-            $filtered=$form->filter(['params'=>$posted['params']]);
-            if(!is_array($filtered)||!is_array($filtered['params']??null)
-                ||!$form->validate($filtered))
-                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
-            // Filtered native Joomla form fields only; preserve stored values
-            // not submitted by the form (e.g. hidden secrets).
-            $params=array_replace_recursive($data['params'],$filtered['params']);
-            $json=json_encode($params,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
-            $q=$db->getQuery(true)->update($db->quoteName('#__extensions'))
-              ->set($db->quoteName('params').'='.$db->quote($json))
-              ->where('extension_id='.(int)$id)->where('type='.$db->quote('plugin'))
+            $updates=[];
+            if($posted!==[]){
+                $form=$data['form'];
+                if($form===null||!is_array($posted['params']??null))
+                    throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+                $filtered=$form->filter(['params'=>$posted['params']]);
+                if(!is_array($filtered)||!is_array($filtered['params']??null)
+                    ||!$form->validate($filtered))
+                    throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+                $params=array_replace_recursive($data['params'],$filtered['params']);
+                $updates[]=$db->quoteName('params').'='.$db->quote(json_encode(
+                    $params,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE));
+            }
+            if($enabled!==null)$updates[]=$db->quoteName('enabled').'='.(int)$enabled;
+            if(!$updates)throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            $q=$db->getQuery(true)->update($db->quoteName('#__extensions'));
+            foreach($updates as $update)$q->set($update);
+            $q->where('extension_id='.(int)$id)->where('type='.$db->quote('plugin'))
               ->where('folder='.$db->quote('minimarket'));
             $db->setQuery($q);$db->execute();
             $db->transactionCommit();

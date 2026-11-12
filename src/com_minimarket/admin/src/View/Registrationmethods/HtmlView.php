@@ -23,7 +23,7 @@ final class HtmlView extends BaseHtmlView
     public array $methodRows=[];
     public string $search='', $typeFilter='', $statusFilter='all', $sort='name_asc', $method='';
     public int $total=0, $offset=0, $pageSize=20;
-    public bool $canEdit=false, $canEditPlugins=false;
+    public bool $canEdit=false, $canEditPlugins=false,$canEditPluginState=false;
 
     public function display($tpl=null)
     {
@@ -38,6 +38,8 @@ final class HtmlView extends BaseHtmlView
             || $user->authorise('core.admin','com_minimarket');
         $this->canEditUsers=$user->authorise('core.options','com_users')
             || $user->authorise('core.admin','com_users');
+        $this->canEditPluginState=$user->authorise('core.edit.state','com_plugins')
+            || $user->authorise('core.admin','com_plugins');
         $this->canEditPlugins=$user->authorise('core.edit','com_plugins')
             || $user->authorise('core.admin','com_plugins');
         // Joomla is the only owner of user accounts and email verification.

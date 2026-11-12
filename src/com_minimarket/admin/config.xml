@@ -46,21 +46,13 @@
                default="" hint="#offcanvas-menu"/>
 
 
-        <field name="mm_system_filters_note" type="note" label="COM_MINIMARKET_SYSTEM_ATTRIBUTES_IN_FILTER" description="COM_MINIMARKET_FILTERS_SECTION_HELP" class="alert alert-info" />
+        <field name="mm_system_filters_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SYSTEM_ATTRIBUTES_IN_FILTER" description="COM_MINIMARKET_SYSTEM_INDEPENDENT_HELP" />
+        <field name="mm_price_section" type="note" class="alert alert-secondary" label="COM_MINIMARKET_SYSTEM_PRICE_GROUP" description="COM_MINIMARKET_SYSTEM_FIELD_GROUP_HELP" />
         <field name="filter_price_mode" type="list" default="slider" filter="cmd"
                        label="COM_MINIMARKET_SYSTEM_PRICE_FILTER" description="COM_MINIMARKET_SYSTEM_PRICE_FILTER_DESC">
                     <option value="none">COM_MINIMARKET_MODE_NONE</option>
                     <option value="range">COM_MINIMARKET_FILTER_RANGE</option>
                     <option value="slider">COM_MINIMARKET_FILTER_SLIDER</option>
-                </field>
-        <field name="filter_sku_mode" type="list" default="none" filter="cmd"
-                       label="COM_MINIMARKET_SYSTEM_SKU_FILTER">
-                    <option value="none">COM_MINIMARKET_MODE_NONE</option>
-                    <option value="text">COM_MINIMARKET_SYSTEM_SKU_SEARCH</option>
-                </field>
-        <field name="filter_stock_enabled" type="radio" default="0" filter="int"
-                       label="COM_MINIMARKET_SYSTEM_STOCK_FILTER">
-                    <option value="1">JYES</option><option value="0">JNO</option>
                 </field>
         <field name="system_price_display_location" type="list" default="both" filter="cmd"
                label="COM_MINIMARKET_SYSTEM_PRICE_DISPLAY_LOCATION">
@@ -68,12 +60,23 @@
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
+        <field name="mm_sku_section" type="note" class="alert alert-secondary" label="COM_MINIMARKET_SYSTEM_SKU_GROUP" description="COM_MINIMARKET_SYSTEM_FIELD_GROUP_HELP" />
+        <field name="filter_sku_mode" type="list" default="none" filter="cmd"
+                       label="COM_MINIMARKET_SYSTEM_SKU_FILTER">
+                    <option value="none">COM_MINIMARKET_MODE_NONE</option>
+                    <option value="text">COM_MINIMARKET_SYSTEM_SKU_SEARCH</option>
+                </field>
         <field name="system_sku_display_location" type="list" default="both" filter="cmd"
                label="COM_MINIMARKET_SYSTEM_SKU_DISPLAY_LOCATION">
             <option value="product">COM_MINIMARKET_VISIBILITY_PRODUCT</option>
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
+        <field name="mm_stock_section" type="note" class="alert alert-secondary" label="COM_MINIMARKET_SYSTEM_STOCK_GROUP" description="COM_MINIMARKET_SYSTEM_FIELD_GROUP_HELP" />
+        <field name="filter_stock_enabled" type="radio" default="0" filter="int"
+                       label="COM_MINIMARKET_SYSTEM_STOCK_FILTER">
+                    <option value="1">JYES</option><option value="0">JNO</option>
+                </field>
         <field name="system_stock_display_location" type="list" default="both" filter="cmd"
                label="COM_MINIMARKET_SYSTEM_STOCK_DISPLAY_LOCATION">
             <option value="product">COM_MINIMARKET_VISIBILITY_PRODUCT</option>

@@ -16,8 +16,12 @@ final class PluginmethodController extends BaseController
         $app=Factory::getApplication();
         if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
-        if(!$app->getIdentity()->authorise('core.edit','com_plugins')
-            && !$app->getIdentity()->authorise('core.admin','com_plugins'))
+        $user=$app->getIdentity();
+        $canEdit=$user->authorise('core.edit','com_plugins')
+            || $user->authorise('core.admin','com_plugins');
+        $canState=$user->authorise('core.edit.state','com_plugins')
+            || $user->authorise('core.admin','com_plugins');
+        if(!$canEdit && !$canState)
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $post=$app->input->post;
         $scope=$post->getCmd('scope','');
@@ -28,8 +32,14 @@ final class PluginmethodController extends BaseController
             'payment'=>'paymentmethods',default=>'registrationmethods'};
         $back='index.php?option=com_minimarket&view='.$view.'&method=plugin_'.$id;
         try {
+            $state=$post->getString('enabled','');
+            if($state!=='' && !$canState)
+                throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+            if($state!=='' && !in_array($state,['0','1'],true))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
             PluginMethodSettings::save(Factory::getContainer()->get(DatabaseInterface::class),
-                $scope,$id,$post->get('plugin',[],'array'));
+                $scope,$id,$canEdit?$post->get('plugin',[],'array'):[],
+                $state===''?null:(int)$state);
             $app->enqueueMessage(Text::_('COM_MINIMARKET_METHOD_SETTINGS_SAVED'));
             $this->setRedirect($post->getInt('save_close',0)===1
                 ?'index.php?option=com_minimarket&view='.$view:$back);

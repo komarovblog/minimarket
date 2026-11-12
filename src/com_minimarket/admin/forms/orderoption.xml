@@ -4,7 +4,7 @@
     <field name="id" type="hidden" default="0" filter="int"/>
     <field name="title" type="text" label="JGLOBAL_TITLE" required="true"
            maxlength="255" filter="string" size="48"/>
-        <field name="display_location" type="list" default="inherit" filter="cmd"
+        <field name="display_location" type="list" default="product" filter="cmd"
                label="COM_MINIMARKET_ENTITY_DISPLAY_LOCATION"
                description="COM_MINIMARKET_ENTITY_DISPLAY_LOCATION_DESC">
             <option value="inherit">COM_MINIMARKET_VISIBILITY_DEFAULT</option>
