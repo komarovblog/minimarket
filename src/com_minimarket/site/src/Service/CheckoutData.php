@@ -6,7 +6,7 @@ namespace MiniMarket\Component\Minimarket\Site\Service;
 final class CheckoutData
 {
     /** @return array{name:string,phone:string,email:string,comment:string} */
-    public static function normalize(array $data,array $policies=[]): array
+    public static function normalize(array $data,array $policies=[],bool $allowEmptyContact=false): array
     {
         foreach (['name','phone','email','comment'] as $field) {
             if (!is_scalar($data[$field] ?? '')) {
@@ -47,7 +47,9 @@ final class CheckoutData
         if ($policies['comment']==='required' && $comment==='') {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_COMMENT_INVALID');
         }
-        if ($phone==='' && $email==='') {
+        // A deliberately disabled buyer step may produce an anonymous order
+        // without contact details. Never invent a name, email or phone.
+        if (!$allowEmptyContact && $phone==='' && $email==='') {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_CONTACT_REQUIRED');
         }
         if (mb_strlen($comment)>2000

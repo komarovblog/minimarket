@@ -49,6 +49,8 @@ final class CheckoutSettings
     /** Auto-hide buyer data only when the account contains every required detail. */
     public static function skipBuyer(object $params,object $user,array $customFields=[]):bool
     {
+        // An explicit administrator override takes priority over completeness.
+        if(!self::step($params,'buyer'))return true;
         if((int)($user->id??0)<1 || !empty($user->block)
             ||mb_strlen(trim((string)($user->name??'')))<2
             ||filter_var((string)($user->email??''),FILTER_VALIDATE_EMAIL)===false)return false;
@@ -68,7 +70,8 @@ final class CheckoutSettings
         }
         // An order must offer a way to contact the buyer. This setting is
         // enforced on the server even if somebody posts hidden form values.
-        if ($result['phone']==='hidden' && $result['email']==='hidden') {
+        if (self::step($params,'buyer')
+            && $result['phone']==='hidden' && $result['email']==='hidden') {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_CONTACT_CONFIG_INVALID');
         }
         return $result;

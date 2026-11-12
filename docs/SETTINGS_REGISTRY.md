@@ -32,6 +32,20 @@
 **Не реализовано:** Sitemap XML c Joomla articles; SKU-row export/import v2; category→option→value combination builder; независимые типы системной фильтрации помимо существующих Цена/Артикул/Наличие; проверка по коду SMS/Email в самом checkout и живые провайдерские адаптеры. Эти задачи запрещено обозначать «готово» по одному UI/включенному флагу.
 
 
+## Актуальное уточнение 0.6.1 — имеет приоритет над ограничениями 0.6.0
+
+| Параметр | Где хранится → используется | Действие |
+|---|---|---|
+| `checkout_step_{buyer,delivery,payment,digital}_enabled` | Joomla component params → CheckoutSettings / CheckoutController / HtmlView | Все четыре OFF безусловно, без проверки обязательных полей/наличия методов |
+| `delivery_method='pending'` | `#__minimarket_orders.delivery_method` VARCHAR → OrderStorage / Order editor | Доставка пропущена, тариф ещё не определён, `fee_cents=0` не обещает бесплатную доставку |
+| `payment_method='pending'` | `#__minimarket_orders.payment_method` VARCHAR → OrderStorage / Order editor | Оплата не выбрана, `payment_status=unpaid` |
+| `checkout_consent_text` | Joomla component params → Checkout HtmlView / template | Нативный Joomla HTML-editor: текст и ссылки перед кнопкой, без checkbox и без отдельного шага |
+| Старое `checkout_confirmation_description` | историческое component params | Только fallback вывода в новом consent field при отсутствии нового сохранённого значения |
+| `checkout_require_terms` / `checkout_terms_itemid` | историческое component params | Удалены из UI и не валидируются как обязательная галочка |
+| `checkout_auth_mode=guest/guests/all` | params → CheckoutSettings | Не зависит от переключателей шагов, при `all` OTP обязателен всегда |
+
+Регрессионный тест: `scripts/test-0-6-1.php`. См. [RELEASE_0_6_1.md](RELEASE_0_6_1.md).
+
 ## Актуальная спецификация 0.6.0 — checkout и digital
 
 | Настройка | Место | Значения / потребитель |

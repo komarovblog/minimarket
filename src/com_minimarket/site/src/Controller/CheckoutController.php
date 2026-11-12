@@ -58,7 +58,7 @@ final class CheckoutController extends BaseController
             foreach($quote['lines'] as $line){
                 if(($line['delivery_type']??'physical')!=='digital')$needsPhysical=true;
             }
-            $delivery=CheckoutDelivery::quote($params,[
+            $delivery=CheckoutDelivery::checkoutQuote($params,[
                 'delivery_method'=>$input->getString('delivery_method',''),
                 'delivery_city'=>$input->getString('delivery_city',''),
                 'delivery_country'=>$input->getString('delivery_country','RU'),
@@ -170,13 +170,6 @@ final class CheckoutController extends BaseController
         if ($app->input->post->getString('website','')!=='') {
             throw new \RuntimeException(Text::_('COM_MINIMARKET_CHECKOUT_INVALID'),400);
         }
-        if((int)$params->get('checkout_require_terms',0)===1){
-            if((int)$params->get('checkout_terms_itemid',0)<1
-               ||$app->input->post->getInt('accept_terms',0)!==1){
-                $app->enqueueMessage(Text::_('COM_MINIMARKET_CHECKOUT_TERMS_REQUIRED'),'warning');
-                $this->setRedirect(RouteHelper::checkout());return;
-            }
-        }
         $cart=CartState::normalize($session->get(CartState::SESSION_KEY,[]));
         if (!$cart) {
             $this->setRedirect(RouteHelper::cart());
@@ -192,34 +185,52 @@ final class CheckoutController extends BaseController
                 if(($line['delivery_type']??'physical')==='digital')$hasDigital=true;
                 else $needsPhysical=true;
             }
+            $buyerEnabled=CheckoutSettings::step($params,'buyer');
+            $digitalEnabled=CheckoutSettings::step($params,'digital');
             $policies=CheckoutSettings::fields($params);
-            if($hasDigital)$policies['email']='required';
-            $customFields=CheckoutExtraFields::definitions($params);
+            if($hasDigital && $buyerEnabled)$policies['email']='required';
+            $customFields=$buyerEnabled
+                ?CheckoutExtraFields::definitions($params):[];
             $skipBuyer=CheckoutSettings::skipBuyer($params,$identity,$customFields);
-            if(!CheckoutSettings::step($params,'buyer')&&!$skipBuyer)
-                throw new \DomainException('COM_MINIMARKET_STEP_BUYER_CONFIGURATION');
-            if($skipBuyer)$policies=['name'=>'required','phone'=>'hidden','email'=>'required','comment'=>'hidden'];
+            // The administrator can explicitly hide even a mandatory buyer form.
+            // A guest order then stores empty fields, never invented personal data.
+            $forceSkipBuyer=!$buyerEnabled;
+            if($forceSkipBuyer)
+                $policies=['name'=>'optional','phone'=>'optional',
+                    'email'=>'optional','comment'=>'hidden'];
+            elseif($skipBuyer)
+                $policies=['name'=>'required','phone'=>'hidden',
+                    'email'=>'required','comment'=>'hidden'];
             $contact=CheckoutData::normalize([
-                'name'=>$skipBuyer?(string)$identity->name:$app->input->post->get('customer_name','','string'),
+                'name'=>$skipBuyer?(string)($identity->name??''):
+                    $app->input->post->get('customer_name','','string'),
                 'phone'=>$skipBuyer?'':$app->input->post->get('phone','','string'),
-                'email'=>$hasDigital?(string)$identity->email:($skipBuyer?(string)$identity->email:$app->input->post->get('email','','string')),
+                'email'=>$skipBuyer?(string)($identity->email??''):
+                    $app->input->post->get('email','','string'),
                 'comment'=>$skipBuyer?'':$app->input->post->get('comment','','string'),
-            ],$policies);
+            ],$policies,$forceSkipBuyer);
             $mask=(string)$params->get('checkout_phone_mask','');
-            if(!$skipBuyer && $mask!=='' && $contact['phone']!==''
-               &&!CheckoutExtraFields::maskMatches($mask,$contact['phone']))
+            if(!$skipBuyer&&$mask!==''&&$contact['phone']!==''
+                &&!CheckoutExtraFields::maskMatches($mask,$contact['phone']))
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXTRA_MASK_INVALID');
             $postedExtra=$app->input->post->get('extra',[],'array');
             $contact['custom_fields']=CheckoutExtraFields::validate(
-                is_array($postedExtra)?$postedExtra:[],$skipBuyer?[]:$customFields);
-            $recipient=$hasDigital
+                is_array($postedExtra)?$postedExtra:[],
+                $skipBuyer?[]:$customFields);
+            $recipient=$hasDigital&&$digitalEnabled
                 ?trim($app->input->post->getString('digital_recipient_email','')):'';
             if($hasDigital){
-                if(!CheckoutSettings::step($params,'digital')||$recipient==='')
+                if(!$digitalEnabled||$recipient==='')
                     $recipient=(string)$contact['email'];
-                if(filter_var($recipient,FILTER_VALIDATE_EMAIL)===false||strlen($recipient)>254)
+                if($recipient!==''
+                    &&(filter_var($recipient,FILTER_VALIDATE_EMAIL)===false
+                        ||strlen($recipient)>254))
                     throw new \DomainException('COM_MINIMARKET_CHECKOUT_EMAIL_INVALID');
-                if(strcasecmp($recipient,(string)$contact['email'])!==0){
+                if($digitalEnabled && $recipient==='')
+                    throw new \DomainException('COM_MINIMARKET_CHECKOUT_EMAIL_INVALID');
+                if($forceSkipBuyer && $contact['email']==='' && $recipient!=='')
+                    $contact['email']=$recipient;
+                if($recipient!=='' && strcasecmp($recipient,(string)$contact['email'])!==0){
                     if((int)$identity->id<1)
                         throw new \DomainException('COM_MINIMARKET_OTP_LOGIN_REQUIRED');
                     CheckoutVerification::assertValid($session,'recipient',(int)$identity->id,
@@ -227,6 +238,8 @@ final class CheckoutController extends BaseController
                 }
             }
             $contact['digital_recipient_email']=$recipient;
+            // The purchase code is controlled ONLY by confirmation mode, never
+            // by a checkbox for the checkout step or the consent text.
             if(CheckoutSettings::requiresPurchaseCode($params)){
                 CheckoutVerification::assertValid($session,'purchase',(int)$identity->id,
                     $expected,(string)$identity->email,
@@ -237,23 +250,17 @@ final class CheckoutController extends BaseController
                 $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
                 $volume+=(int)($line['shipping_volume_cm3']??0)*(int)$line['quantity'];
             }
-            $methods=CheckoutDelivery::methods($params,$needsPhysical);
-            $payments=CheckoutDelivery::payments($params,!$needsPhysical);
-            $skipDelivery=count($methods)===1
-                &&(isset($methods['pickup'])||isset($methods['digital']));
-            $skipPayment=count($payments)===1;
-            if(!CheckoutSettings::step($params,'delivery')&&!$skipDelivery)
-                throw new \DomainException('COM_MINIMARKET_STEP_DELIVERY_CONFIGURATION');
-            if(!CheckoutSettings::step($params,'payment')&&!$skipPayment)
-                throw new \DomainException('COM_MINIMARKET_STEP_PAYMENT_CONFIGURATION');
-            $delivery=CheckoutDelivery::quote($params,[
-                'delivery_method'=>$skipDelivery?($needsPhysical?'pickup':'digital'):$app->input->post->get('delivery_method','','string'),
+            // An administrator-selected step OFF is always honoured. Unknown
+            // delivery and payment are saved as "pending", never mislabelled
+            // as free shipping or a successful payment.
+            $delivery=CheckoutDelivery::checkoutQuote($params,[
+                'delivery_method'=>$app->input->post->get('delivery_method','','string'),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
                 'delivery_country'=>$app->input->post->get('delivery_country','RU','string'),
                 'delivery_region'=>$app->input->post->get('delivery_region','','string'),
                 'delivery_postcode'=>$app->input->post->get('delivery_postcode','','string'),
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
-                'payment_method'=>$skipPayment?(string)array_key_first($payments):$app->input->post->get('payment_method','','string'),
+                'payment_method'=>$app->input->post->get('payment_method','','string'),
             ],(int)$quote['total_cents'],$grams,$volume,$needsPhysical);
             $promoCode=strtoupper(trim((string)$app->input->post->get('promo_code',
                 (string)$session->get('com_minimarket.promo_code',''),'string')));

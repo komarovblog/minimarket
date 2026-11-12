@@ -29,7 +29,7 @@ final class HtmlView extends BaseHtmlView
     public string $buyerDescription='';
     public string $deliveryDescription='';
     public string $paymentDescription='';
-    public string $confirmationDescription='';
+    public string $consentText='';
     public bool $requireTerms=false;
     public int $termsItemid=0;
     public string $phoneMask='';
@@ -68,45 +68,45 @@ final class HtmlView extends BaseHtmlView
             if(($line['delivery_type']??'physical')==='digital')$this->hasDigital=true;
             else $this->needsPhysical=true;
         }
-        $this->zonesMode=(string)$params->get('delivery_rate_source','directory')==='zones';
+        $this->zonesMode=CheckoutSettings::step($params,'delivery')
+            &&(string)$params->get('delivery_rate_source','directory')==='zones';
         if($this->zonesMode){
             $this->zoneCities=\MiniMarket\Component\Minimarket\Site\Service\DeliveryZones::cities(
                 Factory::getContainer()->get(DatabaseInterface::class));
         }
-        $this->cdekPending=(int)$params->get('delivery_courier_enabled',0)===1
+        $this->cdekPending=CheckoutSettings::step($params,'delivery')
+            &&(int)$params->get('delivery_courier_enabled',0)===1
             && (string)$params->get('delivery_rate_source','directory')==='cdek';
         try {
             $this->fields=CheckoutSettings::fields($params);
-            $this->customFields=CheckoutExtraFields::definitions($params);
+            $this->customFields=CheckoutSettings::step($params,'buyer')
+                ?CheckoutExtraFields::definitions($params):[];
             $this->showLoginButton=(int)$params->get('checkout_show_login_button',1)===1;
             $this->buyerDescription=(string)$params->get('checkout_buyer_description','');
             $this->deliveryDescription=(string)$params->get('checkout_delivery_description','');
             $this->paymentDescription=(string)$params->get('checkout_payment_description','');
-            $this->confirmationDescription='';
+            $this->consentText=(string)$params->get('checkout_consent_text',
+                (string)$params->get('checkout_confirmation_description',''));
             $this->digitalDescription=(string)$params->get('checkout_digital_description','');
             $this->showDigitalStep=$this->hasDigital && CheckoutSettings::step($params,'digital');
             $this->confirmationMode=CheckoutSettings::mode($params);
             $this->needPurchaseVerification=CheckoutSettings::requiresPurchaseCode($params);
-            $this->requireTerms=(int)$params->get('checkout_require_terms',0)===1;
-            $this->termsItemid=max(0,(int)$params->get('checkout_terms_itemid',0));
-            if($this->requireTerms&&$this->termsItemid<1)
-                throw new \DomainException('COM_MINIMARKET_CHECKOUT_TERMS_CONFIG_MISSING');
             $this->phoneMask=(string)$params->get('checkout_phone_mask','');
-            $this->deliveryMethods=CheckoutDelivery::methods($params,$this->needsPhysical);
-            $this->paymentMethods=CheckoutDelivery::payments($params,!$this->needsPhysical);
-            $this->cityRates=CheckoutDelivery::rates($params);
-            if($this->hasDigital)$this->fields['email']='required';
-            $this->skipBuyer=CheckoutSettings::skipBuyer($params,$app->getIdentity(),$this->customFields);
-            if(!CheckoutSettings::step($params,'buyer') && !$this->skipBuyer)
-                throw new \DomainException('COM_MINIMARKET_STEP_BUYER_CONFIGURATION');
-            // No manual skipping of mandatory steps.
-            $this->skipDelivery=count($this->deliveryMethods)===1
-                &&(isset($this->deliveryMethods['pickup'])||isset($this->deliveryMethods['digital']));
-            $this->skipPayment=count($this->paymentMethods)===1;
-            if(!CheckoutSettings::step($params,'delivery') && !$this->skipDelivery)
-                throw new \DomainException('COM_MINIMARKET_STEP_DELIVERY_CONFIGURATION');
-            if(!CheckoutSettings::step($params,'payment') && !$this->skipPayment)
-                throw new \DomainException('COM_MINIMARKET_STEP_PAYMENT_CONFIGURATION');
+            $deliveryEnabled=CheckoutSettings::step($params,'delivery');
+            $paymentEnabled=CheckoutSettings::step($params,'payment');
+            // A hidden step must not validate unavailable/invalid methods.
+            $this->deliveryMethods=$deliveryEnabled
+                ?CheckoutDelivery::methods($params,$this->needsPhysical):[];
+            $this->paymentMethods=$paymentEnabled
+                ?CheckoutDelivery::payments($params,!$this->needsPhysical):[];
+            $this->cityRates=$deliveryEnabled?CheckoutDelivery::rates($params):[];
+            $this->skipBuyer=CheckoutSettings::skipBuyer(
+                $params,$app->getIdentity(),$this->customFields);
+            $this->skipDelivery=!$deliveryEnabled
+                ||(count($this->deliveryMethods)===1
+                    &&(isset($this->deliveryMethods['pickup'])
+                        ||isset($this->deliveryMethods['digital'])));
+            $this->skipPayment=!$paymentEnabled ||count($this->paymentMethods)===1;
             $this->pickupAddress=(string)($this->deliveryMethods['pickup']['address']??'');
             $this->pickupSchedule=(string)($this->deliveryMethods['pickup']['schedule']??'');
             $this->pickupMapUrl=(string)($this->deliveryMethods['pickup']['map_url']??'');
@@ -116,7 +116,8 @@ final class HtmlView extends BaseHtmlView
             } elseif (CheckoutSettings::requiresAccount($params)
                 && CheckoutSettings::method($params)!=='email'){
                 $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_AUTH_NOT_CONFIGURED');
-            } elseif (!$this->deliveryMethods || !$this->paymentMethods) {
+            } elseif (($deliveryEnabled && !$this->deliveryMethods)
+                ||($paymentEnabled && !$this->paymentMethods)) {
                 $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_METHODS_MISSING');
             }
         } catch (\DomainException $e) {

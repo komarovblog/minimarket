@@ -107,9 +107,9 @@ final class OrderController extends BaseController
                 if(!in_array($before,['unpaid','paid'],true))
                     throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
                 $rows=DigitalFulfillment::prepare($db,$id);
-                if($rows && filter_var((string)($order['digital_recipient_email']?:$order['email']),
-                    FILTER_VALIDATE_EMAIL)===false)
-                    throw new \DomainException('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
+                // A consciously skipped buyer/recipient step can leave no email.
+                // Payment may still be confirmed independently; digital delivery
+                // remains pending and no mail is sent until an address is known.
                 $email=(string)($order['digital_recipient_email']?:$order['email']);
                 $digitalOnly=$order['delivery_method']==='digital';
                 $buyerUserId=(int)$order['user_id'];

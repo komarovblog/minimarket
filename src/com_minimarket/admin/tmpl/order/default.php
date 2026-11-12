@@ -34,7 +34,7 @@ $order=$this->order;
             <dd class="col-sm-9"><?php echo nl2br($this->escape((string)$field->field_value)); ?></dd>
         <?php endforeach; ?>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></dt>
-        <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_'.strtoupper((string)($order->delivery_method??'pickup'))); ?></dd>
+        <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_'.strtoupper((string)($order->delivery_method??'pickup'))); ?><?php if(($order->delivery_method??'')==='pending'): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_DELIVERY_PENDING_NOTICE'); ?></p><?php endif; ?></dd>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_CITY'); ?></dt>
         <dd class="col-sm-9"><?php echo $this->escape((string)($order->delivery_city??'')); ?></dd>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_ADDRESS'); ?></dt>
@@ -64,6 +64,12 @@ $order=$this->order;
         </tbody>
     </table>
     </div>
+    <?php if($this->hasDigitalItems
+        && trim((string)($order->digital_recipient_email?:$order->email))===''): ?>
+        <div class="alert alert-warning" role="alert">
+            <?php echo Text::_('COM_MINIMARKET_DIGITAL_NO_RECIPIENT'); ?>
+        </div>
+    <?php endif; ?>
     <?php if($this->hasDigitalItems): ?>
     <section class="mb-4">
         <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_DIGITAL_FULFILLMENT'); ?></h2>

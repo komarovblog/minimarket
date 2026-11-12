@@ -90,15 +90,53 @@ final class CheckoutDelivery
         return $methods;
     }
 
+    /**
+     * Explicitly skipped choices become "pending", not a fabricated
+     * courier/pickup or paid status. Shipping remains 0 until staff resolves it.
+     * The admin has intentionally accepted missing checkout information.
+     */
+    public static function checkoutQuote(
+        object $params,array $input,int $itemsTotalCents=0,
+        int $weightGrams=0,int $volumeCm3=0,bool $needsPhysical=true
+    ):array {
+        $deliveryEnabled=CheckoutSettings::step($params,'delivery');
+        $paymentEnabled=CheckoutSettings::step($params,'payment');
+        $payments=$paymentEnabled?self::payments($params,!$needsPhysical):[];
+        if($paymentEnabled){
+            $selected=(string)($input['payment_method']??'');
+            $payment=count($payments)===1?(string)array_key_first($payments):$selected;
+            if(!array_key_exists($payment,$payments))
+                throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
+        }else{
+            $payment='pending';
+        }
+        if(!$deliveryEnabled){
+            return ['method'=>$needsPhysical?'pending':'digital',
+                'city'=>'','address'=>'','country'=>'RU','region'=>'','postcode'=>'',
+                'zone_id'=>null,'fee_cents'=>0,'rate_source'=>'none',
+                'payment_method'=>$payment];
+        }
+        $methods=self::methods($params,$needsPhysical);
+        $method=(string)($input['delivery_method']??'');
+        if(count($methods)===1
+            &&(isset($methods['pickup'])||isset($methods['digital'])))
+            $method=(string)array_key_first($methods);
+        $input['delivery_method']=$method;
+        $input['payment_method']=$payment;
+        return self::quote($params,$input,$itemsTotalCents,$weightGrams,$volumeCm3,
+            $needsPhysical,!$paymentEnabled);
+    }
+
     /** Server-validated order snapshot; never accept any browser-supplied fee. */
-    public static function quote(object $params,array $input,int $itemsTotalCents=0,int $weightGrams=0,int $volumeCm3=0,bool $needsPhysical=true): array
+    public static function quote(object $params,array $input,int $itemsTotalCents=0,int $weightGrams=0,int $volumeCm3=0,bool $needsPhysical=true,bool $allowPendingPayment=false): array
     {
         $methods=self::methods($params,$needsPhysical);
         $payments=self::payments($params,!$needsPhysical);
         $method=(string)($input['delivery_method']??'');
         $payment=(string)($input['payment_method']??'');
-        if (!$methods || !$payments || !array_key_exists($method,$methods)
-            || !array_key_exists($payment,$payments)) {
+        if (!$methods || !array_key_exists($method,$methods)
+            || ($allowPendingPayment && $payment==='pending'
+                ? false : (!$payments || !array_key_exists($payment,$payments)))) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
         }
         if ($method==='digital') {

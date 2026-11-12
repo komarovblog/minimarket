@@ -123,9 +123,14 @@ $firstPayment=array_key_first($this->paymentMethods);
                 <?php endif; ?>
 
                 <?php if($this->skipDelivery): ?>
+                    <?php $automaticDelivery=array_key_first($this->deliveryMethods); ?>
                     <input type="hidden" name="delivery_method"
-                           value="<?php echo $this->needsPhysical?'pickup':'digital'; ?>"
-                           data-fee-cents="<?php echo (int)($this->deliveryMethods['pickup']['fee_cents']??0); ?>">
+                           value="<?php echo $automaticDelivery??($this->needsPhysical?'pending':'digital'); ?>"
+                           data-fee-cents="<?php echo $automaticDelivery==='pickup'
+                               ?(int)($this->deliveryMethods['pickup']['fee_cents']??0):0; ?>">
+                    <?php if($this->needsPhysical && $automaticDelivery===null): ?>
+                        <p class="form-text"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_DELIVERY_PENDING_NOTICE'); ?></p>
+                    <?php endif; ?>
                     <?php if(!$this->needsPhysical): ?>
                         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_DIGITAL_NO_SHIPPING'); ?></p>
                     <?php endif; ?>
@@ -252,7 +257,11 @@ $firstPayment=array_key_first($this->paymentMethods);
                 <?php endif; ?>
 
                 <?php if($this->skipPayment): ?>
-                    <input type="hidden" name="payment_method" value="<?php echo $this->escape((string)$firstPayment); ?>">
+                    <input type="hidden" name="payment_method"
+                           value="<?php echo $this->escape((string)($firstPayment??'pending')); ?>">
+                    <?php if($firstPayment===null): ?>
+                        <p class="form-text"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT_PENDING_NOTICE'); ?></p>
+                    <?php endif; ?>
                 <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-payment">
                     <h2 id="mm-checkout-payment" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT'); ?></h2>
@@ -315,15 +324,9 @@ $firstPayment=array_key_first($this->paymentMethods);
                                    maxlength="6" autocomplete="one-time-code" required>
                         </div>
                     <?php endif; ?>
-                     <?php if($this->requireTerms): ?>
-                         <div class="form-check mb-3">
-                             <input type="checkbox" class="form-check-input" id="mm-checkout-terms"
-                                    name="accept_terms" value="1" required>
-                             <label class="form-check-label" for="mm-checkout-terms">
-                                 <?php echo Text::_('COM_MINIMARKET_CHECKOUT_TERMS_AGREE'); ?>
-                                 <a href="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?Itemid='.$this->termsItemid,false)); ?>"
-                                    target="_blank" rel="noopener noreferrer"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_TERMS_LINK'); ?></a>
-                             </label>
+                     <?php if($this->consentText!==''): ?>
+                         <div class="mb-3 mm-checkout-consent">
+                             <?php echo InputFilter::getInstance()->clean($this->consentText,'HTML'); ?>
                          </div>
                      <?php endif; ?>
                      <input type="hidden" name="checkout_key" value="<?php echo $this->escape($this->checkoutKey); ?>">

@@ -35,8 +35,8 @@ final class OrderStorage
             'rate_source'=>'none','payment_method'=>'on_receipt','zone_id'=>null,
             'country'=>'RU','region'=>'','postcode'=>''
         ],$delivery);
-        if (!in_array($delivery['method'],['pickup','courier','digital'],true)
-            || !in_array($delivery['payment_method'],['on_receipt','bank_transfer'],true)
+        if (!in_array($delivery['method'],['pickup','courier','digital','pending'],true)
+            || !in_array($delivery['payment_method'],['on_receipt','bank_transfer','pending'],true)
             || !in_array($delivery['rate_source'],['none','directory','zones'],true)
             || !is_int($delivery['fee_cents']) || $delivery['fee_cents']<0
             || $delivery['fee_cents']>99999999999
@@ -46,7 +46,11 @@ final class OrderStorage
             || !preg_match('/^[A-Z]{2}$/D',(string)$delivery['country'])
             || mb_strlen((string)$delivery['region'])>120
             || strlen((string)$delivery['postcode'])>16
-            || ($delivery['method']==='pickup' && $delivery['rate_source']!=='none')) {
+            || (in_array($delivery['method'],['pickup','pending'],true)
+                && $delivery['rate_source']!=='none')
+            || ($delivery['method']==='pending'
+                && ($delivery['fee_cents']!==0 || $delivery['zone_id']!==null
+                    ||$delivery['city']!=='' || $delivery['address']!==''))) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
         }
         $recipient=(string)($contact['digital_recipient_email']??'');
@@ -93,8 +97,10 @@ final class OrderStorage
                 'digital_delivery_mode'=>$digitalMode,'digital_delivery_note'=>$digitalNote];
         }
         $anyPhysical=count(array_filter($lines,static fn($r)=>$r['delivery_type']==='physical'))>0;
-        if(($delivery['method']==='digital')===$anyPhysical
-           ||($delivery['method']==='digital'&&$delivery['payment_method']!=='bank_transfer'))
+        if(($delivery['method']==='digital' && $anyPhysical)
+           ||($delivery['method']!=='digital' && !$anyPhysical)
+           ||($delivery['method']==='digital'
+               && !in_array($delivery['payment_method'],['bank_transfer','pending'],true)))
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
         if ($total!==(int)($quote['total_cents']??-1)
             || $units!==(int)($quote['units']??-1)

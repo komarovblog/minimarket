@@ -56,7 +56,7 @@ foreach(['shop_type','checkout_buyer_skip','checkout_delivery_skip','checkout_pa
     $assert(count($form->xpath('//field[@name="'.$old.'"]'))===0,'remove conflicting field '.$old);
 }
 foreach(['product_detail_gallery_effect','checkout_digital_description',
-    'checkout_require_terms','checkout_terms_itemid'] as $new){
+    'checkout_consent_text'] as $new){
     $assert(count($form->xpath('//field[@name="'.$new.'"]'))===1,'new working setting '.$new);
 }
 $productForm=simplexml_load_file($root.'admin/forms/product.xml');

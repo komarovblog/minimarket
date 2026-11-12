@@ -329,6 +329,7 @@ jobs:
           php scripts/test-0-5-98.php
           php scripts/test-0-5-99.php
           php scripts/test-0-6-0.php
+          php scripts/test-0-6-1.php
           node --check src/com_minimarket/media/js/product-digital.js
           node --check src/com_minimarket/media/js/checkout.js
           node --check src/com_minimarket/media/js/gallery.js
