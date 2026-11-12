@@ -75,8 +75,10 @@ namespace MiniMarket\CheckoutSmoke {
     $id=OrderStorage::create($db,$good,$quote,'00112233445566778899aabbccddeeff',77);
     chk($id===123,'returns database-generated order id');
     chk($db->steps===['begin','commit'],'saves order and all lines in one transaction');
-    chk(count($db->saved)===2 && count($db->saved[1]['entries'])===2,
-        'one order and two server-priced snapshot lines');
+    chk(count($db->saved)===3 && count($db->saved[1]['entries'])===2
+        && str_contains($db->saved[2]['table'],'order_events')
+        && str_contains($db->saved[2]['entries'][0],"'order_created'"),
+        'one order, two server-priced snapshot lines and creation audit event');
     chk(str_contains($db->saved[0]['entries'][0],'500100')
         && str_contains($db->saved[1]['entries'][0],"'SKU-M'"),
         'total and SKU come from server quote');
