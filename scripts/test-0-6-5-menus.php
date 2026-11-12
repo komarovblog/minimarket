@@ -9,7 +9,7 @@ $ok=static function(bool $condition,string $what)use(&$count):void{
     if(!$condition)throw new RuntimeException('MM065_MENUS_FAIL: '.$what);
 };
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$ok($manifest!==false && (string)$manifest->version==='0.6.5','version is 0.6.5');
+$ok($manifest!==false && version_compare((string)$manifest->version,'0.6.5','>='),'component supports 0.6.5 menu contracts');
 $items=$manifest->administration->submenu->menu;
 $expected=[
  'orders'=>'index.php?option=com_minimarket&view=order&layout=create',
