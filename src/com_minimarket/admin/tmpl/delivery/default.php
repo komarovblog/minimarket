@@ -36,7 +36,13 @@ $s=$this->shipment;
   <div class="col-12 col-md-6">
     <label class="form-label" for="mm-state"><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS'); ?></label>
     <select class="form-select" id="mm-state" name="status">
-      <?php foreach(['new','in_transit','delivered','cancelled'] as $state): ?><option value="<?php echo $state; ?>" <?php echo $s->status===$state?'selected':''; ?>><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS_'.strtoupper($state)); ?></option><?php endforeach; ?>
+      <?php
+       $allowedStates=match((string)$s->status){
+         'new'=>['new','in_transit','delivered','cancelled'],
+         'in_transit'=>['in_transit','delivered','cancelled'],
+         default=>[(string)$s->status]
+       };
+       foreach($allowedStates as $state): ?><option value="<?php echo $state; ?>" <?php echo $s->status===$state?'selected':''; ?>><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS_'.strtoupper($state)); ?></option><?php endforeach; ?>
     </select>
   </div>
   <div class="col-12">

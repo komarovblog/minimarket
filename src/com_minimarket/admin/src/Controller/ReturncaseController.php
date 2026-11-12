@@ -163,6 +163,8 @@ final class ReturncaseController extends BaseController
             if($before['resolution']!==$resolution)
                 OrderHistory::record($db,(int)$before['order_id'],(int)$app->getIdentity()->id,
                     'return_resolution',(string)$before['resolution'],$resolution);
+            \MiniMarket\Component\Minimarket\Administrator\Service\OrderLifecycle::refresh(
+                $db,(int)$before['order_id'],(int)$app->getIdentity()->id);
             $db->transactionCommit();
             $app->enqueueMessage(Text::_('COM_MINIMARKET_RETURN_SAVED'));
         }catch(\Throwable $e){

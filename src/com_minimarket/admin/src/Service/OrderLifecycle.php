@@ -30,6 +30,13 @@ final class OrderLifecycle
             && (($order['payment_status'] ?? '') !== 'paid'
                 || ($order['fulfillment_status'] ?? '') !== 'delivered'))
             throw new \DomainException('COM_MINIMARKET_ORDER_TRANSITION_DENIED');
+        if ($next === 'completed') {
+            $db->setQuery('SELECT COUNT(*) FROM '.$db->quoteName('#__minimarket_returns')
+                .' WHERE order_id='.(int)($order['id'] ?? 0)
+                ." AND status IN ('new','approved','received')");
+            if ((int)$db->loadResult() > 0)
+                throw new \DomainException('COM_MINIMARKET_ORDER_TRANSITION_DENIED');
+        }
         if ($next === 'cancelled') {
             if (($order['payment_status'] ?? '') === 'paid'
                 || in_array((string)($order['fulfillment_status'] ?? ''),
