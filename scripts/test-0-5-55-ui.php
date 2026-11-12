@@ -20,11 +20,12 @@ namespace MiniMarket\Regression55 {
  $xml=simplexml_load_file($dir.'admin/forms/product.xml');
  check($xml!==false,'valid XML');
  check(count($xml->xpath("//field[@name='product_type' and @type='hidden']"))===1,'hidden structural type');
- // Historical checks updated when 0.5.56 moved the format to component settings.
- check(count($xml->xpath("//field[@name='delivery_type']"))===0,'no per-product delivery format');
+ // 0.5.99 restores product-level fulfillment; the store mode was removed.
+ check(count($xml->xpath("//field[@name='delivery_type' and @type='list']"))===1,
+  'each product has physical or digital fulfillment');
  $edit=file_get_contents($dir.'admin/tmpl/product/edit.php');
  $indexes=array_map(static fn($v)=>strpos($edit,$v),
-  ["'product_type','sku'","renderField('bundle_price_mode')",
+  ["'product_type','delivery_type','sku'","renderField('bundle_price_mode')",
    "renderField('price')","renderField('old_price')",
    "renderField('bundle_discount_pct')"]);
  check(!in_array(false,$indexes,true) && $indexes===array_values($indexes)
