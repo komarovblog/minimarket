@@ -209,7 +209,8 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\build-toolbar-package.ps1 -DistOnly
-          if ($LASTEXITCODE -ne 0) { throw 'MM_TOOLBAR_PACKAGE_BUILD_FAILED' }
+          # This PowerShell script throws on failure and does not set LASTEXITCODE.
+          # Validate the actual archive rather than an earlier external command's code.
           $path = '.\dist\mod_minimarket_toolbar-1.0.0.zip'
           if (-not (Test-Path -LiteralPath $path)) { throw 'MM_TOOLBAR_100_ZIP_MISSING' }
           Add-Type -AssemblyName System.IO.Compression
