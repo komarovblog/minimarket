@@ -31,3 +31,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimar
 ## Проверки
 
 `scripts/test-0-6-8-checkout-order-admin.php` фиксирует формы, валидацию, маршруты, панель заказа, RU/EN, no-DDL и раздельный модуль. Предыдущая проверка 0.6.7 сохраняется. PHP lint, MySQL 8.4, Windows ZIP — обязательный CI; после него отдельно ручная браузерная проверка.
+
+## Автоматическая проверка
+
+**6/6 PASS:** [GitHub Actions #43297927967](https://github.com/komarovblog/minimarket/actions/runs/43297927967), протестированный SHA `95c21afb06e26f8c7bdd01ce60e44e482ed9770b`; PHP 8.4, PHP 8.5, три группы проверок MySQL 8.4, Windows компонентный ZIP. Проверка административных маршрутов дополнена узким исключением для **реальных ссылок на `com_users`**, без отключения защиты остальных путей. Компьютер/браузер с установленной Joomla в CI не запускался — локальная приёмка обязательна.
