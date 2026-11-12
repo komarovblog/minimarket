@@ -22,7 +22,7 @@ final class HtmlView extends BaseHtmlView
     public bool $canDelete=false;
     public bool $canCreateDelivery=false;
     public ?int $shipmentId=null;
-    public array $shipments=[],$returns=[],$events=[];
+    public array $shipments=[],$returns=[];
     public bool $canCreateReturn=false;
     public bool $isCreate=false;
     public array $productChoices=[];
@@ -126,13 +126,6 @@ final class HtmlView extends BaseHtmlView
                 ." WHERE order_id=".(int)$id." AND event_type='payment' AND new_value='refunded'");
             $this->refundAt=$db->loadResult()?:null;
         }
-        $q=$db->getQuery(true)->select(['e.id','e.actor_user_id','e.event_type',
-                'e.old_value','e.new_value','e.created_at','u.name AS actor_name'])
-            ->from($db->quoteName('#__minimarket_order_events','e'))
-            ->join('LEFT',$db->quoteName('#__users','u').' ON u.id=e.actor_user_id')
-            ->where('e.order_id='.(int)$id)->order('e.created_at DESC,e.id DESC');
-        $db->setQuery($q,0,500);
-        $this->events=(array)$db->loadObjectList();
         ToolbarHelper::title(Text::sprintf('COM_MINIMARKET_ORDER_HEADING',$id));
         parent::display($tpl);
     }

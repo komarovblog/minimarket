@@ -10,27 +10,6 @@ $canUpdate=$this->canUpdate&&$active;
 $e=static fn($v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
 $to=static fn(string $view,int $id):string=>Route::_('index.php?option=com_minimarket&view='.$view.'&id='.$id,false);
 $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽';
-// The audit preserves raw machine values; render familiar translated labels
-// without changing the underlying immutable event data.
-$eventValue=static function(string $event,string $value):string {
- if($value==='')return '—';
- $prefix=match($event){
-  'status'=>'COM_MINIMARKET_ORDER_STATUS_',
-  'payment'=>'COM_MINIMARKET_PAYMENT_STATUS_',
-  'fulfillment'=>'COM_MINIMARKET_FULFILLMENT_STATUS_',
-  'delivery_status'=>'COM_MINIMARKET_DELIVERY_STATUS_',
-  'delivery_reason'=>'COM_MINIMARKET_DELIVERY_REASON_',
-  'return_status'=>'COM_MINIMARKET_RETURN_STATUS_',
-  'return_resolution'=>'COM_MINIMARKET_RETURN_RESOLUTION_',
-  default=>''
- };
- if($prefix!==''){
-  $key=$prefix.strtoupper($value);
-  $translated=Text::_($key);
-  if($translated!==$key)return $translated;
- }
- return $value;
-};
 ?>
 <div class="btn-toolbar d-flex align-items-center flex-wrap gap-2 mb-3" role="toolbar">
  <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>"><span class="icon-arrow-left" aria-hidden="true"></span> <?php echo Text::_('JTOOLBAR_BACK'); ?></a>
@@ -41,8 +20,15 @@ $eventValue=static function(string $event,string $value):string {
   <a class="btn btn-success" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=returncase&layout=create&order_id='.$oid,false)); ?>"><span class="icon-plus" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_RETURN_NEW'); ?></a>
  <?php endif; ?>
 </div>
-<div id="j-main-container" class="j-main-container">
- <section class="card card-body mm-admin-panel mb-3">
+<div id="j-main-container" class="j-main-container mm-order-page">
+ <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <span class="badge bg-primary"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$o->status)); ?></span>
+  <span class="badge bg-secondary"><?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS_'.strtoupper((string)$o->payment_status)); ?></span>
+  <span class="badge bg-secondary"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper((string)($o->fulfillment_status??'pending'))); ?></span>
+  <?php if($this->returns): ?><span class="badge bg-warning text-dark"><?php echo Text::_('COM_MINIMARKET_RETURNS_TITLE'); ?>: <?php echo count($this->returns); ?></span><?php endif; ?>
+ </div>
+ <div class="row g-3 mb-3"><div class="col-12 col-xl-7">
+ <section class="card card-body mm-admin-panel mm-order-card mb-3">
   <div class="row g-3 align-items-start">
    <div class="col-12 col-xl-6">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_INFO_BLOCK'); ?> #<?php echo $oid; ?></h2>
@@ -82,14 +68,23 @@ $eventValue=static function(string $event,string $value):string {
    <div class="col-12 col-xl-6">
     <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_BLOCK'); ?></h3>
     <p class="mb-3"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$o->status)); ?></p>
-    <?php if($this->canUpdate&&empty($o->deleted_at)): ?>
+    <?php if($canUpdate&&$this->manualStatusEnabled&&in_array((string)$o->status,['new','confirmed'],true)): ?>
     <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>">
      <input type="hidden" name="id" value="<?php echo $oid; ?>">
      <div class="d-flex flex-wrap gap-2 align-items-end">
       <div class="flex-grow-1">
        <label for="mm-order-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?></label>
        <select name="status" id="mm-order-status" class="form-select">
-        <?php foreach(['new','confirmed','completed','cancelled'] as $status): ?>
+        <?php
+         $available=[(string)$o->status];
+         if($o->status==='new')$available[]='confirmed';
+         if($o->status==='confirmed'&&$o->payment_status==='paid'&&$o->fulfillment_status==='delivered'
+           &&!array_filter($this->returns,static fn($r)=>in_array((string)$r->status,['new','approved','received'],true)))
+             $available[]='completed';
+         if($o->payment_status!=='paid'&&!in_array((string)$o->fulfillment_status,['shipped','delivered'],true)
+            &&!array_filter($this->shipments,static fn($s)=>in_array((string)$s->status,['in_transit','delivered'],true)))
+             $available[]='cancelled';
+         foreach($available as $status): ?>
          <option value="<?php echo $status; ?>"<?php echo $o->status===$status?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper($status)); ?></option>
         <?php endforeach; ?>
        </select>
@@ -110,13 +105,22 @@ $eventValue=static function(string $event,string $value):string {
    </div>
   </div>
  </section>
- <section class="card card-body mm-admin-panel mb-3">
+ </div><div class="col-12 col-xl-5">
+ <section class="card card-body mm-admin-panel mm-order-card mb-3">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK'); ?></h2>
     <dl class="row mb-3">
      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_METHOD'); ?></dt>
      <dd class="col-sm-7"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_'.strtoupper((string)$o->payment_method)); ?></dd>
      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS'); ?></dt>
      <dd class="col-sm-7"><?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS_'.strtoupper((string)$o->payment_status)); ?></dd>
+     <?php if(!empty($o->paid_at)): ?>
+      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAID_AT'); ?></dt>
+      <dd class="col-sm-7"><?php echo $e($o->paid_at); ?></dd>
+     <?php endif; ?>
+     <?php if($this->refundAt!==null): ?>
+      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_REFUNDED_AT'); ?></dt>
+      <dd class="col-sm-7"><?php echo $e($this->refundAt); ?></dd>
+     <?php endif; ?>
      <?php if(!empty($o->payment_reference)): ?>
       <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_PAYMENT_REFERENCE'); ?></dt>
       <dd class="col-sm-7"><?php echo $e($o->payment_reference); ?></dd>
@@ -165,7 +169,32 @@ $eventValue=static function(string $event,string $value):string {
     <?php endif; ?>
     <?php endif; ?>
    </section>
- <section class="card card-body mm-admin-panel mb-3">
+ </div></div>
+ <section class="card card-body mm-admin-panel mm-order-card mb-3">
+  <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PRODUCTS_BLOCK'); ?></h2>
+  <div class="table-responsive mm-editor-table-viewport">
+   <table class="table table-striped mm-admin-list">
+    <thead><tr>
+     <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
+     <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_CART_UNIT_PRICE'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?></th>
+    </tr></thead><tbody>
+    <?php foreach($this->items as $line): ?>
+     <tr>
+      <td><?php echo $e($line->sku); ?></td>
+      <td><?php if((int)$line->product_id>0): ?><a href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=product&layout=edit&id='.(int)$line->product_id,false)); ?>"><?php echo $e($line->title); ?></a><?php else: ?><?php echo $e($line->title); ?><?php endif; ?></td>
+      <td><?php echo $money($line->unit_cents); ?></td>
+      <td><?php echo (int)$line->quantity; ?></td>
+      <td><?php echo $money($line->line_cents); ?></td>
+     </tr>
+    <?php endforeach; ?>
+    </tbody>
+   </table>
+  </div>
+ </section>
+ <section class="card card-body mm-admin-panel mm-order-card mb-3">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_BLOCK'); ?></h2>
     <dl class="row mb-3">
      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></dt>
@@ -208,6 +237,7 @@ $eventValue=static function(string $event,string $value):string {
         <th><?php echo Text::_('COM_MINIMARKET_DELIVERY_CARRIER'); ?></th>
         <th><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS'); ?></th>
         <th><?php echo Text::_('COM_MINIMARKET_DELIVERY_TRACK'); ?></th>
+        <th><?php echo Text::_('COM_MINIMARKET_ORDER_CREATED'); ?></th>
        </tr></thead><tbody>
        <?php foreach($this->shipments as $ship): ?>
         <tr>
@@ -216,6 +246,7 @@ $eventValue=static function(string $event,string $value):string {
          <td><?php echo Text::_('COM_MINIMARKET_DELIVERY_CARRIER_'.strtoupper((string)$ship->carrier)); ?></td>
          <td><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS_'.strtoupper((string)$ship->status)); ?></td>
          <td><?php echo $e($ship->tracking_number); ?></td>
+         <td><?php echo $e($ship->created_at); ?></td>
         </tr>
        <?php endforeach; ?>
        </tbody>
@@ -227,32 +258,8 @@ $eventValue=static function(string $event,string $value):string {
      <?php endif; ?>
     <?php endif; ?>
    </section>
- <section class="card card-body mm-admin-panel mt-3">
-  <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PRODUCTS_BLOCK'); ?></h2>
-  <div class="table-responsive mm-editor-table-viewport">
-   <table class="table table-striped mm-admin-list">
-    <thead><tr>
-     <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
-     <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_CART_UNIT_PRICE'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?></th>
-    </tr></thead><tbody>
-    <?php foreach($this->items as $line): ?>
-     <tr>
-      <td><?php echo $e($line->sku); ?></td>
-      <td><?php if((int)$line->product_id>0): ?><a href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=product&layout=edit&id='.(int)$line->product_id,false)); ?>"><?php echo $e($line->title); ?></a><?php else: ?><?php echo $e($line->title); ?><?php endif; ?></td>
-      <td><?php echo $money($line->unit_cents); ?></td>
-      <td><?php echo (int)$line->quantity; ?></td>
-      <td><?php echo $money($line->line_cents); ?></td>
-     </tr>
-    <?php endforeach; ?>
-    </tbody>
-   </table>
-  </div>
- </section>
  <?php if($this->hasDigitalItems): ?>
- <section class="card card-body mm-admin-panel mt-3">
+ <section class="card card-body mm-admin-panel mm-order-card mt-3">
   <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_DIGITAL_FULFILLMENT'); ?></h2>
   <?php if(trim((string)($o->digital_recipient_email?:$o->email))===''): ?>
     <div class="alert alert-warning"><?php echo Text::_('COM_MINIMARKET_DIGITAL_NO_RECIPIENT'); ?></div>
@@ -284,7 +291,7 @@ $eventValue=static function(string $event,string $value):string {
   <?php endforeach; ?>
  </section>
  <?php endif; ?>
- <section class="card card-body mm-admin-panel mt-3">
+ <section class="card card-body mm-admin-panel mm-order-card mt-3">
   <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_RETURNS_TITLE'); ?></h2>
   <div class="table-responsive mm-editor-table-viewport">
    <table class="table table-striped mm-admin-list">
@@ -293,6 +300,7 @@ $eventValue=static function(string $event,string $value):string {
      <th><?php echo Text::_('COM_MINIMARKET_RETURN_REASON'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_DELIVERY_NUMBER'); ?></th>
+      <th><?php echo Text::_('COM_MINIMARKET_ORDER_CREATED'); ?></th>
     </tr></thead><tbody>
     <?php foreach($this->returns as $r): ?>
      <tr>
@@ -300,6 +308,7 @@ $eventValue=static function(string $event,string $value):string {
       <td><?php echo Text::_('COM_MINIMARKET_RETURN_REASON_'.strtoupper((string)$r->reason)); ?></td>
       <td><?php echo Text::_('COM_MINIMARKET_RETURN_STATUS_'.strtoupper((string)$r->status)); ?></td>
       <td><?php if($r->shipment_id): ?><a href="<?php echo $e($to('delivery',(int)$r->shipment_id)); ?>">#<?php echo (int)$r->shipment_id; ?></a><?php else: ?>—<?php endif; ?></td>
+      <td><?php echo $e($r->created_at); ?></td>
      </tr>
     <?php endforeach; ?>
     </tbody>
@@ -307,31 +316,5 @@ $eventValue=static function(string $event,string $value):string {
   </div>
   <?php if(!$this->returns): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_RETURNS_EMPTY'); ?></p><?php endif; ?>
  </section>
- <section class="card card-body mm-admin-panel mt-3">
-  <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_BLOCK'); ?></h2>
-   <p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_HELP'); ?></p>
-   <details class="mt-2">
-    <summary class="btn btn-outline-secondary btn-sm"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_SHOW'); ?> (<?php echo count($this->events); ?>)</summary>
-  <div class="table-responsive mm-editor-table-viewport">
-   <table class="table table-striped mm-admin-list">
-    <thead><tr>
-     <th><?php echo Text::_('COM_MINIMARKET_ORDER_CREATED'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_ACTION'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_CHANGE'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_ACTOR'); ?></th>
-    </tr></thead><tbody>
-    <?php foreach($this->events as $event): ?>
-     <tr>
-      <td><?php echo $e($event->created_at); ?></td>
-      <td><?php echo Text::_('COM_MINIMARKET_ORDER_EVENT_'.strtoupper((string)$event->event_type)); ?></td>
-      <td><?php echo $e($eventValue((string)$event->event_type,(string)$event->old_value)); ?> → <?php echo $e($eventValue((string)$event->event_type,(string)$event->new_value)); ?></td>
-      <td><?php if((int)$event->actor_user_id>0): ?><?php echo $e($event->actor_name??Text::_('COM_MINIMARKET_ORDER_HISTORY_UNKNOWN_ACTOR')); ?> (#<?php echo (int)$event->actor_user_id; ?>)<?php else: ?><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_SYSTEM'); ?><?php endif; ?></td>
-     </tr>
-    <?php endforeach; ?>
-    </tbody>
-   </table>
-  </div>
-  <?php if(!$this->events): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_EMPTY'); ?></p><?php endif; ?>
-   </details>
- </section>
+
 </div>

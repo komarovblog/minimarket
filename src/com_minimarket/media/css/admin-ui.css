@@ -774,3 +774,15 @@
 .mm-reference-picker [data-mm-ref-panel] .form-control[type="search"] {
   min-width:0!important;flex:1 1 12rem;
 }
+
+/* 0.6.9: native Atum borders in the order detail without affecting Joomla core. */
+.mm-order-page .mm-order-card {
+ min-width:0;max-width:100%;width:100%;
+ border:1px solid var(--border-color,var(--bs-border-color,rgba(128,128,128,.35)));
+ border-radius:.45rem;padding:clamp(.75rem,1.2vw,1rem);box-shadow:none;
+}
+.mm-order-page .mm-order-card h2,.mm-order-page .mm-order-card h3 {margin-bottom:.65rem;font-size:1rem;}
+.mm-order-page .mm-order-card dl dt,.mm-order-page .mm-order-card dl dd {margin-bottom:.35rem;overflow-wrap:anywhere;}
+.mm-order-page .mm-order-card .form-label {margin-bottom:.2rem;}
+.mm-order-page .mm-order-card .table th,.mm-order-page .mm-order-card .table td {padding:.45rem .6rem;vertical-align:middle;}
+.mm-order-page .mm-order-card .form-text {margin-bottom:.35rem;}
