@@ -13,9 +13,24 @@ if (-not (Test-Path -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket
 }
 Set-Location -LiteralPath $root
 
+# PowerShell parses a script before running it. A git pull may replace this
+# very file, but the current invocation would still execute its old body.
+# Record the bootstrap file hash so one command always uses current code.
+$releaseScriptPath = $MyInvocation.MyCommand.Path
+$releaseScriptHashBeforePull = (Get-FileHash -LiteralPath $releaseScriptPath -Algorithm SHA256).Hash
+
 if (-not $SkipPull) {
     & git -C $root pull --ff-only origin development
     if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_GIT_PULL_FAILED' }
+
+    $releaseScriptHashAfterPull = (Get-FileHash -LiteralPath $releaseScriptPath -Algorithm SHA256).Hash
+    if ($releaseScriptHashAfterPull -ne $releaseScriptHashBeforePull) {
+        Write-Output 'MINIMARKET_RELEASE_SCRIPT_UPDATED: restart current script after git pull'
+        # New invocation re-parses the updated file. Skip a second pull; retain
+        # the selected Desktop path. Return stops the previously parsed body.
+        & $releaseScriptPath -SkipPull -DesktopPath $DesktopPath
+        return
+    }
 }
 
 # Parse all release scripts before any build step. PowerShell 5.1's
