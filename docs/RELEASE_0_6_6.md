@@ -34,3 +34,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimar
 `scripts/test-0-6-6-native-admin-ui.php` — статический контракт списков, выделения, ToolbarHelper, SearchTools, редакторов, RU/EN и независимой версии toolbar. Сохранены предыдущие тесты всех версий, PHP 8.4/8.5, MySQL 8.4 и Windows release ZIP. Перед обновлением сделать резервную копию БД, хотя схема этой версии не изменяется.
 
 **Ручная приёмка:** обязательно установить компонент локально и проверить экраны в светлой/тёмной Joomla, RU/EN, XS–XXL. Особенно скролл таблиц в категориях и сохранение выпадающих селектов; в списках фидов/зон пробовать массовые действия **на тестовых данных**; у методов выбрать одну строку и Edit. Нельзя считать UI проверенным в браузере только по зелёному CI.
+
+## Результат CI
+
+**6/6 jobs SUCCESS** — [GitHub Actions #43264181229](https://github.com/komarovblog/minimarket/actions/runs/43264181229), исходный SHA `d5cd9fc0dc53bfdf1ee4bf8fce29209f39889a7a`: PHP 8.4, PHP 8.5, MySQL 8.4 fresh/upgrade/demo и Windows ZIP компонента; **в Windows job отдельно реально собран и проверен `mod_minimarket_toolbar-1.0.0.zip`**. Обычная команда компонента по-прежнему выдаёт ровно два файла (ZIP + необязательный demo SQL), модуль лишь по отдельной команде. **Ручная браузерная проверка установленного MiniMarket на Joomla остаётся обязательной.**
