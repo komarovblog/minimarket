@@ -19,8 +19,9 @@ use Joomla\CMS\Language\Text;
       ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-orderoption', ['active' => 'details']); ?>
     <?php foreach ([
-        'details' => 'COM_MINIMARKET_ORDER_OPTION_EDIT',
+        'details' => 'COM_MINIMARKET_TAB_MAIN',
         'values' => 'COM_MINIMARKET_ORDER_OPTION_VALUES',
+        'filter' => 'COM_MINIMARKET_ATTRIBUTE_FILTER_TAB',
         'categories' => 'COM_MINIMARKET_ORDER_OPTION_CATEGORIES',
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING'
     ] as $tab => $label) : ?>

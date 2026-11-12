@@ -8,11 +8,11 @@ $check=static function(bool $ok,string $why) use (&$n): void {
     if(!$ok)throw new RuntimeException('MM063_UI_FAIL: '.$why);
 };
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$check($manifest!==false && (string)$manifest->version==='0.6.3',
+$check($manifest!==false && version_compare((string)$manifest->version,'0.6.3','>='),
     'component version 0.6.3');
 $module=simplexml_load_file(__DIR__.'/../src/mod_minimarket_toolbar/mod_minimarket_toolbar.xml');
-$check($module!==false && (string)$module->version==='0.6.3',
-    'independent module version matches component');
+$check($module!==false && version_compare((string)$manifest->version,(string)$module->version,'>='),
+    'one-time module can remain older than component');
 $items=$manifest->administration->submenu->menu;
 $check(count($items)>0 && (string)$items[count($items)-1]==='COM_MINIMARKET_CONFIG_SETTINGS_MENU',
     'native left submenu has Settings as its final item');

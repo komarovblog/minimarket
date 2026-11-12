@@ -38,9 +38,9 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
     <?php if ($this->children) : ?>
         <section class="com-minimarket-category__children">
             <h2><?php echo Text::_('COM_MINIMARKET_CHILD_CATEGORIES'); ?></h2>
-            <ul class="list-unstyled">
+            <ul class="<?php echo $this->escape(\MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions::subcategoryGridClasses($this->productListOptions)); ?> list-unstyled">
                 <?php foreach ($this->children as $child) : ?>
-                    <li><a href="<?php echo $this->escape(RouteHelper::category((int) $child->id)); ?>">
+                    <li class="col"><a class="card card-body h-100 text-decoration-none" href="<?php echo $this->escape(RouteHelper::category((int) $child->id)); ?>">
                         <?php echo $this->escape($child->title); ?>
                     </a></li>
                 <?php endforeach; ?>

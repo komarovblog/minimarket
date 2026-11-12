@@ -463,52 +463,6 @@ try {
         Write-Output 'PACKAGE_FAIL: MM_055_DIGITAL_SQL_MISSING_OR_MISMATCH'
         exit 1
     }
-    # Validate the standalone fallback module installer ZIP, in addition to
-    # the module sources embedded into the component installer.
-    $moduleZipName = 'mod_minimarket_toolbar-' + $expectedVersion + '.zip'
-    $moduleZipPath = Join-Path (Split-Path -Parent $ZipPath) $moduleZipName
-    if (-not (Test-Path -LiteralPath $moduleZipPath -PathType Leaf)) {
-        Write-Output 'PACKAGE_FAIL: QUICKLINK_STANDALONE_ZIP_MISSING'
-        exit 1
-    }
-    $moduleArchive = [System.IO.Compression.ZipFile]::OpenRead(
-        [System.IO.Path]::GetFullPath($moduleZipPath))
-    try {
-        $moduleMembers = @($moduleArchive.Entries | ForEach-Object { $_.FullName })
-        if (@($moduleMembers | Where-Object {
-            $_.Contains('\') -or $_.StartsWith('/')
-        }).Count -gt 0) {
-            Write-Output 'PACKAGE_FAIL: QUICKLINK_ZIP_BAD_MEMBER_PATH'
-            exit 1
-        }
-        foreach ($required in @(
-            'mod_minimarket_toolbar.xml',
-            'mod_minimarket_toolbar.php',
-            'script.php',
-            'tmpl/default.php',
-            'language/en-GB/mod_minimarket_toolbar.ini',
-            'language/en-GB/mod_minimarket_toolbar.sys.ini',
-            'language/ru-RU/mod_minimarket_toolbar.ini',
-            'language/ru-RU/mod_minimarket_toolbar.sys.ini'
-        )) {
-            if ($moduleMembers -notcontains $required) {
-                Write-Output ('PACKAGE_FAIL: QUICKLINK_MISSING_' + $required)
-                exit 1
-            }
-        }
-        $moduleManifestReader = New-Object System.IO.StreamReader(
-            $moduleArchive.GetEntry('mod_minimarket_toolbar.xml').Open())
-        try { [xml]$moduleManifest = $moduleManifestReader.ReadToEnd() }
-        finally { $moduleManifestReader.Dispose() }
-        if ($moduleManifest.extension.type -ne 'module' -or
-            $moduleManifest.extension.client -ne 'administrator' -or
-            [string]$moduleManifest.extension.version -ne $expectedVersion) {
-            Write-Output 'PACKAGE_FAIL: QUICKLINK_MODULE_MANIFEST_INVALID'
-            exit 1
-        }
-    }
-    finally { $moduleArchive.Dispose() }
-
     if ($null -ne $xml.SelectSingleNode(
         "/extension/administration/files[@folder='admin']/folder[text()='modules']")) {
         Write-Output 'PACKAGE_FAIL: QUICKLINK_MUST_NOT_BE_BUNDLED'

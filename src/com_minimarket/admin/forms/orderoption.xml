@@ -24,6 +24,19 @@
            multiple="true" min="0" max="250" buttons="add,remove,move"
            layout="joomla.form.field.subform.repeatable" validate="Subform"/>
   </fieldset>
+  <fieldset name="filter" label="COM_MINIMARKET_ATTRIBUTE_FILTER_TAB">
+    <field name="filter_mode" type="list" label="COM_MINIMARKET_FILTER_MODE" description="COM_MINIMARKET_FILTER_PRESENTATION_DESC" default="checkboxes" filter="cmd">
+      <option value="none">COM_MINIMARKET_MODE_NONE</option>
+      <option value="dropdown">COM_MINIMARKET_MODE_DROPDOWN</option>
+      <option value="checkboxes">COM_MINIMARKET_MODE_CHECKBOXES</option>
+    </field>
+    <field name="filter_multiple" type="list" label="COM_MINIMARKET_FILTER_MULTIPLE" description="COM_MINIMARKET_FILTER_MULTIPLE_INDEPENDENT_DESC" default="1" filter="int" showon="filter_mode:dropdown,checkboxes">
+      <option value="0">COM_MINIMARKET_HIDE</option><option value="1">COM_MINIMARKET_SHOW</option>
+    </field>
+    <field name="filter_search" type="list" label="COM_MINIMARKET_FILTER_SEARCH_VALUES" description="COM_MINIMARKET_FILTER_SEARCH_VALUES_DESC" default="0" filter="int" showon="filter_mode:dropdown,checkboxes">
+      <option value="0">COM_MINIMARKET_HIDE</option><option value="1">COM_MINIMARKET_SHOW</option>
+    </field>
+  </fieldset>
   <fieldset name="categories" label="COM_MINIMARKET_ORDER_OPTION_CATEGORIES">
     <field name="categories_present" type="hidden" default="1" filter="int"/>
     <field name="category_rules" type="Optioncategories" filter="raw"

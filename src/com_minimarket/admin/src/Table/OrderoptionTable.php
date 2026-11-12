@@ -23,6 +23,17 @@ final class OrderoptionTable extends Table
         if (!in_array($this->display_location,['inherit','product','category','both'],true)) {
             $this->setError(Text::_('COM_MINIMARKET_ENTITY_DISPLAY_LOCATION_INVALID'));return false;
         }
+        $this->filter_mode=(string)($this->filter_mode??'checkboxes');
+        if(!in_array($this->filter_mode,['none','dropdown','checkboxes'],true)){
+            $this->setError(Text::_('COM_MINIMARKET_ORDER_OPTION_INVALID'));return false;
+        }
+        foreach(['filter_multiple','filter_search'] as $key){
+            $this->$key=(int)($this->$key??0);
+            if(!in_array($this->$key,[0,1],true)){
+                $this->setError(Text::_('COM_MINIMARKET_ORDER_OPTION_INVALID'));return false;
+            }
+        }
+        if($this->filter_mode==='none'){$this->filter_multiple=0;$this->filter_search=0;}
         $this->state = (int) ($this->state ?? 1);
         $this->sort_order = (int) ($this->sort_order ?? 0);
         if ($this->code === '' && $this->title !== '') {

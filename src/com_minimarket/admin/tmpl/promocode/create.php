@@ -22,7 +22,7 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
  <?php echo HTMLHelper::_('form.token'); ?>
  <div class="alert alert-info"><?php echo Text::_('COM_MINIMARKET_PROMOCODES_HELP'); ?></div>
  <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-promocode', ['active' => 'general']); ?>
-   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-promocode', 'general', Text::_('COM_MINIMARKET_PROMO_TAB_GENERAL')); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-promocode', 'general', Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
  <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label for="mm-code" class="form-label"><?php echo Text::_('COM_MINIMARKET_PROMOCODES_CODE'); ?> *</label>

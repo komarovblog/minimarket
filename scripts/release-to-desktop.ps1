@@ -5,9 +5,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# One command => EXACTLY three deliverables on the user's Windows Desktop:
-# 1) component ZIP, 2) standalone toolbar module ZIP,
-# 3) versioned optional cumulative demo SQL. Never modifies the database.
+# One command => component ZIP and optional cumulative demo SQL.
+# The one-time toolbar module remains installed independently; do not regenerate it.
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -PathType Leaf)) {
     throw "MINIMARKET_PROJECT_ROOT_NOT_FOUND: $root"
@@ -90,7 +89,6 @@ if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
 
 $deliverables = @(
     @{ Source = Join-Path $root "dist\com_minimarket-$version.zip"; Name = "com_minimarket-$version.zip" },
-    @{ Source = Join-Path $root "dist\mod_minimarket_toolbar-$version.zip"; Name = "mod_minimarket_toolbar-$version.zip" },
     @{ Source = $demo; Name = $demoName }
 )
 foreach ($item in $deliverables) {
@@ -108,5 +106,5 @@ foreach ($item in $deliverables) {
     }
     Write-Output "DESKTOP_FILE_OK: $dst"
 }
-Write-Output "MINIMARKET_DESKTOP_3_FILES_OK: version=$version"
+Write-Output "MINIMARKET_DESKTOP_2_FILES_OK: version=$version"
 Write-Output 'SQL_IS_OPTIONAL: for the local demo catalog only; not required for Joomla UI changes. Back up before importing.'

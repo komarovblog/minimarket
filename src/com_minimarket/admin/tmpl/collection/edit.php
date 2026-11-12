@@ -9,7 +9,7 @@ use Joomla\CMS\Language\Text;
       data-mm-inherited="<?php echo htmlspecialchars(json_encode(['meta_robots'=>(string)\Joomla\CMS\Factory::getConfig()->get('robots','index,follow')],JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP),ENT_QUOTES,'UTF-8'); ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet','mm-collection',['active'=>'details']); ?>
     <?php foreach ([
-        'details'=>'COM_MINIMARKET_COLLECTION_EDIT',
+        'details'=>'COM_MINIMARKET_TAB_MAIN',
         'descriptions'=>'COM_MINIMARKET_PRODUCT_TAB_DESCRIPTIONS',
         'seo'=>'COM_MINIMARKET_CATEGORY_TAB_SEO',
         'publishing'=>'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',

@@ -19,7 +19,7 @@ use Joomla\CMS\Language\Text;
       ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-attribute', ['active' => 'details']); ?>
     <?php foreach ([
-        'details' => 'COM_MINIMARKET_ATTRIBUTE_DETAILS',
+        'details' => 'COM_MINIMARKET_TAB_MAIN',
         'filter' => 'COM_MINIMARKET_ATTRIBUTE_FILTER_TAB',
         'categories' => 'COM_MINIMARKET_ATTRCAT_TAB',
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',

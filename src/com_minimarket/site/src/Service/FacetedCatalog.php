@@ -210,8 +210,15 @@ final class FacetedCatalog
         // SKU axes are constrained by published global order options.
         $options=[];
         foreach (self::query($db,'#__minimarket_order_options',
-            ['id','title'],'state=1','sort_order ASC,id ASC') as $row) {
-            $options[(int)$row['id']]=(string)$row['title'];
+            ['id','title','filter_mode','filter_multiple','filter_search'],
+            'state=1','sort_order ASC,id ASC') as $row) {
+            $mode=(string)($row['filter_mode']??'checkboxes');
+            if(!in_array($mode,['dropdown','checkboxes'],true))continue;
+            $options[(int)$row['id']]=[
+                'title'=>(string)$row['title'],'mode'=>$mode,
+                'multiple'=>(int)($row['filter_multiple']??1)===1,
+                'search'=>(int)($row['filter_search']??0)===1,
+            ];
         }
         $dimensions=[];
         foreach (self::query($db,'#__minimarket_variant_dimensions',
@@ -223,8 +230,10 @@ final class FacetedCatalog
             $dimensions[$id]=['pid'=>(int)$row['product_id'],'option'=>$option];
             if (!isset($facets[$fid])) {
                 $facets[$fid]=[
-                    'id'=>$fid,'title'=>$options[$option],'type'=>'sku',
-                    'mode'=>'checkboxes','unit'=>'','multiple'=>true,'choices'=>[]
+                    'id'=>$fid,'title'=>$options[$option]['title'],'type'=>'sku',
+                    'mode'=>$options[$option]['mode'],'unit'=>'',
+                    'multiple'=>$options[$option]['multiple'],
+                    'search'=>$options[$option]['search'],'choices'=>[]
                 ];
             }
         }

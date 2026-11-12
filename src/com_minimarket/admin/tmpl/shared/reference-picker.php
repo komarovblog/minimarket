@@ -14,8 +14,11 @@ $endpoint='index.php?option=com_minimarket&task=productpicker.'.$ref['endpoint']
 $multiple=!empty($ref['multiple']);
 $selected=(array)($ref['selected']??[]);
 $input=(string)$ref['input'];
+$editPrefix=(string)($ref['edit_url_prefix']??'');
 $labels=[
  'add'=>Text::_('COM_MINIMARKET_REF_ADD'),
+ 'change'=>Text::_('COM_MINIMARKET_REF_CHANGE'),
+ 'edit'=>Text::_('COM_MINIMARKET_REF_EDIT'),
  'remove'=>Text::_('COM_MINIMARKET_REF_REMOVE'),
  'loading'=>Text::_('COM_MINIMARKET_REF_LOADING'),
  'empty'=>Text::_('COM_MINIMARKET_REF_EMPTY'),
@@ -25,11 +28,12 @@ $labels=[
 <div class="mm-entity-picker mm-reference-picker <?php echo $esc($ref['class']??''); ?>"
      data-mm-reference-picker data-mm-ref-url="<?php echo $esc($endpoint); ?>"
      data-mm-ref-multiple="<?php echo $multiple?'1':'0'; ?>"
+     data-mm-ref-edit-prefix="<?php echo $esc($editPrefix); ?>"
      data-mm-ref-labels="<?php echo $esc(json_encode($labels,JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR)); ?>">
  <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
   <strong><?php echo $esc($ref['title']); ?></strong>
   <button type="button" class="btn btn-success btn-sm" data-mm-ref-toggle>
-   + <?php echo Text::_('COM_MINIMARKET_REF_ADD'); ?>
+   <?php echo !$multiple && count($selected)>0 ? Text::_('COM_MINIMARKET_REF_CHANGE') : '+ '.Text::_('COM_MINIMARKET_REF_ADD'); ?>
   </button>
  </div>
  <div data-mm-ref-panel hidden class="py-2 mb-2">
@@ -53,6 +57,7 @@ $labels=[
   <?php foreach($selected as $id=>$title): if((int)$id<1)continue; ?>
    <div class="mm-entity-picker__row" data-mm-ref-key="<?php echo (int)$id; ?>">
     <span class="flex-grow-1"><?php echo $esc($title); ?></span>
+    <?php if($editPrefix!==''): ?><a class="btn btn-outline-secondary btn-sm" href="<?php echo $esc($editPrefix.(int)$id); ?>" target="_blank" rel="noopener noreferrer"><?php echo Text::_('COM_MINIMARKET_REF_EDIT'); ?></a><?php endif; ?>
     <button type="button" class="btn btn-danger btn-sm" data-mm-ref-remove
       aria-label="<?php echo $esc(Text::_('COM_MINIMARKET_REF_REMOVE')); ?>">−</button>
    </div>

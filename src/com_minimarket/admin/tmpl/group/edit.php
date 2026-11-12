@@ -8,7 +8,7 @@ use Joomla\CMS\Router\Route;
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=group&layout=edit&id=' . (int) ($this->item->id ?? 0)); ?>"
       method="post" name="adminForm" id="adminForm" class="form-validate">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-group', ['active' => 'details']); ?>
-    <?php foreach (['details' => 'COM_MINIMARKET_GROUP_DETAILS',
+    <?php foreach (['details' => 'COM_MINIMARKET_TAB_MAIN',
                     'members' => 'COM_MINIMARKET_GROUP_MEMBERS',
                     'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING'] as $section => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-group', $section, Text::_($label)); ?>

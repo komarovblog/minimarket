@@ -21,7 +21,6 @@ use Joomla\CMS\Button\PublishedButton;
                 <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
                 <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_THUMB'); ?></th>
                 <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_COUNT_DIRECT'); ?></th>
-                <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_COUNT_BRANCH'); ?></th>
                 <th><?php echo Text::_('COM_MINIMARKET_CATEGORY_ORDER'); ?></th>
                 <th class="w-1"><?php echo Text::_('JGRID_HEADING_ID'); ?></th>
             </tr>
@@ -72,7 +71,6 @@ use Joomla\CMS\Button\PublishedButton;
                         <?php endif; ?>
                     </td>
                     <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_COUNT_DIRECT')); ?>"><?php echo (int) $row['direct_count']; ?></td>
-                    <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_COUNT_BRANCH')); ?>"><?php echo (int) $row['branch_count']; ?></td>
                     <td data-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CATEGORY_ORDER')); ?>"><?php echo (int) ($item->sort_order ?? 0); ?></td>
                     <td data-label="<?php echo $this->escape(Text::_('JGRID_HEADING_ID')); ?>"><?php echo $id; ?></td>
                 </tr>

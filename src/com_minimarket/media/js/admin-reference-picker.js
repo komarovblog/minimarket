@@ -15,8 +15,11 @@ function init(root) {
   const multiple=root.dataset.mmRefMultiple==='1';
   let controller=null;
   const labels=JSON.parse(root.dataset.mmRefLabels||'{}');
+  const editPrefix=root.dataset.mmRefEditPrefix||'';
+  const toggle=root.querySelector('[data-mm-ref-toggle]');
+  const updateToggle=()=>{if(toggle)toggle.textContent=(!multiple&&value().length)?(labels.change||'Change'):'+ '+(labels.add||'Add');};
   const value=()=>[...selected.querySelectorAll('[data-mm-ref-key]')].map(x=>x.dataset.mmRefKey);
-  const sync=()=>input.value=multiple?value().join(','):value()[0]||'';
+  const sync=()=>{input.value=multiple?value().join(','):value()[0]||'';updateToggle();};
   function add(item) {
     const key=String(item.key||item.id||'');
     if(!/^[1-9]\d{0,9}$/.test(key)||value().includes(key))return;
@@ -33,6 +36,14 @@ function init(root) {
       const small=document.createElement('small');
       small.textContent=String(item.subtitle);
       row.append(small);
+    }
+    if(editPrefix){
+      const link=document.createElement('a');
+      link.className='btn btn-outline-secondary btn-sm';
+      link.href=editPrefix+encodeURIComponent(key);
+      link.target='_blank';link.rel='noopener noreferrer';
+      link.textContent=labels.edit||'Edit';
+      row.append(link);
     }
     const remove=document.createElement('button');
     remove.type='button';remove.className='btn btn-danger btn-sm';

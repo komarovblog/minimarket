@@ -21,7 +21,7 @@ $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00'
  <?php if($embedded): ?><input type="hidden" name="return_to" value="deliverymethods"><?php endif; ?>
  <?php echo HTMLHelper::_('form.token'); ?>
  <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-deliveryzone', ['active' => 'basic']); ?>
-   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-deliveryzone', 'basic', Text::_('COM_MINIMARKET_ZONE_TAB_MAIN')); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-deliveryzone', 'basic', Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
  <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label for="z-title" class="form-label"><?php echo Text::_('JGLOBAL_TITLE'); ?> *</label>

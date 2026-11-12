@@ -1,0 +1,30 @@
+.mm-admin-panel .subform-repeatable-group:has(> .mm-value-details) {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:.35rem;
+  align-items:start;
+}
+.mm-admin-panel .subform-repeatable-group > .mm-value-details {
+  grid-column:1/-1;
+  border:1px solid var(--border-color,#414b56);
+  border-radius:var(--border-radius,.25rem);
+  min-width:0;
+}
+.mm-admin-panel .mm-value-summary {
+  cursor:pointer;
+  padding:.6rem .85rem;
+  font-weight:600;
+  overflow-wrap:anywhere;
+}
+.mm-admin-panel .mm-value-summary:hover {background:var(--body-bg,transparent);}
+.mm-admin-panel .mm-value-summary:focus-visible {outline:2px solid var(--focus-ring-color,currentColor);}
+.mm-admin-panel .mm-value-details-body {
+  padding:.65rem .85rem;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.65rem;
+}
+.mm-admin-panel .mm-value-details-body > .control-group {min-width:0;}
+@media(max-width:767.98px){
+ .mm-admin-panel .mm-value-details-body {grid-template-columns:1fr;}
+}

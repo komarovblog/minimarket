@@ -41,6 +41,61 @@
             <option value="1">JYES</option>
             <option value="0">JNO</option>
         </field>
+        <field name="subcategory_grid_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SUBCATEGORY_GRID_HEADING" description="COM_MINIMARKET_SUBCATEGORY_GRID_HELP" />
+        <field name="subcategory_cards_xs" type="Gridcards" label="COM_MINIMARKET_CARDS_XS" description="COM_MINIMARKET_CARDS_XS_DESC" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_sm" type="Gridcards" label="COM_MINIMARKET_CARDS_SM" description="COM_MINIMARKET_CARDS_SM_DESC" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_md" type="Gridcards" label="COM_MINIMARKET_CARDS_MD" description="COM_MINIMARKET_CARDS_MD_DESC" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_lg" type="Gridcards" label="COM_MINIMARKET_CARDS_LG" description="COM_MINIMARKET_CARDS_LG_DESC" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_xl" type="Gridcards" label="COM_MINIMARKET_CARDS_XL" description="COM_MINIMARKET_CARDS_XL_DESC" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_xxl" type="Gridcards" label="COM_MINIMARKET_CARDS_XXL" description="COM_MINIMARKET_CARDS_XXL_DESC" default="-1" filter="int">
+            <option value="-1">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
         <field name="product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="inherit" filter="cmd">
             <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
             <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>

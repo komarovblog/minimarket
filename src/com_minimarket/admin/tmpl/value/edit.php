@@ -17,7 +17,7 @@ $returnToAttribute = $parentAttributeId > 0
       method="post" name="adminForm" id="adminForm" class="form-validate">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-value', ['active' => 'details']); ?>
     <?php foreach ([
-        'details' => 'COM_MINIMARKET_VALUE_DETAILS',
+        'details' => 'COM_MINIMARKET_TAB_MAIN',
         'publishing' => 'COM_MINIMARKET_CATEGORY_TAB_PUBLISHING',
     ] as $section => $label) : ?>
         <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-value', $section, \Joomla\CMS\Language\Text::_($label)); ?>

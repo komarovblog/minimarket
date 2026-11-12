@@ -17,7 +17,7 @@ use Joomla\CMS\Component\ComponentHelper;
         || ((int)($this->item->id ?? 0)===0
             && \Joomla\CMS\Factory::getApplication()->input->getCmd('product_type')==='bundle');
     $sections=[
-        'details' => 'COM_MINIMARKET_PRODUCT_TAB_DETAILS',
+        'details' => 'COM_MINIMARKET_TAB_MAIN',
         'badges' => 'COM_MINIMARKET_BADGES_TAB',
         'descriptions' => 'COM_MINIMARKET_PRODUCT_TAB_DESCRIPTIONS',
         'merchandising' => 'COM_MINIMARKET_PRODUCT_TAB_MERCHANDISING',

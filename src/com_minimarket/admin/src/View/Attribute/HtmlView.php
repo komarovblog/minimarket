@@ -30,6 +30,12 @@ final class HtmlView extends BaseHtmlView
                 [],
                 ['defer' => true]
             );
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript('com_minimarket.compact-values',
+                'media/com_minimarket/js/compact-values.js', [], ['defer'=>true])
+            ->registerAndUseStyle('com_minimarket.compact-values',
+                'media/com_minimarket/css/compact-values.css');
+        Text::script('COM_MINIMARKET_VALUE_NEW');
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ATTRIBUTE_EDIT_TITLE'));
         ToolbarHelper::apply('attribute.apply');
         ToolbarHelper::save('attribute.save');

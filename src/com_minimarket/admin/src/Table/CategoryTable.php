@@ -120,7 +120,7 @@ final class CategoryTable extends Table
             return false;
         }
         $this->filter_stock_mode=$stock;
-        foreach (['cards_xs', 'cards_sm', 'cards_md', 'cards_lg', 'cards_xl', 'cards_xxl'] as $field) {
+        foreach (['cards_xs', 'cards_sm', 'cards_md', 'cards_lg', 'cards_xl', 'cards_xxl', 'subcategory_cards_xs', 'subcategory_cards_sm', 'subcategory_cards_md', 'subcategory_cards_lg', 'subcategory_cards_xl', 'subcategory_cards_xxl'] as $field) {
             $count = (int) ($this->$field ?? -1);
             if ($count < -1 || $count === 0 || $count > 6) {
                 $this->setError(Text::_('COM_MINIMARKET_CATEGORY_DISPLAY_INVALID'));

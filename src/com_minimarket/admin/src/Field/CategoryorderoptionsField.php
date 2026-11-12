@@ -9,6 +9,7 @@ use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryListVisibility;
 
 /** One compact native Joomla dropdown per global order option. */
 final class CategoryorderoptionsField extends FormField

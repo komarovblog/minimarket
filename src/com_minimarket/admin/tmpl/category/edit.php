@@ -10,7 +10,7 @@ use Joomla\CMS\Router\Route;
       data-mm-inherited="<?php echo htmlspecialchars(json_encode($this->inheritedDefaults, JSON_UNESCAPED_UNICODE|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP),ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8'); ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-category', ['active' => 'details']); ?>
     <?php foreach ([
-        'details' => 'COM_MINIMARKET_CATEGORY_TAB_DETAILS',
+        'details' => 'COM_MINIMARKET_TAB_MAIN',
         'descriptions' => 'COM_MINIMARKET_CATEGORY_TAB_DESCRIPTIONS',
         'display' => 'COM_MINIMARKET_CATEGORY_TAB_DISPLAY',
         'attributes' => 'COM_MINIMARKET_CATEGORY_TAB_ATTRIBUTES',

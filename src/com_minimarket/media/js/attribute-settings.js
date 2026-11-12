@@ -18,9 +18,12 @@
     const display=document.getElementById('jform_filter_mode');
     if (!type || !display) return;
     const options=Array.from(display.options,o=>o.cloneNode(true));
-    const radios=name=>Array.from(document.querySelectorAll('[name="jform['+name+']"]'));
-    const setRadio=(name,value)=>{
-      for (const radio of radios(name)) radio.checked=radio.value===value;
+    const controls=name=>Array.from(document.querySelectorAll('[name="jform['+name+']"]'));
+    const setValue=(name,value)=>{
+      for(const input of controls(name)){
+        if(input.type==='radio'||input.type==='checkbox')input.checked=input.value===value;
+        else input.value=value;
+      }
     };
     const refresh=()=>{
       const t=type.value,allowed=filters[t]||['none'],previous=display.value;
@@ -34,12 +37,12 @@
         && t!=='boolean';
       const searchAllowed=['text','color'].includes(t)
         && ['dropdown','checkboxes'].includes(display.value);
-      if (!multipleAllowed) setRadio('filter_multiple','0');
-      if (!searchAllowed) setRadio('filter_search','0');
+      if (!multipleAllowed) setValue('filter_multiple','0');
+      if (!searchAllowed) setValue('filter_search','0');
       for (const [field,visible] of [
         ['filter_multiple',multipleAllowed],['filter_search',searchAllowed]
       ]) {
-        const element=radios(field)[0];
+        const element=controls(field)[0];
         const control=element?.closest('.control-group');
         if (control) control.hidden=!visible;
       }

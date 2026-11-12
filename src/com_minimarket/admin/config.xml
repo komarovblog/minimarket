@@ -119,6 +119,55 @@
         <field name="category_show_descendant_bundles" type="list" label="COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES" default="0" filter="int">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
+        <field name="mm_subcategory_grid_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SUBCATEGORY_GRID_HEADING" description="COM_MINIMARKET_SUBCATEGORY_GRID_HELP" />
+        <field name="subcategory_cards_xs" type="Gridcards" label="COM_MINIMARKET_CARDS_XS" description="COM_MINIMARKET_CARDS_XS_DESC" default="1" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_sm" type="Gridcards" label="COM_MINIMARKET_CARDS_SM" description="COM_MINIMARKET_CARDS_SM_DESC" default="1" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_md" type="Gridcards" label="COM_MINIMARKET_CARDS_MD" description="COM_MINIMARKET_CARDS_MD_DESC" default="2" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_lg" type="Gridcards" label="COM_MINIMARKET_CARDS_LG" description="COM_MINIMARKET_CARDS_LG_DESC" default="3" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_xl" type="Gridcards" label="COM_MINIMARKET_CARDS_XL" description="COM_MINIMARKET_CARDS_XL_DESC" default="4" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
+        <field name="subcategory_cards_xxl" type="Gridcards" label="COM_MINIMARKET_CARDS_XXL" description="COM_MINIMARKET_CARDS_XXL_DESC" default="4" filter="int">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </field>
         <field name="category_show_sort" type="list" label="COM_MINIMARKET_CATEGORY_SHOW_SORT" default="1" filter="int">
   <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>

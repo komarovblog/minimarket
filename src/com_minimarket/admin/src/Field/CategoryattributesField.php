@@ -8,6 +8,7 @@ use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
+use MiniMarket\Component\Minimarket\Administrator\Service\CategoryListVisibility;
 use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 
 /**

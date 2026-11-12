@@ -23,6 +23,12 @@ final class HtmlView extends BaseHtmlView
             ->useScript('form.validate')
             ->registerAndUseScript('com_minimarket.option-value-color',
                 'media/com_minimarket/js/option-value-color.js', [], ['defer' => true]);
+        Factory::getApplication()->getDocument()->getWebAssetManager()
+            ->registerAndUseScript('com_minimarket.compact-values',
+                'media/com_minimarket/js/compact-values.js', [], ['defer'=>true])
+            ->registerAndUseStyle('com_minimarket.compact-values',
+                'media/com_minimarket/css/compact-values.css');
+        Text::script('COM_MINIMARKET_VALUE_NEW');
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ORDER_OPTION_EDIT'));
         ToolbarHelper::apply('orderoption.apply');
         ToolbarHelper::save('orderoption.save');

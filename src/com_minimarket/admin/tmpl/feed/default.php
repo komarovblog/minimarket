@@ -38,7 +38,7 @@ $depth=static function(int $id) use($map):int {
         <input type="hidden" name="feed[id]" value="<?php echo (int)$this->feed['id']; ?>">
         <?php echo HTMLHelper::_('form.token'); ?>
         <?php echo HTMLHelper::_('uitab.startTabSet','minimarket-feed',['active'=>'details']); ?>
-        <?php echo HTMLHelper::_('uitab.addTab','minimarket-feed','details',Text::_('COM_MINIMARKET_FEED_GENERAL')); ?>
+        <?php echo HTMLHelper::_('uitab.addTab','minimarket-feed','details',Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
         <div class="card mb-3"><div class="card-body">
             <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_FEED_GENERAL'); ?></h3>
             <div class="row g-3">

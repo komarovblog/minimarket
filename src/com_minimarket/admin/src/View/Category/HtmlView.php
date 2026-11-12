@@ -39,6 +39,9 @@ final class HtmlView extends BaseHtmlView
         foreach(['xs'=>1,'sm'=>1,'md'=>2,'lg'=>3,'xl'=>4,'xxl'=>4] as $size=>$fallback) {
             $this->inheritedDefaults['cards_'.$size]=(string)$global->get('category_cards_'.$size,$fallback);
         }
+        foreach(['xs'=>1,'sm'=>1,'md'=>2,'lg'=>3,'xl'=>4,'xxl'=>4] as $size=>$fallback) {
+            $this->inheritedDefaults['subcategory_cards_'.$size]=(string)$global->get('subcategory_cards_'.$size,$fallback);
+        }
         $this->inheritedDefaults['products_per_page']=(string)$global->get('category_products_per_page',10);
         $this->inheritedDefaults['product_layout']=Text::_(
             (string)$global->get('category_product_layout','list')==='grid'

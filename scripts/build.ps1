@@ -400,57 +400,8 @@ try {
     }
     Write-Output "MiniMarket cumulative update SQL : $updateSqlOutput"
 
-    # Independently installable administrator module ZIP is shipped beside the
-    # component as a recovery path. The component ZIP already contains these
-    # files and attempts to install the module on update/install.
-    $moduleRoot = Join-Path $projectRoot 'src\mod_minimarket_toolbar'
-    foreach ($moduleRel in @(
-        'mod_minimarket_toolbar.xml',
-        'mod_minimarket_toolbar.php',
-        'script.php',
-        'tmpl\default.php',
-        'language\en-GB\mod_minimarket_toolbar.ini',
-        'language\en-GB\mod_minimarket_toolbar.sys.ini',
-        'language\ru-RU\mod_minimarket_toolbar.ini',
-        'language\ru-RU\mod_minimarket_toolbar.sys.ini'
-    )) {
-        if (-not (Test-Path -LiteralPath (Join-Path $moduleRoot $moduleRel) -PathType Leaf)) {
-            throw "QUICKLINK_MODULE_SOURCE_MISSING: $moduleRel"
-        }
-    }
-    $moduleXmlPath = Join-Path $moduleRoot 'mod_minimarket_toolbar.xml'
-    [xml]$moduleXml = Get-Content -LiteralPath $moduleXmlPath -Raw -Encoding UTF8
-    if ($moduleXml.extension.type -ne 'module' -or
-        $moduleXml.extension.client -ne 'administrator' -or
-        [string]$moduleXml.extension.version -ne $version) {
-        throw 'QUICKLINK_MODULE_MANIFEST_INVALID'
-    }
-    $moduleZipPath = Join-Path $zipDirectory ("mod_minimarket_toolbar-$version.zip")
-    $moduleTempZip = Join-Path $zipDirectory (
-        "minimarket-toolbar-building-" + [guid]::NewGuid().ToString('N') + '.zip')
-    try {
-        $moduleWriter = [System.IO.Compression.ZipFile]::Open(
-            $moduleTempZip, [System.IO.Compression.ZipArchiveMode]::Create)
-        try {
-            foreach ($file in @(Get-ChildItem -LiteralPath $moduleRoot -Recurse -File | Sort-Object FullName)) {
-                $memberName = $file.FullName.Substring($moduleRoot.Length + 1).Replace('\', '/')
-                [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
-                    $moduleWriter,
-                    $file.FullName,
-                    $memberName,
-                    [System.IO.Compression.CompressionLevel]::Optimal
-                ) | Out-Null
-            }
-        }
-        finally { $moduleWriter.Dispose() }
-        Move-Item -LiteralPath $moduleTempZip -Destination $moduleZipPath -Force
-    }
-    finally {
-        if (Test-Path -LiteralPath $moduleTempZip) {
-            Remove-Item -LiteralPath $moduleTempZip -Force
-        }
-    }
-    Write-Output "MiniMarket separate admin quicklink ZIP : $moduleZipPath"
+    # The one-time administrator quicklink is versioned independently and
+    # deliberately NOT rebuilt for routine component updates.
     Write-Output "MiniMarket ZIP $version : $OutputPath"
     Write-Output "MiniMarket SQL : $demoSqlOutput"
 }

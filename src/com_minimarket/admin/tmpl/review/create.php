@@ -17,6 +17,7 @@ use Joomla\CMS\Router\Route;
      'endpoint'=>'search','input'=>'product_id','selected'=>[],
      'placeholder'=>Text::_('COM_MINIMARKET_PRODUCT_SEARCH'),
      'multiple'=>false,
+     'edit_url_prefix'=>'index.php?option=com_minimarket&task=product.edit&id=',
    ]; require dirname(__DIR__).'/shared/reference-picker.php'; ?>
   </div>
   <div class="col-12 col-md-6">

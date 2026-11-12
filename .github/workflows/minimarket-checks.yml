@@ -205,7 +205,7 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
-      - name: Verify one-command Desktop delivery has exactly 3 files
+      - name: Verify one-command Desktop delivery has exactly 2 files
         shell: powershell
         run: |
           $dest = Join-Path (Get-Location) 'dist\desktop-ci'
@@ -215,11 +215,11 @@ jobs:
           $actual = @(Get-ChildItem -LiteralPath $dest -File | Select-Object -ExpandProperty Name | Sort-Object)
           [xml]$manifest = Get-Content -LiteralPath '.\src\com_minimarket\minimarket.xml' -Raw -Encoding UTF8
           $version = [string]$manifest.extension.version
-          $expected = @("com_minimarket-$version.zip", "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql", "mod_minimarket_toolbar-$version.zip") | Sort-Object
+          $expected = @("com_minimarket-$version.zip", "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql") | Sort-Object
           if (($actual -join '|') -ne ($expected -join '|')) {
-            throw ("MM75_DESKTOP_RELEASE_EXPECTED_THREE: " + ($actual -join ','))
+            throw ("MM75_DESKTOP_RELEASE_EXPECTED_TWO: " + ($actual -join ','))
           }
-          Write-Output 'MM75_DESKTOP_THREE_FILES_WINDOWS_PASS'
+          Write-Output 'MM75_DESKTOP_TWO_FILES_WINDOWS_PASS'
       - name: Verify clean catalog SQL generator on Windows PowerShell
         shell: powershell
         run: |
@@ -285,7 +285,6 @@ jobs:
             dist/minimarket_ui_benefit_demo_0_5_54.sql
             dist/minimarket_digital_demo_0_5_55.sql
             dist/minimarket_mysql84_nnop3_update_0_5_73.sql
-            dist/mod_minimarket_toolbar-${{ steps.component_version.outputs.value }}.zip
           if-no-files-found: error
           retention-days: 14
 
@@ -452,6 +451,11 @@ jobs:
         run: php scripts/test-0-5-61-feeds.php
       - name: 0.6.3 native SEO and feed UI regression
         run: php scripts/test-0-6-3-ui.php
+      - name: 0.6.4 subcategory cards, options filters and admin UI
+        run: |
+          php scripts/test-0-6-4-ui.php
+          node --check src/com_minimarket/media/js/compact-values.js
+          node --check src/com_minimarket/media/js/admin-reference-picker.js
       - name: 0.5.64 standalone toolbar and retired legacy extension safety
         run: |
           php scripts/test-0-5-64-toolbar.php

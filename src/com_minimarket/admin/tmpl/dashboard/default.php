@@ -84,7 +84,7 @@ $sections = [
 <div class="com-minimarket-dashboard mm-admin-panel">
     <div class="mm-dashboard-topbar d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
         <div>
-            <h2 class="h3 mb-1"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_HEADING'); ?></h2>
+            <h2 class="h3 mb-1"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_HEADING'); ?><?php if(!empty($this->version)): ?> <span class="badge bg-secondary fs-6 align-middle ms-2">v<?php echo htmlspecialchars((string)$this->version, ENT_QUOTES, 'UTF-8'); ?></span><?php endif; ?></h2>
             <p class="text-muted mb-0"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_WIDGETS_HELP'); ?></p>
         </div>
         <a class="btn btn-primary d-inline-flex align-items-center gap-2"

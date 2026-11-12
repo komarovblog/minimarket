@@ -77,6 +77,12 @@ final class CategoryDisplayOptions
             $count=$local===-1?$globalValue:$local;
             $result['cards_'.$size]=max(1,min(6,$count));
         }
+        // Subcategory tile count is independent of product list/grid layout.
+        foreach (['xs'=>1,'sm'=>1,'md'=>2,'lg'=>3,'xl'=>4,'xxl'=>4] as $size=>$default) {
+            $local=(int)($category->{'subcategory_cards_'.$size}??-1);
+            $globalValue=(int)$global->get('subcategory_cards_'.$size,$default);
+            $result['subcategory_cards_'.$size]=max(1,min(6,$local===-1?$globalValue:$local));
+        }
         $globalLimit=(int)$global->get('category_products_per_page',10);
         if (!in_array($globalLimit,[10,20,30,50],true)) $globalLimit=10;
         $localLimit=(int)($category->products_per_page??0);
@@ -94,6 +100,16 @@ final class CategoryDisplayOptions
         $result['filter_stock_enabled']=$stock===-1
             ?(int)$global->get('filter_stock_enabled',0)===1:$stock===1;
         return $result;
+    }
+
+    public static function subcategoryGridClasses(array $config): string
+    {
+        return 'row row-cols-' . $config['subcategory_cards_xs']
+            . ' row-cols-sm-' . $config['subcategory_cards_sm']
+            . ' row-cols-md-' . $config['subcategory_cards_md']
+            . ' row-cols-lg-' . $config['subcategory_cards_lg']
+            . ' row-cols-xl-' . $config['subcategory_cards_xl']
+            . ' row-cols-xxl-' . $config['subcategory_cards_xxl'] . ' g-3';
     }
 
     public static function bootstrapGridClasses(array $config): string

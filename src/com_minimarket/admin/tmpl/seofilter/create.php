@@ -24,7 +24,7 @@ Factory::getApplication()->getDocument()->getWebAssetManager()
  <input type="hidden" name="id" value="<?php echo (int)($p->id??0); ?>">
  <?php echo HTMLHelper::_('form.token'); ?>
  <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-seofilter', ['active' => 'main']); ?>
-   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'main', Text::_('COM_MINIMARKET_SEO_TAB_MAIN')); ?>
+   <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'main', Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
  <div class="card card-body mm-admin-panel">
     <div class="row g-3">
      <div class="col-md-6"><label class="form-label" for="mm-seo-name"><?php echo Text::_('COM_MINIMARKET_SEO_LANDING_NAME'); ?> *</label>
