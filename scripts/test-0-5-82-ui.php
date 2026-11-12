@@ -97,9 +97,12 @@ $ok(str_contains($cartJs,'fetch(form.action') &&
 $admin=(string)file_get_contents($root.'admin/src/Controller/DisplayController.php');
 $ok(str_contains($admin,"useScript('table.columns')") &&
  str_contains($admin,"useScript('multiselect')") &&
- str_contains($admin,'inherited-options.js') &&
- !str_contains($admin,'admin-columns.js'),'native Joomla columns replace custom picker');
-$ok(!is_file($root.'media/js/admin-columns.js'),'obsolete column picker removed');
+ str_contains($admin,'inherited-options.js'),
+ 'native Joomla list tooling is loaded');
+$ok(is_file($root.'media/js/admin-columns.js') &&
+ is_file($root.'admin/tmpl/shared/column-toggle.php') &&
+ str_contains((string)file_get_contents($root.'admin/tmpl/orders/default.php'),'column-toggle.php'),
+ '0.6.7 orders include column management requested by administrators');
 foreach(['category-actions.js','inherited-options.js','manual-order.js'] as $file){
     $ok(is_file($root.'media/js/'.$file),'new Javascript '.$file);
 }
