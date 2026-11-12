@@ -33,10 +33,11 @@ final class CategoryDisplayOptions
         $result['navigation_mode']=in_array($nav,['pages','load_more'],true)?$nav:'pages';
         $trigger=(string)$global->get('category_load_trigger','button');
         $result['load_trigger']=in_array($trigger,['button','scroll'],true)?$trigger:'button';
-        $result['pagination_page_links']=(int)$global->get('category_pagination_page_links',1)===1;
-        $result['pagination_next']=(int)$global->get('category_pagination_next',1)===1;
-        $result['pagination_previous']=(int)$global->get('category_pagination_previous',1)===1;
-        $result['load_previous']=(int)$global->get('category_load_previous',1)===1;
+        // Always provide accessible page links and two-way product loading.
+        $result['pagination_page_links']=true;
+        $result['pagination_next']=true;
+        $result['pagination_previous']=true;
+        $result['load_previous']=true;
         $limit=(int)$global->get('category_product_gallery_limit',5);
         $result['product_gallery_limit']=in_array($limit,[3,5,8],true)?$limit:5;
         // Custom information properties default to the full product page.

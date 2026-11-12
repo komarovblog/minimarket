@@ -325,6 +325,8 @@ jobs:
           php scripts/test-0-5-84-features.php
           php scripts/test-0-5-97.php
           php scripts/test-0-5-98.php
+          php scripts/test-0-5-99.php
+          node --check src/com_minimarket/media/js/gallery.js
           node --check src/com_minimarket/media/js/product-page.js
           node --check src/com_minimarket/media/js/faceted-catalog.js
           node --check src/com_minimarket/media/js/admin-display-groups.js

@@ -8,7 +8,7 @@ final class BundleStock
 {
     public static function snapshot(DatabaseInterface $db):array
     {
-        $q=$db->getQuery(true)->select(['id','category_id','product_type','state','stock','option_stock_mode'])
+        $q=$db->getQuery(true)->select(['id','category_id','product_type','delivery_type','state','stock','option_stock_mode'])
             ->from($db->quoteName('#__minimarket_products'));
         $db->setQuery($q); $products=[];
         foreach ((array)$db->loadAssocList() as $r) $products[(int)$r['id']]=$r;

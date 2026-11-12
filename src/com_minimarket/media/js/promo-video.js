@@ -1,4 +1,4 @@
-/* User-initiated expansion and dismissal, muted autoplay, reduced-motion safety. */
+/* User-initiated promo; never autoplay or loop product videos. */
 (() => {
  'use strict';
  function boot() {
@@ -22,6 +22,7 @@
    panel.hidden=!opened;
    expand?.setAttribute('aria-expanded',String(opened));
    player.setAttribute('aria-expanded',String(opened));
+   if(opened && !reduced) play(); else player.pause();
   }
   // Clicking the floating video itself is an explicit expansion gesture.
   player.addEventListener('click',toggle);
@@ -36,10 +37,11 @@
    root.hidden=true;player.pause();
   });
   document.addEventListener('visibilitychange',()=>{
-   if(document.hidden)player.pause();else play();
+   if(document.hidden)player.pause();
   });
-  // Avoid media auto-playing for users who prefer less animation.
-  if(reduced){player.removeAttribute('autoplay');player.pause();}else play();
+  player.removeAttribute('autoplay');
+  player.removeAttribute('loop');
+  player.pause();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
  else boot();

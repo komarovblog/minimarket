@@ -30,7 +30,7 @@ foreach(['buyer','delivery','payment'] as $step){
       'safe HTML editor '.$step);
 }
 foreach(['product_detail_layout','product_detail_show_similar',
-    'product_detail_show_bought_together','product_detail_show_reviews',
+    'product_detail_show_bought_together','product_detail_gallery_effect',
     'product_detail_sticky_bar','product_detail_section_nav'] as $name){
     $check(count($config->xpath('//fieldset[@name="display"]/field[@name="'.$name.'"]'))===1,
       'product-page option '.$name);
@@ -58,7 +58,7 @@ $consumer=(string)file_get_contents($root.'site/src/Service/ProductRecommendatio
 $catalog=(string)file_get_contents($root.'site/src/Service/CatalogRepository.php');
 $check(str_contains($productView,'product_detail_show_similar')
     &&str_contains($productView,'product_detail_show_bought_together')
-    &&str_contains($productView,'product_detail_show_reviews')
+    &&str_contains($productView,'reviews_enabled')
     &&str_contains($productView,'product_detail_sticky_bar')
     &&str_contains($productView,'product_detail_section_nav'), 'options wired to product view');
 $check(str_contains($product,'data-mm-product-tab')

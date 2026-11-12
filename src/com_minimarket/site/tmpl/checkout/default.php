@@ -109,7 +109,12 @@ $firstPayment=array_key_first($this->paymentMethods);
                 <?php endif; ?>
 
                 <?php if($this->skipDelivery): ?>
-                    <input type="hidden" name="delivery_method" value="pickup" data-fee-cents="<?php echo (int)($this->deliveryMethods['pickup']['fee_cents']??0); ?>">
+                    <input type="hidden" name="delivery_method"
+                           value="<?php echo $this->needsPhysical?'pickup':'digital'; ?>"
+                           data-fee-cents="<?php echo (int)($this->deliveryMethods['pickup']['fee_cents']??0); ?>">
+                    <?php if(!$this->needsPhysical): ?>
+                        <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_DIGITAL_NO_SHIPPING'); ?></p>
+                    <?php endif; ?>
                 <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-delivery">
                     <h2 id="mm-checkout-delivery" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_RECEIPT'); ?></h2>
@@ -258,7 +263,21 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <label for="mm-customer-website">Website</label>
                         <input id="mm-customer-website" name="website" tabindex="-1" autocomplete="off">
                     </div>
-                    <input type="hidden" name="checkout_key" value="<?php echo $this->escape($this->checkoutKey); ?>">
+                    <?php if($this->confirmationDescription!==''): ?>
+                         <div class="mb-3"><?php echo InputFilter::getInstance()->clean($this->confirmationDescription,'HTML'); ?></div>
+                     <?php endif; ?>
+                     <?php if($this->requireTerms): ?>
+                         <div class="form-check mb-3">
+                             <input type="checkbox" class="form-check-input" id="mm-checkout-terms"
+                                    name="accept_terms" value="1" required>
+                             <label class="form-check-label" for="mm-checkout-terms">
+                                 <?php echo Text::_('COM_MINIMARKET_CHECKOUT_TERMS_AGREE'); ?>
+                                 <a href="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?Itemid='.$this->termsItemid,false)); ?>"
+                                    target="_blank" rel="noopener noreferrer"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_TERMS_LINK'); ?></a>
+                             </label>
+                         </div>
+                     <?php endif; ?>
+                     <input type="hidden" name="checkout_key" value="<?php echo $this->escape($this->checkoutKey); ?>">
                     <?php echo HTMLHelper::_('form.token'); ?>
                     <button type="submit" class="btn btn-primary w-100"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_SUBMIT'); ?></button>
                     <a class="btn btn-outline-secondary mt-2 w-100" href="<?php echo $this->escape(RouteHelper::cart()); ?>">

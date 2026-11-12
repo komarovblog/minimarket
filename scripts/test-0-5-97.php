@@ -20,7 +20,7 @@ $p=new class {
             ['code'=>'entrance','title'=>'Entrance','type'=>'text','required'=>1,'mask'=>'AA-99','state'=>1],
             ['code'=>'extra_color','title'=>'Color','type'=>'select','required'=>0,'options'=>"Blue\nRed",'state'=>1]
         ],
-        'checkout_buyer_skip'=>1
+        'checkout_phone_mode'=>'optional'
     ];
     public function get(string $key,mixed $default=null):mixed {return $this->data[$key]??$default;}
 };
@@ -34,10 +34,10 @@ $reject(fn()=>CheckoutExtraFields::validate(['entrance'=>'XX-42','extra_color'=>
     'reject choice outside configured values');
 $reject(fn()=>CheckoutExtraFields::validate(['entrance'=>'','extra_color'=>'Red'],$defs),
     'reject missing required field');
-$check(!CheckoutSettings::skipBuyer($p,(object)['id'=>3,'email'=>'a@example.org','block'=>0],$defs),
+$check(!CheckoutSettings::skipBuyer($p, (object)['id'=>3,'name'=>'Test Buyer','email'=>'a@example.org','block'=>0],$defs),
     'required custom field blocks skipping buyer');
 $p->data['checkout_custom_fields']=[];
-$check(CheckoutSettings::skipBuyer($p,(object)['id'=>3,'email'=>'a@example.org','block'=>0],[]),
+$check(CheckoutSettings::skipBuyer($p,(object)['id'=>3,'name'=>'Test Buyer','email'=>'a@example.org','block'=>0],[]),
     'verified signed-in identity can skip optional buyer step');
 $check(!CheckoutSettings::skipBuyer($p,(object)['id'=>0,'email'=>'','block'=>0],[]),
     'guests cannot bypass contact form');
@@ -48,8 +48,8 @@ foreach(['mm_pagination_note','category_navigation_mode','category_products_per_
     $check(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="'.$key.'"]'))===1,
         'pagination field '.$key);
 }
-foreach(['checkout_custom_fields','checkout_phone_mask','checkout_buyer_skip',
-    'checkout_delivery_skip','checkout_payment_skip','checkout_show_login_button'] as $key){
+foreach(['checkout_custom_fields','checkout_phone_mask','checkout_confirmation_description',
+    'checkout_require_terms','checkout_show_login_button'] as $key){
     $check(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="'.$key.'"]'))===1,
         'checkout field '.$key);
 }

@@ -43,6 +43,9 @@ final class CartStock
                 || ($products[$id]['product_type'] ?? '') !== 'simple') {
                 throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
             }
+            // Digital items have no physical stock demand. Their published
+            // state and variant selection are still validated here.
+            $digital=(string)($products[$id]['delivery_type']??'physical')==='digital';
             if ($variantId > 0) {
                 $variant = $variants[$variantId] ?? null;
                 if (!$variant || (int)$variant['product_id'] !== $id
@@ -57,7 +60,7 @@ final class CartStock
                 }
                 $key = 'p:'.$id;
             }
-            $demand[$key] = ($demand[$key] ?? 0) + $qty;
+            if(!$digital)$demand[$key] = ($demand[$key] ?? 0) + $qty;
         };
 
         $walk = static function (int $id, int $qty, int $depth, array $path)

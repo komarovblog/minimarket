@@ -22,6 +22,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\ProductCollections;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleItems;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductBadges;
+use MiniMarket\Component\Minimarket\Administrator\Service\ProductDigitalFile;
 
 final class ProductModel extends AdminModel
 {
@@ -384,12 +385,16 @@ final class ProductModel extends AdminModel
                 $productId = (int) $this->getState($this->getName() . '.id');
                 ProductGroups::replaceForProduct($db, $productId, $groupIds, $newGroupTitle);
             }
+            // Private digital assets are attached only to the saved product ID.
+            // A missing file is acceptable in a draft but cannot be purchased.
+            ProductDigitalFile::upload($db,$savedProductId);
             $db->transactionCommit();
             return true;
         } catch (\Throwable $error) {
             $db->transactionRollback();
             $key=$error->getMessage();
             $this->setError(Text::_(str_starts_with($key,'COM_MINIMARKET_BUNDLE_')
+                ||str_starts_with($key,'COM_MINIMARKET_DIGITAL_')
                 ? $key : 'COM_MINIMARKET_VARIANTS_SAVE_FAILED'));
             return false;
         }

@@ -35,7 +35,7 @@ final class OrderStorage
             'rate_source'=>'none','payment_method'=>'on_receipt','zone_id'=>null,
             'country'=>'RU','region'=>'','postcode'=>''
         ],$delivery);
-        if (!in_array($delivery['method'],['pickup','courier'],true)
+        if (!in_array($delivery['method'],['pickup','courier','digital'],true)
             || !in_array($delivery['payment_method'],['on_receipt','bank_transfer'],true)
             || !in_array($delivery['rate_source'],['none','directory','zones'],true)
             || !is_int($delivery['fee_cents']) || $delivery['fee_cents']<0
@@ -61,6 +61,14 @@ final class OrderStorage
                 || !in_array($line['type']??'', ['simple','bundle'],true)) {
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_CART_INVALID');
             }
+            $kind=(string)($line['delivery_type']??'physical');
+            $asset=(string)($line['digital_asset_key']??'');
+            $filename=(string)($line['digital_filename']??'');
+            if(!in_array($kind,['physical','digital'],true)
+                ||($kind==='digital'&&(!preg_match('/^[a-f0-9]{48}\\.(?:pdf|zip|epub|mp3|mp4|txt)$/D',$asset)
+                    ||$filename===''||mb_strlen($filename)>255))
+                ||($kind==='physical'&&($asset!==''||$filename!=='')))
+                throw new \DomainException('COM_MINIMARKET_CHECKOUT_CART_INVALID');
             $sku=(string)($line['sku']??'');
             $title=(string)($line['title']??'');
             if ($title==='' || mb_strlen($title)>255 || mb_strlen($sku)>100) {
@@ -70,8 +78,13 @@ final class OrderStorage
             $units += $qty;
             $lines[]=['product_id'=>$pid,'variant_id'=>$vid,'quantity'=>$qty,
                 'unit_cents'=>$price,'line_cents'=>$qty*$price,'sku'=>$sku,
-                'title'=>$title];
+                'title'=>$title,'delivery_type'=>$kind,
+                'digital_asset_key'=>$asset,'digital_filename'=>$filename];
         }
+        $anyPhysical=count(array_filter($lines,static fn($r)=>$r['delivery_type']==='physical'))>0;
+        if(($delivery['method']==='digital')===$anyPhysical
+           ||($delivery['method']==='digital'&&$delivery['payment_method']!=='bank_transfer'))
+            throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
         if ($total!==(int)($quote['total_cents']??-1)
             || $units!==(int)($quote['units']??-1)
             || $units>CartState::MAX_UNITS) {
@@ -111,13 +124,15 @@ final class OrderStorage
             if ($orderId<1) throw new \RuntimeException('Order insert did not create ID');
             $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_items'))
                 ->columns($db->quoteName(['order_id','product_id','variant_id',
-                    'sku','title','unit_cents','quantity','line_cents']));
+                    'sku','title','unit_cents','quantity','line_cents',
+                    'delivery_type','digital_asset_key','digital_filename']));
             foreach ($lines as $line) {
                 $q->values(implode(',',[
                     (string)$orderId,(string)$line['product_id'],(string)$line['variant_id'],
                     $db->quote($line['sku']),$db->quote($line['title']),
                     (string)$line['unit_cents'],(string)$line['quantity'],
-                    (string)$line['line_cents']
+                    (string)$line['line_cents'],$db->quote($line['delivery_type']),
+                    $db->quote($line['digital_asset_key']),$db->quote($line['digital_filename'])
                 ]));
             }
             $db->setQuery($q);$db->execute();

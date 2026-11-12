@@ -37,6 +37,7 @@ final class ProductRecommendations
                 .' ON o.id=a.order_id')
             ->where('a.product_id='.(int)$productId)
             ->where("o.status IN ('confirmed','completed')")
+            ->where("o.payment_status='paid'")
             ->where('o.deleted_at IS NULL')
             ->group('b.product_id')
             ->order('COUNT(DISTINCT o.id) DESC, b.product_id DESC');

@@ -32,9 +32,9 @@ final class CatalogRepository
     /** A product can be sold only if its relevant SKU stock has units left. */
     private function availabilitySql(): string
     {
-        if (!$this->inventoryEnabled()) return '1=1';
+        if (!$this->inventoryEnabled()) return "(p.delivery_type <> 'digital' OR p.digital_asset_key <> '')";
         $variants = $this->db->quoteName('#__minimarket_product_variants');
-        return "(p.product_type = 'bundle' OR (p.product_type = 'simple' AND ("
+        return "( (p.delivery_type = 'digital' AND p.digital_asset_key <> '' AND p.digital_filename <> '') OR p.product_type = 'bundle' OR (p.product_type = 'simple' AND ("
             . "(p.option_stock_mode = 0 AND p.stock > 0)"
             . " OR (p.option_stock_mode <> 0 AND ("
             . "EXISTS (SELECT 1 FROM ".$variants." AS mmv"
@@ -47,12 +47,14 @@ final class CatalogRepository
     /** Physical bundle stock is derived from its real components, not p.stock. */
     private function filterListingRows(array $rows): array
     {
-        if (!$this->inventoryEnabled()) return $rows;
-        // SQL already checks published SKU stock for simple products.
-        // Their base p.stock may legitimately be zero when SKU stock is used.
+        // Published digital products without a readable private file cannot
+        // appear as purchasable cards, even if inventory tracking is disabled.
+        $rows=array_values(array_filter($rows,static fn($p):bool=>
+            ($p->delivery_type??'physical')!=='digital'||DigitalAsset::isReady($p)));
+        if(!$this->inventoryEnabled())return $rows;
         return array_values(array_filter($rows,static fn($p):bool=>
-            ($p->product_type ?? 'simple') !== 'bundle'
-            || !isset($p->stock) || (int)$p->stock > 0));
+            ($p->product_type??'simple')!=='bundle'
+            || !isset($p->stock)||(int)$p->stock>0));
     }
 
 
@@ -139,7 +141,8 @@ final class CatalogRepository
             'badge_benefit','badge_sale_display','badge_benefit_display',
             'bundle_price_mode','bundle_discount_pct','badge_new','badge_new_days',
             'badge_new_since','badge_popular','badge_popular_days',
-            'badge_popular_since','stock','product_type','option_stock_mode',
+            'badge_popular_since','stock','product_type','delivery_type',
+            'digital_asset_key','digital_filename','option_stock_mode',
             'category_id','image','image_alt'];
         $q=$this->db->getQuery(true)
             ->select(array_map(fn($field)=>$this->db->quoteName('p.'.$field),$fields))
@@ -449,6 +452,8 @@ final class CatalogRepository
                 $this->db->quoteName('p.stock'),
                 $this->db->quoteName('p.option_stock_mode'),
                 $this->db->quoteName('p.delivery_type'),
+                $this->db->quoteName('p.digital_asset_key'),
+                $this->db->quoteName('p.digital_filename'),
                 $this->db->quoteName('p.product_type'),
                 $this->db->quoteName('p.image'),
                 $this->db->quoteName('p.image_alt'),

@@ -7,7 +7,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Component\ComponentHelper;
 ?>
 <form action="<?php echo Route::_('index.php?option=com_minimarket&view=product&layout=edit&id=' . (int) $this->item->id); ?>"
-      method="post" name="adminForm" id="adminForm" class="form-validate"
+      method="post" enctype="multipart/form-data" name="adminForm" id="adminForm" class="form-validate"
       data-mm-inventory-enabled="<?php echo (int) ComponentHelper::getParams('com_minimarket')->get('inventory_enabled',1) === 1 ? '1' : '0'; ?>"
       data-mm-inherited="<?php echo htmlspecialchars(json_encode(['meta_robots'=>(string)\Joomla\CMS\Factory::getConfig()->get('robots','index,follow')],JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP),ENT_QUOTES,'UTF-8'); ?>">
     <?php echo HTMLHelper::_('uitab.startTabSet', 'minimarket-product', ['active' => 'details']); ?>
@@ -47,7 +47,7 @@ use Joomla\CMS\Component\ComponentHelper;
                 <?php
                 // Entity kind comes from the sidebar editor, not a dropdown.
                 // The bundle price method appears directly after SKU.
-                foreach (['id','title','alias','category_id','product_type','sku'] as $field)
+                foreach (['id','title','alias','category_id','product_type','delivery_type','sku'] as $field)
                     echo $this->form->renderField($field);
                 if ($isBundle) {
                     echo $this->form->renderField('bundle_price_mode');
@@ -75,6 +75,23 @@ use Joomla\CMS\Component\ComponentHelper;
                     echo $this->form->renderField('option_stock_mode');
                     echo $this->form->renderField('stock');
                 }
+                if (!$isBundle) :
+                ?>
+                <div class="control-group" data-mm-digital-upload>
+                    <div class="control-label">
+                        <label for="mm-digital-upload"><?php echo Text::_('COM_MINIMARKET_DIGITAL_UPLOAD'); ?></label>
+                    </div>
+                    <div class="controls">
+                        <input id="mm-digital-upload" name="digital_upload" type="file" class="form-control"
+                               accept=".pdf,.zip,.epub,.mp3,.mp4,.txt">
+                        <div class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_UPLOAD_HELP'); ?></div>
+                        <?php if(!empty($this->item->digital_filename)): ?>
+                            <div class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_CURRENT_FILE'); ?>:
+                                <?php echo $this->escape((string)$this->item->digital_filename); ?></div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif;
                 // Delivery zone tariffs use these physical measurements.
                 echo $this->form->renderField('shipping_weight_grams');
                 echo $this->form->renderField('shipping_volume_cm3');

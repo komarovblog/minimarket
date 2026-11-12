@@ -89,9 +89,9 @@ $showSystemField=static function(string $name) use ($systemParams,$legacySystem)
 $showSku=$showSystemField('sku');
 $showPrice=$showSystemField('price');
 $showStock=$showSystemField('stock');
-$isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physical'
-    && (string)\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket')
-        ->get('shop_type','physical') === 'physical';
+$isPhysical=(string)($this->product->delivery_type??'physical')==='physical';
+$canOrder=$isPhysical || \MiniMarket\Component\Minimarket\Site\Service\DigitalAsset::isReady($this->product);
+$showStock=$showStock && $isPhysical;
 ?>
 <nav aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_BREADCRUMB')); ?>">
     <a href="<?php echo $this->escape(RouteHelper::catalog()); ?>"><?php echo Text::_('COM_MINIMARKET_CATALOG_MENU_TITLE'); ?></a>
@@ -176,7 +176,7 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
         ?>
         <aside class="mm-promo-video" data-mm-promo aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_VIDEO_PROMO')); ?>">
             <div class="mm-promo-video__media">
-                <video data-mm-promo-player autoplay muted loop playsinline preload="metadata"
+                <video data-mm-promo-player muted playsinline preload="metadata"
                        role="button" tabindex="0" aria-expanded="false"
                        aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_VIDEO_PROMO_EXPAND')); ?>"
                        <?php if ($promoPosterUrl !== '') : ?>poster="<?php echo $this->escape($promoPosterUrl); ?>"<?php endif; ?>>
@@ -192,7 +192,7 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
             </div>
             <div class="mm-promo-video__expanded" data-mm-promo-panel hidden>
                 <p><?php echo $this->escape((string)($promoVideo->title ?: $this->product->title)); ?></p>
-                <?php if ($isPhysical) : ?>
+                <?php if ($canOrder) : ?>
                     <a class="btn btn-primary" href="#mm-cart-add-form">
                         <?php echo Text::_('COM_MINIMARKET_VIDEO_PROMO_BUY'); ?>
                     </a>
@@ -277,7 +277,7 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
              data-mm-description-base="<?php echo $this->escape(InputFilter::getInstance()->clean(
                  (string)($this->product->description??''),'HTML')); ?>"
              data-mm-stock-mode="<?php echo (int)($this->product->option_stock_mode??0); ?>"
-             data-mm-inventory-enabled="<?php echo $this->inventoryEnabled ? '1' : '0'; ?>"
+             data-mm-inventory-enabled="<?php echo $this->inventoryEnabled && $isPhysical ? '1' : '0'; ?>"
              data-mm-stock-base="<?php echo (int)$this->product->stock; ?>"
              data-mm-gallery-base="<?php echo $this->escape(json_encode(
                  $baseImages,
@@ -324,9 +324,9 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
     <?php
     $initialStock = $defaultVariant && (int)($this->product->option_stock_mode??1) !== 0
         ? (int)$defaultVariant['stock'] : (int)$this->product->stock;
-    $initialCanBuy = !$this->inventoryEnabled || $initialStock > 0;
+    $initialCanBuy = $canOrder && (!$this->inventoryEnabled || !$isPhysical || $initialStock > 0);
     ?>
-    <?php if ($isPhysical) : ?>
+    <?php if ($canOrder) : ?>
         <form action="<?php echo $this->escape(RouteHelper::cartAction('add')); ?>"
               method="post" class="mm-cart-add" id="mm-cart-add-form" data-mm-cart-form>
             <input type="hidden" name="product_id" value="<?php echo (int)$this->product->id; ?>">
@@ -602,7 +602,7 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
         <?php endif; ?>
     <?php endif; ?>
 
-    <?php if($this->showStickyBuyBar && $isPhysical): ?>
+    <?php if($this->showStickyBuyBar && $canOrder): ?>
     <aside class="mm-product-sticky-bar shadow-sm" data-mm-product-sticky hidden
            aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_STICKY_BUY')); ?>">
         <div class="container-fluid d-flex align-items-center gap-3 py-2">

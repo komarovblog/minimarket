@@ -72,10 +72,59 @@ $order=$this->order;
     </dl>
     <p><strong><?php echo Text::_('COM_MINIMARKET_ORDER_AMOUNT'); ?>:
         <?php echo number_format((int)$order->total_cents/100,2,'.',' '); ?> ₽</strong></p>
-    <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_ORDER_NO_PAYMENT'); ?></p>
+    <div class="d-flex flex-wrap gap-3 my-3">
+        <div>
+            <strong><?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS'); ?>:</strong>
+            <?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS_'.strtoupper((string)($order->payment_status??'unpaid'))); ?>
+        </div>
+        <div>
+            <strong><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?>:</strong>
+            <?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper((string)($order->fulfillment_status??'pending'))); ?>
+        </div>
+    </div>
     <?php $statusColors=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelled'=>'secondary']; ?>
     <p><span class="badge bg-<?php echo $statusColors[(string)$order->status]??'secondary'; ?>">
         <?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$order->status)); ?></span></p>
+    <?php if($this->canUpdate && empty($order->deleted_at) && (string)$order->status!=='cancelled'): ?>
+        <div class="row g-3 my-3">
+            <div class="col-12 col-md-6">
+                <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.payment',false)); ?>">
+                    <input type="hidden" name="id" value="<?php echo (int)$order->id; ?>">
+                    <label for="mm-payment-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_PAYMENT_ACTION'); ?></label>
+                    <select id="mm-payment-status" name="payment_status" class="form-select">
+                        <?php if((string)($order->payment_status??'unpaid')==='unpaid'): ?>
+                            <option value="paid"><?php echo Text::_('COM_MINIMARKET_PAYMENT_MARK_PAID'); ?></option>
+                        <?php elseif((string)$order->payment_status==='paid'): ?>
+                            <?php if($this->hasDigitalItems): ?>
+                                <option value="paid"><?php echo Text::_('COM_MINIMARKET_DIGITAL_RESEND'); ?></option>
+                            <?php endif; ?>
+                            <option value="refunded"><?php echo Text::_('COM_MINIMARKET_PAYMENT_MARK_REFUNDED'); ?></option>
+                        <?php endif; ?>
+                    </select>
+                    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PAYMENT_MANUAL_HELP'); ?></p>
+                    <?php echo HTMLHelper::_('form.token'); ?>
+                    <button class="btn btn-primary" type="submit"><?php echo Text::_('JSAVE'); ?></button>
+                </form>
+            </div>
+            <?php if((string)($order->delivery_method??'')!=='digital'): ?>
+            <div class="col-12 col-md-6">
+                <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.fulfillment',false)); ?>">
+                    <input type="hidden" name="id" value="<?php echo (int)$order->id; ?>">
+                    <label for="mm-fulfillment-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?></label>
+                    <select name="fulfillment_status" id="mm-fulfillment-status" class="form-select">
+                        <?php foreach(['pending','shipped','delivered'] as $value): ?>
+                            <option value="<?php echo $value; ?>"<?php echo ($order->fulfillment_status??'pending')===$value?' selected':''; ?>>
+                                <?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper($value)); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php echo HTMLHelper::_('form.token'); ?>
+                    <button class="btn btn-primary mt-2" type="submit"><?php echo Text::_('JSAVE'); ?></button>
+                </form>
+            </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
     <?php if ($this->canDelete && ((string)$order->status==='cancelled' || !empty($order->deleted_at))) : ?>
         <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.'.(!empty($order->deleted_at)?'restore':'trash'),false)); ?>" class="mb-3"
               <?php if(empty($order->deleted_at)) : ?>data-confirm="<?php echo $this->escape(Text::_('COM_MINIMARKET_ORDER_TRASH_CONFIRM')); ?>" onsubmit="return confirm(this.dataset.confirm)"<?php endif; ?>>

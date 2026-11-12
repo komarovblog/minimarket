@@ -50,8 +50,9 @@ final class CheckoutDelivery
     }
 
     /** @return array<string,array<string,mixed>> */
-    public static function methods(object $params): array
+    public static function methods(object $params,bool $needsPhysical=true): array
     {
+        if(!$needsPhysical)return ['digital'=>['fee_cents'=>0]];
         $methods=[];
         if ((int)$params->get('delivery_pickup_enabled',1)===1) {
             $fee=(int)$params->get('delivery_pickup_fee_cents',0);
@@ -77,10 +78,10 @@ final class CheckoutDelivery
     }
 
     /** @return array<string,string> */
-    public static function payments(object $params): array
+    public static function payments(object $params,bool $digitalOnly=false): array
     {
         $methods=[];
-        if ((int)$params->get('payment_on_receipt_enabled',1)===1) {
+        if (!$digitalOnly && (int)$params->get('payment_on_receipt_enabled',1)===1) {
             $methods['on_receipt']='COM_MINIMARKET_PAYMENT_ON_RECEIPT';
         }
         if ((int)$params->get('payment_bank_transfer_enabled',0)===1) {
@@ -90,15 +91,20 @@ final class CheckoutDelivery
     }
 
     /** Server-validated order snapshot; never accept any browser-supplied fee. */
-    public static function quote(object $params,array $input,int $itemsTotalCents=0,int $weightGrams=0,int $volumeCm3=0): array
+    public static function quote(object $params,array $input,int $itemsTotalCents=0,int $weightGrams=0,int $volumeCm3=0,bool $needsPhysical=true): array
     {
-        $methods=self::methods($params);
-        $payments=self::payments($params);
+        $methods=self::methods($params,$needsPhysical);
+        $payments=self::payments($params,!$needsPhysical);
         $method=(string)($input['delivery_method']??'');
         $payment=(string)($input['payment_method']??'');
         if (!$methods || !$payments || !array_key_exists($method,$methods)
             || !array_key_exists($payment,$payments)) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
+        }
+        if ($method==='digital') {
+            return ['method'=>'digital','city'=>'','address'=>'','country'=>'RU',
+                'region'=>'','postcode'=>'','zone_id'=>null,'fee_cents'=>0,
+                'rate_source'=>'none','payment_method'=>$payment];
         }
         if ($method==='pickup') {
             $address=$methods['pickup']['address'];

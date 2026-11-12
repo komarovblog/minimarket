@@ -53,6 +53,10 @@ final class CheckoutController extends BaseController
                 $volume+=(int)($line['shipping_volume_cm3']??0)*(int)$line['quantity'];
             }
             $input=$app->input->post;
+            $needsPhysical=false;
+            foreach($quote['lines'] as $line){
+                if(($line['delivery_type']??'physical')!=='digital')$needsPhysical=true;
+            }
             $delivery=CheckoutDelivery::quote($params,[
                 'delivery_method'=>$input->getString('delivery_method',''),
                 'delivery_city'=>$input->getString('delivery_city',''),
@@ -61,7 +65,7 @@ final class CheckoutController extends BaseController
                 'delivery_postcode'=>$input->getString('delivery_postcode',''),
                 'delivery_address'=>$input->getString('delivery_address',''),
                 'payment_method'=>$input->getString('payment_method','')
-            ],(int)$quote['total_cents'],$grams,$volume);
+            ],(int)$quote['total_cents'],$grams,$volume,$needsPhysical);
             $result=['success'=>true,'discount_cents'=>(int)($promo['discount_cents']??0),
                 'shipping_cents'=>(int)$delivery['fee_cents'],
                 'message'=>Text::_('COM_MINIMARKET_PROMO_PREVIEW')];
@@ -82,9 +86,6 @@ final class CheckoutController extends BaseController
         }
         $session=$app->getSession();
         $params=ComponentHelper::getParams('com_minimarket');
-        if ((string)$params->get('shop_type','physical')!=='physical') {
-            throw new \RuntimeException(Text::_('COM_MINIMARKET_CART_NOT_AVAILABLE'),403);
-        }
         // SMS mode must never silently save unverified orders. Until a real
         // provider and Joomla account flow exist it remains fail-closed.
         if (in_array(CheckoutSettings::mode($params),['email','sms'],true)
@@ -112,20 +113,39 @@ final class CheckoutController extends BaseController
         if ($app->input->post->getString('website','')!=='') {
             throw new \RuntimeException(Text::_('COM_MINIMARKET_CHECKOUT_INVALID'),400);
         }
+        if((int)$params->get('checkout_require_terms',0)===1){
+            if((int)$params->get('checkout_terms_itemid',0)<1
+               ||$app->input->post->getInt('accept_terms',0)!==1){
+                $app->enqueueMessage(Text::_('COM_MINIMARKET_CHECKOUT_TERMS_REQUIRED'),'warning');
+                $this->setRedirect(RouteHelper::checkout());return;
+            }
+        }
         $cart=CartState::normalize($session->get(CartState::SESSION_KEY,[]));
         if (!$cart) {
             $this->setRedirect(RouteHelper::cart());
             return;
         }
         try {
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $inventory=(int)$params->get('inventory_enabled',1)===1;
+            $quote=(new CartCatalog($db))->details($cart,$inventory);
+            if(!$quote['available'])throw new \DomainException($quote['error']?:'COM_MINIMARKET_CHECKOUT_CART_INVALID');
+            $needsPhysical=false;$hasDigital=false;
+            foreach($quote['lines'] as $line){
+                if(($line['delivery_type']??'physical')==='digital')$hasDigital=true;
+                else $needsPhysical=true;
+            }
+            if($hasDigital&&(int)$identity->id<1)
+                throw new \DomainException('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
             $policies=CheckoutSettings::fields($params);
+            if($hasDigital)$policies['email']='required';
             $customFields=CheckoutExtraFields::definitions($params);
             $skipBuyer=CheckoutSettings::skipBuyer($params,$identity,$customFields);
             if($skipBuyer)$policies=['name'=>'required','phone'=>'hidden','email'=>'required','comment'=>'hidden'];
             $contact=CheckoutData::normalize([
                 'name'=>$skipBuyer?(string)$identity->name:$app->input->post->get('customer_name','','string'),
                 'phone'=>$skipBuyer?'':$app->input->post->get('phone','','string'),
-                'email'=>$skipBuyer?(string)$identity->email:$app->input->post->get('email','','string'),
+                'email'=>$hasDigital?(string)$identity->email:($skipBuyer?(string)$identity->email:$app->input->post->get('email','','string')),
                 'comment'=>$skipBuyer?'':$app->input->post->get('comment','','string'),
             ],$policies);
             $mask=(string)$params->get('checkout_phone_mask','');
@@ -135,28 +155,25 @@ final class CheckoutController extends BaseController
             $postedExtra=$app->input->post->get('extra',[],'array');
             $contact['custom_fields']=CheckoutExtraFields::validate(
                 is_array($postedExtra)?$postedExtra:[],$skipBuyer?[]:$customFields);
-            $db=Factory::getContainer()->get(DatabaseInterface::class);
-            $inventory=(int)$params->get('inventory_enabled',1)===1;
-            $quote=(new CartCatalog($db))->details($cart,$inventory);
-            if (!$quote['available']) throw new \DomainException($quote['error']?:'COM_MINIMARKET_CHECKOUT_CART_INVALID');
             $grams=0;$volume=0;
             foreach($quote['lines'] as $line){
                 $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
                 $volume+=(int)($line['shipping_volume_cm3']??0)*(int)$line['quantity'];
             }
-            $methods=CheckoutDelivery::methods($params);
-            $payments=CheckoutDelivery::payments($params);
-            $skipDelivery=(int)$params->get('checkout_delivery_skip',0)===1 &&isset($methods['pickup']);
-            $skipPayment=(int)$params->get('checkout_payment_skip',0)===1 &&count($payments)>0;
+            $methods=CheckoutDelivery::methods($params,$needsPhysical);
+            $payments=CheckoutDelivery::payments($params,!$needsPhysical);
+            $skipDelivery=count($methods)===1
+                &&(isset($methods['pickup'])||isset($methods['digital']));
+            $skipPayment=count($payments)===1;
             $delivery=CheckoutDelivery::quote($params,[
-                'delivery_method'=>$skipDelivery?'pickup':$app->input->post->get('delivery_method','','string'),
+                'delivery_method'=>$skipDelivery?($needsPhysical?'pickup':'digital'):$app->input->post->get('delivery_method','','string'),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
                 'delivery_country'=>$app->input->post->get('delivery_country','RU','string'),
                 'delivery_region'=>$app->input->post->get('delivery_region','','string'),
                 'delivery_postcode'=>$app->input->post->get('delivery_postcode','','string'),
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
                 'payment_method'=>$skipPayment?(string)array_key_first($payments):$app->input->post->get('payment_method','','string'),
-            ],(int)$quote['total_cents'],$grams,$volume);
+            ],(int)$quote['total_cents'],$grams,$volume,$needsPhysical);
             $promoCode=strtoupper(trim((string)$app->input->post->get('promo_code',
                 (string)$session->get('com_minimarket.promo_code',''),'string')));
             $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery,'site',$promoCode);

@@ -82,10 +82,6 @@ final class CartController extends BaseController
                     throw new \DomainException('COM_MINIMARKET_CART_STOCK_ERROR');
                 }
             }
-            if ($mode !== 'remove' && (string)ComponentHelper::getParams('com_minimarket')
-                ->get('shop_type','physical') !== 'physical') {
-                throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
-            }
             if ($mode === 'add') {
                 $next = CartState::add($cart,$productId,$variantId,$quantity);
             } else {

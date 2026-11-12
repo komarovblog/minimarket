@@ -7,6 +7,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Session\Session;
 use Joomla\Database\DatabaseInterface;
+use MiniMarket\Component\Minimarket\Administrator\Service\DigitalFulfillment;
 
 /** Operators may change order status, never line snapshots or prices. */
 final class OrderController extends BaseController
@@ -77,6 +78,124 @@ final class OrderController extends BaseController
         }
     }
 
+
+    /** Manual payment verification only; never claim an external gateway charge. */
+    public function payment(): void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        if(!$app->getIdentity()->authorise('core.edit.state','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $id=$app->input->post->getInt('id',0);
+        $action=$app->input->post->getCmd('payment_status','');
+        if($id<1||!in_array($action,['paid','refunded'],true))
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $rows=[];$email='';$digitalOnly=false;
+        try{
+            // Site file helper shares the same private asset location.
+            require_once JPATH_SITE.'/components/com_minimarket/src/Service/DigitalAsset.php';
+            $db->transactionStart();
+            $db->setQuery('SELECT * FROM '.$db->quoteName('#__minimarket_orders')
+                .' WHERE id='.(int)$id.' AND deleted_at IS NULL FOR UPDATE');
+            $order=$db->loadAssoc();
+            if(!$order||$order['status']==='cancelled')throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
+            $before=$order['payment_status'];
+            if($action==='paid'){
+                if(!in_array($before,['unpaid','paid'],true))
+                    throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
+                if((int)$order['user_id']<1 && $order['delivery_method']==='digital')
+                    throw new \DomainException('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
+                $rows=DigitalFulfillment::prepare($db,$id);
+                if($rows && ((int)$order['user_id']<1
+                    ||filter_var($order['email'],FILTER_VALIDATE_EMAIL)===false))
+                    throw new \DomainException('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
+                $email=$order['email'];
+                $digitalOnly=$order['delivery_method']==='digital';
+                $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
+                    ." SET payment_status='paid', paid_at=COALESCE(paid_at,UTC_TIMESTAMP()) WHERE id=".(int)$id);
+                $db->execute();
+            }else{
+                if($before!=='paid')throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
+                $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
+                    ." SET payment_status='refunded' WHERE id=".(int)$id);
+                $db->execute();
+            }
+            if($before!==$action){
+                $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_events'))
+                    ->columns($db->quoteName(['order_id','actor_user_id','event_type','old_value','new_value','created_at']))
+                    ->values(implode(',',[(string)$id,(string)(int)$app->getIdentity()->id,
+                        $db->quote('payment'),$db->quote($before),$db->quote($action),'UTC_TIMESTAMP()']));
+                $db->setQuery($q);$db->execute();
+            }
+            $db->transactionCommit();
+        }catch(\Throwable $e){
+            $db->transactionRollback();
+            $app->enqueueMessage(Text::_($e instanceof \DomainException?$e->getMessage():'COM_MINIMARKET_PAYMENT_INVALID'),'warning');
+            $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
+            return;
+        }
+        if($action==='paid' && $rows){
+            if(DigitalFulfillment::send($db,$id,$rows,$email)){
+                // Digital-only orders complete after confirmed payment and
+                // successful delivery email. Mixed orders await physical shipping.
+                if($digitalOnly){
+                    $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
+                        ." SET fulfillment_status='delivered', fulfilled_at=UTC_TIMESTAMP(), status='completed'"
+                        ." WHERE id=".(int)$id." AND payment_status='paid' AND status<>'cancelled'");
+                    $db->execute();
+                }
+                $app->enqueueMessage(Text::_('COM_MINIMARKET_DIGITAL_SENT'));
+            }else{
+                $app->enqueueMessage(Text::_('COM_MINIMARKET_DIGITAL_SEND_FAILED'),'warning');
+            }
+        }else{
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_STATUS_SAVED'));
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
+    }
+
+    public function fulfillment(): void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        if(!$app->getIdentity()->authorise('core.edit.state','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $id=$app->input->post->getInt('id',0);
+        $state=$app->input->post->getCmd('fulfillment_status','');
+        if($id<1||!in_array($state,['pending','shipped','delivered'],true))
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $db->transactionStart();
+        try{
+            $db->setQuery('SELECT fulfillment_status,delivery_method,status FROM '
+                .$db->quoteName('#__minimarket_orders').' WHERE id='.(int)$id
+                .' AND deleted_at IS NULL FOR UPDATE');
+            $row=$db->loadAssoc();
+            if(!$row||$row['status']==='cancelled'
+                ||$row['delivery_method']==='digital')
+                throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
+            $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
+                ->set('fulfillment_status='.$db->quote($state))
+                ->set('fulfilled_at='.($state==='delivered'?'UTC_TIMESTAMP()':'NULL'))
+                ->where('id='.(int)$id);
+            $db->setQuery($q);$db->execute();
+            $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_events'))
+                ->columns($db->quoteName(['order_id','actor_user_id','event_type','old_value','new_value','created_at']))
+                ->values(implode(',',[(string)$id,(string)(int)$app->getIdentity()->id,
+                    $db->quote('fulfillment'),$db->quote($row['fulfillment_status']),
+                    $db->quote($state),'UTC_TIMESTAMP()']));
+            $db->setQuery($q);$db->execute();
+            $db->transactionCommit();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_STATUS_SAVED'));
+        }catch(\Throwable){
+            $db->transactionRollback();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_INVALID'),'warning');
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
+    }
 
     public function trash(): void { $this->changeTrash(true); }
     public function restore(): void { $this->changeTrash(false); }

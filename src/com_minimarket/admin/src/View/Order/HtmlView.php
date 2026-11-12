@@ -12,6 +12,7 @@ final class HtmlView extends BaseHtmlView
 {
     public ?object $order=null;
     public array $items=[];
+    public bool $hasDigitalItems=false;
     public array $customFields=[];
     public bool $canUpdate=false;
     public bool $canDelete=false;
@@ -82,6 +83,8 @@ final class HtmlView extends BaseHtmlView
             ->order('id ASC');
         $db->setQuery($q);
         $this->items=(array)$db->loadObjectList();
+        $this->hasDigitalItems=count(array_filter($this->items,
+            static fn($i)=>(string)($i->delivery_type??'physical')==='digital'))>0;
         $q=$db->getQuery(true)->select(['field_title','field_value'])
             ->from($db->quoteName('#__minimarket_order_custom_values'))
             ->where('order_id='.(int)$id)->order('field_code ASC');

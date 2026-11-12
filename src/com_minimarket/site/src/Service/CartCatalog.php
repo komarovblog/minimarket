@@ -19,7 +19,8 @@ final class CartCatalog
     /** Exact stock limit after accounting for every OTHER cart line. */
     public function maxQuantity(array $state,int $productId,int $variantId,bool $inventoryEnabled): int
     {
-        $this->quote($productId,$variantId);
+        $item=$this->quote($productId,$variantId);
+        if(($item['delivery_type']??'physical')==='digital')return CartState::MAX_QUANTITY;
         if (!$inventoryEnabled) return CartState::MAX_QUANTITY;
         $others=CartState::normalize($state);
         unset($others[CartState::key($productId,$variantId)]);
@@ -56,7 +57,8 @@ final class CartCatalog
         if ($product === null) throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
         $type = (string)($product->product_type ?? 'simple');
         if (!in_array($type,['simple','bundle'],true)
-            || (string)($product->delivery_type ?? 'physical') !== 'physical') {
+            || ((string)($product->delivery_type??'physical')==='digital'
+                &&($type!=='simple'||!DigitalAsset::isReady($product)))) {
             throw new \DomainException('COM_MINIMARKET_CART_NOT_AVAILABLE');
         }
         if ($type === 'bundle' && $variantId !== 0) {
@@ -104,6 +106,11 @@ final class CartCatalog
             'product_id'=>$productId, 'variant_id'=>$variantId,
             'title'=>$title, 'sku'=>$sku, 'image'=>$image, 'stock'=>$stock,
             'type'=>$type, 'unit_cents'=>CartState::cents((string)$product->price),
+            'delivery_type'=>(string)($product->delivery_type??'physical'),
+            'digital_asset_key'=>(string)($product->delivery_type??'physical')==='digital'
+                ?(string)($product->digital_asset_key??''):'',
+            'digital_filename'=>(string)($product->delivery_type??'physical')==='digital'
+                ?(string)($product->digital_filename??''):'',
             'shipping_weight_grams'=>(int)($product->shipping_weight_grams??0),
             'shipping_volume_cm3'=>(int)($product->shipping_volume_cm3??0),
         ];

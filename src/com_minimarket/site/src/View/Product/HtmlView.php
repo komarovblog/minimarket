@@ -32,6 +32,7 @@ final class HtmlView extends BaseHtmlView
     public string $pageLayout = 'full';
     public bool $showSectionNav = false;
     public bool $showStickyBuyBar = false;
+    public string $galleryEffect = 'lightbox';
     public array $similarProducts = [];
     public array $boughtTogetherProducts = [];
 
@@ -58,6 +59,8 @@ final class HtmlView extends BaseHtmlView
         $this->pageLayout=in_array($requestedLayout,['full','tabs'],true)?$requestedLayout:'full';
         $this->showSectionNav=(int)$params->get('product_detail_section_nav',0)===1;
         $this->showStickyBuyBar=(int)$params->get('product_detail_sticky_bar',0)===1;
+        $effect=(string)$params->get('product_detail_gallery_effect','lightbox');
+        $this->galleryEffect=in_array($effect,['lightbox','zoom'],true)?$effect:'lightbox';
         if((int)$params->get('product_detail_show_similar',0)===1){
             $this->similarProducts=ProductRecommendations::similar(
                 $repo,$id,(int)$product->category_id,4);
@@ -66,8 +69,7 @@ final class HtmlView extends BaseHtmlView
             $this->boughtTogetherProducts=ProductRecommendations::boughtTogether(
                 Factory::getContainer()->get(DatabaseInterface::class),$repo,$id,4);
         }
-        $this->reviewsEnabled=(int)$params->get('reviews_enabled',0)===1
-            &&(int)$params->get('product_detail_show_reviews',1)===1;
+        $this->reviewsEnabled=(int)$params->get('reviews_enabled',0)===1;
         if ($this->reviewsEnabled) {
             $user=Factory::getApplication()->getIdentity();
             $this->reviewsCanSubmit=(string)$params->get('reviews_author_mode','registered')==='all'
@@ -91,7 +93,7 @@ final class HtmlView extends BaseHtmlView
         }
         unset($variant);
         $this->relatedGroups = $repo->getRelatedGroups($id);
-        if ($this->inventoryEnabled) {
+        if ($this->inventoryEnabled && (string)($product->delivery_type??'physical')==='physical') {
             $baseStock = (int)($product->stock??0);
             $variantStock = $this->variants['items'] !== []
                 && (int)($product->option_stock_mode??1) !== 0;

@@ -90,6 +90,8 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `brand_id` INT UNSIGNED NULL DEFAULT NULL,
     `product_type` VARCHAR(12) NOT NULL DEFAULT 'simple',
     `delivery_type` VARCHAR(12) NOT NULL DEFAULT 'physical',
+    `digital_asset_key` VARCHAR(80) NOT NULL DEFAULT '',
+    `digital_filename` VARCHAR(255) NOT NULL DEFAULT '',
     `bundle_price_mode` VARCHAR(12) NOT NULL DEFAULT 'fixed',
     `bundle_discount_pct` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
     `title` VARCHAR(255) NOT NULL,
@@ -621,6 +623,10 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     delivery_zone_id INT UNSIGNED NULL,
     delivery_fee_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     payment_method VARCHAR(24) NOT NULL DEFAULT 'on_receipt',
+    payment_status VARCHAR(16) NOT NULL DEFAULT 'unpaid',
+    paid_at DATETIME NULL,
+    fulfillment_status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    fulfilled_at DATETIME NULL,
     order_source VARCHAR(16) NOT NULL DEFAULT 'site',
     status VARCHAR(20) NOT NULL DEFAULT 'new',
     currency CHAR(3) NOT NULL DEFAULT 'RUB',
@@ -692,11 +698,41 @@ CREATE TABLE IF NOT EXISTS #__minimarket_order_items (
     unit_cents BIGINT UNSIGNED NOT NULL,
     quantity INT UNSIGNED NOT NULL,
     line_cents BIGINT UNSIGNED NOT NULL,
+    delivery_type VARCHAR(12) NOT NULL DEFAULT 'physical',
+    digital_asset_key VARCHAR(80) NOT NULL DEFAULT '',
+    digital_filename VARCHAR(255) NOT NULL DEFAULT '',
     PRIMARY KEY (id),
     KEY idx_mm_order_line_order (order_id),
     CONSTRAINT fk_mm_order_line_parent FOREIGN KEY (order_id)
         REFERENCES #__minimarket_orders (id)
         ON UPDATE RESTRICT ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS #__minimarket_order_events (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    order_id INT UNSIGNED NOT NULL,
+    actor_user_id INT UNSIGNED NOT NULL,
+    event_type VARCHAR(32) NOT NULL,
+    old_value VARCHAR(32) NOT NULL,
+    new_value VARCHAR(32) NOT NULL,
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_mm_order_event (order_id, created_at),
+    CONSTRAINT fk_mm_order_event_parent FOREIGN KEY (order_id)
+        REFERENCES #__minimarket_orders (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS #__minimarket_digital_grants (
+    order_item_id BIGINT UNSIGNED NOT NULL,
+    token_nonce CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    expires_at DATETIME NOT NULL,
+    download_count INT UNSIGNED NOT NULL DEFAULT 0,
+    max_downloads INT UNSIGNED NOT NULL DEFAULT 10,
+    created_at DATETIME NOT NULL,
+    last_sent_at DATETIME NULL,
+    PRIMARY KEY (order_item_id),
+    CONSTRAINT fk_mm_digital_grant_item FOREIGN KEY (order_item_id)
+        REFERENCES #__minimarket_order_items (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS #__minimarket_order_custom_values (

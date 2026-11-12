@@ -21,13 +21,14 @@ final class CheckoutSettings
         return $mode;
     }
 
-    /** A buyer step can be omitted only with trusted Joomla identity. */
+    /** Auto-hide buyer data only when the account contains every required detail. */
     public static function skipBuyer(object $params,object $user,array $customFields=[]):bool
     {
-        if((int)$params->get('checkout_buyer_skip',0)!==1
-           ||(int)($user->id??0)<1||!empty($user->block)
-           ||filter_var((string)($user->email??''),FILTER_VALIDATE_EMAIL)===false
-           ||(string)$params->get('checkout_comment_mode','optional')==='required')return false;
+        if((int)($user->id??0)<1 || !empty($user->block)
+            ||mb_strlen(trim((string)($user->name??'')))<2
+            ||filter_var((string)($user->email??''),FILTER_VALIDATE_EMAIL)===false)return false;
+        $fields=self::fields($params);
+        if($fields['phone']==='required'||$fields['comment']==='required')return false;
         foreach($customFields as $field)if(!empty($field['required']))return false;
         return true;
     }
