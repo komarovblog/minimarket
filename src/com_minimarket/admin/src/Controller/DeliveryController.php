@@ -8,6 +8,7 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Session\Session;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\OrderHistory;
+use MiniMarket\Component\Minimarket\Administrator\Service\OrderLifecycle;
 
 /** Local delivery record only. No CDEK shipment is created via an external API. */
 final class DeliveryController extends BaseController
@@ -70,6 +71,7 @@ final class DeliveryController extends BaseController
                 $id=(int)$db->insertid();
                 OrderHistory::record($db,$oid,(int)$app->getIdentity()->id,
                     'delivery_created','',$data['reason'].' #'.$id);
+                OrderLifecycle::refresh($db,$oid,(int)$app->getIdentity()->id);
                 $db->transactionCommit();
             } catch (\Throwable $e) {
                 $db->transactionRollback();
@@ -99,6 +101,11 @@ final class DeliveryController extends BaseController
                     .' WHERE id='.$id.' FOR UPDATE');
                 $before=$db->loadAssoc();
                 if(!$before)throw new \DomainException('COM_MINIMARKET_DELIVERY_INVALID');
+                $allowed=['new'=>['new','in_transit','delivered','cancelled'],
+                    'in_transit'=>['in_transit','delivered','cancelled'],
+                    'delivered'=>['delivered'],'cancelled'=>['cancelled']];
+                if(!in_array($data['status'],$allowed[(string)$before['status']]??[],true))
+                    throw new \DomainException('COM_MINIMARKET_DELIVERY_INVALID');
                 $db->setQuery('SELECT id FROM '.$db->quoteName('#__minimarket_orders')
                     .' WHERE id='.(int)$before['order_id']." AND status<>'cancelled'"
                     .' AND deleted_at IS NULL');
@@ -124,6 +131,7 @@ final class DeliveryController extends BaseController
                         OrderHistory::record($db,(int)$before['order_id'],(int)$app->getIdentity()->id,
                             $event,(string)$before[$column],$after);
                 }
+                OrderLifecycle::refresh($db,(int)$before['order_id'],(int)$app->getIdentity()->id);
                 $db->transactionCommit();
             }catch(\Throwable $e){
                 $db->transactionRollback();

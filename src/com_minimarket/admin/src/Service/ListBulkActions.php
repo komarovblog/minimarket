@@ -84,11 +84,14 @@ final class ListBulkActions
             throw new \LogicException('Invalid MiniMarket bulk target');
         }
         $ids = self::selected($softDelete ? 'core.delete' : 'core.edit.state');
+        if($table==='#__minimarket_orders'&&!$softDelete&&!OrderLifecycle::manualEnabled())
+            throw new \DomainException('COM_MINIMARKET_ORDER_MANUAL_DISABLED');
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->transactionStart();
         try {
             $sql = 'SELECT '.$db->quoteName('id').', '.$db->quoteName($field)
                 .($table==='#__minimarket_shipments'?', '.$db->quoteName('order_id'):'')
+                .($table==='#__minimarket_orders'?', '.$db->quoteName('payment_status').', '.$db->quoteName('fulfillment_status'):'')
                 .' FROM '.$db->quoteName($table)
                 .' WHERE '.$db->quoteName('id').' IN ('.implode(',', $ids).')';
             if ($onlyLiveOrders) {
@@ -103,6 +106,8 @@ final class ListBulkActions
                 if (!in_array((string)$row[$field], $eligible, true)) {
                     throw new \DomainException('COM_MINIMARKET_LIST_INVALID_TRANSITION');
                 }
+                if($table==='#__minimarket_orders'&&!$softDelete)
+                    OrderLifecycle::validateManual($db,$row,$target);
             }
             $query = $db->getQuery(true)->update($db->quoteName($table))
                 ->where($db->quoteName('id').' IN ('.implode(',', $ids).')');
@@ -123,6 +128,12 @@ final class ListBulkActions
                         (int)Factory::getApplication()->getIdentity()->id,
                         $softDelete?'trash':($table==='#__minimarket_orders'?'status':'delivery_status'),
                         (string)$row[$field],$softDelete?'trashed':$target);
+            }
+            if($table==='#__minimarket_shipments'){
+                $orderIds=array_values(array_unique(array_map(static fn($row)=>(int)$row['order_id'],$rows)));
+                sort($orderIds,SORT_NUMERIC);
+                foreach($orderIds as $orderId)
+                    OrderLifecycle::refresh($db,$orderId,(int)Factory::getApplication()->getIdentity()->id);
             }
             $db->transactionCommit();
             return count($ids);

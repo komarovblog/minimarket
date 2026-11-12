@@ -9,6 +9,7 @@ use Joomla\CMS\Session\Session;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\DigitalFulfillment;
 use MiniMarket\Component\Minimarket\Administrator\Service\OrderHistory;
+use MiniMarket\Component\Minimarket\Administrator\Service\OrderLifecycle;
 
 /** Operators may change order status, never line snapshots or prices. */
 final class OrderController extends BaseController
@@ -142,6 +143,7 @@ final class OrderController extends BaseController
                         $db->quote('payment'),$db->quote($before),$db->quote($action),'UTC_TIMESTAMP()']));
                 $db->setQuery($q);$db->execute();
             }
+            OrderLifecycle::refresh($db,$id,(int)$app->getIdentity()->id);
             $db->transactionCommit();
         }catch(\Throwable $e){
             $db->transactionRollback();
@@ -260,7 +262,7 @@ final class OrderController extends BaseController
                 .' AND deleted_at IS NULL FOR UPDATE');
             $row=$db->loadAssoc();
             if(!$row||$row['status']==='cancelled'
-                ||$row['delivery_method']==='digital')
+                ||$row['delivery_method']!=='pickup')
                 throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
             $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
                 ->set('fulfillment_status='.$db->quote($state))
@@ -273,6 +275,7 @@ final class OrderController extends BaseController
                     $db->quote('fulfillment'),$db->quote($row['fulfillment_status']),
                     $db->quote($state),'UTC_TIMESTAMP()']));
             $db->setQuery($q);$db->execute();
+            OrderLifecycle::refresh($db,$id,(int)$app->getIdentity()->id);
             $db->transactionCommit();
             $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_STATUS_SAVED'));
         }catch(\Throwable){
@@ -374,24 +377,28 @@ final class OrderController extends BaseController
             throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $db->transactionStart();
-        try {
-            $db->setQuery('SELECT status FROM '.$db->quoteName('#__minimarket_orders')
+        try{
+            $db->setQuery('SELECT id,status,payment_status,fulfillment_status'
+                .' FROM '.$db->quoteName('#__minimarket_orders')
                 .' WHERE id='.$id.' AND deleted_at IS NULL FOR UPDATE');
-            $before=$db->loadResult();
-            if($before===null)throw new \DomainException('COM_MINIMARKET_ORDER_STATUS_INVALID');
-            if((string)$before!==$status){
-                $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
-                    ->set($db->quoteName('status').'='.$db->quote($status))
-                    ->where('id='.$id);
-                $db->setQuery($q);$db->execute();
-                OrderHistory::record($db,$id,(int)$app->getIdentity()->id,'status',(string)$before,$status);
+            $before=$db->loadAssoc();
+            if(!$before)throw new \DomainException('COM_MINIMARKET_ORDER_STATUS_INVALID');
+            OrderLifecycle::validateManual($db,$before,$status);
+            if((string)$before['status']!==$status){
+                $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
+                    .' SET status='.$db->quote($status).' WHERE id='.$id);
+                $db->execute();
+                OrderHistory::record($db,$id,(int)$app->getIdentity()->id,
+                    'status',(string)$before['status'],$status);
             }
             $db->transactionCommit();
             $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_SAVED'));
         }catch(\Throwable $e){
             $db->transactionRollback();
-            $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),'warning');
+            $key=$e instanceof \DomainException?$e->getMessage():'COM_MINIMARKET_ORDER_STATUS_INVALID';
+            $app->enqueueMessage(Text::_($key),'warning');
         }
         $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
     }
+
 }

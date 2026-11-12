@@ -68,7 +68,8 @@ final class HtmlView extends BaseHtmlView
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ORDERS_TITLE'));
         if($this->canCreate)ToolbarHelper::addNew('order.add');
-        if(!$this->showTrash && $user->authorise('core.edit.state','com_minimarket')){
+        if(!$this->showTrash && $user->authorise('core.edit.state','com_minimarket')
+            && \MiniMarket\Component\Minimarket\Administrator\Service\OrderLifecycle::manualEnabled()){
             ToolbarHelper::custom('orders.confirm','publish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CONFIRMED'),true);
             ToolbarHelper::custom('orders.cancel','unpublish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CANCELLED'),true);
         }

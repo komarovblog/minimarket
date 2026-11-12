@@ -20,6 +20,16 @@
             <option value="0">COM_MINIMARKET_CONFIG_PRIMARY_MENU_AUTO</option>
         </field>
 
+        <field name="mm_order_lifecycle_note" type="note" class="alert alert-info"
+               label="COM_MINIMARKET_ORDER_LIFECYCLE_SECTION"
+               description="COM_MINIMARKET_ORDER_LIFECYCLE_SECTION_HELP" />
+        <field name="order_manual_status_enabled" type="list" default="1" filter="int"
+               label="COM_MINIMARKET_ORDER_MANUAL_STATUS"
+               description="COM_MINIMARKET_ORDER_MANUAL_STATUS_HELP">
+            <option value="1">COM_MINIMARKET_ENABLE</option>
+            <option value="0">COM_MINIMARKET_DISABLE</option>
+        </field>
+
 <field name="inventory_enabled" type="list" default="1" filter="int"
                label="COM_MINIMARKET_CONFIG_INVENTORY_ENABLED"
                description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">

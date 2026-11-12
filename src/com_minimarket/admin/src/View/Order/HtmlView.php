@@ -17,6 +17,8 @@ final class HtmlView extends BaseHtmlView
     public bool $hasDigitalItems=false;
     public array $customFields=[];
     public bool $canUpdate=false;
+    public bool $manualStatusEnabled=true;
+    public ?string $refundAt=null;
     public bool $canDelete=false;
     public bool $canCreateDelivery=false;
     public ?int $shipmentId=null;
@@ -39,6 +41,7 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         }
         $this->canUpdate=$identity->authorise('core.edit.state','com_minimarket');
+        $this->manualStatusEnabled=\MiniMarket\Component\Minimarket\Administrator\Service\OrderLifecycle::manualEnabled();
         $this->canDelete=$identity->authorise('core.delete','com_minimarket');
         $this->canCreateDelivery=$identity->authorise('core.create','com_minimarket');
         $this->canViewUsers=$identity->authorise('core.manage','com_users');
@@ -118,6 +121,11 @@ final class HtmlView extends BaseHtmlView
             ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
         $db->setQuery($q);
         $this->returns=(array)$db->loadObjectList();
+        if((string)$this->order->payment_status==='refunded'){
+            $db->setQuery('SELECT MAX(created_at) FROM '.$db->quoteName('#__minimarket_order_events')
+                ." WHERE order_id=".(int)$id." AND event_type='payment' AND new_value='refunded'");
+            $this->refundAt=$db->loadResult()?:null;
+        }
         $q=$db->getQuery(true)->select(['e.id','e.actor_user_id','e.event_type',
                 'e.old_value','e.new_value','e.created_at','u.name AS actor_name'])
             ->from($db->quoteName('#__minimarket_order_events','e'))
