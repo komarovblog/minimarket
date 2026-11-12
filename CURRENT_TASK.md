@@ -1,6 +1,6 @@
 # MiniMarket 0.5.98 — карточка товара, нативный редактор и основные настройки
 
-**Исходник:** коммит `e91b9e575350162896f6b519e1c5be681962014b` в `development`. Владелец: `com_minimarket`. Статус: интеграция кода и проверка CI; Joomla browser acceptance не выполнена. Детали: [docs/RELEASE_0_5_98.md](docs/RELEASE_0_5_98.md).
+**Исходник:** коммит `e91b9e575350162896f6b519e1c5be681962014b`; итоговый релиз `c7614efa35af00fb4e040a9745a89def5dafaa9a` в `development`. Владелец: `com_minimarket`. Статус: код и автоматические проверки **PASS (6/6)**, [GitHub Actions #43181456206](https://github.com/komarovblog/minimarket/actions/runs/43181456206); Windows ZIP `com_minimarket-0.5.98.zip` собран. Joomla browser acceptance ещё не выполнена. Детали: [docs/RELEASE_0_5_98.md](docs/RELEASE_0_5_98.md).
 
 **Изменения:** все 6 замечаний от 12.11: три HTML editor checkout; нейтральное обязательное подтверждение; варианты страницы товара full/tabs, похожие/покупают вместе/отзывы/панель при прокрутке/навигация; системные атрибуты по 2 поля без дублирования; все опубликованные подкатегории; Команды интерфейса в конце основных. Схема БД без изменений. Настройки работают через component params и штатные сервисы. Детали регистров: [docs/SETTINGS_REGISTRY.md](docs/SETTINGS_REGISTRY.md).
 
