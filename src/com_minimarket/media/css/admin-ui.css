@@ -407,6 +407,17 @@
 #adminForm .mm-admin-panel .mm-rules-table--state select {width:100%;max-width:100%;}
 #adminForm .mm-rules-table--state small {margin-top:.2rem;}
 
+/* Preserve real table columns on XS/SM: only the assignment table scrolls,
+   instead of the older stacked labels with collapsed publication columns. */
+@media (max-width: 767.98px) {
+  #adminForm .mm-category-rules-viewport .mm-rules-table { display:table; min-width:660px; }
+  #adminForm .mm-category-rules-viewport .mm-rules-table thead { display:table-header-group; }
+  #adminForm .mm-category-rules-viewport .mm-rules-table tbody { display:table-row-group; }
+  #adminForm .mm-category-rules-viewport .mm-rules-table tr { display:table-row; }
+  #adminForm .mm-category-rules-viewport .mm-rules-table th,
+  #adminForm .mm-category-rules-viewport .mm-rules-table td { display:table-cell; }
+}
+
 /* One real SKU matrix. The OPTION columns alone scroll while SKU / stock /
    active controls stay fixed at the right edge, including at small widths. */
 #adminForm .mm-sku-viewport {
