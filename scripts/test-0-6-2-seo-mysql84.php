@@ -42,8 +42,10 @@ try{
         ->fetch_assoc();
     $check($oldDraft['state']==='0'&&$oldDraft['conditions_json']===null,
         'draft legacy row preserved without invented rule');
-    $rules='{\"a10\":{\"mode\":\"exact\",\"value\":\"v:101\"},'
-        .'\"s20\":{\"mode\":\"any\"}}';
+    $rules=json_encode([
+        'a10'=>['mode'=>'exact','value'=>'v:101'],
+        's20'=>['mode'=>'any']
+    ],JSON_THROW_ON_ERROR);
     $stmt=$db->prepare("INSERT INTO $table(id,category_id,filters_json,conditions_json,state)
         VALUES(3,7,?,?,1)");
     $filters='{"a10":["v:101"]}';

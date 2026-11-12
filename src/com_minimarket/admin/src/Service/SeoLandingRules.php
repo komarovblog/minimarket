@@ -57,8 +57,7 @@ final class SeoLandingRules
             }elseif($id==='stock'){
                 if(!in_array($v,['b:0','b:1'],true))
                     throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-            }elseif($id==='sku'||(is_array($rules[$id]['value']??null)
-                &&array_key_exists('text',$rules[$id]['value']))){
+            }elseif($id==='sku'){
                 if(!is_string($v)||trim($v)===''||mb_strlen($v)>100
                     ||preg_match('/[\x00-\x1f<>]/',$v))
                     throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
