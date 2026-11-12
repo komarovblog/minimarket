@@ -90,8 +90,7 @@ $json=json_encode(['facets'=>$facets],
                 <?php foreach ($facet['choices'] as $i=>$choice):
                     $checked=in_array($choice['value'],$chosen,true);
                     $multiple=$facet['multiple'];
-                    $kind=($multiple || in_array($mode,['dropdown','values'],true))
-                        ?'checkbox':'radio';
+                    $kind=$multiple?'checkbox':'radio';
                     $fieldId='mm-facet-'.$id.'-'.$i;
                 ?>
                     <div class="mm-facet-choice" data-mm-facet-choice-row>
