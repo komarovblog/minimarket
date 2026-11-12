@@ -205,6 +205,23 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
+      - name: Build one-time independent MiniMarket toolbar 1.0.0 ZIP
+        shell: powershell
+        run: |
+          & .\scripts\build-toolbar-package.ps1 -DistOnly
+          if ($LASTEXITCODE -ne 0) { throw 'MM_TOOLBAR_PACKAGE_BUILD_FAILED' }
+          $path = '.\dist\mod_minimarket_toolbar-1.0.0.zip'
+          if (-not (Test-Path -LiteralPath $path)) { throw 'MM_TOOLBAR_100_ZIP_MISSING' }
+          Add-Type -AssemblyName System.IO.Compression
+          $archive = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $path).Path)
+          try {
+            $members = @($archive.Entries | ForEach-Object { $_.FullName })
+            foreach ($name in @('mod_minimarket_toolbar.xml','mod_minimarket_toolbar.php','tmpl/default.php')) {
+              if ($members -notcontains $name) { throw "MM_TOOLBAR_ZIP_MISSING_ENTRY: $name" }
+            }
+          }
+          finally { $archive.Dispose() }
+          Write-Output 'MM_TOOLBAR_100_ZIP_WINDOWS_PASS'
       - name: Release bootstrap reparses updated script after git pull
         shell: powershell
         run: |
