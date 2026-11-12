@@ -11,7 +11,7 @@ $check=static function(bool $condition,string $name)use(&$n):void{
     if(!$condition)throw new RuntimeException('MM064_UI_FAIL: '.$name);
 };
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$check((string)$manifest->version==='0.6.4','component version');
+$check(version_compare((string)$manifest->version,'0.6.4','>='),'component version supports schema 0.6.4+');
 $module=simplexml_load_file(__DIR__.'/../src/mod_minimarket_toolbar/mod_minimarket_toolbar.xml');
 $check((string)$module->version==='0.6.3','one-time module remains at 0.6.3');
 $schema=file_get_contents($root.'admin/sql/install.mysql.sql');
