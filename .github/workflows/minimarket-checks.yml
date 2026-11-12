@@ -450,6 +450,8 @@ jobs:
         run: php scripts/test-0-5-60-wiring.php
       - name: 0.5.61 feed selection, XML and native dashboard
         run: php scripts/test-0-5-61-feeds.php
+      - name: 0.6.3 native SEO and feed UI regression
+        run: php scripts/test-0-6-3-ui.php
       - name: 0.5.64 standalone toolbar and retired legacy extension safety
         run: |
           php scripts/test-0-5-64-toolbar.php
