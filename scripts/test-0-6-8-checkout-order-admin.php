@@ -76,7 +76,7 @@ $check(str_contains($deliveryView,'hasPriorShipment') &&
 $order=file_get_contents($root.'admin/tmpl/order/default.php');
 $blocks=['COM_MINIMARKET_ORDER_INFO_BLOCK','COM_MINIMARKET_ORDER_STATUS_BLOCK',
     'COM_MINIMARKET_ORDER_PAYMENT_BLOCK','COM_MINIMARKET_ORDER_PRODUCTS_BLOCK',
-    'COM_MINIMARKET_ORDER_DELIVERY_BLOCK','COM_MINIMARKET_RETURNS_TITLE'];
+    'COM_MINIMARKET_ORDER_DELIVERY_BLOCK'];
 $pos=-1;
 foreach($blocks as $block){
     $new=strpos($order,$block);
