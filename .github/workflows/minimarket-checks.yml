@@ -455,6 +455,8 @@ jobs:
         run: php scripts/test-0-5-61-feeds.php
       - name: 0.6.3 native SEO and feed UI regression
         run: php scripts/test-0-6-3-ui.php
+      - name: 0.6.5 Joomla Cart menu and all administrator Create quicktasks
+        run: php scripts/test-0-6-5-menus.php
       - name: 0.6.4 subcategory cards, options filters and admin UI
         run: |
           php scripts/test-0-6-4-ui.php
