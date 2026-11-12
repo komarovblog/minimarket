@@ -43,10 +43,14 @@ $check(substr_count($feed,'id="mm-feed-public-url"')===1 &&
 $check(str_contains($feed,'type="hidden" name="feed[selection_mode]" value="auto"') &&
     !str_contains($feed,'id="mm-feed-mode"'),
     'obsolete auto/manual selection control removed without schema migration');
-$check(substr_count($feed,'<div class="col-lg-6">')===2 &&
-    str_contains($feed,'data-mm-feed-category-count') &&
-    str_contains($feed,'data-mm-feed-count'),
-    'two equal-width Bootstrap column blocks with live counts');
+$selectionStart=strpos($feed,'name="feed[selection_mode]"');
+$selectionEnd=strpos($feed,"HTMLHelper::_('uitab.endTab');",$selectionStart);
+$selectionMarkup=substr($feed,$selectionStart,$selectionEnd-$selectionStart);
+$check($selectionStart!==false && $selectionEnd!==false &&
+    substr_count($selectionMarkup,'<div class="col-lg-6">')===2 &&
+    str_contains($selectionMarkup,'data-mm-feed-category-count') &&
+    str_contains($selectionMarkup,'data-mm-feed-count'),
+    'two equal-width Bootstrap selection columns with live counts');
 $check(str_contains($feed,'data-mm-feed-category-search') &&
     str_contains($feed,'data-mm-feed-search') &&
     str_contains($feed,'data-mm-feed-cats-all') &&
