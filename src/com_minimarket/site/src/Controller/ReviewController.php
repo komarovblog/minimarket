@@ -44,9 +44,9 @@ final class ReviewController extends BaseController
                'title'=>$post->get('title','','string'),
                'body'=>$post->get('body','','string')
             ]);
-            // Guests always require moderation, even when moderator approval
-            // has been disabled for verified, signed-in Joomla users.
-            $state=$registered&&(int)$params->get('reviews_moderation',1)===0?1:0;
+            // Legacy 1 = all; legacy 0 = only guests; new 2 = none.
+            $mode=(int)$params->get('reviews_moderation',1);
+            $state=($mode===2 || ($mode===0 && $registered))?1:0;
             ReviewStorage::create(Factory::getContainer()->get(DatabaseInterface::class),
                 $id,$data,$registered?(int)$user->id:0,0,'site',$state);
             $session->set('com_minimarket.last_review_at',time());

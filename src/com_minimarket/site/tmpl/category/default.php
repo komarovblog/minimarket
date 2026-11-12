@@ -124,6 +124,9 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
             <button type="submit" class="btn btn-outline-secondary btn-sm"><?php echo Text::_('COM_MINIMARKET_FILTER_APPLY'); ?></button>
         </form>
         <?php endif; ?>
+        <?php if(($this->productListOptions['navigation_mode']??'pages')==='load_more'): ?>
+          <div data-mm-prev-sentinel aria-hidden="true"></div>
+        <?php endif; ?>
         <ul class="<?php echo $this->escape($gridClasses); ?> list-unstyled mm-category-products" data-mm-category-layout="<?php echo $grid ? 'grid' : 'list'; ?>">
         <?php foreach ($this->products as $product) : ?>
             <li class="<?php echo $grid ? 'col' : 'mm-product-list__item'; ?>"
@@ -269,19 +272,46 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                 return $url.(str_contains($url,'?')?'&':'?')
                     .http_build_query($params,'','&',PHP_QUERY_RFC3986);
             };
+            $incremental=($this->productListOptions['navigation_mode']??'pages')==='load_more';
+            $showPrevious=$incremental
+                ?($this->productListOptions['load_previous']??true)
+                :($this->productListOptions['pagination_previous']??true);
+            $showNext=$incremental||($this->productListOptions['pagination_next']??true);
+            $previousCount=min($this->productsPerPage,($this->productPage-1)*$this->productsPerPage);
+            $nextCount=min($this->productsPerPage,$this->productTotal-$this->productPage*$this->productsPerPage);
         ?>
             <nav class="mm-category-pages" data-mm-category-pages
+                 data-mm-navigation-mode="<?php echo $incremental?'load_more':'pages'; ?>"
+                 data-mm-load-trigger="<?php echo $this->escape($this->productListOptions['load_trigger']??'button'); ?>"
+                 data-mm-page-count="<?php echo $this->productPageCount; ?>"
+                 data-mm-page-size="<?php echo $this->productsPerPage; ?>"
+                 data-mm-total-items="<?php echo $this->productTotal; ?>"
+                 data-mm-min-page="<?php echo $this->productPage; ?>"
+                 data-mm-max-page="<?php echo $this->productPage; ?>"
+                 data-mm-allow-previous="<?php echo $showPrevious?'1':'0'; ?>"
+                 data-mm-next-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_LOAD_NEXT_N')); ?>"
+                 data-mm-prev-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_LOAD_PREVIOUS_N')); ?>"
                  aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PAGINATION_LABEL')); ?>">
-                <span><?php echo Text::sprintf('COM_MINIMARKET_PAGINATION_STATUS',
-                    $this->productPage,$this->productPageCount); ?></span>
-                <?php if ($this->productPage > 1) : ?>
-                    <a href="<?php echo $this->escape($pageUrl($this->productPage-1)); ?>"
-                       rel="prev" data-mm-page-link><?php echo Text::_('JPREV'); ?></a>
+                <?php if($incremental || ($this->productListOptions['pagination_page_links']??true)): ?>
+                    <span><?php echo Text::sprintf('COM_MINIMARKET_PAGINATION_STATUS',
+                        $this->productPage,$this->productPageCount); ?></span>
                 <?php endif; ?>
-                <?php if ($this->productPage < $this->productPageCount) : ?>
+                <?php if (!$incremental && ($this->productListOptions['pagination_page_links']??true)): ?>
+                    <?php for($page=max(1,$this->productPage-2);$page<=min($this->productPageCount,$this->productPage+2);$page++): ?>
+                        <a href="<?php echo $this->escape($pageUrl($page)); ?>"
+                           <?php echo $page===$this->productPage?'aria-current="page"':''; ?>
+                           data-mm-page-link><?php echo $page; ?></a>
+                    <?php endfor; ?>
+                <?php endif; ?>
+                <?php if ($showPrevious && $this->productPage > 1) : ?>
+                    <a href="<?php echo $this->escape($pageUrl($this->productPage-1)); ?>"
+                       rel="prev" data-mm-page-link data-mm-prev-page><?php echo $incremental
+                            ?Text::sprintf('COM_MINIMARKET_LOAD_PREVIOUS_N',$previousCount):Text::sprintf('COM_MINIMARKET_LOAD_PREVIOUS_N',$previousCount); ?></a>
+                <?php endif; ?>
+                <?php if ($showNext && $this->productPage < $this->productPageCount) : ?>
                     <a href="<?php echo $this->escape($pageUrl($this->productPage+1)); ?>"
-                       rel="next" data-mm-page-link data-mm-next-page>
-                       <?php echo Text::_('JNEXT'); ?></a>
+                       rel="next" data-mm-page-link data-mm-next-page><?php echo $incremental
+                            ?Text::sprintf('COM_MINIMARKET_LOAD_NEXT_N',$nextCount):Text::sprintf('COM_MINIMARKET_LOAD_NEXT_N',$nextCount); ?></a>
                 <?php endif; ?>
             </nav>
         <?php endif; ?>

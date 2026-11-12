@@ -10,6 +10,7 @@
   let request = null;
   let debounce = null;
   let observer = null;
+  let previousObserver = null;
   let loadingMore = false;
 
   const form = () => root.querySelector('[data-mm-facet-form]');
@@ -60,7 +61,42 @@
     url.searchParams.delete('mm_page'); // Filter and sort always start on page 1.
     return url;
   };
-  const load = async (url, {push=true, append=false}={}) => {
+  const incrementalNav = (container, source, url, direction) => {
+    const oldNav = container.querySelector('[data-mm-category-pages]');
+    const remoteNav = source.querySelector('[data-mm-category-pages]');
+    if (!oldNav || !remoteNav) return;
+    const nav = document.importNode(remoteNav, true);
+    const minOld=Number(oldNav.dataset.mmMinPage)||1;
+    const maxOld=Number(oldNav.dataset.mmMaxPage)||1;
+    const page=Number(new URL(url, location.href).searchParams.get('mm_page'))||1;
+    const min=direction==='previous'?Math.min(minOld,page):minOld;
+    const max=direction==='next'?Math.max(maxOld,page):maxOld;
+    const count=Number(nav.dataset.mmPageCount)||1;
+    const perPage=Number(nav.dataset.mmPageSize)||10;
+    const total=Number(nav.dataset.mmTotalItems)||0;
+    nav.dataset.mmMinPage=String(min);
+    nav.dataset.mmMaxPage=String(max);
+    for (const link of nav.querySelectorAll('[data-mm-page-link]')) link.remove();
+    const makeLink=(page,direction,label,count)=>{
+      if(page<1||page>Number(nav.dataset.mmPageCount))return;
+      const href=new URL(url, location.href);
+      href.searchParams.set('mm_page',String(page));
+      const a=document.createElement('a');
+      a.href=href.toString();a.dataset.mmPageLink='';
+      a.dataset[direction==='next'?'mmNextPage':'mmPrevPage']='';
+      a.rel=direction==='next'?'next':'prev';
+      a.textContent=label.replace('%d',String(count));
+      nav.appendChild(a);
+    };
+    const status=nav.querySelector('span');
+    if(status)status.textContent=min===max?min+' / '+count:min+'–'+max+' / '+count;
+    if(min>1 && nav.dataset.mmAllowPrevious==='1')
+      makeLink(min-1,'previous',nav.dataset.mmPrevLabel||'Previous %d',Math.min(perPage,(min-1)*perPage));
+    if(max<count)
+      makeLink(max+1,'next',nav.dataset.mmNextLabel||'Next %d',Math.min(perPage,total-max*perPage));
+    oldNav.replaceWith(nav);
+  };
+  const load = async (url, {push=true, append=false, prepend=false}={}) => {
     if (request) request.abort();
     const controller = new AbortController();
     request = controller;
@@ -76,20 +112,22 @@
       const remote = html.querySelector('.com-minimarket-category [data-mm-ajax-content]');
       const current = root.querySelector('[data-mm-ajax-content]');
       if (!remote || !current) throw new Error('Missing catalog content');
-      if (append) {
+      if (append || prepend) {
         const destination = current.querySelector('.mm-category-products');
         const source = remote.querySelector('.mm-category-products');
         if (!destination || !source) throw new Error('Missing next product page');
+        const previousHeight=document.documentElement.scrollHeight;
+        const fragment=document.createDocumentFragment();
         for (const product of source.querySelectorAll(':scope > li')) {
-          destination.appendChild(document.importNode(product,true));
+          fragment.appendChild(document.importNode(product,true));
         }
-        const currentNav = current.querySelector('[data-mm-category-pages]');
-        const nextNav = remote.querySelector('[data-mm-category-pages]');
-        if (currentNav && nextNav) {
-          currentNav.replaceWith(document.importNode(nextNav,true));
-        } else if (currentNav) {
-          currentNav.remove();
+        if (prepend) {
+          destination.prepend(fragment);
+          window.scrollBy(0,document.documentElement.scrollHeight-previousHeight);
+        } else {
+          destination.appendChild(fragment);
         }
+        incrementalNav(current,remote,url,prepend?'previous':'next');
       } else {
         current.replaceWith(document.importNode(remote,true));
         if (push) history.pushState(null,'',url);
@@ -117,16 +155,30 @@
   };
   const observeNext = () => {
     observer?.disconnect();
-    if (!('IntersectionObserver' in window)) return;
-    const anchor = root.querySelector('[data-mm-next-page]');
-    if (!anchor) return;
-    observer = new IntersectionObserver(entries => {
-      if (!entries.some(entry=>entry.isIntersecting) || loadingMore || request) return;
-      loadingMore = true;
-      observer.disconnect();
-      load(new URL(anchor.href,location.href),{push:false,append:true});
-    }, {rootMargin:'200px'});
-    observer.observe(anchor);
+    previousObserver?.disconnect();
+    const nav=root.querySelector('[data-mm-category-pages]');
+    if (!nav || nav.dataset.mmNavigationMode!=='load_more'
+        || nav.dataset.mmLoadTrigger!=='scroll'
+        || !('IntersectionObserver' in window)) return;
+    const next=nav.querySelector('[data-mm-next-page]');
+    if(next){
+      observer=new IntersectionObserver(entries=>{
+        if(!entries.some(entry=>entry.isIntersecting)||loadingMore||request)return;
+        loadingMore=true;observer.disconnect();
+        load(new URL(next.href,location.href),{push:false,append:true});
+      },{rootMargin:'150px'});
+      observer.observe(next);
+    }
+    const previous=nav.querySelector('[data-mm-prev-page]');
+    const sentinel=root.querySelector('[data-mm-prev-sentinel]');
+    if(previous && sentinel){
+      previousObserver=new IntersectionObserver(entries=>{
+        if(!entries.some(entry=>entry.isIntersecting)||loadingMore||request)return;
+        loadingMore=true;previousObserver.disconnect();
+        load(new URL(previous.href,location.href),{push:false,prepend:true});
+      },{rootMargin:'0px'});
+      previousObserver.observe(sentinel);
+    }
   };
   root.addEventListener('input', event => {
     if (event.target.matches('[data-mm-choice-search]')) {
@@ -192,7 +244,17 @@
     const link = event.target.closest('[data-mm-page-link]');
     if (link) {
       event.preventDefault();
-      load(new URL(link.href,location.href));
+      const nav=link.closest('[data-mm-category-pages]');
+      if (nav?.dataset.mmNavigationMode==='load_more') {
+        if (request) return;
+        loadingMore=true;
+        load(new URL(link.href,location.href),{
+          push:false,append:link.hasAttribute('data-mm-next-page'),
+          prepend:link.hasAttribute('data-mm-prev-page')
+        });
+      } else {
+        load(new URL(link.href,location.href));
+      }
     }
   });
   window.addEventListener('popstate',()=>load(new URL(location.href),{push:false}));

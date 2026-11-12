@@ -29,14 +29,22 @@ $firstPayment=array_key_first($this->paymentMethods);
         <?php endif; ?>
         <p><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BACK'); ?></a></p>
     <?php else : ?>
+        <?php if($this->showLoginButton && (int)\Joomla\CMS\Factory::getApplication()->getIdentity()->id<1): ?>
+            <p><a class="btn btn-outline-primary" href="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_users&view=login',false)); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_JOOMLA_LOGIN'); ?></a></p>
+        <?php endif; ?>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_NOTICE'); ?></p>
         <form action="<?php echo $this->escape(RouteHelper::checkoutAction()); ?>" method="post"
               class="mm-checkout-form row g-4" autocomplete="on"
               data-items-cents="<?php echo (int)$this->cart['total_cents']; ?>"
               data-promo-preview-url="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.preview',false)); ?>">
             <div class="col-12 col-lg-8">
+                <?php if($this->skipBuyer): ?>
+                    <input type="hidden" name="customer_name" value="<?php echo $this->escape($this->customerName); ?>">
+                    <input type="hidden" name="email" value="<?php echo $this->escape($this->customerEmail); ?>">
+                <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-buyer">
                     <h2 id="mm-checkout-buyer" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BUYER'); ?></h2>
+                    <?php if($this->buyerDescription!==''): ?><p class="text-muted"><?php echo nl2br($this->escape($this->buyerDescription)); ?></p><?php endif; ?>
                     <div class="row g-3">
                         <?php if (($this->fields['name']??'hidden')!=='hidden') : ?>
                         <div class="col-12 col-md-6">
@@ -53,7 +61,7 @@ $firstPayment=array_key_first($this->paymentMethods);
                             <label for="mm-customer-phone" class="form-label"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PHONE'); ?>
                                 <?php echo $this->fields['phone']==='required'?' *':''; ?></label>
                             <input id="mm-customer-phone" type="tel" name="phone" class="form-control"
-                                   maxlength="32" autocomplete="tel"
+                                   maxlength="32" autocomplete="tel" <?php if($this->phoneMask!==''): ?>data-mm-input-mask="<?php echo $this->escape($this->phoneMask); ?>"<?php endif; ?>
                                    <?php echo $this->fields['phone']==='required'?'required':''; ?>>
                         </div>
                         <?php endif; ?>
@@ -67,11 +75,44 @@ $firstPayment=array_key_first($this->paymentMethods);
                                    value="<?php echo $this->escape($this->customerEmail); ?>">
                         </div>
                         <?php endif; ?>
+                    
+                        <?php foreach($this->customFields as $field):
+                            $key=$field['code'];
+                            $id='mm-extra-'.$key;
+                            $req=$field['required']?'required':'';
+                        ?>
+                        <div class="col-12 <?php echo $field['type']==='textarea'?'':'col-md-6'; ?>">
+                            <label class="form-label" for="<?php echo $this->escape($id); ?>"><?php echo $this->escape($field['title']); ?><?php echo $field['required']?' *':''; ?></label>
+                            <?php if($field['type']==='textarea'): ?>
+                                <textarea id="<?php echo $this->escape($id); ?>" name="extra[<?php echo $this->escape($key); ?>]" class="form-control" maxlength="2000" rows="3" <?php echo $req; ?> placeholder="<?php echo $this->escape($field['placeholder']); ?>"></textarea>
+                            <?php elseif($field['type']==='select'): ?>
+                                <select id="<?php echo $this->escape($id); ?>" name="extra[<?php echo $this->escape($key); ?>]" class="form-select" <?php echo $req; ?>>
+                                    <option value=""></option>
+                                    <?php foreach($field['choices'] as $choice): ?><option value="<?php echo $this->escape($choice); ?>"><?php echo $this->escape($choice); ?></option><?php endforeach; ?>
+                                </select>
+                            <?php elseif($field['type']==='checkbox'): ?>
+                                <div class="form-check">
+                                    <input id="<?php echo $this->escape($id); ?>" type="checkbox" value="1" name="extra[<?php echo $this->escape($key); ?>]" class="form-check-input" <?php echo $req; ?>>
+                                </div>
+                            <?php else: ?>
+                                <input id="<?php echo $this->escape($id); ?>" type="<?php echo $this->escape($field['type']); ?>" name="extra[<?php echo $this->escape($key); ?>]" class="form-control" maxlength="2000" <?php echo $req; ?>
+                                    <?php if($field['mask']!==''): ?>data-mm-input-mask="<?php echo $this->escape($field['mask']); ?>"<?php endif; ?>
+                                    placeholder="<?php echo $this->escape($field['placeholder']); ?>">
+                            <?php endif; ?>
+                            <?php if($field['description']!==''): ?><div class="form-text"><?php echo $this->escape($field['description']); ?></div><?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+
                     </div>
                 </section>
+                <?php endif; ?>
 
+                <?php if($this->skipDelivery): ?>
+                    <input type="hidden" name="delivery_method" value="pickup" data-fee-cents="<?php echo (int)($this->deliveryMethods['pickup']['fee_cents']??0); ?>">
+                <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-delivery">
                     <h2 id="mm-checkout-delivery" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_RECEIPT'); ?></h2>
+                    <?php if($this->deliveryDescription!==''): ?><p class="text-muted"><?php echo nl2br($this->escape($this->deliveryDescription)); ?></p><?php endif; ?>
                     <div class="d-flex flex-wrap gap-3" role="group" aria-label="<?php echo Text::_('COM_MINIMARKET_CHECKOUT_RECEIPT'); ?>">
                         <?php foreach ($this->deliveryMethods as $method=>$settings) : ?>
                         <div class="form-check mm-checkout-option">
@@ -158,9 +199,14 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <p class="small text-muted mt-2 mb-0"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CDEK_PENDING'); ?></p>
                     <?php endif; ?>
                 </section>
+                <?php endif; ?>
 
+                <?php if($this->skipPayment): ?>
+                    <input type="hidden" name="payment_method" value="<?php echo $this->escape((string)$firstPayment); ?>">
+                <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-payment">
                     <h2 id="mm-checkout-payment" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT'); ?></h2>
+                    <?php if($this->paymentDescription!==''): ?><p class="text-muted"><?php echo nl2br($this->escape($this->paymentDescription)); ?></p><?php endif; ?>
                     <?php foreach ($this->paymentMethods as $method=>$label) : ?>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" name="payment_method" id="mm-payment-<?php echo $method; ?>"
@@ -170,7 +216,8 @@ $firstPayment=array_key_first($this->paymentMethods);
                     <?php endforeach; ?>
                     <p class="small text-muted"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT_MANUAL'); ?></p>
                 </section>
-                <?php if (($this->fields['comment']??'hidden')!=='hidden') : ?>
+                <?php endif; ?>
+                <?php if (!$this->skipBuyer && ($this->fields['comment']??'hidden')!=='hidden') : ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-note">
                     <h2 id="mm-checkout-note" class="h5"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_COMMENT'); ?>
                         <?php echo $this->fields['comment']==='required'?' *':''; ?></h2>

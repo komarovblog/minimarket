@@ -11,6 +11,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CartCatalog;
 use MiniMarket\Component\Minimarket\Site\Service\CartState;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutSettings;
+use MiniMarket\Component\Minimarket\Site\Service\CheckoutExtraFields;
 
 final class HtmlView extends BaseHtmlView
 {
@@ -20,6 +21,15 @@ final class HtmlView extends BaseHtmlView
     public string $customerEmail='';
     public bool $enabled=false;
     public array $fields=[];
+    public array $customFields=[];
+    public bool $showLoginButton=true;
+    public bool $skipBuyer=false;
+    public bool $skipDelivery=false;
+    public bool $skipPayment=false;
+    public string $buyerDescription='';
+    public string $deliveryDescription='';
+    public string $paymentDescription='';
+    public string $phoneMask='';
     public array $deliveryMethods=[];
     public array $paymentMethods=[];
     public array $cityRates=[];
@@ -46,9 +56,20 @@ final class HtmlView extends BaseHtmlView
             && (string)$params->get('delivery_rate_source','directory')==='cdek';
         try {
             $this->fields=CheckoutSettings::fields($params);
+            $this->customFields=CheckoutExtraFields::definitions($params);
+            $this->showLoginButton=(int)$params->get('checkout_show_login_button',1)===1;
+            $this->buyerDescription=(string)$params->get('checkout_buyer_description','');
+            $this->deliveryDescription=(string)$params->get('checkout_delivery_description','');
+            $this->paymentDescription=(string)$params->get('checkout_payment_description','');
+            $this->phoneMask=(string)$params->get('checkout_phone_mask','');
             $this->deliveryMethods=CheckoutDelivery::methods($params);
             $this->paymentMethods=CheckoutDelivery::payments($params);
             $this->cityRates=CheckoutDelivery::rates($params);
+            $this->skipBuyer=CheckoutSettings::skipBuyer($params,$app->getIdentity(),$this->customFields);
+            $this->skipDelivery=(int)$params->get('checkout_delivery_skip',0)===1
+                &&isset($this->deliveryMethods['pickup']);
+            $this->skipPayment=(int)$params->get('checkout_payment_skip',0)===1
+                &&count($this->paymentMethods)>0;
             $this->pickupAddress=(string)($this->deliveryMethods['pickup']['address']??'');
             $this->pickupSchedule=(string)($this->deliveryMethods['pickup']['schedule']??'');
             $this->pickupMapUrl=(string)($this->deliveryMethods['pickup']['map_url']??'');

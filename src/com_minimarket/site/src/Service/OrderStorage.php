@@ -121,6 +121,13 @@ final class OrderStorage
                 ]));
             }
             $db->setQuery($q);$db->execute();
+            foreach(($contact['custom_fields']??[]) as $field) {
+                $insert=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_custom_values'))
+                    ->columns($db->quoteName(['order_id','field_code','field_title','field_value']))
+                    ->values(implode(',',[(string)$orderId,$db->quote($field['code']),
+                        $db->quote($field['title']),$db->quote($field['value'])]));
+                $db->setQuery($insert);$db->execute();
+            }
             if($promo!==null)PromotionService::redeem($db,$promo,$orderId);
             $db->transactionCommit();
             return $orderId;

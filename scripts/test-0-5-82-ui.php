@@ -38,11 +38,15 @@ foreach(['inventory_enabled','filter_price_mode','filter_sku_mode','filter_stock
     $ok(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="'.$key.'"]'))===1,
         'general option '.$key);
 }
-foreach(['category_products_per_page','category_show_add_to_cart','category_quick_view',
+foreach(['category_show_add_to_cart','category_quick_view',
     'category_show_sort','category_lazy_loading','category_allow_layout_switch',
-    'category_children_per_page','category_list_show_attributes','category_list_show_options'] as $key){
+    'category_list_show_attributes','category_list_show_options'] as $key){
     $ok(count($cfg->xpath('//fieldset[@name="display"]/field[@name="'.$key.'"]'))===1,
         'display option '.$key);
+}
+foreach(['category_products_per_page','category_children_per_page','category_navigation_mode','category_load_trigger'] as $key) {
+    $ok(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="'.$key.'"]'))===1,
+        'pagination option in basic '.$key);
 }
 $auth=$cfg->xpath('//field[@name="checkout_auth_mode"]/option');
 $values=array_map(static fn($x)=>(string)$x['value'],$auth);

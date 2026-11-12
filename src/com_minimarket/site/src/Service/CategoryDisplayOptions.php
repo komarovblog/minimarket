@@ -29,6 +29,14 @@ final class CategoryDisplayOptions
         $result['allow_layout_switch']=(int)$global->get('category_allow_layout_switch',1)===1;
         $result['show_list_attributes']=(int)$global->get('category_list_show_attributes',1)===1;
         $result['show_list_options']=(int)$global->get('category_list_show_options',1)===1;
+        $nav=(string)$global->get('category_navigation_mode','pages');
+        $result['navigation_mode']=in_array($nav,['pages','load_more'],true)?$nav:'pages';
+        $trigger=(string)$global->get('category_load_trigger','button');
+        $result['load_trigger']=in_array($trigger,['button','scroll'],true)?$trigger:'button';
+        $result['pagination_page_links']=(int)$global->get('category_pagination_page_links',1)===1;
+        $result['pagination_next']=(int)$global->get('category_pagination_next',1)===1;
+        $result['pagination_previous']=(int)$global->get('category_pagination_previous',1)===1;
+        $result['load_previous']=(int)$global->get('category_load_previous',1)===1;
         $childLimit=(int)$global->get('category_children_per_page',10);
         $result['children_per_page']=in_array($childLimit,[0,10,20,50],true)?$childLimit:10;
         $limit=(int)$global->get('category_product_gallery_limit',5);

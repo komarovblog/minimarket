@@ -323,6 +323,8 @@ jobs:
           php scripts/test-0-5-82-ui.php
           php scripts/test-0-5-83-features.php
           php scripts/test-0-5-84-features.php
+          php scripts/test-0-5-97.php
+          node --check src/com_minimarket/media/js/faceted-catalog.js
           node --check src/com_minimarket/media/js/admin-display-groups.js
           node --check src/com_minimarket/media/js/category-card-gallery.js
           node --check src/com_minimarket/media/js/promo-video-editor.js

@@ -29,6 +29,10 @@ $order=$this->order;
         <dd class="col-sm-9"><?php echo $this->escape($order->email); ?></dd>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_COMMENT'); ?></dt>
         <dd class="col-sm-9"><?php echo nl2br($this->escape($order->customer_comment)); ?></dd>
+        <?php foreach($this->customFields as $field): ?>
+            <dt class="col-sm-3"><?php echo $this->escape((string)$field->field_title); ?></dt>
+            <dd class="col-sm-9"><?php echo nl2br($this->escape((string)$field->field_value)); ?></dd>
+        <?php endforeach; ?>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></dt>
         <dd class="col-sm-9"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_'.strtoupper((string)($order->delivery_method??'pickup'))); ?></dd>
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_CITY'); ?></dt>

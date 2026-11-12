@@ -16,7 +16,7 @@
   const zones=!!form.querySelector('[name="delivery_city"][list]');
   let discount=0,fee=0,serverFee=null,needsQuote=false,controller=null;
   function update(){
-   const method=form.querySelector('input[name="delivery_method"]:checked')?.value||'pickup';
+   const method=form.querySelector('input[name="delivery_method"]:checked, input[type="hidden"][name="delivery_method"]')?.value||'pickup';
    for(const panel of panels){
     const active=panel.dataset.deliveryPanel===method;
     panel.hidden=!active;
@@ -26,7 +26,7 @@
    if(address)address.required=method==='courier';
    fee=0;needsQuote=false;
    if(method==='pickup'){
-     const input=form.querySelector('input[name="delivery_method"]:checked');
+     const input=form.querySelector('input[name="delivery_method"]:checked, input[type="hidden"][name="delivery_method"]');
      const configured=Number.parseInt(input?.dataset.feeCents||'0',10);
      fee=Number.isSafeInteger(configured)&&configured>=0?configured:0;
    }
@@ -79,6 +79,27 @@
   }
   promo?.addEventListener('change',preview);
   for(const name of ['phone','email'])form.querySelector('[name="'+name+'"]')?.addEventListener('change',preview);
+  // Masks are presentation helpers. The server independently validates
+  // every submitted value against the configured mask and field type.
+  for(const field of form.querySelectorAll('[data-mm-input-mask]')){
+    field.addEventListener('input',()=>{
+      const mask=field.dataset.mmInputMask||'';
+      const raw=Array.from(field.value||'');
+      const takes={9:c=>/[0-9]/.test(c),A:c=>/\p{L}/u.test(c),'*':c=>c.length>0};
+      let pos=0,out='';
+      for(const token of mask){
+        if(takes[token]){
+          while(pos<raw.length&&!takes[token](raw[pos]))pos++;
+          if(pos>=raw.length)break;
+          out+=raw[pos++];
+        }else{
+          if(pos<raw.length)out+=token;
+          if(raw[pos]===token)pos++;
+        }
+      }
+      if(field.value!==out)field.value=out;
+    });
+  }
   update();
   if(zones||promo?.value.trim())void preview();
  }

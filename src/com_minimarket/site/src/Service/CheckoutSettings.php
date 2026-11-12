@@ -21,6 +21,17 @@ final class CheckoutSettings
         return $mode;
     }
 
+    /** A buyer step can be omitted only with trusted Joomla identity. */
+    public static function skipBuyer(object $params,object $user,array $customFields=[]):bool
+    {
+        if((int)$params->get('checkout_buyer_skip',0)!==1
+           ||(int)($user->id??0)<1||!empty($user->block)
+           ||filter_var((string)($user->email??''),FILTER_VALIDATE_EMAIL)===false
+           ||(string)$params->get('checkout_comment_mode','optional')==='required')return false;
+        foreach($customFields as $field)if(!empty($field['required']))return false;
+        return true;
+    }
+
     /** @return array<string,string> */
     public static function fields(object $params): array
     {

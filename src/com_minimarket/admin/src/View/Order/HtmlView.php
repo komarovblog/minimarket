@@ -12,6 +12,7 @@ final class HtmlView extends BaseHtmlView
 {
     public ?object $order=null;
     public array $items=[];
+    public array $customFields=[];
     public bool $canUpdate=false;
     public bool $canDelete=false;
     public bool $canCreateDelivery=false;
@@ -81,6 +82,11 @@ final class HtmlView extends BaseHtmlView
             ->order('id ASC');
         $db->setQuery($q);
         $this->items=(array)$db->loadObjectList();
+        $q=$db->getQuery(true)->select(['field_title','field_value'])
+            ->from($db->quoteName('#__minimarket_order_custom_values'))
+            ->where('order_id='.(int)$id)->order('field_code ASC');
+        $db->setQuery($q);
+        $this->customFields=(array)$db->loadObjectList();
         $q=$db->getQuery(true)->select('id')
             ->from($db->quoteName('#__minimarket_shipments'))
             ->where('order_id='.(int)$id);

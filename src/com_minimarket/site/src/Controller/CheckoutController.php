@@ -13,6 +13,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CartCatalog;
 use MiniMarket\Component\Minimarket\Site\Service\CartState;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutData;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutSettings;
+use MiniMarket\Component\Minimarket\Site\Service\CheckoutExtraFields;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery;
 use MiniMarket\Component\Minimarket\Site\Service\OrderStorage;
 
@@ -118,12 +119,22 @@ final class CheckoutController extends BaseController
         }
         try {
             $policies=CheckoutSettings::fields($params);
+            $customFields=CheckoutExtraFields::definitions($params);
+            $skipBuyer=CheckoutSettings::skipBuyer($params,$identity,$customFields);
+            if($skipBuyer)$policies=['name'=>'required','phone'=>'hidden','email'=>'required','comment'=>'hidden'];
             $contact=CheckoutData::normalize([
-                'name'=>$app->input->post->get('customer_name','','string'),
-                'phone'=>$app->input->post->get('phone','','string'),
-                'email'=>$app->input->post->get('email','','string'),
-                'comment'=>$app->input->post->get('comment','','string'),
+                'name'=>$skipBuyer?(string)$identity->name:$app->input->post->get('customer_name','','string'),
+                'phone'=>$skipBuyer?'':$app->input->post->get('phone','','string'),
+                'email'=>$skipBuyer?(string)$identity->email:$app->input->post->get('email','','string'),
+                'comment'=>$skipBuyer?'':$app->input->post->get('comment','','string'),
             ],$policies);
+            $mask=(string)$params->get('checkout_phone_mask','');
+            if(!$skipBuyer && $mask!=='' && $contact['phone']!==''
+               &&!CheckoutExtraFields::maskMatches($mask,$contact['phone']))
+                throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXTRA_MASK_INVALID');
+            $postedExtra=$app->input->post->get('extra',[],'array');
+            $contact['custom_fields']=CheckoutExtraFields::validate(
+                is_array($postedExtra)?$postedExtra:[],$skipBuyer?[]:$customFields);
             $db=Factory::getContainer()->get(DatabaseInterface::class);
             $inventory=(int)$params->get('inventory_enabled',1)===1;
             $quote=(new CartCatalog($db))->details($cart,$inventory);
@@ -133,14 +144,18 @@ final class CheckoutController extends BaseController
                 $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
                 $volume+=(int)($line['shipping_volume_cm3']??0)*(int)$line['quantity'];
             }
+            $methods=CheckoutDelivery::methods($params);
+            $payments=CheckoutDelivery::payments($params);
+            $skipDelivery=(int)$params->get('checkout_delivery_skip',0)===1 &&isset($methods['pickup']);
+            $skipPayment=(int)$params->get('checkout_payment_skip',0)===1 &&count($payments)>0;
             $delivery=CheckoutDelivery::quote($params,[
-                'delivery_method'=>$app->input->post->get('delivery_method','','string'),
+                'delivery_method'=>$skipDelivery?'pickup':$app->input->post->get('delivery_method','','string'),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
                 'delivery_country'=>$app->input->post->get('delivery_country','RU','string'),
                 'delivery_region'=>$app->input->post->get('delivery_region','','string'),
                 'delivery_postcode'=>$app->input->post->get('delivery_postcode','','string'),
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
-                'payment_method'=>$app->input->post->get('payment_method','','string'),
+                'payment_method'=>$skipPayment?(string)array_key_first($payments):$app->input->post->get('payment_method','','string'),
             ],(int)$quote['total_cents'],$grams,$volume);
             $promoCode=strtoupper(trim((string)$app->input->post->get('promo_code',
                 (string)$session->get('com_minimarket.promo_code',''),'string')));

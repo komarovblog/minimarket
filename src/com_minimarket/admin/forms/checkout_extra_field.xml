@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <field name="title" type="text" label="COM_MINIMARKET_EXTRA_TITLE" required="true" maxlength="120" filter="string" />
+    <field name="code" type="text" label="COM_MINIMARKET_EXTRA_CODE" required="true" maxlength="40" filter="cmd"
+           description="COM_MINIMARKET_EXTRA_CODE_DESC" />
+    <field name="type" type="list" default="text" label="COM_MINIMARKET_EXTRA_TYPE" filter="cmd">
+        <option value="text">COM_MINIMARKET_EXTRA_TEXT</option>
+        <option value="tel">COM_MINIMARKET_EXTRA_TEL</option>
+        <option value="email">COM_MINIMARKET_EXTRA_EMAIL</option>
+        <option value="number">COM_MINIMARKET_EXTRA_NUMBER</option>
+        <option value="textarea">COM_MINIMARKET_EXTRA_TEXTAREA</option>
+        <option value="select">COM_MINIMARKET_EXTRA_SELECT</option>
+        <option value="checkbox">COM_MINIMARKET_EXTRA_CHECKBOX</option>
+    </field>
+    <field name="required" type="list" default="0" filter="int" label="COM_MINIMARKET_EXTRA_REQUIRED">
+        <option value="0">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="1">COM_MINIMARKET_FIELD_REQUIRED</option>
+    </field>
+    <field name="mask" type="text" maxlength="64" filter="string" label="COM_MINIMARKET_EXTRA_MASK" description="COM_MINIMARKET_CHECKOUT_MASK_HELP" />
+    <field name="placeholder" type="text" maxlength="120" filter="string" label="COM_MINIMARKET_EXTRA_PLACEHOLDER" />
+    <field name="options" type="textarea" rows="3" filter="string" label="COM_MINIMARKET_EXTRA_VALUES"
+           description="COM_MINIMARKET_EXTRA_VALUES_DESC" />
+    <field name="description" type="textarea" rows="2" filter="string" label="COM_MINIMARKET_EXTRA_DESCRIPTION" />
+    <field name="state" type="list" default="1" filter="int" label="JSTATUS">
+        <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+    </field>
+</form>

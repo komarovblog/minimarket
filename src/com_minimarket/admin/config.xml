@@ -25,10 +25,10 @@
             <option value="digital">COM_MINIMARKET_SHOP_TYPE_DIGITAL</option>
             <option value="food_delivery">COM_MINIMARKET_SHOP_TYPE_FOOD_DELIVERY</option>
         </field>
-        <field name="inventory_enabled" type="radio" default="1" filter="int"
+        <field name="inventory_enabled" type="list" default="1" filter="int"
                label="COM_MINIMARKET_CONFIG_INVENTORY_ENABLED"
                description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">
-            <option value="1">JYES</option><option value="0">JNO</option>
+            <option value="1">COM_MINIMARKET_ENABLE</option><option value="0">COM_MINIMARKET_DISABLE</option>
         </field>
         <field name="mm_commands_note" type="note" class="alert alert-info" label="COM_MINIMARKET_COMMANDS_GROUP"
                description="COM_MINIMARKET_COMMANDS_GROUP_DESC"/>
@@ -47,7 +47,7 @@
 
 
         <field name="mm_system_filters_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SYSTEM_ATTRIBUTES_IN_FILTER" description="COM_MINIMARKET_SYSTEM_INDEPENDENT_HELP" />
-        <field name="mm_price_section" type="note" class="alert alert-secondary" label="COM_MINIMARKET_SYSTEM_PRICE_GROUP" description="COM_MINIMARKET_SYSTEM_FIELD_GROUP_HELP" />
+        <field name="mm_price_section" type="spacer" label="COM_MINIMARKET_SYSTEM_PRICE_GROUP" hr="false" />
         <field name="filter_price_mode" type="list" default="slider" filter="cmd"
                        label="COM_MINIMARKET_SYSTEM_PRICE_FILTER" description="COM_MINIMARKET_SYSTEM_PRICE_FILTER_DESC">
                     <option value="none">COM_MINIMARKET_MODE_NONE</option>
@@ -60,7 +60,7 @@
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
-        <field name="mm_sku_section" type="note" class="alert alert-secondary" label="COM_MINIMARKET_SYSTEM_SKU_GROUP" description="COM_MINIMARKET_SYSTEM_FIELD_GROUP_HELP" />
+        <field name="mm_sku_section" type="spacer" label="COM_MINIMARKET_SYSTEM_SKU_GROUP" hr="false" />
         <field name="filter_sku_mode" type="list" default="none" filter="cmd"
                        label="COM_MINIMARKET_SYSTEM_SKU_FILTER">
                     <option value="none">COM_MINIMARKET_MODE_NONE</option>
@@ -72,10 +72,10 @@
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
-        <field name="mm_stock_section" type="note" class="alert alert-secondary" label="COM_MINIMARKET_SYSTEM_STOCK_GROUP" description="COM_MINIMARKET_SYSTEM_FIELD_GROUP_HELP" />
-        <field name="filter_stock_enabled" type="radio" default="0" filter="int"
+        <field name="mm_stock_section" type="spacer" label="COM_MINIMARKET_SYSTEM_STOCK_GROUP" hr="false" />
+        <field name="filter_stock_enabled" type="list" default="0" filter="int"
                        label="COM_MINIMARKET_SYSTEM_STOCK_FILTER">
-                    <option value="1">JYES</option><option value="0">JNO</option>
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
         <field name="system_stock_display_location" type="list" default="both" filter="cmd"
                label="COM_MINIMARKET_SYSTEM_STOCK_DISPLAY_LOCATION">
@@ -83,46 +83,71 @@
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
-    </fieldset>
-    <fieldset name="display" label="COM_MINIMARKET_CONFIG_DISPLAY">
-        <field name="mm_display_categories_note" type="note" label="COM_MINIMARKET_DISPLAY_CATEGORIES_SECTION" description="COM_MINIMARKET_DISPLAY_CATEGORIES_HELP" class="alert alert-info" />
-        <field name="category_show_image" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_IMAGE">
-                    <option value="1">JYES</option><option value="0">JNO</option>
+
+        <field name="mm_pagination_note" type="note" class="alert alert-info" label="COM_MINIMARKET_PAGINATION_SETTINGS" description="COM_MINIMARKET_PAGINATION_SETTINGS_DESC" />
+        <field name="category_navigation_mode" type="list" default="pages" filter="cmd" label="COM_MINIMARKET_NAV_MODE">
+            <option value="pages">COM_MINIMARKET_NAV_PAGES</option><option value="load_more">COM_MINIMARKET_NAV_LOAD_MORE</option>
+        </field>
+        <field name="category_load_trigger" type="list" default="button" filter="cmd" label="COM_MINIMARKET_NAV_LOAD_TRIGGER" showon="category_navigation_mode:load_more">
+            <option value="button">COM_MINIMARKET_NAV_BUTTON</option><option value="scroll">COM_MINIMARKET_NAV_SCROLL</option>
+        </field>
+        <field name="category_products_per_page" type="list" default="10" filter="int"
+                       label="COM_MINIMARKET_PRODUCTS_PER_PAGE" description="COM_MINIMARKET_PRODUCTS_PER_PAGE_DESC">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
                 </field>
-        <field name="category_show_introtext" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_INTRO">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
-        <field name="category_show_description" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_DESCRIPTION">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
-        <field name="category_show_children" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_CHILDREN" default="1" filter="int">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
-        <field name="category_show_products" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_PRODUCTS" default="1" filter="int">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
-        <field name="category_show_bundles" type="radio" label="COM_MINIMARKET_GLOBAL_SHOW_BUNDLES" default="1" filter="int">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
-        <field name="category_show_descendant_products" type="radio" label="COM_MINIMARKET_GLOBAL_DESCENDANT_PRODUCTS" default="0" filter="int">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
-        <field name="category_show_descendant_bundles" type="radio" label="COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES" default="0" filter="int">
-                    <option value="1">JYES</option><option value="0">JNO</option>
-                </field>
-        <field name="category_show_sort" type="radio" label="COM_MINIMARKET_CATEGORY_SHOW_SORT" default="1" filter="int">
-  <option value="1">JYES</option><option value="0">JNO</option>
-</field>
-        <field name="category_lazy_loading" type="radio" label="COM_MINIMARKET_CATEGORY_LAZY_LOADING" default="1" filter="int">
-  <option value="1">JYES</option><option value="0">JNO</option>
-</field>
+        <field name="category_pagination_page_links" type="list" default="1" filter="int" label="COM_MINIMARKET_NAV_SHOW_PAGES" showon="category_navigation_mode:pages">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="category_pagination_next" type="list" default="1" filter="int" label="COM_MINIMARKET_NAV_NEXT" showon="category_navigation_mode:pages">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="category_pagination_previous" type="list" default="1" filter="int" label="COM_MINIMARKET_NAV_PREVIOUS" showon="category_navigation_mode:pages">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="category_load_previous" type="list" default="1" filter="int" label="COM_MINIMARKET_NAV_LOAD_PREVIOUS" showon="category_navigation_mode:load_more">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
         <field name="category_children_per_page" type="list" label="COM_MINIMARKET_CHILDREN_PER_PAGE" default="10" filter="int">
   <option value="0">COM_MINIMARKET_PAGES_ALL</option>
   <option value="10">10</option>
   <option value="20">20</option>
   <option value="50">50</option>
 </field>
-        <field name="mm_display_products_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCTS_SECTION" description="COM_MINIMARKET_DISPLAY_PRODUCTS_HELP" class="alert alert-info" />
+    </fieldset>
+    <fieldset name="display" label="COM_MINIMARKET_CONFIG_DISPLAY">
+        <field name="mm_display_categories_note" type="note" label="COM_MINIMARKET_DISPLAY_CATEGORIES_SECTION" description="COM_MINIMARKET_DISPLAY_CATEGORIES_HELP" class="alert alert-info" />
+        <field name="category_show_image" type="list" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_IMAGE">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_introtext" type="list" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_INTRO">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_description" type="list" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_CATEGORY_DESCRIPTION">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_children" type="list" label="COM_MINIMARKET_GLOBAL_SHOW_CHILDREN" default="1" filter="int">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_products" type="list" label="COM_MINIMARKET_GLOBAL_SHOW_PRODUCTS" default="1" filter="int">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_bundles" type="list" label="COM_MINIMARKET_GLOBAL_SHOW_BUNDLES" default="1" filter="int">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_descendant_products" type="list" label="COM_MINIMARKET_GLOBAL_DESCENDANT_PRODUCTS" default="0" filter="int">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_descendant_bundles" type="list" label="COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES" default="0" filter="int">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+                </field>
+        <field name="category_show_sort" type="list" label="COM_MINIMARKET_CATEGORY_SHOW_SORT" default="1" filter="int">
+  <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+</field>
+        <field name="category_lazy_loading" type="hidden" default="1" filter="int" />
+<field name="mm_display_products_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCTS_SECTION" description="COM_MINIMARKET_DISPLAY_PRODUCTS_HELP" class="alert alert-info" />
         <field name="category_product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="grid" filter="cmd">
                     <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
                     <option value="grid">COM_MINIMARKET_LAYOUT_GRID</option>
@@ -181,42 +206,42 @@
                     <option value="5">5</option>
                     <option value="6">6</option>
                 </field>
-        <field name="category_allow_layout_switch" type="radio" label="COM_MINIMARKET_CATEGORY_ALLOW_LAYOUT_SWITCH" default="1" filter="int">
-  <option value="1">JYES</option><option value="0">JNO</option>
+        <field name="category_allow_layout_switch" type="list" label="COM_MINIMARKET_CATEGORY_ALLOW_LAYOUT_SWITCH" default="1" filter="int">
+  <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>
-        <field name="category_products_per_page" type="list" default="10" filter="int"
-                       label="COM_MINIMARKET_PRODUCTS_PER_PAGE" description="COM_MINIMARKET_PRODUCTS_PER_PAGE_DESC">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="30">30</option>
-                    <option value="50">50</option>
-                </field>
-        <field name="mm_display_card_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCT_CARD_SECTION" description="COM_MINIMARKET_DISPLAY_CARD_HELP" class="alert alert-info" />
-        <field name="category_list_show_attributes" type="radio" label="COM_MINIMARKET_CATEGORY_LIST_ATTRIBUTES" default="1" filter="int">
-  <option value="1">JYES</option><option value="0">JNO</option>
+<field name="mm_display_card_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCT_CARD_SECTION" description="COM_MINIMARKET_DISPLAY_CARD_HELP" class="alert alert-info" />
+        <field name="category_list_show_attributes" type="list" label="COM_MINIMARKET_CATEGORY_LIST_ATTRIBUTES" description="COM_MINIMARKET_CATEGORY_LIST_ATTRIBUTES_DESC" default="1" filter="int">
+  <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>
-        <field name="category_list_show_options" type="radio" label="COM_MINIMARKET_CATEGORY_LIST_OPTIONS" default="1" filter="int">
-  <option value="1">JYES</option><option value="0">JNO</option>
+        <field name="category_list_show_options" type="list" label="COM_MINIMARKET_CATEGORY_LIST_OPTIONS" description="COM_MINIMARKET_CATEGORY_LIST_OPTIONS_DESC" default="1" filter="int">
+  <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>
-        <field name="category_show_add_to_cart" type="radio" default="1" filter="int" label="COM_MINIMARKET_LIST_ADD_TO_CART">
-                    <option value="1">JYES</option><option value="0">JNO</option>
+        <field name="category_show_add_to_cart" type="list" default="1" filter="int" label="COM_MINIMARKET_LIST_ADD_TO_CART">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="category_quick_view" type="radio" default="0" filter="int" label="COM_MINIMARKET_LIST_QUICK_VIEW">
-                    <option value="1">JYES</option><option value="0">JNO</option>
+        <field name="category_quick_view" type="list" default="0" filter="int" label="COM_MINIMARKET_LIST_QUICK_VIEW">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="category_product_gallery_enabled" type="radio" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY">
-                    <option value="1">JYES</option><option value="0">JNO</option>
+        <field name="category_product_gallery_enabled" type="list" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
         <field name="category_product_gallery_limit" type="list" default="5" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY_LIMIT" showon="category_product_gallery_enabled:1">
                     <option value="3">3</option><option value="5">5</option><option value="8">8</option>
                 </field>
-        <field name="category_show_badges" type="radio" default="1" filter="int" label="COM_MINIMARKET_LIST_SHOW_BADGES">
-                    <option value="1">JYES</option><option value="0">JNO</option>
+        <field name="category_show_badges" type="list" default="1" filter="int" label="COM_MINIMARKET_LIST_SHOW_BADGES">
+                    <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
     </fieldset>
     <!-- Checkout is deliberately separated from authentication integrations. -->
     <fieldset name="checkout" label="COM_MINIMARKET_CONFIG_CHECKOUT">
         <field name="checkout_buyer_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CHECKOUT_BUYER_SECTION" description="COM_MINIMARKET_CHECKOUT_BUYER_NOTE"/>
+        <field name="checkout_show_login_button" type="list" label="COM_MINIMARKET_CHECKOUT_SHOW_LOGIN" default="1" filter="int">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="checkout_buyer_description" type="textarea" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" rows="3" filter="string" />
+        <field name="checkout_buyer_skip" type="list" label="COM_MINIMARKET_CHECKOUT_SKIP_STEP" default="0" filter="int" description="COM_MINIMARKET_CHECKOUT_SKIP_BUYER_HELP">
+            <option value="0">COM_MINIMARKET_STEP_KEEP</option><option value="1">COM_MINIMARKET_STEP_SKIP</option>
+        </field>
         <field name="checkout_auth_mode" type="list" default="guest" filter="cmd"
                label="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH"
                description="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH_DESC">
@@ -233,6 +258,7 @@
                label="COM_MINIMARKET_CONFIG_FIELD_PHONE" description="COM_MINIMARKET_CONFIG_CONTACT_DESC">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
+        <field name="checkout_phone_mask" type="text" maxlength="32" label="COM_MINIMARKET_CHECKOUT_PHONE_MASK" description="COM_MINIMARKET_CHECKOUT_MASK_HELP" filter="string" />
         <field name="checkout_email_mode" type="list" default="optional" filter="cmd"
                label="COM_MINIMARKET_CONFIG_FIELD_EMAIL" description="COM_MINIMARKET_CONFIG_CONTACT_DESC">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
@@ -241,32 +267,46 @@
                label="COM_MINIMARKET_CONFIG_FIELD_COMMENT" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
-        <field name="checkout_methods_note" type="note" class="alert alert-info"
-               label="COM_MINIMARKET_METHODS_CHECKOUT_NOTE"
-               description="COM_MINIMARKET_METHODS_CHECKOUT_NOTE_DESC" />
+        <field name="checkout_custom_fields" type="subform" multiple="true" min="0" max="20"
+               formsource="administrator/components/com_minimarket/forms/checkout_extra_field.xml"
+               layout="joomla.form.field.subform.repeatable"
+               label="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS" description="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS_DESC" />
+        <field name="checkout_delivery_note" type="note" class="alert alert-info"
+               label="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION" description="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION_HELP" />
+        <field name="checkout_delivery_description" type="textarea" rows="3" filter="string" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_delivery_skip" type="list" default="0" filter="int" label="COM_MINIMARKET_CHECKOUT_SKIP_STEP"
+               description="COM_MINIMARKET_CHECKOUT_SKIP_DELIVERY_HELP">
+            <option value="0">COM_MINIMARKET_STEP_KEEP</option><option value="1">COM_MINIMARKET_STEP_SKIP</option>
+        </field>
+        <field name="checkout_payment_note" type="note" class="alert alert-info"
+               label="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION" description="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION_HELP" />
+        <field name="checkout_payment_description" type="textarea" rows="3" filter="string" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_payment_skip" type="list" default="0" filter="int" label="COM_MINIMARKET_CHECKOUT_SKIP_STEP">
+            <option value="0">COM_MINIMARKET_STEP_KEEP</option><option value="1">COM_MINIMARKET_STEP_SKIP</option>
+        </field>
     </fieldset>
     <fieldset name="reviews" label="COM_MINIMARKET_CONFIG_REVIEWS">
         <field name="reviews_help" type="note" class="alert alert-info" label="COM_MINIMARKET_CONFIG_REVIEWS" description="COM_MINIMARKET_REVIEWS_SECTION_HELP"/>
-        <field name="reviews_enabled" type="radio" default="0" filter="int"
+        <field name="reviews_enabled" type="list" default="0" filter="int"
                label="COM_MINIMARKET_REVIEWS_ENABLED" description="COM_MINIMARKET_REVIEWS_ENABLED_DESC">
-            <option value="1">JYES</option><option value="0">JNO</option>
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
         <field name="reviews_author_mode" type="list" default="registered" filter="cmd"
                label="COM_MINIMARKET_REVIEWS_WHO">
             <option value="registered">COM_MINIMARKET_REVIEWS_REGISTERED</option>
             <option value="all">COM_MINIMARKET_REVIEWS_EVERYONE</option>
         </field>
-        <field name="reviews_moderation" type="radio" default="1" filter="int"
+        <field name="reviews_moderation" type="list" default="1" filter="int"
                label="COM_MINIMARKET_REVIEWS_MODERATE" description="COM_MINIMARKET_REVIEWS_MODERATE_DESC">
-            <option value="1">JYES</option><option value="0">JNO</option>
+            <option value="1">COM_MINIMARKET_REVIEWS_MODERATE_ALL</option><option value="0">COM_MINIMARKET_REVIEWS_MODERATE_GUESTS</option><option value="2">COM_MINIMARKET_REVIEWS_MODERATE_NONE</option>
         </field>
-        <field name="reviews_media_photo" type="radio" default="1" filter="int"
+        <field name="reviews_media_photo" type="list" default="1" filter="int"
                label="COM_MINIMARKET_REVIEWS_PHOTO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC">
-            <option value="1">JYES</option><option value="0">JNO</option>
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
-        <field name="reviews_media_video" type="radio" default="1" filter="int"
+        <field name="reviews_media_video" type="list" default="1" filter="int"
                label="COM_MINIMARKET_REVIEWS_VIDEO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC">
-            <option value="1">JYES</option><option value="0">JNO</option>
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
     </fieldset>
     <fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL">
