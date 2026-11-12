@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.6.4</version>
+    <version>0.6.5</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -64,15 +64,27 @@
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=product&amp;layout=edit&amp;product_type=bundle</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu type="separator" alias="mm-separator-2">-</menu>
-            <menu link="option=com_minimarket&amp;view=groups">COM_MINIMARKET_GROUPS</menu>
-            <menu link="option=com_minimarket&amp;view=bundlegroups">COM_MINIMARKET_BUNDLE_GROUPS</menu>
+            <menu link="option=com_minimarket&amp;view=groups">COM_MINIMARKET_GROUPS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=group.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=bundlegroups">COM_MINIMARKET_BUNDLE_GROUPS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=group&amp;layout=edit&amp;group_type=bundle</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
             <menu type="separator" alias="mm-separator-3">-</menu>
-            <menu link="option=com_minimarket&amp;view=attributes">COM_MINIMARKET_ATTRIBUTES</menu>
-            <menu link="option=com_minimarket&amp;view=orderoptions">COM_MINIMARKET_ORDER_OPTIONS</menu>
+            <menu link="option=com_minimarket&amp;view=attributes">COM_MINIMARKET_ATTRIBUTES
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=attribute.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=orderoptions">COM_MINIMARKET_ORDER_OPTIONS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=orderoption.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
             <menu type="separator" alias="mm-separator-4">-</menu>
-            <menu link="option=com_minimarket&amp;view=brands">COM_MINIMARKET_BRANDS</menu>
+            <menu link="option=com_minimarket&amp;view=brands">COM_MINIMARKET_BRANDS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=brand.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
             <menu type="separator" alias="mm-separator-5">-</menu>
-            <menu link="option=com_minimarket&amp;view=collections">COM_MINIMARKET_COLLECTIONS</menu>
+            <menu link="option=com_minimarket&amp;view=collections">COM_MINIMARKET_COLLECTIONS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=collection.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
             <menu type="separator" alias="mm-separator-6">-</menu>
 
             <menu link="option=com_minimarket&amp;view=promocodes">COM_MINIMARKET_PROMOCODES_TITLE
@@ -83,7 +95,9 @@
             </menu>
             <menu type="separator" alias="mm-separator-seo-import">-</menu>
             <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=feed.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
             <menu type="separator" alias="mm-separator-settings">-</menu>
             <menu link="option=com_minimarket&amp;view=deliverymethods">COM_MINIMARKET_DELIVERY_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=paymentmethods">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
