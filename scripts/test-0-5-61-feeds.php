@@ -98,8 +98,10 @@ $submenu=$manifest->administration->submenu->menu;
 $feedIndex=-1;$settingsIndex=-1;
 for($pos=0;$pos<count($submenu);$pos++) {
   $item=$submenu[$pos];
-  if((string)$item==='COM_MINIMARKET_FEEDS_TITLE')$feedIndex=$pos;
-  if((string)$item==='COM_MINIMARKET_CONFIG_SETTINGS_MENU')$settingsIndex=$pos;
+  // Native Joomla submenu links may include nested quicktask params and
+  // indentation whitespace; the label itself must still be unchanged.
+  if(trim((string)$item)==='COM_MINIMARKET_FEEDS_TITLE')$feedIndex=$pos;
+  if(trim((string)$item)==='COM_MINIMARKET_CONFIG_SETTINGS_MENU')$settingsIndex=$pos;
 }
 check61($feedIndex>0 && $settingsIndex>$feedIndex,
  'Feeds stays beside Import, before final Settings menu');
