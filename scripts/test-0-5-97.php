@@ -49,7 +49,7 @@ foreach(['mm_pagination_note','category_navigation_mode','category_products_per_
         'pagination field '.$key);
 }
 foreach(['checkout_custom_fields','checkout_phone_mask','checkout_digital_description',
-    'checkout_require_terms','checkout_show_login_button'] as $key){
+    'checkout_consent_text','checkout_show_login_button'] as $key){
     $check(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="'.$key.'"]'))===1,
         'checkout field '.$key);
 }
