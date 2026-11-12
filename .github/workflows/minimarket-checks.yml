@@ -476,6 +476,10 @@ jobs:
         run: php scripts/test-0-6-3-ui.php
       - name: 0.6.6 native administrator lists, editor controls and toolbar version
         run: php scripts/test-0-6-6-native-admin-ui.php
+      - name: 0.6.8 checkout verification selector, real Joomla user and stacked order panels
+        run: |
+          php scripts/test-0-6-8-checkout-order-admin.php
+          for file in src/com_minimarket/admin/src/Field/RegistrationverificationField.php src/com_minimarket/admin/src/Controller/{Order,Productpicker}Controller.php src/com_minimarket/admin/src/View/Order/HtmlView.php src/com_minimarket/admin/tmpl/{order/create,order/default,delivery/create}.php; do php -l "$file"; done
       - name: 0.6.7 order returns, shipment reasons, audit history and native operational UI
         run: |
           php scripts/test-0-6-7-return-workflow.php

@@ -7,7 +7,7 @@ $check=static function(bool $condition,string $description)use(&$n):void {
  ++$n;if(!$condition)throw new RuntimeException('MM067_WORKFLOW_FAIL: '.$description);
 };
 $xml=simplexml_load_file($root.'minimarket.xml');
-$check($xml!==false && (string)$xml->version==='0.6.7','manifest 0.6.7');
+$check($xml!==false && version_compare((string)$xml->version,'0.6.7','>='),'compatible return workflows');
 $menu=(string)file_get_contents($root.'minimarket.xml');
 $check((bool)preg_match('~view=deliveries.*?view=returns.*?view=reviews~s',$menu),
  'return menu appears after deliveries and before reviews');

@@ -288,7 +288,7 @@
         </field>
     </fieldset>
     <!-- Checkout is deliberately separated from authentication integrations. -->
-    <fieldset name="checkout" label="COM_MINIMARKET_CONFIG_CHECKOUT">
+    <fieldset name="checkout" label="COM_MINIMARKET_CONFIG_CHECKOUT" addfieldprefix="MiniMarket\Component\Minimarket\Administrator\Field">
         <field name="mm_checkout_auth_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_AUTH_SECTION"
                description="COM_MINIMARKET_CHECKOUT_AUTH_SECTION_HELP" />
@@ -299,8 +299,12 @@
             <option value="guests">COM_MINIMARKET_CHECKOUT_MODE_GUESTS</option>
             <option value="all">COM_MINIMARKET_CHECKOUT_MODE_ALL</option>
         </field>
-        <!-- Configured in Registration Methods, not duplicated here. -->
-        <field name="checkout_verification_method" type="hidden" default="email" filter="cmd" />
+        <!-- The list is derived from registered methods; unimplemented plugins
+             must not be selectable until a real checkout verification adapter exists. -->
+        <field name="checkout_verification_method" type="Registrationverification"
+               default="email" filter="cmd"
+               label="COM_MINIMARKET_CHECKOUT_VERIFICATION_METHOD_LABEL"
+               description="COM_MINIMARKET_CHECKOUT_VERIFICATION_METHOD_HELP" />
         <field name="checkout_auth_hint" type="note" class="alert alert-info"
             label="COM_MINIMARKET_CHECKOUT_VERIFICATION_SECTION"
             description="COM_MINIMARKET_CHECKOUT_VERIFICATION_SECTION_DESC"

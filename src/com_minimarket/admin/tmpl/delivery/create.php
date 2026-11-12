@@ -12,6 +12,7 @@ $mmReference=[
  'input'=>'order_id','endpoint'=>'orders','multiple'=>false,'selected'=>$selected,
  'placeholder'=>Text::_('COM_MINIMARKET_ORDER_PICKER_SEARCH'),
  'help'=>Text::_('COM_MINIMARKET_DELIVERY_ORDER_PICKER_HELP'),
+ 'edit_url_prefix'=>'index.php?option=com_minimarket&view=order&id=',
  'filters'=>[
   ['name'=>'date_from','type'=>'date','label'=>Text::_('COM_MINIMARKET_REF_DATE_FROM')],
   ['name'=>'date_to','type'=>'date','label'=>Text::_('COM_MINIMARKET_REF_DATE_TO')]
@@ -24,6 +25,10 @@ $mmReference=[
 </div>
 <section class="mm-admin-panel">
  <div class="alert alert-info" role="note"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CREATE_HINT'); ?></div>
+ <?php if($this->preselectedOrder>0): ?>
+ <p><a class="btn btn-outline-secondary btn-sm" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$this->preselectedOrder,false)); ?>">
+ <span class="icon-arrow-left" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?> #<?php echo (int)$this->preselectedOrder; ?></a></p>
+ <?php endif; ?>
  <?php if($this->hasPriorShipment): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_DELIVERY_REPEAT_HINT'); ?></p><?php endif; ?>
  <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.create',false)); ?>" id="mm-delivery-form" class="row g-3">
   <div class="col-12"><?php require dirname(__DIR__).'/shared/reference-picker.php'; ?></div>

@@ -11,6 +11,8 @@ use Joomla\Database\DatabaseInterface;
 final class HtmlView extends BaseHtmlView
 {
     public ?object $order=null;
+    public ?object $linkedUser=null;
+    public bool $canViewUsers=false;
     public array $items=[];
     public bool $hasDigitalItems=false;
     public array $customFields=[];
@@ -39,6 +41,7 @@ final class HtmlView extends BaseHtmlView
         $this->canUpdate=$identity->authorise('core.edit.state','com_minimarket');
         $this->canDelete=$identity->authorise('core.delete','com_minimarket');
         $this->canCreateDelivery=$identity->authorise('core.create','com_minimarket');
+        $this->canViewUsers=$identity->authorise('core.manage','com_users');
         $this->canCreateReturn=$identity->authorise('core.create','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {
@@ -80,6 +83,15 @@ final class HtmlView extends BaseHtmlView
         $db->setQuery($q);
         $this->order=$db->loadObject() ?: null;
         if ($this->order===null) throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
+        // Customer contact fields are immutable order snapshots. The account
+        // relation uses the explicitly saved Joomla user_id, never name/email.
+        if((int)($this->order->user_id??0)>0){
+            $q=$db->getQuery(true)->select(['id','name'])
+                ->from($db->quoteName('#__users'))
+                ->where('id='.(int)$this->order->user_id);
+            $db->setQuery($q);
+            $this->linkedUser=$db->loadObject() ?: null;
+        }
         $q=$db->getQuery(true)->select('*')
             ->from($db->quoteName('#__minimarket_order_items'))
             ->where($db->quoteName('order_id').'='.(int)$id)
@@ -106,10 +118,11 @@ final class HtmlView extends BaseHtmlView
             ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
         $db->setQuery($q);
         $this->returns=(array)$db->loadObjectList();
-        $q=$db->getQuery(true)->select(['id','actor_user_id','event_type',
-                'old_value','new_value','created_at'])
-            ->from($db->quoteName('#__minimarket_order_events'))
-            ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
+        $q=$db->getQuery(true)->select(['e.id','e.actor_user_id','e.event_type',
+                'e.old_value','e.new_value','e.created_at','u.name AS actor_name'])
+            ->from($db->quoteName('#__minimarket_order_events','e'))
+            ->join('LEFT',$db->quoteName('#__users','u').' ON u.id=e.actor_user_id')
+            ->where('e.order_id='.(int)$id)->order('e.created_at DESC,e.id DESC');
         $db->setQuery($q,0,500);
         $this->events=(array)$db->loadObjectList();
         ToolbarHelper::title(Text::sprintf('COM_MINIMARKET_ORDER_HEADING',$id));

@@ -194,6 +194,37 @@ final class ProductpickerController extends BaseController
             'members'=>$members]]);
     }
 
+    /** Paginated Joomla user lookup, never trust the browser's selected ID. */
+    public function users(): void
+    {
+        $this->ensureAllowed();
+        $app=Factory::getApplication();
+        if (!$app->getIdentity()->authorise('core.create','com_minimarket'))
+            throw new \RuntimeException('Access denied',403);
+        $term=mb_substr(trim((string)$app->input->getString('q','')),0,100);
+        // No listing of the entire user directory on an empty query.
+        if(mb_strlen($term)<2 && !ctype_digit($term)) {
+            $this->respond(['items'=>[]]);return;
+        }
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $q=$db->getQuery(true)->select(['id','name','username'])
+            ->from($db->quoteName('#__users'))->where('block=0')
+            ->order('name ASC,id ASC');
+        $like=$db->quote('%'.$db->escape($term,true).'%',false);
+        $criteria=['name LIKE '.$like,'username LIKE '.$like,'email LIKE '.$like];
+        if(ctype_digit($term))$criteria[]='id='.(int)$term;
+        $q->where('('.implode(' OR ',$criteria).')');
+        $db->setQuery($q,0,20);
+        $items=[];
+        foreach((array)$db->loadAssocList() as $row){
+            $id=(int)$row['id'];
+            $items[]=['id'=>$id,'key'=>(string)$id,
+                'title'=>(string)$row['name'].' (#'.$id.')',
+                'subtitle'=>(string)$row['username']];
+        }
+        $this->respond(['items'=>$items]);
+    }
+
     /** The shipment picker shows only eligible courier orders and searches on the server. */
     public function orders(): void
     {
@@ -214,11 +245,9 @@ final class ProductpickerController extends BaseController
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $q=$db->getQuery(true)->select(['o.id','o.customer_name','o.delivery_city','o.created_at'])
             ->from($db->quoteName('#__minimarket_orders','o'))
-            ->join('LEFT',$db->quoteName('#__minimarket_shipments','s').' ON s.order_id=o.id')
             ->where('o.deleted_at IS NULL')
             ->where("o.delivery_method='courier'")
-            ->where("o.status<>'cancelled'")
-            ->where('s.id IS NULL')->order('o.id DESC');
+            ->where("o.status<>'cancelled'")->order('o.id DESC');
         if ($from!=='')$q->where('o.created_at >= '.$db->quote($from.' 00:00:00'));
         if ($to!=='')$q->where('o.created_at <= '.$db->quote($to.' 23:59:59'));
         if ($term!=='') {

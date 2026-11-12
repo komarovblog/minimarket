@@ -20,7 +20,17 @@ $firstPayment=array_key_first($this->paymentMethods);
           action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.create',false)); ?>">
         <fieldset class="mb-4">
             <legend class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_CUSTOMER'); ?></legend>
-            <div class="row g-3">
+            <?php
+            $mmReference=[
+             'title'=>Text::_('COM_MINIMARKET_ORDER_JOOMLA_USER'),
+             'input'=>'user_id','endpoint'=>'users','multiple'=>false,'selected'=>[],
+             'placeholder'=>Text::_('COM_MINIMARKET_ORDER_USER_SEARCH'),
+             'help'=>Text::_('COM_MINIMARKET_ORDER_USER_PICKER_HELP'),
+             'edit_url_prefix'=>$this->canViewUsers?'index.php?option=com_users&task=user.edit&id=':''
+            ];
+            require dirname(__DIR__).'/shared/reference-picker.php';
+            ?>
+            <div class="row g-3 mt-2">
                 <div class="col-12 col-lg-6">
                     <label class="form-label" for="mm-order-create-name"><?php echo Text::_('COM_MINIMARKET_ORDER_CUSTOMER'); ?> *</label>
                     <input id="mm-order-create-name" name="customer_name" class="form-control" required minlength="2" maxlength="120">

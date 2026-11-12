@@ -1,0 +1,2 @@
+-- MiniMarket 0.6.8: editor and validation changes only; no schema migrations.
+-- 0.6.7 return/shipment migration must remain the last DDL change.

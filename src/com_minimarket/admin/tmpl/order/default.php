@@ -10,6 +10,27 @@ $canUpdate=$this->canUpdate&&$active;
 $e=static fn($v):string=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
 $to=static fn(string $view,int $id):string=>Route::_('index.php?option=com_minimarket&view='.$view.'&id='.$id,false);
 $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽';
+// The audit preserves raw machine values; render familiar translated labels
+// without changing the underlying immutable event data.
+$eventValue=static function(string $event,string $value):string {
+ if($value==='')return '—';
+ $prefix=match($event){
+  'status'=>'COM_MINIMARKET_ORDER_STATUS_',
+  'payment'=>'COM_MINIMARKET_PAYMENT_STATUS_',
+  'fulfillment'=>'COM_MINIMARKET_FULFILLMENT_STATUS_',
+  'delivery_status'=>'COM_MINIMARKET_DELIVERY_STATUS_',
+  'delivery_reason'=>'COM_MINIMARKET_DELIVERY_REASON_',
+  'return_status'=>'COM_MINIMARKET_RETURN_STATUS_',
+  'return_resolution'=>'COM_MINIMARKET_RETURN_RESOLUTION_',
+  default=>''
+ };
+ if($prefix!==''){
+  $key=$prefix.strtoupper($value);
+  $translated=Text::_($key);
+  if($translated!==$key)return $translated;
+ }
+ return $value;
+};
 ?>
 <div class="btn-toolbar d-flex align-items-center flex-wrap gap-2 mb-3" role="toolbar">
  <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>"><span class="icon-arrow-left" aria-hidden="true"></span> <?php echo Text::_('JTOOLBAR_BACK'); ?></a>
@@ -21,10 +42,45 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
  <?php endif; ?>
 </div>
 <div id="j-main-container" class="j-main-container">
- <div class="row g-3 align-items-start">
-  <div class="col-12 col-lg-7">
-   <section class="card card-body mm-admin-panel mb-3">
-    <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_BLOCK'); ?></h2>
+ <section class="card card-body mm-admin-panel mb-3">
+  <div class="row g-3 align-items-start">
+   <div class="col-12 col-xl-6">
+    <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_INFO_BLOCK'); ?> #<?php echo $oid; ?></h2>
+    <dl class="row mb-0">
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_CREATED'); ?></dt>
+     <dd class="col-sm-7"><?php echo $e($o->created_at); ?></dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE'); ?></dt>
+     <dd class="col-sm-7"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE_'.strtoupper((string)($o->order_source??'site'))); ?></dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_CUSTOMER'); ?></dt>
+     <dd class="col-sm-7"><?php echo $e($o->customer_name); ?></dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_JOOMLA_USER'); ?></dt>
+     <dd class="col-sm-7">
+      <?php if($this->linkedUser!==null): ?>
+       <?php if($this->canViewUsers): ?>
+       <a href="<?php echo $e(Route::_('index.php?option=com_users&task=user.edit&id='.(int)$this->linkedUser->id,false)); ?>"><?php echo $e($this->linkedUser->name); ?> (#<?php echo (int)$this->linkedUser->id; ?>)</a>
+       <?php else: ?><?php echo $e($this->linkedUser->name); ?> (#<?php echo (int)$this->linkedUser->id; ?>)<?php endif; ?>
+      <?php else: ?><?php echo Text::_('COM_MINIMARKET_ORDER_USER_UNLINKED'); ?><?php endif; ?>
+     </dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_PHONE'); ?></dt>
+     <dd class="col-sm-7"><?php echo $e($o->phone); ?></dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_EMAIL'); ?></dt>
+     <dd class="col-sm-7"><?php echo $e($o->email); ?></dd>
+     <?php foreach($this->customFields as $field): ?>
+      <dt class="col-sm-5"><?php echo $e($field->field_title); ?></dt>
+      <dd class="col-sm-7"><?php echo nl2br($e($field->field_value)); ?></dd>
+     <?php endforeach; ?>
+     <dt class="col-12"><?php echo Text::_('COM_MINIMARKET_ORDER_COMMENT'); ?></dt>
+     <dd class="col-12"><?php echo nl2br($e($o->customer_comment)); ?></dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_ITEMS_TOTAL'); ?></dt>
+     <dd class="col-sm-7"><?php echo $money($o->items_total_cents??$o->total_cents); ?></dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_FEE'); ?></dt>
+     <dd class="col-sm-7"><?php echo $money($o->delivery_fee_cents??0); ?></dd>
+     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_AMOUNT'); ?></dt>
+     <dd class="col-sm-7"><strong><?php echo $money($o->total_cents); ?></strong></dd>
+    </dl>
+   </div>
+   <div class="col-12 col-xl-6">
+    <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_BLOCK'); ?></h3>
     <p class="mb-3"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$o->status)); ?></p>
     <?php if($this->canUpdate&&empty($o->deleted_at)): ?>
     <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>">
@@ -43,25 +99,6 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      </div>
     </form>
     <?php endif; ?>
-    <div class="mt-3">
-     <span class="text-muted"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?>:</span>
-     <strong><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper((string)($o->fulfillment_status??'pending'))); ?></strong>
-    </div>
-    <?php if($canUpdate && $o->delivery_method!=='digital'): ?>
-    <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.fulfillment',false)); ?>" class="d-flex flex-wrap gap-2 align-items-end mt-2">
-     <input type="hidden" name="id" value="<?php echo $oid; ?>">
-     <div class="flex-grow-1">
-      <label for="mm-fulfillment-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?></label>
-      <select name="fulfillment_status" id="mm-fulfillment-status" class="form-select">
-       <?php foreach(['pending','shipped','delivered'] as $status): ?>
-        <option value="<?php echo $status; ?>"<?php echo ($o->fulfillment_status??'pending')===$status?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper($status)); ?></option>
-       <?php endforeach; ?>
-      </select>
-     </div>
-     <?php echo HTMLHelper::_('form.token'); ?>
-     <button type="submit" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
-    </form>
-    <?php endif; ?>
     <?php if($this->canDelete && ((string)$o->status==='cancelled'||!empty($o->deleted_at))): ?>
     <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.'.(!empty($o->deleted_at)?'restore':'trash'),false)); ?>" class="mt-3"
       <?php if(empty($o->deleted_at)): ?>data-confirm="<?php echo $e(Text::_('COM_MINIMARKET_ORDER_TRASH_CONFIRM')); ?>" onsubmit="return confirm(this.dataset.confirm)"<?php endif; ?>>
@@ -70,8 +107,10 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      <button class="btn btn-outline-<?php echo empty($o->deleted_at)?'danger':'secondary'; ?>" type="submit"><?php echo Text::_(empty($o->deleted_at)?'COM_MINIMARKET_ORDER_TRASH':'COM_MINIMARKET_ORDER_RESTORE'); ?></button>
     </form>
     <?php endif; ?>
-   </section>
-   <section class="card card-body mm-admin-panel mb-3">
+   </div>
+  </div>
+ </section>
+ <section class="card card-body mm-admin-panel mb-3">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK'); ?></h2>
     <dl class="row mb-3">
      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_METHOD'); ?></dt>
@@ -126,7 +165,7 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
     <?php endif; ?>
     <?php endif; ?>
    </section>
-   <section class="card card-body mm-admin-panel mb-3">
+ <section class="card card-body mm-admin-panel mb-3">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_BLOCK'); ?></h2>
     <dl class="row mb-3">
      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></dt>
@@ -138,6 +177,28 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_FEE'); ?></dt>
      <dd class="col-sm-7"><?php echo $money($o->delivery_fee_cents??0); ?></dd>
     </dl>
+    <div class="border-top pt-3 mt-3">
+    <div class="mt-3">
+     <span class="text-muted"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?>:</span>
+     <strong><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper((string)($o->fulfillment_status??'pending'))); ?></strong>
+    </div>
+    <?php if($canUpdate && $o->delivery_method==='pickup'): ?>
+    <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.fulfillment',false)); ?>" class="d-flex flex-wrap gap-2 align-items-end mt-2">
+     <input type="hidden" name="id" value="<?php echo $oid; ?>">
+     <div class="flex-grow-1">
+      <label for="mm-fulfillment-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?></label>
+      <select name="fulfillment_status" id="mm-fulfillment-status" class="form-select">
+       <?php foreach(['pending','shipped','delivered'] as $status): ?>
+        <option value="<?php echo $status; ?>"<?php echo ($o->fulfillment_status??'pending')===$status?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper($status)); ?></option>
+       <?php endforeach; ?>
+      </select>
+     </div>
+     <?php echo HTMLHelper::_('form.token'); ?>
+     <button type="submit" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
+    </form>
+    <?php endif; ?>
+
+    </div>
     <?php if($o->delivery_method==='courier'): ?>
      <div class="table-responsive mm-editor-table-viewport">
       <table class="table table-striped mm-admin-list">
@@ -166,37 +227,6 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      <?php endif; ?>
     <?php endif; ?>
    </section>
-  </div>
-  <div class="col-12 col-lg-5">
-   <section class="card card-body mm-admin-panel">
-    <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_INFO_BLOCK'); ?> #<?php echo $oid; ?></h2>
-    <dl class="row mb-0">
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_CREATED'); ?></dt>
-     <dd class="col-sm-7"><?php echo $e($o->created_at); ?></dd>
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE'); ?></dt>
-     <dd class="col-sm-7"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE_'.strtoupper((string)($o->order_source??'site'))); ?></dd>
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_CUSTOMER'); ?></dt>
-     <dd class="col-sm-7"><?php echo $e($o->customer_name); ?></dd>
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_PHONE'); ?></dt>
-     <dd class="col-sm-7"><?php echo $e($o->phone); ?></dd>
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_EMAIL'); ?></dt>
-     <dd class="col-sm-7"><?php echo $e($o->email); ?></dd>
-     <?php foreach($this->customFields as $field): ?>
-      <dt class="col-sm-5"><?php echo $e($field->field_title); ?></dt>
-      <dd class="col-sm-7"><?php echo nl2br($e($field->field_value)); ?></dd>
-     <?php endforeach; ?>
-     <dt class="col-12"><?php echo Text::_('COM_MINIMARKET_ORDER_COMMENT'); ?></dt>
-     <dd class="col-12"><?php echo nl2br($e($o->customer_comment)); ?></dd>
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_ITEMS_TOTAL'); ?></dt>
-     <dd class="col-sm-7"><?php echo $money($o->items_total_cents??$o->total_cents); ?></dd>
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_FEE'); ?></dt>
-     <dd class="col-sm-7"><?php echo $money($o->delivery_fee_cents??0); ?></dd>
-     <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_AMOUNT'); ?></dt>
-     <dd class="col-sm-7"><strong><?php echo $money($o->total_cents); ?></strong></dd>
-    </dl>
-   </section>
-  </div>
- </div>
  <section class="card card-body mm-admin-panel mt-3">
   <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PRODUCTS_BLOCK'); ?></h2>
   <div class="table-responsive mm-editor-table-viewport">
@@ -279,6 +309,9 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
  </section>
  <section class="card card-body mm-admin-panel mt-3">
   <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_BLOCK'); ?></h2>
+   <p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_HELP'); ?></p>
+   <details class="mt-2">
+    <summary class="btn btn-outline-secondary btn-sm"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_SHOW'); ?> (<?php echo count($this->events); ?>)</summary>
   <div class="table-responsive mm-editor-table-viewport">
    <table class="table table-striped mm-admin-list">
     <thead><tr>
@@ -291,13 +324,14 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      <tr>
       <td><?php echo $e($event->created_at); ?></td>
       <td><?php echo Text::_('COM_MINIMARKET_ORDER_EVENT_'.strtoupper((string)$event->event_type)); ?></td>
-      <td><?php echo $e((string)$event->old_value); ?> <?php if((string)$event->new_value!==''): ?>→ <?php echo $e((string)$event->new_value); ?><?php endif; ?></td>
-      <td><?php echo (int)$event->actor_user_id>0?'#'.(int)$event->actor_user_id:'—'; ?></td>
+      <td><?php echo $e($eventValue((string)$event->event_type,(string)$event->old_value)); ?> → <?php echo $e($eventValue((string)$event->event_type,(string)$event->new_value)); ?></td>
+      <td><?php if((int)$event->actor_user_id>0): ?><?php echo $e($event->actor_name??Text::_('COM_MINIMARKET_ORDER_HISTORY_UNKNOWN_ACTOR')); ?> (#<?php echo (int)$event->actor_user_id; ?>)<?php else: ?><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_SYSTEM'); ?><?php endif; ?></td>
      </tr>
     <?php endforeach; ?>
     </tbody>
    </table>
   </div>
   <?php if(!$this->events): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_HISTORY_EMPTY'); ?></p><?php endif; ?>
+   </details>
  </section>
 </div>

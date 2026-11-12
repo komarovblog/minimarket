@@ -66,8 +66,20 @@ final class OrderController extends BaseController
                 'delivery_address'=>$app->input->post->get('delivery_address','','string'),
                 'payment_method'=>$app->input->post->get('payment_method','','string'),
             ],(int)$quote['total_cents'],$grams,$volume);
+            // A manually selected Joomla account is linked only by its
+            // exact verified ID, never by comparing customer contacts.
+            $userId=$app->input->post->getInt('user_id',0);
+            if($userId<0)throw new \DomainException('COM_MINIMARKET_ORDER_USER_INVALID');
+            if($userId>0){
+                $query=$db->getQuery(true)->select('id')
+                    ->from($db->quoteName('#__users'))
+                    ->where('id='.(int)$userId)->where('block=0');
+                $db->setQuery($query);
+                if((int)$db->loadResult()!==$userId)
+                    throw new \DomainException('COM_MINIMARKET_ORDER_USER_INVALID');
+            }
             $id=\MiniMarket\Component\Minimarket\Site\Service\OrderStorage::create(
-                $db,$contact,$quote,bin2hex(random_bytes(16)),0,$delivery,'manual');
+                $db,$contact,$quote,bin2hex(random_bytes(16)),$userId,$delivery,'manual');
             $app->enqueueMessage(Text::_('COM_MINIMARKET_MANUAL_ORDER_CREATED'));
             $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
         } catch (\DomainException $e) {
