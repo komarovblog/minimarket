@@ -16,7 +16,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
         public static function view(string $name):string{
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
-                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','reviews','seofilters','promocodes','settings',
+                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','returns','returns','reviews','seofilters','promocodes','settings',
                 'deliverymethods','paymentmethods','registrationmethods'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
             if ($name==='deliveries') return 'index.php?option=com_minimarket&amp;view=deliveries';
@@ -28,7 +28,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
 }
 namespace MiniMarket\DashboardTest {
     class View {
-        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3,'orders'=>2,'deliveries'=>1,'reviews'=>2,'seofilters'=>3,'promocodes'=>4];
+        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3,'orders'=>2,'deliveries'=>1,'returns'=>1,'reviews'=>2,'seofilters'=>3,'promocodes'=>4];
         public function output():string {
             ob_start();
             try {
@@ -48,9 +48,9 @@ namespace MiniMarket\DashboardTest {
     $html=(new View())->output();
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===4,
         'four independent native dashboard panels including settings');
-    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===20 &&
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===21 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
-        'twenty working management/store/tools/settings tiles');
+        'twenty-one working management/store/tools/settings tiles');
     verify(substr_count($html,'mm-dashboard-tiles')===4,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
