@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.6.2</version>
+    <version>0.6.3</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -85,10 +85,10 @@
             <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE</menu>
             <menu type="separator" alias="mm-separator-settings">-</menu>
-            <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
             <menu link="option=com_minimarket&amp;view=deliverymethods">COM_MINIMARKET_DELIVERY_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=paymentmethods">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=registrationmethods">COM_MINIMARKET_REGISTRATION_METHODS_TITLE</menu>
+            <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
         </submenu>
     </administration>
     <dashboards>
