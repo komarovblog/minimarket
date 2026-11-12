@@ -164,7 +164,7 @@ $check(is_file(dirname(__DIR__).'/sample-data/minimarket_mysql84_nnop3_update_0_
 echo "MM067_WORKFLOW_PASS: $n checks\n";
 .$field.'=[]'),
     'order view loads '.$field);
-$check(!str_contains($orderView,"->from($db->quoteName('#__minimarket_order_events','e'))")
+$check(!str_contains($orderView,'actor_user_id')
     &&!str_contains($orderTpl,'COM_MINIMARKET_ORDER_HISTORY_BLOCK'),
     '0.6.9 hides history in order card without deleting the audit trail');
 foreach(['ORDER_STATUS_BLOCK','ORDER_PAYMENT_BLOCK','ORDER_DELIVERY_BLOCK',
