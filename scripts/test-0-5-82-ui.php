@@ -33,7 +33,8 @@ foreach(['delivery_methods','payment_methods','registration'] as $removed){
     $ok(count($cfg->xpath('//fieldset[@name="'.$removed.'"]'))===0,
         'dedicated methods list, not duplicate settings tab '.$removed);
 }
-foreach(['inventory_enabled','filter_price_mode','filter_sku_mode','filter_stock_enabled','system_display_location'] as $key){
+foreach(['inventory_enabled','filter_price_mode','filter_sku_mode','filter_stock_enabled',
+    'system_price_display_location','system_sku_display_location','system_stock_display_location'] as $key){
     $ok(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="'.$key.'"]'))===1,
         'general option '.$key);
 }

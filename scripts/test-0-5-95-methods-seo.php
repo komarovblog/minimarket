@@ -96,6 +96,20 @@ namespace MiniMarket\Smoke95 {
  }
  check95(count($cfg->xpath('//field[@name="system_display_location"]'))===0,
   'no shared system location selector');
+ $systemFields=$cfg->xpath('//fieldset[@name="basic"]/field');
+ $names=array_map(static fn($node)=>(string)$node['name'],$systemFields);
+ foreach(['price'=>['filter_price_mode','system_price_display_location'],
+          'sku'=>['filter_sku_mode','system_sku_display_location'],
+          'stock'=>['filter_stock_enabled','system_stock_display_location']] as $system=>$pair){
+  $note=array_search('mm_'.$system.'_section',$names,true);
+  $first=array_search($pair[0],$names,true);
+  $second=array_search($pair[1],$names,true);
+  check95($note!==false && $first===$note+1 && $second===$note+2,
+   'system attribute '.$system.' has adjacent filter and display controls');
+ }
+ $option=simplexml_load_file($root.'admin/forms/orderoption.xml');
+ check95((string)$option->xpath("//field[@name='display_location']")[0]['default']==='product',
+   'new order options default to product page, not a global system setting');
  $attributes=simplexml_load_file($root.'admin/forms/attribute.xml');
  check95((string)$attributes->xpath("//field[@name='display_location']")[0]['default']==='product',
   'custom attribute default product only');
@@ -129,6 +143,11 @@ namespace MiniMarket\Smoke95 {
  check95(str_contains($pluginTpl,'$this->pluginForm->renderFieldset')
    && str_contains($pluginTpl,'COM_MINIMARKET_METHOD_PLUGIN_INFO'),
    'plugin card renders own manifest settings and separate info link');
+ check95(str_contains($pluginTpl,'name="enabled"')
+   && str_contains($pluginController,"'core.edit.state','com_plugins'")
+   && str_contains($pluginService,"'enabled'")
+   && str_contains($pluginService,'$db->transactionCommit()'),
+   'plugin publication can be edited inside method card with Joomla ACL');
  $pickupTpl=(string)file_get_contents($root.'admin/tmpl/deliverymethods/default.php');
  check95(str_contains($pickupTpl,'mm-delivery-method')
    && str_contains($pickupTpl,'deliveryzone/edit.php')
