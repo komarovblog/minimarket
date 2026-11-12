@@ -88,6 +88,17 @@ namespace MiniMarket\RouterSmoke {
 
     class FakeMenu extends AbstractMenu
     {
+        private ?object $active = null;
+
+        public function setActiveItem(?object $item): void
+        {
+            $this->active = $item;
+        }
+
+        public function getActive(): ?object
+        {
+            return $this->active;
+        }
     }
 
     final class FakeQuery
@@ -202,9 +213,11 @@ namespace MiniMarket\RouterSmoke {
         return new FakeMenuItem($id, $alias, $home);
     }
 
-    function router(array $items, ?FakeDb $db = null): Router
+    function router(array $items, ?FakeDb $db = null, ?object $active = null): Router
     {
-        return new Router(null, new FakeMenu($items), null, $db ?? new FakeDb([
+        $menu = new FakeMenu($items);
+        $menu->setActiveItem($active);
+        return new Router(null, $menu, null, $db ?? new FakeDb([
             'category' => [1 => ['id' => 1, 'alias' => 'testovaa-kategoria']],
             'product' => [1 => ['id' => 1, 'alias' => 'testovyj-tovar']],
         ]));
@@ -330,6 +343,37 @@ namespace MiniMarket\RouterSmoke {
     expect(router([$legacy, menuItem(45, 'home', true)])
         ->preprocess(['option' => 'com_minimarket', 'view' => 'product'])['Itemid'] === 45,
         'old per-menu flags do not override automatic configuration');
+
+    // Dedicated Joomla Cart menu type: clean menu alias, no duplicated /cart.
+    // Category/product routes still use the configured primary Shop Itemid.
+    $basket = new FakeMenuItem(92, 'basket', false, 'com_minimarket', ['view' => 'cart']);
+    $cartRouter = router([menuItem(31, 'shop'), $basket], null, $basket);
+    $cartQuery = $cartRouter->preprocess(['option' => 'com_minimarket', 'view' => 'cart']);
+    expect($cartQuery['Itemid'] === 92, 'Cart links prefer dedicated published Cart item');
+    expect($cartRouter->build($cartQuery) === [], 'dedicated Cart Itemid builds without /cart suffix');
+    expect(!isset($cartQuery['view']), 'dedicated cart view consumed');
+    $empty = [];
+    expect($cartRouter->parse($empty) === ['view' => 'cart'], 'Cart menu alias with zero segments resolves Cart');
+    expect($empty === [], 'Cart empty tail is preserved');
+    $cartQuery = $cartRouter->preprocess(['option' => 'com_minimarket', 'view' => 'cart', 'Itemid' => 92]);
+    expect($cartQuery['Itemid'] === 92, 'explicit published Cart Itemid remains intact');
+    $cartQuery = $cartRouter->preprocess(['option' => 'com_minimarket', 'view' => 'cart', 'Itemid' => 999]);
+    expect($cartQuery['Itemid'] === 92, 'foreign Itemid cannot displace Cart menu');
+    $productQuery = $cartRouter->preprocess(['option' => 'com_minimarket', 'view' => 'product', 'id' => 1, 'Itemid' => 92]);
+    expect($productQuery['Itemid'] === 31, 'Cart menu never becomes product canonical base');
+    $categoryQuery = $cartRouter->preprocess(['option' => 'com_minimarket', 'view' => 'category', 'id' => 1]);
+    expect($categoryQuery['Itemid'] === 31, 'Category links retain primary Shop base');
+    $checkoutQuery = $cartRouter->preprocess(['option' => 'com_minimarket', 'view' => 'checkout', 'Itemid' => 92]);
+    expect($checkoutQuery['Itemid'] === 31, 'Checkout does not inherit cart base');
+    expect($cartRouter->build($checkoutQuery) === ['checkout'], 'Checkout remains a Shop subpath');
+    $shopOnlyCart = router([menuItem(31, 'shop')]);
+    $oldCartQuery = $shopOnlyCart->preprocess(['option' => 'com_minimarket', 'view' => 'cart']);
+    expect($oldCartQuery['Itemid'] === 31, 'cart without dedicated menu stays compatible');
+    expect($shopOnlyCart->build($oldCartQuery) === ['cart'], 'legacy /shop/cart URL preserved');
+    $empty = [];
+    expect($shopOnlyCart->parse($empty) === ['view' => 'catalog'], 'Shop empty tail remains catalog');
+    $segments = ['cart'];
+    expect($shopOnlyCart->parse($segments) === ['view' => 'cart'], 'legacy /shop/cart still parses');
 
     // Missing menu remains an explicit configuration error. Never create hidden menu.
     try {
