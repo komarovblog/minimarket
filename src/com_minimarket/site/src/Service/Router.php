@@ -37,6 +37,22 @@ final class Router implements RouterInterface
         $view = (string) ($query['view'] ?? 'catalog');
         $requestedId = (int) ($query['Itemid'] ?? 0);
 
+        // A dedicated Cart menu item has its own clean URL. Product/category
+        // URLs continue to use the primary Shop item, unchanged.
+        if ($view === 'cart') {
+            $cartItems = $this->getCartItems();
+            if ($cartItems) {
+                foreach ($cartItems as $item) {
+                    if ($requestedId > 0 && (int) $item->id === $requestedId) {
+                        return $query;
+                    }
+                }
+                usort($cartItems, static fn ($a, $b) => (int) $a->id <=> (int) $b->id);
+                $query['Itemid'] = (int) $cartItems[0]->id;
+                return $query;
+            }
+        }
+
         // Each ordinary Joomla Shop menu entry may open its own storefront.
         // An explicit Itemid is preserved ONLY for the storefront view.
         // Product/category links always use a single canonical route.
@@ -70,6 +86,14 @@ final class Router implements RouterInterface
             return ['seo',$record->alias.'-'.(int)$id];
         }
         if ($view === 'cart') {
+            // When anchored at a dedicated cart menu item, the menu alias
+            // supplies the full route; do not append a second /cart segment.
+            foreach ($this->getCartItems() as $item) {
+                if ((int) $item->id === (int) ($query['Itemid'] ?? 0)) {
+                    unset($query['view']);
+                    return [];
+                }
+            }
             unset($query['view']);
             return ['cart'];
         }
@@ -105,6 +129,13 @@ final class Router implements RouterInterface
     public function parse(&$segments)
     {
         if (!$segments) {
+            // Joomla has already matched the menu path: an empty tail on a
+            // Cart item is the cart, whereas an empty Shop tail is the catalog.
+            $active = $this->menu->getActive();
+            if ($active !== null && ($active->component ?? '') === 'com_minimarket'
+                && ($active->query['view'] ?? null) === 'cart') {
+                return ['view' => 'cart'];
+            }
             return ['view' => 'catalog'];
         }
 
@@ -162,6 +193,14 @@ final class Router implements RouterInterface
         }
 
         throw new \RuntimeException('MiniMarket route not found', 404);
+    }
+
+    /** @return object[] */
+    private function getCartItems(): array
+    {
+        $items = $this->menu->getItems('component', 'com_minimarket') ?: [];
+        return array_values(array_filter($items, static fn (object $item): bool =>
+            ($item->query['view'] ?? null) === 'cart'));
     }
 
     /** @return object[] */
