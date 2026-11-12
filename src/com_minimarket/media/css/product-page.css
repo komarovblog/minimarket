@@ -1,0 +1,38 @@
+/* Product detail layout: use the active site template / Bootstrap variables. */
+.mm-product-tabs {flex-wrap:wrap;}
+.mm-product-tabs .nav-link {white-space:normal;}
+.mm-product-section-nav {
+  position:sticky;
+  top:var(--mm-product-nav-top,0px);
+  z-index:20;
+  background:var(--bs-body-bg,Canvas);
+  border-bottom:1px solid var(--bs-border-color,currentColor);
+  padding:.5rem 0;
+}
+.mm-product-section-nav a {scroll-margin-top:5rem;}
+.com-minimarket-product [data-mm-tab-panel] {scroll-margin-top:6rem;}
+.mm-product-sticky-bar {
+  position:fixed;
+  inset-inline:0;
+  bottom:0;
+  z-index:1050;
+  background:var(--bs-body-bg,Canvas);
+  color:var(--bs-body-color,CanvasText);
+  border-top:1px solid var(--bs-border-color,currentColor);
+}
+.mm-product-sticky-bar__image {object-fit:contain;flex:none;}
+.mm-product-sticky-bar__name {min-width:0;overflow:hidden;}
+.mm-product-sticky-bar__name strong {
+  display:block;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.mm-product-sticky-bar__quantity {width:4.5rem;}
+body.mm-product-sticky-visible {padding-bottom:5rem;}
+@media(max-width:575.98px){
+  .mm-product-sticky-bar__image {display:none;}
+  .mm-product-sticky-bar__name strong {font-size:.875rem;}
+  .mm-product-sticky-bar__quantity {width:3.75rem;}
+  .mm-product-sticky-bar .container-fluid {gap:.5rem!important;}
+}

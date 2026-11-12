@@ -1,6 +1,6 @@
-# MiniMarket 0.5.91 — действующий реестр настроек и полей
+# MiniMarket 0.5.98 — действующий реестр настроек и полей
 
-Обновлён 11 ноября 2026 по **фактическим XML исходникам** ветки `development`. Это перечисление полей конфигурации/форм. **Наличие XML-поля не означает рабочую бизнес-логику**: статусы ниже разделяют реально подключённые настройки и будущие связи.
+Обновлён 12 ноября 2026 по **фактическим XML исходникам** ветки `development`. Это перечисление полей конфигурации/форм. **Наличие XML-поля не означает рабочую бизнес-логику**: статусы ниже разделяют реально подключённые настройки и будущие связи.
 
 ## Правила для каждого параметра
 
@@ -16,20 +16,38 @@
 | `category_product_layout`, `category_cards_{xs,sm,md,lg,xl,xxl}` | component params → category overrides | `CategoryDisplayOptions`, category template; Bootstrap row-cols | Реализовано, CI PASS |
 | `category_show_sort` | component params | category template | Реализовано, CI PASS |
 | `category_lazy_loading` | component params | category template; lazy/eager | Реализовано, CI PASS |
-| `category_children_per_page` | component params | Category HtmlView, child page nav | Реализовано, CI PASS |
+| `category_children_per_page` (устаревший параметр) | Сохранённые значения params игнорируются | Category HtmlView всегда показывает все опубликованные прямые подкатегории | Удалён из формы 0.5.98, миграция не нужна |
 | `category_allow_layout_switch` | component params | Category HtmlView + grid/list links | Реализовано, CI PASS |
 | `category_list_show_attributes/options` | component params | category template | Реализовано как **глобальные** флаги, индивидуальное управление на привязках ещё не создано |
 | `category_show_add_to_cart/quick_view/show_badges/gallery_*` | component params | category template | Существующий функционал сохранён |
 | `filter_price_mode/sku_mode/stock_enabled`, `system_display_location` | component params → category filters | CategoryDisplayOptions + FacetedCatalog/site UI | Параметры перенесены в «Основные», расширенное поле-на-поле управление не готово |
 | `checkout_auth_mode`: `guest` / `email` | component params | `CheckoutSettings`, Checkout controller/view | Гость доступен, email-режим требует уже вошедшего Joomla-пользователя; встроенной регистрации в момент заказа нет |
 | `checkout_verification_method=email` | component params | Joomla `com_users` | Только стандартная email-активация Joomla; **не одноразовый код**, не SMS |
-| `checkout_{name,phone,email,comment}_mode` | component params | CheckoutSettings + CheckoutData + checkout template | Скрыто / необязательно / обязательно; пользовательские маски и новые поля не готово |
+| `checkout_{name,phone,email,comment}_mode`, `checkout_phone_mask`, `checkout_custom_fields` | component params → order custom values | CheckoutSettings, CheckoutExtraFields, CheckoutData, OrderStorage | Поля и маски подключены 0.5.97, CI PASS; браузерная приёмка ожидается |
 | Built-in Delivery/Payment | component params через `MethodSettings` | `CheckoutDelivery`, MethodsettingsController | Два встроенных метода каждого типа, отдельные карточки редакторов, CI PASS |
 | Email Registration | `com_users` params | Joomla Users, Registrationmethods view | Только нативная активация; провайдеры SMS/OAuth без настоящих плагинов недоступны |
 | `feed.category_ids`, products, manual/auto | `#__minimarket_feeds` | FeedSelection, FeedConfig, feed editor, public FeedController | Только явные категории; отдельные поисковые фильтры справа/слева |
 | Промокоды `fixed/percent`, публикация | `#__minimarket_promo_codes` | PromoCodeData/Controller, PromotionService, checkout | Новые/отредактированные — скидка со всей корзины, публикация с ACL; старые ограниченные купоны не перенормализованы |
 
-**Не реализовано:** Sitemap XML c Joomla articles; SKU-row export/import v2; per-category list checkboxes for each attached attribute/option and associated DB migration; category→option→value combination builder; independent filter type/presentation of every system attribute; custom checkout fields/masks and verified-code registration; live provider adapters. Эти задачи запрещено обозначать «готово» по одному UI/включенному флагу.
+**Не реализовано:** Sitemap XML c Joomla articles; SKU-row export/import v2; category→option→value combination builder; независимые типы системной фильтрации помимо существующих Цена/Артикул/Наличие; проверка по коду SMS/Email в самом checkout и живые провайдерские адаптеры. Эти задачи запрещено обозначать «готово» по одному UI/включенному флагу.
+
+
+## Связи настроек, добавленные в 0.5.98 (до браузерной приёмки)
+
+Все параметры сохраняются в Joomla `#__extensions.params` для `com_minimarket`; дублей в БД нет. Их XML: `src/com_minimarket/admin/config.xml`; обе локализации: `admin/language/{ru-RU,en-GB}/com_minimarket.ini`.
+
+| Параметр | Значения / умолчание | Потребитель → наблюдаемый эффект | Тест |
+|---|---|---|---|
+| `product_detail_layout` | `full` / `tabs`, default `full` | `View/Product/HtmlView` → `tmpl/product/default.php` → `js/product-page.js`; последовательно или tab-панели | `test-0-5-98.php`, Joomla |
+| `product_detail_show_similar` | 0/1, default 0 | `ProductRecommendations::similar`, опубликованные доступные товары той же категории, кроме текущего | `test-0-5-98.php`, Joomla |
+| `product_detail_show_bought_together` | 0/1, default 0 | `ProductRecommendations::boughtTogether`; реальные подтверждённые/завершённые совместные заказы, скрытые/недоступные товары отфильтрованы; нет данных → нет блока | `test-0-5-98.php`, MySQL/Browser pending |
+| `product_detail_show_reviews` | 0/1, default 1 | `View/Product/HtmlView` + global `reviews_enabled`; оба условия обязательны | `test-0-5-98.php`, Joomla |
+| `product_detail_sticky_bar` | 0/1, default 0 | `tmpl/product/default.php` + `js/product-page.js`; один существующий POST, SKU, CSRF и количество наследуются от исходной формы | `test-0-5-98.php`, Joomla |
+| `product_detail_section_nav` | 0/1, default 0 | Якорная навигация; в режиме tabs JS переключает активную панель | `test-0-5-98.php`, Joomla |
+| `checkout_{buyer,delivery,payment}_description` | HTML, default пусто | Native Joomla `editor` + `filter=safehtml` → `tmpl/checkout/default.php` с InputFilter HTML | `test-0-5-98.php`, Joomla |
+| `checkout_auth_mode` | `guest` / `email` (хранимое значение для совместимости) | В интерфейсе «Обязательное подтверждение», без привязки заголовка к будущему провайдеру. Реальный SMS не активирован | `test-0-5-98.php`, Joomla |
+| `mm_commands_note` + `offcanvas_*_target` | прежние значения | Прежние потребители; поля теперь **в конце** Basic | `test-0-5-98.php` |
+| `filter_{price,sku,stock}` и `system_*_display_location` | прежние значения | Две настройки на атрибут без отдельного заголовка | `test-0-5-98.php` |
 
 ## Машинная инвентаризация XML (скрытые служебные поля, примечания и ACL исключены)
 

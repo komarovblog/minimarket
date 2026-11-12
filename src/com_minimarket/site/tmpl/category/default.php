@@ -45,22 +45,7 @@ use MiniMarket\Component\Minimarket\Site\Helper\BadgeHelper;
                     </a></li>
                 <?php endforeach; ?>
             </ul>
-            <?php if($this->childPageCount>1):
-                $childUrl=RouteHelper::category((int)$this->category->id);
-                $childHref=static function(int $page) use($childUrl):string {
-                    return $childUrl.(str_contains($childUrl,'?')?'&':'?').'mm_child_page='.$page;
-                };
-            ?>
-             <nav class="d-flex align-items-center gap-2" aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_CHILD_CATEGORIES')); ?>">
-              <?php if($this->childPage>1): ?>
-               <a href="<?php echo $this->escape($childHref($this->childPage-1)); ?>" class="btn btn-outline-secondary btn-sm"><?php echo Text::_('JPREV'); ?></a>
-              <?php endif; ?>
-              <span><?php echo $this->childPage; ?> / <?php echo $this->childPageCount; ?></span>
-              <?php if($this->childPage<$this->childPageCount): ?>
-               <a href="<?php echo $this->escape($childHref($this->childPage+1)); ?>" class="btn btn-outline-secondary btn-sm"><?php echo Text::_('JNEXT'); ?></a>
-              <?php endif; ?>
-             </nav>
-            <?php endif; ?>
+
         </section>
     <?php endif; ?>
 

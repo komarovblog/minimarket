@@ -53,8 +53,8 @@ foreach(['checkout_custom_fields','checkout_phone_mask','checkout_buyer_skip',
     $check(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="'.$key.'"]'))===1,
         'checkout field '.$key);
 }
-$check(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="mm_price_section" and @type="spacer"]'))===1,
-    'plain system attribute section heading');
+$check(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="mm_price_section"]'))===0,
+    'no duplicate system attribute heading');
 $check(!str_contains((string)file_get_contents($root.'media/js/admin-display-groups.js'),'createElement'),
     'no custom card panel injection');
 $reviews=$cfg->xpath('//field[@name="reviews_moderation"]/option');

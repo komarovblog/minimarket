@@ -98,7 +98,7 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
     <span> / </span>
     <a href="<?php echo $this->escape(RouteHelper::category((int) $this->product->category_id)); ?>"><?php echo $this->escape($this->product->category_title); ?></a>
 </nav>
-<article class="com-minimarket-product">
+<article class="com-minimarket-product" data-mm-product-page data-mm-page-layout="<?php echo $this->escape($this->pageLayout); ?>">
     <h1><?php echo $this->escape($this->product->title); ?></h1>
     <?php echo BadgeHelper::render($this->product); ?>
     <?php if ((string)($this->product->brand_title ?? '') !== '') : ?>
@@ -342,8 +342,38 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
                 <?php echo Text::_('COM_MINIMARKET_CART_ADD'); ?></button>
         </form>
     <?php endif; ?>
+
+    <?php
+    $detailTabs=['description'=>'COM_MINIMARKET_PRODUCT_DESCRIPTION_SECTION'];
+    if($this->attributes)$detailTabs['attributes']='COM_MINIMARKET_PRODUCT_ATTRIBUTES';
+    if($this->reviewsEnabled)$detailTabs['reviews']='COM_MINIMARKET_REVIEWS_TITLE';
+    ?>
+    <?php if($this->pageLayout==='tabs'): ?>
+    <nav class="nav nav-tabs mm-product-tabs mb-3" role="tablist"
+         aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_DETAIL_TABS_TITLE')); ?>">
+        <?php foreach($detailTabs as $tabKey=>$tabLabel): ?>
+        <button class="nav-link<?php echo $tabKey==='description'?' active':''; ?>"
+                type="button" id="mm-product-tab-<?php echo $tabKey; ?>" role="tab"
+                data-mm-product-tab="<?php echo $tabKey; ?>"
+                aria-controls="mm-product-<?php echo $tabKey; ?>"
+                aria-selected="<?php echo $tabKey==='description'?'true':'false'; ?>"
+                tabindex="<?php echo $tabKey==='description'?'0':'-1'; ?>">
+            <?php echo Text::_($tabLabel); ?>
+        </button>
+        <?php endforeach; ?>
+    </nav>
+    <?php endif; ?>
+    <?php if($this->showSectionNav): ?>
+    <nav class="mm-product-section-nav nav nav-pills gap-2 my-3" data-mm-section-nav
+         aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_DETAIL_QUICK_NAV')); ?>">
+        <?php foreach($detailTabs as $tabKey=>$tabLabel): ?>
+        <a class="nav-link" href="#mm-product-<?php echo $tabKey; ?>"
+           data-mm-section-link="<?php echo $tabKey; ?>"><?php echo Text::_($tabLabel); ?></a>
+        <?php endforeach; ?>
+    </nav>
+    <?php endif; ?>
     <?php if (!empty($this->attributes)) : ?>
-        <section class="mm-product-attributes" aria-labelledby="mm-product-attributes-heading">
+        <section class="mm-product-attributes" id="mm-product-attributes" data-mm-tab-panel="attributes" aria-labelledby="mm-product-attributes-heading">
             <h2 id="mm-product-attributes-heading"><?php echo Text::_('COM_MINIMARKET_PRODUCT_ATTRIBUTES'); ?></h2>
             <dl class="mm-product-attributes__list">
                 <?php foreach ($this->attributes as $attribute) : ?>
@@ -405,66 +435,16 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
             </dl>
         </section>
     <?php endif; ?>
+    <section class="mm-product-description" id="mm-product-description" data-mm-tab-panel="description"
+             aria-labelledby="mm-product-description-heading">
+        <h2 id="mm-product-description-heading"><?php echo Text::_('COM_MINIMARKET_PRODUCT_DESCRIPTION_SECTION'); ?></h2>
     <div class="com-minimarket-product__description" data-mm-variant-description
          <?php echo trim($initialDescription)==='' ? 'hidden' : ''; ?>>
         <?php echo InputFilter::getInstance()->clean($initialDescription, 'HTML'); ?>
     </div>
-    <?php if ($this->relatedGroups) : ?>
-        <section class="mm-related-products" aria-labelledby="mm-related-products-title">
-            <h2 id="mm-related-products-title"><?php echo Text::_('COM_MINIMARKET_RELATED_PRODUCTS'); ?></h2>
-            <?php foreach ($this->relatedGroups as $group) : ?>
-                <section class="mb-3" aria-labelledby="mm-related-group-<?php echo (int) $group['id']; ?>">
-                    <h3 id="mm-related-group-<?php echo (int) $group['id']; ?>" class="h5">
-                        <?php echo $this->escape((string) $group['title']); ?>
-                    </h3>
-                    <div class="d-flex flex-wrap gap-3">
-                    <?php foreach ($group['products'] as $linked) :
-                        $relatedImage = explode('#', (string) ($linked->image ?? ''), 2)[0];
-                        $showRelatedImage = $isSafeImage($relatedImage);
-                    ?>
-                        <a class="d-flex align-items-center gap-2 border rounded p-2 text-decoration-none"
-                           href="<?php echo $this->escape(RouteHelper::product((int) $linked->id)); ?>">
-                            <?php if ($showRelatedImage) : ?>
-                                <img src="<?php echo $this->escape(Uri::root() . $relatedImage); ?>"
-                                     alt="" loading="lazy" width="64" height="64" style="object-fit:contain">
-                            <?php endif; ?>
-                            <span><?php echo $this->escape((string) $linked->title); ?></span>
-                        </a>
-                    <?php endforeach; ?>
-                    </div>
-                </section>
-            <?php endforeach; ?>
-        </section>
-    <?php endif; ?>
-    <p class="mm-cart__nav"><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></a></p>
-    <?php if ($this->outOfStock) : ?>
-        <p class="alert alert-secondary" role="status"><?php echo Text::_('COM_MINIMARKET_OUT_OF_STOCK'); ?></p>
-        <?php if ($this->alternatives) : ?>
-            <section class="mm-alternatives">
-                <h2><?php echo Text::_('COM_MINIMARKET_ALTERNATIVES'); ?></h2>
-                <ul class="list-unstyled d-flex flex-wrap gap-3">
-                    <?php foreach ($this->alternatives as $alternative) :
-                        $thumb=explode('#',(string)($alternative->image??''),2)[0];
-                        $safeThumb=str_starts_with($thumb,'images/')
-                            && !str_contains($thumb,'..') && !str_contains($thumb,'//');
-                    ?>
-                        <li class="border rounded p-2" style="max-width:160px">
-                            <a href="<?php echo $this->escape(RouteHelper::product((int)$alternative->id)); ?>">
-                                <?php if ($safeThumb) : ?>
-                                    <img src="<?php echo $this->escape(Uri::root().$thumb); ?>"
-                                         alt="" loading="lazy" style="width:100%;max-height:110px;object-fit:contain">
-                                <?php endif; ?>
-                                <span><?php echo $this->escape($alternative->title); ?></span>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </section>
-        <?php endif; ?>
-    <?php endif; ?>
-
+    </section>
     <?php if ($this->reviewsEnabled) : ?>
-    <section class="mm-product-reviews mt-4" id="mm-product-reviews">
+    <section class="mm-product-reviews mt-4" id="mm-product-reviews" data-mm-tab-panel="reviews">
         <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_REVIEWS_TITLE'); ?></h2>
         <?php if (!$this->reviews) : ?>
             <p><?php echo Text::_('COM_MINIMARKET_REVIEWS_EMPTY'); ?></p>
@@ -495,7 +475,9 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
                 <p><a href="<?php echo $this->escape(str_starts_with($video,'https://')?$video:Uri::root().$video); ?>"
                     target="_blank" rel="noopener noreferrer"><?php echo Text::_('COM_MINIMARKET_REVIEW_WATCH_VIDEO'); ?></a></p>
             <?php endif; ?>
-        </article>
+        
+
+</article>
         <?php endforeach; ?>
         <?php if ($this->reviewsCanSubmit) : ?>
             <form method="post" action="<?php echo $this->escape(RouteHelper::reviewAction()); ?>"
@@ -532,5 +514,117 @@ $isPhysical = (string)($this->product->delivery_type ?? 'physical') === 'physica
             <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_REVIEWS_SIGNIN'); ?></p>
         <?php endif; ?>
     </section>
+    <?php endif; ?>
+
+    <?php if ($this->relatedGroups) : ?>
+        <section class="mm-related-products" aria-labelledby="mm-related-products-title">
+            <h2 id="mm-related-products-title"><?php echo Text::_('COM_MINIMARKET_RELATED_PRODUCTS'); ?></h2>
+            <?php foreach ($this->relatedGroups as $group) : ?>
+                <section class="mb-3" aria-labelledby="mm-related-group-<?php echo (int) $group['id']; ?>">
+                    <h3 id="mm-related-group-<?php echo (int) $group['id']; ?>" class="h5">
+                        <?php echo $this->escape((string) $group['title']); ?>
+                    </h3>
+                    <div class="d-flex flex-wrap gap-3">
+                    <?php foreach ($group['products'] as $linked) :
+                        $relatedImage = explode('#', (string) ($linked->image ?? ''), 2)[0];
+                        $showRelatedImage = $isSafeImage($relatedImage);
+                    ?>
+                        <a class="d-flex align-items-center gap-2 border rounded p-2 text-decoration-none"
+                           href="<?php echo $this->escape(RouteHelper::product((int) $linked->id)); ?>">
+                            <?php if ($showRelatedImage) : ?>
+                                <img src="<?php echo $this->escape(Uri::root() . $relatedImage); ?>"
+                                     alt="" loading="lazy" width="64" height="64" style="object-fit:contain">
+                            <?php endif; ?>
+                            <span><?php echo $this->escape((string) $linked->title); ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                    </div>
+                </section>
+            <?php endforeach; ?>
+        </section>
+    <?php endif; ?>
+
+    <?php
+    $recommendations=[
+        ['title'=>'COM_MINIMARKET_PRODUCT_SIMILAR_TITLE','products'=>$this->similarProducts],
+        ['title'=>'COM_MINIMARKET_PRODUCT_BOUGHT_TOGETHER_TITLE','products'=>$this->boughtTogetherProducts],
+    ];
+    foreach($recommendations as $group): if(!$group['products'])continue;
+    ?>
+    <section class="mm-product-recommendations my-4">
+        <h2 class="h4"><?php echo Text::_($group['title']); ?></h2>
+        <ul class="row row-cols-2 row-cols-md-4 g-3 list-unstyled">
+        <?php foreach($group['products'] as $suggestion):
+            $thumb=explode('#',(string)($suggestion->image??''),2)[0];
+            $safeThumb=$isSafeImage($thumb);
+        ?>
+            <li class="col">
+                <a class="d-flex flex-column h-100 border rounded p-3 text-decoration-none"
+                   href="<?php echo $this->escape(RouteHelper::product((int)$suggestion->id)); ?>">
+                    <?php if($safeThumb): ?>
+                    <img class="img-fluid mb-2" loading="lazy" style="max-height:140px;object-fit:contain"
+                         src="<?php echo $this->escape(Uri::root().$thumb); ?>"
+                         alt="<?php echo $this->escape((string)($suggestion->image_alt ?: $suggestion->title)); ?>">
+                    <?php endif; ?>
+                    <span><?php echo $this->escape((string)$suggestion->title); ?></span>
+                    <strong class="mt-auto"><?php echo $this->escape((string)$suggestion->price); ?>
+                        <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong>
+                </a>
+            </li>
+        <?php endforeach; ?>
+        </ul>
+    </section>
+    <?php endforeach; ?>
+    <p class="mm-cart__nav"><a href="<?php echo $this->escape(RouteHelper::cart()); ?>"><?php echo Text::_('COM_MINIMARKET_CART_TITLE'); ?></a></p>
+    <?php if ($this->outOfStock) : ?>
+        <p class="alert alert-secondary" role="status"><?php echo Text::_('COM_MINIMARKET_OUT_OF_STOCK'); ?></p>
+        <?php if ($this->alternatives) : ?>
+            <section class="mm-alternatives">
+                <h2><?php echo Text::_('COM_MINIMARKET_ALTERNATIVES'); ?></h2>
+                <ul class="list-unstyled d-flex flex-wrap gap-3">
+                    <?php foreach ($this->alternatives as $alternative) :
+                        $thumb=explode('#',(string)($alternative->image??''),2)[0];
+                        $safeThumb=str_starts_with($thumb,'images/')
+                            && !str_contains($thumb,'..') && !str_contains($thumb,'//');
+                    ?>
+                        <li class="border rounded p-2" style="max-width:160px">
+                            <a href="<?php echo $this->escape(RouteHelper::product((int)$alternative->id)); ?>">
+                                <?php if ($safeThumb) : ?>
+                                    <img src="<?php echo $this->escape(Uri::root().$thumb); ?>"
+                                         alt="" loading="lazy" style="width:100%;max-height:110px;object-fit:contain">
+                                <?php endif; ?>
+                                <span><?php echo $this->escape($alternative->title); ?></span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </section>
+        <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if($this->showStickyBuyBar && $isPhysical): ?>
+    <aside class="mm-product-sticky-bar shadow-sm" data-mm-product-sticky hidden
+           aria-label="<?php echo $this->escape(Text::_('COM_MINIMARKET_PRODUCT_STICKY_BUY')); ?>">
+        <div class="container-fluid d-flex align-items-center gap-3 py-2">
+            <?php if($main): ?>
+                <img data-mm-sticky-image src="<?php echo $this->escape($main['url']); ?>"
+                     alt="" width="52" height="52" class="mm-product-sticky-bar__image">
+            <?php endif; ?>
+            <div class="mm-product-sticky-bar__name flex-grow-1">
+                <strong><?php echo $this->escape((string)$this->product->title); ?></strong>
+                <span class="d-block"><?php echo $this->escape((string)$this->product->price); ?>
+                    <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></span>
+            </div>
+            <label class="d-flex align-items-center gap-2 mb-0">
+                <span class="visually-hidden"><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></span>
+                <input type="number" class="form-control form-control-sm mm-product-sticky-bar__quantity"
+                       data-mm-sticky-quantity min="1" max="99" value="1" step="1">
+            </label>
+            <button class="btn btn-primary" type="button" data-mm-sticky-buy
+                    <?php echo $initialCanBuy?'':'disabled'; ?>>
+                <?php echo Text::_('COM_MINIMARKET_CART_ADD'); ?>
+            </button>
+        </div>
+    </aside>
     <?php endif; ?>
 </article>

@@ -11,6 +11,7 @@ use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Site\Helper\SeoHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
+use MiniMarket\Component\Minimarket\Site\Service\ProductRecommendations;
 
 final class HtmlView extends BaseHtmlView
 {
@@ -28,6 +29,11 @@ final class HtmlView extends BaseHtmlView
     public array $bundleComponents = [];
     public array $alternatives = [];
     public bool $outOfStock = false;
+    public string $pageLayout = 'full';
+    public bool $showSectionNav = false;
+    public bool $showStickyBuyBar = false;
+    public array $similarProducts = [];
+    public array $boughtTogetherProducts = [];
 
     public function display($tpl = null)
     {
@@ -48,7 +54,20 @@ final class HtmlView extends BaseHtmlView
             ->get('inventory_enabled', 1) === 1;
         $this->product = $product;
         $params=ComponentHelper::getParams('com_minimarket');
-        $this->reviewsEnabled=(int)$params->get('reviews_enabled',0)===1;
+        $requestedLayout=(string)$params->get('product_detail_layout','full');
+        $this->pageLayout=in_array($requestedLayout,['full','tabs'],true)?$requestedLayout:'full';
+        $this->showSectionNav=(int)$params->get('product_detail_section_nav',0)===1;
+        $this->showStickyBuyBar=(int)$params->get('product_detail_sticky_bar',0)===1;
+        if((int)$params->get('product_detail_show_similar',0)===1){
+            $this->similarProducts=ProductRecommendations::similar(
+                $repo,$id,(int)$product->category_id,4);
+        }
+        if((int)$params->get('product_detail_show_bought_together',0)===1){
+            $this->boughtTogetherProducts=ProductRecommendations::boughtTogether(
+                Factory::getContainer()->get(DatabaseInterface::class),$repo,$id,4);
+        }
+        $this->reviewsEnabled=(int)$params->get('reviews_enabled',0)===1
+            &&(int)$params->get('product_detail_show_reviews',1)===1;
         if ($this->reviewsEnabled) {
             $user=Factory::getApplication()->getIdentity();
             $this->reviewsCanSubmit=(string)$params->get('reviews_author_mode','registered')==='all'
@@ -120,7 +139,9 @@ final class HtmlView extends BaseHtmlView
             ->registerAndUseStyle('com_minimarket.promo', 'media/com_minimarket/css/promo-video.css')
             ->registerAndUseStyle('com_minimarket.cart', 'media/com_minimarket/css/cart.css')
             ->registerAndUseScript('com_minimarket.promo', 'media/com_minimarket/js/promo-video.js', [], ['defer' => true])
-            ->registerAndUseScript('com_minimarket.variants', 'media/com_minimarket/js/variants.js', [], ['defer' => true]);
+            ->registerAndUseScript('com_minimarket.variants', 'media/com_minimarket/js/variants.js', [], ['defer' => true])
+            ->registerAndUseStyle('com_minimarket.product-page','media/com_minimarket/css/product-page.css')
+            ->registerAndUseScript('com_minimarket.product-page','media/com_minimarket/js/product-page.js',[],['defer'=>true]);
         $document = $this->getDocument();
         $metaTitle = trim((string) ($product->meta_title ?? ''));
         $document->setTitle($metaTitle !== '' ? $metaTitle : (string) $product->title);

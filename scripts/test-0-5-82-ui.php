@@ -44,7 +44,7 @@ foreach(['category_show_add_to_cart','category_quick_view',
     $ok(count($cfg->xpath('//fieldset[@name="display"]/field[@name="'.$key.'"]'))===1,
         'display option '.$key);
 }
-foreach(['category_products_per_page','category_children_per_page','category_navigation_mode','category_load_trigger'] as $key) {
+foreach(['category_products_per_page','category_navigation_mode','category_load_trigger'] as $key) {
     $ok(count($cfg->xpath('//fieldset[@name="basic"]/field[@name="'.$key.'"]'))===1,
         'pagination option in basic '.$key);
 }

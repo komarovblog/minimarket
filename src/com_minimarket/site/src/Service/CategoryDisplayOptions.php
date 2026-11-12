@@ -37,8 +37,6 @@ final class CategoryDisplayOptions
         $result['pagination_next']=(int)$global->get('category_pagination_next',1)===1;
         $result['pagination_previous']=(int)$global->get('category_pagination_previous',1)===1;
         $result['load_previous']=(int)$global->get('category_load_previous',1)===1;
-        $childLimit=(int)$global->get('category_children_per_page',10);
-        $result['children_per_page']=in_array($childLimit,[0,10,20,50],true)?$childLimit:10;
         $limit=(int)$global->get('category_product_gallery_limit',5);
         $result['product_gallery_limit']=in_array($limit,[3,5,8],true)?$limit:5;
         // Custom information properties default to the full product page.

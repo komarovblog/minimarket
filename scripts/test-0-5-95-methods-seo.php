@@ -101,11 +101,11 @@ namespace MiniMarket\Smoke95 {
  foreach(['price'=>['filter_price_mode','system_price_display_location'],
           'sku'=>['filter_sku_mode','system_sku_display_location'],
           'stock'=>['filter_stock_enabled','system_stock_display_location']] as $system=>$pair){
-  $note=array_search('mm_'.$system.'_section',$names,true);
   $first=array_search($pair[0],$names,true);
   $second=array_search($pair[1],$names,true);
-  check95($note!==false && $first===$note+1 && $second===$note+2,
-   'system attribute '.$system.' has adjacent filter and display controls');
+  check95($first!==false && $second===$first+1
+    &&!in_array('mm_'.$system.'_section',$names,true),
+    'system attribute '.$system.' has exactly two adjacent controls, no duplicate heading');
  }
  $option=simplexml_load_file($root.'admin/forms/orderoption.xml');
  check95((string)$option->xpath("//field[@name='display_location']")[0]['default']==='product',

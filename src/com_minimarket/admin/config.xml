@@ -30,24 +30,7 @@
                description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">
             <option value="1">COM_MINIMARKET_ENABLE</option><option value="0">COM_MINIMARKET_DISABLE</option>
         </field>
-        <field name="mm_commands_note" type="note" class="alert alert-info" label="COM_MINIMARKET_COMMANDS_GROUP"
-               description="COM_MINIMARKET_COMMANDS_GROUP_DESC"/>
-        <field name="offcanvas_cart_target" type="text" filter="string" maxlength="64"
-               label="COM_MINIMARKET_COMMANDS_CART" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
-               default="" hint="#offcanvas-cart"/>
-        <field name="offcanvas_filters_target" type="text" filter="string" maxlength="64"
-               label="COM_MINIMARKET_COMMANDS_FILTERS" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
-               default="" hint="#offcanvas-filters"/>
-        <field name="offcanvas_account_target" type="text" filter="string" maxlength="64"
-               label="COM_MINIMARKET_COMMANDS_ACCOUNT" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
-               default="" hint="#offcanvas-account"/>
-        <field name="offcanvas_menu_target" type="text" filter="string" maxlength="64"
-               label="COM_MINIMARKET_COMMANDS_MENU" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
-               default="" hint="#offcanvas-menu"/>
-
-
         <field name="mm_system_filters_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SYSTEM_ATTRIBUTES_IN_FILTER" description="COM_MINIMARKET_SYSTEM_INDEPENDENT_HELP" />
-        <field name="mm_price_section" type="spacer" label="COM_MINIMARKET_SYSTEM_PRICE_GROUP" hr="false" />
         <field name="filter_price_mode" type="list" default="slider" filter="cmd"
                        label="COM_MINIMARKET_SYSTEM_PRICE_FILTER" description="COM_MINIMARKET_SYSTEM_PRICE_FILTER_DESC">
                     <option value="none">COM_MINIMARKET_MODE_NONE</option>
@@ -60,7 +43,6 @@
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
-        <field name="mm_sku_section" type="spacer" label="COM_MINIMARKET_SYSTEM_SKU_GROUP" hr="false" />
         <field name="filter_sku_mode" type="list" default="none" filter="cmd"
                        label="COM_MINIMARKET_SYSTEM_SKU_FILTER">
                     <option value="none">COM_MINIMARKET_MODE_NONE</option>
@@ -72,7 +54,6 @@
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
-        <field name="mm_stock_section" type="spacer" label="COM_MINIMARKET_SYSTEM_STOCK_GROUP" hr="false" />
         <field name="filter_stock_enabled" type="list" default="0" filter="int"
                        label="COM_MINIMARKET_SYSTEM_STOCK_FILTER">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
@@ -110,12 +91,21 @@
         <field name="category_load_previous" type="list" default="1" filter="int" label="COM_MINIMARKET_NAV_LOAD_PREVIOUS" showon="category_navigation_mode:load_more">
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
-        <field name="category_children_per_page" type="list" label="COM_MINIMARKET_CHILDREN_PER_PAGE" default="10" filter="int">
-  <option value="0">COM_MINIMARKET_PAGES_ALL</option>
-  <option value="10">10</option>
-  <option value="20">20</option>
-  <option value="50">50</option>
-</field>
+
+        <field name="mm_commands_note" type="note" class="alert alert-info" label="COM_MINIMARKET_COMMANDS_GROUP"
+               description="COM_MINIMARKET_COMMANDS_GROUP_DESC"/>
+        <field name="offcanvas_cart_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_CART" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-cart"/>
+        <field name="offcanvas_filters_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_FILTERS" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-filters"/>
+        <field name="offcanvas_account_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_ACCOUNT" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-account"/>
+        <field name="offcanvas_menu_target" type="text" filter="string" maxlength="64"
+               label="COM_MINIMARKET_COMMANDS_MENU" description="COM_MINIMARKET_COMMANDS_TARGET_HELP"
+               default="" hint="#offcanvas-menu"/>
     </fieldset>
     <fieldset name="display" label="COM_MINIMARKET_CONFIG_DISPLAY">
         <field name="mm_display_categories_note" type="note" label="COM_MINIMARKET_DISPLAY_CATEGORIES_SECTION" description="COM_MINIMARKET_DISPLAY_CATEGORIES_HELP" class="alert alert-info" />
@@ -231,6 +221,34 @@
         <field name="category_show_badges" type="list" default="1" filter="int" label="COM_MINIMARKET_LIST_SHOW_BADGES">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
+
+        <field name="mm_product_detail_note" type="note" class="alert alert-info"
+               label="COM_MINIMARKET_PRODUCT_DETAIL_SECTION" description="COM_MINIMARKET_PRODUCT_DETAIL_SECTION_DESC" />
+        <field name="product_detail_layout" type="list" default="full" filter="cmd"
+               label="COM_MINIMARKET_PRODUCT_DETAIL_LAYOUT" description="COM_MINIMARKET_PRODUCT_DETAIL_LAYOUT_DESC">
+            <option value="full">COM_MINIMARKET_PRODUCT_DETAIL_FULL</option>
+            <option value="tabs">COM_MINIMARKET_PRODUCT_DETAIL_TABS</option>
+        </field>
+        <field name="product_detail_show_similar" type="list" default="0" filter="int"
+               label="COM_MINIMARKET_PRODUCT_DETAIL_SIMILAR">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="product_detail_show_bought_together" type="list" default="0" filter="int"
+               label="COM_MINIMARKET_PRODUCT_DETAIL_BOUGHT_TOGETHER">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="product_detail_show_reviews" type="list" default="1" filter="int"
+               label="COM_MINIMARKET_PRODUCT_DETAIL_REVIEWS" description="COM_MINIMARKET_PRODUCT_DETAIL_REVIEWS_DESC">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="product_detail_sticky_bar" type="list" default="0" filter="int"
+               label="COM_MINIMARKET_PRODUCT_DETAIL_STICKY_BAR">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
+        <field name="product_detail_section_nav" type="list" default="0" filter="int"
+               label="COM_MINIMARKET_PRODUCT_DETAIL_SECTION_NAV">
+            <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
+        </field>
     </fieldset>
     <!-- Checkout is deliberately separated from authentication integrations. -->
     <fieldset name="checkout" label="COM_MINIMARKET_CONFIG_CHECKOUT">
@@ -238,7 +256,7 @@
         <field name="checkout_show_login_button" type="list" label="COM_MINIMARKET_CHECKOUT_SHOW_LOGIN" default="1" filter="int">
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
-        <field name="checkout_buyer_description" type="textarea" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" rows="3" filter="string" />
+        <field name="checkout_buyer_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
         <field name="checkout_buyer_skip" type="list" label="COM_MINIMARKET_CHECKOUT_SKIP_STEP" default="0" filter="int" description="COM_MINIMARKET_CHECKOUT_SKIP_BUYER_HELP">
             <option value="0">COM_MINIMARKET_STEP_KEEP</option><option value="1">COM_MINIMARKET_STEP_SKIP</option>
         </field>
@@ -273,14 +291,14 @@
                label="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS" description="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS_DESC" />
         <field name="checkout_delivery_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION" description="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION_HELP" />
-        <field name="checkout_delivery_description" type="textarea" rows="3" filter="string" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_delivery_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
         <field name="checkout_delivery_skip" type="list" default="0" filter="int" label="COM_MINIMARKET_CHECKOUT_SKIP_STEP"
                description="COM_MINIMARKET_CHECKOUT_SKIP_DELIVERY_HELP">
             <option value="0">COM_MINIMARKET_STEP_KEEP</option><option value="1">COM_MINIMARKET_STEP_SKIP</option>
         </field>
         <field name="checkout_payment_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION" description="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION_HELP" />
-        <field name="checkout_payment_description" type="textarea" rows="3" filter="string" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_payment_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
         <field name="checkout_payment_skip" type="list" default="0" filter="int" label="COM_MINIMARKET_CHECKOUT_SKIP_STEP">
             <option value="0">COM_MINIMARKET_STEP_KEEP</option><option value="1">COM_MINIMARKET_STEP_SKIP</option>
         </field>

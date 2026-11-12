@@ -2,6 +2,7 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Filter\InputFilter;
 use Joomla\CMS\Language\Text;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CartState;
@@ -44,7 +45,7 @@ $firstPayment=array_key_first($this->paymentMethods);
                 <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-buyer">
                     <h2 id="mm-checkout-buyer" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_BUYER'); ?></h2>
-                    <?php if($this->buyerDescription!==''): ?><p class="text-muted"><?php echo nl2br($this->escape($this->buyerDescription)); ?></p><?php endif; ?>
+                    <?php if($this->buyerDescription!==''): ?><p class="text-muted"><?php echo InputFilter::getInstance()->clean($this->buyerDescription, 'HTML'); ?></p><?php endif; ?>
                     <div class="row g-3">
                         <?php if (($this->fields['name']??'hidden')!=='hidden') : ?>
                         <div class="col-12 col-md-6">
@@ -112,7 +113,7 @@ $firstPayment=array_key_first($this->paymentMethods);
                 <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-delivery">
                     <h2 id="mm-checkout-delivery" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_RECEIPT'); ?></h2>
-                    <?php if($this->deliveryDescription!==''): ?><p class="text-muted"><?php echo nl2br($this->escape($this->deliveryDescription)); ?></p><?php endif; ?>
+                    <?php if($this->deliveryDescription!==''): ?><p class="text-muted"><?php echo InputFilter::getInstance()->clean($this->deliveryDescription, 'HTML'); ?></p><?php endif; ?>
                     <div class="d-flex flex-wrap gap-3" role="group" aria-label="<?php echo Text::_('COM_MINIMARKET_CHECKOUT_RECEIPT'); ?>">
                         <?php foreach ($this->deliveryMethods as $method=>$settings) : ?>
                         <div class="form-check mm-checkout-option">
@@ -206,7 +207,7 @@ $firstPayment=array_key_first($this->paymentMethods);
                 <?php else: ?>
                 <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-payment">
                     <h2 id="mm-checkout-payment" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT'); ?></h2>
-                    <?php if($this->paymentDescription!==''): ?><p class="text-muted"><?php echo nl2br($this->escape($this->paymentDescription)); ?></p><?php endif; ?>
+                    <?php if($this->paymentDescription!==''): ?><p class="text-muted"><?php echo InputFilter::getInstance()->clean($this->paymentDescription, 'HTML'); ?></p><?php endif; ?>
                     <?php foreach ($this->paymentMethods as $method=>$label) : ?>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" name="payment_method" id="mm-payment-<?php echo $method; ?>"

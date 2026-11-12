@@ -155,6 +155,23 @@ final class CatalogRepository
             $this->derivedStock((array)$this->db->loadObjectList()));
     }
 
+    /** Published, accessible, in-stock products in the provided priority order. */
+    public function getVisibleRecommendationsByIds(array $ids, int $limit = 4): array
+    {
+        $wanted=array_values(array_unique(array_filter(array_map('intval',$ids),
+            static fn(int $id):bool=>$id>0)));
+        if(!$wanted)return [];
+        $items=[];
+        foreach($this->catalogListing() as $row)$items[(int)$row->id]=$row;
+        $result=[];
+        foreach($wanted as $id){
+            if(!isset($items[$id]))continue;
+            $result[]=$items[$id];
+            if(count($result)>=max(1,min(12,$limit)))break;
+        }
+        return $result;
+    }
+
     public function countAllProducts(): int
     {
         return count($this->catalogListing());
