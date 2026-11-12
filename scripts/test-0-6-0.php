@@ -78,7 +78,7 @@ $check(!str_contains($view,'$this->hasDigital && (int)$app->getIdentity()->id<1'
     &&!str_contains($ctrl,"COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED"),
     'digital guest orders accepted when guest mode selected');
 $download=(string)file_get_contents($root.'site/src/Controller/DownloadController.php');
-$check(str_contains($download,"(int)$row['user_id']>0")
+$check(str_contains($download,"(int)\$row['user_id']>0")
     &&str_contains($download,'hash_equals')&&str_contains($download,'download_count'),
     'guest token ownership and paid download protection');
 $keys=(string)file_get_contents($root.'site/src/Service/DigitalLicensePool.php');
