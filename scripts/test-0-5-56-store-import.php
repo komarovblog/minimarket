@@ -20,16 +20,14 @@ namespace MiniMarket\StoreImportSmoke {
     $config = simplexml_load_file($root.'admin/config.xml');
     $form = simplexml_load_file($root.'admin/forms/product.xml');
     ok($config !== false && $form !== false, 'Joomla configuration XML parses');
-    ok(count($config->xpath("//field[@name='shop_type' and @default='physical']")) === 1,
-        'physical is the global default');
-    ok(count($config->xpath("//field[@name='shop_type']/option")) === 3,
-        'physical, digital and food delivery profiles');
-    ok(count($form->xpath("//field[@name='delivery_type']")) === 0,
-        'products and bundles have no independent format picker');
+    ok(count($config->xpath("//field[@name='shop_type']"))===0,
+        'global shop profiles removed');
+    ok(count($form->xpath("//field[@name='delivery_type' and @type='list']"))===1,
+        'product fulfillment is selected per item');
     $table=(string)file_get_contents($root.'admin/src/Table/ProductTable.php');
-    ok(str_contains($table, "ComponentHelper::getParams('com_minimarket')")
-        && str_contains($table, '$this->delivery_type = in_array'),
-        'product table overrides posted or historical per-product type');
+    ok(str_contains($table,"['physical','digital']")
+        &&!str_contains($table,"get('shop_type'"),
+        'table accepts per-product fulfillment and refuses obsolete global override');
     $raw=(string)file_get_contents($root.'admin/examples/import-rich-catalog-v1.json');
     $doc=CatalogImport::decode($raw);
     ok($doc['source']==='minimarket-rich-demo' && count($doc['bundles'])===5,
