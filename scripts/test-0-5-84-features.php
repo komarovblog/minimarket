@@ -69,8 +69,9 @@ $check(str_contains($registration,'shared/method-list.php') &&
  'registration methods use Joomla accounts and installed plugin registry');
 $display=$read('admin/src/Controller/DisplayController.php');
 $check(str_contains($display,"useScript('table.columns')") &&
- !file_exists($root.'media/js/admin-columns.js'),
- 'native Joomla columns control replaces custom asset');
+ is_file($root.'media/js/admin-columns.js') &&
+ is_file($root.'admin/tmpl/shared/column-toggle.php'),
+ 'native Joomla table controls retained alongside requested bounded column selector');
 $sql=$read('admin/sql/updates/mysql/0.5.84.sql');
 $check(str_contains($sql,'#__minimarket_shipments') &&
  str_contains($sql,'#__minimarket_promo_codes') &&
