@@ -5,9 +5,9 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 $s=$this->shipment;
 ?>
-<div class="d-flex gap-2 flex-wrap mb-3">
+<div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
  <button type="submit" form="mm-delivery-update-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
- <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+ <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
 <section class="mm-admin-panel mm-admin-list-panel">
  <h2 class="h4">#<?php echo (int)$s->id; ?> — <?php echo Text::_('COM_MINIMARKET_DASHBOARD_DELIVERIES'); ?></h2>
@@ -35,10 +35,6 @@ $s=$this->shipment;
    <label class="form-label" for="mm-note"><?php echo Text::_('COM_MINIMARKET_DELIVERY_NOTE'); ?></label>
    <textarea class="form-control" id="mm-note" name="note" maxlength="2000" rows="4"><?php echo $this->escape((string)$s->note); ?></textarea>
   </div>
-  <div class="col-12">
-   <?php echo HTMLHelper::_('form.token'); ?>
-   <button type="submit" class="btn btn-primary"><?php echo Text::_('JSAVE'); ?></button>
-   <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
-  </div>
+  <div class="col-12"><?php echo HTMLHelper::_('form.token'); ?></div>
  </form>
 </section>

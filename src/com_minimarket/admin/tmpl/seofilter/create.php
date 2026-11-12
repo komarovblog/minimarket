@@ -16,10 +16,10 @@ Factory::getApplication()->getDocument()->getWebAssetManager()
         'media/com_minimarket/js/seo-category-editor.js',[],['defer'=>true]);
 ?>
 <form method="post" id="mm-seo-editor" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.save',false)); ?>">
- <div class="d-flex gap-2 flex-wrap mb-3">
+ <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
   <button type="submit" class="btn btn-success" name="save_close" value="0"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
   <button type="submit" class="btn btn-success" name="save_close" value="1"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
-  <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilters',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=seofilters',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
  </div>
  <input type="hidden" name="id" value="<?php echo (int)($p->id??0); ?>">
  <?php echo HTMLHelper::_('form.token'); ?>

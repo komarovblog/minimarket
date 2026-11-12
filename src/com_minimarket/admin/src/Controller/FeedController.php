@@ -48,6 +48,53 @@ final class FeedController extends BaseController
         }
     }
 
+    /** Native Joomla checked rows; accept only a bounded POST selection. */
+    private function checkedIds(): array
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        $posted=$app->input->post->get('cid',[],'array');
+        $ids=array_values(array_unique(array_filter(array_map('intval',
+            is_array($posted)?$posted:[]),static fn(int $id):bool=>$id>0)));
+        if(!$ids||count($ids)>100)
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_FEED_INVALID'),400);
+        return $ids;
+    }
+
+    private function batchState(int $state): void
+    {
+        $this->permitted();
+        if(!Factory::getApplication()->getIdentity()->authorise('core.edit.state','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $ids=$this->checkedIds();
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $db->setQuery($db->getQuery(true)
+            ->update($db->quoteName('#__minimarket_feeds'))
+            ->set($db->quoteName('state').'='.(int)$state)
+            ->where($db->quoteName('id').' IN ('.implode(',',$ids).')'));
+        $db->execute();
+        Factory::getApplication()->enqueueMessage(Text::_('COM_MINIMARKET_FEED_SAVED'));
+        $this->setRedirect(Route::_('index.php?option=com_minimarket&view=feeds',false));
+    }
+
+    public function bulkPublish(): void { $this->batchState(1); }
+    public function bulkUnpublish(): void { $this->batchState(0); }
+
+    public function bulkDelete(): void
+    {
+        $this->permitted();
+        if(!Factory::getApplication()->getIdentity()->authorise('core.delete','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $ids=$this->checkedIds();
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        foreach($ids as $id){
+            if(FeedConfig::find($db,$id)!==null)FeedConfig::delete($db,$id);
+        }
+        Factory::getApplication()->enqueueMessage(Text::_('COM_MINIMARKET_FEED_DELETED'));
+        $this->setRedirect(Route::_('index.php?option=com_minimarket&view=feeds',false));
+    }
+
     public function delete(): void
     {
         Session::checkToken('post') or die(Text::_('JINVALID_TOKEN'));

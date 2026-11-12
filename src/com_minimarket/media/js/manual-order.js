@@ -30,7 +30,7 @@
    label.textContent=item.title+(item.subtitle?' · '+item.subtitle:'');
    selected.append(label);
    const remove=document.createElement('button');
-   remove.type='button';remove.className='btn btn-danger btn-sm ms-2';remove.textContent='−';
+   remove.type='button';remove.className='btn btn-outline-danger btn-sm ms-2';remove.textContent='−';
    remove.setAttribute('aria-label',list.dataset.mmManualPickerRemove||'−');
    remove.addEventListener('click',()=>{
     row.querySelector('[data-mm-manual-key]').value='';

@@ -18,9 +18,9 @@ $mmReference=[
  ]
 ];
 ?>
-<div class="d-flex gap-2 flex-wrap mb-3">
+<div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
  <button type="submit" form="mm-delivery-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
- <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+ <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
 <section class="mm-admin-panel">
  <div class="alert alert-info" role="note"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CREATE_HINT'); ?></div>

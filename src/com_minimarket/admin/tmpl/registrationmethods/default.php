@@ -44,6 +44,11 @@ $esc=static fn($value):string=>htmlspecialchars((string)$value, ENT_QUOTES|ENT_S
    </dl>
    <form method="post" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
     <input type="hidden" name="scope" value="registration">
+    <?php if($this->canEdit): ?>
+    <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
+      <button class="btn btn-success" type="submit"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
+    </div>
+    <?php endif; ?>
     <input type="hidden" name="method" value="email">
     <input type="hidden" name="primary" value="0">
     <label class="form-check mb-2">
@@ -54,7 +59,7 @@ $esc=static fn($value):string=>htmlspecialchars((string)$value, ENT_QUOTES|ENT_S
     </label>
     <p class="form-text"><?php echo Text::_('COM_MINIMARKET_REGISTRATION_PRIMARY_HELP'); ?></p>
     <?php echo \Joomla\CMS\HTML\HTMLHelper::_('form.token'); ?>
-    <?php if($this->canEdit): ?><button class="btn btn-success" type="submit"><?php echo Text::_('JSAVE'); ?></button><?php endif; ?>
+    
    </form>
    <?php if($this->canEditUsers): ?>
     <div><a class="btn btn-outline-secondary mt-3" href="<?php echo $esc(Route::_('index.php?option=com_config&view=component&component=com_users',false)); ?>">

@@ -11,10 +11,10 @@ $back=$embedded
 $get=static fn($key,$default='')=>$z?(string)($z->$key??$default):$default;
 $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00';
 ?>
-<div class="d-flex gap-2 flex-wrap mb-3">
+<div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
  <button type="submit" form="mm-zone-form" name="save_close" value="0" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
  <button type="submit" form="mm-zone-form" name="save_close" value="1" class="btn btn-success"><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
- <a class="btn btn-danger" href="<?php echo $this->escape(Route::_($back,false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+ <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_($back,false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
 <form id="mm-zone-form" method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=deliveryzone.save',false)); ?>">
  <input type="hidden" name="id" value="<?php echo (int)($z->id??0); ?>">

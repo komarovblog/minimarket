@@ -36,19 +36,21 @@ $href='index.php?option=com_minimarket&view=feeds&'.http_build_query([
   <div class="table-responsive mm-native-list-viewport">
    <table id="mm-feeds-list" class="table table-striped mm-admin-list">
     <thead><tr>
+     <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
      <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_FEED_PROVIDER'); ?></th>
      <th><?php echo Text::_('JSTATUS'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_FEED_URL'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_FEED_ACTIONS'); ?></th>
     </tr></thead><tbody>
-    <?php foreach($this->feeds as $feed):
+    <?php foreach($this->feeds as $i=>$feed):
        $url=\Joomla\CMS\Uri\Uri::root().'index.php?option=com_minimarket&task=feed.xml&id='
           .(int)$feed['id'].'&key='.rawurlencode((string)$feed['access_key']);
        $edit=Route::_('index.php?option=com_minimarket&view=feed&id='.(int)$feed['id'],false);
     ?>
      <tr>
-      <td data-label="<?php echo Text::_('JGLOBAL_TITLE'); ?>"><a href="<?php echo $e($edit); ?>"><?php echo $e($feed['title']); ?></a></td>
+      <td class="text-center"><?php echo HTMLHelper::_('grid.id',$i,(int)$feed['id']); ?></td>
+     <td data-label="<?php echo Text::_('JGLOBAL_TITLE'); ?>"><a href="<?php echo $e($edit); ?>"><?php echo $e($feed['title']); ?></a></td>
       <td data-label="<?php echo Text::_('COM_MINIMARKET_FEED_PROVIDER'); ?>"><?php echo Text::_(FeedConfig::PROVIDERS[$feed['provider']]??'COM_MINIMARKET_FEED_INVALID'); ?></td>
       <td data-label="<?php echo Text::_('JSTATUS'); ?>"><span class="badge bg-<?php echo (int)$feed['state']===1?'success':'secondary'; ?>"><?php echo (int)$feed['state']===1?Text::_('JPUBLISHED'):Text::_('JUNPUBLISHED'); ?></span></td>
       <td data-label="<?php echo Text::_('COM_MINIMARKET_FEED_URL'); ?>">

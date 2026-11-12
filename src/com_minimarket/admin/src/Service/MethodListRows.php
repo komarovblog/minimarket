@@ -48,6 +48,7 @@ final class MethodListRows
             $rows[] = [
                 'name' => Text::_($label),
                 'code' => $method,
+                'quick_id' => $method,
                 'type' => 'builtin',
                 'enabled' => (int) $params->get($param, $default) === 1,
                 'url' => $canEdit
@@ -60,6 +61,7 @@ final class MethodListRows
             $rows[] = [
                 'name' => Text::_((string) $plugin->name),
                 'code' => (string) $plugin->element,
+                'quick_id' => 'plugin_'.(int)$plugin->extension_id,
                 'type' => 'plugin',
                 'enabled' => (int) $plugin->enabled === 1,
                 'url' => Route::_('index.php?option=com_minimarket&view='.$view

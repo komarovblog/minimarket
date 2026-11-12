@@ -4,9 +4,9 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 ?>
-<div class="d-flex gap-2 flex-wrap mb-3">
+<div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
  <button type="submit" form="mm-review-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
- <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=reviews',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+ <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=reviews',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
 <section class="mm-admin-panel card card-body">
  <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_REVIEW_NEW'); ?></h2>
@@ -46,8 +46,7 @@ use Joomla\CMS\Router\Route;
   </div>
   <div class="col-12">
    <?php echo HTMLHelper::_('form.token'); ?>
-   <button type="submit" class="btn btn-primary"><?php echo Text::_('JSAVE'); ?></button>
-   <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=reviews',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+
   </div>
  </form>
 </section>

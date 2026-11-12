@@ -48,7 +48,7 @@ $forms=['CategoryattributesField.php','CategoryorderoptionsField.php'];
 foreach($forms as $field) {
  $html=(string)file_get_contents($base.'admin/src/Field/'.$field);
  checkList(str_contains($html,"['v'") || str_contains($html,".'[v'"),
- 'category form includes separate visibility checkbox '.$field);
+ 'category form includes separate visibility selector '.$field);
 }
 $catModel=(string)file_get_contents($base.'admin/src/Model/CategoryModel.php');
 checkList(str_contains($catModel,'CategoryListVisibility::flags')

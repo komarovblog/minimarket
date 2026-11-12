@@ -44,7 +44,7 @@ final class CategoryorderoptionsField extends FormField
         $esc = static fn(string $s): string =>
             htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $html = '<p class="text-muted">' . $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTIONS_HELP')) .
-            '</p><table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state"><thead><tr><th>' .
+            '</p><div class="table-responsive mm-category-rules-viewport"><table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state"><thead><tr><th>' .
             $esc(Text::_('COM_MINIMARKET_ORDER_OPTIONS')) . '</th><th>' .
             $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTION_RULE')) .
             '</th><th>' . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')) .
@@ -82,15 +82,18 @@ final class CategoryorderoptionsField extends FormField
             $flagName=$esc($this->name.'[v'.$id.']');
             $flagId=$esc($this->id.'_v'.$id);
             $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
-                . '<input type="checkbox" class="form-check-input" name="'.$flagName
-                . '" id="'.$flagId.'" data-mm-category-list-flag value="1"'.($listVisible?' checked':'').'>'
-                . '<label class="visually-hidden" for="'.$flagId.'">'
-                . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'</label>'
+                . '<select class="form-select form-select-sm" name="'.$flagName
+                . '" id="'.$flagId.'" data-mm-category-list-flag aria-label="'
+                . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'">'
+                . '<option value="1"'.($listVisible?' selected':'').'>'
+                . $esc(Text::_('COM_MINIMARKET_SHOW')).'</option>'
+                . '<option value="0"'.(!$listVisible?' selected':'').'>'
+                . $esc(Text::_('COM_MINIMARKET_HIDE')).'</option></select>'
                 . '</td><td class="mm-rules-state"><span class="'
                 . ($published ? 'text-success' : 'text-muted') . '">'
                 . $esc(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))
                 . '</span></td></tr>';
         }
-        return $html . '</tbody></table>';
+        return $html . '</tbody></table></div>';
     }
 }

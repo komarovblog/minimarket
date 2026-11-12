@@ -80,8 +80,8 @@ namespace MiniMarket\QuicklinkTest {
        (string)$module['client']==='administrator' &&
        (string)$module['method']==='upgrade',
        'separate module has Joomla administrator client and upgrade semantics');
-    testIt(version_compare((string)$component->version,(string)$module->version,'>=') &&
-       version_compare((string)$module->version,'0.5.64','>='),'one-time module remains compatible with newer component releases');
+    testIt((string)$module->version==='1.0.0' &&
+       version_compare((string)$component->version,'0.6.4','>='),'one-time module remains compatible with newer component releases');
     testIt(count($component->xpath('/extension/administration/files/folder[text()="modules"]'))===0,
        'component does not bundle or automatically install the administrator quicklink');
     testIt(count($module->xpath('/extension/files/filename[@module="mod_minimarket_toolbar"]'))===1,

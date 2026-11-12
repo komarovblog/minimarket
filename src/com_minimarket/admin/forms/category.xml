@@ -96,6 +96,8 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
+        <field name="product_grid_note" type="note" class="alert alert-info"
+               label="COM_MINIMARKET_PRODUCT_GRID_HEADING" description="COM_MINIMARKET_PRODUCT_GRID_HELP" />
         <field name="product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="inherit" filter="cmd">
             <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
             <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>

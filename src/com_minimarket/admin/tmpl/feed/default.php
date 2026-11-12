@@ -37,6 +37,10 @@ $depth=static function(int $id) use($map):int {
           method="post" id="mm-feed-editor">
         <input type="hidden" name="feed[id]" value="<?php echo (int)$this->feed['id']; ?>">
         <?php echo HTMLHelper::_('form.token'); ?>
+        <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
+            <button type="submit" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
+            <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+        </div>
         <?php echo HTMLHelper::_('uitab.startTabSet','minimarket-feed',['active'=>'details']); ?>
         <?php echo HTMLHelper::_('uitab.addTab','minimarket-feed','details',Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
         <div class="card mb-3"><div class="card-body">
@@ -191,10 +195,7 @@ $depth=static function(int $id) use($map):int {
         </div></div>
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
         <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
-        <div class="d-flex gap-2 flex-wrap">
-            <button type="submit" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
-            <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=feeds',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
-        </div>
+
 </form>
     <p class="mt-3 text-muted small"><?php echo Text::_('COM_MINIMARKET_FEED_LIMITATIONS'); ?></p>
 </div>

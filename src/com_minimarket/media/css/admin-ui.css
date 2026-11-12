@@ -387,18 +387,25 @@
 /* Entity lists use Joomla's native table borders and spacing. */
 
 
-/* 0.5.43 — category rules: title/code stack and separate status column. */
-#adminForm .mm-rules-table--state { table-layout: fixed; }
-#adminForm .mm-rules-table--state th:first-child { width: 48%; }
-#adminForm .mm-rules-table--state th:nth-child(2) { width: 32%; }
-#adminForm .mm-rules-table--state th:last-child { width: 20%; }
-#adminForm .mm-rules-table--state td.mm-rules-state {
-  text-align: start;
-  vertical-align: middle;
-  white-space: normal;
-  overflow-wrap: normal;
+/* Category assignment tables: four real columns, native Atum colors. */
+#adminForm .mm-admin-panel .control-group:has(.mm-category-rules-viewport) {display:block;width:100%;min-width:0;}
+#adminForm .mm-admin-panel .control-group:has(.mm-category-rules-viewport) > .control-label,
+#adminForm .mm-admin-panel .control-group:has(.mm-category-rules-viewport) > .controls {
+  display:block;float:none;width:100%;max-width:100%;min-width:0;
 }
-#adminForm .mm-rules-table--state small { margin-top: .2rem; }
+#adminForm .mm-category-rules-viewport {width:100%;max-width:100%;overflow-x:auto;}
+#adminForm .mm-admin-panel .mm-rules-table--state {width:100%;min-width:660px;table-layout:fixed;}
+#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(1) {width:32%;}
+#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(2) {width:30%;}
+#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(3) {width:20%;}
+#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(4) {width:18%;}
+#adminForm .mm-admin-panel .mm-rules-table--state th,
+#adminForm .mm-admin-panel .mm-rules-table--state td {vertical-align:middle;word-break:normal;overflow-wrap:normal;}
+#adminForm .mm-admin-panel .mm-rules-table--state th:first-child {overflow-wrap:anywhere;}
+#adminForm .mm-admin-panel .mm-rules-table--state td.mm-rules-state,
+#adminForm .mm-admin-panel .mm-rules-table--state th:last-child {white-space:nowrap;}
+#adminForm .mm-admin-panel .mm-rules-table--state select {width:100%;max-width:100%;}
+#adminForm .mm-rules-table--state small {margin-top:.2rem;}
 
 /* One real SKU matrix. The OPTION columns alone scroll while SKU / stock /
    active controls stay fixed at the right edge, including at small widths. */
@@ -538,10 +545,6 @@
     --mm-pin-active: 64px;
     --mm-pin-stock: 80px;
     --mm-pin-sku: 150px;
-  }
-  #adminForm .mm-rules-table--state th,
-  #adminForm .mm-rules-table--state td {
-    width: 100% !important;
   }
 }
 

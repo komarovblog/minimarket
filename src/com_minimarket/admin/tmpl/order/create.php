@@ -6,9 +6,9 @@ use Joomla\CMS\Router\Route;
 $firstDelivery=array_key_first($this->deliveryMethods);
 $firstPayment=array_key_first($this->paymentMethods);
 ?>
-<div class="d-flex gap-2 flex-wrap mb-3">
- <button type="submit" form="mm-manual-order-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
- <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+<div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
+ <button type="submit" form="mm-manual-order-form" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
+ <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
 <section class="mm-admin-panel card card-body">
     <h2 class="h4"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_TITLE'); ?></h2>
@@ -71,8 +71,10 @@ $firstPayment=array_key_first($this->paymentMethods);
                                min="1" max="99" value="1">
                     </div>
                     <div class="col-6 col-lg-1">
-                        <button type="button" class="btn btn-danger w-100" data-mm-manual-remove
-                                aria-label="<?php echo $this->escape(Text::_('JREMOVE')); ?>">×</button>
+                        <label class="form-label d-block" aria-hidden="true">&nbsp;</label>
+                        <button type="button" class="btn btn-outline-danger w-100" data-mm-manual-remove
+                                title="<?php echo $this->escape(Text::_('JREMOVE')); ?>"
+                                aria-label="<?php echo $this->escape(Text::_('JREMOVE')); ?>"><span class="icon-trash" aria-hidden="true"></span></button>
                     </div>
                 </div>
             </div>
@@ -142,9 +144,7 @@ $firstPayment=array_key_first($this->paymentMethods);
             <?php endforeach; ?>
         </fieldset>
         <?php echo HTMLHelper::_('form.token'); ?>
-        <button class="btn btn-primary" type="submit"><?php echo Text::_('COM_MINIMARKET_MANUAL_ORDER_SAVE'); ?></button>
-        <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=orders',false)); ?>">
-            <?php echo Text::_('JCANCEL'); ?></a>
+
     </form>
     <?php endif; ?>
 </section>

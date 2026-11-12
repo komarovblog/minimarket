@@ -51,6 +51,13 @@ final class HtmlView extends BaseHtmlView
         $this->feeds=array_slice($filtered,$this->offset,$this->pageSize);
         ToolbarHelper::title(Text::_('COM_MINIMARKET_FEEDS_TITLE'),'share-alt');
         if($this->canCreate)ToolbarHelper::addNew('feed.add');
+        if($user->authorise('core.edit.state','com_minimarket')){
+            ToolbarHelper::custom('feed.bulkPublish','publish','',Text::_('COM_MINIMARKET_LIST_PUBLISH'),true);
+            ToolbarHelper::custom('feed.bulkUnpublish','unpublish','',Text::_('COM_MINIMARKET_LIST_UNPUBLISH'),true);
+        }
+        if($user->authorise('core.delete','com_minimarket')){
+            ToolbarHelper::deleteList(Text::_('COM_MINIMARKET_FEED_CONFIRM_DELETE'),'feed.bulkDelete');
+        }
         if($user->authorise('core.options','com_minimarket')||$user->authorise('core.admin','com_minimarket'))
             ToolbarHelper::preferences('com_minimarket');
         parent::display($tpl);

@@ -44,10 +44,10 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
   <input type="hidden" name="scope" value="delivery">
   <input type="hidden" name="method" value="<?php echo $esc($this->method); ?>">
   <?php echo HTMLHelper::_('form.token'); ?>
-  <div class="d-flex gap-2 flex-wrap mb-3">
+  <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
    <button class="btn btn-success" name="save_close" value="0" type="submit"<?php echo $this->canEdit?'':' disabled'; ?>><?php echo Text::_('JSAVE'); ?></button>
    <button class="btn btn-success" name="save_close" value="1" type="submit"<?php echo $this->canEdit?'':' disabled'; ?>><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
-   <a class="btn btn-danger" href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliverymethods',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+   <a class="btn btn-outline-secondary" href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliverymethods',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
   </div>
   <div class="card card-body mm-admin-panel">
    <h2 class="h5"><?php echo Text::_($this->method==='pickup'?'COM_MINIMARKET_ORDER_DELIVERY_PICKUP':'COM_MINIMARKET_ORDER_DELIVERY_COURIER'); ?></h2>

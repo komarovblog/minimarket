@@ -32,6 +32,7 @@ $href='index.php?option=com_minimarket&view=deliveryzones&'.http_build_query([
  <div class="table-responsive mm-native-list-viewport">
   <table class="table table-striped mm-admin-list" id="mm-deliveryzones-list">
    <thead><tr>
+    <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
     <th>ID</th><th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
     <th><?php echo Text::_('COM_MINIMARKET_ZONE_CITIES'); ?></th>
     <th><?php echo Text::_('COM_MINIMARKET_ZONE_RATE_MODE'); ?></th>
@@ -39,8 +40,9 @@ $href='index.php?option=com_minimarket&view=deliveryzones&'.http_build_query([
     <th><?php echo Text::_('COM_MINIMARKET_ZONE_FREE_FROM'); ?></th>
     <th><?php echo Text::_('JSTATUS'); ?></th>
    </tr></thead><tbody>
-   <?php foreach($this->zones as $z): ?>
+   <?php foreach($this->zones as $i=>$z): ?>
     <tr>
+     <td class="text-center"><?php echo HTMLHelper::_('grid.id',$i,(int)$z->id); ?></td>
      <td><?php echo (int)$z->id; ?></td>
      <td><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveryzone&id='.(int)$z->id,false)); ?>"><?php echo $this->escape($z->title); ?></a></td>
      <td><?php echo $this->escape(mb_substr(str_replace("\n",', ',(string)$z->cities),0,180)); ?></td>

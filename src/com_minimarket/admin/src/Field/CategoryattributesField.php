@@ -55,7 +55,7 @@ final class CategoryattributesField extends FormField
             htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         $html = '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_CATATTR_HELP')) . '</p>'
-            . '<table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state">'
+            . '<div class="table-responsive mm-category-rules-viewport"><table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state">'
             . '<thead><tr><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_ATTRIBUTE'))
             . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
             . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST'))
@@ -101,17 +101,20 @@ final class CategoryattributesField extends FormField
             $flagName=$escape($this->name.'[v'.$id.']');
             $flagId=$escape($this->id.'_v'.$id);
             $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
-                . '<input type="checkbox" class="form-check-input" name="'.$flagName
-                . '" id="'.$flagId.'" data-mm-category-list-flag value="1"'.($listVisible?' checked':'').'>'
-                . '<label class="visually-hidden" for="'.$flagId.'">'
-                . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'</label>'
+                . '<select class="form-select form-select-sm" name="'.$flagName
+                . '" id="'.$flagId.'" data-mm-category-list-flag aria-label="'
+                . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'">'
+                . '<option value="1"'.($listVisible?' selected':'').'>'
+                . $escape(Text::_('COM_MINIMARKET_SHOW')).'</option>'
+                . '<option value="0"'.(!$listVisible?' selected':'').'>'
+                . $escape(Text::_('COM_MINIMARKET_HIDE')).'</option></select>'
                 . '</td><td class="mm-rules-state"><span class="'
                 . ($published ? 'text-success' : 'text-muted') . '">'
                 . $escape(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))
                 . '</span></td></tr>';
         }
 
-        $html .= '</tbody></table>';
+        $html .= '</tbody></table></div>';
         $html .= '<p class="text-muted">' . $escape(Text::_('COM_MINIMARKET_CATATTR_PARENT_CHANGE')) . '</p>';
 
         return $html;

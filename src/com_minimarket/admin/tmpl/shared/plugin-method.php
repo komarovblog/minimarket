@@ -34,6 +34,10 @@ $info=Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='.$pl
   <input type="hidden" name="scope" value="<?php echo $esc($mmPluginScope); ?>">
   <input type="hidden" name="plugin_id" value="<?php echo $pluginId; ?>">
   <?php echo HTMLHelper::_('form.token'); ?>
+  <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
+   <button class="btn btn-success" name="save_close" value="0" type="submit"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
+   <button class="btn btn-success" name="save_close" value="1" type="submit"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
+  </div>
   <?php if($canState): ?>
   <div class="mb-3">
    <label for="mm-plugin-enabled" class="form-label"><?php echo Text::_('JSTATUS'); ?></label>
@@ -51,10 +55,7 @@ $info=Route::_('index.php?option=com_plugins&task=plugin.edit&extension_id='.$pl
    </div>
   <?php endforeach; ?>
   <?php endif; ?>
-  <div class="d-flex flex-wrap gap-2">
-   <button class="btn btn-success" name="save_close" value="0" type="submit"><?php echo Text::_('JSAVE'); ?></button>
-   <button class="btn btn-success" name="save_close" value="1" type="submit"><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
-  </div>
+
  </form>
  <?php else: ?>
  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_NO_LOCAL_SETTINGS'); ?></p>

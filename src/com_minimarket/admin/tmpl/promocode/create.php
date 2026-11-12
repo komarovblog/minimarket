@@ -16,7 +16,7 @@ $targets=is_array($ids)?implode(', ',array_map('intval',$ids)):'';
  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
   <button type="submit" class="btn btn-success" name="save_close" value="0"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
   <button type="submit" class="btn btn-success" name="save_close" value="1"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
-  <a class="btn btn-danger" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=promocodes',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=promocodes',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
  </div>
  <input type="hidden" name="id" value="<?php echo (int)($p->id??0); ?>">
  <?php echo HTMLHelper::_('form.token'); ?>

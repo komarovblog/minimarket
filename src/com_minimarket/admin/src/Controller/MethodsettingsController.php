@@ -11,6 +11,41 @@ use MiniMarket\Component\Minimarket\Administrator\Service\MethodSettings;
 
 final class MethodsettingsController extends BaseController
 {
+    /** Native Joomla single-selection Edit action for a mixed settings/provider list.
+     * Methods are configuration, not deletable catalog entities; never invent bulk
+     * publish/delete operations over third-party plugin extension records. */
+    public function editSelected(): void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        if(!$app->getIdentity()->authorise('core.manage','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $post=$app->input->post;
+        $scope=$post->getCmd('scope','');
+        $allow=['delivery'=>['pickup','courier'],
+                'payment'=>['on_receipt','bank_transfer'],
+                'registration'=>['email']];
+        if(!isset($allow[$scope]))
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),400);
+        $selected=$post->get('cid',[],'array');
+        if(!is_array($selected)||count($selected)!==1)
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),400);
+        $method=(string)$selected[0];
+        if(!in_array($method,$allow[$scope],true)){
+            if(!preg_match('/^plugin_[1-9][0-9]*$/D',$method))
+                throw new \RuntimeException(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),400);
+            $pluginId=(int)substr($method,7);
+            $plugins=\MiniMarket\Component\Minimarket\Administrator\Service\InstalledMethodPlugins::list(
+                Factory::getContainer()->get(DatabaseInterface::class),$scope);
+            $found=false;
+            foreach($plugins as $plugin)if((int)$plugin->extension_id===$pluginId){$found=true;break;}
+            if(!$found)throw new \RuntimeException(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),404);
+        }
+        $view=$scope.'methods';
+        $this->setRedirect('index.php?option=com_minimarket&view='.$view.'&method='.$method);
+    }
+
     public function save(): void
     {
         $app=Factory::getApplication();

@@ -20,6 +20,7 @@ $viewName = (string) $mmSearch['view'];
          class="table table-striped mm-admin-list">
    <thead>
     <tr>
+     <th class="w-1 text-center"><?php echo HTMLHelper::_('grid.checkall'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_METHOD_NAME'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_METHOD_TYPE'); ?></th>
      <th><?php echo Text::_('JSTATUS'); ?></th>
@@ -27,8 +28,9 @@ $viewName = (string) $mmSearch['view'];
     </tr>
    </thead>
    <tbody>
-    <?php foreach ($this->methodRows as $row): ?>
+    <?php foreach ($this->methodRows as $i=>$row): ?>
     <tr>
+     <td class="text-center"><?php echo HTMLHelper::_('grid.id',$i,(string)$row['quick_id']); ?></td>
      <td data-label="<?php echo $esc(Text::_('COM_MINIMARKET_METHOD_NAME')); ?>">
       <?php if ($row['url'] !== ''): ?>
        <a href="<?php echo $esc($row['url']); ?>"><?php echo $esc($row['name']); ?></a>
@@ -64,6 +66,7 @@ $viewName = (string) $mmSearch['view'];
  <?php echo \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::pagination(
      $this->total, $this->offset, $this->pageSize
  ); ?>
+ <input type="hidden" name="scope" value="<?php echo $esc(str_replace('methods','',$viewName)); ?>">
  <input type="hidden" name="limitstart" value="<?php echo (int) $this->offset; ?>">
  <input type="hidden" name="boxchecked" value="0">
  <input type="hidden" name="task" value="">

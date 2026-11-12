@@ -11,7 +11,7 @@ $manifest=simplexml_load_file($root.'minimarket.xml');
 $check($manifest!==false && version_compare((string)$manifest->version,'0.6.3','>='),
     'component version 0.6.3');
 $module=simplexml_load_file(__DIR__.'/../src/mod_minimarket_toolbar/mod_minimarket_toolbar.xml');
-$check($module!==false && version_compare((string)$manifest->version,(string)$module->version,'>='),
+$check($module!==false && (string)$module->version==='1.0.0',
     'one-time module can remain older than component');
 $items=$manifest->administration->submenu->menu;
 $check(count($items)>0 && (string)$items[count($items)-1]==='COM_MINIMARKET_CONFIG_SETTINGS_MENU',

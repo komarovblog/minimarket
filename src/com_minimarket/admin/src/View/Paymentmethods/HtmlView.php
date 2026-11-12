@@ -70,6 +70,9 @@ final class HtmlView extends BaseHtmlView
             $this->offset=$list['offset'];
         }
         ToolbarHelper::title(Text::_('COM_MINIMARKET_PAYMENT_METHODS_TITLE'));
+        if($this->method===''){
+            ToolbarHelper::custom('methodsettings.editSelected','edit','',Text::_('JTOOLBAR_EDIT'),true);
+        }
         if($this->canEdit)ToolbarHelper::preferences('com_minimarket');
         parent::display($tpl);
     }

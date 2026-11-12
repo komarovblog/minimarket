@@ -13,7 +13,7 @@ $check=static function(bool $condition,string $name)use(&$n):void{
 $manifest=simplexml_load_file($root.'minimarket.xml');
 $check(version_compare((string)$manifest->version,'0.6.4','>='),'component version supports schema 0.6.4+');
 $module=simplexml_load_file(__DIR__.'/../src/mod_minimarket_toolbar/mod_minimarket_toolbar.xml');
-$check((string)$module->version==='0.6.3','one-time module remains at 0.6.3');
+$check((string)$module->version==='1.0.0','one-time module has independent version 1.0.0');
 $schema=file_get_contents($root.'admin/sql/install.mysql.sql');
 $migration=file_get_contents($root.'admin/sql/updates/mysql/0.6.4.sql');
 $form=simplexml_load_file($root.'admin/forms/category.xml');

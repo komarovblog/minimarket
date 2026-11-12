@@ -74,6 +74,9 @@ final class HtmlView extends BaseHtmlView
             $this->offset=$list['offset'];
         }
         ToolbarHelper::title(Text::_('COM_MINIMARKET_REGISTRATION_METHODS_TITLE'));
+        if($this->method===''){
+            ToolbarHelper::custom('methodsettings.editSelected','edit','',Text::_('JTOOLBAR_EDIT'),true);
+        }
         parent::display($tpl);
     }
 }

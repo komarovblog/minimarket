@@ -38,6 +38,10 @@ final class HtmlView extends BaseHtmlView
   $this->total=count($all);$this->zones=array_slice($all,$this->offset,$this->pageSize);
   ToolbarHelper::title(Text::_('COM_MINIMARKET_ZONES_TITLE'));
   if($u->authorise('core.create','com_minimarket'))ToolbarHelper::addNew('deliveryzones.add');
+  if($u->authorise('core.edit.state','com_minimarket')){
+   ToolbarHelper::custom('deliveryzones.publish','publish','',Text::_('COM_MINIMARKET_LIST_PUBLISH'),true);
+   ToolbarHelper::custom('deliveryzones.unpublish','unpublish','',Text::_('COM_MINIMARKET_LIST_UNPUBLISH'),true);
+  }
   parent::display($tpl);
  }
 }
