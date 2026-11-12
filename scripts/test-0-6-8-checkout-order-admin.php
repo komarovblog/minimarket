@@ -7,7 +7,7 @@ $check=static function(bool $ok,string $name)use(&$n):void{
     $n++;if(!$ok)throw new RuntimeException('MM068_UI_FAIL: '.$name);
 };
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$check((string)$manifest->version==='0.6.8','component version');
+$check(version_compare((string)$manifest->version,'0.6.8','>=' ),'component version');
 
 $config=simplexml_load_file($root.'admin/config.xml');
 $fields=$config->xpath('//fieldset[@name="checkout"]/field[@name="checkout_verification_method"]');
@@ -75,9 +75,8 @@ $check(str_contains($deliveryView,'hasPriorShipment') &&
 
 $order=file_get_contents($root.'admin/tmpl/order/default.php');
 $blocks=['COM_MINIMARKET_ORDER_INFO_BLOCK','COM_MINIMARKET_ORDER_STATUS_BLOCK',
-    'COM_MINIMARKET_ORDER_PAYMENT_BLOCK','COM_MINIMARKET_ORDER_DELIVERY_BLOCK',
-    'COM_MINIMARKET_ORDER_PRODUCTS_BLOCK','COM_MINIMARKET_RETURNS_TITLE',
-    'COM_MINIMARKET_ORDER_HISTORY_BLOCK'];
+    'COM_MINIMARKET_ORDER_PAYMENT_BLOCK','COM_MINIMARKET_ORDER_PRODUCTS_BLOCK',
+    'COM_MINIMARKET_ORDER_DELIVERY_BLOCK','COM_MINIMARKET_RETURNS_TITLE'];
 $pos=-1;
 foreach($blocks as $block){
     $new=strpos($order,$block);
@@ -92,12 +91,11 @@ $check(str_contains($order,"\$o->delivery_method==='pickup'") &&
     'pickup fulfillment lives in delivery block; courier uses shipment statuses');
 $check(substr_count($order,'view=delivery&layout=create&order_id=')>=2,
     'new delivery action available both in header and delivery block');
-$check(str_contains($order,'COM_MINIMARKET_ORDER_HISTORY_HELP') &&
-    str_contains($order,'<details class="mt-2">') &&
-    str_contains($order,'eventValue('),
-    'history is explained, collapsible and translates event values');
-$check(str_contains($orderView,'u.name AS actor_name'),
-    'audit view resolves actual employee name without rewriting history');
+$check(!str_contains($order,'COM_MINIMARKET_ORDER_HISTORY_BLOCK') &&
+    !str_contains($order,'eventValue('),
+    'history is retained in storage but hidden from order view');
+$check(!str_contains($orderView,'u.name AS actor_name'),
+    'unused audit query removed from order detail');
 foreach(['ru-RU','en-GB'] as $lang){
     $ini=parse_ini_file($root.'admin/language/'.$lang.'/com_minimarket.ini');
     foreach(['COM_MINIMARKET_CHECKOUT_VERIFICATION_METHOD_LABEL',
