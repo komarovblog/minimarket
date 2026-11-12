@@ -25,7 +25,7 @@ namespace MiniMarket\Regression55 {
   'each product has physical or digital fulfillment');
  $edit=file_get_contents($dir.'admin/tmpl/product/edit.php');
  $indexes=array_map(static fn($v)=>strpos($edit,$v),
-  ["'product_type','delivery_type','sku'","renderField('bundle_price_mode')",
+  ["'digital_delivery_mode','digital_delivery_note','sku'","renderField('bundle_price_mode')",
    "renderField('price')","renderField('old_price')",
    "renderField('bundle_discount_pct')"]);
  check(!in_array(false,$indexes,true) && $indexes===array_values($indexes)
