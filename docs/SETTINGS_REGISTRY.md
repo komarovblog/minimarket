@@ -6,9 +6,9 @@
 
 | Поле | Хранение | Потребители | Значение |
 |---|---|---|---|
-| \`order_manual_status_enabled\` | \`admin/config.xml\` → \`#__extensions.params\` компонента | \`OrderLifecycle::manualEnabled\` → \`OrderController::status\`, \`ListBulkActions::apply\`, \`Orders/HtmlView\`, \`Order/HtmlView\` → карточка заказа / массовая панель | 1 (default): допустимые ручные переходы; 0: только автоматический основной статус. Не блокирует внесение достоверных фактов оплаты/доставки. |
+| `order_manual_status_enabled` | `admin/config.xml` → `#__extensions.params` компонента | `OrderLifecycle::manualEnabled` → `OrderController::status`, `ListBulkActions::apply`, `Orders/HtmlView`, `Order/HtmlView` → карточка заказа / массовая панель | 1 (default): допустимые ручные переходы; 0: только автоматический основной статус. Не блокирует внесение достоверных фактов оплаты/доставки. |
 
-Автоматический путь: DeliveryController.create/update и массовые доставки → OrderLifecycle::refresh → orders.fulfillment_status/status → карточка / список, с аудитом OrderHistory. Оплата → OrderController.payment → refresh. Закрытие Return → ReturncaseController.status → refresh. Открытый Return останавливает завершение незавершённого заказа; терминальный completed не переоткрывается. CI: \`scripts/test-0-6-9-lifecycle.php\`; браузерная приёмка ещё не подтверждена. Внешние ЮKassa/СДЭК и безопасные резервы SKU не добавлены.
+Автоматический путь: DeliveryController.create/update и массовые доставки → OrderLifecycle::refresh → orders.fulfillment_status/status → карточка / список, с аудитом OrderHistory. Оплата → OrderController.payment → refresh. Закрытие Return → ReturncaseController.status → refresh. Открытый Return останавливает завершение незавершённого заказа; терминальный completed не переоткрывается. CI: `scripts/test-0-6-9-lifecycle.php`; CI 6/6 PASS [#43305465980](https://github.com/komarovblog/minimarket/actions/runs/43305465980), браузерная приёмка ещё не подтверждена. Внешние ЮKassa/СДЭК и безопасные резервы SKU не добавлены.
 
 ## Настройки 0.6.4 — сквозная проверка
 
