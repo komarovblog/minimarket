@@ -1,0 +1,1 @@
+-- MiniMarket 0.6.9: no DDL changes; reuse order, shipment, return and audit tables.
