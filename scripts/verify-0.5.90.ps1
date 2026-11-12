@@ -25,7 +25,11 @@ Assert ($display.Contains("useScript('multiselect')")) 'Joomla multiselect web a
 Assert (-not $display.Contains("'com_minimarket.admin-columns'")) 'custom columns loaded'
 Assert (-not $display.Contains("'com_minimarket.admin-list-tools'")) 'custom search loaded'
 Assert ($display.Contains('NativeListTools::importRequest')) 'native filter POST mapping'
-Assert (-not (Test-Path -LiteralPath (Join-Path $component 'media\js\admin-columns.js'))) 'legacy columns source'
+# Since 0.6.7 only operational lists have a scoped per-table column manager.
+# No global Joomla table-column replacement or legacy picker is allowed.
+$columnScript=Source 'media\js\admin-columns.js'
+Assert ($columnScript.Contains('[data-mm-columns-for]')) 'operational columns remain scoped to one table'
+Assert (-not $columnScript.Contains('.mm-columns-picker')) 'legacy global column picker cannot return'
 Assert (-not (Test-Path -LiteralPath (Join-Path $component 'media\js\admin-list-tools.js'))) 'legacy search source'
 
 $helper=Source 'admin\src\Service\NativeListTools.php'
