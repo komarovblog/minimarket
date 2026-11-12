@@ -45,6 +45,11 @@ foreach(glob($root.'admin/tmpl/*/*.php') ?: [] as $path) {
             && (basename(dirname($path))!=='shared'
                 || basename($path)==='plugin-method.php')
             && str_contains($source,'option=com_plugins&task=plugin.edit'))continue;
+        // User edit links on order screens belong to Joomla com_users.
+        if($id==='user.edit'
+            && basename(dirname($path))==='order'
+            && in_array(basename($path),['create.php','default.php'],true)
+            && str_contains($source,'option=com_users&task=user.edit'))continue;
         if(!isset($controllers[$name])) $mismatches[]='No controller for '.$id;
         elseif(!isset($controllers[$name][$method])&&!isset($inherit[$method])
             && !isset($siteControllers[$name][$method]))
