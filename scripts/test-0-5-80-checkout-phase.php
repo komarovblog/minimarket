@@ -10,8 +10,9 @@ $c=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php')
 $s=(string)file_get_contents($root.'site/src/Service/OrderStorage.php');
 $t=(string)file_get_contents($root.'site/tmpl/checkout/default.php');
 $v=(string)file_get_contents($root.'site/src/View/Ordercomplete/HtmlView.php');
-$a(str_contains($c,'COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED') && str_contains($c,'$hasDigital'),
-   'guest requests remain possible for physical orders; digital orders require login');
+$a(str_contains($c,'CheckoutSettings::requiresAccount') && str_contains($c,'$hasDigital')
+   && str_contains($c,'CheckoutVerification::assertValid'),
+   'guest and verified checkout are separate; recipient confirmation is enforced');
 $a(str_contains($c,"Session::checkToken('post')") && str_contains($c,'hash_equals($expected,$provided)') && str_contains($c,'CartCatalog($db)'),'server validation preserved');
 $a(str_contains($s,'$userId<0') && !str_contains($s,'$userId<1'),'owner 0 supported for interim orders');
 $a(!str_contains($t,'!$this->authenticated') && str_contains($t,'name="phone"') && str_contains($t,"HTMLHelper::_('form.token')"),'guest form enabled');

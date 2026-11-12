@@ -21,10 +21,10 @@ $reject=function(callable $callback,string $reason)use($ok):void{
 };
 $default=new Params81();
 $ok(CheckoutSettings::mode($default)==='guest','guest is the default');
-$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'sms']))==='sms','SMS mode is explicit');
-$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'email']))==='email',
-    'email mode never silently becomes guest');
-$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'invalid']))==='sms',
+$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'sms']))==='guests','legacy SMS mode maps to signed-in flow');
+$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'email']))==='guests',
+    'legacy email mode never silently becomes guest');
+$ok(CheckoutSettings::mode(new Params81(['checkout_auth_mode'=>'invalid']))==='guests',
     'unknown login mode fails closed');
 $policy=CheckoutSettings::fields($default);
 $ok($policy['name']==='required' && $policy['email']==='optional','default contact field policy');
@@ -95,11 +95,11 @@ $ok(str_contains($methods,'delivery_rate_source')
  && !str_contains($config,'<fieldset name="payment_methods"'),
  'delivery/payment settings live in dedicated method editors');
 $controller=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
-$ok(str_contains($controller,"in_array(CheckoutSettings::mode(\$params),['email','sms'],true)")
-    && str_contains($controller,"(int)\$app->getIdentity()->id<1"),
- 'unavailable SMS and email block guests only');
+$ok(str_contains($controller,'CheckoutSettings::requiresAccount')
+    && str_contains($controller,'CheckoutSettings::requiresPurchaseCode'),
+ 'guest mode and every-order OTP are separate server policies');
 $ok(str_contains($controller,'CheckoutDelivery::quote')
- && str_contains($controller,'CheckoutSettings::mode')
+ && str_contains($controller,'CheckoutSettings::requiresAccount')
  && str_contains($controller,'CheckoutSettings::fields'),'server checkout wiring');
 $view=(string)file_get_contents($root.'site/tmpl/checkout/default.php');
 $ok(str_contains($view,'name="delivery_method"')
