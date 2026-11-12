@@ -56,3 +56,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimar
 ```
 
 На рабочем столе: `com_minimarket-0.6.5.zip` и необязательный накопительный `minimarket_mysql84_nnop3_update_0_6_5.sql`. SQL не требуется для обновления меню. Установленный `mod_minimarket_toolbar` не удалять и не переустанавливать.
+
+## Итог автоматических проверок
+
+**6/6 PASS** — [GitHub Actions #43256790087](https://github.com/komarovblog/minimarket/actions/runs/43256790087), проверяемый SHA `38702535e14a6a5de064145f4b35dc544a18e936`. Отдельный PHP-тест подтверждает 15 быстрых пунктов создания и metadata для Корзины, тест маршрутизатора — оба варианта Cart URL без изменений Shop canonical. Windows ZIP, PHP 8.4/8.5, MySQL 8.4 fresh/upgrade/demo успешно завершились. **Ручная проверка Joomla остаётся обязательной.**
