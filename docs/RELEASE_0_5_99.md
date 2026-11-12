@@ -1,6 +1,6 @@
 # MiniMarket 0.5.99 — единые настройки, изображения и цифровые товары
 
-**Разработка:** `development`, база 0.5.98. Обновление схемы: `admin/sql/updates/mysql/0.5.99.sql` (только ADD COLUMN/CREATE TABLE, без потери данных). Joomla 6, MySQL 8.0/8.4, PHP 8.4/8.5. ZIP компонента и отдельного toolbar как прежде. Браузерная приёмка на локальной Joomla должна быть отдельной.
+**Разработка:** `development`, база 0.5.98. **CI: 6/6 PASS, GitHub Actions #43189149240** ([проверки и установочный ZIP](https://github.com/komarovblog/minimarket/actions/runs/43189149240)). Отдельный MySQL 8.4 прогон новой миграции: `MM99_SCHEMA_MYSQL84_PASS: 6 checks`. Обновление схемы: `admin/sql/updates/mysql/0.5.99.sql` (только ADD COLUMN/CREATE TABLE, без потери данных). Joomla 6, MySQL 8.0/8.4, PHP 8.4/8.5. ZIP компонента и отдельного toolbar как прежде. Браузерная приёмка на локальной Joomla должна быть отдельной.
 
 ## Реализовано
 
