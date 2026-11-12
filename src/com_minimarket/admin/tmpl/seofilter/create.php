@@ -50,7 +50,10 @@ Factory::getApplication()->getDocument()->getWebAssetManager()
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
    <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'filters', Text::_('COM_MINIMARKET_SEO_TAB_FILTERS')); ?>
  <div class="card card-body mm-admin-panel">
-    <div class="alert alert-info"><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CHOICE_HELP'); ?></div>
+    <div class="alert alert-info">
+     <p><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CATEGORY_NOTICE'); ?></p>
+     <p class="mb-0"><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CHOICE_HELP'); ?></p>
+    </div>
      <div class="col-12">
       <?php
        $categorySelected=[];
@@ -136,7 +139,6 @@ Factory::getApplication()->getDocument()->getWebAssetManager()
       <?php endforeach; ?>
      </div>
     </fieldset>
-    <div class="alert alert-secondary"><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CATEGORY_NOTICE'); ?></div>
     <div class="alert alert-warning" id="mm-seo-rule-warning" role="alert" hidden></div>
     <input type="hidden" id="mm-seo-conditions" name="conditions_json" value="">
    </div>
