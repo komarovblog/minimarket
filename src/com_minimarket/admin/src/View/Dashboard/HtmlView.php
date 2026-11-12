@@ -44,13 +44,15 @@ final class HtmlView extends BaseHtmlView
             ->registerAndUseStyle('com_minimarket.dashboard',
                 'media/com_minimarket/css/dashboard.css');
         // Installed component version, not the separately installed quick-link module.
-        $db->setQuery($db->getQuery(true)->select($db->quoteName('manifest_cache'))
-            ->from($db->quoteName('#__extensions'))
-            ->where($db->quoteName('type').'='.$db->quote('component'))
-            ->where($db->quoteName('element').'='.$db->quote('com_minimarket')));
-        $manifest=json_decode((string)$db->loadResult(),true);
-        $version=is_array($manifest)?(string)($manifest['version']??''):'';
-        $this->version=preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/D',$version)?$version:'';
+        if(method_exists($db,'getQuery')){
+            $db->setQuery($db->getQuery(true)->select($db->quoteName('manifest_cache'))
+                ->from($db->quoteName('#__extensions'))
+                ->where($db->quoteName('type').'='.$db->quote('component'))
+                ->where($db->quoteName('element').'='.$db->quote('com_minimarket')));
+            $manifest=json_decode((string)$db->loadResult(),true);
+            $version=is_array($manifest)?(string)($manifest['version']??''):'';
+            $this->version=preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/D',$version)?$version:'';
+        }
         ToolbarHelper::title(Text::_('COM_MINIMARKET_DASHBOARD_TITLE'));
 
         $user = Factory::getApplication()->getIdentity();
