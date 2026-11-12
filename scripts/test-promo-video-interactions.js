@@ -42,9 +42,9 @@ function setup(reduced=false){
   return {root,player,expand,close,panel,document};
 }
 let a=setup();
-test(a.player.plays===1 && a.player.muted===true,'muted video autoplays on page');
+test(a.player.plays===0 && a.player.paused===true,'promo never autoplays on page');
 a.player.emit('click');
-test(a.panel.hidden===false && a.root.classList.contains('is-expanded'),
+test(a.player.plays===1 && a.player.muted===true && a.panel.hidden===false && a.root.classList.contains('is-expanded'),
  'clicking video expands floating promo, not only the separate button');
 test(a.player.getAttribute('aria-expanded')==='true'
  && a.expand.getAttribute('aria-expanded')==='true','both controls update accessibility status');
@@ -56,16 +56,16 @@ test(prevented===2 && a.panel.hidden===false,'Enter expands promo for keyboard u
 a.expand.emit('click');
 test(a.panel.hidden===true,'explicit expand button still works');
 a.document.hidden=true;a.document.emit('visibilitychange');
-test(a.player.paused===true,'tab hiding pauses autoplay');
+test(a.player.paused===true,'tab hiding pauses preview');
 a.document.hidden=false;a.document.emit('visibilitychange');
-test(a.player.plays===2,'returning to visible tab resumes muted playback');
+test(a.player.plays===2,'returning to visible tab never auto-resumes playback');
 a.close.emit('click');
 test(a.root.hidden===true && a.player.paused===true,'close hides and stops promo');
 a.document.emit('visibilitychange');
 test(a.player.plays===2,'closed promo never restarts playback');
 const b=setup(true);
-test(b.player.plays===0 && b.player.removed.includes('autoplay'),
- 'prefers-reduced-motion disables autoplay entirely');
+test(b.player.plays===0 && b.player.removed.includes('autoplay') && b.player.removed.includes('loop'),
+ 'all users get no autoplay or loop');
 b.player.emit('click');
 test(b.panel.hidden===false,'reduced-motion user can still expand explicitly');
 const template=fs.readFileSync(path.join(__dirname,'../src/com_minimarket/site/tmpl/product/default.php'),'utf8');
@@ -74,6 +74,6 @@ test(template.includes('role="button" tabindex="0" aria-expanded="false"') &&
  'real markup exposes video surface to keyboard and screen readers');
 test(template.includes('href="#mm-cart-add-form"') &&
  template.includes('data-mm-cart-form') &&
- template.includes('if ($isPhysical) :'),
+ template.includes('if ($canOrder) :'),
  'promo buy links to the real physical SKU cart form, not a fake checkout');
 console.log('PROMO_VIDEO_DOM_OK: '+checks+' checks');
