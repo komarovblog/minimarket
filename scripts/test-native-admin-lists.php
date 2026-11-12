@@ -39,8 +39,8 @@ $tree=file_get_contents($root.'tmpl/categories/default.php');
 ok(str_contains($tree,'mm-category-tree') && !str_contains($tree,'mm-tree-toggle')
     && !str_contains($tree,'data-mm-depth') && str_contains($tree,'$depth > 0'),
     'native category table keeps visible hierarchy without collapsing controls');
-ok(str_contains($tree,"COM_MINIMARKET_CATEGORY_COUNT_BRANCH"),
-    'category subtree counts retained');
+ok(!str_contains($tree,"COM_MINIMARKET_CATEGORY_COUNT_BRANCH"),
+    'obsolete category subtree count removed from presentation only');
 // Regression for 0.5.38: no global fixed-table layout is allowed to squeeze
 // PublishedButton columns or split a heading into one-character lines.
 $css=file_get_contents(__DIR__.'/../src/com_minimarket/media/css/admin-ui.css');
@@ -60,7 +60,7 @@ ok(str_contains($css,'#adminForm .mm-rules-table') &&
    str_contains($css,'table-layout: fixed;'),
    'fixed table layout remains scoped to rule editors only');
 foreach ([
- 'products'=>12, 'bundles'=>12, 'groups'=>5, 'bundlegroups'=>5, 'categories'=>8, 'attributes'=>7,
+ 'products'=>12, 'bundles'=>12, 'groups'=>5, 'bundlegroups'=>5, 'categories'=>7, 'attributes'=>7,
  'brands'=>6, 'collections'=>6,
  'values'=>7, 'groups'=>5, 'orderoptions'=>6,
 ] as $entity=>$cells) {
