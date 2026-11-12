@@ -51,7 +51,7 @@ foreach(['category_products_per_page','category_navigation_mode','category_load_
 $auth=$cfg->xpath('//field[@name="checkout_auth_mode"]/option');
 $values=array_map(static fn($x)=>(string)$x['value'],$auth);
 sort($values);
-$ok($values===['email','guest'],'only usable guest or Joomla email registration modes');
+$ok($values===['guest','guests','all'],'three distinct purchase verification modes');
 $ok(count($cfg->xpath('//fieldset[@name="checkout"]/field[@name="checkout_verification_method"]'))===1,
     'email verification selected under checkout');
 $dash=(string)file_get_contents($root.'admin/tmpl/dashboard/default.php');
