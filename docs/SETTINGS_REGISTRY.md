@@ -2,6 +2,19 @@
 
 Обновлён 12 ноября 2026 по **фактическим XML исходникам** ветки `development`. Это перечисление полей конфигурации/форм. **Наличие XML-поля не означает рабочую бизнес-логику**: статусы ниже разделяют реально подключённые настройки и будущие связи.
 
+## Настройки 0.6.4 — сквозная проверка
+
+| Параметры | Владелец / хранилище | Читает и исполняет | Значение / наследование | Статус |
+|---|---|---|---|---|
+| `subcategory_cards_xs/sm/md/lg/xl/xxl` | `admin/config.xml`, `com_minimarket` component params | `Site/Service/CategoryDisplayOptions::resolve` → `subcategoryGridClasses` → `site/tmpl/category/default.php` | 1–6 колонок, defaults 1/1/2/3/4/4 | CI PASS; Joomla browser pending |
+| `subcategory_cards_*` в категории | `admin/forms/category.xml`; `#__minimarket_categories` + upgrade `0.6.4.sql` | тот же `CategoryDisplayOptions` → Bootstrap `row-cols-*` | `-1` = глобальная настройка; отдельно от режима `product_layout` | CI PASS; Joomla browser pending |
+| `orderoption.filter_mode` | `admin/forms/orderoption.xml`; `#__minimarket_order_options` + upgrade | `OrderoptionTable::check` → `FacetedCatalog::build` → `site/tmpl/category/filters.php` | `none/dropdown/checkboxes`, default `checkboxes` | CI PASS; Joomla browser pending |
+| `orderoption.filter_multiple` | там же | `FacetedCatalog`, `FacetedCatalog::selection`, публичный filter input | 0/1 (одиночный / множественный), default 1 | CI PASS; Joomla browser pending |
+| `orderoption.filter_search` | там же | `FacetedCatalog`, витрина и фильтр поиска значений | Show/Hide, default 0 | CI PASS; Joomla browser pending |
+| `attribute.filter_multiple/filter_search` | `admin/forms/attribute.xml`, прежние колонки `#__minimarket_attributes` | `AttributeSettings`, `FacetedCatalog`, публичный facet | Show/Hide с native select вместо radio; схема без изменений | CI PASS; Joomla browser pending |
+
+Новые редакторы значений используют только UI-обёртку `compact-values.js` вокруг имеющихся Joomla Subform: не изменяют схему или ID значений. Общий reference picker — `admin/tmpl/shared/reference-picker.php`, `media/js/admin-reference-picker.js`; после выбора одиночной сущности «Сменить», при переданном адресе Edit. Отдельный `mod_minimarket_toolbar` фиксирован на 0.6.3 и больше не выпускается при обновлении компонента. См. [RELEASE_0_6_4.md](RELEASE_0_6_4.md), [Actions #43244843772](https://github.com/komarovblog/minimarket/actions/runs/43244843772).
+
 ## Правила для каждого параметра
 
 Документировать: владелец / функциональный этап; значение/default; UI/XML; путь хранения; рабочий потребитель (метод/шаблон); приоритет наследования; RU/EN; unit/integration/браузерный тест; статус «описано → реализовано → интегрировано → автоматические тесты PASS → браузерная приёмка PASS → принято».
