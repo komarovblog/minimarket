@@ -94,7 +94,6 @@ use Joomla\CMS\Component\ComponentHelper;
                         <?php endif; ?>
                     </div>
                 </div>
-                <?php if(!$isBundle): ?>
                 <div class="control-group" data-mm-digital-license
                      <?php echo ($this->item->delivery_type??'physical')==='digital'
                          &&($this->item->digital_delivery_mode??'file')==='license'?'':'hidden'; ?>>
