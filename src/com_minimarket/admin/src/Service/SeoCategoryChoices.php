@@ -29,21 +29,39 @@ final class SeoCategoryChoices
             $ids=implode(',',array_map('intval',array_keys($allowAttrs)));
             $q=$db->getQuery(true)->select([
                 'a.id AS property_id','a.title AS property_title',
+                'a.input_type','a.filter_mode',
                 'v.id AS value_id','v.title AS value_title'
             ])->from($db->quoteName('#__minimarket_attributes','a'))
-              ->join('INNER',$db->quoteName('#__minimarket_attribute_values','v').' ON v.attribute_id=a.id')
+              ->join('LEFT',$db->quoteName('#__minimarket_attribute_values','v')
+                 .' ON v.attribute_id=a.id AND v.state=1')
               ->where('a.id IN ('.$ids.')')->where('a.state=1')
-              ->where('a.is_filterable=1')->where('v.state=1')
+              ->where('a.is_filterable=1')->where("a.filter_mode<>'none'")
               ->order('a.title ASC,v.sort_order ASC,v.id ASC');
             $db->setQuery($q,0,5000);
             foreach((array)$db->loadAssocList() as $row){
                 $key='a'.(int)$row['property_id'];
+                $type=(string)($row['input_type']??'');
+                $filterMode=(string)($row['filter_mode']??'');
+                $kind=in_array($filterMode,['slider','range'],true)?'range'
+                    :($filterMode==='text'?'text':'choices');
                 if(!isset($groups[$key]))$groups[$key]=[
-                    'key'=>$key,'title'=>(string)$row['property_title'],'values'=>[]
+                    'key'=>$key,'title'=>(string)$row['property_title'],
+                    'kind'=>$kind,'values'=>[]
                 ];
-                $groups[$key]['values'][]=[
-                    'token'=>'v:'.(int)$row['value_id'],'title'=>(string)$row['value_title']
-                ];
+                if($kind==='choices' && $row['value_id']!==null
+                    && (int)$row['value_id']>0){
+                    $groups[$key]['values'][]=[
+                        'token'=>'v:'.(int)$row['value_id'],
+                        'title'=>(string)$row['value_title']
+                    ];
+                }elseif($kind==='choices' && $type==='boolean'){
+                    $groups[$key]['values']=[
+                        ['token'=>'b:1','title'=>'Yes'],
+                        ['token'=>'b:0','title'=>'No']
+                    ];
+                }
+                if($kind==='choices' && !$groups[$key]['values']
+                    && $type==='text')$groups[$key]['kind']='text-token';
             }
         }
         if($allowOpts){
@@ -59,7 +77,8 @@ final class SeoCategoryChoices
             foreach((array)$db->loadAssocList() as $row){
                 $key='s'.(int)$row['property_id'];
                 if(!isset($groups[$key]))$groups[$key]=[
-                    'key'=>$key,'title'=>(string)$row['property_title'],'values'=>[]
+                    'key'=>$key,'title'=>(string)$row['property_title'],
+                    'kind'=>'choices','values'=>[]
                 ];
                 $groups[$key]['values'][]=[
                     'token'=>'v:'.(int)$row['value_id'],'title'=>(string)$row['value_title']
@@ -86,4 +105,34 @@ final class SeoCategoryChoices
                     throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         }
     }
+    /** Server-authoritative validation of three-state facet rules for a category. */
+    public static function validateConditions(DatabaseInterface $db,int $categoryId,array $rules):void
+    {
+        $allowed=[];
+        foreach(self::groups($db,$categoryId) as $group)$allowed[$group['key']]=$group;
+        foreach($rules as $key=>$rule){
+            if(in_array($key,['price','stock','sku'],true))continue;
+            if(!isset($allowed[$key]))throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            if(($rule['mode']??'')==='any')continue;
+            if(($rule['mode']??'')!=='exact')
+                throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            $value=$rule['value']??null;
+            $kind=$allowed[$key]['kind']??'choices';
+            if($kind==='range'){
+                if(!is_array($value)||isset($value['text']))
+                    throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            }elseif($kind==='text'){
+                if(!is_array($value)||!isset($value['text']))
+                    throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            }elseif($kind==='text-token'){
+                if(!is_string($value)||!preg_match('/^t:[^<>\\x00-\\x1f]{1,100}$/D',$value))
+                    throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            }else{
+                $tokens=array_column($allowed[$key]['values'],'token');
+                if(!is_string($value)||!in_array($value,$tokens,true))
+                    throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            }
+        }
+    }
+
 }

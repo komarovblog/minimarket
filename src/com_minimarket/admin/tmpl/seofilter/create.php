@@ -8,6 +8,8 @@ $p=$this->page;
 $get=static fn(string $key,string $default='')=>$p===null?$default:(string)($p->$key??$default);
 $saved=$p?json_decode((string)$p->filters_json,true):[];
 if(!is_array($saved))$saved=[];
+$conditions=$p?json_decode((string)($p->conditions_json??''),true):[];
+if(!is_array($conditions))$conditions=[];
 $seoEditor=\Joomla\CMS\Editor\Editor::getInstance((string)Factory::getApplication()->get('editor','tinymce'));
 Factory::getApplication()->getDocument()->getWebAssetManager()
     ->registerAndUseScript('com_minimarket.seo-category-editor',
@@ -70,6 +72,13 @@ Factory::getApplication()->getDocument()->getWebAssetManager()
      </div>
     <div id="mm-seo-category-choices" data-mm-seo-choices-url="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=seofilter.choices&'.\Joomla\CMS\Session\Session::getFormToken().'=1',false)); ?>"
          data-mm-seo-saved="<?php echo $this->escape(json_encode($saved,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE)); ?>"
+         data-mm-seo-conditions="<?php echo $this->escape(json_encode($conditions,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE)); ?>"
+         data-mm-seo-unused="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_STATE_UNUSED')); ?>"
+         data-mm-seo-any="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_STATE_ANY')); ?>"
+         data-mm-seo-exact="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_STATE_EXACT')); ?>"
+         data-mm-seo-exact-value="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_EXACT_VALUE')); ?>"
+         data-mm-seo-legacy-warning="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_LEGACY_MULTIPLE')); ?>"
+         data-mm-seo-needs-exact="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEOFILTER_NEEDS_EXACT')); ?>"
          data-mm-seo-original-category="<?php echo (int)$get('category_id'); ?>"
          data-mm-seo-choose="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_PICK_CATEGORY_FIRST')); ?>"
          data-mm-seo-none="<?php echo $this->escape(Text::_('COM_MINIMARKET_SEO_NO_CATEGORY_CHOICES')); ?>"
@@ -80,26 +89,56 @@ Factory::getApplication()->getDocument()->getWebAssetManager()
     </div>
     <fieldset class="border rounded p-3 mb-3">
      <legend class="float-none w-auto px-2 fs-6"><?php echo Text::_('COM_MINIMARKET_SEO_SYSTEM_FILTERS'); ?></legend>
+     <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SEO_RULES_EXPLAIN'); ?></p>
      <div class="row g-3">
-      <div class="col-md-4"><label for="mm-seo-price-min" class="form-label"><?php echo Text::_('COM_MINIMARKET_SEO_MIN_PRICE'); ?></label>
-       <input id="mm-seo-price-min" data-mm-seo-range="price" data-mm-bound="min" class="form-control" type="number"
-              min="0" step="0.01" value="<?php echo $this->escape((string)($saved['price']['min']??'')); ?>"></div>
-      <div class="col-md-4"><label for="mm-seo-price-max" class="form-label"><?php echo Text::_('COM_MINIMARKET_SEO_MAX_PRICE'); ?></label>
-       <input id="mm-seo-price-max" data-mm-seo-range="price" data-mm-bound="max" class="form-control" type="number"
-              min="0" step="0.01" value="<?php echo $this->escape((string)($saved['price']['max']??'')); ?>"></div>
-      <div class="col-md-4"><label for="mm-seo-stock" class="form-label"><?php echo Text::_('COM_MINIMARKET_SEO_STOCK'); ?></label>
-       <select id="mm-seo-stock" class="form-select" data-mm-seo-stock>
-        <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
-        <option value="b:1"<?php echo in_array('b:1',(array)($saved['stock']??[]),true)?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_SEO_IN_STOCK'); ?></option>
-        <option value="b:0"<?php echo in_array('b:0',(array)($saved['stock']??[]),true)?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_SEO_OUT_OF_STOCK'); ?></option>
-       </select></div>
-      <div class="col-12"><label for="mm-seo-sku" class="form-label"><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></label>
-       <input id="mm-seo-sku" data-mm-seo-sku class="form-control" maxlength="100"
-              value="<?php echo $this->escape((string)($saved['sku']??'')); ?>"></div>
+      <?php foreach(['price','stock','sku'] as $systemKey):
+          $label=Text::_($systemKey==='price'?'COM_MINIMARKET_FILTER_PRICE':
+             ($systemKey==='stock'?'COM_MINIMARKET_SEO_STOCK':'COM_MINIMARKET_PRODUCT_SKU'));
+      ?>
+       <div class="col-12">
+        <label class="form-label" for="mm-seo-state-<?php echo $systemKey; ?>"><?php echo $label; ?></label>
+        <div class="row g-2 align-items-start">
+         <div class="col-12 col-md-5">
+          <select id="mm-seo-state-<?php echo $systemKey; ?>" class="form-select"
+                  data-mm-seo-state="<?php echo $systemKey; ?>">
+           <option value="unused"><?php echo Text::_('COM_MINIMARKET_SEO_STATE_UNUSED'); ?></option>
+           <option value="any"><?php echo Text::_('COM_MINIMARKET_SEO_STATE_ANY'); ?></option>
+           <option value="exact"><?php echo Text::_('COM_MINIMARKET_SEO_STATE_EXACT'); ?></option>
+          </select>
+         </div>
+         <div class="col-12 col-md-7" data-mm-seo-details="<?php echo $systemKey; ?>" hidden>
+          <?php if($systemKey==='price'): ?>
+           <div class="row g-2">
+            <div class="col-6">
+             <label class="form-label" for="mm-seo-price-min"><?php echo Text::_('COM_MINIMARKET_SEO_MIN_PRICE'); ?></label>
+             <input id="mm-seo-price-min" data-mm-seo-range="price" data-mm-bound="min"
+                    class="form-control" type="number" min="0" step="0.01">
+            </div>
+            <div class="col-6">
+             <label class="form-label" for="mm-seo-price-max"><?php echo Text::_('COM_MINIMARKET_SEO_MAX_PRICE'); ?></label>
+             <input id="mm-seo-price-max" data-mm-seo-range="price" data-mm-bound="max"
+                    class="form-control" type="number" min="0" step="0.01">
+            </div>
+           </div>
+          <?php elseif($systemKey==='stock'): ?>
+           <select class="form-select" data-mm-seo-choice="stock"
+                   aria-label="<?php echo $this->escape($label); ?>">
+            <option value="b:1"><?php echo Text::_('COM_MINIMARKET_SEO_IN_STOCK'); ?></option>
+            <option value="b:0"><?php echo Text::_('COM_MINIMARKET_SEO_OUT_OF_STOCK'); ?></option>
+           </select>
+          <?php else: ?>
+           <input class="form-control" data-mm-seo-text="sku" maxlength="100"
+                  aria-label="<?php echo $this->escape($label); ?>">
+          <?php endif; ?>
+         </div>
+        </div>
+       </div>
+      <?php endforeach; ?>
      </div>
     </fieldset>
     <div class="alert alert-secondary"><?php echo Text::_('COM_MINIMARKET_SEO_FILTER_CATEGORY_NOTICE'); ?></div>
-    <input type="hidden" id="mm-seo-query" name="filter_query" value="">
+    <div class="alert alert-warning" id="mm-seo-rule-warning" role="alert" hidden></div>
+    <input type="hidden" id="mm-seo-conditions" name="conditions_json" value="">
    </div>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
    <?php echo HTMLHelper::_('uitab.addTab', 'minimarket-seofilter', 'meta', Text::_('COM_MINIMARKET_SEO_TAB_META')); ?>

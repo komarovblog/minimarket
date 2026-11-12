@@ -11,7 +11,7 @@ final class SeoFilterData
     public static function normalize(array $input):array
     {
         foreach (['alias','title','heading','introtext','description',
-                  'meta_description','meta_robots','filter_query','name',
+                  'meta_description','meta_robots','filter_query','conditions_json','name',
                   'image','image_alt','og_title','og_description','og_image'] as $field) {
             if (!is_scalar($input[$field]??'')) throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         }
@@ -43,31 +43,46 @@ final class SeoFilterData
         if($image===null||$ogImage===null||mb_strlen($imageAlt)>255
             ||mb_strlen($ogTitle)>255||mb_strlen($ogDescription)>320)
             throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-        $query=trim((string)($input['filter_query']??''));
-        if(strlen($query)>4000)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-        if(str_contains($query,'?'))$query=explode('?',$query,2)[1];
-        parse_str($query,$parsed);
-        if(!is_array($parsed['mmf']??null) || !$parsed['mmf'] || count($parsed['mmf'])>12) {
-            throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+        $conditionsText=trim((string)($input['conditions_json']??''));
+        $conditions=[];
+        if($conditionsText!==''){
+            if(strlen($conditionsText)>12000)
+                throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            $decoded=json_decode($conditionsText,true,8);
+            if(!is_array($decoded)||json_last_error()!==JSON_ERROR_NONE)
+                throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            $conditions=SeoLandingRules::normalize($decoded);
+            $parsed=['mmf'=>SeoLandingRules::exactFilters($conditions)];
+        }else{
+            // Existing 0.6.1 pages remain valid without silently converting
+            // their potentially multi-valued condition sets.
+            $query=trim((string)($input['filter_query']??''));
+            if(strlen($query)>4000)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            if(str_contains($query,'?'))$query=explode('?',$query,2)[1];
+            parse_str($query,$parsed);
+            if(!is_array($parsed['mmf']??null) || !$parsed['mmf']
+                ||count($parsed['mmf'])>12)
+                throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            $flat=0;
+            $validate=function(mixed $value,int $depth=0) use (&$validate,&$flat):void {
+                if($depth>3)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+                if(is_array($value)) {
+                    if(count($value)>20)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+                    foreach($value as $v)$validate($v,$depth+1);
+                }elseif(is_string($value)){
+                    ++$flat;
+                    if(strlen($value)>120||preg_match('/[\\x00-\\x1f<>]/',$value))
+                        throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+                }else throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+            };
+            $validate($parsed['mmf']);
+            if($flat<1||$flat>40)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         }
-        $flat=0;
-        $validate=function(mixed $value,int $depth=0) use (&$validate,&$flat):void {
-            if($depth>3)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-            if(is_array($value)) {
-                if(count($value)>20)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-                foreach($value as $v)$validate($v,$depth+1);
-            }elseif(is_string($value)) {
-                ++$flat;
-                if(strlen($value)>120||preg_match('/[\x00-\x1f<>]/',$value))
-                    throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-            }else throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
-        };
-        $validate($parsed['mmf']);
-        if($flat<1||$flat>40)throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
         return ['category_id'=>$category,'alias'=>$alias,'name'=>$name,'title'=>$title,'heading'=>$heading,
             'introtext'=>$intro,'description'=>$description,'meta_description'=>$meta,
             'meta_robots'=>$robots,'image'=>$image,'image_alt'=>$imageAlt,
             'og_title'=>$ogTitle,'og_description'=>$ogDescription,'og_image'=>$ogImage,
-            'filters_json'=>json_encode($parsed['mmf'],JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE)];
+            'filters_json'=>json_encode($parsed['mmf'],JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE),
+            'conditions_json'=>json_encode($conditions,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE)];
     }
 }

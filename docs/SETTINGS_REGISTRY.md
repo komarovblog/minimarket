@@ -32,6 +32,19 @@
 **Не реализовано:** Sitemap XML c Joomla articles; SKU-row export/import v2; category→option→value combination builder; независимые типы системной фильтрации помимо существующих Цена/Артикул/Наличие; проверка по коду SMS/Email в самом checkout и живые провайдерские адаптеры. Эти задачи запрещено обозначать «готово» по одному UI/включенному флагу.
 
 
+## SEO-страницы — новая спецификация 0.6.2
+
+| Поле | Место → потребитель | Условия |
+|---|---|---|
+| `#__minimarket_seo_filters.category_id` | Категория в SEO-редакторе → SeoCategoryChoices, SEO View | **Одна** опубликованная категория. Только её опубликованные фильтруемые характеристики и доступные опции. |
+| `#__minimarket_seo_filters.conditions_json` | Редактор SEO → SeoLandingRules / SeoLandingResolver | Ключи `a<ID>`, `s<ID>`, `price`, `sku`, `stock`. Режим `unused` **не записывается**; `any` — фильтр обязательно использован, `exact` — ровно один выбор или диапазон. Не менее одного exact. |
+| `#__minimarket_seo_filters.filters_json` | SeoFilterData → Seofilter HtmlView / FacetedCatalog | Только exact для базового, чистого URL; выбранные значения wildcard могут передаваться временными параметрами `mmf`. |
+| Состояние публикации | Controller::save / state → SeoLandingResolver::assertUnambiguous | Публикуемые правила одинаковой специфичности не могут пересекаться; более конкретная страница имеет приоритет. |
+| Canonical и robots | Category/Seofilter view → SeoHelper | Чистый URL landing индексируем согласно настройкам. Вариации wildcard с параметрами `mmf` — `noindex,follow` и canonical чистого landing. |
+| Старые страницы `conditions_json IS NULL` | Site/Seofilter View | Сохраняют прежние URL и прямую фильтрацию, но не участвуют в автоматическом выборе SEO-страницы до ручного перевода. |
+
+[RELEASE_0_6_2.md](RELEASE_0_6_2.md) — правила и ограничения; 0.6.1 checkout и все другие настройки не изменяются.
+
 ## Актуальное уточнение 0.6.1 — имеет приоритет над ограничениями 0.6.0
 
 | Параметр | Где хранится → используется | Действие |

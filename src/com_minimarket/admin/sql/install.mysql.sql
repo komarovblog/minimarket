@@ -840,6 +840,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_seo_filters` (
     `og_image` VARCHAR(1024) NOT NULL DEFAULT '',
     `meta_robots` VARCHAR(32) NOT NULL DEFAULT 'index,follow',
     `filters_json` TEXT NOT NULL,
+    `conditions_json` TEXT NULL DEFAULT NULL,
     `state` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `created_at` DATETIME NOT NULL,
     PRIMARY KEY (`id`),

@@ -108,6 +108,14 @@
         signal:controller.signal
       });
       if (!response.ok) throw new Error('Request failed');
+      // A filter can select a canonical SEO landing. Never replace only
+      // product cards when Joomla's page, H1 or canonical needs to change.
+      const destination=new URL(response.url,location.href);
+      if(destination.origin===location.origin
+          &&destination.pathname!==location.pathname){
+        window.location.assign(destination.toString());
+        return;
+      }
       const html = new DOMParser().parseFromString(await response.text(),'text/html');
       const remote = html.querySelector('.com-minimarket-category [data-mm-ajax-content]');
       const current = root.querySelector('[data-mm-ajax-content]');

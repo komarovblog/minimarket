@@ -10,6 +10,9 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Site\Helper\SeoHelper;
+use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
+use MiniMarket\Component\Minimarket\Administrator\Service\SeoLandingRules;
+use MiniMarket\Component\Minimarket\Administrator\Service\SeoLandingResolver;
 use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 use MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions;
 use MiniMarket\Component\Minimarket\Site\Service\FacetedCatalog;
@@ -137,6 +140,42 @@ class HtmlView extends BaseHtmlView
                 unset($choice);
             }
             unset($facet);
+        }
+        // Match *normalized* current facets, not arbitrary GET parameters.
+        // Only a real category request is eligible: the landing view inherits
+        // this view and must never recursively redirect itself.
+        $app=Factory::getApplication();
+        if($app->input->getMethod()==='GET'
+            &&$app->input->getCmd('view','')==='category'
+            &&FacetedCatalog::active($this->facetSelection)){
+            $db=Factory::getContainer()->get(DatabaseInterface::class);
+            $landing=SeoLandingRules::pick(
+                SeoLandingResolver::candidates($db,$id),$this->facetSelection);
+            if($landing!==null){
+                $url=RouteHelper::seoFilter((int)$landing['id']);
+                $extra=[];
+                if(in_array('any',array_column($landing['rules'],'mode'),true)){
+                    $normalized=[];
+                    foreach($this->facetSelection as $fid=>$selection){
+                        if(isset($selection['values']))
+                            $normalized[$fid]=$selection['values'];
+                        elseif(isset($selection['text']))
+                            $normalized[$fid]=$selection['text'];
+                        else $normalized[$fid]=$selection;
+                    }
+                    $extra['mmf']=$normalized;
+                }
+                foreach(['mm_order','mm_layout'] as $opt){
+                    $requested=$app->input->getCmd($opt,'');
+                    if($requested!=='')$extra[$opt]=$requested;
+                }
+                $requestedPage=$app->input->getInt('mm_page',1);
+                if($requestedPage>1)$extra['mm_page']=$requestedPage;
+                if($extra)$url.=(str_contains($url,'?')?'&':'?')
+                    .http_build_query($extra,'','&',PHP_QUERY_RFC3986);
+                $app->redirect($url,302);
+                $app->close();
+            }
         }
         // Pagination is performed only AFTER matching all published products.
         // The browser receives just the requested slice; AJAX pages and sort
