@@ -24,3 +24,7 @@
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\release-to-desktop.ps1"
 ```
+
+## Итог автоматической приёмки
+
+[GitHub Actions #43244843772](https://github.com/komarovblog/minimarket/actions/runs/43244843772), исходный SHA `ba76ac6633b21f6cedec2905a784cd0fb0d0beb3`: **6/6 jobs SUCCESS**, PHP 8.4, PHP 8.5, Windows ZIP, MySQL fresh schema/upgrade и demo import. Исправлен тестовый сценарий чтения версии панели; обновлён контракт нативного списка категорий после удаления колонки «В ветке». Для одиночного выбора на витрине используется `radio` вместо `checkbox`. **Joomla browser acceptance ещё требуется** и не подменяется CI.
