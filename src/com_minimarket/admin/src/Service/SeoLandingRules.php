@@ -52,7 +52,7 @@ final class SeoLandingRules
                 if(array_keys($v)!==['text']||!is_string($v['text'])
                     ||trim($v['text'])===''||mb_strlen($v['text'])>100
                     ||preg_match('/[\\x00-\\x1f<>]/',$v['text']))
-                    throw new \\DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
+                    throw new \DomainException('COM_MINIMARKET_SEOFILTER_INVALID');
                 $v=['text'=>trim($v['text'])];
             }elseif($id==='stock'){
                 if(!in_array($v,['b:0','b:1'],true))
