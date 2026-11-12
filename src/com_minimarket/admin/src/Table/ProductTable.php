@@ -31,6 +31,17 @@ final class ProductTable extends Table
             $this->setError(Text::_('COM_MINIMARKET_DELIVERY_TYPE_INVALID'));
             return false;
         }
+        $this->digital_delivery_mode=(string)($this->digital_delivery_mode??'file');
+        if(!in_array($this->digital_delivery_mode,['file','license','cloud','manual'],true)){
+            $this->setError(Text::_('COM_MINIMARKET_DIGITAL_MODE_INVALID'));
+            return false;
+        }
+        $this->digital_delivery_note=trim(strip_tags((string)($this->digital_delivery_note??'')));
+        if(mb_strlen($this->digital_delivery_note)>2000
+            ||preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f]/u',$this->digital_delivery_note)){
+            $this->setError(Text::_('COM_MINIMARKET_DIGITAL_MODE_INVALID'));
+            return false;
+        }
         if (!in_array($this->product_type,['simple','bundle'],true)) {
             $this->setError(Text::_('COM_MINIMARKET_BUNDLE_TYPE_INVALID'));
             return false;

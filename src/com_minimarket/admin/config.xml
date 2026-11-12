@@ -241,6 +241,10 @@
     <!-- Checkout is deliberately separated from authentication integrations. -->
     <fieldset name="checkout" label="COM_MINIMARKET_CONFIG_CHECKOUT">
         <field name="checkout_buyer_note" type="note" class="alert alert-info" label="COM_MINIMARKET_CHECKOUT_BUYER_SECTION" description="COM_MINIMARKET_CHECKOUT_BUYER_NOTE"/>
+        <field name="checkout_step_buyer_enabled" type="list" default="1" filter="int"
+              label="COM_MINIMARKET_CHECKOUT_STEP_ENABLED" description="COM_MINIMARKET_CHECKOUT_BUYER_STEP_HELP">
+            <option value="1">JENABLED</option><option value="0">JDISABLED</option>
+        </field>
         <field name="checkout_show_login_button" type="list" label="COM_MINIMARKET_CHECKOUT_SHOW_LOGIN" default="1" filter="int">
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
@@ -249,11 +253,16 @@
 <field name="checkout_auth_mode" type="list" default="guest" filter="cmd"
                label="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH"
                description="COM_MINIMARKET_CONFIG_CHECKOUT_AUTH_DESC">
-            <option value="guest">COM_MINIMARKET_CHECKOUT_AUTH_GUEST</option>
-                <option value="email">COM_MINIMARKET_CHECKOUT_AUTH_EMAIL</option>
+            <option value="guest">COM_MINIMARKET_CHECKOUT_MODE_GUEST</option>
+            <option value="guests">COM_MINIMARKET_CHECKOUT_MODE_GUESTS</option>
+            <option value="all">COM_MINIMARKET_CHECKOUT_MODE_ALL</option>
         </field>
-        <!-- Managed by Registration Methods, not a second global dropdown. -->
+        <!-- Configured in Registration Methods, not duplicated here. -->
         <field name="checkout_verification_method" type="hidden" default="email" filter="cmd" />
+        <field name="checkout_auth_hint" type="note" class="alert alert-info"
+            label="COM_MINIMARKET_CHECKOUT_VERIFICATION_SECTION"
+            description="COM_MINIMARKET_CHECKOUT_VERIFICATION_SECTION_DESC"
+            showon="checkout_auth_mode:guests,all" />
         <field name="checkout_name_mode" type="list" default="required" filter="cmd"
                label="COM_MINIMARKET_CONFIG_FIELD_NAME" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
@@ -277,15 +286,27 @@
                label="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS" description="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS_DESC" />
         <field name="checkout_delivery_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION" description="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION_HELP" />
+        <field name="checkout_step_delivery_enabled" type="list" default="1" filter="int"
+              label="COM_MINIMARKET_CHECKOUT_STEP_ENABLED" description="COM_MINIMARKET_CHECKOUT_DELIVERY_STEP_HELP">
+            <option value="1">JENABLED</option><option value="0">JDISABLED</option>
+        </field>
         <field name="checkout_delivery_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
 
 <field name="checkout_payment_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION" description="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION_HELP" />
+        <field name="checkout_step_payment_enabled" type="list" default="1" filter="int"
+              label="COM_MINIMARKET_CHECKOUT_STEP_ENABLED" description="COM_MINIMARKET_CHECKOUT_PAYMENT_STEP_HELP">
+            <option value="1">JENABLED</option><option value="0">JDISABLED</option>
+        </field>
         <field name="checkout_payment_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
-        <field name="checkout_confirmation_note" type="note" class="alert alert-info"
-               label="COM_MINIMARKET_CHECKOUT_CONFIRMATION" description="COM_MINIMARKET_CHECKOUT_CONFIRMATION_HELP" />
-        <field name="checkout_confirmation_description" type="editor" filter="safehtml" buttons="true"
-               label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_digital_note" type="note" class="alert alert-info"
+             label="COM_MINIMARKET_CHECKOUT_DIGITAL_STEP" description="COM_MINIMARKET_CHECKOUT_DIGITAL_STEP_HELP" />
+        <field name="checkout_step_digital_enabled" type="list" default="1" filter="int"
+             label="COM_MINIMARKET_CHECKOUT_STEP_ENABLED">
+            <option value="1">JENABLED</option><option value="0">JDISABLED</option>
+        </field>
+        <field name="checkout_digital_description" type="editor" filter="safehtml"
+             buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
         <field name="checkout_require_terms" type="list" default="0" filter="int"
                label="COM_MINIMARKET_CHECKOUT_REQUIRE_TERMS">
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>

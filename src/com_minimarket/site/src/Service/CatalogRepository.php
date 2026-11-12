@@ -32,16 +32,23 @@ final class CatalogRepository
     /** A product can be sold only if its relevant SKU stock has units left. */
     private function availabilitySql(): string
     {
-        if (!$this->inventoryEnabled()) return "(p.delivery_type <> 'digital' OR p.digital_asset_key <> '')";
-        $variants = $this->db->quoteName('#__minimarket_product_variants');
-        return "( (p.delivery_type = 'digital' AND p.digital_asset_key <> '' AND p.digital_filename <> '') OR p.product_type = 'bundle' OR (p.product_type = 'simple' AND ("
-            . "(p.option_stock_mode = 0 AND p.stock > 0)"
-            . " OR (p.option_stock_mode <> 0 AND ("
-            . "EXISTS (SELECT 1 FROM ".$variants." AS mmv"
-            . " WHERE mmv.product_id=p.id AND mmv.state=1 AND mmv.stock>0)"
-            . " OR (p.stock>0 AND NOT EXISTS (SELECT 1 FROM ".$variants." AS mmv2"
-            . " WHERE mmv2.product_id=p.id))"
-            . ")))))";
+        $keys=$this->db->quoteName('#__minimarket_digital_keys');
+        $digital="(p.delivery_type='digital' AND (".
+            "(p.digital_delivery_mode='file' AND p.digital_asset_key<>'' AND p.digital_filename<>'')".
+            " OR (p.digital_delivery_mode IN ('manual','cloud'))".
+            " OR (p.digital_delivery_mode='license' AND EXISTS ".
+            "(SELECT 1 FROM ".$keys." AS mmk WHERE mmk.product_id=p.id AND mmk.order_item_id IS NULL))".
+            "))";
+        if(!$this->inventoryEnabled())
+            return "(p.delivery_type <> 'digital' OR ".$digital.")";
+        $variants=$this->db->quoteName('#__minimarket_product_variants');
+        return "(".$digital." OR p.product_type='bundle' OR (".
+            "p.delivery_type<>'digital' AND p.product_type='simple' AND (".
+            "(p.option_stock_mode=0 AND p.stock>0) OR ".
+            "(p.option_stock_mode<>0 AND (".
+            "EXISTS (SELECT 1 FROM ".$variants." AS mmv WHERE mmv.product_id=p.id AND mmv.state=1 AND mmv.stock>0)".
+            " OR (p.stock>0 AND NOT EXISTS (SELECT 1 FROM ".$variants." AS mmv2 WHERE mmv2.product_id=p.id))".
+            ")))))";
     }
 
     /** Physical bundle stock is derived from its real components, not p.stock. */
@@ -142,7 +149,8 @@ final class CatalogRepository
             'bundle_price_mode','bundle_discount_pct','badge_new','badge_new_days',
             'badge_new_since','badge_popular','badge_popular_days',
             'badge_popular_since','stock','product_type','delivery_type',
-            'digital_asset_key','digital_filename','option_stock_mode',
+            'digital_asset_key','digital_filename','digital_delivery_mode',
+            'digital_delivery_note','option_stock_mode',
             'category_id','image','image_alt'];
         $q=$this->db->getQuery(true)
             ->select(array_map(fn($field)=>$this->db->quoteName('p.'.$field),$fields))

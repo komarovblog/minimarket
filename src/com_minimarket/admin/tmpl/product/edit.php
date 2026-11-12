@@ -47,7 +47,8 @@ use Joomla\CMS\Component\ComponentHelper;
                 <?php
                 // Entity kind comes from the sidebar editor, not a dropdown.
                 // The bundle price method appears directly after SKU.
-                foreach (['id','title','alias','category_id','product_type','delivery_type','sku'] as $field)
+                foreach (['id','title','alias','category_id','product_type','delivery_type',
+                    'digital_delivery_mode','digital_delivery_note','sku'] as $field)
                     echo $this->form->renderField($field);
                 if ($isBundle) {
                     echo $this->form->renderField('bundle_price_mode');
@@ -77,7 +78,9 @@ use Joomla\CMS\Component\ComponentHelper;
                 }
                 if (!$isBundle) :
                 ?>
-                <div class="control-group" data-mm-digital-upload>
+                <div class="control-group" data-mm-digital-upload
+                     <?php echo ($this->item->delivery_type??'physical')==='digital'
+                         &&($this->item->digital_delivery_mode??'file')==='file'?'':'hidden'; ?>>
                     <div class="control-label">
                         <label for="mm-digital-upload"><?php echo Text::_('COM_MINIMARKET_DIGITAL_UPLOAD'); ?></label>
                     </div>
@@ -89,6 +92,20 @@ use Joomla\CMS\Component\ComponentHelper;
                             <div class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_CURRENT_FILE'); ?>:
                                 <?php echo $this->escape((string)$this->item->digital_filename); ?></div>
                         <?php endif; ?>
+                    </div>
+                </div>
+                <?php if(!$isBundle): ?>
+                <div class="control-group" data-mm-digital-license
+                     <?php echo ($this->item->delivery_type??'physical')==='digital'
+                         &&($this->item->digital_delivery_mode??'file')==='license'?'':'hidden'; ?>>
+                    <div class="control-label">
+                        <label for="mm-digital-license-import"><?php echo Text::_('COM_MINIMARKET_DIGITAL_LICENSE_IMPORT'); ?></label>
+                    </div>
+                    <div class="controls">
+                        <textarea id="mm-digital-license-import" class="form-control" rows="4"
+                                  name="digital_keys_import" autocomplete="off"
+                                  placeholder="<?php echo $this->escape(Text::_('COM_MINIMARKET_DIGITAL_LICENSE_PLACEHOLDER')); ?>"></textarea>
+                        <div class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_LICENSE_IMPORT_HELP'); ?></div>
                     </div>
                 </div>
                 <?php endif;

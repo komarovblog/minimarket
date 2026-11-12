@@ -13,6 +13,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CartCatalog;
 use MiniMarket\Component\Minimarket\Site\Service\CartState;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutData;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutSettings;
+use MiniMarket\Component\Minimarket\Site\Service\CheckoutVerification;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutExtraFields;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery;
 use MiniMarket\Component\Minimarket\Site\Service\OrderStorage;
@@ -78,6 +79,60 @@ final class CheckoutController extends BaseController
         $app->close();
     }
 
+    /** CSRF/session-guarded request. SMTP never runs on ordinary checkout GET. */
+    public function sendCode():void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        $params=ComponentHelper::getParams('com_minimarket');
+        $session=$app->getSession();
+        $key=(string)$session->get('com_minimarket.checkout.key','');
+        $posted=$app->input->post->get('checkout_key','','string');
+        $response=['success'=>false,'message'=>Text::_('COM_MINIMARKET_OTP_INVALID')];
+        try{
+            if(!preg_match('/^[a-f0-9]{32}$/D',$key)||!hash_equals($key,$posted))
+                throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXPIRED');
+            if($app->input->post->getString('website','')!=='')
+                throw new \DomainException('COM_MINIMARKET_OTP_INVALID');
+            CheckoutSettings::method($params);
+            $scope=$app->input->post->getCmd('verification_scope','');
+            $user=$app->getIdentity();
+            $email='';
+            if($scope==='purchase'){
+                if(!CheckoutSettings::requiresPurchaseCode($params)
+                   ||(int)$user->id<1||!empty($user->block))
+                    throw new \DomainException('COM_MINIMARKET_OTP_INVALID');
+                $email=(string)$user->email;
+            }elseif($scope==='recipient'){
+                if((int)$user->id<1||!empty($user->block))
+                    throw new \DomainException('COM_MINIMARKET_OTP_LOGIN_REQUIRED');
+                $email=$app->input->post->getString('digital_recipient_email','');
+                $cart=CartState::normalize($session->get(CartState::SESSION_KEY,[]));
+                if(!$cart)throw new \DomainException('COM_MINIMARKET_OTP_INVALID');
+                $quote=(new CartCatalog(Factory::getContainer()->get(DatabaseInterface::class)))
+                    ->details($cart,(int)$params->get('inventory_enabled',1)===1);
+                if(!$quote['available']||!count(array_filter($quote['lines'],
+                    static fn($l)=>($l['delivery_type']??'physical')==='digital')))
+                    throw new \DomainException('COM_MINIMARKET_OTP_INVALID');
+            }else throw new \DomainException('COM_MINIMARKET_OTP_INVALID');
+            CheckoutVerification::issue($session,$scope,(int)$user->id,$key,$email);
+            $response=['success'=>true,'message'=>Text::_('COM_MINIMARKET_OTP_SENT')];
+        }catch(\DomainException $error){
+            $response['message']=Text::_($error->getMessage());
+        }catch(\Throwable){
+            $response['message']=Text::_('COM_MINIMARKET_OTP_UNAVAILABLE');
+        }
+        if(str_contains((string)$app->input->server->getString('HTTP_ACCEPT',''),'application/json')){
+            $app->setHeader('Content-Type','application/json; charset=utf-8',true);
+            $app->setHeader('Cache-Control','private, no-store',true);
+            echo json_encode($response,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
+            $app->close();
+        }
+        $app->enqueueMessage($response['message'],$response['success']?'message':'warning');
+        $this->setRedirect(RouteHelper::checkout());
+    }
+
     public function submit(): void
     {
         $app=Factory::getApplication();
@@ -86,15 +141,17 @@ final class CheckoutController extends BaseController
         }
         $session=$app->getSession();
         $params=ComponentHelper::getParams('com_minimarket');
-        // SMS mode must never silently save unverified orders. Until a real
-        // provider and Joomla account flow exist it remains fail-closed.
-        if (in_array(CheckoutSettings::mode($params),['email','sms'],true)
-            && (int)$app->getIdentity()->id<1) {
-            $pending=CheckoutSettings::mode($params)==='email'
-                ?'COM_MINIMARKET_CHECKOUT_EMAIL_PENDING':'COM_MINIMARKET_CHECKOUT_SMS_PENDING';
-            $app->enqueueMessage(Text::_($pending),'warning');
-            $this->setRedirect(RouteHelper::checkout());
-            return;
+        if(CheckoutSettings::requiresAccount($params)
+            &&(int)$app->getIdentity()->id<1){
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED'),'warning');
+            $this->setRedirect(RouteHelper::checkout());return;
+        }
+        if(CheckoutSettings::requiresAccount($params)){
+            try{CheckoutSettings::method($params);}
+            catch(\DomainException $e){
+                $app->enqueueMessage(Text::_($e->getMessage()),'warning');
+                $this->setRedirect(RouteHelper::checkout());return;
+            }
         }
         // Guest mode is used to test the final checkout UX without integrations.
         $identity=$app->getIdentity();
@@ -135,12 +192,12 @@ final class CheckoutController extends BaseController
                 if(($line['delivery_type']??'physical')==='digital')$hasDigital=true;
                 else $needsPhysical=true;
             }
-            if($hasDigital&&(int)$identity->id<1)
-                throw new \DomainException('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
             $policies=CheckoutSettings::fields($params);
             if($hasDigital)$policies['email']='required';
             $customFields=CheckoutExtraFields::definitions($params);
             $skipBuyer=CheckoutSettings::skipBuyer($params,$identity,$customFields);
+            if(!CheckoutSettings::step($params,'buyer')&&!$skipBuyer)
+                throw new \DomainException('COM_MINIMARKET_STEP_BUYER_CONFIGURATION');
             if($skipBuyer)$policies=['name'=>'required','phone'=>'hidden','email'=>'required','comment'=>'hidden'];
             $contact=CheckoutData::normalize([
                 'name'=>$skipBuyer?(string)$identity->name:$app->input->post->get('customer_name','','string'),
@@ -155,6 +212,26 @@ final class CheckoutController extends BaseController
             $postedExtra=$app->input->post->get('extra',[],'array');
             $contact['custom_fields']=CheckoutExtraFields::validate(
                 is_array($postedExtra)?$postedExtra:[],$skipBuyer?[]:$customFields);
+            $recipient=$hasDigital
+                ?trim($app->input->post->getString('digital_recipient_email','')):'';
+            if($hasDigital){
+                if(!CheckoutSettings::step($params,'digital')||$recipient==='')
+                    $recipient=(string)$contact['email'];
+                if(filter_var($recipient,FILTER_VALIDATE_EMAIL)===false||strlen($recipient)>254)
+                    throw new \DomainException('COM_MINIMARKET_CHECKOUT_EMAIL_INVALID');
+                if(strcasecmp($recipient,(string)$contact['email'])!==0){
+                    if((int)$identity->id<1)
+                        throw new \DomainException('COM_MINIMARKET_OTP_LOGIN_REQUIRED');
+                    CheckoutVerification::assertValid($session,'recipient',(int)$identity->id,
+                        $expected,$recipient,$app->input->post->getString('recipient_code',''));
+                }
+            }
+            $contact['digital_recipient_email']=$recipient;
+            if(CheckoutSettings::requiresPurchaseCode($params)){
+                CheckoutVerification::assertValid($session,'purchase',(int)$identity->id,
+                    $expected,(string)$identity->email,
+                    $app->input->post->getString('purchase_code',''));
+            }
             $grams=0;$volume=0;
             foreach($quote['lines'] as $line){
                 $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
@@ -165,6 +242,10 @@ final class CheckoutController extends BaseController
             $skipDelivery=count($methods)===1
                 &&(isset($methods['pickup'])||isset($methods['digital']));
             $skipPayment=count($payments)===1;
+            if(!CheckoutSettings::step($params,'delivery')&&!$skipDelivery)
+                throw new \DomainException('COM_MINIMARKET_STEP_DELIVERY_CONFIGURATION');
+            if(!CheckoutSettings::step($params,'payment')&&!$skipPayment)
+                throw new \DomainException('COM_MINIMARKET_STEP_PAYMENT_CONFIGURATION');
             $delivery=CheckoutDelivery::quote($params,[
                 'delivery_method'=>$skipDelivery?($needsPhysical?'pickup':'digital'):$app->input->post->get('delivery_method','','string'),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
@@ -177,6 +258,7 @@ final class CheckoutController extends BaseController
             $promoCode=strtoupper(trim((string)$app->input->post->get('promo_code',
                 (string)$session->get('com_minimarket.promo_code',''),'string')));
             $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery,'site',$promoCode);
+            CheckoutVerification::consume($session);
             $session->set('com_minimarket.checkout.key','');
             $session->set(CartState::SESSION_KEY,[]);
             $session->set('com_minimarket.promo_code','');

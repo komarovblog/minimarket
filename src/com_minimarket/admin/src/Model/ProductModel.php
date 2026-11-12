@@ -23,6 +23,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\BundleItems;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductBadges;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductDigitalFile;
+use MiniMarket\Component\Minimarket\Site\Service\DigitalLicensePool;
 
 final class ProductModel extends AdminModel
 {
@@ -388,6 +389,10 @@ final class ProductModel extends AdminModel
             // Private digital assets are attached only to the saved product ID.
             // A missing file is acceptable in a draft but cannot be purchased.
             ProductDigitalFile::upload($db,$savedProductId);
+            $rawKeys=\Joomla\CMS\Factory::getApplication()->input->post->get('digital_keys_import','','raw');
+            if(!is_string($rawKeys))throw new \DomainException('COM_MINIMARKET_DIGITAL_LICENSE_INVALID');
+            require_once JPATH_SITE.'/components/com_minimarket/src/Service/DigitalLicensePool.php';
+            DigitalLicensePool::import($db,$savedProductId,$rawKeys);
             $db->transactionCommit();
             return true;
         } catch (\Throwable $error) {

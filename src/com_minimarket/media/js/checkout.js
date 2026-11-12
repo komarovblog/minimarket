@@ -100,6 +100,34 @@
       if(field.value!==out)field.value=out;
     });
   }
+  // A recipient other than the buyer requires a session-bound email code.
+  for(const button of form.querySelectorAll('[data-mm-otp-send]')){
+    button.addEventListener('click',async()=>{
+      if(button.disabled)return;
+      const endpoint=form.dataset.otpUrl;
+      if(!endpoint)return;
+      const state=form.querySelector('[data-mm-otp-status]');
+      const recipient=form.querySelector('[name="digital_recipient_email"]');
+      const selected=recipient?.value.trim()||'';
+      if(!selected || !recipient.checkValidity()){
+        if(recipient){recipient.required=true;recipient.reportValidity();}
+        return;
+      }
+      const body=new FormData(form);
+      body.set('verification_scope','recipient');
+      body.set('digital_recipient_email',selected);
+      button.disabled=true;
+      if(state)state.textContent='';
+      try{
+        const response=await fetch(endpoint,{method:'POST',body,credentials:'same-origin',
+          headers:{'Accept':'application/json'}});
+        const json=await response.json();
+        if(state)state.textContent=json.message||'';
+      }catch(error){
+        if(state)state.textContent='Unable to send confirmation code.';
+      }finally{button.disabled=false;}
+    });
+  }
   update();
   if(zones||promo?.value.trim())void preview();
  }

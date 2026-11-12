@@ -92,6 +92,8 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `delivery_type` VARCHAR(12) NOT NULL DEFAULT 'physical',
     `digital_asset_key` VARCHAR(80) NOT NULL DEFAULT '',
     `digital_filename` VARCHAR(255) NOT NULL DEFAULT '',
+    `digital_delivery_mode` VARCHAR(16) NOT NULL DEFAULT 'file',
+    `digital_delivery_note` VARCHAR(2000) NOT NULL DEFAULT '',
     `bundle_price_mode` VARCHAR(12) NOT NULL DEFAULT 'fixed',
     `bundle_discount_pct` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
     `title` VARCHAR(255) NOT NULL,
@@ -623,6 +625,7 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     delivery_zone_id INT UNSIGNED NULL,
     delivery_fee_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     payment_method VARCHAR(24) NOT NULL DEFAULT 'on_receipt',
+    digital_recipient_email VARCHAR(254) NOT NULL DEFAULT '',
     payment_status VARCHAR(16) NOT NULL DEFAULT 'unpaid',
     paid_at DATETIME NULL,
     fulfillment_status VARCHAR(20) NOT NULL DEFAULT 'pending',
@@ -701,6 +704,10 @@ CREATE TABLE IF NOT EXISTS #__minimarket_order_items (
     delivery_type VARCHAR(12) NOT NULL DEFAULT 'physical',
     digital_asset_key VARCHAR(80) NOT NULL DEFAULT '',
     digital_filename VARCHAR(255) NOT NULL DEFAULT '',
+    digital_delivery_mode VARCHAR(16) NOT NULL DEFAULT 'file',
+    digital_delivery_note VARCHAR(2000) NOT NULL DEFAULT '',
+    digital_fulfilled_at DATETIME NULL,
+    digital_manual_message TEXT NULL,
     PRIMARY KEY (id),
     KEY idx_mm_order_line_order (order_id),
     CONSTRAINT fk_mm_order_line_parent FOREIGN KEY (order_id)
@@ -720,6 +727,21 @@ CREATE TABLE IF NOT EXISTS #__minimarket_order_events (
     KEY idx_mm_order_event (order_id, created_at),
     CONSTRAINT fk_mm_order_event_parent FOREIGN KEY (order_id)
         REFERENCES #__minimarket_orders (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS #__minimarket_digital_keys (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    product_id INT UNSIGNED NOT NULL,
+    fingerprint CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    encrypted_code TEXT NOT NULL,
+    order_item_id BIGINT UNSIGNED NULL,
+    created_at DATETIME NOT NULL,
+    assigned_at DATETIME NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_mm_digital_key_fingerprint (product_id, fingerprint),
+    KEY idx_mm_digital_key_available (product_id, order_item_id, id),
+    CONSTRAINT fk_mm_digital_key_product FOREIGN KEY (product_id)
+        REFERENCES #__minimarket_products (id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS #__minimarket_digital_grants (

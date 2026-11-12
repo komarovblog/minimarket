@@ -34,10 +34,24 @@ $firstPayment=array_key_first($this->paymentMethods);
             <p><a class="btn btn-outline-primary" href="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_users&view=login',false)); ?>"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_JOOMLA_LOGIN'); ?></a></p>
         <?php endif; ?>
         <p class="text-muted"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_NOTICE'); ?></p>
+        <?php if($this->needPurchaseVerification): ?>
+        <form method="post" class="mb-4" action="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.sendCode',false)); ?>">
+            <div class="alert alert-info">
+                <label class="form-label"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PURCHASE_VERIFICATION'); ?></label>
+                <p><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PURCHASE_CODE_HELP'); ?>
+                    <strong><?php echo $this->escape($this->verificationEmail); ?></strong></p>
+                <input type="hidden" name="checkout_key" value="<?php echo $this->escape($this->checkoutKey); ?>">
+                <input type="hidden" name="verification_scope" value="purchase">
+                <?php echo HTMLHelper::_('form.token'); ?>
+                <button type="submit" class="btn btn-outline-primary"><?php echo Text::_('COM_MINIMARKET_OTP_SEND'); ?></button>
+            </div>
+        </form>
+        <?php endif; ?>
         <form action="<?php echo $this->escape(RouteHelper::checkoutAction()); ?>" method="post"
               class="mm-checkout-form row g-4" autocomplete="on"
               data-items-cents="<?php echo (int)$this->cart['total_cents']; ?>"
-              data-promo-preview-url="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.preview',false)); ?>">
+              data-promo-preview-url="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.preview',false)); ?>"
+              data-otp-url="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.sendCode',false)); ?>">
             <div class="col-12 col-lg-8">
                 <?php if($this->skipBuyer): ?>
                     <input type="hidden" name="customer_name" value="<?php echo $this->escape($this->customerName); ?>">
@@ -207,6 +221,36 @@ $firstPayment=array_key_first($this->paymentMethods);
                 </section>
                 <?php endif; ?>
 
+                <?php if($this->showDigitalStep): ?>
+                <section class="mm-checkout-section mb-4" aria-labelledby="mm-checkout-digital">
+                    <h2 id="mm-checkout-digital" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_DIGITAL_STEP'); ?></h2>
+                    <?php if($this->digitalDescription!==''): ?>
+                        <div class="mb-2"><?php echo InputFilter::getInstance()->clean($this->digitalDescription,'HTML'); ?></div>
+                    <?php endif; ?>
+                    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_RECIPIENT_HELP'); ?></p>
+                    <label class="form-label" for="mm-digital-recipient"><?php echo Text::_('COM_MINIMARKET_DIGITAL_RECIPIENT'); ?></label>
+                    <input class="form-control" type="email" maxlength="254"
+                           id="mm-digital-recipient" name="digital_recipient_email"
+                           value="<?php echo $this->escape($this->digitalRecipientEmail); ?>"
+                           autocomplete="email" placeholder="<?php echo Text::_('COM_MINIMARKET_DIGITAL_USE_BUYER_EMAIL'); ?>">
+                    <?php if((int)\Joomla\CMS\Factory::getApplication()->getIdentity()->id>0): ?>
+                    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_ALTERNATE_HELP'); ?></p>
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" for="mm-recipient-code"><?php echo Text::_('COM_MINIMARKET_OTP_RECIPIENT_CODE'); ?></label>
+                            <input class="form-control" id="mm-recipient-code" name="recipient_code"
+                                   inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code">
+                        </div>
+                        <div class="col-12 col-sm-6 align-self-end">
+                            <button type="button" class="btn btn-outline-secondary"
+                                    data-mm-otp-send="recipient"><?php echo Text::_('COM_MINIMARKET_OTP_SEND_RECIPIENT'); ?></button>
+                        </div>
+                    </div>
+                    <div class="form-text" data-mm-otp-status role="status" aria-live="polite"></div>
+                    <?php endif; ?>
+                </section>
+                <?php endif; ?>
+
                 <?php if($this->skipPayment): ?>
                     <input type="hidden" name="payment_method" value="<?php echo $this->escape((string)$firstPayment); ?>">
                 <?php else: ?>
@@ -263,9 +307,14 @@ $firstPayment=array_key_first($this->paymentMethods);
                         <label for="mm-customer-website">Website</label>
                         <input id="mm-customer-website" name="website" tabindex="-1" autocomplete="off">
                     </div>
-                    <?php if($this->confirmationDescription!==''): ?>
-                         <div class="mb-3"><?php echo InputFilter::getInstance()->clean($this->confirmationDescription,'HTML'); ?></div>
-                     <?php endif; ?>
+                    <?php if($this->needPurchaseVerification): ?>
+                        <div class="mb-3">
+                            <label for="mm-purchase-code" class="form-label"><?php echo Text::_('COM_MINIMARKET_OTP_PURCHASE_CODE'); ?></label>
+                            <input type="text" id="mm-purchase-code" name="purchase_code"
+                                   class="form-control" pattern="[0-9]{6}" inputmode="numeric"
+                                   maxlength="6" autocomplete="one-time-code" required>
+                        </div>
+                    <?php endif; ?>
                      <?php if($this->requireTerms): ?>
                          <div class="form-check mb-3">
                              <input type="checkbox" class="form-check-input" id="mm-checkout-terms"

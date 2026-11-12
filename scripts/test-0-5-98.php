@@ -36,7 +36,7 @@ foreach(['product_detail_layout','product_detail_show_similar',
       'product-page option '.$name);
 }
 $authOptions=$config->xpath('//field[@name="checkout_auth_mode"]/option');
-$check(count($authOptions)===2,'existing compatible auth modes');
+$check(count($authOptions)===3,'three purchase confirmation modes');
 foreach(['ru-RU','en-GB'] as $lang){
     $admin=(string)file_get_contents($root.'admin/language/'.$lang.'/com_minimarket.ini');
     $site=(string)file_get_contents($root.'site/language/'.$lang.'/com_minimarket.ini');

@@ -17,8 +17,17 @@ final class DigitalAsset
     }
     public static function isReady(object $product):bool
     {
-        return (string)($product->delivery_type??'physical')==='digital'
-            &&(string)($product->digital_filename??'')!==''
+        if(($product->delivery_type??'physical')!=='digital')return false;
+        $mode=(string)($product->digital_delivery_mode??'file');
+        if($mode==='file')return ($product->digital_filename??'')!==''
             &&self::path((string)($product->digital_asset_key??''))!==null;
+        if(in_array($mode,['manual','cloud'],true))return true;
+        if($mode==='license'){
+            try{
+                $db=\Joomla\CMS\Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class);
+                return DigitalLicensePool::available($db,(int)($product->id??0))>0;
+            }catch(\Throwable){return false;}
+        }
+        return false;
     }
 }

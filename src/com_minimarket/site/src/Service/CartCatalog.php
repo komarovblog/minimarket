@@ -20,7 +20,16 @@ final class CartCatalog
     public function maxQuantity(array $state,int $productId,int $variantId,bool $inventoryEnabled): int
     {
         $item=$this->quote($productId,$variantId);
-        if(($item['delivery_type']??'physical')==='digital')return CartState::MAX_QUANTITY;
+        if(($item['delivery_type']??'physical')==='digital'){
+            if(($item['digital_delivery_mode']??'file')!=='license')return CartState::MAX_QUANTITY;
+            $other=0;
+            foreach(CartState::normalize($state) as $key=>$qty){
+                [$pid,$vid]=array_map('intval',explode(':',$key));
+                if($pid===$productId &&$vid!==$variantId)$other+=$qty;
+            }
+            return min(CartState::MAX_QUANTITY,max(0,
+                DigitalLicensePool::available($this->db,$productId)-$other));
+        }
         if (!$inventoryEnabled) return CartState::MAX_QUANTITY;
         $others=CartState::normalize($state);
         unset($others[CartState::key($productId,$variantId)]);
@@ -107,9 +116,13 @@ final class CartCatalog
             'title'=>$title, 'sku'=>$sku, 'image'=>$image, 'stock'=>$stock,
             'type'=>$type, 'unit_cents'=>CartState::cents((string)$product->price),
             'delivery_type'=>(string)($product->delivery_type??'physical'),
+            'digital_delivery_mode'=>(string)($product->digital_delivery_mode??'file'),
+            'digital_delivery_note'=>(string)($product->digital_delivery_note??''),
             'digital_asset_key'=>(string)($product->delivery_type??'physical')==='digital'
+                &&($product->digital_delivery_mode??'file')==='file'
                 ?(string)($product->digital_asset_key??''):'',
             'digital_filename'=>(string)($product->delivery_type??'physical')==='digital'
+                &&($product->digital_delivery_mode??'file')==='file'
                 ?(string)($product->digital_filename??''):'',
             'shipping_weight_grams'=>(int)($product->shipping_weight_grams??0),
             'shipping_volume_cm3'=>(int)($product->shipping_volume_cm3??0),
@@ -140,6 +153,19 @@ final class CartCatalog
         }
         $error = '';
         $available = count($rows) === count($lines);
+        $licenseTotals=[];
+        foreach($lines as $line){
+            if(($line['delivery_type']??'')==='digital'
+                &&($line['digital_delivery_mode']??'')==='license'){
+                $id=(int)$line['product_id'];
+                $licenseTotals[$id]=($licenseTotals[$id]??0)+(int)$line['quantity'];
+            }
+        }
+        foreach($licenseTotals as $id=>$total){
+            if($total>DigitalLicensePool::available($this->db,$id)){
+                $available=false;break;
+            }
+        }
         if ($available) {
             try {
                 CartStock::assertAvailable($rows, $this->snapshot(), $inventoryEnabled);

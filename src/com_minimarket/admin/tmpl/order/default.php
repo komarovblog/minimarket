@@ -64,6 +64,44 @@ $order=$this->order;
         </tbody>
     </table>
     </div>
+    <?php if($this->hasDigitalItems): ?>
+    <section class="mb-4">
+        <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_DIGITAL_FULFILLMENT'); ?></h2>
+        <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_FULFILLMENT_HELP'); ?></p>
+        <?php foreach($this->items as $item):
+            if(($item->delivery_type??'physical')!=='digital')continue;
+            $mode=(string)($item->digital_delivery_mode??'file');
+            $needsManual=in_array($mode,['manual','cloud'],true);
+        ?>
+        <div class="border rounded p-3 my-2">
+            <strong><?php echo $this->escape((string)$item->title); ?></strong>
+            <span class="badge bg-secondary ms-2"><?php echo Text::_('COM_MINIMARKET_DIGITAL_MODE_'.strtoupper($mode)); ?></span>
+            <?php if($needsManual): ?>
+                <?php if($item->digital_fulfilled_at): ?>
+                    <p class="mt-2"><?php echo Text::_('COM_MINIMARKET_DIGITAL_MANUAL_SENT'); ?></p>
+                    <p class="small text-muted"><?php echo nl2br($this->escape((string)$item->digital_manual_message)); ?></p>
+                <?php elseif($this->canUpdate && (string)$order->payment_status==='paid'
+                    &&(string)$order->status!=='cancelled' &&empty($order->deleted_at)): ?>
+                    <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=order.digitalIssue',false)); ?>">
+                        <input type="hidden" name="id" value="<?php echo (int)$order->id; ?>">
+                        <input type="hidden" name="item_id" value="<?php echo (int)$item->id; ?>">
+                        <?php if(!empty($item->digital_delivery_note)): ?>
+                            <p class="form-text"><?php echo nl2br($this->escape((string)$item->digital_delivery_note)); ?></p>
+                        <?php endif; ?>
+                        <label class="form-label" for="mm-digital-issue-<?php echo (int)$item->id; ?>"><?php echo Text::_('COM_MINIMARKET_DIGITAL_MANUAL_MESSAGE'); ?></label>
+                        <textarea class="form-control" name="digital_message" rows="3" maxlength="2000"
+                                  id="mm-digital-issue-<?php echo (int)$item->id; ?>" required></textarea>
+                        <?php echo HTMLHelper::_('form.token'); ?>
+                        <button class="btn btn-primary mt-2" type="submit"><?php echo Text::_('COM_MINIMARKET_DIGITAL_MANUAL_SEND'); ?></button>
+                    </form>
+                <?php else: ?>
+                    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DIGITAL_MANUAL_PENDING'); ?></p>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+        <?php endforeach; ?>
+    </section>
+    <?php endif; ?>
     <dl class="row">
         <dt class="col-sm-3"><?php echo Text::_('COM_MINIMARKET_ORDER_ITEMS_TOTAL'); ?></dt>
         <dd class="col-sm-9"><?php echo number_format((int)($order->items_total_cents??$order->total_cents)/100,2,'.',' '); ?> ₽</dd>

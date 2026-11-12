@@ -15,7 +15,7 @@ final class DownloadController extends BaseController
         $app=Factory::getApplication();
         if($app->input->getMethod()!=='GET')throw new \RuntimeException('Not found',404);
         $user=$app->getIdentity();
-        if((int)$user->id<1||!empty($user->block))throw new \RuntimeException('Not found',404);
+        if((int)$user->id>0&&!empty($user->block))throw new \RuntimeException('Not found',404);
         $id=$app->input->getInt('item_id',0);
         $token=$app->input->getString('token','');
         if($id<1||!preg_match('/^[a-f0-9]{64}$/D',$token))
@@ -35,7 +35,8 @@ final class DownloadController extends BaseController
             $db->setQuery((string)$q.' FOR UPDATE');
             $row=$db->loadAssoc();
             $secret=(string)Factory::getConfig()->get('secret','');
-            if(!$row||strlen($secret)<16||(int)$row['user_id']!==(int)$user->id
+            if(!$row||strlen($secret)<16
+                ||((int)$row['user_id']>0&&(int)$row['user_id']!==(int)$user->id)
                 ||$row['payment_status']!=='paid'||$row['delivery_type']!=='digital'
                 ||$row['status']==='cancelled'||$row['deleted_at']!==null
                 ||(int)$row['download_count']>=(int)$row['max_downloads']

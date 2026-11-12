@@ -92,10 +92,11 @@ final class OrderController extends BaseController
         if($id<1||!in_array($action,['paid','refunded'],true))
             throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
-        $rows=[];$email='';$digitalOnly=false;
+        $rows=[];$email='';$digitalOnly=false;$buyerUserId=0;
         try{
             // Site file helper shares the same private asset location.
             require_once JPATH_SITE.'/components/com_minimarket/src/Service/DigitalAsset.php';
+            require_once JPATH_SITE.'/components/com_minimarket/src/Service/DigitalLicensePool.php';
             $db->transactionStart();
             $db->setQuery('SELECT * FROM '.$db->quoteName('#__minimarket_orders')
                 .' WHERE id='.(int)$id.' AND deleted_at IS NULL FOR UPDATE');
@@ -105,14 +106,13 @@ final class OrderController extends BaseController
             if($action==='paid'){
                 if(!in_array($before,['unpaid','paid'],true))
                     throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
-                if((int)$order['user_id']<1 && $order['delivery_method']==='digital')
-                    throw new \DomainException('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
                 $rows=DigitalFulfillment::prepare($db,$id);
-                if($rows && ((int)$order['user_id']<1
-                    ||filter_var($order['email'],FILTER_VALIDATE_EMAIL)===false))
+                if($rows && filter_var((string)($order['digital_recipient_email']?:$order['email']),
+                    FILTER_VALIDATE_EMAIL)===false)
                     throw new \DomainException('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
-                $email=$order['email'];
+                $email=(string)($order['digital_recipient_email']?:$order['email']);
                 $digitalOnly=$order['delivery_method']==='digital';
+                $buyerUserId=(int)$order['user_id'];
                 $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
                     ." SET payment_status='paid', paid_at=COALESCE(paid_at,UTC_TIMESTAMP()) WHERE id=".(int)$id);
                 $db->execute();
@@ -137,10 +137,10 @@ final class OrderController extends BaseController
             return;
         }
         if($action==='paid' && $rows){
-            if(DigitalFulfillment::send($db,$id,$rows,$email)){
+            if(DigitalFulfillment::send($db,$id,$rows,$email,$buyerUserId)){
                 // Digital-only orders complete after confirmed payment and
                 // successful delivery email. Mixed orders await physical shipping.
-                if($digitalOnly){
+                if($digitalOnly && DigitalFulfillment::allAutomatic($rows)){
                     $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
                         ." SET fulfillment_status='delivered', fulfilled_at=UTC_TIMESTAMP(), status='completed'"
                         ." WHERE id=".(int)$id." AND payment_status='paid' AND status<>'cancelled'");
@@ -152,6 +152,78 @@ final class OrderController extends BaseController
             }
         }else{
             $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_STATUS_SAVED'));
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
+    }
+
+    /** Operator-supplied access instructions. Cloud adapters are not active. */
+    public function digitalIssue():void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        if(!$app->getIdentity()->authorise('core.edit.state','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $id=$app->input->post->getInt('id',0);
+        $itemId=$app->input->post->getInt('item_id',0);
+        $message=trim(strip_tags($app->input->post->getString('digital_message','')));
+        if($id<1||$itemId<1||mb_strlen($message)<3||mb_strlen($message)>2000
+            ||preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f]/u',$message))
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_DIGITAL_MANUAL_INVALID'),400);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $db->transactionStart();
+        try {
+            $db->setQuery('SELECT * FROM '.$db->quoteName('#__minimarket_orders')
+                .' WHERE id='.$id.' AND deleted_at IS NULL FOR UPDATE');
+            $order=$db->loadAssoc();
+            if(!$order||$order['status']==='cancelled'||$order['payment_status']!=='paid')
+                throw new \DomainException('COM_MINIMARKET_DIGITAL_MANUAL_INVALID');
+            $q=$db->getQuery(true)->select('*')
+                ->from($db->quoteName('#__minimarket_order_items'))
+                ->where('id='.$itemId)->where('order_id='.$id);
+            $db->setQuery($q);
+            $item=$db->loadAssoc();
+            if(!$item||$item['delivery_type']!=='digital'
+                ||!in_array($item['digital_delivery_mode'],['manual','cloud'],true)
+                ||$item['digital_fulfilled_at']!==null)
+                throw new \DomainException('COM_MINIMARKET_DIGITAL_MANUAL_INVALID');
+            $email=(string)($order['digital_recipient_email']?:$order['email']);
+            $subject=Text::sprintf('COM_MINIMARKET_DIGITAL_MAIL_TITLE',$id);
+            $body=Text::sprintf('COM_MINIMARKET_DIGITAL_MANUAL_MAIL_BODY',(string)$item['title'],$message);
+            if(!DigitalFulfillment::mail($email,$subject,$body))
+                throw new \DomainException('COM_MINIMARKET_DIGITAL_SEND_FAILED');
+            $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_order_items'))
+                ->set('digital_fulfilled_at=UTC_TIMESTAMP()')
+                ->set('digital_manual_message='.$db->quote($message))
+                ->where('id='.$itemId)->where('order_id='.$id);
+            $db->setQuery($q);$db->execute();
+            $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_events'))
+                ->columns($db->quoteName(['order_id','actor_user_id','event_type','old_value','new_value','created_at']))
+                ->values(implode(',',[(string)$id,(string)(int)$app->getIdentity()->id,
+                    $db->quote('digital_issued'),$db->quote('pending'),$db->quote('sent'),'UTC_TIMESTAMP()']));
+            $db->setQuery($q);$db->execute();
+            if($order['delivery_method']==='digital'){
+                $q=$db->getQuery(true)->select('COUNT(*)')
+                    ->from($db->quoteName('#__minimarket_order_items'))
+                    ->where('order_id='.$id)
+                    ->where("delivery_type='digital'")
+                    ->where("digital_delivery_mode IN ('manual','cloud')")
+                    ->where('digital_fulfilled_at IS NULL');
+                $db->setQuery($q);
+                if((int)$db->loadResult()===0){
+                    $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
+                        ->set("fulfillment_status='delivered'")
+                        ->set('fulfilled_at=UTC_TIMESTAMP()')->set("status='completed'")
+                        ->where('id='.$id)->where("payment_status='paid'");
+                    $db->setQuery($q);$db->execute();
+                }
+            }
+            $db->transactionCommit();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_DIGITAL_MANUAL_SENT'));
+        }catch(\Throwable $e){
+            $db->transactionRollback();
+            $app->enqueueMessage(Text::_($e instanceof \DomainException
+                ?$e->getMessage():'COM_MINIMARKET_DIGITAL_MANUAL_INVALID'),'warning');
         }
         $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
     }

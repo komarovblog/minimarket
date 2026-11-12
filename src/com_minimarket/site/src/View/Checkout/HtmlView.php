@@ -44,6 +44,12 @@ final class HtmlView extends BaseHtmlView
     public string $promoCode='';
     public bool $needsPhysical=true;
     public bool $hasDigital=false;
+    public bool $needPurchaseVerification=false;
+    public string $confirmationMode='guest';
+    public string $digitalDescription='';
+    public bool $showDigitalStep=false;
+    public string $digitalRecipientEmail='';
+    public string $verificationEmail='';
     public bool $zonesMode=false;
     public array $zoneCities=[];
 
@@ -76,7 +82,11 @@ final class HtmlView extends BaseHtmlView
             $this->buyerDescription=(string)$params->get('checkout_buyer_description','');
             $this->deliveryDescription=(string)$params->get('checkout_delivery_description','');
             $this->paymentDescription=(string)$params->get('checkout_payment_description','');
-            $this->confirmationDescription=(string)$params->get('checkout_confirmation_description','');
+            $this->confirmationDescription='';
+            $this->digitalDescription=(string)$params->get('checkout_digital_description','');
+            $this->showDigitalStep=$this->hasDigital && CheckoutSettings::step($params,'digital');
+            $this->confirmationMode=CheckoutSettings::mode($params);
+            $this->needPurchaseVerification=CheckoutSettings::requiresPurchaseCode($params);
             $this->requireTerms=(int)$params->get('checkout_require_terms',0)===1;
             $this->termsItemid=max(0,(int)$params->get('checkout_terms_itemid',0));
             if($this->requireTerms&&$this->termsItemid<1)
@@ -85,21 +95,27 @@ final class HtmlView extends BaseHtmlView
             $this->deliveryMethods=CheckoutDelivery::methods($params,$this->needsPhysical);
             $this->paymentMethods=CheckoutDelivery::payments($params,!$this->needsPhysical);
             $this->cityRates=CheckoutDelivery::rates($params);
+            if($this->hasDigital)$this->fields['email']='required';
             $this->skipBuyer=CheckoutSettings::skipBuyer($params,$app->getIdentity(),$this->customFields);
+            if(!CheckoutSettings::step($params,'buyer') && !$this->skipBuyer)
+                throw new \DomainException('COM_MINIMARKET_STEP_BUYER_CONFIGURATION');
             // No manual skipping of mandatory steps.
             $this->skipDelivery=count($this->deliveryMethods)===1
                 &&(isset($this->deliveryMethods['pickup'])||isset($this->deliveryMethods['digital']));
             $this->skipPayment=count($this->paymentMethods)===1;
+            if(!CheckoutSettings::step($params,'delivery') && !$this->skipDelivery)
+                throw new \DomainException('COM_MINIMARKET_STEP_DELIVERY_CONFIGURATION');
+            if(!CheckoutSettings::step($params,'payment') && !$this->skipPayment)
+                throw new \DomainException('COM_MINIMARKET_STEP_PAYMENT_CONFIGURATION');
             $this->pickupAddress=(string)($this->deliveryMethods['pickup']['address']??'');
             $this->pickupSchedule=(string)($this->deliveryMethods['pickup']['schedule']??'');
             $this->pickupMapUrl=(string)($this->deliveryMethods['pickup']['map_url']??'');
-            if (in_array(CheckoutSettings::mode($params),['email','sms'],true)
+            if (CheckoutSettings::requiresAccount($params)
                 && (int)$app->getIdentity()->id<1) {
-                $pending=CheckoutSettings::mode($params)==='email'
-                    ?'COM_MINIMARKET_CHECKOUT_EMAIL_PENDING':'COM_MINIMARKET_CHECKOUT_SMS_PENDING';
-                $this->blockedMessage=Text::_($pending);
-            } elseif ($this->hasDigital && (int)$app->getIdentity()->id<1) {
-                $this->blockedMessage=Text::_('COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED');
+                $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_LOGIN_REQUIRED');
+            } elseif (CheckoutSettings::requiresAccount($params)
+                && CheckoutSettings::method($params)!=='email'){
+                $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_AUTH_NOT_CONFIGURED');
             } elseif (!$this->deliveryMethods || !$this->paymentMethods) {
                 $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_METHODS_MISSING');
             }
@@ -116,6 +132,8 @@ final class HtmlView extends BaseHtmlView
         $identity=$app->getIdentity();
         $this->customerName=(int)$identity->id>0?(string)$identity->name:'';
         $this->customerEmail=(int)$identity->id>0?(string)$identity->email:'';
+        $this->digitalRecipientEmail=$this->customerEmail;
+        $this->verificationEmail=$this->customerEmail;
         $document=$this->getDocument();
         $document->setTitle(Text::_('COM_MINIMARKET_CHECKOUT_TITLE'));
         $document->setMetaData('robots','noindex,nofollow');

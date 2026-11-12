@@ -12,13 +12,38 @@ final class CheckoutSettings
         'comment'=>'optional',
     ];
 
-    public static function mode(object $params): string
+    /** guest: no identity check; guests: signed-in only; all: signed-in + fresh OTP. */
+    public static function mode(object $params):string
     {
-        $mode=(string)$params->get('checkout_auth_mode','guest');
-        $mode=in_array($mode,['guest','sms','email'],true)?$mode:'sms';
-        if($mode==='email' && (string)$params->get('checkout_verification_method','email')!=='email')
-            throw new \DomainException('COM_MINIMARKET_CHECKOUT_AUTH_NOT_CONFIGURED');
-        return $mode;
+        $value=(string)$params->get('checkout_auth_mode','guest');
+        // Values saved in 0.5.99 represent the old signed-in-only mode.
+        if(in_array($value,['email','sms'],true))return 'guests';
+        return in_array($value,['guest','guests','all'],true)?$value:'guests';
+    }
+
+    public static function requiresAccount(object $params):bool
+    {
+        return self::mode($params)!=='guest';
+    }
+
+    public static function requiresPurchaseCode(object $params):bool
+    {
+        return self::mode($params)==='all';
+    }
+
+    public static function step(object $params,string $step):bool
+    {
+        if(!in_array($step,['buyer','delivery','payment','digital'],true))
+            throw new \InvalidArgumentException('Unknown checkout step');
+        return (int)$params->get('checkout_step_'.$step.'_enabled',1)===1;
+    }
+
+    /** No silent fallback to an unavailable verification provider. */
+    public static function method(object $params):string
+    {
+        $method=(string)$params->get('checkout_verification_method','email');
+        if($method!=='email')throw new \DomainException('COM_MINIMARKET_CHECKOUT_AUTH_NOT_CONFIGURED');
+        return $method;
     }
 
     /** Auto-hide buyer data only when the account contains every required detail. */

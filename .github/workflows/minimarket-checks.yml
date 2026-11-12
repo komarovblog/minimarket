@@ -189,6 +189,7 @@ jobs:
           php scripts/test-0-5-83-schema-mysql84.php
           php scripts/test-0-5-84-schema-mysql84.php
           php scripts/test-0-5-99-migration-mysql84.php
+          php scripts/test-0-6-0-migration-mysql84.php
 
   windows-package:
     name: Windows component ZIP
@@ -327,6 +328,9 @@ jobs:
           php scripts/test-0-5-97.php
           php scripts/test-0-5-98.php
           php scripts/test-0-5-99.php
+          php scripts/test-0-6-0.php
+          node --check src/com_minimarket/media/js/product-digital.js
+          node --check src/com_minimarket/media/js/checkout.js
           node --check src/com_minimarket/media/js/gallery.js
           node --check src/com_minimarket/media/js/product-page.js
           node --check src/com_minimarket/media/js/faceted-catalog.js

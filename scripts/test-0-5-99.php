@@ -55,7 +55,7 @@ foreach(['shop_type','checkout_buyer_skip','checkout_delivery_skip','checkout_pa
     'product_detail_show_reviews','category_pagination_next','category_load_previous'] as $old){
     $assert(count($form->xpath('//field[@name="'.$old.'"]'))===0,'remove conflicting field '.$old);
 }
-foreach(['product_detail_gallery_effect','checkout_confirmation_description',
+foreach(['product_detail_gallery_effect','checkout_digital_description',
     'checkout_require_terms','checkout_terms_itemid'] as $new){
     $assert(count($form->xpath('//field[@name="'.$new.'"]'))===1,'new working setting '.$new);
 }

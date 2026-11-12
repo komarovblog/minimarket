@@ -20,9 +20,10 @@ final class ProductDigitalFile
             ||(int)($file['size']??0)<1||(int)($file['size']??0)>self::MAX_BYTES
             ||!is_uploaded_file($file['tmp_name']))
             throw new \DomainException('COM_MINIMARKET_DIGITAL_UPLOAD_ERROR');
-        $db->setQuery('SELECT delivery_type FROM '.$db->quoteName('#__minimarket_products')
+        $db->setQuery('SELECT digital_delivery_mode,delivery_type FROM '.$db->quoteName('#__minimarket_products')
             .' WHERE id='.(int)$productId);
-        if($db->loadResult()!=='digital')
+        $row=$db->loadAssoc();
+        if(($row['delivery_type']??'')!=='digital'||($row['digital_delivery_mode']??'')!=='file')
             throw new \DomainException('COM_MINIMARKET_DIGITAL_UPLOAD_ERROR');
         $filename=basename(str_replace('\\','/',(string)$file['name']));
         $ext=strtolower((string)pathinfo($filename,PATHINFO_EXTENSION));
