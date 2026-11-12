@@ -32,3 +32,7 @@
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\release-to-desktop.ps1"
 ```
+
+## GitHub CI (проверено)
+
+[Запуск #43235567881](https://github.com/komarovblog/minimarket/actions/runs/43235567881), исходный SHA `1ab0cca3309832bc6ea35473c9af2d094e2b2492` — **SUCCESS, 6/6 jobs**: PHP 8.4, PHP 8.5, Windows component ZIP, MySQL upgrade, fresh schema, demo import. Релиз содержит обновлённые тесты и оба манифеста версии 0.6.3. Сборка ZIP в CI не означает его установку в реальную Joomla; это отдельная ручная приёмка.
