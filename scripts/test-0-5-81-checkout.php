@@ -98,7 +98,7 @@ $controller=(string)file_get_contents($root.'site/src/Controller/CheckoutControl
 $ok(str_contains($controller,'CheckoutSettings::requiresAccount')
     && str_contains($controller,'CheckoutSettings::requiresPurchaseCode'),
  'guest mode and every-order OTP are separate server policies');
-$ok(str_contains($controller,'CheckoutDelivery::quote')
+$ok(str_contains($controller,'CheckoutDelivery::checkoutQuote')
  && str_contains($controller,'CheckoutSettings::requiresAccount')
  && str_contains($controller,'CheckoutSettings::fields'),'server checkout wiring');
 $view=(string)file_get_contents($root.'site/tmpl/checkout/default.php');
