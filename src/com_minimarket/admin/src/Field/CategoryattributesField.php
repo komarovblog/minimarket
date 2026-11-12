@@ -42,8 +42,6 @@ final class CategoryattributesField extends FormField
         $hierarchy = CategoryAttributes::loadHierarchy($db);
         $parentRules = CategoryAttributes::resolve($parentId, $hierarchy['parents'], $hierarchy['rules']);
         $parentModes = CategoryAttributes::resolveModes($parentId, $hierarchy['parents'], $hierarchy['rules']);
-        $parentListFlags = CategoryListVisibility::resolve($parentId, $hierarchy['parents'],
-            $hierarchy['rules'], $hierarchy['list_flags']??[]);
 
         // On validation failure, honor posted form values instead of silently
         // restoring the last persisted rule selection.
@@ -58,7 +56,6 @@ final class CategoryattributesField extends FormField
             . '<div class="table-responsive mm-category-rules-viewport"><table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state">'
             . '<thead><tr><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_ATTRIBUTE'))
             . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_CATATTR_OVERRIDE'))
-            . '</th><th scope="col">' . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST'))
             . '</th><th scope="col">' . $escape(Text::_('JSTATUS'))
             . '</th></tr></thead><tbody>';
 
@@ -97,17 +94,7 @@ final class CategoryattributesField extends FormField
                     . ($mode === (int) $value ? ' selected' : '')
                     . '>' . $escape(Text::_($languageKey)) . '</option>';
             }
-            $listVisible=(int)($ownRules['v'.$id]??($parentListFlags[$id]??true))===1;
-            $flagName=$escape($this->name.'[v'.$id.']');
-            $flagId=$escape($this->id.'_v'.$id);
-            $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
-                . '<select class="form-select form-select-sm" name="'.$flagName
-                . '" id="'.$flagId.'" data-mm-category-list-flag aria-label="'
-                . $escape(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'">'
-                . '<option value="1"'.($listVisible?' selected':'').'>'
-                . $escape(Text::_('COM_MINIMARKET_SHOW')).'</option>'
-                . '<option value="0"'.(!$listVisible?' selected':'').'>'
-                . $escape(Text::_('COM_MINIMARKET_HIDE')).'</option></select>'
+            $html .= '</select>'
                 . '</td><td class="mm-rules-state"><span class="'
                 . ($published ? 'text-success' : 'text-muted') . '">'
                 . $escape(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))

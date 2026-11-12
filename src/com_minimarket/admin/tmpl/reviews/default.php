@@ -29,6 +29,7 @@ $href='index.php?option=com_minimarket&view=reviews&'.http_build_query([
  <div id="j-main-container" class="j-main-container">
 
     <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+    <?php $mmColumnTable='mm-reviews-list'; require dirname(__DIR__).'/shared/column-toggle.php'; ?>
 
    <div class="table-responsive mm-native-list-viewport">
     <table id="mm-reviews-list" class="table table-striped mm-admin-list">
@@ -46,7 +47,7 @@ $href='index.php?option=com_minimarket&view=reviews&'.http_build_query([
      <?php foreach($this->reviews as $i=>$review): ?>
       <tr>
        <td class="text-center" data-label="<?php echo Text::_('JSELECT'); ?>"><?php echo HTMLHelper::_('grid.id',$i,(int)$review->id); ?></td>
-       <td data-label="ID">#<?php echo (int)$review->id; ?></td>
+       <td data-label="ID"><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=review&id='.(int)$review->id,false)); ?>">#<?php echo (int)$review->id; ?></a></td>
        <td data-label="<?php echo Text::_('COM_MINIMARKET_REVIEW_PRODUCT'); ?>"><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=product.edit&id='.(int)$review->product_id,false)); ?>"><?php echo $this->escape($review->product_title); ?></a></td>
        <td data-label="<?php echo Text::_('COM_MINIMARKET_REVIEW_AUTHOR'); ?>"><?php echo $this->escape($review->author_name); ?></td>
        <td data-label="<?php echo Text::_('COM_MINIMARKET_REVIEW_RATING'); ?>"><?php echo (int)$review->rating; ?> / 5</td>

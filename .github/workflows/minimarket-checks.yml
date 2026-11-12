@@ -191,6 +191,7 @@ jobs:
           php scripts/test-0-5-99-migration-mysql84.php
           php scripts/test-0-6-0-migration-mysql84.php
           php scripts/test-0-6-2-seo-mysql84.php
+          php scripts/test-0-6-7-migration-mysql84.php
 
   windows-package:
     name: Windows component ZIP
@@ -475,6 +476,11 @@ jobs:
         run: php scripts/test-0-6-3-ui.php
       - name: 0.6.6 native administrator lists, editor controls and toolbar version
         run: php scripts/test-0-6-6-native-admin-ui.php
+      - name: 0.6.7 order returns, shipment reasons, audit history and native operational UI
+        run: |
+          php scripts/test-0-6-7-return-workflow.php
+          node --check src/com_minimarket/media/js/admin-columns.js
+          for file in src/com_minimarket/admin/src/Controller/{Returncase,Returns,Delivery,Order,Review}Controller.php src/com_minimarket/admin/src/View/{Returns,Returncase}/HtmlView.php src/com_minimarket/admin/tmpl/returncase/{create,default}.php src/com_minimarket/admin/tmpl/returns/default.php; do php -l "$file"; done
       - name: 0.6.5 Joomla Cart menu and all administrator Create quicktasks
         run: php scripts/test-0-6-5-menus.php
       - name: 0.6.4 subcategory cards, options filters and admin UI

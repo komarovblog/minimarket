@@ -163,6 +163,14 @@ final class OrderStorage
                 $db->setQuery($insert);$db->execute();
             }
             if($promo!==null)PromotionService::redeem($db,$promo,$orderId);
+            // The first entry in the order timeline exists even if the order has
+            // not yet been paid or shipped. No external service is invoked.
+            $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_events'))
+                ->columns($db->quoteName(['order_id','actor_user_id','event_type',
+                    'old_value','new_value','created_at']))
+                ->values(implode(',',[(string)$orderId,'0',$db->quote('order_created'),
+                    $db->quote(''),$db->quote($source),'UTC_TIMESTAMP()']));
+            $db->setQuery($q);$db->execute();
             $db->transactionCommit();
             return $orderId;
         } catch (\Throwable $e) {

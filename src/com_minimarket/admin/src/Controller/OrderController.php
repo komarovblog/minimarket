@@ -8,6 +8,7 @@ use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Session\Session;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\DigitalFulfillment;
+use MiniMarket\Component\Minimarket\Administrator\Service\OrderHistory;
 
 /** Operators may change order status, never line snapshots or prices. */
 final class OrderController extends BaseController
@@ -283,39 +284,102 @@ final class OrderController extends BaseController
         $id=$app->input->post->getInt('id',0);
         if ($id<1)throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_TRASH_DENIED'),400);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
-        $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
-            ->set($db->quoteName('deleted_at').'='.($remove?'UTC_TIMESTAMP()':'NULL'))
-            ->where($db->quoteName('id').'='.(int)$id);
-        if($remove)$q->where($db->quoteName('status').'='.$db->quote('cancelled'))
-                      ->where($db->quoteName('deleted_at').' IS NULL');
-        else $q->where($db->quoteName('deleted_at').' IS NOT NULL');
-        $db->setQuery($q);$db->execute();
-        if ($db->getAffectedRows()<1)
+        $db->transactionStart();
+        try {
+            $db->setQuery('SELECT status,deleted_at FROM '.$db->quoteName('#__minimarket_orders')
+                .' WHERE id='.(int)$id.' FOR UPDATE');
+            $before=$db->loadAssoc();
+            if(!$before||($remove
+                ?($before['status']!=='cancelled'||$before['deleted_at']!==null)
+                :($before['deleted_at']===null)))
+                throw new \DomainException('COM_MINIMARKET_ORDER_TRASH_DENIED');
+            $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
+                ->set('deleted_at='.($remove?'UTC_TIMESTAMP()':'NULL'))
+                ->where('id='.(int)$id);
+            $db->setQuery($q);$db->execute();
+            OrderHistory::record($db,$id,(int)$app->getIdentity()->id,
+                'trash',$remove?'active':'trashed',$remove?'trashed':'restored');
+            $db->transactionCommit();
+        }catch(\Throwable $e){
+            $db->transactionRollback();
             throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_TRASH_DENIED'),400);
+        }
         $app->enqueueMessage(Text::_($remove?'COM_MINIMARKET_ORDER_TRASHED':'COM_MINIMARKET_ORDER_RESTORED'));
         $this->setRedirect('index.php?option=com_minimarket&view=orders&filter_trash='.($remove?'1':'0'));
+    }
+
+    /** Persist gateway metadata only; never mark a real external payment as paid. */
+    public function paymentReference(): void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        if(!$app->getIdentity()->authorise('core.edit.state','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $id=$app->input->post->getInt('id',0);
+        $reference=trim($app->input->post->getString('payment_reference',''));
+        $url=trim($app->input->post->getString('payment_url',''));
+        $parts=$url!==''?parse_url($url):[];
+        if($id<1||mb_strlen($reference)>128||mb_strlen($url)>2048
+            ||preg_match('/[\x00-\x1f<>]/u',$reference.$url)
+            ||($url!==''&&(!is_array($parts)||strtolower((string)($parts['scheme']??''))!=='https'
+                ||empty($parts['host'])||isset($parts['user'])||isset($parts['pass']))))
+            throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_PAYMENT_REFERENCE_INVALID'),400);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        $db->transactionStart();
+        try {
+            $db->setQuery('SELECT payment_reference,payment_url FROM '.$db->quoteName('#__minimarket_orders')
+                .' WHERE id='.$id.' AND deleted_at IS NULL FOR UPDATE');
+            $before=$db->loadAssoc();
+            if(!$before)throw new \DomainException('COM_MINIMARKET_ORDER_PAYMENT_REFERENCE_INVALID');
+            $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
+                ->set($db->quoteName('payment_reference').'='.$db->quote($reference))
+                ->set($db->quoteName('payment_url').'='.$db->quote($url))
+                ->where('id='.$id);
+            $db->setQuery($q);$db->execute();
+            if($before['payment_reference']!==$reference||$before['payment_url']!==$url)
+                OrderHistory::record($db,$id,(int)$app->getIdentity()->id,'payment_reference',
+                    (string)$before['payment_reference'],$reference);
+            $db->transactionCommit();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_STATUS_SAVED'));
+        }catch(\Throwable $e){
+            $db->transactionRollback();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_PAYMENT_REFERENCE_INVALID'),'warning');
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
     }
 
     public function status(): void
     {
         $app=Factory::getApplication();
-        if ($app->input->getMethod()!=='POST' || !Session::checkToken('post')) {
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
             throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
-        }
-        if (!$app->getIdentity()->authorise('core.edit.state','com_minimarket')) {
+        if(!$app->getIdentity()->authorise('core.edit.state','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
-        }
         $id=$app->input->post->getInt('id',0);
         $status=$app->input->post->getCmd('status','');
-        if ($id<1 || !in_array($status,['new','confirmed','completed','cancelled'],true)) {
+        if($id<1||!in_array($status,['new','confirmed','completed','cancelled'],true))
             throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
-        }
         $db=Factory::getContainer()->get(DatabaseInterface::class);
-        $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
-            ->set($db->quoteName('status').'='.$db->quote($status))
-            ->where($db->quoteName('id').'='.(int)$id)->where($db->quoteName('deleted_at').' IS NULL');
-        $db->setQuery($q);$db->execute();
-        $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_SAVED'));
+        $db->transactionStart();
+        try {
+            $db->setQuery('SELECT status FROM '.$db->quoteName('#__minimarket_orders')
+                .' WHERE id='.$id.' AND deleted_at IS NULL FOR UPDATE');
+            $before=$db->loadResult();
+            if($before===null)throw new \DomainException('COM_MINIMARKET_ORDER_STATUS_INVALID');
+            if((string)$before!==$status){
+                $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
+                    ->set($db->quoteName('status').'='.$db->quote($status))
+                    ->where('id='.$id);
+                $db->setQuery($q);$db->execute();
+                OrderHistory::record($db,$id,(int)$app->getIdentity()->id,'status',(string)$before,$status);
+            }
+            $db->transactionCommit();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_SAVED'));
+        }catch(\Throwable $e){
+            $db->transactionRollback();
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),'warning');
+        }
         $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
     }
 }

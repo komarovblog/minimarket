@@ -47,8 +47,9 @@ checkList(substr_count($migration,'ADD COLUMN show_in_list')===2
 $forms=['CategoryattributesField.php','CategoryorderoptionsField.php'];
 foreach($forms as $field) {
  $html=(string)file_get_contents($base.'admin/src/Field/'.$field);
- checkList(str_contains($html,"['v'") || str_contains($html,".'[v'"),
- 'category form includes separate visibility selector '.$field);
+ checkList(!str_contains($html,'data-mm-category-list-flag')
+    && !str_contains($html,'COM_MINIMARKET_SHOW_IN_PRODUCT_LIST'),
+ 'category form delegates display exclusively to characteristic/option '.$field);
 }
 $catModel=(string)file_get_contents($base.'admin/src/Model/CategoryModel.php');
 checkList(str_contains($catModel,'CategoryListVisibility::flags')
@@ -66,8 +67,10 @@ foreach(['CategoryAttributes.php'=>'replaceForAttribute',
 }
 $public=(string)file_get_contents($base.'site/src/Service/ProductAttributeCatalog.php');
 $view=(string)file_get_contents($base.'site/src/View/Category/HtmlView.php');
-checkList(str_contains($public,"\$context==='category' && !\$assignment['list']")
- && str_contains($view,'CategoryListVisibility::resolve')
- && str_contains($view,'!($visibleOptions[$linkedOptionId]??false)'),
- 'frontend applies per-category flags only to list cards');
+checkList(!str_contains($public,"\$context==='category' && !\$assignment['list']")
+    &&str_contains($public,'display_location'),
+ 'characteristic display uses its global setting');
+checkList(str_contains($view,'CategoryOrderOptions::resolveModes')
+    &&!str_contains($view,'CategoryListVisibility::resolve'),
+ 'option display uses its global setting after category eligibility');
 echo 'CATEGORY_CARD_VISIBILITY_PASS: '.$checks." checks\n";

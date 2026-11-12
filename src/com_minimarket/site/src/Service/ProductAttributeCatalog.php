@@ -24,7 +24,7 @@ final class ProductAttributeCatalog
         }
         $ids = implode(',', array_map('intval', $ancestors));
         $q = $db->getQuery(true)
-            ->select(['category_id', 'attribute_id', 'enabled', 'show_in_list'])
+            ->select(['category_id', 'attribute_id', 'enabled'])
             ->from($db->quoteName('#__minimarket_category_attributes'))
             ->where($db->quoteName('category_id') . ' IN (' . $ids . ')');
         $db->setQuery($q);
@@ -32,7 +32,6 @@ final class ProductAttributeCatalog
         foreach ((array) $db->loadObjectList() as $rule) {
             $byCategory[(int)$rule->category_id][(int)$rule->attribute_id] = [
                 'enabled'=>(int)$rule->enabled===1,
-                'list'=>(int)($rule->show_in_list??1)===1,
             ];
         }
         $enabled = [];
@@ -44,7 +43,6 @@ final class ProductAttributeCatalog
         $allowed=[];
         foreach($enabled as $id=>$assignment) {
             if(!$assignment['enabled'])continue;
-            if($context==='category' && !$assignment['list'])continue;
             $allowed[]=(int)$id;
         }
         if ($allowed === []) {

@@ -9,7 +9,7 @@ $ok=static function(bool $yes,string $label)use(&$checks):void{
 };
 $component=simplexml_load_file($root.'minimarket.xml');
 $module=simplexml_load_file(dirname(__DIR__).'/src/mod_minimarket_toolbar/mod_minimarket_toolbar.xml');
-$ok((string)$component->version==='0.6.6','component manifest version');
+$ok(version_compare((string)$component->version,'0.6.6','>='),'component supports 0.6.6 UI contracts');
 $ok((string)$module->version==='1.0.0','separately versioned one-time toolbar');
 $ok(is_file(dirname(__DIR__).'/scripts/build-toolbar-package.ps1'),
     'one-time module ZIP has independent build entrypoint');
@@ -20,26 +20,18 @@ $ok(!str_contains($release,'mod_minimarket_toolbar-$version.zip')
 $categoryForm=simplexml_load_file($root.'admin/forms/category.xml');
 $ok(count($categoryForm->xpath('//fieldset[@name="display"]/field[@name="product_grid_note"]'))===1,
     'product grid note separates subcategory and product cards');
-$catFields=[
-    $root.'admin/src/Field/CategoryattributesField.php',
-    $root.'admin/src/Field/CategoryorderoptionsField.php'
-];
+$catFields=[$root.'admin/src/Field/CategoryattributesField.php',
+ $root.'admin/src/Field/CategoryorderoptionsField.php'];
 foreach($catFields as $path){
-    $source=file_get_contents($path);
-    $ok(str_contains($source,'mm-category-rules-viewport'),'rules table scroll viewport '.basename($path));
-    $ok(str_contains($source,'data-mm-category-list-flag'),'list flag field '.basename($path));
-    $ok(str_contains($source,'<select class="form-select form-select-sm" name=')
-        &&str_contains($source,"Text::_('COM_MINIMARKET_HIDE')")
-        &&str_contains($source,"Text::_('COM_MINIMARKET_SHOW')"),
-        'native Show/Hide dropdown '.basename($path));
-    $ok(!str_contains($source,'type="checkbox"'),
-        'no checkbox in assignment list '.basename($path));
+ $source=file_get_contents($path);
+ $ok(str_contains($source,'mm-category-rules-viewport'),
+     'category rules table local scroll '.basename($path));
 }
 $css=file_get_contents($root.'media/css/admin-ui.css');
-foreach([1,2,3,4] as $i)
+foreach([1,2,3] as $i)
     $ok(str_contains($css,'mm-rules-table--state th:nth-child('.$i.')'),
         'four explicit rule-table column widths '.$i);
-$ok(str_contains($css,'mm-rules-table--state {width:100%;min-width:660px'),
+$ok(str_contains($css,'mm-rules-table--state {width:100%;min-width:540px'),
     'rule tables prevent vertical text on cramped layouts');
 $order=file_get_contents($root.'admin/tmpl/order/create.php');
 $ok(str_contains($order,'data-mm-manual-remove') &&

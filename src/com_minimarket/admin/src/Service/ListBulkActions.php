@@ -54,6 +54,9 @@ final class ListBulkActions
             $query=$db->getQuery(true)->update($table)->set('deleted_at=NULL')
                 ->where($where);
             $db->setQuery($query);$db->execute();
+            foreach($ids as $orderId)
+                OrderHistory::record($db,$orderId,(int)Factory::getApplication()->getIdentity()->id,
+                    'trash','trashed','restored');
             $db->transactionCommit();
             return count($ids);
         } catch(\Throwable $e) {
@@ -85,6 +88,7 @@ final class ListBulkActions
         $db->transactionStart();
         try {
             $sql = 'SELECT '.$db->quoteName('id').', '.$db->quoteName($field)
+                .($table==='#__minimarket_shipments'?', '.$db->quoteName('order_id'):'')
                 .' FROM '.$db->quoteName($table)
                 .' WHERE '.$db->quoteName('id').' IN ('.implode(',', $ids).')';
             if ($onlyLiveOrders) {
@@ -112,6 +116,14 @@ final class ListBulkActions
             }
             $db->setQuery($query);
             $db->execute();
+            if($table==='#__minimarket_orders'||$table==='#__minimarket_shipments'){
+                foreach($rows as $row)
+                    OrderHistory::record($db,
+                        $table==='#__minimarket_orders'?(int)$row['id']:(int)$row['order_id'],
+                        (int)Factory::getApplication()->getIdentity()->id,
+                        $softDelete?'trash':($table==='#__minimarket_orders'?'status':'delivery_status'),
+                        (string)$row[$field],$softDelete?'trashed':$target);
+            }
             $db->transactionCommit();
             return count($ids);
         } catch (\Throwable $e) {

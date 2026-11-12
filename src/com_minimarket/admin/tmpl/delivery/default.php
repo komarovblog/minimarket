@@ -22,6 +22,14 @@ $s=$this->shipment;
     </select>
   </div>
   <div class="col-12 col-md-6">
+    <label class="form-label" for="mm-reason"><?php echo Text::_('COM_MINIMARKET_DELIVERY_REASON'); ?></label>
+    <select id="mm-reason" name="reason" class="form-select">
+     <?php foreach(['initial','redelivery','replacement','other'] as $reason): ?>
+      <option value="<?php echo $reason; ?>"<?php echo ($s->reason??'initial')===$reason?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_DELIVERY_REASON_'.strtoupper($reason)); ?></option>
+     <?php endforeach; ?>
+    </select>
+  </div>
+  <div class="col-12 col-md-6">
     <label class="form-label" for="mm-track"><?php echo Text::_('COM_MINIMARKET_DELIVERY_TRACK'); ?></label>
     <input class="form-control" id="mm-track" name="tracking_number" maxlength="120" value="<?php echo $this->escape((string)$s->tracking_number); ?>">
   </div>
@@ -37,4 +45,12 @@ $s=$this->shipment;
   </div>
   <div class="col-12"><?php echo HTMLHelper::_('form.token'); ?></div>
  </form>
+  <?php if($this->linkedReturns): ?>
+  <div class="mt-3">
+   <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_RETURNS_TITLE'); ?></h3>
+   <?php foreach($this->linkedReturns as $r): ?>
+    <a class="d-block" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=returncase&id='.(int)$r->id,false)); ?>">#<?php echo (int)$r->id; ?> — <?php echo Text::_('COM_MINIMARKET_RETURN_STATUS_'.strtoupper((string)$r->status)); ?></a>
+   <?php endforeach; ?>
+  </div>
+  <?php endif; ?>
 </section>

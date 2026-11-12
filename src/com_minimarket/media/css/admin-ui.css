@@ -387,30 +387,25 @@
 /* Entity lists use Joomla's native table borders and spacing. */
 
 
-/* Category assignment tables: four real columns, native Atum colors. */
+/* Native Atum category assignment tables, one global display rule per attribute/option. */
 #adminForm .mm-admin-panel .control-group:has(.mm-category-rules-viewport) {display:block;width:100%;min-width:0;}
 #adminForm .mm-admin-panel .control-group:has(.mm-category-rules-viewport) > .control-label,
-#adminForm .mm-admin-panel .control-group:has(.mm-category-rules-viewport) > .controls {
-  display:block;float:none;width:100%;max-width:100%;min-width:0;
-}
+#adminForm .mm-admin-panel .control-group:has(.mm-category-rules-viewport) > .controls {display:block;float:none;width:100%;max-width:100%;min-width:0;}
 #adminForm .mm-category-rules-viewport {width:100%;max-width:100%;overflow-x:auto;}
-#adminForm .mm-admin-panel .mm-rules-table--state {width:100%;min-width:660px;table-layout:fixed;}
-#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(1) {width:32%;}
-#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(2) {width:30%;}
+#adminForm .mm-admin-panel .mm-rules-table--state {width:100%;min-width:540px;table-layout:fixed;}
+#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(1) {width:46%;}
+#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(2) {width:34%;}
 #adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(3) {width:20%;}
-#adminForm .mm-admin-panel .mm-rules-table--state th:nth-child(4) {width:18%;}
-#adminForm .mm-admin-panel .mm-rules-table--state th,
-#adminForm .mm-admin-panel .mm-rules-table--state td {vertical-align:middle;word-break:normal;overflow-wrap:normal;}
+#adminForm .mm-admin-panel .mm-rules-table--state th, #adminForm .mm-admin-panel .mm-rules-table--state td {vertical-align:middle;word-break:normal;overflow-wrap:normal;}
 #adminForm .mm-admin-panel .mm-rules-table--state th:first-child {overflow-wrap:anywhere;}
-#adminForm .mm-admin-panel .mm-rules-table--state td.mm-rules-state,
-#adminForm .mm-admin-panel .mm-rules-table--state th:last-child {white-space:nowrap;}
+#adminForm .mm-admin-panel .mm-rules-table--state td.mm-rules-state {white-space:nowrap;}
 #adminForm .mm-admin-panel .mm-rules-table--state select {width:100%;max-width:100%;}
 #adminForm .mm-rules-table--state small {margin-top:.2rem;}
 
 /* Preserve real table columns on XS/SM: only the assignment table scrolls,
    instead of the older stacked labels with collapsed publication columns. */
 @media (max-width: 767.98px) {
-  #adminForm .mm-category-rules-viewport .mm-rules-table { display:table; min-width:660px; }
+  #adminForm .mm-category-rules-viewport .mm-rules-table { display:table; min-width:540px; }
   #adminForm .mm-category-rules-viewport .mm-rules-table thead { display:table-header-group; }
   #adminForm .mm-category-rules-viewport .mm-rules-table tbody { display:table-row-group; }
   #adminForm .mm-category-rules-viewport .mm-rules-table tr { display:table-row; }

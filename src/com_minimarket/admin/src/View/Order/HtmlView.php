@@ -18,6 +18,8 @@ final class HtmlView extends BaseHtmlView
     public bool $canDelete=false;
     public bool $canCreateDelivery=false;
     public ?int $shipmentId=null;
+    public array $shipments=[],$returns=[],$events=[];
+    public bool $canCreateReturn=false;
     public bool $isCreate=false;
     public array $productChoices=[];
     public array $pickerCategories=[];
@@ -37,6 +39,7 @@ final class HtmlView extends BaseHtmlView
         $this->canUpdate=$identity->authorise('core.edit.state','com_minimarket');
         $this->canDelete=$identity->authorise('core.delete','com_minimarket');
         $this->canCreateDelivery=$identity->authorise('core.create','com_minimarket');
+        $this->canCreateReturn=$identity->authorise('core.create','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {
             $this->setLayout('create');
@@ -90,12 +93,25 @@ final class HtmlView extends BaseHtmlView
             ->where('order_id='.(int)$id)->order('field_code ASC');
         $db->setQuery($q);
         $this->customFields=(array)$db->loadObjectList();
-        $q=$db->getQuery(true)->select('id')
+        $q=$db->getQuery(true)->select(['id','order_id','carrier','tracking_number',
+                'reason','status','created_at'])
             ->from($db->quoteName('#__minimarket_shipments'))
-            ->where('order_id='.(int)$id);
+            ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
         $db->setQuery($q);
-        $existing=$db->loadResult();
-        $this->shipmentId=$existing!==null?(int)$existing:null;
+        $this->shipments=(array)$db->loadObjectList();
+        $this->shipmentId=$this->shipments?(int)$this->shipments[0]->id:null;
+        $q=$db->getQuery(true)->select(['id','order_id','shipment_id','reason',
+                'status','resolution','created_at'])
+            ->from($db->quoteName('#__minimarket_returns'))
+            ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
+        $db->setQuery($q);
+        $this->returns=(array)$db->loadObjectList();
+        $q=$db->getQuery(true)->select(['id','actor_user_id','event_type',
+                'old_value','new_value','created_at'])
+            ->from($db->quoteName('#__minimarket_order_events'))
+            ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
+        $db->setQuery($q,0,500);
+        $this->events=(array)$db->loadObjectList();
         ToolbarHelper::title(Text::sprintf('COM_MINIMARKET_ORDER_HEADING',$id));
         parent::display($tpl);
     }

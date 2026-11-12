@@ -17,7 +17,6 @@ use MiniMarket\Component\Minimarket\Site\Service\CatalogRepository;
 use MiniMarket\Component\Minimarket\Site\Service\CategoryDisplayOptions;
 use MiniMarket\Component\Minimarket\Site\Service\FacetedCatalog;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
-use MiniMarket\Component\Minimarket\Administrator\Service\CategoryListVisibility;
 
 class HtmlView extends BaseHtmlView
 {
@@ -210,7 +209,7 @@ class HtmlView extends BaseHtmlView
             }
             $optionLocations=[];$optionIds=[];
             $optionHierarchy=CategoryOrderOptions::hierarchy($db);
-            $optionFlagsByCategory=[];
+            $optionModesByCategory=[];
             $q=$db->getQuery(true)->select(['id','code','display_location'])
                 ->from($db->quoteName('#__minimarket_order_options'))
                 ->where('state=1');
@@ -227,15 +226,14 @@ class HtmlView extends BaseHtmlView
                 if (isset($this->variantsInProducts[$pid])) {
                     $categoryId=(int)$product->category_id;
                     if(!isset($optionFlagsByCategory[$categoryId])){
-                        $optionFlagsByCategory[$categoryId]=CategoryListVisibility::resolve(
-                            $categoryId,$optionHierarchy['parents'],$optionHierarchy['rules'],
-                            $optionHierarchy['list_flags']??[]);
+                        $optionFlagsByCategory[$categoryId]=CategoryOrderOptions::resolveModes(
+                            $categoryId,$optionHierarchy['parents'],$optionHierarchy['rules']);
                     }
                     $visibleOptions=$optionFlagsByCategory[$categoryId];
                     $variants=$repo->getProductVariants($pid,$categoryId);
                     foreach($variants['axes']??[] as $code=>$axis) {
                         $linkedOptionId=$optionIds[(string)$code]??0;
-                        if($linkedOptionId>0 && !($visibleOptions[$linkedOptionId]??false))continue;
+                        if($linkedOptionId>0 && !isset($enabledOptions[$linkedOptionId]))continue;
                         $location=$optionLocations[(string)$code]??'inherit';
                         if ($location==='inherit') {
                             $location=$this->productListOptions['option_display_location'];

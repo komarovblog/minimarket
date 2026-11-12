@@ -24,6 +24,7 @@ $mmReference=[
 </div>
 <section class="mm-admin-panel">
  <div class="alert alert-info" role="note"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CREATE_HINT'); ?></div>
+ <?php if($this->hasPriorShipment): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_DELIVERY_REPEAT_HINT'); ?></p><?php endif; ?>
  <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.create',false)); ?>" id="mm-delivery-form" class="row g-3">
   <div class="col-12"><?php require dirname(__DIR__).'/shared/reference-picker.php'; ?></div>
   <div class="col-12 col-md-6">
@@ -31,6 +32,14 @@ $mmReference=[
    <select class="form-select" id="mm-shipment-carrier" name="carrier">
     <?php foreach(['own','cdek','other'] as $carrier): ?>
      <option value="<?php echo $carrier; ?>"><?php echo Text::_('COM_MINIMARKET_DELIVERY_CARRIER_'.strtoupper($carrier)); ?></option>
+    <?php endforeach; ?>
+   </select>
+  </div>
+  <div class="col-12 col-md-6">
+   <label class="form-label" for="mm-shipment-reason"><?php echo Text::_('COM_MINIMARKET_DELIVERY_REASON'); ?></label>
+   <select class="form-select" name="reason" id="mm-shipment-reason">
+    <?php foreach(['initial','redelivery','replacement','other'] as $reason): ?>
+     <option value="<?php echo $reason; ?>"<?php echo ($this->hasPriorShipment?'redelivery':'initial')===$reason?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_DELIVERY_REASON_'.strtoupper($reason)); ?></option>
     <?php endforeach; ?>
    </select>
   </div>

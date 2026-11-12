@@ -35,6 +35,7 @@ $href='index.php?option=com_minimarket&view=orders&'.http_build_query($params,''
  <div id="j-main-container" class="j-main-container">
 
     <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
+    <?php $mmColumnTable='mm-orders-list'; require dirname(__DIR__).'/shared/column-toggle.php'; ?>
 
       <div class="table-responsive mm-native-list-viewport">
         <table id="mm-orders-list" class="table table-striped mm-admin-list">

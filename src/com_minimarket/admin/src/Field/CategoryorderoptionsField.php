@@ -37,8 +37,6 @@ final class CategoryorderoptionsField extends FormField
         $hierarchy = CategoryOrderOptions::hierarchy($db);
         $inherited = CategoryOrderOptions::resolveModes($parentId,
             $hierarchy['parents'], $hierarchy['rules']);
-        $inheritedList = CategoryListVisibility::resolve($parentId,
-            $hierarchy['parents'], $hierarchy['rules'], $hierarchy['list_flags']??[]);
         $own = is_array($this->value)
             ? $this->value : CategoryOrderOptions::directWithVisibility($db, $categoryId);
         $esc = static fn(string $s): string =>
@@ -47,7 +45,6 @@ final class CategoryorderoptionsField extends FormField
             '</p><div class="table-responsive mm-category-rules-viewport"><table class="table table-striped table-sm align-middle mm-rules-table mm-rules-table--state"><thead><tr><th>' .
             $esc(Text::_('COM_MINIMARKET_ORDER_OPTIONS')) . '</th><th>' .
             $esc(Text::_('COM_MINIMARKET_CATEGORY_ORDER_OPTION_RULE')) .
-            '</th><th>' . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')) .
             '</th><th>' . $esc(Text::_('JSTATUS')) .
             '</th></tr></thead><tbody>';
         foreach ($options as $option) {
@@ -78,17 +75,7 @@ final class CategoryorderoptionsField extends FormField
                 $html .= '<option value="' . $value . '"' . ($mode === $value ? ' selected' : '')
                     . '>' . $esc(Text::_($key)) . '</option>';
             }
-            $listVisible=(int)($own['v'.$id]??($inheritedList[$id]??true))===1;
-            $flagName=$esc($this->name.'[v'.$id.']');
-            $flagId=$esc($this->id.'_v'.$id);
-            $html .= '</select></td><td><input type="hidden" name="'.$flagName.'" value="0">'
-                . '<select class="form-select form-select-sm" name="'.$flagName
-                . '" id="'.$flagId.'" data-mm-category-list-flag aria-label="'
-                . $esc(Text::_('COM_MINIMARKET_SHOW_IN_PRODUCT_LIST')).'">'
-                . '<option value="1"'.($listVisible?' selected':'').'>'
-                . $esc(Text::_('COM_MINIMARKET_SHOW')).'</option>'
-                . '<option value="0"'.(!$listVisible?' selected':'').'>'
-                . $esc(Text::_('COM_MINIMARKET_HIDE')).'</option></select>'
+            $html .= '</select>'
                 . '</td><td class="mm-rules-state"><span class="'
                 . ($published ? 'text-success' : 'text-muted') . '">'
                 . $esc(Text::_($published ? 'JPUBLISHED' : 'JUNPUBLISHED'))

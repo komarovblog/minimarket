@@ -14,6 +14,7 @@ $items=$manifest->administration->submenu->menu;
 $expected=[
  'orders'=>'index.php?option=com_minimarket&view=order&layout=create',
  'deliveries'=>'index.php?option=com_minimarket&view=delivery&layout=create',
+ 'returns'=>'index.php?option=com_minimarket&view=returncase&layout=create',
  'reviews'=>'index.php?option=com_minimarket&view=review&layout=create',
  'categories'=>'index.php?option=com_minimarket&task=category.add',
  'products'=>'index.php?option=com_minimarket&view=product&layout=edit&product_type=simple',
@@ -49,7 +50,7 @@ foreach($items as $item){
     $ok(!isset($found[$view]),'exactly one plus on '.$view);
     $found[$view]=true;
 }
-$ok(count($found)===count($expected),'all 15 possible create actions covered');
+$ok(count($found)===count($expected),'all 16 possible create actions covered');
 
 $cartXml=$root.'site/tmpl/cart/default.xml';
 $cart=simplexml_load_file($cartXml);

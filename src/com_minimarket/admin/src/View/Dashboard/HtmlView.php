@@ -31,6 +31,7 @@ final class HtmlView extends BaseHtmlView
             'feeds'        => ['feeds', '1=1'],
             'orders'       => ['orders', 'deleted_at IS NULL'],
             'deliveries'   => ['shipments', "status IN ('new','in_transit')"],
+            'returns'      => ['returns', "status IN ('new','approved','received')"],
             'deliveryzones'=> ['delivery_zones','1=1'],
             'reviews'      => ['reviews', 'state=0'],
             'seofilters'   => ['seo_filters','1=1'],

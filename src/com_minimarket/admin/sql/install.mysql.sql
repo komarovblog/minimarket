@@ -636,6 +636,8 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     payment_method VARCHAR(24) NOT NULL DEFAULT 'on_receipt',
     digital_recipient_email VARCHAR(254) NOT NULL DEFAULT '',
     payment_status VARCHAR(16) NOT NULL DEFAULT 'unpaid',
+    payment_reference VARCHAR(128) NOT NULL DEFAULT '',
+    payment_url VARCHAR(2048) NOT NULL DEFAULT '',
     paid_at DATETIME NULL,
     fulfillment_status VARCHAR(20) NOT NULL DEFAULT 'pending',
     fulfilled_at DATETIME NULL,
@@ -687,13 +689,14 @@ CREATE TABLE IF NOT EXISTS #__minimarket_shipments (
     order_id INT UNSIGNED NOT NULL,
     carrier VARCHAR(16) NOT NULL DEFAULT 'own',
     tracking_number VARCHAR(120) NOT NULL DEFAULT '',
+    reason VARCHAR(24) NOT NULL DEFAULT 'initial',
     status VARCHAR(16) NOT NULL DEFAULT 'new',
     note TEXT NULL,
     created_by INT UNSIGNED NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL,
     updated_at DATETIME NULL,
     PRIMARY KEY(id),
-    UNIQUE KEY idx_mm_shipment_one_per_order(order_id),
+    KEY idx_mm_shipment_order(order_id),
     KEY idx_mm_shipment_status(status,created_at),
     CONSTRAINT fk_mm_shipment_order FOREIGN KEY(order_id)
         REFERENCES #__minimarket_orders(id)
@@ -722,6 +725,43 @@ CREATE TABLE IF NOT EXISTS #__minimarket_order_items (
     CONSTRAINT fk_mm_order_line_parent FOREIGN KEY (order_id)
         REFERENCES #__minimarket_orders (id)
         ON UPDATE RESTRICT ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- A return is a separate case, not a rewrite of immutable order snapshots.
+-- Optional shipment_id refers to the delivery that triggered the return.
+CREATE TABLE IF NOT EXISTS #__minimarket_returns (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    order_id INT UNSIGNED NOT NULL,
+    shipment_id INT UNSIGNED NULL,
+    reason VARCHAR(24) NOT NULL DEFAULT 'defective',
+    status VARCHAR(20) NOT NULL DEFAULT 'new',
+    note TEXT NULL,
+    resolution VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_by INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NULL,
+    PRIMARY KEY (id),
+    KEY idx_mm_return_order (order_id,created_at),
+    KEY idx_mm_return_status (status,created_at),
+    KEY idx_mm_return_shipment (shipment_id),
+    CONSTRAINT fk_mm_return_order FOREIGN KEY (order_id)
+        REFERENCES #__minimarket_orders(id) ON DELETE RESTRICT,
+    CONSTRAINT fk_mm_return_shipment FOREIGN KEY (shipment_id)
+        REFERENCES #__minimarket_shipments(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS #__minimarket_return_items (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    return_id INT UNSIGNED NOT NULL,
+    order_item_id BIGINT UNSIGNED NOT NULL,
+    quantity INT UNSIGNED NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_mm_return_item (return_id,order_item_id),
+    KEY idx_mm_return_item_order_line (order_item_id),
+    CONSTRAINT fk_mm_return_item_return FOREIGN KEY(return_id)
+        REFERENCES #__minimarket_returns(id) ON DELETE CASCADE,
+    CONSTRAINT fk_mm_return_item_order_item FOREIGN KEY(order_item_id)
+        REFERENCES #__minimarket_order_items(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS #__minimarket_order_events (

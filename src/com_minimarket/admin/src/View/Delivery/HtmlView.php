@@ -12,6 +12,8 @@ final class HtmlView extends BaseHtmlView
     public ?object $shipment=null;
     public array $orders=[];
     public int $preselectedOrder=0;
+    public bool $hasPriorShipment=false;
+    public array $linkedReturns=[];
     public function display($tpl=null)
     {
         $app=Factory::getApplication();$u=$app->getIdentity();
@@ -28,10 +30,14 @@ final class HtmlView extends BaseHtmlView
             $this->preselectedOrder=$app->input->getInt('order_id',0);
             $q=$db->getQuery(true)->select(['o.id','o.customer_name','o.delivery_city','o.created_at'])
                 ->from($db->quoteName('#__minimarket_orders','o'))
-                ->join('LEFT',$db->quoteName('#__minimarket_shipments','s').' ON s.order_id=o.id')
                 ->where('o.deleted_at IS NULL')->where("o.delivery_method='courier'")
-                ->where("o.status<>'cancelled'")->where('s.id IS NULL')->order('o.id DESC');
+                ->where("o.status<>'cancelled'")->order('o.id DESC');
             if($this->preselectedOrder>0){$q->where('o.id='.(int)$this->preselectedOrder);$db->setQuery($q,0,1);$this->orders=(array)$db->loadObjectList();}
+            if($this->preselectedOrder>0&&$this->orders){
+                $db->setQuery('SELECT COUNT(*) FROM '.$db->quoteName('#__minimarket_shipments')
+                    .' WHERE order_id='.(int)$this->preselectedOrder);
+                $this->hasPriorShipment=(int)$db->loadResult()>0;
+            }
         }else{
             $id=$app->input->getInt('id',0);
             $q=$db->getQuery(true)->select(['s.*','o.customer_name','o.delivery_city','o.delivery_address'])
@@ -40,8 +46,12 @@ final class HtmlView extends BaseHtmlView
                 ->where('s.id='.(int)$id);
             $db->setQuery($q);$this->shipment=$db->loadObject()?:null;
             if(!$this->shipment)throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
+            $q=$db->getQuery(true)->select(['id','reason','status'])
+                ->from($db->quoteName('#__minimarket_returns'))
+                ->where('shipment_id='.(int)$id)->order('id DESC');
+            $db->setQuery($q);$this->linkedReturns=(array)$db->loadObjectList();
         }
-        ToolbarHelper::title(Text::_('COM_MINIMARKET_DELIVERY_NEW'));
+        ToolbarHelper::title(Text::_($this->isCreate?'COM_MINIMARKET_DELIVERY_NEW':'COM_MINIMARKET_DASHBOARD_DELIVERIES'));
         parent::display($tpl);
     }
 }
