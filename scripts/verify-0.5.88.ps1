@@ -87,7 +87,7 @@ foreach($key in @("uitab.addTab', 'minimarket-seofilter', 'publication'",
 # The category-bound facets are intentionally generated client-side from
 # SeoCategoryChoices. Do not demand their markup in the static PHP template.
 $seoScript=Get-Content -LiteralPath (Join-Path $component 'media\js\seo-category-editor.js') -Raw -Encoding UTF8
-foreach($key in @('data-mm-seo-state="stock"','og_image','mm-seo-price-min','data-mm-seo-choices-url','mm-seo-conditions')) {
+foreach($key in @('data-mm-seo-state="<?php echo $systemKey; ?>"','og_image','mm-seo-price-min','data-mm-seo-choices-url','mm-seo-conditions')) {
     if(-not $text['seo'].Contains($key)){
         throw "MINIMARKET_088_SEO_CHECK_MISSING: $key"
     }

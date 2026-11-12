@@ -106,6 +106,14 @@ $check(str_contains($controller,'SeoCategoryChoices::validateConditions')
 $check(str_contains($controller,"function state():void")
     &&substr_count($controller,'SeoLandingResolver::assertUnambiguous')===2,
     'both save and separate publication validate overlapping SEO pages');
+$bulk=(string)file_get_contents($root.'admin/src/Controller/SeofiltersController.php');
+$check(str_contains($bulk,'SeoLandingRules::overlap')
+    &&str_contains($bulk,'SeoLandingRules::specificity')
+    &&str_contains($bulk,'SeoCategoryChoices::validateConditions')
+    &&str_contains($bulk,'ORDER BY id ASC FOR UPDATE')
+    &&str_contains($bulk,'transactionStart()'),
+    'bulk publication validates overlapping equal-rank rules under locks');
+
 $check(str_contains($adminView,'data-mm-seo-conditions')
     &&str_contains($editor,"data-mm-seo-state")
     &&!str_contains($editor,"input.type='checkbox'"),

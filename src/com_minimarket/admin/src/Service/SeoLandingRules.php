@@ -137,8 +137,11 @@ final class SeoLandingRules
         foreach($raw as $id=>$value){
             if(!is_string($id)||!preg_match('/^(?:[as][1-9][0-9]*|price|stock|sku)$/D',$id))
                 return [];
-            if($id==='sku'){
-                if(is_string($value)&&trim($value)!=='')
+            if($id==='sku' || (
+                is_array($rules[$id]['value']??null)
+                && array_key_exists('text',$rules[$id]['value']))) {
+                if(is_string($value)&&trim($value)!==''
+                    &&mb_strlen(trim($value))<=100)
                     $out[$id]=['text'=>trim($value)];
             }elseif(is_array($value)
                 &&(array_key_exists('min',$value)||array_key_exists('max',$value))){
