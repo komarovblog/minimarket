@@ -1,6 +1,6 @@
 
 /* Native Bootstrap cards and Joomla form controls; no global admin overrides. */
-.mm-feed-picker { max-height: 30rem; overflow-y: auto; }
+.mm-feed-picker { height: min(30rem, 60vh); min-height: 16rem; overflow-y: auto; }
 .mm-feed-picker .form-check { padding-block: .25rem; }
 .mm-feed-picker .form-check[hidden] { display: none !important; }
 .mm-feed-product .form-check-label { overflow-wrap: anywhere; }
@@ -19,3 +19,9 @@
 }
 .mm-feed-product-category-options { max-height: 16rem; overflow-y: auto; }
 .mm-feed-product-category-options .form-check { padding-block: .25rem; }
+
+.mm-feed-product-category-options [data-mm-feed-product-filter-row][hidden] { display: none !important; }
+.mm-feed-product-search { width: 100%; }
+@media (max-width: 575.98px) {
+  .mm-feed-product-category-filter > summary > span:not(.icon-filter):not([data-mm-feed-product-filter-count]) { display: none; }
+}
