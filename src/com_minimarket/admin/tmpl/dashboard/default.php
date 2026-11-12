@@ -69,14 +69,14 @@ $sections = [
         'type' => 'settings',
         'icon' => 'icon-cog',
         'items' => [
-            ['view' => 'settings', 'label' => 'COM_MINIMARKET_CONFIG_SETTINGS_MENU',
-                'icon' => 'icon-cog', 'count' => null],
             ['view' => 'deliverymethods', 'label' => 'COM_MINIMARKET_DELIVERY_METHODS_TITLE',
                 'icon' => 'icon-truck', 'count' => null],
             ['view' => 'paymentmethods', 'label' => 'COM_MINIMARKET_PAYMENT_METHODS_TITLE',
                 'icon' => 'icon-credit-card', 'count' => null],
             ['view' => 'registrationmethods', 'label' => 'COM_MINIMARKET_REGISTRATION_METHODS_TITLE',
                 'icon' => 'icon-user', 'count' => null],
+            ['view' => 'settings', 'label' => 'COM_MINIMARKET_CONFIG_SETTINGS_MENU',
+                'icon' => 'icon-cog', 'count' => null],
         ],
     ],
 ];
