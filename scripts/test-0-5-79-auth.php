@@ -48,9 +48,9 @@ $storage=(string)file_get_contents($root.'site/src/Service/OrderStorage.php');
 $ok(str_contains($storage,'$userId<0') && !str_contains($storage,'$userId<1'),
     'interim orders allow anonymous contact-only requests');
 $ctrl=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
-$ok(!str_contains($ctrl,'$identity->id<1')
+$ok(str_contains($ctrl,'COM_MINIMARKET_DIGITAL_LOGIN_REQUIRED')
     && str_contains($ctrl,'OrderStorage::create'),
-    'interim order controller permits guests');
+    'physical guest requests remain possible, digital items require Joomla identity');
 $migration=(string)file_get_contents($root.'admin/sql/updates/mysql/0.5.79.sql');
 $ok(str_contains($migration,'#__minimarket_user_phones')
     && str_contains($migration,'#__minimarket_phone_challenges'),'additive schema');
