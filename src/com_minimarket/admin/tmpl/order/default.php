@@ -210,6 +210,9 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
     <div class="mt-3">
      <span class="text-muted"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?>:</span>
      <strong><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper((string)($o->fulfillment_status??'pending'))); ?></strong>
+     <?php if(!empty($o->fulfilled_at)): ?>
+      <div class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_FULFILLED_AT'); ?>: <?php echo $e($o->fulfilled_at); ?></div>
+     <?php endif; ?>
     </div>
     <?php if($canUpdate && $o->delivery_method==='pickup'): ?>
     <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.fulfillment',false)); ?>" class="d-flex flex-wrap gap-2 align-items-end mt-2">
