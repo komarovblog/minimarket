@@ -42,7 +42,7 @@ namespace MiniMarket\Smoke95 {
  check95(CheckoutDelivery::methods($params)['pickup']['fee_cents']===15950,'pickup has fee');
  check95(CheckoutDelivery::quote($params,['delivery_method'=>'pickup','payment_method'=>'on_receipt'])['fee_cents']===15950,
   'server pickup quote includes fee');
- try{CheckoutSettings::mode(new Params(['checkout_auth_mode'=>'email','checkout_verification_method'=>'']));
+ try{CheckoutSettings::method(new Params(['checkout_auth_mode'=>'guests','checkout_verification_method'=>'']));
   check95(false,'email confirmation not configured');}
  catch(\DomainException){check95(true,'email needs selected method');}
  final class Q {
