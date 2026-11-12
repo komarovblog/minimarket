@@ -205,6 +205,10 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
+      - name: Release bootstrap reparses updated script after git pull
+        shell: powershell
+        run: |
+          & .\scripts\test-release-self-update.ps1
       - name: Verify one-command Desktop delivery has exactly 2 files
         shell: powershell
         run: |

@@ -37,7 +37,7 @@ if (-not $SkipPull) {
 # parser catches an unmatched bracket before it reaches a runtime check.
 foreach ($scriptName in @('release-to-desktop.ps1', 'verify-admin-lists.ps1',
     'verify-0.5.87.ps1', 'verify-0.5.88.ps1', 'verify-0.5.89.ps1', 'verify-0.5.90.ps1',
-    'verify-translations.ps1',
+    'verify-translations.ps1', 'test-release-self-update.ps1',
     'build.ps1', 'inspect-package.ps1')) {
     $scriptPath = Join-Path $PSScriptRoot $scriptName
     $tokens = $null
