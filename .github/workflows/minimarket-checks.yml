@@ -188,6 +188,7 @@ jobs:
           php scripts/test-0-5-82-schema-mysql84.php
           php scripts/test-0-5-83-schema-mysql84.php
           php scripts/test-0-5-84-schema-mysql84.php
+          php scripts/test-0-5-99-migration-mysql84.php
 
   windows-package:
     name: Windows component ZIP
