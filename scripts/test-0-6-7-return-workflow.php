@@ -41,6 +41,14 @@ $check(!str_contains($catalog,"\$assignment['list']")&&
 $check(str_contains($categoryView,'CategoryOrderOptions::resolveModes')
     && !str_contains($categoryView,'CategoryListVisibility::resolve'),
     'order-option display uses global setting');
+// New pages are only reachable when DisplayController permits and dispatches
+// them, and the native list receives Joomla POST filter normalization.
+$dispatcher=file_get_contents($root.'admin/src/Controller/DisplayController.php');
+$check(substr_count($dispatcher,"'returns'")>=4 &&
+    substr_count($dispatcher,"'returncase'")>=2,
+    'return routes listed in native toolbar, allowlist, filter and view dispatch');
+$check(str_contains($dispatcher,"NativeListTools::importRequest()"),
+    'returns honor Joomla native SearchTools input normalization');
 $orderView=file_get_contents($root.'admin/src/View/Order/HtmlView.php');
 $orderTpl=file_get_contents($root.'admin/tmpl/order/default.php');
 foreach(['shipments','returns','events'] as $field)
