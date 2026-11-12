@@ -93,6 +93,8 @@ $assert(str_contains($gallery,'showModal()')
     &&str_contains($gallery,'pointermove')&&str_contains($gallery,'ArrowLeft'),
     'interactive lightbox, hover zoom and keyboard navigation');
 $checkout=(string)file_get_contents($root.'site/src/Controller/CheckoutController.php');
-$assert(str_contains($checkout,'accept_terms')&&str_contains($checkout,'$needsPhysical'),
-    'server terms and mixed cart validation');
+$assert(str_contains($checkout,'CheckoutSettings::requiresPurchaseCode')
+    &&str_contains($checkout,"Session::checkToken('post')")
+    &&str_contains($checkout,'$needsPhysical'),
+    'server purchase-code, CSRF and mixed cart validation');
 echo "MM99_PASS: ".$checks." assertions\n";
