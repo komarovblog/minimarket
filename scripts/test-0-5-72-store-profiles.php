@@ -10,7 +10,8 @@ $product=simplexml_load_file($root.'admin/forms/product.xml');
 if($product===false)throw new RuntimeException('MM72_PRODUCT_XML');
 $fields=$product->xpath('//field[@name="delivery_type"]');
 if(count($fields)!==1)throw new RuntimeException('MM72_DELIVERY_TYPE_FIELD');
-$values=array_map(static fn($x)=>(string)$x['value'],iterator_to_array($fields[0]->option));
+$values=[];
+foreach($fields[0]->option as $option)$values[]=(string)$option['value'];
 if($values!==['physical','digital'] ||(string)$fields[0]['default']!=='physical')
     throw new RuntimeException('MM72_PRODUCT_TYPES');
 foreach(['ru-RU','en-GB'] as $lang){
