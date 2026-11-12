@@ -1,3 +1,11 @@
+> **Актуальный и единственный способ получения ZIP на Desktop:**
+>
+> ```powershell
+> powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\release-to-desktop.ps1"
+> ```
+>
+> Выполнять одной строкой из CMD или PowerShell. Скрипт сам выполняет `git pull`, сборку и копирование. **Не использовать отдельно `cd`, `git pull` и `-SkipPull`.** [Постоянное правило](../docs/DELIVERY_RULES.md). Инструкции ниже для старых версий — исторические.
+
 > **04.11.2026 — сборка MiniMarket: РОВНО ДВА файла рядом в dist/**: `com_minimarket-<версия>.zip` (установка компонента Joomla) и `minimarket_toys_rich_import.sql` (отдельный ручной импорт демоданных). Исходник SQL в `sample-data/minimarket_toys_rich_import.sql` (в GitHub, без Joomla system/credentials). `scripts/build.ps1` автоматически копирует SQL в директорию выходного ZIP без включения SQL в ZIP, `scripts/inspect-package.ps1` сверяет SHA256 и отсутствие SQL внутри архива. Windows GitHub Actions сохраняет оба файла одним набором artifacts. SQL существующие данные MiniMarket ЗАМЕНЯЕТ, поэтому импортировать отдельно через phpMyAdmin только после бэкапа и проверки БД `minimarket`/префикса `wquew_`. ZIP-компонента автоматически демоданные не загружает. **Не создавать третий demo ZIP в dist.** Только development.
 
 > **0.5.2:** версия архива `dist/com_minimarket-0.5.2.zip`. Установка стандартным Joomla upgrade после backup. Проверка нормализации путей изображений для категорий/товаров/OG — `scripts/test-product-editor.php`, SQL очистка старых фрагментов — `scripts/test-category-schema.php` в CI, клиент JS — `src/com_minimarket/media/js/clean-media.js`. [Правило](../docs/MEDIA_PATH_POLICY.md), [один Joomla smoke](../docs/M2_PRODUCT_052_MEDIA_SMOKE.md). Справки о 0.5.1 ниже — история.
