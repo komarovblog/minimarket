@@ -74,7 +74,9 @@ final class HtmlView extends BaseHtmlView
             'tickets_new'=>['support_tickets',"status='new'"],
             'fiscal_attention'=>['fiscal_operations',"status IN ('failed','pending')"],
             'abandonedcarts'=>['cart_snapshots',
-                \MiniMarket\Component\Minimarket\Site\Service\AbandonedCartStore::abandonedPredicate('c')],
+                "c.cart_status='active' AND c.item_units>0"
+                ." AND c.updated_at<=DATE_SUB(UTC_TIMESTAMP(),INTERVAL 60 MINUTE)"
+                ." AND c.updated_at>DATE_SUB(UTC_TIMESTAMP(),INTERVAL 30 DAY)"],
         ] as $key=>[$table,$predicate]){
             $source=$db->quoteName('#__minimarket_'.$table,
                 $key==='abandonedcarts'?'c':null);
