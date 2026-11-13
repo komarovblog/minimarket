@@ -207,6 +207,13 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\inspect-package.ps1
+      - name: Build independent MiniMarket reservation monitor Task plugin ZIP
+        shell: powershell
+        run: |
+          & .\scripts\build-task-plugin.ps1
+          if (-not (Test-Path '.\dist\plg_task_minimarketreserves-0.6.10.zip')) {
+            throw 'MM610_TASK_PLUGIN_ZIP_NOT_BUILT'
+          }
       - name: Build one-time independent MiniMarket toolbar 1.0.0 ZIP
         shell: powershell
         run: |
@@ -229,7 +236,7 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\test-release-self-update.ps1
-      - name: Verify one-command Desktop delivery has exactly 2 files
+      - name: Verify one-command Desktop delivery has exactly 3 files
         shell: powershell
         run: |
           $dest = Join-Path (Get-Location) 'dist\desktop-ci'
@@ -239,11 +246,11 @@ jobs:
           $actual = @(Get-ChildItem -LiteralPath $dest -File | Select-Object -ExpandProperty Name | Sort-Object)
           [xml]$manifest = Get-Content -LiteralPath '.\src\com_minimarket\minimarket.xml' -Raw -Encoding UTF8
           $version = [string]$manifest.extension.version
-          $expected = @("com_minimarket-$version.zip", "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql") | Sort-Object
+          $expected = @("com_minimarket-$version.zip", "plg_task_minimarketreserves-$version.zip", "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql") | Sort-Object
           if (($actual -join '|') -ne ($expected -join '|')) {
-            throw ("MM75_DESKTOP_RELEASE_EXPECTED_TWO: " + ($actual -join ','))
+            throw ("MM75_DESKTOP_RELEASE_EXPECTED_THREE: " + ($actual -join ','))
           }
-          Write-Output 'MM75_DESKTOP_TWO_FILES_WINDOWS_PASS'
+          Write-Output 'MM75_DESKTOP_THREE_FILES_WINDOWS_PASS'
       - name: Verify clean catalog SQL generator on Windows PowerShell
         shell: powershell
         run: |
