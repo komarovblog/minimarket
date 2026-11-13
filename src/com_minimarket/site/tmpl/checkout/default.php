@@ -153,6 +153,19 @@ $mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket
                     </div>
                     <?php if (isset($this->deliveryMethods['pickup'])) : ?>
                     <div class="mm-delivery-details mt-3" data-delivery-panel="pickup">
+                        <?php if($this->multiplePickup): ?>
+                        <div class="mb-3">
+                          <label class="form-label" for="mm-pickup-point"><?php echo Text::_('COM_MINIMARKET_PICKUP_SELECT'); ?> *</label>
+                          <select class="form-select" name="pickup_point_id" id="mm-pickup-point" required>
+                            <option value="0"><?php echo Text::_('COM_MINIMARKET_PICKUP_CHOOSE'); ?></option>
+                            <?php foreach($this->pickupPoints as $point): ?>
+                             <option value="<?php echo (int)$point->id; ?>" data-fee-cents="<?php echo (int)$point->fee_cents; ?>"<?php echo count($this->pickupPoints)===1?' selected':''; ?>>
+                              <?php echo $this->escape($point->title.' — '.$point->address.($point->schedule!==''?' ('.$point->schedule.')':'')); ?>
+                             </option>
+                            <?php endforeach; ?>
+                          </select>
+                        </div>
+                        <?php else: ?>
                         <p class="mb-1"><?php echo (int)($this->deliveryMethods['pickup']['fee_cents']??0)>0
                          ?Text::_('COM_MINIMARKET_PICKUP_FEE').': '.\MiniMarket\Component\Minimarket\Site\Service\CartState::format((int)$this->deliveryMethods['pickup']['fee_cents']).' '.Text::_('COM_MINIMARKET_CURRENCY_SYMBOL')
                          :Text::_('COM_MINIMARKET_DELIVERY_PICKUP_FREE'); ?></p>
@@ -168,6 +181,7 @@ $mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket
                           && parse_url($this->pickupMapUrl,PHP_URL_PASS)===null): ?>
                          <a target="_blank" rel="noopener noreferrer" href="<?php echo $this->escape($this->pickupMapUrl); ?>">
                            <?php echo Text::_('COM_MINIMARKET_PICKUP_SHOW_MAP'); ?></a>
+                        <?php endif; ?>
                         <?php endif; ?>
                     </div>
                     <?php endif; ?>
