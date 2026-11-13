@@ -27,6 +27,15 @@ $sections = [
         ],
     ],
     [
+        'title' => 'COM_MINIMARKET_DASHBOARD_REPORTS',
+        'type' => 'reports',
+        'icon' => 'icon-chart-bar',
+        'items' => [
+            ['view' => 'stockreport', 'label' => 'COM_MINIMARKET_STOCK_REPORT_TITLE',
+                'icon' => 'icon-box', 'count' => null],
+        ],
+    ],
+    [
         'title' => 'COM_MINIMARKET_DASHBOARD_SHOP',
         'type' => 'shop',
         'icon' => 'icon-cart',
@@ -62,15 +71,6 @@ $sections = [
                 'icon' => 'icon-tag', 'count' => 'promocodes'],
             ['view' => 'seofilters', 'label' => 'COM_MINIMARKET_SEOFILTERS_TITLE',
                 'icon' => 'icon-filter', 'count' => 'seofilters'],
-        ],
-    ],
-    [
-        'title' => 'COM_MINIMARKET_DASHBOARD_REPORTS',
-        'type' => 'reports',
-        'icon' => 'icon-chart-bar',
-        'items' => [
-            ['view' => 'stockreport', 'label' => 'COM_MINIMARKET_STOCK_REPORT_TITLE',
-                'icon' => 'icon-box', 'count' => null],
         ],
     ],
     [
@@ -151,7 +151,7 @@ $sections = [
                                             <rect x="2" y="6" width="12" height="12" rx="1"/><path d="M14 10h4l4 4v4h-8"/>
                                             <circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>
                                         </svg>
-                                    <?php elseif ($item['view'] === 'paymentmethods') : ?>
+                                    <?php elseif ($item['view'] === 'paymentmethods' || $item['view'] === 'payments') : ?>
                                         <svg class="mm-dashboard-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                             <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h5"/>
                                         </svg>
