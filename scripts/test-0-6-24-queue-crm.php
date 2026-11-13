@@ -71,6 +71,26 @@ $ok(str_contains($ticketUi,"view=delivery")&&str_contains($ticketUi,"view=return
  &&str_contains($createUi,'name="return_id"')
  &&str_contains($listUi,'filter_priority'),'editor list and links');
 
+// Contextual actions must prefill source IDs, not invent duplicate CRM records.
+foreach([
+ 'order'=>['order_id','user_id'],
+ 'delivery'=>['order_id','shipment_id'],
+ 'returncase'=>['order_id','return_id'],
+ 'customer'=>['user_id']
+] as $view=>$fields){
+ $markup=(string)file_get_contents($root.'admin/tmpl/'.$view.'/default.php');
+ $ok(str_contains($markup,'view=ticket&layout=create'),
+   'create support case directly from '.$view);
+ foreach($fields as $field)
+  $ok(str_contains($markup,'&'.$field.'='),
+    'source prefilled from '.$view.' '.$field);
+ $php=(string)file_get_contents($root.'admin/src/View/'.ucfirst($view).'/HtmlView.php');
+ $ok(str_contains($php,"authorise('core.create','com_minimarket')"),
+  'Joomla create permission for contextual '.$view);
+}
+$queueUi=(string)file_get_contents($root.'admin/tmpl/workqueue/default.php');
+$ok(str_contains($queueUi,'COM_MINIMARKET_TICKET_PRIORITY_HIGH'),
+ 'manager queue flags urgent support cases');
 foreach(['ru-RU','en-GB'] as $loc){
  $ini=(string)file_get_contents($root.'admin/language/'.$loc.'/com_minimarket.ini');
  foreach(['COM_MINIMARKET_WORKQUEUE_MARK_READ',
