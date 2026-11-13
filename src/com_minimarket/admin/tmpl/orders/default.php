@@ -5,6 +5,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
 $statuses=['new'=>'info','confirmed'=>'primary','completed'=>'success','cancelled'=>'secondary'];
+$paymentStatuses=['unpaid'=>'secondary','paid'=>'success','refunded'=>'info'];
+$fulfillmentStatuses=['pending'=>'secondary','shipped'=>'primary','delivered'=>'success'];
 $mmSearch=[
  'view'=>'orders','query'=>$this->search,'searchLabel'=>Text::_('COM_MINIMARKET_ORDERS_FILTER_CUSTOMER'),
  'sort'=>$this->sort,'limit'=>$this->pageSize,
@@ -14,6 +16,12 @@ $mmSearch=[
    ['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_ORDER_STATUS'),'value'=>$this->statusFilter,
     'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY')]+array_combine(array_keys($statuses),array_map(
        static fn($v)=>Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper($v)),array_keys($statuses)))],
+   ['name'=>'filter_payment','label'=>Text::_('COM_MINIMARKET_PAYMENT_STATUS'),'value'=>$this->paymentFilter,
+    'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY')]+array_combine(array_keys($paymentStatuses),array_map(
+       static fn($v)=>Text::_('COM_MINIMARKET_PAYMENT_STATUS_'.strtoupper($v)),array_keys($paymentStatuses)))],
+   ['name'=>'filter_fulfillment','label'=>Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'),'value'=>$this->fulfillmentFilter,
+    'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY')]+array_combine(array_keys($fulfillmentStatuses),array_map(
+       static fn($v)=>Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper($v)),array_keys($fulfillmentStatuses)))],
    ['name'=>'filter_delivery','label'=>Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'),'value'=>$this->deliveryFilter,
     'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
        'pickup'=>Text::_('COM_MINIMARKET_ORDER_DELIVERY_PICKUP'),
@@ -25,7 +33,8 @@ $mmSearch=[
 ];
 $params=[
  'filter_search'=>$this->search,'filter_product'=>$this->productSearch,
- 'filter_status'=>$this->statusFilter,'filter_delivery'=>$this->deliveryFilter,
+ 'filter_status'=>$this->statusFilter,'filter_payment'=>$this->paymentFilter,
+ 'filter_fulfillment'=>$this->fulfillmentFilter,'filter_delivery'=>$this->deliveryFilter,
  'filter_trash'=>$this->showTrash?1:0,'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ];
 $href='index.php?option=com_minimarket&view=orders&'.http_build_query($params,'','&',PHP_QUERY_RFC3986);
@@ -48,6 +57,8 @@ $href='index.php?option=com_minimarket&view=orders&'.http_build_query($params,''
             <th><?php echo Text::_('COM_MINIMARKET_ORDER_AMOUNT'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?></th>
+            <th><?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS'); ?></th>
+            <th><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?></th>
             <th><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE'); ?></th>
           </tr></thead>
           <tbody>
@@ -62,6 +73,8 @@ $href='index.php?option=com_minimarket&view=orders&'.http_build_query($params,''
               <td data-label="<?php echo Text::_('COM_MINIMARKET_ORDER_AMOUNT'); ?>"><?php echo number_format((int)$order->total_cents/100,2,'.',' '); ?> ₽</td>
               <td data-label="<?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_'.strtoupper((string)$order->delivery_method)); ?></td>
               <td data-label="<?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?>"><span class="badge bg-<?php echo $statuses[(string)$order->status]??'secondary'; ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$order->status)); ?></span></td>
+              <td data-label="<?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS'); ?>"><span class="badge bg-<?php echo $paymentStatuses[(string)$order->payment_status]??'secondary'; ?>"><?php echo Text::_('COM_MINIMARKET_PAYMENT_STATUS_'.strtoupper((string)$order->payment_status)); ?></span></td>
+              <td data-label="<?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?>"><span class="badge bg-<?php echo $fulfillmentStatuses[(string)$order->fulfillment_status]??'secondary'; ?>"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper((string)$order->fulfillment_status)); ?></span></td>
               <td data-label="<?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE'); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_SOURCE_'.strtoupper((string)$order->order_source)); ?></td>
             </tr>
           <?php endforeach; ?>
