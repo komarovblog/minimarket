@@ -20,9 +20,12 @@ checkNative(str_contains($html, "'title' => 'COM_MINIMARKET_DASHBOARD_SHOP'") &&
 checkNative(str_contains($html, 'mm-dashboard-icon--bundle') &&
     str_contains($html, '<svg') && str_contains($html, "'view' => 'bundles'"),
     'Bundles have distinct vector icon');
-checkNative(substr_count($html, "'count' => '") >= 20 &&
-    substr_count($html, "'pending' => true") === 0,
-    'all current live dashboard tile counters including CRM and reports links');
+checkNative(substr_count($html, "'count' => '") >= 9 &&
+    substr_count($html, "'pending' => true") === 0 &&
+    str_contains($html,"'count' => 'orders_new'") &&
+    str_contains($html,"'count' => 'notifications_unread'") &&
+    str_contains($html,"'count' => 'abandonedcarts'"),
+    'only actionable dashboard badges, no synthetic catalogue totals');
 checkNative(str_contains($css, 'a.mm-dashboard-tile:focus-visible') &&
     str_contains($css, 'outline: 2px solid') &&
     str_contains($css, 'prefers-reduced-motion'),
