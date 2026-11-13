@@ -15,10 +15,10 @@
     <field name="required" type="list" default="0" filter="int" label="COM_MINIMARKET_EXTRA_REQUIRED">
         <option value="0">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="1">COM_MINIMARKET_FIELD_REQUIRED</option>
     </field>
-    <field name="mask" type="text" maxlength="64" filter="string" label="COM_MINIMARKET_EXTRA_MASK" description="COM_MINIMARKET_CHECKOUT_MASK_HELP" />
-    <field name="placeholder" type="text" maxlength="120" filter="string" label="COM_MINIMARKET_EXTRA_PLACEHOLDER" />
+    <field name="mask" type="text" maxlength="64" filter="string" label="COM_MINIMARKET_EXTRA_MASK" description="COM_MINIMARKET_CHECKOUT_MASK_HELP" showon="type:text,tel" />
+    <field name="placeholder" type="text" maxlength="120" filter="string" label="COM_MINIMARKET_EXTRA_PLACEHOLDER" showon="type:text,tel,email,number,textarea" />
     <field name="options" type="textarea" rows="3" filter="string" label="COM_MINIMARKET_EXTRA_VALUES"
-           description="COM_MINIMARKET_EXTRA_VALUES_DESC" />
+           description="COM_MINIMARKET_EXTRA_VALUES_DESC" showon="type:select" />
     <field name="description" type="textarea" rows="2" filter="string" label="COM_MINIMARKET_EXTRA_DESCRIPTION" />
     <field name="state" type="list" default="1" filter="int" label="JSTATUS">
         <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>

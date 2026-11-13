@@ -25,20 +25,22 @@ final class CheckoutExtraFields
                 ||$title==='' ||mb_strlen($title)>120
                 ||!in_array($type,['text','tel','email','number','textarea','select','checkbox'],true))
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXTRA_INVALID');
-            $mask=trim((string)($entry['mask']??''));
+            // Hidden type-specific settings remain saved in Joomla but must not invalidate a different active type.
+            $mask=in_array($type,['text','tel'],true) ? trim((string)($entry['mask']??'')) : '';
             if(strlen($mask)>64 || ($mask!=='' && !preg_match('/^[\p{L}\p{N} ()+*._\/-]+$/uD',$mask)))
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXTRA_INVALID');
-            if($mask!==''&&!in_array($type,['text','tel'],true))
-                throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXTRA_INVALID');
-            $choices=array_values(array_filter(array_map('trim',preg_split('/\r\n|\n|\r/',(string)($entry['options']??'')) ?: []),
-                static fn($v)=>$v!==''));
+            $choices=$type==='select'
+                ?array_values(array_filter(array_map('trim',preg_split('/\r\n|\n|\r/',(string)($entry['options']??'')) ?: []),
+                    static fn($v)=>$v!==''))
+                :[];
             if(count($choices)>30 || array_filter($choices,static fn($v)=>mb_strlen($v)>120))
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXTRA_INVALID');
             if($type==='select'&&!$choices)throw new \DomainException('COM_MINIMARKET_CHECKOUT_EXTRA_INVALID');
             $result[$code]=[
               'code'=>$code,'title'=>strip_tags($title),'type'=>$type,
               'required'=>(int)($entry['required']??0)===1,
-              'placeholder'=>mb_substr(strip_tags((string)($entry['placeholder']??'')),0,120),
+              'placeholder'=>in_array($type,['text','tel','email','number','textarea'],true)
+                  ?mb_substr(strip_tags((string)($entry['placeholder']??'')),0,120):'',
               'description'=>mb_substr(strip_tags((string)($entry['description']??'')),0,500),
               'mask'=>$mask,'choices'=>$choices
             ];

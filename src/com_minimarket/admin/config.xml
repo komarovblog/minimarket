@@ -20,20 +20,26 @@
             <option value="0">COM_MINIMARKET_CONFIG_PRIMARY_MENU_AUTO</option>
         </field>
 
+        <field name="inventory_enabled" type="list" default="1" filter="int"
+               label="COM_MINIMARKET_CONFIG_INVENTORY_ENABLED"
+               description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">
+            <option value="1">COM_MINIMARKET_ENABLE</option><option value="0">COM_MINIMARKET_DISABLE</option>
+        </field>
+
         <field name="mm_pickup_reservation_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_PICKUP_RESERVATION_SECTION"
-               description="COM_MINIMARKET_PICKUP_RESERVATION_NOTE" />
+               description="COM_MINIMARKET_PICKUP_RESERVATION_NOTE" showon="inventory_enabled:1" />
         <field name="pickup_unpaid_reserve_days" type="number" default="3" min="1" max="90" step="1"
-               label="COM_MINIMARKET_PICKUP_UNPAID_DAYS" description="COM_MINIMARKET_PICKUP_UNPAID_DAYS_HELP" />
+               label="COM_MINIMARKET_PICKUP_UNPAID_DAYS" description="COM_MINIMARKET_PICKUP_UNPAID_DAYS_HELP" showon="inventory_enabled:1" />
         <field name="pickup_paid_review_days" type="number" default="7" min="1" max="90" step="1"
-               label="COM_MINIMARKET_PICKUP_PAID_DAYS" description="COM_MINIMARKET_PICKUP_PAID_DAYS_HELP" />
+               label="COM_MINIMARKET_PICKUP_PAID_DAYS" description="COM_MINIMARKET_PICKUP_PAID_DAYS_HELP" showon="inventory_enabled:1" />
         <field name="pickup_remind_before_days" type="number" default="3" min="1" max="30" step="1"
-               label="COM_MINIMARKET_PICKUP_REMIND_FIRST" description="COM_MINIMARKET_PICKUP_REMIND_HELP" />
+               label="COM_MINIMARKET_PICKUP_REMIND_FIRST" description="COM_MINIMARKET_PICKUP_REMIND_HELP" showon="inventory_enabled:1" />
         <field name="pickup_remind_final_days" type="number" default="1" min="1" max="30" step="1"
-               label="COM_MINIMARKET_PICKUP_REMIND_FINAL" description="COM_MINIMARKET_PICKUP_REMIND_HELP" />
+               label="COM_MINIMARKET_PICKUP_REMIND_FINAL" description="COM_MINIMARKET_PICKUP_REMIND_HELP" showon="inventory_enabled:1" />
         <field name="pickup_auto_cancel_unpaid" type="list" default="0" filter="int"
                label="COM_MINIMARKET_PICKUP_AUTO_CANCEL"
-               description="COM_MINIMARKET_PICKUP_AUTO_CANCEL_HELP">
+               description="COM_MINIMARKET_PICKUP_AUTO_CANCEL_HELP"showon="inventory_enabled:1">
             <option value="0">COM_MINIMARKET_DISABLE</option>
             <option value="1">COM_MINIMARKET_ENABLE</option>
         </field>
@@ -48,11 +54,7 @@
             <option value="0">COM_MINIMARKET_DISABLE</option>
         </field>
 
-<field name="inventory_enabled" type="list" default="1" filter="int"
-               label="COM_MINIMARKET_CONFIG_INVENTORY_ENABLED"
-               description="COM_MINIMARKET_CONFIG_INVENTORY_HELP">
-            <option value="1">COM_MINIMARKET_ENABLE</option><option value="0">COM_MINIMARKET_DISABLE</option>
-        </field>
+
         <field name="mm_system_filters_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SYSTEM_ATTRIBUTES_IN_FILTER" description="COM_MINIMARKET_SYSTEM_INDEPENDENT_HELP" />
         <field name="filter_price_mode" type="list" default="slider" filter="cmd"
                        label="COM_MINIMARKET_SYSTEM_PRICE_FILTER" description="COM_MINIMARKET_SYSTEM_PRICE_FILTER_DESC">
@@ -78,11 +80,11 @@
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
         </field>
         <field name="filter_stock_enabled" type="list" default="0" filter="int"
-                       label="COM_MINIMARKET_SYSTEM_STOCK_FILTER">
+                       label="COM_MINIMARKET_SYSTEM_STOCK_FILTER"showon="inventory_enabled:1">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
         <field name="system_stock_display_location" type="list" default="both" filter="cmd"
-               label="COM_MINIMARKET_SYSTEM_STOCK_DISPLAY_LOCATION">
+               label="COM_MINIMARKET_SYSTEM_STOCK_DISPLAY_LOCATION"showon="inventory_enabled:1">
             <option value="product">COM_MINIMARKET_VISIBILITY_PRODUCT</option>
             <option value="category">COM_MINIMARKET_VISIBILITY_CATEGORY</option>
             <option value="both">COM_MINIMARKET_VISIBILITY_BOTH</option>
@@ -141,14 +143,14 @@
         <field name="category_show_bundles" type="list" label="COM_MINIMARKET_GLOBAL_SHOW_BUNDLES" default="1" filter="int">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="category_show_descendant_products" type="list" label="COM_MINIMARKET_GLOBAL_DESCENDANT_PRODUCTS" default="0" filter="int">
+        <field name="category_show_descendant_products" type="list" label="COM_MINIMARKET_GLOBAL_DESCENDANT_PRODUCTS" default="0" filter="int"showon="category_show_products:1">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="category_show_descendant_bundles" type="list" label="COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES" default="0" filter="int">
+        <field name="category_show_descendant_bundles" type="list" label="COM_MINIMARKET_GLOBAL_DESCENDANT_BUNDLES" default="0" filter="int"showon="category_show_bundles:1">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="mm_subcategory_grid_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SUBCATEGORY_GRID_HEADING" description="COM_MINIMARKET_SUBCATEGORY_GRID_HELP" />
-        <field name="subcategory_cards_xs" type="Gridcards" label="COM_MINIMARKET_CARDS_XS" description="COM_MINIMARKET_CARDS_XS_DESC" default="1" filter="int">
+        <field name="mm_subcategory_grid_note" type="note" class="alert alert-info" label="COM_MINIMARKET_SUBCATEGORY_GRID_HEADING" description="COM_MINIMARKET_SUBCATEGORY_GRID_HELP" showon="category_show_children:1" />
+        <field name="subcategory_cards_xs" type="Gridcards" label="COM_MINIMARKET_CARDS_XS" description="COM_MINIMARKET_CARDS_XS_DESC" default="1" filter="int"showon="category_show_children:1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -156,7 +158,7 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="subcategory_cards_sm" type="Gridcards" label="COM_MINIMARKET_CARDS_SM" description="COM_MINIMARKET_CARDS_SM_DESC" default="1" filter="int">
+        <field name="subcategory_cards_sm" type="Gridcards" label="COM_MINIMARKET_CARDS_SM" description="COM_MINIMARKET_CARDS_SM_DESC" default="1" filter="int"showon="category_show_children:1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -164,7 +166,7 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="subcategory_cards_md" type="Gridcards" label="COM_MINIMARKET_CARDS_MD" description="COM_MINIMARKET_CARDS_MD_DESC" default="2" filter="int">
+        <field name="subcategory_cards_md" type="Gridcards" label="COM_MINIMARKET_CARDS_MD" description="COM_MINIMARKET_CARDS_MD_DESC" default="2" filter="int"showon="category_show_children:1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -172,7 +174,7 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="subcategory_cards_lg" type="Gridcards" label="COM_MINIMARKET_CARDS_LG" description="COM_MINIMARKET_CARDS_LG_DESC" default="3" filter="int">
+        <field name="subcategory_cards_lg" type="Gridcards" label="COM_MINIMARKET_CARDS_LG" description="COM_MINIMARKET_CARDS_LG_DESC" default="3" filter="int"showon="category_show_children:1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -180,7 +182,7 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="subcategory_cards_xl" type="Gridcards" label="COM_MINIMARKET_CARDS_XL" description="COM_MINIMARKET_CARDS_XL_DESC" default="4" filter="int">
+        <field name="subcategory_cards_xl" type="Gridcards" label="COM_MINIMARKET_CARDS_XL" description="COM_MINIMARKET_CARDS_XL_DESC" default="4" filter="int"showon="category_show_children:1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -188,7 +190,7 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </field>
-        <field name="subcategory_cards_xxl" type="Gridcards" label="COM_MINIMARKET_CARDS_XXL" description="COM_MINIMARKET_CARDS_XXL_DESC" default="4" filter="int">
+        <field name="subcategory_cards_xxl" type="Gridcards" label="COM_MINIMARKET_CARDS_XXL" description="COM_MINIMARKET_CARDS_XXL_DESC" default="4" filter="int"showon="category_show_children:1">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -200,13 +202,13 @@
   <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>
         <field name="category_lazy_loading" type="hidden" default="1" filter="int" />
-<field name="mm_display_products_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCTS_SECTION" description="COM_MINIMARKET_DISPLAY_PRODUCTS_HELP" class="alert alert-info" />
-        <field name="category_product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="grid" filter="cmd">
+<field name="mm_display_products_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCTS_SECTION" description="COM_MINIMARKET_DISPLAY_PRODUCTS_HELP" class="alert alert-info" showon="category_show_products:1" />
+        <field name="category_product_layout" type="list" label="COM_MINIMARKET_CATEGORY_PRODUCT_LAYOUT" default="grid" filter="cmd"showon="category_show_products:1">
                     <option value="list">COM_MINIMARKET_LAYOUT_LIST</option>
                     <option value="grid">COM_MINIMARKET_LAYOUT_GRID</option>
                 </field>
         <field name="category_cards_xs" type="Gridcards" label="COM_MINIMARKET_CARDS_XS"
-                       description="COM_MINIMARKET_CARDS_XS_DESC" default="1" showon="category_product_layout:grid" filter="int">
+                       description="COM_MINIMARKET_CARDS_XS_DESC" default="1" showon="category_show_products:1[AND]category_product_layout:grid" filter="int">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -215,7 +217,7 @@
                     <option value="6">6</option>
                 </field>
         <field name="category_cards_sm" type="Gridcards" label="COM_MINIMARKET_CARDS_SM"
-                       description="COM_MINIMARKET_CARDS_SM_DESC" default="1" showon="category_product_layout:grid" filter="int">
+                       description="COM_MINIMARKET_CARDS_SM_DESC" default="1" showon="category_show_products:1[AND]category_product_layout:grid" filter="int">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -224,7 +226,7 @@
                     <option value="6">6</option>
                 </field>
         <field name="category_cards_md" type="Gridcards" label="COM_MINIMARKET_CARDS_MD"
-                       description="COM_MINIMARKET_CARDS_MD_DESC" default="2" showon="category_product_layout:grid" filter="int">
+                       description="COM_MINIMARKET_CARDS_MD_DESC" default="2" showon="category_show_products:1[AND]category_product_layout:grid" filter="int">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -233,7 +235,7 @@
                     <option value="6">6</option>
                 </field>
         <field name="category_cards_lg" type="Gridcards" label="COM_MINIMARKET_CARDS_LG"
-                       description="COM_MINIMARKET_CARDS_LG_DESC" default="3" showon="category_product_layout:grid" filter="int">
+                       description="COM_MINIMARKET_CARDS_LG_DESC" default="3" showon="category_show_products:1[AND]category_product_layout:grid" filter="int">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -242,7 +244,7 @@
                     <option value="6">6</option>
                 </field>
         <field name="category_cards_xl" type="Gridcards" label="COM_MINIMARKET_CARDS_XL"
-                       description="COM_MINIMARKET_CARDS_XL_DESC" default="4" showon="category_product_layout:grid" filter="int">
+                       description="COM_MINIMARKET_CARDS_XL_DESC" default="4" showon="category_show_products:1[AND]category_product_layout:grid" filter="int">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -251,7 +253,7 @@
                     <option value="6">6</option>
                 </field>
         <field name="category_cards_xxl" type="Gridcards" label="COM_MINIMARKET_CARDS_XXL"
-                       description="COM_MINIMARKET_CARDS_XXL_DESC" default="4" showon="category_product_layout:grid" filter="int">
+                       description="COM_MINIMARKET_CARDS_XXL_DESC" default="4" showon="category_show_products:1[AND]category_product_layout:grid" filter="int">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -259,29 +261,29 @@
                     <option value="5">5</option>
                     <option value="6">6</option>
                 </field>
-        <field name="category_allow_layout_switch" type="list" label="COM_MINIMARKET_CATEGORY_ALLOW_LAYOUT_SWITCH" default="1" filter="int">
+        <field name="category_allow_layout_switch" type="list" label="COM_MINIMARKET_CATEGORY_ALLOW_LAYOUT_SWITCH" default="1" filter="int"showon="category_show_products:1">
   <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>
 <field name="mm_display_card_note" type="note" label="COM_MINIMARKET_DISPLAY_PRODUCT_CARD_SECTION" description="COM_MINIMARKET_DISPLAY_CARD_HELP" class="alert alert-info" />
-        <field name="category_list_show_attributes" type="list" label="COM_MINIMARKET_CATEGORY_LIST_ATTRIBUTES" description="COM_MINIMARKET_CATEGORY_LIST_ATTRIBUTES_DESC" default="1" filter="int">
+        <field name="category_list_show_attributes" type="list" label="COM_MINIMARKET_CATEGORY_LIST_ATTRIBUTES" description="COM_MINIMARKET_CATEGORY_LIST_ATTRIBUTES_DESC" default="1" filter="int"showon="category_show_products:1">
   <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>
-        <field name="category_list_show_options" type="list" label="COM_MINIMARKET_CATEGORY_LIST_OPTIONS" description="COM_MINIMARKET_CATEGORY_LIST_OPTIONS_DESC" default="1" filter="int">
+        <field name="category_list_show_options" type="list" label="COM_MINIMARKET_CATEGORY_LIST_OPTIONS" description="COM_MINIMARKET_CATEGORY_LIST_OPTIONS_DESC" default="1" filter="int"showon="category_show_products:1">
   <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
 </field>
-        <field name="category_show_add_to_cart" type="list" default="1" filter="int" label="COM_MINIMARKET_LIST_ADD_TO_CART">
+        <field name="category_show_add_to_cart" type="list" default="1" filter="int" label="COM_MINIMARKET_LIST_ADD_TO_CART"showon="category_show_products:1">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="category_quick_view" type="list" default="0" filter="int" label="COM_MINIMARKET_LIST_QUICK_VIEW">
+        <field name="category_quick_view" type="list" default="0" filter="int" label="COM_MINIMARKET_LIST_QUICK_VIEW"showon="category_show_products:1">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="category_product_gallery_enabled" type="list" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY">
+        <field name="category_product_gallery_enabled" type="list" default="1" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY"showon="category_show_products:1">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
-        <field name="category_product_gallery_limit" type="list" default="5" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY_LIMIT" showon="category_product_gallery_enabled:1">
+        <field name="category_product_gallery_limit" type="list" default="5" filter="int" label="COM_MINIMARKET_DISPLAY_PRODUCT_GALLERY_LIMIT" showon="category_show_products:1[AND]category_product_gallery_enabled:1">
                     <option value="3">3</option><option value="5">5</option><option value="8">8</option>
                 </field>
-        <field name="category_show_badges" type="list" default="1" filter="int" label="COM_MINIMARKET_LIST_SHOW_BADGES">
+        <field name="category_show_badges" type="list" default="1" filter="int" label="COM_MINIMARKET_LIST_SHOW_BADGES"showon="category_show_products:1">
                     <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
                 </field>
 
@@ -332,7 +334,7 @@
         <field name="checkout_verification_method" type="Registrationverification"
                default="email" filter="cmd"
                label="COM_MINIMARKET_CHECKOUT_VERIFICATION_METHOD_LABEL"
-               description="COM_MINIMARKET_CHECKOUT_VERIFICATION_METHOD_HELP" />
+               description="COM_MINIMARKET_CHECKOUT_VERIFICATION_METHOD_HELP" showon="checkout_auth_mode:guests,all" />
         <field name="checkout_auth_hint" type="note" class="alert alert-info"
             label="COM_MINIMARKET_CHECKOUT_VERIFICATION_SECTION"
             description="COM_MINIMARKET_CHECKOUT_VERIFICATION_SECTION_DESC"
@@ -346,36 +348,36 @@
         <field name="checkout_show_login_button" type="list" label="COM_MINIMARKET_CHECKOUT_SHOW_LOGIN" default="1" filter="int">
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
-        <field name="checkout_buyer_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_buyer_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" showon="checkout_step_buyer_enabled:1" />
 
         <field name="checkout_name_mode" type="list" default="required" filter="cmd"
-               label="COM_MINIMARKET_CONFIG_FIELD_NAME" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
+               label="COM_MINIMARKET_CONFIG_FIELD_NAME" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC"showon="checkout_step_buyer_enabled:1">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
         <field name="checkout_phone_mode" type="list" default="required" filter="cmd"
-               label="COM_MINIMARKET_CONFIG_FIELD_PHONE" description="COM_MINIMARKET_CONFIG_CONTACT_DESC">
+               label="COM_MINIMARKET_CONFIG_FIELD_PHONE" description="COM_MINIMARKET_CONFIG_CONTACT_DESC"showon="checkout_step_buyer_enabled:1">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
-        <field name="checkout_phone_mask" type="text" maxlength="32" label="COM_MINIMARKET_CHECKOUT_PHONE_MASK" description="COM_MINIMARKET_CHECKOUT_MASK_HELP" filter="string" />
+        <field name="checkout_phone_mask" type="text" maxlength="32" label="COM_MINIMARKET_CHECKOUT_PHONE_MASK" description="COM_MINIMARKET_CHECKOUT_MASK_HELP" filter="string" showon="checkout_step_buyer_enabled:1[AND]checkout_phone_mode!:hidden" />
         <field name="checkout_email_mode" type="list" default="optional" filter="cmd"
-               label="COM_MINIMARKET_CONFIG_FIELD_EMAIL" description="COM_MINIMARKET_CONFIG_CONTACT_DESC">
+               label="COM_MINIMARKET_CONFIG_FIELD_EMAIL" description="COM_MINIMARKET_CONFIG_CONTACT_DESC"showon="checkout_step_buyer_enabled:1">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
         <field name="checkout_comment_mode" type="list" default="optional" filter="cmd"
-               label="COM_MINIMARKET_CONFIG_FIELD_COMMENT" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC">
+               label="COM_MINIMARKET_CONFIG_FIELD_COMMENT" description="COM_MINIMARKET_CONFIG_FIELD_MODES_DESC"showon="checkout_step_buyer_enabled:1">
             <option value="hidden">COM_MINIMARKET_FIELD_HIDDEN</option><option value="optional">COM_MINIMARKET_FIELD_OPTIONAL</option><option value="required">COM_MINIMARKET_FIELD_REQUIRED</option>
         </field>
         <field name="checkout_custom_fields" type="subform" multiple="true" min="0" max="20"
                formsource="administrator/components/com_minimarket/forms/checkout_extra_field.xml"
                layout="joomla.form.field.subform.repeatable"
-               label="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS" description="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS_DESC" />
+               label="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS" description="COM_MINIMARKET_CHECKOUT_EXTRA_FIELDS_DESC" showon="checkout_step_buyer_enabled:1" />
         <field name="checkout_delivery_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION" description="COM_MINIMARKET_CHECKOUT_DELIVERY_SECTION_HELP" />
         <field name="checkout_step_delivery_enabled" type="list" default="1" filter="int"
               label="COM_MINIMARKET_CHECKOUT_STEP_ENABLED" description="COM_MINIMARKET_CHECKOUT_STEP_UNCONDITIONAL_HELP">
             <option value="1">JENABLED</option><option value="0">JDISABLED</option>
         </field>
-        <field name="checkout_delivery_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_delivery_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" showon="checkout_step_delivery_enabled:1" />
 
 <field name="checkout_payment_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION" description="COM_MINIMARKET_CHECKOUT_PAYMENT_SECTION_HELP" />
@@ -383,7 +385,7 @@
               label="COM_MINIMARKET_CHECKOUT_STEP_ENABLED" description="COM_MINIMARKET_CHECKOUT_STEP_UNCONDITIONAL_HELP">
             <option value="1">JENABLED</option><option value="0">JDISABLED</option>
         </field>
-        <field name="checkout_payment_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+        <field name="checkout_payment_description" type="editor" filter="safehtml" buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" showon="checkout_step_payment_enabled:1" />
         <field name="checkout_digital_note" type="note" class="alert alert-info"
              label="COM_MINIMARKET_CHECKOUT_DIGITAL_STEP" description="COM_MINIMARKET_CHECKOUT_DIGITAL_STEP_HELP" />
         <field name="checkout_step_digital_enabled" type="list" default="1" filter="int"
@@ -392,7 +394,7 @@
             <option value="1">JENABLED</option><option value="0">JDISABLED</option>
         </field>
         <field name="checkout_digital_description" type="editor" filter="safehtml"
-             buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" />
+             buttons="true" label="COM_MINIMARKET_CHECKOUT_STEP_DESCRIPTION" showon="checkout_step_digital_enabled:1" />
         <field name="mm_checkout_consent_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_CHECKOUT_CONSENT_SECTION"
                description="COM_MINIMARKET_CHECKOUT_CONSENT_HELP" />
@@ -408,20 +410,20 @@
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
         <field name="reviews_author_mode" type="list" default="registered" filter="cmd"
-               label="COM_MINIMARKET_REVIEWS_WHO">
+               label="COM_MINIMARKET_REVIEWS_WHO"showon="reviews_enabled:1">
             <option value="registered">COM_MINIMARKET_REVIEWS_REGISTERED</option>
             <option value="all">COM_MINIMARKET_REVIEWS_EVERYONE</option>
         </field>
         <field name="reviews_moderation" type="list" default="1" filter="int"
-               label="COM_MINIMARKET_REVIEWS_MODERATE" description="COM_MINIMARKET_REVIEWS_MODERATE_DESC">
+               label="COM_MINIMARKET_REVIEWS_MODERATE" description="COM_MINIMARKET_REVIEWS_MODERATE_DESC"showon="reviews_enabled:1">
             <option value="1">COM_MINIMARKET_REVIEWS_MODERATE_ALL</option><option value="0">COM_MINIMARKET_REVIEWS_MODERATE_GUESTS</option><option value="2">COM_MINIMARKET_REVIEWS_MODERATE_NONE</option>
         </field>
         <field name="reviews_media_photo" type="list" default="1" filter="int"
-               label="COM_MINIMARKET_REVIEWS_PHOTO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC">
+               label="COM_MINIMARKET_REVIEWS_PHOTO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC"showon="reviews_enabled:1">
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
         <field name="reviews_media_video" type="list" default="1" filter="int"
-               label="COM_MINIMARKET_REVIEWS_VIDEO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC">
+               label="COM_MINIMARKET_REVIEWS_VIDEO" description="COM_MINIMARKET_REVIEWS_MEDIA_DESC"showon="reviews_enabled:1">
             <option value="1">COM_MINIMARKET_SHOW</option><option value="0">COM_MINIMARKET_HIDE</option>
         </field>
     </fieldset>

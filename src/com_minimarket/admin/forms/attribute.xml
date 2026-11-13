@@ -31,7 +31,7 @@
             formsource="administrator/components/com_minimarket/forms/attribute_unified_value_row.xml"
             multiple="true" min="0" max="1000" buttons="add,remove,move"
             layout="joomla.form.field.subform.repeatable" validate="Subform"
-            showon="value_source:preset"/>
+            showon="value_source:preset[AND]input_type!:boolean"/>
         <field name="color_display" type="list" label="COM_MINIMARKET_COLOR_DISPLAY"
             default="both" filter="cmd" showon="input_type:color">
             <option value="both">COM_MINIMARKET_COLOR_DISPLAY_BOTH</option>

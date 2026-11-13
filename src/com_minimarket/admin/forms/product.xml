@@ -34,10 +34,10 @@
                min="0" max="9999999999999.99" step="0.01" filter="string"/>
         <field name="shipping_weight_grams" type="number" min="0" max="4294967295"
                step="1" default="0" filter="int" label="COM_MINIMARKET_SHIPPING_WEIGHT_GRAMS"
-               description="COM_MINIMARKET_SHIPPING_WEIGHT_HELP" />
+               description="COM_MINIMARKET_SHIPPING_WEIGHT_HELP" showon="delivery_type:physical" />
         <field name="shipping_volume_cm3" type="number" min="0" max="4294967295"
                step="1" default="0" filter="int" label="COM_MINIMARKET_SHIPPING_VOLUME_CM3"
-               description="COM_MINIMARKET_SHIPPING_VOLUME_HELP" />
+               description="COM_MINIMARKET_SHIPPING_VOLUME_HELP" showon="delivery_type:physical" />
         <field name="stock" type="number" label="COM_MINIMARKET_PRODUCT_STOCK" default="0"
                description="COM_MINIMARKET_OPTION_STOCK_MAIN_HELP"
                min="0" max="4294967295" step="1" required="true" filter="string"/>
@@ -56,14 +56,14 @@
         </field>
         <field name="bundle_discount_pct" type="number" min="0" max="100" step="0.01"
                default="0.00" filter="string" label="COM_MINIMARKET_BUNDLE_DISCOUNT_PCT"
-               description="COM_MINIMARKET_BUNDLE_DISCOUNT_HELP"/>
+               description="COM_MINIMARKET_BUNDLE_DISCOUNT_HELP"showon="bundle_price_mode:discount" />
     </fieldset>
     <fieldset name="badges" label="COM_MINIMARKET_BADGES_TAB">
         <field name="badge_sale" type="checkbox" label="COM_MINIMARKET_BADGE_SALE_ENABLE"
                description="COM_MINIMARKET_BADGE_SALE_HELP"
                value="1" unchecked="0" default="0" filter="int"/>
         <field name="badge_sale_display" type="list" label="COM_MINIMARKET_BADGE_DISPLAY"
-               default="percent" filter="cmd">
+               default="percent" filter="cmd"showon="badge_sale:1">
             <option value="percent">COM_MINIMARKET_BADGE_DISPLAY_PERCENT</option>
             <option value="money">COM_MINIMARKET_BADGE_DISPLAY_MONEY</option>
         </field>
@@ -71,19 +71,19 @@
                value="1" unchecked="0" default="0" filter="int"/>
         <field name="badge_new_days" type="number" label="COM_MINIMARKET_BADGE_DAYS"
                description="COM_MINIMARKET_BADGE_DAYS_HELP"
-               min="1" max="36500" step="1" filter="string"/>
+               min="1" max="36500" step="1" filter="string"showon="badge_new:1" />
         <field name="badge_popular" type="checkbox" label="COM_MINIMARKET_BADGE_POPULAR_ENABLE"
                value="1" unchecked="0" default="0" filter="int"/>
         <field name="badge_popular_days" type="number" label="COM_MINIMARKET_BADGE_DAYS"
                description="COM_MINIMARKET_BADGE_DAYS_HELP"
-               min="1" max="36500" step="1" filter="string"/>
+               min="1" max="36500" step="1" filter="string"showon="badge_popular:1" />
     </fieldset>
     <fieldset name="bundle_benefit" label="COM_MINIMARKET_BADGE_BENEFIT_ENABLE">
         <field name="badge_benefit" type="checkbox" label="COM_MINIMARKET_BADGE_BENEFIT_ENABLE"
                description="COM_MINIMARKET_BADGE_BENEFIT_HELP"
                value="1" unchecked="0" default="0" filter="int"/>
         <field name="badge_benefit_display" type="list" label="COM_MINIMARKET_BADGE_DISPLAY"
-               default="money" filter="cmd">
+               default="money" filter="cmd"showon="badge_benefit:1">
             <option value="money">COM_MINIMARKET_BADGE_DISPLAY_MONEY</option>
             <option value="percent">COM_MINIMARKET_BADGE_DISPLAY_PERCENT</option>
         </field>

@@ -40,24 +40,20 @@
         // on another tab. The user can activate Sale before saving; the
         // server validates that old price is greater than the selling price.
         // Only automatically priced bundles must use Benefit instead.
-        sale.disabled=discounted;
         if(discounted)sale.checked=false;
-        row(sale)?.classList.toggle('mm-unavailable-setting',discounted);
+        const wrap=row(sale);if(wrap)wrap.hidden=discounted;
         const present=!!old && old.value.trim()!=='';
         const valid=present&&!!price&&Number(old.value)>Number(price.value);
         const hint=row(sale)?.querySelector('[data-mm-badge-sale-hint]');
         if (hint) hint.hidden=valid||!sale.checked;
       }
       if(benefit) {
-        benefit.disabled=!discounted;
         if(!discounted)benefit.checked=false;
-        row(benefit)?.classList.toggle('mm-unavailable-setting',!discounted);
+        const wrap=row(benefit);if(wrap)wrap.hidden=!discounted;
       }
-      // Units are configurable independently of the flag being checked.
-      // They should always be visible whenever the respective flag is valid
-      // for this product type; do not hide the only control behind a toggle.
-      if (saleDisplay && row(saleDisplay)) row(saleDisplay).hidden=discounted;
-      if (benefitDisplay && row(benefitDisplay)) row(benefitDisplay).hidden=!discounted;
+      // Display units only matter while their corresponding flag is enabled.
+      if (saleDisplay && row(saleDisplay)) row(saleDisplay).hidden=discounted||!sale?.checked;
+      if (benefitDisplay && row(benefitDisplay)) row(benefitDisplay).hidden=!discounted||!benefit?.checked;
       for(const [toggle,days] of [[fresh,daysNew],[popular,daysPopular]]){
         const wrap=row(days);if(toggle&&wrap)wrap.hidden=!toggle.checked;
       }
