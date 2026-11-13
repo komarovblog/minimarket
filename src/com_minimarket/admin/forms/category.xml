@@ -202,6 +202,31 @@
         <field name="order_option_rules" type="Categoryorderoptions" filter="raw"
                label="COM_MINIMARKET_ORDER_OPTIONS"/>
     </fieldset>
+    <fieldset name="recommend_similar" label="COM_MINIMARKET_RECOMM_SIMILAR_TAB">
+        <field name="similar_scope" type="list" default="inherit" filter="cmd"
+               label="COM_MINIMARKET_RECOMM_SOURCE" description="COM_MINIMARKET_RECOMM_CATEGORY_INHERIT_HELP">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="own">COM_MINIMARKET_RECOMM_OWN_CATEGORY</option>
+            <option value="selected">COM_MINIMARKET_RECOMM_SELECTED_CATEGORIES</option>
+        </field>
+        <field name="similar_categories" type="Recommendcategories" filter="array" multiple="true"
+               size="9" label="COM_MINIMARKET_RECOMM_SOURCE_CATEGORIES"
+               description="COM_MINIMARKET_RECOMM_SOURCE_CATEGORIES_HELP" showon="similar_scope:selected"/>
+        <field name="similar_attributes" type="Recommendattributes" filter="array" multiple="true"
+               size="9" label="COM_MINIMARKET_RECOMM_MATCH_ATTRIBUTES"
+               description="COM_MINIMARKET_RECOMM_MATCH_ATTRIBUTES_HELP" showon="similar_scope:own,selected"/>
+    </fieldset>
+    <fieldset name="recommend_together" label="COM_MINIMARKET_RECOMM_TOGETHER_TAB">
+        <field name="together_scope" type="list" default="inherit" filter="cmd"
+               label="COM_MINIMARKET_RECOMM_SOURCE" description="COM_MINIMARKET_RECOMM_CATEGORY_INHERIT_HELP">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="own">COM_MINIMARKET_RECOMM_OWN_CATEGORY</option>
+            <option value="selected">COM_MINIMARKET_RECOMM_SELECTED_CATEGORIES</option>
+        </field>
+        <field name="together_categories" type="Recommendcategories" filter="array" multiple="true"
+               size="9" label="COM_MINIMARKET_RECOMM_SOURCE_CATEGORIES"
+               description="COM_MINIMARKET_RECOMM_TOGETHER_HELP" showon="together_scope:selected"/>
+    </fieldset>
     <fieldset name="seo" label="COM_MINIMARKET_CATEGORY_TAB_SEO">
         <field name="meta_title" type="text" label="COM_MINIMARKET_META_TITLE" filter="string" maxlength="255" size="60"/>
         <field name="meta_description" type="textarea" label="COM_MINIMARKET_META_DESCRIPTION"

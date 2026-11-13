@@ -10,6 +10,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\CategoryAttributes;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryOrderOptions;
 use MiniMarket\Component\Minimarket\Administrator\Service\CategoryListVisibility;
 use MiniMarket\Component\Minimarket\Administrator\Service\BulkDeleteGuard;
+use MiniMarket\Component\Minimarket\Site\Service\CategoryRecommendationRules;
 
 final class CategoryModel extends AdminModel
 {
@@ -32,6 +33,8 @@ final class CategoryModel extends AdminModel
             $item->order_option_rules = CategoryOrderOptions::directWithVisibility(
                 $this->getDatabase(), (int) ($item->id ?? 0)
             );
+            foreach(CategoryRecommendationRules::raw($this->getDatabase(),(int)($item->id??0))
+                    as $key=>$value)$item->$key=$value;
         }
         return $item;
     }
@@ -46,6 +49,12 @@ final class CategoryModel extends AdminModel
             || !empty($data['attributes_present']);
         $hasOrderOptions = array_key_exists('order_option_rules', $data)
             || !empty($data['order_options_present']);
+        $hasRecommendations=array_key_exists('similar_scope',$data)
+            ||array_key_exists('together_scope',$data);
+        $recData=$hasRecommendations?array_intersect_key($data,array_flip([
+            'similar_scope','similar_categories','similar_attributes',
+            'together_scope','together_categories'
+        ])):[];
         $db = $this->getDatabase();
 
         try {
@@ -77,7 +86,9 @@ final class CategoryModel extends AdminModel
         }
 
         unset($data['attribute_rules'], $data['attributes_present'],
-            $data['order_option_rules'], $data['order_options_present']);
+            $data['order_option_rules'], $data['order_options_present'],
+            $data['similar_scope'], $data['similar_categories'], $data['similar_attributes'],
+            $data['together_scope'], $data['together_categories']);
         $db->transactionStart();
         try {
             if (!parent::save($data)) {
@@ -91,11 +102,16 @@ final class CategoryModel extends AdminModel
             if ($hasOrderOptions) {
                 CategoryOrderOptions::replace($db, $categoryId, $orderOptionRules, $optionListFlags);
             }
+            if ($hasRecommendations) {
+                CategoryRecommendationRules::save($db,$categoryId,$recData);
+            }
             $db->transactionCommit();
             return true;
         } catch (\Throwable $error) {
             $db->transactionRollback();
-            $this->setError(Text::_('COM_MINIMARKET_CATATTR_SAVE_FAILED'));
+            $this->setError($error instanceof \DomainException
+                ?Text::_('COM_MINIMARKET_RECOMM_RULE_INVALID')
+                :Text::_('COM_MINIMARKET_CATATTR_SAVE_FAILED'));
             return false;
         }
     }
