@@ -77,16 +77,18 @@ $xmlViews=[];$presetViews=[];
 preg_match_all('/<menu link="[^"]*view=([a-z]+)"[^>]*>/',$xml,$a);
 preg_match_all('/<menuitem title="[^"]+" type="component"[^>]*link="[^"]*view=([a-z]+)"[^>]*\\/>/',$preset,$b);
 $xmlViews=$a[1];$presetViews=$b[1];
-$ok(array_slice($xmlViews,0,-1)===array_slice($expected,0,-1)
- &&end($xmlViews)==='component','sidebar ordered correctly');
-$ok(array_slice($presetViews,1,-1)===array_slice($expected,0,-1)
- &&end($presetViews)==='component','component preset ordered correctly');
+$ok($xmlViews===array_slice($expected,0,-1)
+ &&str_contains($xml,'view=component&amp;component=com_minimarket'),
+ 'sidebar ordered correctly');
+$ok(array_slice($presetViews,1)===array_slice($expected,0,-1)
+ &&str_contains($preset,'view=component&amp;component=com_minimarket'),
+ 'component preset ordered correctly');
 foreach($xmlViews as $view)
  $ok((bool)preg_match('/<menu link="[^"]*view='.$view.'" img="class:[^"]+">/',$xml),
   'sidebar icon '.$view);
 foreach($expected as $view)
- $ok((bool)preg_match('/<menuitem[^>]+icon="[^"]+"[^>]+link="[^"]*(?:view='
-   .($view==='settings'?'component':$view).')[^"]*"/',$preset),
+ $ok((bool)preg_match('/<menuitem[^>]+icon="[^"]+"[^>]+link="[^"]*view='
+   .($view==='settings'?'component':$view).'[^"]*"/',$preset),
   'preset icon '.$view);
 foreach(['category','product'] as $kind){
  $form=file_get_contents($root.'admin/forms/'.$kind.'.xml');
