@@ -34,4 +34,4 @@
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\OSPanel\home\minimarket.local\scripts\release-to-desktop.ps1"
 ```
 
-**Статус:** исходники реализованы, CI и реальная Joomla/Atum приёмка фиксируются отдельно. Бизнес-направление C11 остаётся частично реализованным до живого кассового адаптера.
+**Статус:** **CI:** 6/6 PASS на кодовом SHA `eb1b6ee13ecb2bae37d027b78cf3ade946e43f45`, [Actions #43468335142](https://github.com/komarovblog/minimarket/actions/runs/43468335142). PHP 8.4/8.5, MySQL 8.4 fresh/demo/isolated migration и Windows ZIP (включая стандартную Desktop доставку). **Реальная локальная браузерная приёмка Joomla/Atum всё ещё НЕ проведена.** Финальная приёмка пользователем после установки. Бизнес-направление C11 остаётся частично реализованным до живого кассового адаптера.
