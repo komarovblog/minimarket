@@ -39,7 +39,7 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
 <?php else: ?>
 <div id="j-main-container" class="j-main-container">
  <?php $selectedTab=\Joomla\CMS\Factory::getApplication()->input->getCmd('tab','main');
- $selectedTab=($this->method==='courier'&&$this->embeddedZoneEditor)?'zones':(in_array($selectedTab,['main','zones','compatibility'],true)?$selectedTab:'main'); ?>
+ $selectedTab=$this->method==='pickup'&&$this->embeddedPointEditor?'points':(($this->method==='courier'&&$this->embeddedZoneEditor)?'zones':(in_array($selectedTab,['main','points','zones','compatibility'],true)?$selectedTab:'main')); ?>
  <?php echo HTMLHelper::_('uitab.startTabSet','mm-delivery-method',['active'=>$selectedTab]); ?>
  <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-method','main',Text::_('COM_MINIMARKET_ZONE_TAB_MAIN')); ?>
  <form method="post" id="mm-method-form" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
@@ -159,6 +159,55 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
   </form>
  </div>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
+
+ <?php if($this->method==='pickup'): ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-method','points',Text::_('COM_MINIMARKET_PICKUP_POINTS_TITLE')); ?>
+ <div class="py-3">
+ <?php if($this->embeddedPointEditor): $point=$this->pickupPoint; ?>
+  <form method="post" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=pickuppoint.save',false)); ?>" class="row g-3">
+   <input name="id" type="hidden" value="<?php echo (int)($point->id??0); ?>">
+   <div class="col-md-6"><label class="form-label" for="mm-point-title"><?php echo Text::_('JGLOBAL_TITLE'); ?></label>
+    <input class="form-control" id="mm-point-title" name="title" maxlength="150" required value="<?php echo $esc($point->title??''); ?>"></div>
+   <div class="col-md-6"><label class="form-label" for="mm-point-state"><?php echo Text::_('JSTATUS'); ?></label>
+    <select id="mm-point-state" name="state" class="form-select">
+     <option value="1" <?php echo (int)($point->state??1)===1?'selected':''; ?>><?php echo Text::_('JPUBLISHED'); ?></option>
+     <option value="0" <?php echo (int)($point->state??1)===0?'selected':''; ?>><?php echo Text::_('JUNPUBLISHED'); ?></option>
+    </select></div>
+   <div class="col-12"><label class="form-label" for="mm-point-address"><?php echo Text::_('COM_MINIMARKET_DELIVERY_PICKUP_ADDRESS'); ?></label>
+    <textarea name="address" id="mm-point-address" class="form-control" maxlength="512" required rows="2"><?php echo $esc($point->address??''); ?></textarea></div>
+   <div class="col-md-6"><label class="form-label" for="mm-point-hours"><?php echo Text::_('COM_MINIMARKET_PICKUP_SCHEDULE'); ?></label>
+    <textarea name="schedule" id="mm-point-hours" class="form-control" maxlength="1000" rows="2"><?php echo $esc($point->schedule??''); ?></textarea></div>
+   <div class="col-md-6"><label class="form-label" for="mm-point-fee"><?php echo Text::_('COM_MINIMARKET_PICKUP_FEE'); ?></label>
+    <input name="fee" id="mm-point-fee" class="form-control" type="number" min="0" step="0.01" required
+      value="<?php echo $point===null?'0':intdiv((int)$point->fee_cents,100).'.'.str_pad((string)((int)$point->fee_cents%100),2,'0',STR_PAD_LEFT); ?>"></div>
+   <div class="col-12"><label class="form-label" for="mm-point-map"><?php echo Text::_('COM_MINIMARKET_PICKUP_MAP_URL'); ?></label>
+    <input class="form-control" type="url" id="mm-point-map" name="map_url" maxlength="1024" value="<?php echo $esc($point->map_url??''); ?>"></div>
+   <div class="col-12 d-flex gap-2"><?php echo HTMLHelper::_('form.token'); ?>
+    <button class="btn btn-success" type="submit"><?php echo Text::_('JSAVE'); ?></button>
+    <a class="btn btn-outline-secondary" href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliverymethods&method=pickup&tab=points',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a></div>
+  </form>
+ <?php else: ?>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+   <h3 class="h5 mb-0"><?php echo Text::_('COM_MINIMARKET_PICKUP_POINTS_TITLE'); ?> (<?php echo count($this->pickupPoints); ?>)</h3>
+   <?php if($this->canEdit): ?><a class="btn btn-success btn-sm" href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliverymethods&method=pickup&tab=points&point_new=1',false)); ?>"><?php echo Text::_('JTOOLBAR_NEW'); ?></a><?php endif; ?>
+  </div>
+  <div class="table-responsive mm-native-list-viewport"><table class="table table-striped"><thead><tr>
+   <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th><th><?php echo Text::_('COM_MINIMARKET_DELIVERY_PICKUP_ADDRESS'); ?></th>
+   <th><?php echo Text::_('COM_MINIMARKET_PICKUP_SCHEDULE'); ?></th><th><?php echo Text::_('COM_MINIMARKET_PICKUP_FEE'); ?></th><th><?php echo Text::_('JSTATUS'); ?></th>
+  </tr></thead><tbody>
+  <?php foreach($this->pickupPoints as $point): ?><tr>
+   <td><a href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=deliverymethods&method=pickup&tab=points&point_id='.(int)$point->id,false)); ?>"><?php echo $esc($point->title); ?></a></td>
+   <td><?php echo $esc($point->address); ?></td><td><?php echo $esc($point->schedule); ?></td>
+   <td><?php echo number_format((int)$point->fee_cents/100,2,'.',' '); ?></td>
+   <td><?php echo Text::_((int)$point->state===1?'JPUBLISHED':'JUNPUBLISHED'); ?></td>
+  </tr><?php endforeach; ?>
+  </tbody></table></div>
+  <?php if(!$this->pickupPoints): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_PICKUP_POINTS_LEGACY'); ?></p><?php endif; ?>
+ <?php endif; ?>
+ </div>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php endif; ?>
+
  <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
  <?php if($this->method==='courier'): ?>
  <script>
