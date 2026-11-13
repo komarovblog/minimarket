@@ -208,4 +208,78 @@ final class DeliveryController extends BaseController
         }
         $this->setRedirect('index.php?option=com_minimarket&view=delivery&id='.$id);
     }
+
+    /**
+     * Add a confirmed operational fact. The browser never chooses the resulting
+     * status: it is derived by ShipmentEvents::apply under a row lock.
+     * Repeated manual POSTs with the same nonce are idempotent.
+     */
+    public function event():void
+    {
+        $this->requirePost('core.edit.state');
+        $app=Factory::getApplication();
+        $post=$app->input->post;
+        $id=$post->getInt('id',0);
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        try {
+            $data=\MiniMarket\Component\Minimarket\Administrator\Service\ShipmentEvents::normalize([
+                'event_code'=>$post->getCmd('event_code',''),
+                'problem_code'=>$post->getCmd('problem_code',''),
+                'note'=>$post->getString('event_note',''),
+                'event_key'=>$post->getCmd('event_key',''),
+                'occurred_at'=>$post->getString('occurred_at','')
+            ]);
+            if($id<1)throw new \DomainException('COM_MINIMARKET_SHIPMENT_EVENT_INVALID');
+            $actor=(int)$app->getIdentity()->id;
+            $changed=false;
+            $orderId=0;
+            $db->transactionStart();
+            try {
+                $db->setQuery('SELECT * FROM '.$db->quoteName('#__minimarket_shipments')
+                    .' WHERE id='.$id.' FOR UPDATE');
+                $before=$db->loadAssoc();
+                if(!$before)throw new \DomainException('COM_MINIMARKET_SHIPMENT_EVENT_INVALID');
+                $orderId=(int)$before['order_id'];
+                $db->setQuery('SELECT id FROM '.$db->quoteName('#__minimarket_orders')
+                    .' WHERE id='.$orderId." AND status<>'cancelled' AND deleted_at IS NULL");
+                if((int)$db->loadResult()!==$orderId)
+                    throw new \DomainException('COM_MINIMARKET_SHIPMENT_EVENT_INVALID');
+                $db->setQuery('SELECT event_code,occurred_at FROM '
+                    .$db->quoteName('#__minimarket_shipment_events')
+                    .' WHERE shipment_id='.$id.' AND event_key='.$db->quote($data['event_key']));
+                $existing=$db->loadAssoc();
+                if($existing){
+                    if((string)$existing['event_code']!==$data['event_code']
+                        ||(string)$existing['occurred_at']!==$data['occurred_at'])
+                        throw new \DomainException('COM_MINIMARKET_SHIPMENT_EVENT_INVALID');
+                    $db->transactionCommit();
+                }else{
+                    $after=\MiniMarket\Component\Minimarket\Administrator\Service\ShipmentEvents::apply($before,$data);
+                    $changed=$after['status']!==(string)$before['status'];
+                    $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_shipments'))
+                        ->set('status='.$db->quote($after['status']))
+                        ->set('problem_status='.$db->quote($after['problem_status']))
+                        ->set('problem_code='.$db->quote($after['problem_code']))
+                        ->set('updated_at=UTC_TIMESTAMP()')->where('id='.$id);
+                    $db->setQuery($q);$db->execute();
+                    \MiniMarket\Component\Minimarket\Administrator\Service\ShipmentEvents::record(
+                        $db,$id,$data,$actor);
+                    OrderHistory::record($db,$orderId,$actor,'delivery_event','',$data['event_code']);
+                    if($changed)OrderHistory::record($db,$orderId,$actor,'delivery_status',
+                        (string)$before['status'],$after['status']);
+                    OrderLifecycle::refresh($db,$orderId,$actor);
+                    $db->transactionCommit();
+                }
+            }catch(\Throwable $e){$db->transactionRollback();throw $e;}
+            if($changed){
+                \MiniMarket\Component\Minimarket\Site\Service\NotificationSender::emit(
+                    $orderId,'delivery_updated','shipment_event_'.$id.'_'.$data['event_key']);
+            }
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_SHIPMENT_EVENT_SAVED'));
+        }catch(\Throwable $e){
+            $app->enqueueMessage(Text::_($e instanceof \DomainException
+                ?$e->getMessage():'COM_MINIMARKET_SHIPMENT_EVENT_INVALID'),'warning');
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=delivery&id='.$id);
+    }
 }
