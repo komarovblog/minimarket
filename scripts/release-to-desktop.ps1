@@ -86,7 +86,14 @@ if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_TASK_PLUGIN_BUILD_FAILED' }
 
 [xml]$manifest = Get-Content -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -Raw -Encoding UTF8
 $version = [string]$manifest.extension.version
-if ($version -notmatch '^\d+\.\d+\.\d+
+if ($version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "MINIMARKET_INVALID_VERSION: $version"
+}
+[xml]$taskManifest=Get-Content -LiteralPath (Join-Path $root 'src\plg_task_minimarketreserves\minimarketreserves.xml') -Raw -Encoding UTF8
+$taskVersion=[string]$taskManifest.extension.version
+if ($taskVersion -notmatch '^\d+\.\d+\.\d+$') {
+    throw "MINIMARKET_TASK_VERSION_INVALID: $taskVersion"
+}
 $demoName = "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql"
 $demo = Join-Path (Join-Path $root 'sample-data') $demoName
 if (-not (Test-Path -LiteralPath $demo -PathType Leaf)) {
