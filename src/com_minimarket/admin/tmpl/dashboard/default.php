@@ -148,6 +148,9 @@ $sections = [
                 </h3>
             </div>
             <div class="card-body">
+                <?php if ($section['type'] === 'reports') : ?>
+                    <p class="form-text mb-3"><?php echo Text::_('COM_MINIMARKET_REPORTS_OVERVIEW_HELP'); ?></p>
+                <?php endif; ?>
                 <div class="mm-dashboard-tiles">
                     <?php foreach ($section['items'] as $item) : ?>
                         <?php if (!empty($item['pending'])) : ?>

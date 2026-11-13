@@ -10,6 +10,7 @@ $mmSearch=['view'=>'recommendations','query'=>$this->search,'sort'=>$this->sort,
 <form action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=recommendations',false)); ?>"
  method="post" name="adminForm" id="adminForm" class="mm-list-form">
  <div id="j-main-container">
+  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_RECOMMEND_LIST_HELP'); ?></p>
   <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
   <?php $mmColumnTable='mm-recommendations-list';require dirname(__DIR__).'/shared/column-toggle.php'; ?>
   <div class="table-responsive mm-native-list-viewport"><table class="table table-striped mm-admin-list" id="mm-recommendations-list">

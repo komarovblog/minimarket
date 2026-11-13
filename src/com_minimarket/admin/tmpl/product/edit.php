@@ -170,6 +170,9 @@ use Joomla\CMS\Component\ComponentHelper;
                 $type=$section==='recommend_similar'?'similar':'together';
                 if((int)($this->item->id??0)>0):
                     echo $this->form->renderField('rec_'.$type.'_mode');
+                    ?>
+                    <div data-mm-recommend-target-panel="<?php echo $type; ?>">
+                    <?php
                     $mmReference=['input'=>'jform[rec_'.$type.'_ids]',
                         'endpoint'=>'search','multiple'=>true,
                         'selected'=>$this->{'rec'.ucfirst($type)},
@@ -177,6 +180,7 @@ use Joomla\CMS\Component\ComponentHelper;
                         'help'=>Text::_('COM_MINIMARKET_RECOMM_PRODUCT_OVERRIDE_HELP')];
                     require dirname(__DIR__).'/shared/reference-picker.php';
                     ?>
+                    </div>
                     <p class="form-text"><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=category.edit&id='.(int)$this->item->category_id,false)); ?>">
                         <?php echo Text::_('COM_MINIMARKET_RECOMM_OPEN_CATEGORY_RULES'); ?></a></p>
                 <?php else: ?>
@@ -219,6 +223,17 @@ use Joomla\CMS\Component\ComponentHelper;
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
     <?php endforeach; ?>
     <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
+    <script>
+    (() => {
+      for(const type of ['similar','together']){
+        const selector=document.getElementById('jform_rec_'+type+'_mode');
+        const target=document.querySelector('[data-mm-recommend-target-panel="'+type+'"]');
+        if(!selector||!target)continue;
+        const sync=()=>{target.hidden=!['manual','hybrid'].includes(selector.value);};
+        selector.addEventListener('change',sync);sync();
+      }
+    })();
+    </script>
     <input type="hidden" name="task" value="">
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
