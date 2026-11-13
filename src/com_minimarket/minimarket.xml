@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.6.11</version>
+    <version>0.6.12</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -91,6 +91,8 @@
             <menu link="option=com_minimarket&amp;view=seofilters">COM_MINIMARKET_SEOFILTERS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=seofilter&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
+            <menu type="separator" alias="mm-group-reports">-</menu>
+            <menu link="option=com_minimarket&amp;view=stockreport">COM_MINIMARKET_STOCK_REPORT_TITLE</menu>
             <menu type="separator" alias="mm-group-3">-</menu>
             <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE
