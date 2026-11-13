@@ -116,7 +116,7 @@ final class ProductRecommendations
         if($productId<1)return [];
         $mode=self::modes($db,$productId)['together'];
         $manual=in_array($mode,['manual','hybrid'],true)?$catalog->getVisibleRecommendationsByIds(
-            self::manualIds($db,$productId,'together'),$limit);
+            self::manualIds($db,$productId,'together'),$limit):[];
         if($mode==='manual'||count($manual)>=min(12,max(1,$limit)))return $manual;
         // Only paid and fulfilled orders; returned paired item is not evidence
         // for a successful cross-sale. No identifying customer data is read.
