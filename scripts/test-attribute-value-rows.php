@@ -148,8 +148,8 @@ namespace MiniMarket\AttributeValueRowsSmoke {
     ok(count($field)===1 && (string)$field[0]['type']==='subform'
         && (string)$field[0]['multiple']==='true','one native repeatable field in Attribute details');
     ok((string)$field[0]['buttons']==='add,remove,move','native Joomla add/remove/move handles');
-    ok((string)$field[0]['showon']==='value_source:preset',
-        'canonical preset values shown only for dictionary-backed attributes');
+    ok((string)$field[0]['showon']==='value_source:preset[AND]input_type!:boolean',
+        'canonical preset values shown only for dictionary-backed non-boolean attributes');
     ok(count($form->xpath("//field[@name='values_present']"))===1,'empty field sentinel');
     ok(count($sub->xpath("//field[@name='id' and @type='hidden']"))===1,'stable ID hidden in each row');
     ok(count($sub->xpath("//field[@name='title']"))===1,'simple title entry');
