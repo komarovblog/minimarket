@@ -84,7 +84,7 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
         &&$o->payment_status!=='processing'
         &&!in_array((string)$o->fulfillment_status,['shipped','in_transit','awaiting_pickup','delivered','failed'],true)
         &&!array_filter($this->shipments,static fn($x)=>in_array((string)$x->status,['in_transit','awaiting_pickup','delivered','failed'],true)); ?>
-    <?php if($canUpdate&&$o->status==='new'): ?>
+    <?php if($canUpdate&&$this->manualStatusEnabled&&$o->status==='new'): ?>
     <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>" class="mb-2">
      <input type="hidden" name="id" value="<?php echo $oid; ?>">
      <input type="hidden" name="status" value="confirmed">
@@ -92,7 +92,7 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      <button class="btn btn-success" type="submit"><?php echo Text::_('COM_MINIMARKET_ORDER_ACCEPT'); ?></button>
     </form>
     <?php endif; ?>
-    <?php if($canCancel): ?>
+    <?php if($canCancel&&$this->manualStatusEnabled): ?>
     <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>" class="d-flex flex-column gap-2">
      <input type="hidden" name="id" value="<?php echo $oid; ?>">
      <input type="hidden" name="status" value="cancelled">

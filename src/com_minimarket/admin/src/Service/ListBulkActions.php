@@ -85,8 +85,8 @@ final class ListBulkActions
         }
         $ids = self::selected($softDelete ? 'core.delete' : 'core.edit.state');
 
-        // Accept/cancel are regular business actions, never disabled by a
-        // setting for exceptional direct status overrides.
+        if($table==='#__minimarket_orders'&&!$softDelete&&!OrderLifecycle::manualEnabled())
+            throw new \DomainException('COM_MINIMARKET_ORDER_MANUAL_DISABLED');
         sort($ids,SORT_NUMERIC);
         $actor=(int)Factory::getApplication()->getIdentity()->id;
         $reason=trim(strip_tags(Factory::getApplication()->input->post->getString('cancel_reason','')));

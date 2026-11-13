@@ -45,6 +45,7 @@ final class OrderLifecycle
     public static function validateManual(DatabaseInterface $db,array $o,string $next):void
     {
         $previous=(string)($o['status']??'');
+        if(!self::manualEnabled())throw new \DomainException('COM_MINIMARKET_ORDER_MANUAL_DISABLED');
         if($previous===$next)return;
         if($previous==='new'&&$next==='confirmed')return;
         if(in_array($previous,['new','confirmed'],true)&&$next==='cancelled'){
@@ -91,7 +92,13 @@ final class OrderLifecycle
             // Fulfillment comes from a confirmed store-handling action, not a calendar.
             if($fulfillment==='pending')$fulfillment='awaiting_assembly';
         }
-        // A paid order remains New until an employee explicitly accepts it.
+        // With manual control disabled, actual processing/payment facts accept
+        // the order. Merely creating a shipment does not.
+        if($status==='new'&&!self::manualEnabled()
+           &&($o['payment_status']==='paid'
+              ||in_array($fulfillment,['assembling','ready','in_transit',
+                  'awaiting_pickup','delivered'],true)))
+           $status='confirmed';
         if($status==='confirmed'&&$o['payment_status']==='paid'
            &&$fulfillment==='delivered')$status='completed';
         if($status===$fromStatus&&$fulfillment===$fromFulfillment){
