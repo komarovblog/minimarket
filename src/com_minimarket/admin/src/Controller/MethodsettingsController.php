@@ -92,4 +92,25 @@ final class MethodsettingsController extends BaseController
             $this->setRedirect('index.php?option=com_minimarket&view='.$view.'&method='.$method);
         }
     }
+    public function saveDeliveryCompatibility():void
+    {
+        $app=Factory::getApplication();
+        if($app->input->getMethod()!=='POST'||!Session::checkToken('post'))
+            throw new \RuntimeException(Text::_('JINVALID_TOKEN'),403);
+        if(!$app->getIdentity()->authorise('core.options','com_minimarket')
+            && !$app->getIdentity()->authorise('core.admin','com_minimarket'))
+            throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $delivery=$app->input->post->getCmd('delivery_method','');
+        $selected=$app->input->post->get('allowed_payments',[],'array');
+        try{
+            if(!is_array($selected))throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            MethodSettings::saveDeliveryMirror(
+                Factory::getContainer()->get(DatabaseInterface::class),$delivery,$selected);
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_METHOD_SETTINGS_SAVED'));
+        }catch(\DomainException $e){
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),'warning');
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=deliverymethods&method='
+            .(in_array($delivery,['pickup','courier'],true)?$delivery:'pickup').'&tab=compatibility');
+    }
 }

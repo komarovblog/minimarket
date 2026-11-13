@@ -111,6 +111,54 @@ final class MethodSettings
         }
     }
 
+
+    /** Resolve the reverse editor into the same two original payment settings. */
+    public static function mirrorChanges(array $settings,string $delivery,array $selected):array
+    {
+        if(!in_array($delivery,['pickup','courier'],true)||count($selected)>2)
+            throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        foreach($selected as $name){
+            if(!is_string($name)||!in_array($name,['on_receipt','bank_transfer'],true))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        }
+        if(count(array_unique($selected))!==count($selected))
+            throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        $changes=[];
+        foreach(['on_receipt'=>['pickup','courier'],'bank_transfer'=>['pickup','courier','digital']] as $method=>$defaults){
+            $key='payment_'.$method.'_allowed_deliveries';
+            $raw=$settings[$key]??null;
+            $old=$raw===null?$defaults:($raw===''?[]:explode(',',(string)$raw));
+            if(array_diff($old,$defaults)||count($old)!==count(array_unique($old)))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            $new=array_values(array_diff($old,[$delivery]));
+            if(in_array($method,$selected,true))$new[]=$delivery;
+            $changes[$key]=implode(',',array_values(array_intersect($defaults,$new)));
+        }
+        return $changes;
+    }
+
+    public static function saveDeliveryMirror(DatabaseInterface $db,string $delivery,array $selected):void
+    {
+        $db->transactionStart();
+        try{
+            $db->setQuery('SELECT extension_id,params FROM '.$db->quoteName('#__extensions')
+                .' WHERE type='.$db->quote('component')
+                .' AND element='.$db->quote('com_minimarket').' FOR UPDATE');
+            $row=$db->loadAssoc();
+            if(!$row)throw new \RuntimeException('MiniMarket component unavailable');
+            $params=json_decode((string)$row['params'],true);
+            if(!is_array($params))$params=[];
+            foreach(self::mirrorChanges($params,$delivery,$selected) as $key=>$value)
+                $params[$key]=$value;
+            $json=json_encode($params,JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE);
+            $q=$db->getQuery(true)->update($db->quoteName('#__extensions'))
+                ->set($db->quoteName('params').'='.$db->quote($json))
+                ->where($db->quoteName('extension_id').'='.(int)$row['extension_id']);
+            $db->setQuery($q);$db->execute();
+            $db->transactionCommit();
+        }catch(\Throwable $e){$db->transactionRollback();throw $e;}
+    }
+
     private static function amountCents(string $raw): int
     {
         $raw=trim($raw);

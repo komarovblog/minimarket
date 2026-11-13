@@ -38,7 +38,9 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
  <?php $mmPluginScope='delivery';require dirname(__DIR__).'/shared/plugin-method.php'; ?>
 <?php else: ?>
 <div id="j-main-container" class="j-main-container">
- <?php echo HTMLHelper::_('uitab.startTabSet','mm-delivery-method',['active'=>($this->method==='courier' && $this->embeddedZoneEditor)?'zones':(\Joomla\CMS\Factory::getApplication()->input->getCmd('tab','main')==='zones'?'zones':'main')]); ?>
+ <?php $selectedTab=\Joomla\CMS\Factory::getApplication()->input->getCmd('tab','main');
+ $selectedTab=($this->method==='courier'&&$this->embeddedZoneEditor)?'zones':(in_array($selectedTab,['main','zones','compatibility'],true)?$selectedTab:'main'); ?>
+ <?php echo HTMLHelper::_('uitab.startTabSet','mm-delivery-method',['active'=>$selectedTab]); ?>
  <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-method','main',Text::_('COM_MINIMARKET_ZONE_TAB_MAIN')); ?>
  <form method="post" id="mm-method-form" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.save',false)); ?>">
   <input type="hidden" name="scope" value="delivery">
@@ -129,6 +131,34 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
  </div>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
  <?php endif; ?>
+
+ <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-method','compatibility',Text::_('COM_MINIMARKET_PAYMENT_COMPATIBILITY')); ?>
+ <div class="card card-body mm-admin-panel">
+  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DELIVERY_COMPATIBILITY_MIRROR_HELP'); ?></p>
+  <form method="post" action="<?php echo $esc(Route::_('index.php?option=com_minimarket&task=methodsettings.saveDeliveryCompatibility',false)); ?>">
+   <input type="hidden" name="delivery_method" value="<?php echo $esc($this->method); ?>">
+   <?php foreach(['on_receipt'=>'COM_MINIMARKET_PAYMENT_ON_RECEIPT','bank_transfer'=>'COM_MINIMARKET_PAYMENT_BANK_TRANSFER'] as $payment=>$label):
+       $allowed=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::allowedForPayment($p,$payment);
+       $enabled=$bool('payment_'.$payment.'_enabled',$payment==='on_receipt'?1:0);
+   ?>
+    <div class="form-check mb-2">
+     <input type="checkbox" name="allowed_payments[]" class="form-check-input"
+       id="mm-compatible-payment-<?php echo $payment; ?>" value="<?php echo $payment; ?>"
+       <?php echo in_array($this->method,$allowed,true)?'checked':''; ?>
+       <?php echo $this->canEdit?'':'disabled'; ?>>
+     <label class="form-check-label" for="mm-compatible-payment-<?php echo $payment; ?>">
+      <?php echo Text::_($label); ?>
+      <?php if(!$enabled): ?><span class="text-muted">(<?php echo Text::_('COM_MINIMARKET_METHOD_INACTIVE'); ?>)</span><?php endif; ?>
+     </label>
+    </div>
+   <?php endforeach; ?>
+   <?php echo HTMLHelper::_('form.token'); ?>
+   <?php if($this->canEdit): ?>
+    <button type="submit" class="btn btn-success mt-2"><?php echo Text::_('JSAVE'); ?></button>
+   <?php endif; ?>
+  </form>
+ </div>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
  <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
  <?php if($this->method==='courier'): ?>
  <script>
