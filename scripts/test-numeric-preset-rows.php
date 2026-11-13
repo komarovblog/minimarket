@@ -50,7 +50,7 @@ namespace MiniMarket\Tests\NumericDictionary {
     ok($form!==false && $row!==false,'both canonical XML forms parse');
     $dictionary=$form->xpath("//fieldset[@name='details']/field[@name='unified_values']");
     ok(count($dictionary)===1 && (string)$dictionary[0]['type']==='subform'
-       && (string)$dictionary[0]['showon']==='value_source:preset'
+       && (string)$dictionary[0]['showon']==='value_source:preset[AND]input_type!:boolean'
        && (string)$dictionary[0]['buttons']==='add,remove,move',
        'numeric values edited using the common preset dictionary');
     ok(count($row->xpath("//field[@name='value_payload']"))===1,
