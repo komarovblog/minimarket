@@ -48,6 +48,10 @@ namespace MiniMarket\CheckoutSmoke {
         public array $columns=[];
         public array $entries=[];
         public function insert($table):self{$this->table=(string)$table;return $this;}
+        public function select($columns):self{return $this;}
+        public function from($table):self{return $this;}
+        public function where($filter):self{return $this;}
+        public function order($sort):self{return $this;}
         public function columns($columns):self{$this->columns=$columns;return $this;}
         public function values($row):self{$this->entries[]=(string)$row;return $this;}
     }
@@ -63,6 +67,7 @@ namespace MiniMarket\CheckoutSmoke {
         // Legacy checkout smoke has no catalog tables. NULL costs are real
         // unknowns; production cost snapshots are tested against MySQL 8.4.
         public function loadAssoc():?array{return null;}
+        public function loadAssocList():array{return [];}
         public function execute():void {
             if($this->failItems && str_contains($this->current->table,'order_items')) {
                 throw new \RuntimeException('simulated line write failure');
