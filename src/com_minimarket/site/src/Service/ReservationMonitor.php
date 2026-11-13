@@ -19,27 +19,28 @@ final class ReservationMonitor
         $params=ComponentHelper::getParams('com_minimarket');
         $batch=max(1,min(200,$batch));
         $first=max(1,min(30,(int)$params->get('pickup_remind_before_days',3)));
-        $final=max(1,min(30,(int)$params->get('pickup_remind_final_days',1)));
+        $final=min($first,max(1,min(30,(int)$params->get('pickup_remind_final_days',1))));
         $db->setQuery('SELECT id,reserved_until FROM '.$db->quoteName('#__minimarket_orders')
             ." WHERE delivery_method='pickup' AND reservation_state='held'"
             ." AND status IN ('new','confirmed') AND ready_at IS NOT NULL"
             ." AND fulfillment_status='ready'"
             ." AND reserved_until>UTC_TIMESTAMP()"
             .' AND reserved_until<=DATE_ADD(UTC_TIMESTAMP(), INTERVAL '.$first.' DAY)'
-            .' ORDER BY reserved_until,id LIMIT '.$batch);
+            .' ORDER BY reserved_until,id');
         $toRemind=(array)$db->loadAssocList();
         $reminders=0;
         foreach($toRemind as $order){
             $id=(int)$order['id'];
             $ref='deadline_'.str_replace([' ',':','-'],'_',(string)$order['reserved_until']);
-            NotificationSender::emit($id,'pickup_reminder',$ref);
-            ++$reminders;
             $db->setQuery('SELECT IF(reserved_until<=DATE_ADD(UTC_TIMESTAMP(),'
                 .'INTERVAL '.$final.' DAY),1,0) FROM '
                 .$db->quoteName('#__minimarket_orders').' WHERE id='.$id
                 .' AND reservation_state='.$db->quote('held'));
-            if((int)$db->loadResult()===1)
-                NotificationSender::emit($id,'pickup_final',$ref);
+            $finalWindow=(int)$db->loadResult()===1;
+            // One reminder tier per evaluation, even if the scheduler was
+            // unavailable before the final reminder threshold.
+            NotificationSender::emit($id,$finalWindow?'pickup_final':'pickup_reminder',$ref);
+            ++$reminders;
         }
 
         $canceled=0;
