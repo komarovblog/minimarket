@@ -15,6 +15,7 @@ final class HtmlView extends BaseHtmlView
     public bool $hasPriorShipment=false;
     public array $linkedReturns=[];
     public bool $canViewFinance=false;
+    public bool $canCreateTicket=false;
     public array $costRevisions=[];
     public array $shipmentEvents=[];
     public function display($tpl=null)
@@ -23,6 +24,7 @@ final class HtmlView extends BaseHtmlView
         if(!$u->authorise('core.manage','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $this->canViewFinance=$u->authorise('core.admin','com_minimarket');
+        $this->canCreateTicket=$u->authorise('core.create','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         $this->setLayout($this->isCreate?'create':'default');
         if($this->isCreate && !$u->authorise('core.create','com_minimarket'))

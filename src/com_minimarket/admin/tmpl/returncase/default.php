@@ -16,6 +16,9 @@ $validNext=match((string)$r->status){
  <?php if($canChange): ?><button class="btn btn-success" form="mm-return-status-form" type="submit"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button><?php endif; ?>
  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=returns',false)); ?>"><span class="icon-arrow-left" aria-hidden="true"></span> <?php echo Text::_('JTOOLBAR_BACK'); ?></a>
  <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$r->order_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?> #<?php echo (int)$r->order_id; ?></a>
+ <?php if($this->canCreateTicket): ?>
+  <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&layout=create&order_id='.(int)$r->order_id.'&return_id='.(int)$r->id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_TICKET_NEW'); ?></a>
+ <?php endif; ?>
 </div>
 <div id="j-main-container" class="j-main-container">
  <?php echo HTMLHelper::_('uitab.startTabSet','mm-return-'.(int)$r->id,['active'=>'details']); ?>

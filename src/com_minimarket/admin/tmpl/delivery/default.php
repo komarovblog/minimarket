@@ -8,6 +8,9 @@ $s=$this->shipment;
 <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
  <button type="submit" form="mm-delivery-update-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+ <?php if($this->canCreateTicket): ?>
+  <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&layout=create&order_id='.(int)$s->order_id.'&shipment_id='.(int)$s->id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_TICKET_NEW'); ?></a>
+ <?php endif; ?>
 </div>
 <div id="j-main-container" class="j-main-container">
  <?php echo HTMLHelper::_('uitab.startTabSet','mm-delivery-'.(int)$s->id,['active'=>'details']); ?>

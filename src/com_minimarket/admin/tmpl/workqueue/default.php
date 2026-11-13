@@ -29,7 +29,8 @@ $views=['payment'=>'payment','delivery'=>'delivery','ticket'=>'ticket','returnca
       <tbody><?php foreach($group['rows'] as $entry): ?>
        <tr>
         <td><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view='.$views[$kind].'&id='.(int)$entry->id,false)); ?>">#<?php echo (int)$entry->id; ?></a></td>
-        <td><?php echo $this->escape($entry->description); ?></td>
+        <td><?php echo $this->escape($entry->description); ?>
+         <?php if(($entry->priority??'')==='high'): ?><span class="small text-body-secondary"> — <?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_HIGH'); ?></span><?php endif; ?></td>
         <td><?php echo $this->escape($entry->date_value); ?></td>
         <td><?php echo Text::_($entry->wasRead?'COM_MINIMARKET_WORKQUEUE_READ':'COM_MINIMARKET_WORKQUEUE_UNREAD'); ?></td>
         <td>

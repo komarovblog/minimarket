@@ -30,7 +30,7 @@ $t=$this->ticket;
     <label for="mm-ticket-status" class="form-label"><?php echo Text::_('JSTATUS'); ?></label>
     <select name="status" id="mm-ticket-status" class="form-select" <?php echo $this->canChangeStatus?'':'disabled'; ?>>
      <?php foreach(['new','in_progress','closed'] as $state): ?>
-      <option value="<?php echo $state; ?>"<?php echo $t->status===$state?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_TICKET_'.strtoupper($state)); ?></option>
+      <option value="<?php echo $state; ?>"<?php echo $t->status===$state?' selected':''; ?>><?php echo Text::_($state==='new'?'COM_MINIMARKET_TICKET_NEW_STATUS':'COM_MINIMARKET_TICKET_'.strtoupper($state)); ?></option>
      <?php endforeach; ?>
     </select>
     <?php if(!$this->canChangeStatus): ?><input type="hidden" name="status" value="<?php echo $this->escape($t->status); ?>"><?php endif; ?>

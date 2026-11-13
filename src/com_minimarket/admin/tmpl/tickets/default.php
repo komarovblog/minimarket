@@ -38,7 +38,7 @@ $mmSearch=[
    <tbody><?php foreach($this->tickets as $ticket): ?><tr>
     <td>#<?php echo (int)$ticket->id; ?></td>
     <td><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&id='.(int)$ticket->id,false)); ?>"><?php echo $this->escape($ticket->subject); ?></a></td>
-    <td><?php echo Text::_('COM_MINIMARKET_TICKET_'.strtoupper((string)$ticket->status)); ?></td>
+    <td><?php echo Text::_((string)$ticket->status==='new'?'COM_MINIMARKET_TICKET_NEW_STATUS':'COM_MINIMARKET_TICKET_'.strtoupper((string)$ticket->status)); ?></td>
      <td><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_'.strtoupper((string)$ticket->priority)); ?></td>
     <td><?php if($ticket->order_id!==null): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$ticket->order_id,false)); ?>">#<?php echo (int)$ticket->order_id; ?></a><?php endif; ?></td>
     <td><?php if((int)$ticket->user_id>0): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=customer&id='.(int)$ticket->user_id,false)); ?>">#<?php echo (int)$ticket->user_id; ?></a><?php endif; ?></td>

@@ -19,6 +19,9 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
  <?php if($this->canCreateReturn&&empty($o->deleted_at)): ?>
   <a class="btn btn-success" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=returncase&layout=create&order_id='.$oid,false)); ?>"><span class="icon-plus" aria-hidden="true"></span> <?php echo Text::_('COM_MINIMARKET_RETURN_NEW'); ?></a>
  <?php endif; ?>
+ <?php if($this->canCreateTicket&&empty($o->deleted_at)): ?>
+  <a class="btn btn-outline-primary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=ticket&layout=create&order_id='.$oid.'&user_id='.(int)$o->user_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_TICKET_NEW'); ?></a>
+ <?php endif; ?>
 </div>
 <div id="j-main-container" class="j-main-container mm-order-page">
  <div class="d-flex flex-wrap gap-2 align-items-center mb-3">

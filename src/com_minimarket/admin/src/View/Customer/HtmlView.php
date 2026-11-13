@@ -10,7 +10,7 @@ final class HtmlView extends BaseHtmlView
 {
     public ?object $customer=null;
     public array $orders=[],$notes=[],$tickets=[];
-    public bool $canNote=false;
+    public bool $canNote=false,$canCreateTicket=false;
     public function display($tpl=null)
     {
         $app=Factory::getApplication();$user=$app->getIdentity();
@@ -19,6 +19,7 @@ final class HtmlView extends BaseHtmlView
         $id=$app->input->getInt('id',0);
         if($id<1)throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
         $this->canNote=$user->authorise('core.edit','com_minimarket');
+        $this->canCreateTicket=$user->authorise('core.create','com_minimarket');
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $db->setQuery($db->getQuery(true)->select(['id','name','email','registerDate','block'])
             ->from($db->quoteName('#__users'))->where('id='.$id));

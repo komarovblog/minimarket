@@ -10,7 +10,7 @@ use Joomla\Database\DatabaseInterface;
 
 final class HtmlView extends BaseHtmlView
 {
-    public bool $isCreate=false,$canEdit=false;
+    public bool $isCreate=false,$canEdit=false,$canCreateTicket=false;
     public ?object $case=null;
     public array $items=[],$orderItems=[],$shipments=[],$selectedOrder=[];
     public int $preselectedOrder=0;
@@ -20,6 +20,7 @@ final class HtmlView extends BaseHtmlView
         if(!$u->authorise('core.manage','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $this->canEdit=$u->authorise('core.edit.state','com_minimarket');
+        $this->canCreateTicket=$u->authorise('core.create','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         $this->setLayout($this->isCreate?'create':'default');
         if($this->isCreate && !$u->authorise('core.create','com_minimarket'))

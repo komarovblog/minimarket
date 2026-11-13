@@ -25,6 +25,7 @@ final class HtmlView extends BaseHtmlView
     public ?int $shipmentId=null;
     public array $shipments=[],$returns=[];
     public bool $canCreateReturn=false;
+    public bool $canCreateTicket=false;
     public bool $canCreateDocument=false;
     public ?int $documentId=null;
     public bool $isCreate=false;
@@ -52,6 +53,7 @@ final class HtmlView extends BaseHtmlView
         $this->canViewUsers=$identity->authorise('core.manage','com_users');
         $this->canViewFinance=$identity->authorise('core.admin','com_minimarket');
         $this->canCreateReturn=$identity->authorise('core.create','com_minimarket');
+        $this->canCreateTicket=$identity->authorise('core.create','com_minimarket');
         $this->canCreateDocument=$identity->authorise('core.admin','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {

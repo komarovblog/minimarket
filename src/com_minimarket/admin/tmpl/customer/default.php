@@ -7,6 +7,9 @@ $c=$this->customer;
 ?>
 <div class="btn-toolbar mb-3">
  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=customers',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+ <?php if($this->canCreateTicket): ?>
+  <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&layout=create&user_id='.(int)$c->id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_TICKET_NEW'); ?></a>
+ <?php endif; ?>
 </div>
 <div id="j-main-container" class="j-main-container">
  <?php echo HTMLHelper::_('uitab.startTabSet','mm-customer-'.(int)$c->id,['active'=>'orders']); ?>
@@ -33,7 +36,7 @@ $c=$this->customer;
   <?php foreach($this->tickets as $ticket): ?>
    <p><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&id='.(int)$ticket->id,false)); ?>">#<?php echo (int)$ticket->id; ?> — <?php echo $this->escape($ticket->subject); ?></a>
    (<?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_'.strtoupper((string)$ticket->priority)); ?>;
-    <?php echo Text::_('COM_MINIMARKET_TICKET_'.strtoupper((string)$ticket->status)); ?>)</p>
+    <?php echo Text::_((string)$ticket->status==='new'?'COM_MINIMARKET_TICKET_NEW_STATUS':'COM_MINIMARKET_TICKET_'.strtoupper((string)$ticket->status)); ?>)</p>
   <?php endforeach; ?>
  </section>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
