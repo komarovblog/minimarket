@@ -27,6 +27,9 @@ final class HtmlView extends BaseHtmlView
     public array $zoneRows=[];
     public ?object $zone=null;
     public bool $embeddedZoneEditor=false;
+    public array $pickupPoints=[];
+    public ?object $pickupPoint=null;
+    public bool $embeddedPointEditor=false;
 
     public function display($tpl=null)
     {
@@ -74,6 +77,22 @@ final class HtmlView extends BaseHtmlView
         }
         $db->setQuery('SELECT COUNT(*) FROM '.$db->quoteName('#__minimarket_delivery_zones'));
         $this->zones=(int)$db->loadResult();
+        if($this->method==='pickup') {
+            $this->pickupPoints=\MiniMarket\Component\Minimarket\Site\Service\PickupPoints::all($db,false);
+            $pointId=max(0,$app->input->getInt('point_id',0));
+            $isNew=$app->input->getInt('point_new',0)===1;
+            if($pointId>0||$isNew) {
+                if(!$user->authorise($pointId?'core.edit':'core.create','com_minimarket'))
+                    throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+                $this->embeddedPointEditor=true;
+                if($pointId>0){
+                    foreach($this->pickupPoints as $point)
+                        if((int)$point->id===$pointId){$this->pickupPoint=$point;break;}
+                    if(!$this->pickupPoint)
+                        throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
+                }
+            }
+        }
         if($this->method==='courier') {
             $q=$db->getQuery(true)->select(['id','title','cities','rate_mode','base_fee_cents',
                 'free_from_cents','state'])
