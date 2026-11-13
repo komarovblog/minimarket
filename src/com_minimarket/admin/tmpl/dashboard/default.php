@@ -132,6 +132,36 @@ $sections = [
         ],
     ],
 ];
+
+$mmDashboardSvgPaths=[
+    'icon-cog'=>'M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l-1.45 1.45a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-.95 1.5V21h-3v-1.56a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.81.33l-1.45-1.45a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.5-.95H5v-3h1.56a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.81L9.18 6.8A1.65 1.65 0 0 0 11 7.13a1.65 1.65 0 0 0 1-1.5V4h3v1.56a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.81-.33l1.45 1.45a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.5.95H21v3h-1.56a1.65 1.65 0 0 0-1.5 1Z',
+    'icon-bell'=>'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4',
+    'icon-cart'=>'M3 3h2l2.4 11.4a2 2 0 0 0 2 1.6H19l2-9H6 M10 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM19 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
+    'icon-truck'=>'M2 6h12v12H2V6ZM14 10h4l4 4v4h-8M5 18a2 2 0 1 0 4 0M17 18a2 2 0 1 0 4 0',
+    'icon-reply'=>'M10 9 5 14l5 5M5 14h10a5 5 0 0 0 0-10h-3',
+    'icon-credit-card'=>'M2 5h20v14H2V5ZM2 10h20M6 15h5',
+    'icon-file'=>'M6 2h8l5 5v15H6V2ZM14 2v5h5M9 12h7M9 16h7',
+    'icon-users'=>'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM18 8a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87',
+    'icon-comments'=>'M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9H13a8.48 8.48 0 0 1 8 8v.5Z',
+    'icon-chart-bar'=>'M4 20V11h4v9M10 20V4h4v16M16 20v-7h4v7M2 20h20',
+    'icon-box'=>'M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8ZM3.3 7 12 12l8.7-5M12 22V12',
+    'icon-folder'=>'M3 7V4h7l2 3h9v13H3V7Z',
+    'icon-cube'=>'M12 2 3 7v10l9 5 9-5V7l-9-5ZM3 7l9 5 9-5M12 12v10',
+    'icon-link'=>'M10 13a5 5 0 0 0 7 .5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7',
+    'icon-tag'=>'M20 13 12 21 3 12V3h9l8 8v2ZM7.5 7.5h.01',
+    'icon-bookmark'=>'M5 3h14v18l-7-4-7 4V3Z',
+    'icon-list'=>'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
+    'icon-sliders-h'=>'M4 7h16M4 17h16M8 4v6M16 14v6',
+    'icon-bullhorn'=>'M3 9h4l12-5v16l-12-5H3V9ZM7 15l2 5h3',
+    'icon-percent'=>'M19 5 5 19M7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM17 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+    'icon-star'=>'m12 2 3 6 6.6 1-4.8 4.7L18 21l-6-3.1L6 21l1.2-7.3L2.4 9 9 8l3-6Z',
+    'icon-filter'=>'M3 4h18l-7 8v7l-4 2v-9L3 4Z',
+    'icon-wrench'=>'M14 7a6 6 0 0 0-7 7l-5 5 3 3 5-5a6 6 0 0 0 7-7l-3 3-4-1-1-4 3-3Z',
+    'icon-exchange-alt'=>'M4 7h16M16 3l4 4-4 4M20 17H4M8 13l-4 4 4 4',
+    'icon-share'=>'M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8.7 10.5l6.6-4M8.7 13.5l6.6 4',
+    'icon-user'=>'M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 22v-3a8 8 0 0 1 16 0v3',
+    'icon-envelope'=>'M3 5h18v14H3V5ZM3 6l9 7 9-7',
+];
 ?>
 <div class="com-minimarket-dashboard mm-admin-panel">
     <div class="mm-dashboard-topbar d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
@@ -205,7 +235,11 @@ $sections = [
                                             <path d="M3 18v3h8M21 6V3h-8"/>
                                         </svg>
                                     <?php else : ?>
-                                        <span class="<?php echo htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8'); ?> mm-dashboard-icon" aria-hidden="true"></span>
+                                        <svg class="mm-dashboard-icon" viewBox="0 0 24 24" fill="none"
+                                             stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                                             stroke-linejoin="round" aria-hidden="true" focusable="false">
+                                            <path d="<?php echo htmlspecialchars($mmDashboardSvgPaths[$item['icon']],ENT_QUOTES,'UTF-8'); ?>"/>
+                                        </svg>
                                     <?php endif; ?>
                                     <?php $mmCount=$item['count']===null?null:($this->stats[$item['count']]??null); ?>
                                     <?php if($mmCount!==null && (int)$mmCount>0): ?>
