@@ -51,6 +51,7 @@ $mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket
         <form action="<?php echo $this->escape(RouteHelper::checkoutAction()); ?>" method="post"
               class="mm-checkout-form row g-4" autocomplete="on"
               data-items-cents="<?php echo (int)$this->cart['total_cents']; ?>"
+              data-auto-discount-cents="<?php echo (int)($this->autoDiscountPreview['discount_cents']??0); ?>"
               data-promo-preview-url="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.preview',false)); ?>"
               data-otp-url="<?php echo $this->escape(\Joomla\CMS\Router\Route::_('index.php?option=com_minimarket&task=checkout.sendCode',false)); ?>">
             <div class="col-12 col-lg-8">
@@ -319,11 +320,11 @@ $mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket
                         <dt><?php echo Text::_('COM_MINIMARKET_CHECKOUT_ITEMS_TOTAL'); ?></dt>
                         <dd><?php echo CartState::format($this->cart['total_cents']); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></dd>
                         <dt><?php echo Text::_('COM_MINIMARKET_PROMO_DISCOUNT'); ?></dt>
-                        <dd data-promo-discount aria-live="polite">0 <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></dd>
+                        <dd data-promo-discount aria-live="polite"><?php echo CartState::format((int)($this->autoDiscountPreview['discount_cents']??0)); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></dd>
                         <dt><?php echo Text::_('COM_MINIMARKET_CHECKOUT_DELIVERY_TOTAL'); ?></dt>
                         <dd data-shipping-total aria-live="polite">0 <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></dd>
                         <dt><strong><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?></strong></dt>
-                        <dd><strong data-order-total aria-live="polite"><?php echo CartState::format($this->cart['total_cents']); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></dd>
+                        <dd><strong data-order-total aria-live="polite"><?php echo CartState::format(max(0,(int)$this->cart['total_cents']-(int)($this->autoDiscountPreview['discount_cents']??0))); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></dd>
                     </dl>
                     <div class="mb-3">
                       <label class="form-label" for="mm-checkout-promo"><?php echo Text::_('COM_MINIMARKET_PROMO_CODE'); ?></label>

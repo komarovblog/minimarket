@@ -16,6 +16,7 @@ final class HtmlView extends BaseHtmlView
     public bool $inventoryEnabled = true;
     public string $promoCode='';
     public ?array $promoPreview=null;
+    public ?array $autoPreview=null;
     public string $promoMessage='';
 
     public function display($tpl = null)
@@ -27,6 +28,15 @@ final class HtmlView extends BaseHtmlView
         $state = CartState::normalize($app->getSession()->get(CartState::SESSION_KEY,[]));
         $catalog = new CartCatalog(Factory::getContainer()->get(DatabaseInterface::class));
         $this->cart = $catalog->details($state,$this->inventoryEnabled);
+        if(!empty($this->cart['available'])&&!empty($this->cart['lines'])){
+            try{
+                $this->autoPreview=\MiniMarket\Component\Minimarket\Site\Service\AutoDiscount::quote(
+                    Factory::getContainer()->get(DatabaseInterface::class),
+                    $this->cart['lines'],(int)$this->cart['total_cents']);
+            }catch(\DomainException $e){
+                $this->promoMessage=Text::_($e->getMessage());
+            }
+        }
         if($this->promoCode!=='' && !empty($this->cart['available'])
            && !empty($this->cart['lines'])){
             try {

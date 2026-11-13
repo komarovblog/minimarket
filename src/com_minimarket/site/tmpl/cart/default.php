@@ -78,12 +78,15 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
             <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PROMO_CART_NOTE'); ?></p>
             <?php echo HTMLHelper::_('form.token'); ?>
         </form>
-        <?php if($this->promoPreview!==null): 
-            $discount=(int)$this->promoPreview['discount_cents'];
+        <?php if($this->promoPreview!==null||$this->autoPreview!==null):
+            $autoCents=(int)($this->autoPreview['discount_cents']??0);
+            $promoCents=(int)($this->promoPreview['discount_cents']??0);
+            $discount=max($autoCents,$promoCents);
             $estimated=max(0,(int)$this->cart['total_cents']-$discount);
         ?>
         <div data-mm-cart-promo-preview class="mm-cart-promo-preview my-3">
-            <p class="mb-1"><?php echo Text::_('COM_MINIMARKET_PROMO_DISCOUNT'); ?>:
+            <p class="mb-1"><?php echo Text::_($autoCents>$promoCents
+                 ?'COM_MINIMARKET_AUTO_DISCOUNT_BEST_APPLIED':'COM_MINIMARKET_PROMO_DISCOUNT'); ?>:
                 <strong>−<?php echo CartState::format($discount); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></p>
             <p class="mb-1"><?php echo Text::_('COM_MINIMARKET_PROMO_ESTIMATED_TOTAL'); ?>:
                 <strong><?php echo CartState::format($estimated); ?> <?php echo Text::_('COM_MINIMARKET_CURRENCY_SYMBOL'); ?></strong></p>
