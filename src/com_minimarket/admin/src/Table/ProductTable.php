@@ -89,7 +89,7 @@ final class ProductTable extends Table
         $costPrice=trim((string)($this->cost_price??''));
         if($costPrice==='') {
             $this->cost_price=null;
-        } elseif(!preg_match('/^(0|[1-9][0-9]{0,12})(?:\\.[0-9]{1,2})?$/D',$costPrice)) {
+        } elseif(!preg_match('/^(0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?$/D',$costPrice)) {
             $this->setError(Text::_('COM_MINIMARKET_COST_PRICE_INVALID'));
             return false;
         } else {
