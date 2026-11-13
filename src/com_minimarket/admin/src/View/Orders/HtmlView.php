@@ -13,7 +13,9 @@ final class HtmlView extends BaseHtmlView
 {
     public array $orders=[];
     public int $total=0, $offset=0, $pageSize=20;
-    public string $search='', $productSearch='', $statusFilter='', $paymentFilter='', $fulfillmentFilter='', $deliveryFilter='', $sort='newest';
+    public string $search='', $productSearch='', $statusFilter='', $paymentFilter='', $fulfillmentFilter='', $deliveryFilter='', $quickFilter='', $sort='newest';
+    public array $quickCounts=[];
+    public int $remindFirst=3,$remindFinal=1;
     public bool $canCreate=false, $showTrash=false;
 
     public function display($tpl=null)
@@ -40,12 +42,36 @@ final class HtmlView extends BaseHtmlView
         $delivery=$app->input->getCmd('filter_delivery','');
         $this->deliveryFilter=in_array($delivery,['pickup','courier'],true)?$delivery:'';
 
+        $params=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
+        $this->remindFirst=max(1,min(30,(int)$params->get('pickup_remind_before_days',3)));
+        $this->remindFinal=max(1,min(30,(int)$params->get('pickup_remind_final_days',1)));
+        $requestedQuick=$app->input->getCmd('filter_quick','');
+        $this->quickFilter=in_array($requestedQuick,
+            ['new','due_first','due_final','overdue','unpaid_reserved','paid_uncollected'],true)
+            ?$requestedQuick:'';
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $where=['o.deleted_at IS '.($this->showTrash?'NOT NULL':'NULL')];
         if($this->statusFilter!=='')$where[]='o.status='.$db->quote($this->statusFilter);
         if($this->paymentFilter!=='')$where[]='o.payment_status='.$db->quote($this->paymentFilter);
         if($this->fulfillmentFilter!=='')$where[]='o.fulfillment_status='.$db->quote($this->fulfillmentFilter);
         if($this->deliveryFilter!=='')$where[]='o.delivery_method='.$db->quote($this->deliveryFilter);
+        // All dates in storage and checks are UTC, never server-local. A quick
+        // filter is independent of the three normal status filters.
+        $conditions=[
+            'new'=>"o.status='new'",
+            'due_first'=>"o.reservation_state='held' AND o.delivery_method='pickup'
+                AND o.payment_status='unpaid' AND o.reserved_until>=UTC_TIMESTAMP()
+                AND o.reserved_until<=DATE_ADD(UTC_TIMESTAMP(),INTERVAL ".$this->remindFirst." DAY)",
+            'due_final'=>"o.reservation_state='held' AND o.delivery_method='pickup'
+                AND o.payment_status='unpaid' AND o.reserved_until>=UTC_TIMESTAMP()
+                AND o.reserved_until<=DATE_ADD(UTC_TIMESTAMP(),INTERVAL ".$this->remindFinal." DAY)",
+            'overdue'=>"o.reservation_state='held' AND o.delivery_method='pickup'
+                AND o.payment_status='unpaid' AND o.reserved_until<UTC_TIMESTAMP()",
+            'unpaid_reserved'=>"o.reservation_state='held' AND o.payment_status='unpaid'",
+            'paid_uncollected'=>"o.delivery_method='pickup' AND o.payment_status='paid'
+                AND o.fulfillment_status<>'delivered' AND o.status<>'cancelled'"
+        ];
+        if($this->quickFilter!=='')$where[]='('.$conditions[$this->quickFilter].')';
         if($this->search!==''){
             $like=$db->quote('%'.$db->escape($this->search,true).'%',false);
             $parts=['o.customer_name LIKE '.$like,'o.phone LIKE '.$like,'o.email LIKE '.$like];
@@ -59,13 +85,21 @@ final class HtmlView extends BaseHtmlView
             $where[]='EXISTS (SELECT 1 FROM '.$db->quoteName('#__minimarket_order_items','oi')
                 .' WHERE oi.order_id=o.id AND ('.implode(' OR ',$terms).'))';
         }
+        // One aggregation; counts are never estimated from the current page.
+        $parts=["COUNT(*) AS all_orders"];
+        foreach($conditions as $key=>$condition)
+            $parts[]='SUM(CASE WHEN '.$condition.' THEN 1 ELSE 0 END) AS '.$key;
+        $db->setQuery('SELECT '.implode(',',$parts).' FROM '
+            .$db->quoteName('#__minimarket_orders','o').' WHERE o.deleted_at IS NULL');
+        $this->quickCounts=(array)($db->loadAssoc()?:[]);
         $count=$db->getQuery(true)->select('COUNT(*)')->from($db->quoteName('#__minimarket_orders','o'));
         foreach($where as $condition)$count->where($condition);
         $db->setQuery($count);$this->total=(int)$db->loadResult();
         $this->offset=$this->total===0?0:min($this->offset,(int)(floor(($this->total-1)/$this->pageSize)*$this->pageSize));
         $query=$db->getQuery(true)->select([
             'o.id','o.customer_name','o.phone','o.status','o.payment_status','o.fulfillment_status','o.delivery_method',
-            'o.payment_method','o.order_source','o.total_cents','o.item_count','o.created_at'
+            'o.payment_method','o.order_source','o.total_cents','o.item_count','o.created_at',
+            'o.reserved_until','o.reservation_state'
         ])->from($db->quoteName('#__minimarket_orders','o'))
           ->order('o.id '.($this->sort==='oldest'?'ASC':'DESC'));
         foreach($where as $condition)$query->where($condition);
@@ -74,8 +108,7 @@ final class HtmlView extends BaseHtmlView
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ORDERS_TITLE'));
         if($this->canCreate)ToolbarHelper::addNew('order.add');
-        if(!$this->showTrash && $user->authorise('core.edit.state','com_minimarket')
-            && \MiniMarket\Component\Minimarket\Administrator\Service\OrderLifecycle::manualEnabled()){
+        if(!$this->showTrash && $user->authorise('core.edit.state','com_minimarket')){
             ToolbarHelper::custom('orders.confirm','publish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CONFIRMED'),true);
             ToolbarHelper::custom('orders.cancel','unpublish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CANCELLED'),true);
         }
