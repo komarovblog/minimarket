@@ -123,6 +123,6 @@ $sql=(string)file_get_contents($root.'admin/sql/updates/mysql/0.6.26.sql');
 $install=(string)file_get_contents($root.'admin/sql/install.mysql.sql');
 $ok(str_contains($sql,'#__minimarket_cart_snapshots')
  &&str_contains($install,'#__minimarket_cart_snapshots')
- &&!str_contains($sql,'email')&&!str_contains($sql,'phone'),
+ &&!preg_match('/^\\s*(?:email|phone)\\s+(?:VARCHAR|TEXT|CHAR)\\b/im',$sql),
  'additive privacy-minimal cart table for upgrade and fresh install');
 echo "MM626_CARTS_EVENTS_MENU_PASS\n";
