@@ -494,6 +494,7 @@ jobs:
           php scripts/test-0-6-10-lifecycle.php
           php scripts/test-0-6-10-notifications.php
           php scripts/test-0-6-11-operations-ui.php
+          php scripts/test-0-6-12-stock-report.php
           for file in src/com_minimarket/admin/src/Field/RegistrationverificationField.php src/com_minimarket/admin/src/Controller/{Order,Productpicker}Controller.php src/com_minimarket/admin/src/View/Order/HtmlView.php src/com_minimarket/admin/tmpl/{order/create,order/default,delivery/create}.php; do php -l "$file"; done
       - name: 0.6.7 order returns, shipment reasons, audit history and native operational UI
         run: |
