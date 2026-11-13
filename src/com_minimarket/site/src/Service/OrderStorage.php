@@ -6,7 +6,8 @@ use Joomla\Database\DatabaseInterface;
 
 /**
  * Atomically persist an uncharged order request with immutable SKU/title/price
- * snapshots. NEVER reserve or deduct stock. Shipping/payment are not active.
+ * snapshots. New physical orders atomically allocate the actual stock once.
+ * External shipping and gateway payment providers are not active.
  */
 final class OrderStorage
 {
@@ -163,6 +164,12 @@ final class OrderStorage
                 $db->setQuery($insert);$db->execute();
             }
             if($promo!==null)PromotionService::redeem($db,$promo,$orderId);
+            // Allocation is part of the SAME transaction as the order and all
+            // line snapshots. A concurrent checkout cannot sell the final SKU twice.
+            if($anyPhysical) {
+                StockReservation::allocate($db,$orderId,$lines,
+                    $delivery['method']==='pickup');
+            }
             // The first entry in the order timeline exists even if the order has
             // not yet been paid or shipped. No external service is invoked.
             $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_events'))

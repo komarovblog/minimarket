@@ -20,6 +20,24 @@
             <option value="0">COM_MINIMARKET_CONFIG_PRIMARY_MENU_AUTO</option>
         </field>
 
+        <field name="mm_pickup_reservation_note" type="note" class="alert alert-info"
+               label="COM_MINIMARKET_PICKUP_RESERVATION_SECTION"
+               description="COM_MINIMARKET_PICKUP_RESERVATION_NOTE" />
+        <field name="pickup_unpaid_reserve_days" type="number" default="3" min="1" max="90" step="1"
+               label="COM_MINIMARKET_PICKUP_UNPAID_DAYS" description="COM_MINIMARKET_PICKUP_UNPAID_DAYS_HELP" />
+        <field name="pickup_paid_review_days" type="number" default="7" min="1" max="90" step="1"
+               label="COM_MINIMARKET_PICKUP_PAID_DAYS" description="COM_MINIMARKET_PICKUP_PAID_DAYS_HELP" />
+        <field name="pickup_remind_before_days" type="number" default="3" min="1" max="30" step="1"
+               label="COM_MINIMARKET_PICKUP_REMIND_FIRST" description="COM_MINIMARKET_PICKUP_REMIND_HELP" />
+        <field name="pickup_remind_final_days" type="number" default="1" min="1" max="30" step="1"
+               label="COM_MINIMARKET_PICKUP_REMIND_FINAL" description="COM_MINIMARKET_PICKUP_REMIND_HELP" />
+        <field name="pickup_auto_cancel_unpaid" type="list" default="0" filter="int"
+               label="COM_MINIMARKET_PICKUP_AUTO_CANCEL"
+               description="COM_MINIMARKET_PICKUP_AUTO_CANCEL_HELP">
+            <option value="0">COM_MINIMARKET_DISABLE</option>
+            <option value="1">COM_MINIMARKET_ENABLE</option>
+        </field>
+
         <field name="mm_order_lifecycle_note" type="note" class="alert alert-info"
                label="COM_MINIMARKET_ORDER_LIFECYCLE_SECTION"
                description="COM_MINIMARKET_ORDER_LIFECYCLE_SECTION_HELP" />

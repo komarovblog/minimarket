@@ -651,11 +651,39 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     total_cents BIGINT UNSIGNED NOT NULL,
     item_count INT UNSIGNED NOT NULL,
     deleted_at DATETIME NULL DEFAULT NULL,
+    reserved_until DATETIME NULL,
+    reservation_state VARCHAR(16) NOT NULL DEFAULT 'legacy',
+    ready_at DATETIME NULL,
+    accepted_at DATETIME NULL,
+    accepted_by INT UNSIGNED NOT NULL DEFAULT 0,
+    cancelled_reason VARCHAR(512) NOT NULL DEFAULT '',
     created_at DATETIME NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY idx_mm_order_checkout_key (checkout_key),
     KEY idx_mm_order_status_created (status, created_at),
-    KEY idx_mm_order_user_created (user_id, created_at)
+    KEY idx_mm_order_user_created (user_id, created_at),
+    KEY idx_mm_order_reservation (reservation_state,reserved_until),
+    KEY idx_mm_order_payment_reservation (payment_status,reserved_until)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- New orders only: legacy orders remain untouched and have no fictitious holds.
+-- Available stock decreases atomically on order creation. The ledger makes release
+-- idempotent, even with bundles and shared variant stock.
+CREATE TABLE IF NOT EXISTS #__minimarket_stock_allocations (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    order_id INT UNSIGNED NOT NULL,
+    source_kind VARCHAR(8) NOT NULL,
+    source_id INT UNSIGNED NOT NULL,
+    quantity INT UNSIGNED NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'held',
+    created_at DATETIME NOT NULL,
+    released_at DATETIME NULL,
+    PRIMARY KEY(id),
+    UNIQUE KEY uq_mm_allocation_key (order_id,source_kind,source_id),
+    KEY idx_mm_allocation_order (order_id,status),
+    CONSTRAINT fk_mm_stock_allocation_order FOREIGN KEY(order_id)
+      REFERENCES #__minimarket_orders(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Native courier delivery zones; plugins remain independent of these tariffs.
