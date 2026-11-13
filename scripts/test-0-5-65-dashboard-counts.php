@@ -27,6 +27,9 @@ namespace Joomla\CMS\MVC\View {
     }
 }
 namespace MiniMarket\Component\Minimarket\Administrator\Service {
+    final class AttentionInbox {
+        public static function count(object $db):int{return 6;}
+    }
     final class AdminInbox {
         public static function load(object $db,int $userId):array{
             if($userId!==7)throw new \RuntimeException('Operator identity mismatch');
@@ -156,14 +159,14 @@ namespace MiniMarket\DashboardCountsTest {
         'reviews'=>2,'seofilters'=>3,'promocodes'=>4,'autodiscounts'=>2,'recommendations'=>3,'payments'=>2,
         'tickets'=>1,'customers'=>1,'workqueue'=>7,'orders_new'=>1,'deliveries_attention'=>2,
         'returns_new'=>1,'payments_attention'=>1,'tickets_new'=>1,'fiscal_attention'=>0,
-        'abandonedcarts'=>2,'notifications_unread'=>4,'notifications_capped'=>false
+        'abandonedcarts'=>2,'notifications_attention'=>6,'notifications_unread'=>4,'notifications_capped'=>false
     ];
     verify($view->stats==$expected,'real entity reference counts retained and actionable badges derived from business status');
     verify(count(Factory::$database->queries)===32,'legacy queries plus seven distinct actionable source queries');
     verify(count(array_unique(Factory::$database->queries))===31,
         'seven new actionable SQL predicates are distinct, no synthetic payment rows');
     $html=(new Renderer($view->stats))->html();
-    $badgeKeys=['workqueue'=>7,'notifications_unread'=>4,'orders_new'=>1,
+    $badgeKeys=['notifications_attention'=>6,'orders_new'=>1,
         'deliveries_attention'=>2,'returns_new'=>1,'payments_attention'=>1,
         'tickets_new'=>1,'abandonedcarts'=>2,'reviews'=>2];
     foreach($badgeKeys as $key=>$value)
@@ -181,7 +184,7 @@ namespace MiniMarket\DashboardCountsTest {
         && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
         'Orders shows new cases instead of all historic orders');
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===41 &&
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===37 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');

@@ -23,7 +23,7 @@ checkNative(str_contains($html, 'mm-dashboard-icon--bundle') &&
 checkNative(substr_count($html, "'count' => '") >= 9 &&
     substr_count($html, "'pending' => true") === 0 &&
     str_contains($html,"'count' => 'orders_new'") &&
-    str_contains($html,"'count' => 'notifications_unread'") &&
+    str_contains($html,'data-mm-stat="notifications_attention"') &&
     str_contains($html,"'count' => 'abandonedcarts'"),
     'only actionable dashboard badges, no synthetic catalogue totals');
 checkNative(str_contains($css, 'a.mm-dashboard-tile:focus-visible') &&

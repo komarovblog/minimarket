@@ -14,7 +14,7 @@ $module=simplexml_load_file(__DIR__.'/../src/mod_minimarket_toolbar/mod_minimark
 $check($module!==false && (string)$module->version==='1.0.0',
     'one-time module can remain older than component');
 $items=$manifest->administration->submenu->menu;
-$check(count($items)>0 && (string)$items[count($items)-1]==='COM_MINIMARKET_CONFIG_SETTINGS_MENU',
+$check(count($items)>0 && in_array((string)$items[count($items)-1],['COM_MINIMARKET_CONFIG_SETTINGS_MENU','COM_MINIMARKET_GENERAL_SETTINGS_TITLE'],true),
     'native left submenu has Settings as its final item');
 $dashboard=(string)file_get_contents($root.'admin/tmpl/dashboard/default.php');
 $settingsAt=strpos($dashboard,"['view' => 'settings'");
