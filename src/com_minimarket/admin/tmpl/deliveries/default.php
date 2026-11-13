@@ -4,7 +4,9 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 
-$colors=['new'=>'info','in_transit'=>'primary','delivered'=>'success','cancelled'=>'secondary'];
+$colors=['new'=>'secondary','awaiting_assembly'=>'secondary','assembling'=>'info',
+ 'ready'=>'primary','in_transit'=>'primary','awaiting_pickup'=>'info',
+ 'delivered'=>'success','failed'=>'warning','cancelled'=>'secondary'];
 $statusOptions=[''=>Text::_('COM_MINIMARKET_FILTER_ANY')];
 foreach(array_keys($colors) as $value)$statusOptions[$value]=Text::_('COM_MINIMARKET_DELIVERY_STATUS_'.strtoupper($value));
 $mmSearch=[

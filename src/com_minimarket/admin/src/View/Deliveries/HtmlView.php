@@ -22,7 +22,7 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $this->canCreate=$user->authorise('core.create','com_minimarket');
         $requested=$app->input->getCmd('filter_status','');
-        $this->status=in_array($requested,['new','in_transit','delivered','cancelled'],true)?$requested:'';
+        $this->status=in_array($requested,['awaiting_assembly','assembling','ready','in_transit','awaiting_pickup','delivered','failed','cancelled','new'],true)?$requested:'';
         $this->search=mb_substr(trim($app->input->getString('filter_search','')),0,100);
         $carrier=$app->input->getCmd('filter_carrier','');
         $this->carrierFilter=in_array($carrier,['own','cdek','other'],true)?$carrier:'';
