@@ -1,6 +1,6 @@
 # MiniMarket 0.6.12 — отчёт «Остатки», фиксация складских правил, необязательный Scheduler
 
-**Код:** `komarovblog/minimarket`, ветка `development`; Joomla 6, PHP 8.4/8.5, MySQL 8.4. **Проверки GitHub Actions:** запускать и фиксировать отдельным коммитом только после полного 6/6 PASS. **Реальная локальная браузерная проверка в Joomla 6 и СУБД пользователя ещё не подтверждена**.
+**Код:** `komarovblog/minimarket`, ветка `development`; Joomla 6, PHP 8.4/8.5, MySQL 8.4. **Проверки GitHub Actions: 6/6 PASS** — [Actions #43404889863](https://github.com/komarovblog/minimarket/actions/runs/43404889863), исходный SHA `e42cc6c2415f717bada47bc43facfdaeedfa4e08`; PHP 8.4/8.5, MySQL fresh/upgrade/demo, Windows ZIP и опциональная отдельная сборка Scheduler. **Реальная локальная браузерная проверка в Joomla 6 и СУБД пользователя ещё не подтверждена**.
 
 ## Что реализовано
 
