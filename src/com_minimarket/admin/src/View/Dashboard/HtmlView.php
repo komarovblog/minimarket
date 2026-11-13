@@ -64,6 +64,11 @@ final class HtmlView extends BaseHtmlView
             $work+=(int)$db->loadResult();
         }
         $this->stats['workqueue']=$work;
+        // Static dashboard report also loads in Joomla's CLI/unit harness.
+        if(!class_exists(\MiniMarket\Component\Minimarket\Site\Service\AbandonedCartStore::class)){
+            require_once dirname(__DIR__,4).'/site/src/Service/CartState.php';
+            require_once dirname(__DIR__,4).'/site/src/Service/AbandonedCartStore.php';
+        }
         // Alert badges describe what needs action, never all stored records.
         foreach([
             'orders_new'=>['orders',"status='new' AND deleted_at IS NULL"],
