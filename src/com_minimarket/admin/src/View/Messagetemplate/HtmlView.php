@@ -13,7 +13,7 @@ final class HtmlView extends BaseHtmlView
 {
     public ?object $item=null;
     public array $events=[];
-    public string $initialAudience='customer',$initialEvent='order_created';
+    public string $initialAudience='customer',$initialEvent='order_created',$initialChannel='email';
     public function display($tpl=null)
     {
         $app=Factory::getApplication();$id=$app->input->getInt('id',0);
@@ -33,6 +33,8 @@ final class HtmlView extends BaseHtmlView
         $event=$app->input->getCmd('event_code','');
         $available=MessageTemplates::events($this->initialAudience);
         $this->initialEvent=in_array($event,$available,true)?$event:(string)($available[0]??'');
+        $channel=$app->input->getCmd('channel_code','email');
+        $this->initialChannel=in_array($channel,MessageTemplates::CHANNELS,true)?$channel:'email';
         $this->events=[
             'customer'=>NotificationPolicy::EVENTS,
             'admin'=>NotificationPolicy::ADMIN_EVENTS,

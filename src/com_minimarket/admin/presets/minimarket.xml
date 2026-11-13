@@ -5,9 +5,6 @@
         <menuitem title="COM_MINIMARKET_DASHBOARD_TITLE" type="component" icon="file"
                   element="com_minimarket"
                   link="index.php?option=com_minimarket&amp;view=dashboard"/>
-        <menuitem title="COM_MINIMARKET_WORKQUEUE_TITLE" type="component" icon="bell"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=workqueue"/>
-        <menuitem title="COM_MINIMARKET_NOTIFICATIONS_TITLE" type="component" icon="bell" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notifications"/>
         <menuitem title="COM_MINIMARKET_ORDERS_TITLE" type="component" icon="cart"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=orders"/>
         <menuitem title="COM_MINIMARKET_DASHBOARD_DELIVERIES" type="component" icon="truck"
@@ -67,19 +64,15 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=import"/>
         <menuitem title="COM_MINIMARKET_FEEDS_TITLE" type="component" icon="share"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=feeds"/>
-        <menuitem title="COM_MINIMARKET_DELIVERY_METHODS_TITLE" type="component" icon="truck"
+        <menuitem title="COM_MINIMARKET_DELIVERY_SETTINGS_TITLE" type="component" icon="truck"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=deliverymethods"/>
-        <menuitem title="COM_MINIMARKET_PAYMENT_METHODS_TITLE" type="component" icon="credit-card"
+        <menuitem title="COM_MINIMARKET_PAYMENT_SETTINGS_TITLE" type="component" icon="credit-card"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=paymentmethods"/>
-        <menuitem title="COM_MINIMARKET_REGISTRATION_METHODS_TITLE" type="component" icon="user"
+        <menuitem title="COM_MINIMARKET_REGISTRATION_SETTINGS_TITLE" type="component" icon="user"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=registrationmethods"/>
-        <menuitem title="COM_MINIMARKET_NOTIFICATION_METHODS_TITLE" type="component" icon="envelope"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notificationmethods"/>
-        <menuitem title="COM_MINIMARKET_NOTIFICATION_EVENTS_TITLE" type="component" icon="bell" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notificationevents"/>
-        <menuitem title="COM_MINIMARKET_MESSAGE_TEMPLATES_TITLE" type="component" icon="file"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=messagetemplates"/>
-        <menuitem title="COM_MINIMARKET_FISCAL_PROVIDERS_TITLE" type="component" icon="file" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=fiscalproviders"/>
-        <menuitem title="COM_MINIMARKET_CONFIG_SETTINGS_MENU" type="component" icon="cog"
+        <menuitem title="COM_MINIMARKET_NOTIFICATION_SETTINGS_TITLE" type="component" icon="bell" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notificationevents"/>
+        <menuitem title="COM_MINIMARKET_FISCAL_SETTINGS_TITLE" type="component" icon="file" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=fiscalproviders"/>
+        <menuitem title="COM_MINIMARKET_GENERAL_SETTINGS_TITLE" type="component" icon="cog"
                   element="com_config" link="index.php?option=com_config&amp;view=component&amp;component=com_minimarket"/>
     </menuitem>
 </menu>

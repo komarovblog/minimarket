@@ -16,10 +16,6 @@ $sections = [
         'type' => 'management',
         'icon' => 'icon-cog',
         'items' => [
-            ['view' => 'workqueue', 'label' => 'COM_MINIMARKET_WORKQUEUE_TITLE',
-                'icon' => 'icon-bell', 'count' => 'workqueue'],
-            ['view' => 'notifications', 'label' => 'COM_MINIMARKET_NOTIFICATIONS_TITLE',
-                'icon' => 'icon-bell', 'count' => 'notifications_unread'],
             ['view' => 'orders', 'label' => 'COM_MINIMARKET_DASHBOARD_ORDERS',
                 'icon' => 'icon-cart', 'count' => 'orders_new'],
             ['view' => 'deliveries', 'label' => 'COM_MINIMARKET_DASHBOARD_DELIVERIES',
@@ -117,21 +113,17 @@ $sections = [
         'type' => 'settings',
         'icon' => 'icon-cog',
         'items' => [
-            ['view' => 'deliverymethods', 'label' => 'COM_MINIMARKET_DELIVERY_METHODS_TITLE',
+            ['view' => 'deliverymethods', 'label' => 'COM_MINIMARKET_DELIVERY_SETTINGS_TITLE',
                 'icon' => 'icon-truck', 'count' => null],
-            ['view' => 'paymentmethods', 'label' => 'COM_MINIMARKET_PAYMENT_METHODS_TITLE',
+            ['view' => 'paymentmethods', 'label' => 'COM_MINIMARKET_PAYMENT_SETTINGS_TITLE',
                 'icon' => 'icon-credit-card', 'count' => null],
-            ['view' => 'registrationmethods', 'label' => 'COM_MINIMARKET_REGISTRATION_METHODS_TITLE',
+            ['view' => 'registrationmethods', 'label' => 'COM_MINIMARKET_REGISTRATION_SETTINGS_TITLE',
                 'icon' => 'icon-user', 'count' => null],
-            ['view' => 'notificationmethods', 'label' => 'COM_MINIMARKET_NOTIFICATION_METHODS_TITLE',
-                'icon' => 'icon-envelope', 'count' => null],
-            ['view' => 'notificationevents', 'label' => 'COM_MINIMARKET_NOTIFICATION_EVENTS_TITLE',
+            ['view' => 'notificationevents', 'label' => 'COM_MINIMARKET_NOTIFICATION_SETTINGS_TITLE',
                 'icon' => 'icon-bell', 'count' => null],
-            ['view' => 'messagetemplates', 'label' => 'COM_MINIMARKET_MESSAGE_TEMPLATES_TITLE',
+            ['view' => 'fiscalproviders', 'label' => 'COM_MINIMARKET_FISCAL_SETTINGS_TITLE',
                 'icon' => 'icon-file', 'count' => null],
-            ['view' => 'fiscalproviders', 'label' => 'COM_MINIMARKET_FISCAL_PROVIDERS_TITLE',
-                'icon' => 'icon-file', 'count' => null],
-            ['view' => 'settings', 'label' => 'COM_MINIMARKET_CONFIG_SETTINGS_MENU',
+            ['view' => 'settings', 'label' => 'COM_MINIMARKET_GENERAL_SETTINGS_TITLE',
                 'icon' => 'icon-cog', 'count' => null],
         ],
     ],
@@ -173,12 +165,25 @@ $mmDashboardSvgPaths=[
             <h2 class="h3 mb-1"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_HEADING'); ?><?php if(!empty($this->version)): ?> <span class="badge bg-secondary fs-6 align-middle ms-2">v<?php echo htmlspecialchars((string)$this->version, ENT_QUOTES, 'UTF-8'); ?></span><?php endif; ?></h2>
             <p class="text-muted mb-0"><?php echo Text::_('COM_MINIMARKET_DASHBOARD_WIDGETS_HELP'); ?></p>
         </div>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+        <a class="btn btn-warning d-inline-flex align-items-center gap-2 mm-dashboard-alert-button"
+           href="<?php echo AdminEntityLinks::view('notifications'); ?>">
+            <span class="icon-bell" aria-hidden="true"></span>
+            <span><?php echo Text::_('COM_MINIMARKET_NOTIFICATIONS_TITLE'); ?></span>
+            <?php if((int)($this->stats['notifications_attention']??0)>0): ?>
+              <span class="badge bg-danger text-white rounded-pill"
+                    data-mm-stat="notifications_attention">
+                <?php echo (int)$this->stats['notifications_attention']; ?>
+              </span>
+            <?php endif; ?>
+        </a>
         <a class="btn btn-primary d-inline-flex align-items-center gap-2"
            href="<?php echo htmlspecialchars(Uri::root().'index.php?option=com_minimarket&view=catalog', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>"
            target="_blank" rel="noopener noreferrer">
             <span class="icon-eye" aria-hidden="true"></span>
             <span><?php echo Text::_('COM_MINIMARKET_OPEN_SITE'); ?></span>
         </a>
+        </div>
     </div>
 
     <?php foreach ($sections as $section) : ?>

@@ -527,6 +527,7 @@ jobs:
           php scripts/test-0-6-25-navigation-recommendations.php
           php scripts/test-0-6-26-carts-events-menu.php
           php scripts/test-0-6-27-campaigns-tasks.php
+          php scripts/test-0-6-28-notification-center.php
           node --check src/com_minimarket/media/js/payment-compatibility.js
           for file in src/com_minimarket/admin/src/Field/RegistrationverificationField.php src/com_minimarket/admin/src/Controller/{Order,Productpicker}Controller.php src/com_minimarket/admin/src/View/Order/HtmlView.php src/com_minimarket/admin/tmpl/{order/create,order/default,delivery/create}.php; do php -l "$file"; done
       - name: 0.6.7 order returns, shipment reasons, audit history and native operational UI

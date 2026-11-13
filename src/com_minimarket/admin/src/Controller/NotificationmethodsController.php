@@ -26,15 +26,17 @@ final class NotificationmethodsController extends BaseController
         $method=$app->input->post->getCmd('method','');
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         try {
-            $raw=$app->input->post->get('events',[],'array');
-            if(!is_array($raw))throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
-            $events=NotificationPolicy::normalizeEvents($raw);
+            // Channel editor no longer owns event permissions; keep legacy POST support.
+            $raw=$app->input->post->get('events',null,'array');
+            if($raw!==null&&!is_array($raw))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            $events=$raw===null?null:NotificationPolicy::normalizeEvents($raw);
             if($method==='email'){
                 $enabled=$app->input->post->getInt('enabled',0);
                 if(!in_array($enabled,[0,1],true))
                     throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
-                $changes=['notification_email_enabled'=>$enabled,
-                    'notification_email_events'=>$events];
+                $changes=['notification_email_enabled'=>$enabled];
+                if($events!==null)$changes['notification_email_events']=$events;
             }elseif(preg_match('/^plugin_([1-9][0-9]*)$/D',$method,$m)){
                 $installed=false;
                 foreach(InstalledMethodPlugins::list($db,'notification') as $p)
@@ -43,8 +45,11 @@ final class NotificationmethodsController extends BaseController
                 $all=ComponentHelper::getParams('com_minimarket')->get('notification_plugin_events',[]);
                 if($all instanceof \Joomla\Registry\Registry)$all=$all->toArray();
                 if(!is_array($all))$all=[];
-                $all[$method]=$events;
-                $changes=['notification_plugin_events'=>$all];
+                $changes=[];
+                if($events!==null){
+                    $all[$method]=$events;
+                    $changes=['notification_plugin_events'=>$all];
+                }
             }else throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
             MethodSettings::save($db,$changes);
             $app->enqueueMessage(Text::_('COM_MINIMARKET_NOTIFY_EVENTS_SAVE'));

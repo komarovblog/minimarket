@@ -55,12 +55,12 @@ $ok($manifest!==false&&version_compare((string)$manifest->version,'0.6.25','>=')
  'component version');
 $dashboard=file_get_contents($root.'admin/tmpl/dashboard/default.php');
 $groups=[
- 'management'=>['workqueue','notifications','orders','deliveries','returns','payments','fiscalization','customers','tickets','documents'],
+ 'management'=>['orders','deliveries','returns','payments','fiscalization','customers','tickets','documents'],
  'reports'=>['businessreport','salesreport','stockreport','returnsreport','planfactreport'],
  'shop'=>['categories','products','bundles','groups','bundlegroups','brands','collections','attributes','orderoptions'],
  'marketing'=>['autodiscounts','promocodes','marketingflows','recommendations','abandonedcarts','reviews','seofilters'],
  'tools'=>['import','feeds'],
- 'settings'=>['deliverymethods','paymentmethods','registrationmethods','notificationmethods','notificationevents','messagetemplates','fiscalproviders','settings']
+ 'settings'=>['deliverymethods','paymentmethods','registrationmethods','notificationevents','fiscalproviders','settings']
 ];
 $expected=[];
 foreach($groups as $group=>$views){

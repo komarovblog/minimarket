@@ -12,7 +12,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\NotificationPolicy;
 
 final class HtmlView extends BaseHtmlView
 {
-    public array $channels=[],$customer=[],$admin=[];
+    public array $channels=[],$customer=[],$admin=[],$templates=[];
     public bool $canEdit=false;
     public function display($tpl=null)
     {
@@ -36,7 +36,13 @@ final class HtmlView extends BaseHtmlView
             $this->customer[$code]=NotificationPolicy::allowedEvents($params,$code);
             $this->admin[$code]=NotificationPolicy::allowedAdminEvents($params,$code);
         }
-        ToolbarHelper::title(Text::_('COM_MINIMARKET_NOTIFICATION_EVENTS_TITLE'));
+        $db->setQuery('SELECT id,audience,event_code,channel_code,state FROM '
+            .$db->quoteName('#__minimarket_message_templates').' ORDER BY id DESC');
+        foreach((array)$db->loadAssocList() as $template){
+            $key=$template['audience'].':'.$template['event_code'].':'.$template['channel_code'];
+            if(!isset($this->templates[$key]))$this->templates[$key]=$template;
+        }
+        ToolbarHelper::title(Text::_('COM_MINIMARKET_NOTIFICATION_SETTINGS_TITLE'));
         parent::display($tpl);
     }
 }

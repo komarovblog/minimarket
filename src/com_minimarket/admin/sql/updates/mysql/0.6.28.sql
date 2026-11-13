@@ -1,0 +1,2 @@
+-- MiniMarket 0.6.28: notification centre and menu organization only.
+-- Existing event and template records remain in place; no schema updates required.

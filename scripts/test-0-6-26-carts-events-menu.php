@@ -31,7 +31,7 @@ $ok($manifest!==false&&version_compare((string)$manifest->version,'0.6.26','>=')
  'manifest version');
 $dashboard=(string)file_get_contents($root.'admin/tmpl/dashboard/default.php');
 $groups=[
- 'management'=>['workqueue','notifications','orders','deliveries','returns','payments',
+ 'management'=>['orders','deliveries','returns','payments',
    'fiscalization','customers','tickets','documents'],
  'reports'=>['businessreport','salesreport','stockreport','returnsreport','planfactreport'],
  'shop'=>['categories','products','bundles','groups','bundlegroups','brands',
@@ -39,7 +39,7 @@ $groups=[
  'marketing'=>['autodiscounts','promocodes','marketingflows','recommendations','abandonedcarts','reviews','seofilters'],
  'tools'=>['import','feeds'],
  'settings'=>['deliverymethods','paymentmethods','registrationmethods',
-  'notificationmethods','notificationevents','messagetemplates','fiscalproviders','settings']
+  'notificationevents','fiscalproviders','settings']
 ];
 $all=[];
 foreach($groups as $section=>$views){
@@ -74,7 +74,7 @@ foreach($uniqueIcons as $icon){
 }
 $ok(str_contains($dashboard,'<svg class="mm-dashboard-icon"')
  &&str_contains($dashboard,"'count' => 'orders_new'")
- &&str_contains($dashboard,"'count' => 'notifications_unread'")
+ &&str_contains($dashboard,'data-mm-stat="notifications_attention"')
  &&str_contains($dashboard,"'count' => 'abandonedcarts'")
  &&str_contains($dashboard,'$mmCount>0'),'visible icons and actionable counts');
 $ok(!str_contains($dashboard,'data-mm-stat="none"'),'no fake number placeholders');

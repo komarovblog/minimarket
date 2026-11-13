@@ -13,6 +13,11 @@ $groups=[
 ];
 ?>
 <div id="j-main-container" class="j-main-container">
+ <div class="btn-toolbar d-flex flex-wrap gap-2 mb-3">
+   <a class="btn btn-outline-secondary" href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=notificationmethods',false)); ?>">
+    <?php echo Text::_('COM_MINIMARKET_NOTIFICATION_METHODS_TITLE'); ?></a>
+ </div>
+ <p class="form-text"><?php echo Text::_('COM_MINIMARKET_NOTIFICATION_SETTINGS_HELP'); ?></p>
  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_NOTIFICATION_EVENTS_HELP'); ?></p>
  <div class="alert alert-warning"><?php echo Text::_('COM_MINIMARKET_NOTIFICATION_EVENTS_ADMIN_DISABLED'); ?></div>
  <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=notificationevents.save',false)); ?>">
@@ -32,11 +37,29 @@ $groups=[
           <span class="form-text">(<?php echo Text::_('COM_MINIMARKET_METHOD_INACTIVE'); ?>)</span>
          <?php endif; ?></th>
         <?php endforeach; ?>
+        <th><?php echo Text::_('JGLOBAL_ACTIONS'); ?></th>
        </tr></thead><tbody>
        <?php foreach($group['events'] as $event=>$label): ?><tr>
         <th scope="row"><?php echo Text::_($label); ?></th>
-        <td><a href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=messagetemplate&layout=edit&audience='.$group['name'].'&event_code='.$event,false)); ?>">
-         <?php echo Text::_('COM_MINIMARKET_TEMPLATE_EDIT_FOR_EVENT'); ?></a></td>
+        <td>
+         <div class="d-flex flex-wrap gap-2">
+         <?php foreach(['email','telegram','max','account'] as $channelCode):
+           $key=$group['name'].':'.$event.':'.$channelCode;
+           $stored=$this->templates[$key]??null;
+           $url='index.php?option=com_minimarket&view=messagetemplate'
+             .($stored?'&id='.(int)$stored['id']
+               :'&layout=edit&audience='.$group['name'].'&event_code='.$event.'&channel_code='.$channelCode);
+         ?>
+           <a class="btn btn-outline-secondary btn-sm" href="<?php echo $e(Route::_($url,false)); ?>">
+            <?php echo Text::_('COM_MINIMARKET_TEMPLATE_CHANNEL_'.strtoupper($channelCode)); ?>
+            <?php if($channelCode!=='email'): ?>
+             <span class="visually-hidden"><?php echo Text::_('COM_MINIMARKET_TEMPLATE_DRAFT_ONLY'); ?></span>
+            <?php endif; ?>
+           </a>
+         <?php endforeach; ?>
+         </div>
+         <p class="form-text mb-0"><?php echo Text::_('COM_MINIMARKET_TEMPLATE_DRAFT_CHANNEL_HELP'); ?></p>
+        </td>
         <?php foreach($this->channels as $channel): ?>
          <td><label class="form-check">
           <input class="form-check-input" type="checkbox"
@@ -47,6 +70,12 @@ $groups=[
           <span class="visually-hidden"><?php echo $e($channel['name']).' — '.Text::_($label); ?></span>
          </label></td>
         <?php endforeach; ?>
+        <td>
+         <button class="btn btn-outline-danger btn-sm" type="button" data-mm-event-disable
+          <?php echo $this->canEdit?'':'disabled'; ?>>
+          <?php echo Text::_('COM_MINIMARKET_NOTIFICATION_DISABLE_EVENT'); ?>
+         </button>
+        </td>
        </tr><?php endforeach; ?>
        </tbody></table>
      </div>
@@ -55,4 +84,9 @@ $groups=[
   <?php endforeach; ?>
   <?php echo HTMLHelper::_('form.token'); ?>
  </form>
+ <script>
+  (()=>{for(const b of document.querySelectorAll('[data-mm-event-disable]')){
+    b.addEventListener('click',()=>{for(const checkbox of b.closest('tr').querySelectorAll('input[type=checkbox]'))checkbox.checked=false;});
+  }})();
+ </script>
 </div>

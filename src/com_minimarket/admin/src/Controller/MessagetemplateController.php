@@ -19,11 +19,15 @@ final class MessagetemplateController extends BaseController
         $identity=$app->getIdentity();
         if(!$identity->authorise($id?'core.edit':'core.create','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
-        $back='index.php?option=com_minimarket&view=messagetemplate'.($id?'&id='.$id:'&layout=edit');
+        $back='index.php?option=com_minimarket&view=messagetemplate'.($id?'&id='.$id:
+            '&layout=edit&audience='.$post->getCmd('audience','customer')
+            .'&event_code='.$post->getCmd('event_code','')
+            .'&channel_code='.$post->getCmd('channel_code','email'));
         try{
             $raw=['title'=>$post->getString('title',''),
                 'audience'=>$post->getCmd('audience','customer'),
                 'event_code'=>$post->getCmd('event_code',''),
+                'channel_code'=>$post->getCmd('channel_code','email'),
                 'subject'=>$post->getString('subject',''),
                 'body'=>$post->getString('body',''),
                 'state'=>$identity->authorise('core.edit.state','com_minimarket')
@@ -56,7 +60,9 @@ final class MessagetemplateController extends BaseController
             }catch(\Throwable $e){$db->transactionRollback();throw $e;}
             $app->enqueueMessage(Text::_('COM_MINIMARKET_MESSAGE_TEMPLATE_SAVED'));
             $this->setRedirect($post->getInt('save_close',0)
-                ?'index.php?option=com_minimarket&view=messagetemplates'
+                ?($data['audience']==='marketing'
+                    ?'index.php?option=com_minimarket&view=messagetemplates'
+                    :'index.php?option=com_minimarket&view=notificationevents')
                 :'index.php?option=com_minimarket&view=messagetemplate&id='.$id);
         }catch(\Throwable $e){
             $app->enqueueMessage(Text::_('COM_MINIMARKET_MESSAGE_TEMPLATE_INVALID'),'warning');

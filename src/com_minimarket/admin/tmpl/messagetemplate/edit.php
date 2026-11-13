@@ -6,13 +6,14 @@ use Joomla\CMS\Router\Route;
 $t=$this->item;
 $initialAudience=$this->initialAudience;
 $initialEvent=$this->initialEvent;
+$initialChannel=$this->initialChannel;
 $val=static fn($key,$default='')=>(string)($t->$key??$default);
 ?>
 <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=messagetemplate.save',false)); ?>">
  <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3">
   <button class="btn btn-success" name="save_close" value="0" type="submit"><?php echo Text::_('JSAVE'); ?></button>
   <button class="btn btn-success" name="save_close" value="1" type="submit"><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
-  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=messagetemplates',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
+  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view='.($val('audience',$initialAudience)==='marketing'?'messagetemplates':'notificationevents'),false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
  </div>
  <input type="hidden" name="id" value="<?php echo (int)($t->id??0); ?>">
  <?php echo HTMLHelper::_('form.token'); ?>
@@ -37,6 +38,15 @@ $val=static fn($key,$default='')=>(string)($t->$key??$default);
      <?php endforeach; ?>
     <?php endforeach; ?>
    </select></div>
+  <div class="col-md-6"><label class="form-label" for="mm-template-channel"><?php echo Text::_('COM_MINIMARKET_TEMPLATE_CHANNEL'); ?></label>
+    <select class="form-select" id="mm-template-channel" name="channel_code">
+     <?php foreach(['email','telegram','max','account'] as $channel): ?>
+      <option value="<?php echo $channel; ?>"<?php echo $val('channel_code',$initialChannel)===$channel?' selected':''; ?>>
+       <?php echo Text::_('COM_MINIMARKET_TEMPLATE_CHANNEL_'.strtoupper($channel)); ?></option>
+     <?php endforeach; ?>
+    </select>
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_TEMPLATE_CHANNEL_HELP'); ?></p>
+   </div>
   <div class="col-12"><label class="form-label" for="mm-template-subject"><?php echo Text::_('COM_MINIMARKET_TEMPLATE_SUBJECT'); ?></label>
    <input class="form-control" id="mm-template-subject" maxlength="190" name="subject"
     value="<?php echo $this->escape($val('subject')); ?>" required></div>
@@ -59,7 +69,9 @@ $val=static fn($key,$default='')=>(string)($t->$key??$default);
 <script>
 (()=> {
  const audience=document.getElementById('mm-template-audience'),
-       event=document.getElementById('mm-template-event');
+       event=document.getElementById('mm-template-event'),
+       channel=document.getElementById('mm-template-channel'),
+       state=document.getElementById('mm-template-state');
  const sync=()=>{const selected=event.value;let chosen=false;
   for(const option of event.options){
    const visible=option.dataset.mmAudience===audience.value;
@@ -69,6 +81,17 @@ $val=static fn($key,$default='')=>(string)($t->$key??$default);
   if(!chosen){const first=Array.from(event.options).find(o=>!o.disabled);
    if(first)event.value=first.value;}
  };
- audience.addEventListener('change',sync);sync();
+ const syncChannel=()=>{const draft=channel.value!=='email';
+    const isMarketing=audience.value==='marketing';
+    for(const option of channel.options){
+      option.disabled=isMarketing&&option.value!=='email';
+    }
+    if(isMarketing&&draft)channel.value='email';
+    if(channel.value!=='email')state.value='0';
+    state.querySelector('option[value="1"]').disabled=channel.value!=='email';
+ };
+ audience.addEventListener('change',()=>{sync();syncChannel();});
+ channel.addEventListener('change',syncChannel);
+ sync();syncChannel();
 })();
 </script>

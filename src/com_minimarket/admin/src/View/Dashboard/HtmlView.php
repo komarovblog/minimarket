@@ -63,7 +63,9 @@ final class HtmlView extends BaseHtmlView
                 .' WHERE '.$condition);
             $work+=(int)$db->loadResult();
         }
-        $this->stats['workqueue']=$work;
+        $this->stats['workqueue']=$work; // compatibility for older bookmarked screens.
+        // Unresolved source records, not personal event read receipts.
+        $this->stats['notifications_attention']=\MiniMarket\Component\Minimarket\Administrator\Service\AttentionInbox::count($db);
         // Static dashboard report also loads in Joomla's CLI/unit harness.
         if(!class_exists(\MiniMarket\Component\Minimarket\Site\Service\AbandonedCartStore::class)){
             require_once dirname(__DIR__,4).'/site/src/Service/CartState.php';

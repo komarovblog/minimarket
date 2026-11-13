@@ -47,33 +47,9 @@ $esc=static fn($v)=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8
       <a href="<?php echo $esc(Route::_('index.php?option=com_plugins',false)); ?>"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_INFO'); ?></a>
      </p>
     <?php endif; ?>
-    <div data-mm-notification-events>
-    <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_NOTIFY_EVENT_SECTION'); ?></h3>
-    <div class="row g-2">
-     <?php foreach(NotificationPolicy::EVENTS as $code=>$label): ?>
-      <div class="col-12 col-md-6">
-       <label class="form-check">
-        <input class="form-check-input" type="checkbox" name="events[]" value="<?php echo $esc($code); ?>"
-          <?php echo in_array($code,$this->events,true)?'checked':''; ?>
-          <?php echo $this->canEdit?'':'disabled'; ?>>
-        <span class="form-check-label"><?php echo Text::_($label); ?></span>
-       </label>
-      </div>
-     <?php endforeach; ?>
-    </div>
-    </div>
+    <p class="form-text"><a href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=notificationevents',false)); ?>"><?php echo Text::_('COM_MINIMARKET_NOTIFICATION_SETTINGS_TITLE'); ?></a></p>
    </section>
    <?php echo HTMLHelper::_('form.token'); ?>
   </form>
-  <script>
-  (()=>{
-   const enabled=document.getElementById('mm-notify-email-enabled');
-   const events=document.querySelector('[data-mm-notification-events]');
-   if(!enabled||!events)return;
-   const sync=()=>{events.hidden=enabled.value!=='1';};
-   enabled.addEventListener('change',sync);
-   sync();
-  })();
-  </script>
  </div>
 <?php endif; ?>

@@ -7,6 +7,8 @@ use Joomla\Database\DatabaseInterface;
 final class MessageTemplates
 {
     public const AUDIENCES=['customer','admin','marketing'];
+    // Non-email channels are editable drafts until adapters and personal account inbox exist.
+    public const CHANNELS=['email','telegram','max','account'];
     public const TOKENS=['order_id','customer_name','shop_name','order_link'];
     public const MARKETING_EVENTS=['cart_abandoned','order_delivered','order_created'];
 
@@ -28,10 +30,13 @@ final class MessageTemplates
         $subject=trim((string)($data['subject']??''));
         $body=trim(str_replace(["\r\n","\r"],"\n",(string)($data['body']??'')));
         $state=(string)($data['state']??'0');
+        $channel=(string)($data['channel_code']??'email');
         if($title===''||mb_strlen($title)>160||!in_array($audience,self::AUDIENCES,true)
           ||!in_array($event,self::events($audience),true)
           ||$subject===''||mb_strlen($subject)>190||preg_match('/[\r\n\x00-\x1F]/',$subject)
           ||$body===''||mb_strlen($body)>6000||!in_array($state,['0','1'],true)
+          ||!in_array($channel,self::CHANNELS,true)
+          ||($channel!=='email'&&($state!=='0'||$audience==='marketing'))
           ||str_contains($body,"\0"))
             throw new \DomainException('COM_MINIMARKET_MESSAGE_TEMPLATE_INVALID');
         foreach([$subject,$body] as $str){
@@ -46,7 +51,7 @@ final class MessageTemplates
                 throw new \DomainException('COM_MINIMARKET_MESSAGE_TEMPLATE_INVALID');
         }
         return ['title'=>$title,'audience'=>$audience,'event_code'=>$event,
-            'channel_code'=>'email','subject'=>$subject,'body'=>$body,'state'=>(int)$state];
+            'channel_code'=>$channel,'subject'=>$subject,'body'=>$body,'state'=>(int)$state];
     }
 
     /** Plain-text interpolation only; do not replace with HTML or execute macros. */

@@ -91,10 +91,11 @@ $ok(!str_contains($dashboard,'COM_MINIMARKET_REPORTS_OVERVIEW_HELP'),
 $all=[];
 preg_match_all("/\\['view' => '([a-z]+)'/",$dashboard,$m);
 $all=$m[1];
-$ok(in_array('marketingflows',$all,true)&&in_array('messagetemplates',$all,true)
+$ok(in_array('marketingflows',$all,true)&&in_array('notificationevents',$all,true)
+ &&!in_array('workqueue',$all,true)&&!in_array('notifications',$all,true)
+ &&!in_array('messagetemplates',$all,true)
  &&array_search('promocodes',$all,true)<array_search('marketingflows',$all,true)
- &&array_search('marketingflows',$all,true)<array_search('recommendations',$all,true)
- &&array_search('notificationevents',$all,true)<array_search('messagetemplates',$all,true),
+ &&array_search('marketingflows',$all,true)<array_search('recommendations',$all,true),
  'new sections sorted in dashboard');
 foreach(['ru-RU','en-GB'] as $lang){
  $ini=parse_ini_file($root.'admin/language/'.$lang.'/com_minimarket.ini');
@@ -105,7 +106,7 @@ foreach(['ru-RU','en-GB'] as $lang){
  'promotions renamed without touching product price flags');
 }
 $xml=(string)file_get_contents($root.'minimarket.xml');
-$ok(str_contains($xml,'<version>0.6.27</version>'),'version bump');
+$ok(str_contains($xml,'<version>0.6.28</version>'),'version bump');
 $ddl=(string)file_get_contents($root.'admin/sql/updates/mysql/0.6.27.sql');
 $fresh=(string)file_get_contents($root.'admin/sql/install.mysql.sql');
 foreach(['#__minimarket_message_templates','#__minimarket_marketing_flows',
