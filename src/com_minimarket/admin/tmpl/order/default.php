@@ -157,7 +157,7 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
       <button class="btn btn-success" type="submit"><?php echo Text::_('JSAVE'); ?></button>
      </div>
     </form>
-    <?php if(in_array((string)$o->payment_status,['unpaid','paid'],true)): ?>
+    <?php if($o->payment_status==='unpaid'||($o->payment_status==='paid'&&$this->hasDigitalItems)): ?>
     <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.payment',false)); ?>">
      <input type="hidden" name="id" value="<?php echo $oid; ?>">
      <div class="d-flex flex-wrap align-items-end gap-2">
@@ -172,7 +172,14 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
         <?php endif; ?>
        </select>
       </div>
-      <?php echo HTMLHelper::_('form.token'); ?>
+      <?php if($o->payment_status==='unpaid'): ?>
+       <div class="w-100">
+        <label class="form-label" for="mm-payment-confirmation"><?php echo Text::_('COM_MINIMARKET_PAYMENT_PROOF'); ?></label>
+        <input class="form-control" id="mm-payment-confirmation" name="payment_confirmation"
+           minlength="3" maxlength="128" required placeholder="<?php echo $e(Text::_('COM_MINIMARKET_PAYMENT_PROOF_HELP')); ?>">
+       </div>
+       <?php endif; ?>
+       <?php echo HTMLHelper::_('form.token'); ?>
       <button type="submit" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
      </div>
      <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PAYMENT_MANUAL_HELP'); ?></p>
