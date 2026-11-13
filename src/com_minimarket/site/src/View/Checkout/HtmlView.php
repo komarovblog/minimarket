@@ -35,6 +35,8 @@ final class HtmlView extends BaseHtmlView
     public string $phoneMask='';
     public array $deliveryMethods=[];
     public array $paymentMethods=[];
+    public array $pickupPoints=[];
+    public bool $multiplePickup=false;
     public array $cityRates=[];
     public string $pickupAddress='';
     public string $pickupSchedule='';
@@ -100,12 +102,18 @@ final class HtmlView extends BaseHtmlView
             $this->paymentMethods=$paymentEnabled
                 ?CheckoutDelivery::payments($params,!$this->needsPhysical):[];
             $this->cityRates=$deliveryEnabled?CheckoutDelivery::rates($params):[];
+            $this->multiplePickup=isset($this->deliveryMethods['pickup'])
+                &&(string)$params->get('delivery_pickup_points_mode','single')==='multiple';
+            if($this->multiplePickup)
+                $this->pickupPoints=PickupPoints::all(
+                    Factory::getContainer()->get(DatabaseInterface::class));
             $this->skipBuyer=CheckoutSettings::skipBuyer(
                 $params,$app->getIdentity(),$this->customFields);
             $this->skipDelivery=!$deliveryEnabled
                 ||(count($this->deliveryMethods)===1
                     &&(isset($this->deliveryMethods['pickup'])
-                        ||isset($this->deliveryMethods['digital'])));
+                        ||isset($this->deliveryMethods['digital']))
+                    &&!$this->multiplePickup);
             $this->skipPayment=!$paymentEnabled ||count($this->paymentMethods)===1;
             $this->pickupAddress=(string)($this->deliveryMethods['pickup']['address']??'');
             $this->pickupSchedule=(string)($this->deliveryMethods['pickup']['schedule']??'');
@@ -117,7 +125,8 @@ final class HtmlView extends BaseHtmlView
                 && CheckoutSettings::method($params)!=='email'){
                 $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_AUTH_NOT_CONFIGURED');
             } elseif (($deliveryEnabled && !$this->deliveryMethods)
-                ||($paymentEnabled && !$this->paymentMethods)) {
+                ||($paymentEnabled && !$this->paymentMethods)
+                ||($this->multiplePickup && !$this->pickupPoints)) {
                 $this->blockedMessage=Text::_('COM_MINIMARKET_CHECKOUT_METHODS_MISSING');
             }
         } catch (\DomainException $e) {

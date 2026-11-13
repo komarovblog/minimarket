@@ -29,6 +29,8 @@ final class HtmlView extends BaseHtmlView
     public array $productChoices=[];
     public array $pickerCategories=[];
     public array $deliveryMethods=[];
+    public array $pickupPoints=[];
+    public bool $multiplePickup=false;
     public array $paymentMethods=[];
     public array $cityRates=[];
     public bool $zonesMode=false;
@@ -68,6 +70,10 @@ final class HtmlView extends BaseHtmlView
             $this->deliveryMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::methods($params);
             $this->paymentMethods=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::payments($params);
             $this->cityRates=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::rates($params);
+            $this->multiplePickup=isset($this->deliveryMethods['pickup'])
+                &&(string)$params->get('delivery_pickup_points_mode','single')==='multiple';
+            if($this->multiplePickup)
+                $this->pickupPoints=\MiniMarket\Component\Minimarket\Site\Service\PickupPoints::all($db);
             $this->zonesMode=(string)$params->get('delivery_rate_source','directory')==='zones';
             if($this->zonesMode){
                 $this->zoneCities=\MiniMarket\Component\Minimarket\Site\Service\DeliveryZones::cities($db);
