@@ -617,6 +617,21 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_feeds` (
 
 -- MiniMarket 0.5.78: checkout request ledger. No payment, shipping,
 -- invoice, inventory hold/deduction or email delivery at this stage.
+
+CREATE TABLE IF NOT EXISTS #__minimarket_pickup_points (
+ id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ title VARCHAR(150) NOT NULL,
+ address VARCHAR(512) NOT NULL,
+ schedule VARCHAR(1000) NOT NULL DEFAULT '',
+ map_url VARCHAR(1024) NOT NULL DEFAULT '',
+ fee_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
+ state TINYINT NOT NULL DEFAULT 1,
+ ordering INT NOT NULL DEFAULT 0,
+ created_at DATETIME NOT NULL,
+ updated_at DATETIME NULL,
+ KEY idx_mm_pickup_state (state,ordering,id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     checkout_key CHAR(32) NOT NULL,
@@ -626,6 +641,7 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     email VARCHAR(254) NOT NULL DEFAULT '',
     customer_comment TEXT NULL,
     delivery_method VARCHAR(16) NOT NULL DEFAULT 'pickup',
+    pickup_point_id INT UNSIGNED NULL DEFAULT NULL,
     delivery_city VARCHAR(120) NOT NULL DEFAULT '',
     delivery_country CHAR(2) NOT NULL DEFAULT 'RU',
     delivery_region VARCHAR(120) NOT NULL DEFAULT '',
