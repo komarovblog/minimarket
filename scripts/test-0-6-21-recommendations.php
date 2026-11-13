@@ -44,7 +44,8 @@ namespace MiniMarket\RecommendationsTest {
   public function loadColumn():array{return $this->ids;}
  }
  $db=new Db();
- $assert(Recs::modes($db,11)===['similar'=>'auto','together'=>'auto'],'legacy product default');
+ $assert(Recs::modes($db,11)===['similar'=>'inherit','together'=>'inherit'],
+  'legacy products inherit category rules, whose default is their own category');
  $db->config=['similar_mode'=>'hybrid','together_mode'=>'manual'];
  $assert(Recs::modes($db,11)===['similar'=>'hybrid','together'=>'manual'],'stored policy');
  $assert(Recs::manualIds($db,11,'similar')===[12,13],'manual IDs preserve priority');
