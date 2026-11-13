@@ -8,15 +8,17 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\WorkqueueReads;
 
-final class HtmlView extends BaseHtmlView
+class HtmlView extends BaseHtmlView
 {
     public array $groups=[];
+    public bool $onlyUnread=false;
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
         $user=$app->getIdentity();
         if(!$user->authorise('core.manage','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $this->onlyUnread=$app->input->getCmd('view','workqueue')==='notifications';
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         // Counts stay based on unresolved sources; read receipts never reduce them.
         $tables=[
@@ -43,9 +45,17 @@ final class HtmlView extends BaseHtmlView
                 $saved=$receipts[(int)$row->id]??'';
                 $row->wasRead=$saved!==''&&hash_equals($saved,$row->signature);
             }
+            if($this->onlyUnread){
+                $rows=array_values(array_filter($rows,
+                    static fn($row)=>!$row->wasRead));
+                // The inbox shows the first 100 current events per source;
+                // do not call this number the global total when >100 exist.
+                $total=count($rows);
+            }
             $this->groups[$kind]=['total'=>$total,'rows'=>$rows];
         }
-        ToolbarHelper::title(Text::_('COM_MINIMARKET_WORKQUEUE_TITLE'));
+        ToolbarHelper::title(Text::_($this->onlyUnread
+            ?'COM_MINIMARKET_NOTIFICATIONS_TITLE':'COM_MINIMARKET_WORKQUEUE_TITLE'));
         parent::display($tpl);
     }
 }

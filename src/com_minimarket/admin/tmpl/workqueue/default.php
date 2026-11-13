@@ -11,7 +11,8 @@ $labels=[
 $views=['payment'=>'payment','delivery'=>'delivery','ticket'=>'ticket','returncase'=>'returncase'];
 ?>
 <div id="j-main-container" class="j-main-container">
- <p class="form-text"><?php echo Text::_('COM_MINIMARKET_WORKQUEUE_HELP'); ?></p>
+ <p class="form-text"><?php echo Text::_($this->onlyUnread
+    ?'COM_MINIMARKET_NOTIFICATIONS_HELP':'COM_MINIMARKET_WORKQUEUE_HELP'); ?></p>
  <?php foreach($this->groups as $kind=>$group): ?>
   <section class="card mb-3 mm-admin-panel">
    <div class="card-header">
@@ -46,7 +47,7 @@ $views=['payment'=>'payment','delivery'=>'delivery','ticket'=>'ticket','returnca
        </tr>
       <?php endforeach; ?></tbody>
      </table></div>
-     <?php if(count($group['rows'])<$group['total']): ?>
+     <?php if(count($group['rows'])<$group['total'] || $this->onlyUnread): ?>
       <p class="form-text"><?php echo Text::_('COM_MINIMARKET_WORKQUEUE_LIMIT'); ?></p>
      <?php endif; ?>
     <?php endif; ?>
