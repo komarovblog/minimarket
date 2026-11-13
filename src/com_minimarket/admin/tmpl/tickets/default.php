@@ -13,7 +13,7 @@ $mmSearch=[
     'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
       'new'=>Text::_('COM_MINIMARKET_TICKET_NEW_STATUS'),
       'in_progress'=>Text::_('COM_MINIMARKET_TICKET_PROGRESS'),
-      'closed'=>Text::_('COM_MINIMARKET_TICKET_CLOSED')]]];
+      'closed'=>Text::_('COM_MINIMARKET_TICKET_CLOSED')]]]];
 ?>
 <form method="post" id="adminForm" name="adminForm" class="mm-list-form"
  action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=tickets',false)); ?>">
