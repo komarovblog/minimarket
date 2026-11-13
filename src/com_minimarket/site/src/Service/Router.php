@@ -97,6 +97,10 @@ final class Router implements RouterInterface
             unset($query['view']);
             return ['cart'];
         }
+        if ($view === 'notificationpreferences') {
+            unset($query['view']);
+            return ['notification-preferences'];
+        }
         if ($view === 'checkout') {
             unset($query['view']);
             return ['checkout'];
@@ -161,6 +165,10 @@ final class Router implements RouterInterface
             if ((string)$segments[0] === 'cart') {
                 $segments = [];
                 return ['view'=>'cart'];
+            }
+            if ((string)$segments[0] === 'notification-preferences') {
+                $segments=[];
+                return ['view'=>'notificationpreferences'];
             }
             if ((string)$segments[0] === 'checkout') {
                 $segments = [];
