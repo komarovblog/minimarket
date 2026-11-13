@@ -21,6 +21,7 @@ final class HtmlView extends BaseHtmlView
     public function display($tpl=null)
     {
         $app=Factory::getApplication();
+        \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::importRequest();
         $user=$app->getIdentity();
         if(!$user->authorise('core.manage','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
@@ -36,9 +37,9 @@ final class HtmlView extends BaseHtmlView
         $status=$app->input->getCmd('filter_status','');
         $this->statusFilter=in_array($status,['new','confirmed','completed','cancelled'],true)?$status:'';
         $payment=$app->input->getCmd('filter_payment','');
-        $this->paymentFilter=in_array($payment,['unpaid','paid','refunded'],true)?$payment:'';
+        $this->paymentFilter=in_array($payment,['unpaid','processing','paid','refunded'],true)?$payment:'';
         $fulfillment=$app->input->getCmd('filter_fulfillment','');
-        $this->fulfillmentFilter=in_array($fulfillment,['pending','shipped','delivered'],true)?$fulfillment:'';
+        $this->fulfillmentFilter=in_array($fulfillment,['pending','shipped','awaiting_assembly','assembling','ready','in_transit','awaiting_pickup','delivered','failed'],true)?$fulfillment:'';
         $delivery=$app->input->getCmd('filter_delivery','');
         $this->deliveryFilter=in_array($delivery,['pickup','courier'],true)?$delivery:'';
 
@@ -108,10 +109,11 @@ final class HtmlView extends BaseHtmlView
 
         ToolbarHelper::title(Text::_('COM_MINIMARKET_ORDERS_TITLE'));
         if($this->canCreate)ToolbarHelper::addNew('order.add');
+        // A cancellation needs its own reasoned order action. Never expose an
+        // unlabeled bulk reason field permanently in the native list.
         if(!$this->showTrash && $user->authorise('core.edit.state','com_minimarket')
             && \MiniMarket\Component\Minimarket\Administrator\Service\OrderLifecycle::manualEnabled()){
             ToolbarHelper::custom('orders.confirm','publish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CONFIRMED'),true);
-            ToolbarHelper::custom('orders.cancel','unpublish','',Text::_('COM_MINIMARKET_ORDER_STATUS_CANCELLED'),true);
         }
         if($this->showTrash && $user->authorise('core.delete','com_minimarket')){
             ToolbarHelper::custom('orders.restore','publish','',Text::_('COM_MINIMARKET_ORDER_RESTORE'),true);
