@@ -83,6 +83,8 @@ $sections = [
                 'icon' => 'icon-tag', 'count' => 'promocodes'],
             ['view' => 'autodiscounts', 'label' => 'COM_MINIMARKET_AUTO_DISCOUNTS_TITLE',
                 'icon' => 'icon-percent', 'count' => 'autodiscounts'],
+            ['view' => 'recommendations', 'label' => 'COM_MINIMARKET_RECOMMENDATIONS_TITLE',
+                'icon' => 'icon-link', 'count' => 'recommendations'],
             ['view' => 'seofilters', 'label' => 'COM_MINIMARKET_SEOFILTERS_TITLE',
                 'icon' => 'icon-filter', 'count' => 'seofilters'],
         ],

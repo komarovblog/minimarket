@@ -38,14 +38,14 @@ final class DisplayController extends BaseController
             'attributes', 'brands', 'bundlegroups', 'bundles', 'categories',
             'collections', 'groups', 'orderoptions', 'products', 'values',
             'orders', 'deliveries', 'returns', 'payments', 'customers','tickets','stockreport','salesreport','returnsreport','businessreport', 'deliveryzones', 'reviews', 'promocodes',
-            'seofilters', 'autodiscounts', 'feeds', 'registrationmethods', 'deliverymethods', 'paymentmethods', 'notificationmethods'
+            'seofilters', 'autodiscounts', 'recommendations', 'feeds', 'registrationmethods', 'deliverymethods', 'paymentmethods', 'notificationmethods'
         ], true)) {
             \Joomla\CMS\Factory::getApplication()->getDocument()
                 ->getWebAssetManager()->useScript('table.columns')
                 ->useScript('multiselect');
         }
 
-        if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order', 'deliveries', 'delivery', 'returns', 'returncase', 'payments', 'payment', 'customers','customer','tickets','ticket','workqueue','stockreport','salesreport','returnsreport','businessreport', 'deliveryzones', 'deliveryzone', 'deliverymethods', 'paymentmethods', 'registrationmethods', 'notificationmethods', 'reviews', 'review', 'seofilters', 'seofilter', 'promocodes','promocode','autodiscounts','autodiscount'], true)) {
+        if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order', 'deliveries', 'delivery', 'returns', 'returncase', 'payments', 'payment', 'customers','customer','tickets','ticket','workqueue','stockreport','salesreport','returnsreport','businessreport', 'deliveryzones', 'deliveryzone', 'deliverymethods', 'paymentmethods', 'registrationmethods', 'notificationmethods', 'reviews', 'review', 'seofilters', 'seofilter', 'promocodes','promocode','autodiscounts','autodiscount','recommendations','recommendation'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);
         }
 
@@ -53,7 +53,7 @@ final class DisplayController extends BaseController
         // legacy no-ListModel views read the request. This is intentionally
         // limited to entity lists and never alters edit/save actions.
         if (in_array($viewName, [
-            'orders', 'deliveries', 'returns', 'payments', 'customers','tickets','stockreport', 'reviews', 'promocodes', 'autodiscounts', 'seofilters',
+            'orders', 'deliveries', 'returns', 'payments', 'customers','tickets','stockreport', 'reviews', 'promocodes', 'autodiscounts', 'recommendations', 'seofilters',
             'feeds', 'registrationmethods', 'deliveryzones',
             'deliverymethods', 'paymentmethods', 'notificationmethods'
         ], true)) {
@@ -61,7 +61,7 @@ final class DisplayController extends BaseController
         }
 
         // Keep the proven M0 dashboard without introducing a dummy Model.
-        if (in_array($viewName, ['dashboard','import','feeds','feed','orders','order','deliveries','delivery','returns','returncase','payments','payment','customers','customer','tickets','ticket','workqueue','stockreport','salesreport','returnsreport','businessreport','deliveryzones','deliveryzone','deliverymethods','paymentmethods','registrationmethods','notificationmethods','reviews','review','seofilters','seofilter','promocodes','promocode','autodiscounts','autodiscount'],true)) {
+        if (in_array($viewName, ['dashboard','import','feeds','feed','orders','order','deliveries','delivery','returns','returncase','payments','payment','customers','customer','tickets','ticket','workqueue','stockreport','salesreport','returnsreport','businessreport','deliveryzones','deliveryzone','deliverymethods','paymentmethods','registrationmethods','notificationmethods','reviews','review','seofilters','seofilter','promocodes','promocode','autodiscounts','autodiscount','recommendations','recommendation'],true)) {
             if(in_array($viewName,['feeds','feed'],true)) {
                 \Joomla\CMS\Factory::getApplication()->getDocument()->getWebAssetManager()
                     ->registerAndUseStyle('com_minimarket.feed-editor',

@@ -94,6 +94,7 @@
             <menu link="option=com_minimarket&amp;view=promocodes">COM_MINIMARKET_PROMOCODES_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=promocode&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
+            <menu link="option=com_minimarket&amp;view=recommendations">COM_MINIMARKET_RECOMMENDATIONS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=autodiscounts">COM_MINIMARKET_AUTO_DISCOUNTS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=autodiscount&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>

@@ -41,6 +41,8 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=reviews"/>
         <menuitem title="COM_MINIMARKET_PROMOCODES_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=promocodes"/>
+        <menuitem title="COM_MINIMARKET_RECOMMENDATIONS_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=recommendations"/>
         <menuitem title="COM_MINIMARKET_AUTO_DISCOUNTS_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=autodiscounts"/>
         <menuitem title="COM_MINIMARKET_SEOFILTERS_TITLE" type="component"
