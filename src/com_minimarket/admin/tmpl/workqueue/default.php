@@ -1,6 +1,7 @@
 <?php
 \defined('_JEXEC') or die;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Router\Route;
 $labels=[
  'payment'=>'COM_MINIMARKET_PAYMENTS_TITLE',
@@ -21,12 +22,26 @@ $views=['payment'=>'payment','delivery'=>'delivery','ticket'=>'ticket','returnca
      <p class="form-text"><?php echo Text::_('COM_MINIMARKET_WORKQUEUE_EMPTY'); ?></p>
     <?php else: ?>
      <div class="table-responsive"><table class="table table-striped">
-      <thead><tr><th>ID</th><th><?php echo Text::_('JGLOBAL_TITLE'); ?></th><th><?php echo Text::_('JDATE'); ?></th></tr></thead>
+      <thead><tr><th>ID</th><th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
+       <th><?php echo Text::_('JDATE'); ?></th>
+       <th><?php echo Text::_('COM_MINIMARKET_WORKQUEUE_READ_STATE'); ?></th>
+       <th><?php echo Text::_('JGLOBAL_ACTIONS'); ?></th></tr></thead>
       <tbody><?php foreach($group['rows'] as $entry): ?>
        <tr>
         <td><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view='.$views[$kind].'&id='.(int)$entry->id,false)); ?>">#<?php echo (int)$entry->id; ?></a></td>
         <td><?php echo $this->escape($entry->description); ?></td>
         <td><?php echo $this->escape($entry->date_value); ?></td>
+        <td><?php echo Text::_($entry->wasRead?'COM_MINIMARKET_WORKQUEUE_READ':'COM_MINIMARKET_WORKQUEUE_UNREAD'); ?></td>
+        <td>
+         <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=workqueue.setRead',false)); ?>">
+          <input type="hidden" name="kind" value="<?php echo $this->escape($kind); ?>">
+          <input type="hidden" name="id" value="<?php echo (int)$entry->id; ?>">
+          <input type="hidden" name="signature" value="<?php echo $this->escape($entry->signature); ?>">
+          <input type="hidden" name="read" value="<?php echo $entry->wasRead?'0':'1'; ?>">
+          <?php echo HTMLHelper::_('form.token'); ?>
+          <button type="submit" class="btn btn-outline-secondary btn-sm"><?php echo Text::_($entry->wasRead?'COM_MINIMARKET_WORKQUEUE_MARK_UNREAD':'COM_MINIMARKET_WORKQUEUE_MARK_READ'); ?></button>
+         </form>
+        </td>
        </tr>
       <?php endforeach; ?></tbody>
      </table></div>
