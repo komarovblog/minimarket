@@ -252,35 +252,50 @@ final class OrderController extends BaseController
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $id=$app->input->post->getInt('id',0);
         $state=$app->input->post->getCmd('fulfillment_status','');
-        if($id<1||!in_array($state,['pending','shipped','delivered'],true))
+        if($id<1||!in_array($state,['awaiting_assembly','assembling','ready','delivered'],true))
             throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $db->transactionStart();
         try{
-            $db->setQuery('SELECT fulfillment_status,delivery_method,status FROM '
-                .$db->quoteName('#__minimarket_orders').' WHERE id='.(int)$id
-                .' AND deleted_at IS NULL FOR UPDATE');
-            $row=$db->loadAssoc();
-            if(!$row||$row['status']==='cancelled'
-                ||$row['delivery_method']!=='pickup')
-                throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
-            $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_orders'))
-                ->set('fulfillment_status='.$db->quote($state))
-                ->set('fulfilled_at='.($state==='delivered'?'UTC_TIMESTAMP()':'NULL'))
-                ->where('id='.(int)$id);
-            $db->setQuery($q);$db->execute();
-            $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_events'))
-                ->columns($db->quoteName(['order_id','actor_user_id','event_type','old_value','new_value','created_at']))
-                ->values(implode(',',[(string)$id,(string)(int)$app->getIdentity()->id,
-                    $db->quote('fulfillment'),$db->quote($row['fulfillment_status']),
-                    $db->quote($state),'UTC_TIMESTAMP()']));
-            $db->setQuery($q);$db->execute();
+            $db->setQuery('SELECT * FROM '.$db->quoteName('#__minimarket_orders')
+                .' WHERE id='.$id.' AND deleted_at IS NULL FOR UPDATE');
+            $order=$db->loadAssoc();
+            if(!$order||in_array($order['status'],['cancelled','completed'],true)
+               ||$order['delivery_method']!=='pickup')
+                throw new \DomainException('COM_MINIMARKET_ORDER_TRANSITION_DENIED');
+            $before=(string)$order['fulfillment_status'];
+            $stages=['pending'=>0,'awaiting_assembly'=>0,'assembling'=>1,'ready'=>2,'delivered'=>3];
+            if(($stages[$state]??-1)<($stages[$before]??-1))
+                throw new \DomainException('COM_MINIMARKET_ORDER_TRANSITION_DENIED');
+            if($state!==$before){
+                $sets=['fulfillment_status='.$db->quote($state)];
+                if($state==='ready'&&!$order['ready_at']){
+                    $days=\MiniMarket\Component\Minimarket\Site\Service\StockReservation::days(
+                        $order['payment_status']==='paid'?'pickup_paid_review_days':'pickup_unpaid_reserve_days',
+                        $order['payment_status']==='paid'?7:3);
+                    $sets[]='ready_at=UTC_TIMESTAMP()';
+                    $sets[]='reserved_until=CASE WHEN reservation_state='.$db->quote('held')
+                        .' THEN DATE_ADD(UTC_TIMESTAMP(),INTERVAL '.$days.' DAY) ELSE reserved_until END';
+                }
+                if($state==='delivered'){
+                    $sets[]='fulfilled_at=COALESCE(fulfilled_at,UTC_TIMESTAMP())';
+                    $sets[]='reserved_until=NULL';
+                }
+                $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
+                    .' SET '.implode(',',$sets).' WHERE id='.$id);
+                $db->execute();
+                OrderHistory::record($db,$id,(int)$app->getIdentity()->id,
+                    'fulfillment',$before,$state);
+                if($state==='delivered')
+                    \MiniMarket\Component\Minimarket\Site\Service\StockReservation::fulfill($db,$id);
+            }
             OrderLifecycle::refresh($db,$id,(int)$app->getIdentity()->id);
             $db->transactionCommit();
             $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_STATUS_SAVED'));
-        }catch(\Throwable){
+        }catch(\Throwable $e){
             $db->transactionRollback();
-            $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_INVALID'),'warning');
+            $app->enqueueMessage(Text::_($e instanceof \DomainException
+                ?$e->getMessage():'COM_MINIMARKET_PAYMENT_INVALID'),'warning');
         }
         $this->setRedirect('index.php?option=com_minimarket&view=order&id='.$id);
     }
@@ -372,24 +387,40 @@ final class OrderController extends BaseController
         if(!$app->getIdentity()->authorise('core.edit.state','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $id=$app->input->post->getInt('id',0);
-        $status=$app->input->post->getCmd('status','');
-        if($id<1||!in_array($status,['new','confirmed','completed','cancelled'],true))
+        $next=$app->input->post->getCmd('status','');
+        $reason=trim(strip_tags($app->input->post->getString('cancel_reason','')));
+        if($id<1||!in_array($next,['confirmed','cancelled'],true))
             throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $db->transactionStart();
         try{
-            $db->setQuery('SELECT id,status,payment_status,fulfillment_status'
-                .' FROM '.$db->quoteName('#__minimarket_orders')
+            $db->setQuery('SELECT * FROM '.$db->quoteName('#__minimarket_orders')
                 .' WHERE id='.$id.' AND deleted_at IS NULL FOR UPDATE');
             $before=$db->loadAssoc();
             if(!$before)throw new \DomainException('COM_MINIMARKET_ORDER_STATUS_INVALID');
-            OrderLifecycle::validateManual($db,$before,$status);
-            if((string)$before['status']!==$status){
+            OrderLifecycle::validateManual($db,$before,$next);
+            if($next==='cancelled'&&(mb_strlen($reason)<3||mb_strlen($reason)>512
+              ||preg_match('/[\x00-\x1f<>]/u',$reason)))
+                throw new \DomainException('COM_MINIMARKET_ORDER_CANCEL_REASON_REQUIRED');
+            if((string)$before['status']!==$next){
+                if($next==='cancelled'){
+                    \MiniMarket\Component\Minimarket\Site\Service\StockReservation::release($db,$id);
+                    $sets=['status='.$db->quote('cancelled'),'cancelled_reason='.$db->quote($reason)];
+                }else{
+                    $sets=['status='.$db->quote('confirmed'),
+                        'accepted_at=COALESCE(accepted_at,UTC_TIMESTAMP())',
+                        'accepted_by='.(int)$app->getIdentity()->id];
+                }
                 $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
-                    .' SET status='.$db->quote($status).' WHERE id='.$id);
+                    .' SET '.implode(',',$sets).' WHERE id='.$id);
                 $db->execute();
                 OrderHistory::record($db,$id,(int)$app->getIdentity()->id,
-                    'status',(string)$before['status'],$status);
+                    'status',(string)$before['status'],$next);
+                if($next==='cancelled')
+                    OrderHistory::record($db,$id,(int)$app->getIdentity()->id,
+                        'cancel_reason','',mb_substr($reason,0,32));
+                if($next==='confirmed')
+                    OrderLifecycle::refresh($db,$id,(int)$app->getIdentity()->id);
             }
             $db->transactionCommit();
             $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_SAVED'));
