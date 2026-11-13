@@ -71,6 +71,7 @@
         <menuitem title="COM_MINIMARKET_NOTIFICATION_METHODS_TITLE" type="component" icon="envelope"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notificationmethods"/>
         <menuitem title="COM_MINIMARKET_FISCAL_TITLE" type="component" icon="file" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=fiscalization"/>
-        undefined
+        <menuitem title="COM_MINIMARKET_CONFIG_SETTINGS_MENU" type="component" icon="cog"
+                  element="com_config" link="index.php?option=com_config&amp;view=component&amp;component=com_minimarket"/>
     </menuitem>
 </menu>

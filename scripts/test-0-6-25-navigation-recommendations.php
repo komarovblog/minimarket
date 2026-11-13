@@ -81,7 +81,8 @@ $ok($xmlViews===array_slice($expected,0,-1)
  &&str_contains($xml,'view=component&amp;component=com_minimarket'),
  'sidebar ordered correctly');
 $ok(array_slice($presetViews,1)===array_slice($expected,0,-1)
- &&str_contains($preset,'view=component&amp;component=com_minimarket'),
+ &&str_contains($preset,'view=component&amp;component=com_minimarket')
+ &&!str_contains($preset,'undefined'),
  'component preset ordered correctly');
 foreach($xmlViews as $view)
  $ok((bool)preg_match('/<menu link="[^"]*view='.$view.'" img="class:[^"]+">/',$xml),
