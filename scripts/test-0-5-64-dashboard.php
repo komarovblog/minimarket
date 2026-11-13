@@ -54,9 +54,9 @@ namespace MiniMarket\DashboardTest {
     verify(substr_count($html,'mm-dashboard-tiles')===6,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
+        'COM_MINIMARKET_DASHBOARD_REPORTS',
         'COM_MINIMARKET_DASHBOARD_SHOP',
         'COM_MINIMARKET_DASHBOARD_MARKETING',
-        'COM_MINIMARKET_DASHBOARD_REPORTS',
         'COM_MINIMARKET_DASHBOARD_TOOLS',
         'COM_MINIMARKET_DASHBOARD_SETTINGS'];
     $positions=array_map(static fn($name)=>strpos($html,$name),$names);
@@ -64,7 +64,7 @@ namespace MiniMarket\DashboardTest {
         && $positions[2]!==false && $positions[0]<$positions[1]
         && $positions[1]<$positions[2]
         && $positions[2]<$positions[3] && $positions[3]<$positions[4] && $positions[4]<$positions[5],
-        'correct section order Management / Shop / Marketing / Reports / Tools / Settings');
+        'correct section order Management / Reports / Shop / Marketing / Tools / Settings');
     verify(substr_count($html,'COM_MINIMARKET_DASHBOARD_ORDERS')>=1
         && substr_count($html,'mm-dashboard-tile--pending')===0
         && str_contains($html,'href="index.php?option=com_minimarket&amp;view=orders"'),
