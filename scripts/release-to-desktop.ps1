@@ -1,11 +1,13 @@
 param(
     [string]$DesktopPath = '',
-    [switch]$SkipPull
+    [switch]$SkipPull,
+    [switch]$IncludeTaskPlugin
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# One command => component ZIP, separate Task plugin ZIP and optional demo SQL.
+# Default: component ZIP and optional demo SQL only. Reservation accounting is
+# inside the component, not in the separately installable optional scheduler.
 # The one-time toolbar module remains installed independently; do not regenerate it.
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -PathType Leaf)) {
@@ -28,7 +30,7 @@ if (-not $SkipPull) {
         Write-Output 'MINIMARKET_RELEASE_SCRIPT_UPDATED: restart current script after git pull'
         # New invocation re-parses the updated file. Skip a second pull; retain
         # the selected Desktop path. Return stops the previously parsed body.
-        & $releaseScriptPath -SkipPull -DesktopPath $DesktopPath
+        & $releaseScriptPath -SkipPull -DesktopPath $DesktopPath -IncludeTaskPlugin:$IncludeTaskPlugin
         return
     }
 }
@@ -81,18 +83,68 @@ $global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'inspect-package.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_PACKAGE_INSPECTION_FAILED' }
 $global:LASTEXITCODE = 0
-& (Join-Path $PSScriptRoot 'build-task-plugin.ps1')
-if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_TASK_PLUGIN_BUILD_FAILED' }
+if($IncludeTaskPlugin){
+    & (Join-Path $PSScriptRoot 'build-task-plugin.ps1')
+    if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_TASK_PLUGIN_BUILD_FAILED' }
+}
 
 [xml]$manifest = Get-Content -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -Raw -Encoding UTF8
 $version = [string]$manifest.extension.version
 if ($version -notmatch '^\d+\.\d+\.\d+$') {
     throw "MINIMARKET_INVALID_VERSION: $version"
 }
-[xml]$taskManifest=Get-Content -LiteralPath (Join-Path $root 'src\plg_task_minimarketreserves\minimarketreserves.xml') -Raw -Encoding UTF8
-$taskVersion=[string]$taskManifest.extension.version
-if ($taskVersion -notmatch '^\d+\.\d+\.\d+$') {
-    throw "MINIMARKET_TASK_VERSION_INVALID: $taskVersion"
+if($IncludeTaskPlugin){
+    [xml]$taskManifest=Get-Content -LiteralPath (Join-Path $root 'src\plg_task_minimarketreserves\minimarketreserves.xml') -Raw -Encoding UTF8
+    $taskVersion=[string]$taskManifest.extension.version
+    if ($taskVersion -notmatch '^\d+\.\d+\.\d+
+$demoName = "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql"
+$demo = Join-Path (Join-Path $root 'sample-data') $demoName
+if (-not (Test-Path -LiteralPath $demo -PathType Leaf)) {
+    throw "MINIMARKET_DEMO_SQL_NOT_READY_FOR_VERSION: $version"
+}
+# Desktop may be redirected to OneDrive. Windows supplies the actual location.
+if ([string]::IsNullOrWhiteSpace($DesktopPath)) {
+    $DesktopPath = [Environment]::GetFolderPath('Desktop')
+}
+if ([string]::IsNullOrWhiteSpace($DesktopPath)) {
+    $DesktopPath = Join-Path $env:USERPROFILE 'Desktop'
+}
+if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
+    throw "MINIMARKET_DESKTOP_NOT_FOUND: $DesktopPath"
+}
+
+$deliverables = @(
+    @{ Source = Join-Path $root "dist\com_minimarket-$version.zip"; Name = "com_minimarket-$version.zip" },
+    @{ Source = $demo; Name = $demoName }
+)
+if($IncludeTaskPlugin){
+    $deliverables += @{ Source = Join-Path $root "dist\plg_task_minimarketreserves-$taskVersion.zip"; Name = "plg_task_minimarketreserves-$taskVersion.zip" }
+}
+foreach ($item in $deliverables) {
+    if (-not (Test-Path -LiteralPath $item.Source -PathType Leaf)) {
+        throw "MINIMARKET_REQUIRED_FILE_MISSING: $($item.Source)"
+    }
+}
+foreach ($item in $deliverables) {
+    $dst = Join-Path $DesktopPath $item.Name
+    Copy-Item -LiteralPath $item.Source -Destination $dst -Force
+    $fromHash = (Get-FileHash -LiteralPath $item.Source -Algorithm SHA256).Hash
+    $toHash = (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash
+    if ($fromHash -ne $toHash) {
+        throw "MINIMARKET_DESKTOP_HASH_MISMATCH: $dst"
+    }
+    Write-Output "DESKTOP_FILE_OK: $dst"
+}
+if($IncludeTaskPlugin){
+    Write-Output "MINIMARKET_DESKTOP_3_FILES_OK: version=$version"
+}else{
+    Write-Output "MINIMARKET_DESKTOP_2_FILES_OK: version=$version"
+    Write-Output 'SCHEDULER_OPTIONAL: reservation accounting works without plg_task_minimarketreserves.'
+}
+Write-Output 'SQL_IS_OPTIONAL: for the local demo catalog only; not required for Joomla UI changes. Back up before importing.'
+) {
+        throw "MINIMARKET_TASK_VERSION_INVALID: $taskVersion"
+    }
 }
 $demoName = "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql"
 $demo = Join-Path (Join-Path $root 'sample-data') $demoName
