@@ -1,3 +1,16 @@
+## 13.11.2026 — 0.6.25: наследование рекомендаций и интерфейс
+
+| Экран / элемент | Источник записи | Потребитель и проверка |
+|---|---|---|
+| Категория → Похожие | `category.xml` `recommend_similar` → `CategoryModel::save` → `CategoryRecommendationRules::save` → `#__minimarket_category_recommendations` | `ProductRecommendations::similar` → категории, наследование предка, совпадения назначенных характеристик; category ID и attribute ID проверяются на сервере |
+| Категория → Сопутствующие | `category.xml` `recommend_together` → та же таблица, отдельный `together_scope`/source IDs | `ProductRecommendations::boughtTogether` → выбранные категории + реальные paid/delivered/nonreturned пары |
+| Товар → обе вкладки | `product.xml` `rec_*_mode`, `rec_*_ids`, существующий reference-picker → `ProductModel::save` → `RecommendationSettings::normalize/save` | Общие таблицы `recommendation_settings` и `recommendation_links`, не дубликаты маркетингового редактора; `inherit` по умолчанию, ручной/смешанный режимы сохранены |
+| Отчёт → Остатки | `StockReport::load/analyze/xyz` (только SELECT реально исполненных заказов) | `Stockreport/HtmlView` `filter_xyz`, UI и перевод. XYZ 90 дней, ABC по выручке 30/90 дней. Никакой складской записи |
+| Checkout RU/EN и admin-меню | `site/language/*/com_minimarket.ini`, `admin/language/*` | Строгий `verify-translations.ps1 -Strict`, Windows CI; три меню, иконки, порядок и `com_config` маршрут |
+| Документы / Фискализация | Счёт создаётся через Order, глобальный read-only список; фискальные операции из `fiscal_operations`, только будущий реальный провайдер | Пока не считать счёт фискальным чеком; не создавать фиктивные операции |
+
+Новых глобальных настроек `com_minimarket` для кассы/склада нет. **CI 6/6 PASS:** [GitHub Actions #43481244580](https://github.com/komarovblog/minimarket/actions/runs/43481244580), проверенный код SHA `7b7784e3572e833fa688aafb7195d203ba233a13` (PHP 8.4/8.5, MySQL 8.4, Windows ZIP, строгий RU/EN языковой аудит: 0 отсутствующих ключей). **Браузерная проверка установленной Joomla/Atum пока не подтверждена.**
+
 ## 13.11.2026 — 0.6.24: пользовательские отметки и приоритет обращений
 
 | Действие | Источник и запись | Чтение / эффект | Проверка |
