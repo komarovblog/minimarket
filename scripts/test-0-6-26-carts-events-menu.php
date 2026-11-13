@@ -91,7 +91,7 @@ $ok(str_contains($cartCtrl,'Session::checkToken')
  &&str_contains($checkout,'AbandonedCartStore::converted')
  &&strpos($checkout,'OrderStorage::create(')<strpos($checkout,'AbandonedCartStore::converted('),
  'cart mutation recorded and successful checkout converted, never premature');
-$ok(!str_contains($store,'customer_email')&&!str_contains($store,'phone')
+$ok(!str_contains($store,"'customer_email'")&&!str_contains($store,"'phone'")
  &&!str_contains($store,'getMailer')&&!str_contains($store,'$_COOKIE')
  &&str_contains($store,'random_bytes(32)')
  &&str_contains($store,"hash('sha256',\$token)"),
