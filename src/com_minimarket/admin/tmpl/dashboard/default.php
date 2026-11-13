@@ -24,6 +24,12 @@ $sections = [
                 'icon' => 'icon-reply', 'count' => 'returns'],
             ['view' => 'payments', 'label' => 'COM_MINIMARKET_PAYMENTS_TITLE',
                 'icon' => 'icon-credit-card', 'count' => 'payments'],
+            ['view' => 'customers', 'label' => 'COM_MINIMARKET_CUSTOMERS_TITLE',
+                'icon' => 'icon-users', 'count' => 'customers'],
+            ['view' => 'tickets', 'label' => 'COM_MINIMARKET_TICKETS_TITLE',
+                'icon' => 'icon-comments', 'count' => 'tickets'],
+            ['view' => 'workqueue', 'label' => 'COM_MINIMARKET_WORKQUEUE_TITLE',
+                'icon' => 'icon-bell', 'count' => 'workqueue'],
         ],
     ],
     [

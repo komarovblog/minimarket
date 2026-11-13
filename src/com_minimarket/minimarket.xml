@@ -53,6 +53,12 @@
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=returncase&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu link="option=com_minimarket&amp;view=payments">COM_MINIMARKET_PAYMENTS_TITLE</menu>
+
+            <menu link="option=com_minimarket&amp;view=customers">COM_MINIMARKET_CUSTOMERS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=tickets">COM_MINIMARKET_TICKETS_TITLE
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=ticket&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=workqueue">COM_MINIMARKET_WORKQUEUE_TITLE</menu>
             <menu type="separator" alias="mm-group-1">-</menu>
             <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=category.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>

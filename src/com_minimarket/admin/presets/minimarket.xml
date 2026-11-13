@@ -13,6 +13,12 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returns"/>
         <menuitem title="COM_MINIMARKET_PAYMENTS_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=payments"/>
+        <menuitem title="COM_MINIMARKET_CUSTOMERS_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=customers"/>
+        <menuitem title="COM_MINIMARKET_TICKETS_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=tickets"/>
+        <menuitem title="COM_MINIMARKET_WORKQUEUE_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=workqueue"/>
         <menuitem title="COM_MINIMARKET_CATEGORIES" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=categories"/>
         <menuitem title="COM_MINIMARKET_PRODUCTS" type="component"

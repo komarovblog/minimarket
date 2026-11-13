@@ -30,6 +30,7 @@ final class HtmlView extends BaseHtmlView
             'orderoptions' => ['order_options', '1=1'],
             'feeds'        => ['feeds', '1=1'],
             'orders'       => ['orders', 'deleted_at IS NULL'],
+            'tickets'      => ['support_tickets', "status IN ('new','in_progress')"],
             'deliveries'   => ['shipments', "status IN ('new','in_transit')"],
             'returns'      => ['returns', "status IN ('new','approved','received')"],
             'deliveryzones'=> ['delivery_zones','1=1'],
@@ -44,6 +45,22 @@ final class HtmlView extends BaseHtmlView
         // Payment register contains an obligation row for every active order.
         // Reuse the same count; avoid duplicate SQL and invented receipts.
         $this->stats['payments']=$this->stats['orders'];
+        // Only explicit verified Joomla user links; guest orders stay unmerged.
+        $db->setQuery('SELECT COUNT(DISTINCT user_id) FROM '
+            .$db->quoteName('#__minimarket_orders')
+            .' WHERE user_id>0 AND deleted_at IS NULL');
+        $this->stats['customers']=(int)$db->loadResult();
+        $work=$this->stats['tickets'];
+        foreach([
+            ['orders',"payment_status IN ('unpaid','processing') AND status NOT IN ('cancelled','completed') AND deleted_at IS NULL"],
+            ['shipments',"problem_status='open'"],
+            ['returns',"status IN ('new','approved','received')"]
+        ] as [$table,$condition]){
+            $db->setQuery('SELECT COUNT(*) FROM '.$db->quoteName('#__minimarket_'.$table)
+                .' WHERE '.$condition);
+            $work+=(int)$db->loadResult();
+        }
+        $this->stats['workqueue']=$work;
 
         Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseStyle('com_minimarket.dashboard',
