@@ -41,7 +41,7 @@ foreach(glob($root.'admin/tmpl/*/*.php') ?: [] as $path) {
         // The Integrations screen links to Joomla's com_plugins, not our own
         // controller. Only this explicit core component route is exempt.
         if($id==='plugin.edit'
-            && in_array(basename(dirname($path)),['integrations','notificationmethods','shared'],true)
+            && in_array(basename(dirname($path)),['integrations','notificationmethods','fiscalproviders','shared'],true)
             && (basename(dirname($path))!=='shared'
                 || basename($path)==='plugin-method.php')
             && str_contains($source,'option=com_plugins&task=plugin.edit'))continue;
