@@ -14,7 +14,6 @@ final class HtmlView extends BaseHtmlView
     public array $orders=[];
     public int $total=0, $offset=0, $pageSize=20;
     public string $search='', $productSearch='', $statusFilter='', $paymentFilter='', $fulfillmentFilter='', $deliveryFilter='', $quickFilter='', $sort='newest';
-    public array $quickCounts=[];
     public int $remindFirst=3,$remindFinal=1;
     public bool $canCreate=false, $showTrash=false;
 
@@ -86,20 +85,13 @@ final class HtmlView extends BaseHtmlView
             $where[]='EXISTS (SELECT 1 FROM '.$db->quoteName('#__minimarket_order_items','oi')
                 .' WHERE oi.order_id=o.id AND ('.implode(' OR ',$terms).'))';
         }
-        // One aggregation; counts are never estimated from the current page.
-        $parts=["COUNT(*) AS all_orders"];
-        foreach($conditions as $key=>$condition)
-            $parts[]='SUM(CASE WHEN '.$condition.' THEN 1 ELSE 0 END) AS '.$key;
-        $db->setQuery('SELECT '.implode(',',$parts).' FROM '
-            .$db->quoteName('#__minimarket_orders','o').' WHERE o.deleted_at IS NULL');
-        $this->quickCounts=(array)($db->loadAssoc()?:[]);
         $count=$db->getQuery(true)->select('COUNT(*)')->from($db->quoteName('#__minimarket_orders','o'));
         foreach($where as $condition)$count->where($condition);
         $db->setQuery($count);$this->total=(int)$db->loadResult();
         $this->offset=$this->total===0?0:min($this->offset,(int)(floor(($this->total-1)/$this->pageSize)*$this->pageSize));
         $query=$db->getQuery(true)->select([
             'o.id','o.customer_name','o.phone','o.status','o.payment_status','o.fulfillment_status','o.delivery_method',
-            'o.payment_method','o.order_source','o.total_cents','o.item_count','o.created_at',
+            'o.total_cents','o.created_at',
             'o.reserved_until','o.reservation_state'
         ])->from($db->quoteName('#__minimarket_orders','o'))
           ->order('o.id '.($this->sort==='oldest'?'ASC':'DESC'));
