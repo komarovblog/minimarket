@@ -37,6 +37,7 @@ final class HtmlView extends BaseHtmlView
             'reviews'      => ['reviews', 'state=0'],
             'seofilters'   => ['seo_filters','1=1'],
             'promocodes'   => ['promo_codes','1=1'],
+            'autodiscounts'=> ['auto_discounts','1=1'],
         ] as $key=>[$table,$predicate]) {
             $db->setQuery('SELECT COUNT(*) FROM '
                 .$db->quoteName('#__minimarket_'.$table).' WHERE '.$predicate);

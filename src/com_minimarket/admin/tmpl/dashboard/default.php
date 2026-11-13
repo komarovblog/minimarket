@@ -81,6 +81,8 @@ $sections = [
                 'icon' => 'icon-star', 'count' => 'reviews'],
             ['view' => 'promocodes', 'label' => 'COM_MINIMARKET_PROMOCODES_TITLE',
                 'icon' => 'icon-tag', 'count' => 'promocodes'],
+            ['view' => 'autodiscounts', 'label' => 'COM_MINIMARKET_AUTO_DISCOUNTS_TITLE',
+                'icon' => 'icon-percent', 'count' => 'autodiscounts'],
             ['view' => 'seofilters', 'label' => 'COM_MINIMARKET_SEOFILTERS_TITLE',
                 'icon' => 'icon-filter', 'count' => 'seofilters'],
         ],
