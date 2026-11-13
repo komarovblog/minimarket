@@ -14,9 +14,9 @@ verify68(!str_contains($tpl, "Text::_('COM_MINIMARKET_DASHBOARD_COMING_SOON')") 
     !str_contains($tpl, '<small class="mm-dashboard-tile-note">'),
     'Orders no longer displays Coming soon');
 verify68(str_contains($tpl, "'view' => 'orders'") &&
-    str_contains($tpl, "'count' => 'orders'") &&
+    str_contains($tpl, "'count' => 'orders_new'") &&
     !str_contains($tpl, "'pending' => true"),
-    'Orders is a real management tile with live count');
+    'Orders is a real management tile that counts newly received orders');
 verify68(str_contains($tpl, "\$item['view'] === 'import'") &&
     str_contains($tpl, 'mm-dashboard-icon--import') &&
     str_contains($tpl, '<svg') &&
