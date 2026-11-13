@@ -242,13 +242,16 @@ $mmDashboardSvgPaths=[
                                         </svg>
                                     <?php endif; ?>
                                     <?php $mmCount=$item['count']===null?null:($this->stats[$item['count']]??null); ?>
-                                    <?php if($mmCount!==null && (int)$mmCount>0): ?>
+                                    <?php $mmPartial=$item['view']==='notifications'
+                                        && !empty($this->stats['notifications_capped']); ?>
+                                    <?php if($mmCount!==null && ((int)$mmCount>0 || $mmPartial)): ?>
                                     <span class="badge mm-dashboard-count"
                                           data-mm-stat="<?php echo htmlspecialchars((string)$item['count'], ENT_QUOTES, 'UTF-8'); ?>"
                                           aria-label="<?php echo htmlspecialchars(Text::sprintf('COM_MINIMARKET_DASHBOARD_ATTENTION_COUNT',
                                                Text::_($item['label']),(int)$mmCount),ENT_QUOTES,'UTF-8'); ?>">
-                                      <?php echo $item['view']==='notifications'&&!empty($this->stats['notifications_capped'])
-                                          ?'999+':(int)$mmCount; ?>
+                                      <?php echo $mmPartial
+                                          ?((int)$mmCount>0?'≥'.(int)$mmCount:'…')
+                                          :(int)$mmCount; ?>
                                     </span>
                                     <?php endif; ?>
                                 </div>
