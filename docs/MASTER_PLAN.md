@@ -1,3 +1,9 @@
+## 13.11.2026 — 0.6.27: дизайн уведомлений, задач, акций и маркетинговых цепочек
+
+**CI 6/6 PASS** — [GitHub Actions #43502722693](https://github.com/komarovblog/minimarket/actions/runs/43502722693), проверенный SHA `b91c43dfd81cb98e0caf4d6bda39615c62667ed0` (PHP 8.4/8.5, Windows ZIP, MySQL 8.4 fresh/demo/upgrade, `MM627_CAMPAIGNS_TASKS_PASS`, `MM627_MARKETING_MYSQL84_PASS`, `ADMIN_WIRING_PASS`, RU/EN strict `missing=0`). **Живая проверка в Joomla 6/Atum на localhost пока не проведена.**
+
+Маркетинг: **Акции** (старый technical `autodiscounts`, единое лучшее правило), Промокоды, **Цепочки рассылок** (редактор события и последовательных задержек; только draft, consent/scheduler ещё отсутствуют), Рекомендации, Брошенные корзины и пр. Настройки: матрица «События уведомлений», а рядом **Шаблоны уведомлений** с безопасным текстом и audience. Существующая сервисная email-отправка может использовать опубликованные шаблоны без обхода preference/allowedEvents. Управление: **Задачи** — нерешённые действия и просроченный самовывоз, **Уведомления** — immutable события последних 30 суток с персональными read receipts, а не дубликат задач. Платежи и Касса различны. Не добавлять избранное/сравнение. Не объявлять draft-маркетинг реальной доставкой писем. Подробности [RELEASE_0_6_27.md](RELEASE_0_6_27.md).
+
 ## 13.11.2026 — 0.6.26: новые действующие разделы и полезные badges
 
 **MiniMarket 0.6.26: CI 6/6 PASS:** [GitHub Actions #43495569874](https://github.com/komarovblog/minimarket/actions/runs/43495569874), код SHA `1ed57043bbe82a34c4bee817ce7a4592df047ea3`; PHP 8.4/8.5, MySQL 8.4 fresh/demo/isolated migration, Windows component ZIP и строгий RU/EN аудит. **Браузерная Joomla/Atum приёмка не проведена.**

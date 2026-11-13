@@ -1,3 +1,17 @@
+## 13.11.2026 — 0.6.27: настройка шаблонов и маркетинговых сценариев
+
+| Раздел | Ввод / запись | Потребитель / факт |
+|---|---|---|
+| Маркетинг → Акции | прежний `AutodiscountController` → `auto_discounts`, title / type / scope / dates | `AutoDiscount` применяет наиболее выгодное правило, отдельно от старой цены конкретного товара; изменено только пользовательское название |
+| Настройки → Шаблоны уведомлений | `MessagetemplateController::save` → `MessageTemplates::normalize` → `#__minimarket_message_templates` (event, audience, plain text, whitelist tokens) | `NotificationSender` выбирает последний опубликованный клиентский шаблон **после** обязательной проверки channel enabled + allowed event + Joomla recipient preference; остальные аудитории пока не отправляются |
+| Настройки → События уведомлений | прежняя матрица `Notificationevents/HtmlView` | Ссылка на предзаполненное создание шаблона для конкретного события; каналы и шаблоны не дублируют друг друга |
+| Маркетинг → Цепочки рассылок | `MarketingflowController::save` → `MarketingFlows::normalize/save` → `#__minimarket_marketing_flows`, `marketing_flow_steps` | Draft editor: trigger, 1–10 последовательных шагов, 0–43200 min, published marketing template matching trigger; **нет отправителя, worker и opt-in** |
+| Управление → Задачи | `WorkqueueReads::sourceSql`, `Workqueue/HtmlView` | Реальные незавершённые проблемы + ожидание получения отправления >3 суток; прочитано не означает закрыто |
+| Управление → Уведомления | `AdminInbox` → `#__minimarket_admin_inbox_reads`; `NotificationsController::markRead` | Реальные события order/payment/shipment/ticket/returncase последних 30 дней; персональное read/unread; не бизнес-задача, не исходящее письмо |
+| Управление → Платежи / Касса | existing `payments` vs `fiscalization` | Деньги/подтверждение vs фискальная регистрация/чек; разные источники фактов, не дублировать |
+
+**CI 6/6 PASS** — [GitHub Actions #43502722693](https://github.com/komarovblog/minimarket/actions/runs/43502722693), проверенный SHA `b91c43dfd81cb98e0caf4d6bda39615c62667ed0` (PHP 8.4/8.5, Windows ZIP, MySQL 8.4 fresh/demo/upgrade, `MM627_CAMPAIGNS_TASKS_PASS`, `MM627_MARKETING_MYSQL84_PASS`, `ADMIN_WIRING_PASS`, RU/EN strict `missing=0`). **Живая проверка в Joomla 6/Atum на localhost пока не проведена.**
+
 ## 13.11.2026 — 0.6.26: событийная матрица, корзины и кассовые провайдеры
 
 | Экран | Источник записи | Использование / граница |
