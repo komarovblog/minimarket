@@ -1,3 +1,13 @@
+## 13.11.2026 — 0.6.24: пользовательские отметки и приоритет обращений
+
+| Действие | Источник и запись | Чтение / эффект | Проверка |
+|---|---|---|---|
+| Очередь → Прочитано / Не прочитано | POST `workqueue.setRead`, `WorkqueueReads::save`, `#__minimarket_queue_reads` с текущим Joomla `user_id`, типом, ID, SHA-256 сигнатурой и UTC | `Workqueue/HtmlView` читает только текущего сотрудника. Непрочитанное возвращается при изменении статуса/даты/последнего фактического сообщения, не влияет на исходные статусы или общий счётчик | `test-0-6-24-queue-crm.php`, MySQL 8.4 |
+| Обращение → Приоритет | `TicketController::create/update` → `support_tickets.priority`; `normal/high` | Нативный список с фильтром, карточки обращения/CRM и приоритет очереди; не меняет заказ | PHP + MySQL 8.4 |
+| Обращение → Доставка/Возврат | `TicketController::create` → `support_tickets.shipment_id/return_id` | Сервер подтверждает принадлежность `order_id`; обратные ссылки из обращения. Из Order/Shipment/Return/Customer — контекстная форма с исходными IDs. | PHP + MySQL 8.4 |
+
+Новых глобальных params и реальных внешних каналов уведомления не добавлено. `NotificationPolicy/NotificationSender` не изменены. **Автотесты:** 6/6 PASS, [GitHub Actions #43471739349](https://github.com/komarovblog/minimarket/actions/runs/43471739349), проверенный кодовый SHA `d50cee7f04e8ae6082f11debf3d89fd1e3d1fc14` (PHP 8.4/8.5, MySQL 8.4 fresh/demo/миграции, Windows ZIP). **Браузерная Joomla 6/Atum приёмка ещё не подтверждена.**
+
 ## 13.11.2026 — 0.6.23: документы и фискальный реестр
 
 Новых сохранённых `com_minimarket` component params и реальных настроек провайдера **нет**. Вкладка «Документы» в Order вызывает POST `document.create` (CSRF, `core.admin`) → `OrderDocuments::create` → immutable `#__minimarket_order_documents` → закрытый `view=document` c хеш-проверкой. `view=documents` — read-only список; `view=fiscalization` — `core.admin` read-only для `#__minimarket_fiscal_operations`. Не открывать настройку «включить фискализацию» до реального интеграционного адаптера и юридического контракта. Тест `test-0-6-23-documents.php`, MySQL `test-0-6-23-documents-mysql84.php`.
