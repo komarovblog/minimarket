@@ -907,12 +907,18 @@ CREATE TABLE IF NOT EXISTS #__minimarket_support_tickets (
  user_id INT UNSIGNED NOT NULL DEFAULT 0,
  subject VARCHAR(180) NOT NULL,
  status VARCHAR(16) NOT NULL DEFAULT 'new',
+ priority VARCHAR(8) NOT NULL DEFAULT 'normal',
+ shipment_id INT UNSIGNED NULL DEFAULT NULL,
+ return_id INT UNSIGNED NULL DEFAULT NULL,
  created_by INT UNSIGNED NOT NULL,
  created_at DATETIME NOT NULL,
  updated_at DATETIME NULL,
  KEY idx_mm_ticket_status (status,created_at),
  KEY idx_mm_ticket_customer (user_id,created_at),
  KEY idx_mm_ticket_order (order_id),
+ KEY idx_mm_ticket_priority (priority,status,created_at),
+ KEY idx_mm_ticket_shipment (shipment_id),
+ KEY idx_mm_ticket_return (return_id),
  CONSTRAINT fk_mm_ticket_order FOREIGN KEY(order_id)
   REFERENCES #__minimarket_orders(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1265,3 +1271,23 @@ CREATE TABLE IF NOT EXISTS #__minimarket_fiscal_operation_events (
  CONSTRAINT fk_mm_fiscal_event_operation FOREIGN KEY (fiscal_operation_id)
   REFERENCES #__minimarket_fiscal_operations(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Source-independent, operator-scoped read state; never hides an unresolved issue.
+CREATE TABLE IF NOT EXISTS #__minimarket_queue_reads (
+ user_id INT UNSIGNED NOT NULL,
+ source_kind VARCHAR(16) NOT NULL,
+ source_id INT UNSIGNED NOT NULL,
+ source_signature CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+ read_at DATETIME NOT NULL,
+ PRIMARY KEY(user_id,source_kind,source_id),
+ KEY idx_mm_queue_kind_source (source_kind,source_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tickets are created above before the referenced returns table exists.
+-- Add these two constraints only AFTER all fresh-install tables exist.
+ALTER TABLE #__minimarket_support_tickets
+ ADD CONSTRAINT fk_mm_ticket_shipment FOREIGN KEY(shipment_id)
+  REFERENCES #__minimarket_shipments(id) ON DELETE RESTRICT,
+ ADD CONSTRAINT fk_mm_ticket_return FOREIGN KEY(return_id)
+  REFERENCES #__minimarket_returns(id) ON DELETE RESTRICT;
+

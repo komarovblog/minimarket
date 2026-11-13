@@ -64,7 +64,7 @@ final class TicketController extends BaseController
                         .$db->quoteName('#__minimarket_'.$tableName)
                         .' WHERE id='.$relatedId.' FOR UPDATE');
                     if((int)$db->loadResult()!==$orderId)
-                        throw new DomainException('COM_MINIMARKET_TICKET_INVALID');
+                        throw new \DomainException('COM_MINIMARKET_TICKET_INVALID');
                 }
                 $actor=(int)$app->getIdentity()->id;
                 $table=$db->quoteName('#__minimarket_support_tickets');
