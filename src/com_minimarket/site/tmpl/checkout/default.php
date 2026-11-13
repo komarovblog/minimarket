@@ -261,6 +261,7 @@ $mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket
                     <input type="hidden" name="payment_method"
                            data-allowed-deliveries="<?php echo $this->escape(implode(',',\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::allowedForPayment($mmMethodParams,(string)($firstPayment??'pending')))); ?>"
                            value="<?php echo $this->escape((string)($firstPayment??'pending')); ?>">
+                    <p class="text-danger small" data-mm-compatibility-error hidden><?php echo Text::_('COM_MINIMARKET_PAYMENT_INCOMPATIBLE'); ?></p>
                     <?php if($firstPayment===null): ?>
                         <p class="form-text"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT_PENDING_NOTICE'); ?></p>
                     <?php endif; ?>
