@@ -80,8 +80,8 @@ $ok(str_contains($router,'getCartItems()')&&str_contains($router,'getActive()'),
 $ok(str_contains($router,"return ['cart'];")&&str_contains($router,"return ['view' => 'cart'];"),
     'Cart menu has both dedicated and legacy route handling');
 $release=file_get_contents(__DIR__.'/release-to-desktop.ps1');
-$ok(str_contains($release,'MINIMARKET_DESKTOP_2_FILES_OK'),
-    'regular release still includes component ZIP and optional SQL, not module ZIP');
+$ok(str_contains($release,'MINIMARKET_DESKTOP_3_FILES_OK'),
+    'regular release includes component ZIP, separate task plugin and optional SQL, never toolbar ZIP');
 $demo=__DIR__.'/../sample-data/minimarket_mysql84_nnop3_update_0_6_5.sql';
 $ok(is_file($demo),'versioned optional cumulative demo SQL exists');
 echo 'MM065_MENUS_PASS: '.$count." assertions\n";
