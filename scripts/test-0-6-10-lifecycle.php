@@ -18,7 +18,7 @@ if(!str_contains($storage,'StockReservation::allocate')||
    strpos($storage,'StockReservation::allocate')>strpos($storage,'$db->transactionCommit()'))
  throw new RuntimeException('MM010_ORDER_ATOMIC');
 $life=file_get_contents($root.'admin/src/Service/OrderLifecycle.php');
-if(str_contains($life,"$"."status='confirmed';")&&str_contains($life,"if ($all"))
+if(str_contains($life,"$"."status='confirmed';")&&str_contains($life,'if ($all'))
  throw new RuntimeException('MM010_FAKE_SHIPMENT_ACCEPTANCE');
 if(!str_contains($life,'function assertCancelable')||!str_contains($life,'payment_status'))
  throw new RuntimeException('MM010_CANCEL_CHECK');
