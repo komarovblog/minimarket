@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace Joomla\CMS\Language {
     final class Text {
         public static function _(string $name):string {return $name;}
+        public static function sprintf(string $name,...$args):string{return $name.' '.implode(' ',$args);}
     }
 }
 namespace Joomla\CMS\Uri {
@@ -26,6 +27,12 @@ namespace Joomla\CMS\MVC\View {
     }
 }
 namespace MiniMarket\Component\Minimarket\Administrator\Service {
+    final class WorkqueueReads {
+        public static function unreadCount(object $db,int $userId):array{
+            if($userId!==7)throw new \RuntimeException('Operator identity mismatch');
+            return ['count'=>4,'capped'=>false];
+        }
+    }
     final class AdminEntityLinks {
         public static function view(string $name):string {
             return 'index.php?option=com_minimarket&amp;view='.$name;
@@ -59,6 +66,7 @@ namespace Joomla\CMS {
                 }
                 public function getIdentity():object {
                     return new class {
+                        public int $id=7;
                         public function authorise(string $name,string $target):bool{return false;}
                     };
                 }
@@ -100,12 +108,19 @@ namespace MiniMarket\DashboardCountsTest {
             'promo_codes|1=1'=>4,
             'auto_discounts|1=1'=>2,
             'recommendation_settings|1=1'=>3,
+            "orders|status='new' AND deleted_at IS NULL"=>1,
+            "shipments|status='new' OR problem_status='open'"=>2,
+            "returns|status='new'"=>1,
+            "orders|payment_status IN ('unpaid','processing') AND status<>'cancelled' AND deleted_at IS NULL"=>1,
+            "support_tickets|status='new'"=>1,
+            "fiscal_operations|status IN ('failed','pending')"=>0,
+            "cart_snapshots|c.cart_status='active' AND c.item_units>0 AND c.updated_at<=DATE_SUB(UTC_TIMESTAMP(),INTERVAL 60 MINUTE) AND c.updated_at>DATE_SUB(UTC_TIMESTAMP(),INTERVAL 30 DAY)"=>2,
         ];
-        public function quoteName(string $name):string{return '`'.$name.'`';}
+        public function quoteName(string $name,?string $as=null):string{return '`'.$name.'`'.($as!==null?' AS `'.$as.'`':'');}
         public function setQuery(string $query):void{$this->query=$query;$this->queries[]=$query;}
         public function loadResult():int{
             if($this->query==='SELECT COUNT(DISTINCT user_id) FROM `#__minimarket_orders` WHERE user_id>0 AND deleted_at IS NULL')return 1;
-            if(!preg_match('/^SELECT COUNT\\(\\*\\) FROM `#__minimarket_([a-z_]+)` WHERE (.+)$/D',$this->query,$matches)) {
+            if(!preg_match('/^SELECT COUNT\\(\\*\\) FROM `#__minimarket_([a-z_]+)`(?: AS `c`)? WHERE (.+)$/D',$this->query,$matches)) {
                 throw new \RuntimeException('Unexpected count SQL: '.$this->query);
             }
             $key=$matches[1].'|'.$matches[2];
@@ -128,6 +143,8 @@ namespace MiniMarket\DashboardCountsTest {
         }
     }
     \define('_JEXEC',1);
+    require __DIR__.'/../src/com_minimarket/site/src/Service/CartState.php';
+    require __DIR__.'/../src/com_minimarket/site/src/Service/AbandonedCartStore.php';
     require __DIR__.'/../src/com_minimarket/admin/src/View/Dashboard/HtmlView.php';
     Factory::$database=new FakeDatabase();
     $view=new \MiniMarket\Component\Minimarket\Administrator\View\Dashboard\HtmlView();
@@ -137,31 +154,34 @@ namespace MiniMarket\DashboardCountsTest {
         'collections'=>6,'groups'=>4,'bundlegroups'=>2,'attributes'=>12,
         'orderoptions'=>7,'feeds'=>3,'orders'=>2,'documents'=>1,'deliveries'=>1,'returns'=>3,'deliveryzones'=>6,
         'reviews'=>2,'seofilters'=>3,'promocodes'=>4,'autodiscounts'=>2,'recommendations'=>3,'payments'=>2,
-        'tickets'=>1,'customers'=>1,'workqueue'=>7
+        'tickets'=>1,'customers'=>1,'workqueue'=>7,'orders_new'=>1,'deliveries_attention'=>2,
+        'returns_new'=>1,'payments_attention'=>1,'tickets_new'=>1,'fiscal_attention'=>0,
+        'abandonedcarts'=>2,'notifications_unread'=>4,'notifications_capped'=>false
     ];
-    verify($view->stats==$expected,'all real entity counters plus payment obligations use actual records');
-    verify(count(Factory::$database->queries)===25,'twenty-five real count queries including promotions and workqueue');
-    verify(count(array_unique(Factory::$database->queries))===24,
-        'the returns count is deliberately reused for workqueue, other count queries remain distinct');
+    verify($view->stats==$expected,'real entity reference counts retained and actionable badges derived from business status');
+    verify(count(Factory::$database->queries)===32,'legacy queries plus seven distinct actionable source queries');
+    verify(count(array_unique(Factory::$database->queries))===31,
+        'seven new actionable SQL predicates are distinct, no synthetic payment rows');
     $html=(new Renderer($view->stats))->html();
-    foreach($expected as $key=>$count){
-        if($key==='deliveryzones'){
-            verify(!str_contains($html,'data-mm-stat="deliveryzones"'),
-                'delivery-zone count does not reintroduce removed dashboard tile');
-            continue;
-        }
-        verify((bool)preg_match('/data-mm-stat="'.preg_quote($key,'/').'"[^>]*>\\s*'.(int)$count.'\\s*<\\/span>/u',$html),
-            'real server-rendered number for '.$key);
-    }
-    verify(substr_count($html,'data-mm-stat="none"')===12,
-        'Import, Settings, fiscalization, provider methods and three new financial reports have non-numeric counters');
-    verify(substr_count($html,'<span aria-hidden="true">—</span>')===12,
-        'All twelve report/settings/tool tiles without counts show dashes, never zero');
-    verify(str_contains($html,'data-mm-stat="orders"')
+    $badgeKeys=['workqueue'=>7,'notifications_unread'=>4,'orders_new'=>1,
+        'deliveries_attention'=>2,'returns_new'=>1,'payments_attention'=>1,
+        'tickets_new'=>1,'abandonedcarts'=>2,'reviews'=>2];
+    foreach($badgeKeys as $key=>$value)
+        verify((bool)preg_match('/data-mm-stat="'.preg_quote($key,'/').'"[^>]*>[\\s\\S]*?'
+           .(int)$value.'\\s*<\\/span>/u',$html),
+           'action-only badge '.$key);
+    foreach(['categories','products','bundles','brands','collections','customers',
+             'documents','fiscal_attention','feeds','settings','payments'] as $key)
+        verify(!str_contains($html,'data-mm-stat="'.$key.'"'),
+            'no total or zero badge for '.$key);
+    verify(!str_contains($html,'data-mm-stat="none"')
+        && !str_contains($html,'<span aria-hidden="true">—</span>'),
+        'no meaningless dash badges');
+    verify(str_contains($html,'data-mm-stat="orders_new"')
         && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
-        'Orders now has a real counter and active link');
+        'Orders shows new cases instead of all historic orders');
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===35 &&
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===39 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
