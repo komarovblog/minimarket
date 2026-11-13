@@ -46,24 +46,25 @@ namespace MiniMarket\DashboardTest {
     }
     \define('_JEXEC',1);
     $html=(new View())->output();
-    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===5,
-        'five native dashboard panels including Marketing and Settings');
-    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===23 &&
+    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6,
+        'six native dashboard panels including Reports');
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===24 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
-        'twenty-three working tiles across all five groups');
-    verify(substr_count($html,'mm-dashboard-tiles')===5,
+        'twenty-four working tiles across six groups');
+    verify(substr_count($html,'mm-dashboard-tiles')===6,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
         'COM_MINIMARKET_DASHBOARD_SHOP',
         'COM_MINIMARKET_DASHBOARD_MARKETING',
+        'COM_MINIMARKET_DASHBOARD_REPORTS',
         'COM_MINIMARKET_DASHBOARD_TOOLS',
         'COM_MINIMARKET_DASHBOARD_SETTINGS'];
     $positions=array_map(static fn($name)=>strpos($html,$name),$names);
     verify($positions[0]!==false && $positions[1]!==false
         && $positions[2]!==false && $positions[0]<$positions[1]
         && $positions[1]<$positions[2]
-        && $positions[2]<$positions[3] && $positions[3]<$positions[4],
-        'correct section order Management / Shop / Marketing / Tools / Settings');
+        && $positions[2]<$positions[3] && $positions[3]<$positions[4] && $positions[4]<$positions[5],
+        'correct section order Management / Shop / Marketing / Reports / Tools / Settings');
     verify(substr_count($html,'COM_MINIMARKET_DASHBOARD_ORDERS')>=1
         && substr_count($html,'mm-dashboard-tile--pending')===0
         && str_contains($html,'href="index.php?option=com_minimarket&amp;view=orders"'),
@@ -71,7 +72,7 @@ namespace MiniMarket\DashboardTest {
     foreach(['categories','products','bundles','brands','collections','groups',
         'bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries',
         'seofilters','promocodes','deliverymethods','paymentmethods','registrationmethods',
-        'payments','notificationmethods'] as $view) {
+        'payments','notificationmethods','stockreport'] as $view) {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
     }
@@ -86,7 +87,7 @@ namespace MiniMarket\DashboardTest {
     verify(str_contains($html,'mm-dashboard-band-header') &&
         str_contains($html,'mm-dashboard-tile-top') &&
         !str_contains($html,'mm-dashboard-grid'),
-        'five stacked full-width Joomla panels with icon above labels');
+        'six stacked full-width Joomla panels with icon above labels');
     verify(str_contains($html,'btn btn-primary d-inline-flex') &&
         str_contains($html,'https://example.local/index.php?option=com_minimarket&amp;view=catalog'),
         'Storefront button is solid and still points to public catalog');
