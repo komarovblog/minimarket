@@ -129,9 +129,9 @@ namespace MiniMarket\DashboardCountsTest {
         'categories'=>27,'products'=>78,'bundles'=>3,'brands'=>5,
         'collections'=>6,'groups'=>4,'bundlegroups'=>2,'attributes'=>12,
         'orderoptions'=>7,'feeds'=>3,'orders'=>2,'deliveries'=>1,'returns'=>3,'deliveryzones'=>6,
-        'reviews'=>2,'seofilters'=>3,'promocodes'=>4
+        'reviews'=>2,'seofilters'=>3,'promocodes'=>4,'payments'=>2
     ];
-    verify($view->stats===$expected,'all seventeen server counters use actual entities, including returns');
+    verify($view->stats===$expected,'all real entity counters plus payment obligations use actual records');
     verify(count(Factory::$database->queries)===17,'exactly seventeen count queries including returns');
     verify(count(array_unique(Factory::$database->queries))===17,
         'each entity/filter has its own distinct count query');
@@ -145,15 +145,15 @@ namespace MiniMarket\DashboardCountsTest {
         verify((bool)preg_match('/data-mm-stat="'.preg_quote($key,'/').'"[^>]*>\\s*'.(int)$count.'\\s*<\\/span>/u',$html),
             'real server-rendered number for '.$key);
     }
-    verify(substr_count($html,'data-mm-stat="none"')===5,
-        'Import, Settings, Delivery Methods, Payment Methods and Registration have non-numeric counters');
-    verify(substr_count($html,'<span aria-hidden="true">—</span>')===5,
-        'All five settings/tool tiles without counts show dashes, never zero');
+    verify(substr_count($html,'data-mm-stat="none"')===6,
+        'Import, Settings and four provider methods have non-numeric counters');
+    verify(substr_count($html,'<span aria-hidden="true">—</span>')===6,
+        'All six settings/tool tiles without counts show dashes, never zero');
     verify(str_contains($html,'data-mm-stat="orders"')
         && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
         'Orders now has a real counter and active link');
-    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===4 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===21 &&
+    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===5 &&
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===23 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
