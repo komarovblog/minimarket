@@ -34,7 +34,10 @@ final class WorkqueueReads
                 .' FROM '.$db->quoteName('#__minimarket_shipments','s')
                 .' INNER JOIN '.$db->quoteName('#__minimarket_orders','o')
                 .' ON o.id=s.order_id'
-                ." WHERE s.problem_status='open' AND o.deleted_at IS NULL",
+                ." WHERE (s.problem_status='open' OR "
+                ." (s.status='awaiting_pickup' AND "
+                ." COALESCE(s.updated_at,s.created_at)<=DATE_SUB(UTC_TIMESTAMP(),INTERVAL 3 DAY)))"
+                ." AND o.deleted_at IS NULL",
             'ticket' => 'SELECT t.id,t.subject AS description,t.created_at AS date_value,'
                 .'CONCAT(t.status,'.$db->quote(':').',t.priority) AS state_code,'
                 .'COALESCE(t.updated_at,t.created_at) AS state_at,t.priority,'

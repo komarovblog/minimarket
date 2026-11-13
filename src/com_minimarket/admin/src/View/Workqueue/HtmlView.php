@@ -23,7 +23,8 @@ class HtmlView extends BaseHtmlView
         // Counts stay based on unresolved sources; read receipts never reduce them.
         $tables=[
             'payment'=>['orders',"payment_status IN ('unpaid','processing') AND status NOT IN ('cancelled','completed') AND deleted_at IS NULL"],
-            'delivery'=>['shipments',"problem_status='open'"],
+            'delivery'=>['shipments',"problem_status='open' OR (status='awaiting_pickup'"
+                ." AND COALESCE(updated_at,created_at)<=DATE_SUB(UTC_TIMESTAMP(),INTERVAL 3 DAY))"],
             'ticket'=>['support_tickets',"status IN ('new','in_progress')"],
             'returncase'=>['returns',"status IN ('new','approved','received')"]
         ];

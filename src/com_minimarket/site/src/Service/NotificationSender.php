@@ -7,6 +7,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Administrator\Service\NotificationPolicy;
+use MiniMarket\Component\Minimarket\Administrator\Service\MessageTemplates;
 
 /**
  * Email is the sole built-in sender in v0.6.10. It requires an enabled event
@@ -26,7 +27,7 @@ final class NotificationSender
                ||!in_array($eventCode,NotificationPolicy::allowedEvents($params,'email'),true))
                 return;
             $db=Factory::getContainer()->get(DatabaseInterface::class);
-            $db->setQuery('SELECT o.id,o.user_id,u.email FROM '
+            $db->setQuery('SELECT o.id,o.user_id,o.customer_name,u.email FROM '
                 .$db->quoteName('#__minimarket_orders','o')
                 .' INNER JOIN '.$db->quoteName('#__users','u').' ON u.id=o.user_id'
                 .' WHERE o.id='.$orderId.' AND u.block=0'
@@ -49,9 +50,22 @@ final class NotificationSender
             $mailer=Factory::getMailer();
             $mailer->addRecipient((string)$order['email']);
             $mailer->isHtml(false);
-            $mailer->setSubject(Text::sprintf('COM_MINIMARKET_NOTIFY_MAIL_SUBJECT',$orderId));
-            $mailer->setBody(Text::sprintf('COM_MINIMARKET_NOTIFY_MAIL_BODY',
-                Text::_(NotificationPolicy::EVENTS[$eventCode]),$orderId));
+            // A published event-specific template may override built-in plain text.
+            // No template is mandatory: service emails retain their former fallback.
+            $template=MessageTemplates::customerEmail($db,$eventCode);
+            $vars=['order_id'=>(string)$orderId,
+                'customer_name'=>(string)($order['customer_name']??''),
+                'shop_name'=>(string)$params->get('shop_name','MiniMarket'),
+                'order_link'=>''];
+            $subject=$template!==null
+                ?MessageTemplates::render((string)$template['subject'],$vars)
+                :Text::sprintf('COM_MINIMARKET_NOTIFY_MAIL_SUBJECT',$orderId);
+            $body=$template!==null
+                ?MessageTemplates::render((string)$template['body'],$vars)
+                :Text::sprintf('COM_MINIMARKET_NOTIFY_MAIL_BODY',
+                    Text::_(NotificationPolicy::EVENTS[$eventCode]),$orderId);
+            $mailer->setSubject($subject);
+            $mailer->setBody($body);
             $sent=$mailer->Send()===true;
             $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_notification_log')
                 .' SET status='.$db->quote($sent?'sent':'failed')

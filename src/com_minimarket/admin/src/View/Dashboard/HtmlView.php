@@ -72,7 +72,9 @@ final class HtmlView extends BaseHtmlView
         // Alert badges describe what needs action, never all stored records.
         foreach([
             'orders_new'=>['orders',"status='new' AND deleted_at IS NULL"],
-            'deliveries_attention'=>['shipments',"status='new' OR problem_status='open'"],
+            'deliveries_attention'=>['shipments',"status='new' OR problem_status='open'"
+                ." OR (status='awaiting_pickup' AND COALESCE(updated_at,created_at)"
+                ." <=DATE_SUB(UTC_TIMESTAMP(),INTERVAL 3 DAY))"],
             'returns_new'=>['returns',"status='new'"],
             'payments_attention'=>['orders',
                 "payment_status IN ('unpaid','processing') AND status<>'cancelled' AND deleted_at IS NULL"],
