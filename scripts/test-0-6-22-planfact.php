@@ -31,9 +31,11 @@ $xml=(string)file_get_contents($root.'minimarket.xml');
 $preset=(string)file_get_contents($root.'admin/presets/minimarket.xml');
 $dash=(string)file_get_contents($root.'admin/tmpl/dashboard/default.php');
 $links=(string)file_get_contents($root.'admin/src/Service/AdminEntityLinks.php');
+$display=(string)file_get_contents($root.'admin/src/Controller/DisplayController.php');
 $ok(str_contains($xml,'view=planfactreport')&&str_contains($preset,'view=planfactreport')
  &&str_contains($dash,"'view' => 'planfactreport'")
- &&str_contains($links,"'planfactreport'"),'all three navigation surfaces plus URL registry');
+ &&str_contains($links,"'planfactreport'")
+ &&str_contains($display,"'planfactreport'"),'all three navigation surfaces plus URL registry');
 $controller=(string)file_get_contents($root.'admin/src/Controller/PlanfactreportController.php');
 $ok(str_contains($controller,"authorise('core.admin','com_minimarket')")
  &&str_contains($controller,"Session::checkToken('post')")

@@ -37,7 +37,7 @@ final class DisplayController extends BaseController
         if (in_array($viewName, [
             'attributes', 'brands', 'bundlegroups', 'bundles', 'categories',
             'collections', 'groups', 'orderoptions', 'products', 'values',
-            'orders', 'deliveries', 'returns', 'payments', 'customers','tickets','stockreport','salesreport','returnsreport','businessreport', 'deliveryzones', 'reviews', 'promocodes',
+            'orders', 'deliveries', 'returns', 'payments', 'customers','tickets','stockreport','salesreport','returnsreport','businessreport','planfactreport','planfactreport','planfactreport', 'deliveryzones', 'reviews', 'promocodes',
             'seofilters', 'autodiscounts', 'recommendations', 'feeds', 'registrationmethods', 'deliverymethods', 'paymentmethods', 'notificationmethods'
         ], true)) {
             \Joomla\CMS\Factory::getApplication()->getDocument()
