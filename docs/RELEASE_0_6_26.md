@@ -63,7 +63,7 @@
 `scripts/test-0-6-26-carts-mysql84.php` — реальная isolated MySQL 8.4 миграция, active/converted, 60m+30d, FK.
 Все предыдущие регрессии PHP 8.4/8.5, MySQL 8.4, Windows ZIP и `verify-translations.ps1 -Strict`.
 
-**CI:** [GitHub Actions #43495569874](https://github.com/komarovblog/minimarket/actions/runs/43495569874) — итог фиксировать только после статуса success. Ручная Joomla/Atum приёмка пока не подтверждена.
+**MiniMarket 0.6.26: CI 6/6 PASS:** [GitHub Actions #43495569874](https://github.com/komarovblog/minimarket/actions/runs/43495569874), код SHA `1ed57043bbe82a34c4bee817ce7a4592df047ea3`; PHP 8.4/8.5, MySQL 8.4 fresh/demo/isolated migration, Windows component ZIP и строгий RU/EN аудит. **Браузерная Joomla/Atum приёмка не проведена.**
 
 **Обновление:** создать backup БД. В Windows выполнить **единственную штатную команду**:
 

@@ -9,7 +9,7 @@
 | Настройки → Операторы фискализации | `Fiscalproviders/HtmlView` → `InstalledMethodPlugins::list('fiscal')` → `#__extensions` | Вывод установленных plugin `minimarket/fiscal_*` и ссылка на core Joomla plugin edit при ACL; **нет готового провайдера** |
 | Главная панель | `Dashboard/HtmlView` агрегаты по реальным статусам, отдельно WorkqueueReads | badges new/attention/unread, нет count для справочников/отчётов; при cap уведомлений указывать неполную оценку |
 
-Не вводить дублирующие senders или табличные ERP-сущности без отдельного решения. `scripts/test-0-6-26-carts-events-menu.php`, `scripts/test-0-6-26-carts-mysql84.php`. **0.6.26:** UI и серверный каркас реализованы в `development`; CI [#43495569874](https://github.com/komarovblog/minimarket/actions/runs/43495569874) проверяет код. Последний полностью проверенный код до этой правки: `878040c7be5d7aafaf694316c35dde48fdcdb2f6`, CI 6/6. Браузерная Joomla/Atum приёмка ещё не проведена.
+Не вводить дублирующие senders или табличные ERP-сущности без отдельного решения. `scripts/test-0-6-26-carts-events-menu.php`, `scripts/test-0-6-26-carts-mysql84.php`. **MiniMarket 0.6.26: CI 6/6 PASS:** [GitHub Actions #43495569874](https://github.com/komarovblog/minimarket/actions/runs/43495569874), код SHA `1ed57043bbe82a34c4bee817ce7a4592df047ea3`; PHP 8.4/8.5, MySQL 8.4 fresh/demo/isolated migration, Windows component ZIP и строгий RU/EN аудит. **Браузерная Joomla/Atum приёмка не проведена.**
 
 ## 13.11.2026 — 0.6.25: наследование рекомендаций и интерфейс
 
