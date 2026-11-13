@@ -75,12 +75,12 @@ $check(str_contains($deliveryView,'hasPriorShipment') &&
 
 $order=file_get_contents($root.'admin/tmpl/order/default.php');
 $blocks=['COM_MINIMARKET_ORDER_INFO_BLOCK','COM_MINIMARKET_ORDER_STATUS_BLOCK',
-    'COM_MINIMARKET_ORDER_PAYMENT_BLOCK','COM_MINIMARKET_ORDER_PRODUCTS_BLOCK',
+    'COM_MINIMARKET_ORDER_PRODUCTS_BLOCK','COM_MINIMARKET_ORDER_PAYMENT_BLOCK',
     'COM_MINIMARKET_ORDER_DELIVERY_BLOCK'];
 $pos=-1;
 foreach($blocks as $block){
     $new=strpos($order,$block);
-    $check($new!==false&&$new>$pos,'stacked blocks in required order: '.$block);
+    $check($new!==false&&$new>$pos,'native Joomla order tabs in required order: '.$block);
     $pos=$new;
 }
 $check(str_contains($order,'COM_MINIMARKET_ORDER_USER_UNLINKED') &&
