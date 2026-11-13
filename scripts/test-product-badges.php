@@ -117,11 +117,11 @@ namespace MiniMarket\ProductBadgeSmoke {
         && str_contains($adminTemplate,"renderField('badge_benefit_display')"),
         'flag names are below Show flag; money and percent remain independent');
     $badgeJs=file_get_contents($base.'media/js/product-badges.js');
-    ok(str_contains($badgeJs,'sale.disabled=discounted')
+    ok(str_contains($badgeJs,'wrap.hidden=discounted')
         && !str_contains($badgeJs,'sale.disabled=!eligible')
-        && str_contains($badgeJs,'row(saleDisplay).hidden=discounted')
-        && str_contains($badgeJs,'row(benefitDisplay).hidden=!discounted'),
-        'manual sale toggle enabled even before price comparison; units accessible');
+        && str_contains($badgeJs,'row(saleDisplay).hidden=discounted||!sale?.checked')
+        && str_contains($badgeJs,'row(benefitDisplay).hidden=!discounted||!benefit?.checked'),
+        'manual sale remains selectable for fixed price; units follow active flags');
 
     $form=simplexml_load_file($base.'admin/forms/product.xml');
     ok($form!==false,'product form parses');
