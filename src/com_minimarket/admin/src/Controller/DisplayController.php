@@ -38,14 +38,14 @@ final class DisplayController extends BaseController
             'attributes', 'brands', 'bundlegroups', 'bundles', 'categories',
             'collections', 'groups', 'orderoptions', 'products', 'values',
             'orders', 'deliveries', 'returns', 'deliveryzones', 'reviews', 'promocodes',
-            'seofilters', 'feeds', 'registrationmethods', 'deliverymethods', 'paymentmethods'
+            'seofilters', 'feeds', 'registrationmethods', 'deliverymethods', 'paymentmethods', 'notificationmethods'
         ], true)) {
             \Joomla\CMS\Factory::getApplication()->getDocument()
                 ->getWebAssetManager()->useScript('table.columns')
                 ->useScript('multiselect');
         }
 
-        if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order', 'deliveries', 'delivery', 'returns', 'returncase', 'deliveryzones', 'deliveryzone', 'deliverymethods', 'paymentmethods', 'registrationmethods', 'reviews', 'review', 'seofilters', 'seofilter', 'promocodes','promocode'], true)) {
+        if (!\in_array($viewName, ['dashboard', 'feeds', 'feed', 'categories', 'category', 'products', 'product', 'attributes', 'attribute', 'values', 'value', 'groups', 'group', 'orderoptions', 'orderoption', 'import', 'brands', 'brand', 'collections', 'collection', 'bundles', 'bundlegroups', 'orders', 'order', 'deliveries', 'delivery', 'returns', 'returncase', 'deliveryzones', 'deliveryzone', 'deliverymethods', 'paymentmethods', 'registrationmethods', 'notificationmethods', 'reviews', 'review', 'seofilters', 'seofilter', 'promocodes','promocode'], true)) {
             throw new \RuntimeException('Unknown MiniMarket view', 404);
         }
 

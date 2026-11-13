@@ -9,11 +9,12 @@ final class InstalledMethodPlugins
 {
     public static function list(DatabaseInterface $db,string $kind): array
     {
-        if(!in_array($kind,['delivery','payment','registration'],true))return [];
+        if(!in_array($kind,['delivery','payment','registration','notification'],true))return [];
         $prefix=match($kind) {
             'delivery' => "('delivery','shipping')",
             'payment' => "('payment')",
             'registration' => "('auth','registration','email','sms')",
+            'notification' => "('notification')",
         };
         $q=$db->getQuery(true)->select(['extension_id','name','element','enabled'])
             ->from($db->quoteName('#__extensions'))

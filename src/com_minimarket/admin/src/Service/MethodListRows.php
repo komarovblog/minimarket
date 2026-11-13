@@ -28,6 +28,9 @@ final class MethodListRows
                 'pickup' => ['COM_MINIMARKET_ORDER_DELIVERY_PICKUP', 'delivery_pickup_enabled', 1],
                 'courier' => ['COM_MINIMARKET_ORDER_DELIVERY_COURIER', 'delivery_courier_enabled', 0],
             ],
+            'notification' => [
+                'email' => ['COM_MINIMARKET_NOTIFY_EMAIL','notification_email_enabled',0],
+            ],
             'registration' => [
                 'email' => ['COM_MINIMARKET_REGISTRATION_EMAIL_METHOD', 'allowUserRegistration', 0],
             ],
@@ -40,6 +43,7 @@ final class MethodListRows
         $view = match ($kind) {
             'delivery' => 'deliverymethods',
             'registration' => 'registrationmethods',
+            'notification' => 'notificationmethods',
             default => 'paymentmethods',
         };
         $rows = [];

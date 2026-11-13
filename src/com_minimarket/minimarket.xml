@@ -105,6 +105,7 @@
             <menu link="option=com_minimarket&amp;view=deliverymethods">COM_MINIMARKET_DELIVERY_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=paymentmethods">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=registrationmethods">COM_MINIMARKET_REGISTRATION_METHODS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=notificationmethods">COM_MINIMARKET_NOTIFICATION_METHODS_TITLE</menu>
             <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
         </submenu>
     </administration>
