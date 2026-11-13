@@ -94,7 +94,11 @@ final class OrderLifecycle
         // A paid order remains New until an employee explicitly accepts it.
         if($status==='confirmed'&&$o['payment_status']==='paid'
            &&$fulfillment==='delivered')$status='completed';
-        if($status===$fromStatus&&$fulfillment===$fromFulfillment)return;
+        if($status===$fromStatus&&$fulfillment===$fromFulfillment){
+            if(in_array($fulfillment,['in_transit','awaiting_pickup','delivered'],true))
+                StockReservation::fulfill($db,$orderId);
+            return;
+        }
 
         $sets=[];
         if($status!==$fromStatus)$sets[]='status='.$db->quote($status);

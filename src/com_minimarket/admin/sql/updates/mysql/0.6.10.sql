@@ -25,3 +25,15 @@ CREATE TABLE IF NOT EXISTS #__minimarket_stock_allocations (
     CONSTRAINT fk_mm_stock_allocation_order FOREIGN KEY(order_id)
       REFERENCES #__minimarket_orders(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Canonical seven-stage fulfillment; keep completed/cancelled main order states intact.
+ALTER TABLE #__minimarket_orders
+    MODIFY fulfillment_status VARCHAR(24) NOT NULL DEFAULT 'awaiting_assembly';
+ALTER TABLE #__minimarket_shipments
+    MODIFY status VARCHAR(24) NOT NULL DEFAULT 'awaiting_assembly';
+UPDATE #__minimarket_orders SET fulfillment_status='awaiting_assembly'
+    WHERE fulfillment_status='pending';
+UPDATE #__minimarket_orders SET fulfillment_status='in_transit'
+    WHERE fulfillment_status='shipped';
+UPDATE #__minimarket_shipments SET status='awaiting_assembly'
+    WHERE status='new';

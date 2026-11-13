@@ -38,8 +38,12 @@ $s=$this->shipment;
     <select class="form-select" id="mm-state" name="status">
       <?php
        $allowedStates=match((string)$s->status){
-         'new'=>['new','in_transit','delivered','cancelled'],
-         'in_transit'=>['in_transit','delivered','cancelled'],
+         'new','awaiting_assembly'=>['awaiting_assembly','assembling','ready','in_transit','delivered','cancelled'],
+         'assembling'=>['assembling','ready','in_transit','delivered','cancelled'],
+         'ready'=>['ready','in_transit','awaiting_pickup','delivered','cancelled'],
+         'in_transit'=>['in_transit','awaiting_pickup','delivered','failed'],
+         'awaiting_pickup'=>['awaiting_pickup','delivered','failed'],
+         'failed'=>['failed','ready','in_transit','awaiting_pickup','delivered'],
          default=>[(string)$s->status]
        };
        foreach($allowedStates as $state): ?><option value="<?php echo $state; ?>" <?php echo $s->status===$state?'selected':''; ?>><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS_'.strtoupper($state)); ?></option><?php endforeach; ?>

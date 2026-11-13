@@ -20,12 +20,12 @@ final class DeliveriesController extends BaseController
 
     public function deliver(): void
     {
-        $this->change('#__minimarket_shipments', 'status', 'delivered', ['new','in_transit','delivered'], false, false);
+        $this->change('#__minimarket_shipments', 'status', 'delivered', ['awaiting_assembly','assembling','ready','in_transit','awaiting_pickup','failed','delivered'], false, false);
     }
 
     public function cancel(): void
     {
-        $this->change('#__minimarket_shipments', 'status', 'cancelled', ['new','in_transit','cancelled'], false, false);
+        $this->change('#__minimarket_shipments', 'status', 'cancelled', ['awaiting_assembly','assembling','ready','cancelled'], false, false);
     }
 
     private function change(

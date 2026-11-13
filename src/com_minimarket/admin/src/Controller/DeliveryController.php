@@ -26,12 +26,12 @@ final class DeliveryController extends BaseController
     {
         $post=Factory::getApplication()->input->post;
         $carrier=$post->getCmd('carrier','own');
-        $status=$post->getCmd('status','new');
+        $status=$post->getCmd('status','awaiting_assembly');
         $reason=$post->getCmd('reason','initial');
         $track=trim($post->getString('tracking_number',''));
         $note=trim($post->getString('note',''));
         if(!in_array($carrier,['own','cdek','other'],true)
-            ||!in_array($status,['new','in_transit','delivered','cancelled'],true)
+            ||!in_array($status,['awaiting_assembly','assembling','ready','in_transit','awaiting_pickup','delivered','failed','cancelled'],true)
             ||!in_array($reason,['initial','redelivery','replacement','other'],true)
             ||mb_strlen($track)>120||mb_strlen($note)>2000
             ||preg_match('/[\x00-\x1f<>]/u',$track))
@@ -65,7 +65,7 @@ final class DeliveryController extends BaseController
                         'status','note','created_by','created_at']))
                     ->values(implode(',',[(string)$oid,$db->quote($data['carrier']),
                         $db->quote($data['track']),$db->quote($data['reason']),
-                        $db->quote('new'),$db->quote($data['note']),
+                        $db->quote('awaiting_assembly'),$db->quote($data['note']),
                         (string)(int)$app->getIdentity()->id,'UTC_TIMESTAMP()']));
                 $db->setQuery($q);$db->execute();
                 $id=(int)$db->insertid();
@@ -101,9 +101,16 @@ final class DeliveryController extends BaseController
                     .' WHERE id='.$id.' FOR UPDATE');
                 $before=$db->loadAssoc();
                 if(!$before)throw new \DomainException('COM_MINIMARKET_DELIVERY_INVALID');
-                $allowed=['new'=>['new','in_transit','delivered','cancelled'],
-                    'in_transit'=>['in_transit','delivered','cancelled'],
-                    'delivered'=>['delivered'],'cancelled'=>['cancelled']];
+                $allowed=[
+                    'new'=>['awaiting_assembly','assembling','ready','in_transit','delivered','cancelled'],
+                    'awaiting_assembly'=>['awaiting_assembly','assembling','ready','in_transit','delivered','cancelled'],
+                    'assembling'=>['assembling','ready','in_transit','delivered','cancelled'],
+                    'ready'=>['ready','in_transit','awaiting_pickup','delivered','cancelled'],
+                    'in_transit'=>['in_transit','awaiting_pickup','delivered','failed'],
+                    'awaiting_pickup'=>['awaiting_pickup','delivered','failed'],
+                    'failed'=>['failed','ready','in_transit','awaiting_pickup','delivered'],
+                    'delivered'=>['delivered'],'cancelled'=>['cancelled']
+                ];
                 if(!in_array($data['status'],$allowed[(string)$before['status']]??[],true))
                     throw new \DomainException('COM_MINIMARKET_DELIVERY_INVALID');
                 $db->setQuery('SELECT id FROM '.$db->quoteName('#__minimarket_orders')
