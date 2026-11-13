@@ -146,6 +146,11 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
     </tbody>
    </table>
   </div>
+  <?php if(!empty($o->auto_discount_id)): ?>
+   <p class="form-text"><?php echo Text::_('COM_MINIMARKET_AUTO_DISCOUNTS_TITLE'); ?>:
+    <?php echo $e((string)$o->auto_discount_title); ?> —
+    <?php echo $money((int)$o->discount_cents); ?></p>
+  <?php endif; ?>
   <?php if($this->canViewFinance): ?>
    <?php
     $allKnown=count($this->items)>0;
