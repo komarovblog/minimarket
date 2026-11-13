@@ -30,8 +30,11 @@ final class HtmlView extends BaseHtmlView
             $db->setQuery('SELECT COUNT(*) FROM '.$db->quoteName('#__minimarket_'.$table)
                 .' WHERE '.$where);
             $total=(int)$db->loadResult();
+            $alias=match($kind){'payment'=>'o','delivery'=>'s','ticket'=>'t','returncase'=>'r'};
+            $priorityFirst=$kind==='ticket'
+                ?'CASE WHEN t.priority='.$db->quote('high').' THEN 0 ELSE 1 END,':'';
             $db->setQuery(WorkqueueReads::sourceSql($db,$kind)
-                .' ORDER BY date_value ASC,id ASC',0,100);
+                .' ORDER BY '.$priorityFirst.'date_value ASC,'.$alias.'.id ASC',0,100);
             $rows=(array)$db->loadObjectList();
             $ids=array_map(static fn($row)=>(int)$row->id,$rows);
             $receipts=WorkqueueReads::receipts($db,(int)$user->id,$kind,$ids);
