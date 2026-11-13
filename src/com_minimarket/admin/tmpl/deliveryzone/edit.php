@@ -52,7 +52,7 @@ $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00'
       'base_fee_cents'=>'COM_MINIMARKET_ZONE_BASE_FEE','rate_per_unit_cents'=>'COM_MINIMARKET_ZONE_UNIT_FEE',
       'free_from_cents'=>'COM_MINIMARKET_ZONE_FREE_FROM','min_cart_cents'=>'COM_MINIMARKET_ZONE_MIN_CART'
       ] as $key=>$label): $name=str_replace('_cents','',$key); ?>
-      <div class="col-md-6"><label class="form-label" for="z-<?php echo $name; ?>"><?php echo Text::_($label); ?></label>
+      <div class="col-md-6"<?php echo $name==='rate_per_unit'?' data-mm-zone-unit-rate':''; ?>><label class="form-label" for="z-<?php echo $name; ?>"><?php echo Text::_($label); ?></label>
        <input id="z-<?php echo $name; ?>" class="form-control" name="<?php echo $name; ?>" type="number"
               min="0" step="0.01" value="<?php echo $this->escape($money($key)); ?>"></div>
      <?php endforeach; ?>
@@ -80,3 +80,14 @@ $money=static fn($key)=>$z?number_format((int)($z->$key??0)/100,2,'.',''):'0.00'
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
 <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </form>
+<script>
+(()=>{
+ const form=document.getElementById('mm-zone-form');
+ const mode=form?.querySelector('#z-mode');
+ const units=form?.querySelector('[data-mm-zone-unit-rate]');
+ if(!mode||!units)return;
+ const sync=()=>{units.hidden=mode.value==='fixed';};
+ mode.addEventListener('change',sync);
+ sync();
+})();
+</script>

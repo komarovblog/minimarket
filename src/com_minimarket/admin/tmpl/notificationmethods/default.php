@@ -47,6 +47,7 @@ $esc=static fn($v)=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8
       <a href="<?php echo $esc(Route::_('index.php?option=com_plugins',false)); ?>"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_INFO'); ?></a>
      </p>
     <?php endif; ?>
+    <div data-mm-notification-events>
     <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_NOTIFY_EVENT_SECTION'); ?></h3>
     <div class="row g-2">
      <?php foreach(NotificationPolicy::EVENTS as $code=>$label): ?>
@@ -60,8 +61,19 @@ $esc=static fn($v)=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8
       </div>
      <?php endforeach; ?>
     </div>
+    </div>
    </section>
    <?php echo HTMLHelper::_('form.token'); ?>
   </form>
+  <script>
+  (()=>{
+   const enabled=document.getElementById('mm-notify-email-enabled');
+   const events=document.querySelector('[data-mm-notification-events]');
+   if(!enabled||!events)return;
+   const sync=()=>{events.hidden=enabled.value!=='1';};
+   enabled.addEventListener('change',sync);
+   sync();
+  })();
+  </script>
  </div>
 <?php endif; ?>

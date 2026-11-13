@@ -74,5 +74,11 @@ $assert($choice[0]==='A','valid selectable value');
 $badges=file_get_contents($root.'media/js/product-badges.js');
 $assert(str_contains($badges,'wrap.hidden=discounted')&&str_contains($badges,'wrap.hidden=!discounted'),
     'inapplicable badge toggles hidden, not disabled');
+$zone=file_get_contents($root.'admin/tmpl/deliveryzone/edit.php');
+$assert(str_contains($zone,"data-mm-zone-unit-rate")&&str_contains($zone,"mode.value==='fixed'"),
+    'unit-rate input hidden when delivery zone uses fixed tariff');
+$notify=file_get_contents($root.'admin/tmpl/notificationmethods/default.php');
+$assert(str_contains($notify,'data-mm-notification-events')&&str_contains($notify,"enabled.value!=='1'"),
+    'email event settings hidden while notifications disabled');
 $assert(is_file($root.'admin/sql/updates/mysql/0.6.13.sql'),'versioned no-DB-change upgrade');
 echo "MM613_CONDITIONAL_SETTINGS_PASS\n";
