@@ -63,7 +63,8 @@ final class HtmlView extends BaseHtmlView
         $this->galleryEffect=in_array($effect,['lightbox','zoom'],true)?$effect:'lightbox';
         if((int)$params->get('product_detail_show_similar',0)===1){
             $this->similarProducts=ProductRecommendations::similar(
-                $repo,$id,(int)$product->category_id,4);
+                $repo,$id,(int)$product->category_id,4,
+                Factory::getContainer()->get(DatabaseInterface::class));
         }
         if((int)$params->get('product_detail_show_bought_together',0)===1){
             $this->boughtTogetherProducts=ProductRecommendations::boughtTogether(
