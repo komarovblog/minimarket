@@ -21,6 +21,44 @@ final class NotificationPolicy
         'refund_updated'=>'COM_MINIMARKET_NOTIFY_EVENT_REFUND_UPDATED',
     ];
 
+    /** Operational events. These are CONFIGURED only; admin delivery is not installed. */
+    public const ADMIN_EVENTS=[
+        'order_new'=>'COM_MINIMARKET_NOTIFY_ADMIN_ORDER_NEW',
+        'payment_pending'=>'COM_MINIMARKET_NOTIFY_ADMIN_PAYMENT_PENDING',
+        'delivery_issue'=>'COM_MINIMARKET_NOTIFY_ADMIN_DELIVERY_ISSUE',
+        'return_new'=>'COM_MINIMARKET_NOTIFY_ADMIN_RETURN_NEW',
+        'ticket_new'=>'COM_MINIMARKET_NOTIFY_ADMIN_TICKET_NEW',
+        'fiscal_error'=>'COM_MINIMARKET_NOTIFY_ADMIN_FISCAL_ERROR',
+        'cart_abandoned'=>'COM_MINIMARKET_NOTIFY_ADMIN_CART_ABANDONED',
+    ];
+
+    public static function normalizeAdminEvents(array $raw):array
+    {
+        if(count($raw)>count(self::ADMIN_EVENTS))
+            throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+        $events=[];
+        foreach($raw as $event){
+            if(!is_string($event)||!isset(self::ADMIN_EVENTS[$event]))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            $events[$event]=$event;
+        }
+        return array_values($events);
+    }
+
+    /** Settings only. Never interpreted as proof a message was sent. */
+    public static function allowedAdminEvents(Registry $params,string $channel):array
+    {
+        if($channel==='email')$raw=$params->get('notification_admin_email_events',[]);
+        elseif(preg_match('/^plugin_[1-9][0-9]*$/D',$channel)){
+            $all=$params->get('notification_admin_plugin_events',[]);
+            if($all instanceof Registry)$all=$all->toArray();
+            $raw=is_array($all)?($all[$channel]??[]):[];
+        }else return [];
+        if($raw instanceof Registry)$raw=$raw->toArray();
+        if(!is_array($raw))return [];
+        try{return self::normalizeAdminEvents($raw);}catch(\DomainException){return [];}
+    }
+
     public static function normalizeEvents(array $raw):array
     {
         if(count($raw)>count(self::EVENTS))
