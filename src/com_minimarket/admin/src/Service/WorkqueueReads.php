@@ -18,7 +18,9 @@ final class WorkqueueReads
     {
         return match($kind) {
             'payment' => 'SELECT o.id,o.customer_name AS description,o.created_at AS date_value,'
-                .'o.payment_status AS state_code,COALESCE(o.paid_at,o.created_at) AS state_at'
+                .'o.payment_status AS state_code,COALESCE(o.paid_at,o.created_at) AS state_at,'
+                .'COALESCE((SELECT MAX(p.id) FROM '.$db->quoteName('#__minimarket_payment_records','p')
+                .' WHERE p.order_id=o.id),0) AS event_revision'
                 .' FROM '.$db->quoteName('#__minimarket_orders','o')
                 ." WHERE o.payment_status IN ('unpaid','processing')"
                 ." AND o.status NOT IN ('cancelled','completed') AND o.deleted_at IS NULL",
@@ -26,20 +28,24 @@ final class WorkqueueReads
                 .$db->quote(' · ').',s.problem_code) AS description,'
                 .'s.created_at AS date_value,CONCAT(s.problem_status,'
                 .$db->quote(':').',s.problem_code) AS state_code,'
-                .'COALESCE(s.updated_at,s.created_at) AS state_at'
+                .'COALESCE(s.updated_at,s.created_at) AS state_at,'
+                .'COALESCE((SELECT MAX(e.id) FROM '.$db->quoteName('#__minimarket_shipment_events','e')
+                .' WHERE e.shipment_id=s.id),0) AS event_revision'
                 .' FROM '.$db->quoteName('#__minimarket_shipments','s')
                 .' INNER JOIN '.$db->quoteName('#__minimarket_orders','o')
                 .' ON o.id=s.order_id'
                 ." WHERE s.problem_status='open' AND o.deleted_at IS NULL",
             'ticket' => 'SELECT t.id,t.subject AS description,t.created_at AS date_value,'
                 .'CONCAT(t.status,'.$db->quote(':').',t.priority) AS state_code,'
-                .'COALESCE(t.updated_at,t.created_at) AS state_at,t.priority'
+                .'COALESCE(t.updated_at,t.created_at) AS state_at,t.priority,'
+                .'COALESCE((SELECT MAX(m.id) FROM '.$db->quoteName('#__minimarket_support_messages','m')
+                .' WHERE m.ticket_id=t.id),0) AS event_revision'
                 .' FROM '.$db->quoteName('#__minimarket_support_tickets','t')
                 ." WHERE t.status IN ('new','in_progress')",
             'returncase' => 'SELECT r.id,CONCAT('.$db->quote('Order #').',r.order_id,'
                 .$db->quote(' · ').',r.reason) AS description,'
                 .'r.created_at AS date_value,r.status AS state_code,'
-                .'COALESCE(r.updated_at,r.created_at) AS state_at'
+                .'COALESCE(r.updated_at,r.created_at) AS state_at,0 AS event_revision'
                 .' FROM '.$db->quoteName('#__minimarket_returns','r')
                 .' INNER JOIN '.$db->quoteName('#__minimarket_orders','o')
                 .' ON o.id=r.order_id'
@@ -54,7 +60,8 @@ final class WorkqueueReads
           ||!isset($row->state_code,$row->state_at))
             throw new \DomainException('COM_MINIMARKET_WORKQUEUE_STALE');
         return hash('sha256',json_encode([
-            $kind,(int)$row->id,(string)$row->state_code,(string)$row->state_at
+            $kind,(int)$row->id,(string)$row->state_code,(string)$row->state_at,
+            (int)($row->event_revision??0)
         ],JSON_THROW_ON_ERROR));
     }
 

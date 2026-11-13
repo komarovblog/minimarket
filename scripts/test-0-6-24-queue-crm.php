@@ -18,6 +18,9 @@ $row->state_code='new:normal';$row->state_at='2026-11-13 13:00:01';
 $ok($first!==$service::signature('ticket',$row),'new internal note becomes unread');
 $row->state_at='2026-11-13 13:00:00';
 $ok($first!==$service::signature('returncase',$row),'source kinds do not share receipts');
+$row->event_revision=5;
+$ok($first!==$service::signature('ticket',$row),'new message ID within same second resets read');
+$row->event_revision=0;
 try{$service::signature('fake',$row);$ok(false,'unknown type accepted');}
 catch(DomainException){$ok(true,'invalid source rejected');}
 
@@ -57,7 +60,7 @@ $ok(str_contains($tickets,'SELECT order_id FROM')
  &&str_contains($tickets,'FOR UPDATE')
  &&str_contains($tickets,'shipment_id')
  &&str_contains($tickets,'return_id')
- &&str_contains($tickets,"in_array($priority,['normal','high'],true)"),
+ &&str_contains($tickets,"in_array(\$priority,['normal','high'],true)"),
  'ticket links validated against source order, priority whitelisted');
 $ticketUi=(string)file_get_contents($root.'admin/tmpl/ticket/default.php');
 $createUi=(string)file_get_contents($root.'admin/tmpl/ticket/create.php');
