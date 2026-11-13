@@ -145,15 +145,15 @@ namespace MiniMarket\DashboardCountsTest {
         verify((bool)preg_match('/data-mm-stat="'.preg_quote($key,'/').'"[^>]*>\\s*'.(int)$count.'\\s*<\\/span>/u',$html),
             'real server-rendered number for '.$key);
     }
-    verify(substr_count($html,'data-mm-stat="none"')===6,
+    verify(substr_count($html,'data-mm-stat="none"')===7,
         'Import, Settings and four provider methods have non-numeric counters');
-    verify(substr_count($html,'<span aria-hidden="true">—</span>')===6,
-        'All six settings/tool tiles without counts show dashes, never zero');
+    verify(substr_count($html,'<span aria-hidden="true">—</span>')===7,
+        'All seven report/settings/tool tiles without counts show dashes, never zero');
     verify(str_contains($html,'data-mm-stat="orders"')
         && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
         'Orders now has a real counter and active link');
-    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===5 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===23 &&
+    verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6 &&
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===24 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
