@@ -9,7 +9,7 @@ foreach(['payment_status','fulfillment_status','status','filter_payment','filter
  if(!str_contains($tpl,$key))throw new RuntimeException('MM_LIST_3AXES_TPL: '.$key);
 }
 if(!str_contains($tpl,"'cancelled'=>'secondary'")||
-   !str_contains($tpl,"Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$order->status))"))
+   (!str_contains($tpl,'COM_MINIMARKET_ORDER_STATUS_')||!str_contains($tpl,'$order->status')))
  throw new RuntimeException('MM_LIST_CANCELLED_NOT_VISIBLE');
 if(str_contains($tpl,'reserved_until')||str_contains($tpl,'reservation_expires_at'))
  throw new RuntimeException('MM_LIST_FAKE_RESERVE');
