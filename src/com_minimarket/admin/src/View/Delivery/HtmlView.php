@@ -16,6 +16,7 @@ final class HtmlView extends BaseHtmlView
     public array $linkedReturns=[];
     public bool $canViewFinance=false;
     public array $costRevisions=[];
+    public array $shipmentEvents=[];
     public function display($tpl=null)
     {
         $app=Factory::getApplication();$u=$app->getIdentity();
@@ -53,6 +54,12 @@ final class HtmlView extends BaseHtmlView
                 ->from($db->quoteName('#__minimarket_returns'))
                 ->where('shipment_id='.(int)$id)->order('id DESC');
             $db->setQuery($q);$this->linkedReturns=(array)$db->loadObjectList();
+            $q=$db->getQuery(true)->select(['event_code','problem_code','note',
+                'occurred_at','created_at','source','actor_user_id'])
+                ->from($db->quoteName('#__minimarket_shipment_events'))
+                ->where('shipment_id='.(int)$id)->order('occurred_at DESC,id DESC');
+            $db->setQuery($q,0,200);
+            $this->shipmentEvents=(array)$db->loadObjectList();
             if($this->canViewFinance){
                 $q=$db->getQuery(true)->select(['previous_cost_cents','confirmed_cost_cents',
                     'evidence_reference','actor_user_id','created_at'])

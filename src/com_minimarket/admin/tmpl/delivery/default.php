@@ -110,5 +110,102 @@ $s=$this->shipment;
 
  </section>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ 
+ <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-'.(int)$s->id,'events',Text::_('COM_MINIMARKET_SHIPMENT_EVENTS_TITLE')); ?>
+ <section class="card card-body mm-admin-panel">
+  <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENTS_TITLE'); ?></h2>
+  <?php if((string)$s->problem_status==='open'): ?>
+    <div class="alert alert-warning">
+     <?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_OPEN'); ?>:
+     <?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_'.strtoupper((string)$s->problem_code)); ?>
+    </div>
+  <?php elseif((string)$s->problem_status==='resolved'): ?>
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_RESOLVED'); ?></p>
+  <?php endif; ?>
+  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENTS_HELP'); ?></p>
+  <?php if((string)$s->status!=='cancelled'): ?>
+  <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.event',false)); ?>" class="row g-3" data-mm-shipment-event-form>
+   <input type="hidden" name="id" value="<?php echo (int)$s->id; ?>">
+   <input type="hidden" name="event_key" value="<?php echo bin2hex(random_bytes(16)); ?>">
+   <div class="col-12 col-md-6">
+    <label class="form-label" for="mm-event-code"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_TYPE'); ?></label>
+    <select name="event_code" id="mm-event-code" class="form-select" required>
+     <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
+     <?php
+      $events=\MiniMarket\Component\Minimarket\Administrator\Service\ShipmentEvents::EVENTS;
+      foreach($events as $event):
+       try{
+        \MiniMarket\Component\Minimarket\Administrator\Service\ShipmentEvents::apply(
+           (array)$s,['event_code'=>$event,'problem_code'=>'delay']);
+       }catch(\DomainException){continue;}
+     ?>
+      <option value="<?php echo $event; ?>"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_'.strtoupper($event)); ?></option>
+     <?php endforeach; ?>
+    </select>
+   </div>
+   <div class="col-12 col-md-6">
+    <label class="form-label" for="mm-event-date"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_OCCURRED'); ?></label>
+    <input id="mm-event-date" name="occurred_at" type="datetime-local" class="form-control"
+     value="<?php echo gmdate('Y-m-d\TH:i'); ?>" required>
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_UTC'); ?></p>
+   </div>
+   <div class="col-12" data-mm-event-problem hidden>
+    <label class="form-label" for="mm-event-problem-code"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_TYPE'); ?></label>
+    <select id="mm-event-problem-code" name="problem_code" class="form-select" disabled>
+     <option value=""><?php echo Text::_('COM_MINIMARKET_FILTER_ANY'); ?></option>
+     <?php foreach(\MiniMarket\Component\Minimarket\Administrator\Service\ShipmentEvents::PROBLEMS as $problem): ?>
+      <option value="<?php echo $problem; ?>"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_'.strtoupper($problem)); ?></option>
+     <?php endforeach; ?>
+    </select>
+   </div>
+   <div class="col-12">
+    <label class="form-label" for="mm-event-note"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_NOTE'); ?></label>
+    <textarea id="mm-event-note" name="event_note" class="form-control" rows="3" maxlength="2000"></textarea>
+   </div>
+   <div class="col-12">
+    <?php echo HTMLHelper::_('form.token'); ?>
+    <button type="submit" class="btn btn-success"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_ADD'); ?></button>
+   </div>
+  </form>
+  <script>
+  (()=>{const form=document.querySelector('[data-mm-shipment-event-form]');
+   const code=form?.querySelector('[name="event_code"]');
+   const wrap=form?.querySelector('[data-mm-event-problem]');
+   const problem=form?.querySelector('[name="problem_code"]');
+   if(!code||!wrap||!problem)return;
+   const update=()=>{const open=code.value==='problem_opened';
+    wrap.hidden=!open;problem.disabled=!open;problem.required=open;
+    if(!open)problem.value='';};
+   code.addEventListener('change',update);update();
+  })();
+  </script>
+  <?php endif; ?>
+  <?php if($this->shipmentEvents): ?>
+   <div class="table-responsive mt-4"><table class="table table-striped">
+    <thead><tr>
+     <th><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_OCCURRED'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_TYPE'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_NOTE'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_SOURCE'); ?></th>
+    </tr></thead>
+    <tbody><?php foreach($this->shipmentEvents as $event): ?>
+     <tr>
+      <td><?php echo $this->escape((string)$event->occurred_at); ?></td>
+      <td><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENT_'.strtoupper((string)$event->event_code)); ?>
+       <?php if($event->problem_code!==''): ?>
+        — <?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_'.strtoupper((string)$event->problem_code)); ?>
+       <?php endif; ?>
+      </td>
+      <td><?php echo $this->escape((string)$event->note); ?></td>
+      <td><?php echo $this->escape((string)$event->source); ?> #<?php echo (int)$event->actor_user_id; ?></td>
+     </tr>
+    <?php endforeach; ?></tbody>
+   </table></div>
+  <?php else: ?>
+   <p class="form-text"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_EVENTS_EMPTY'); ?></p>
+  <?php endif; ?>
+ </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+
  <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </div>
