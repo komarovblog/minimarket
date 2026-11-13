@@ -391,5 +391,22 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
   <?php if(!$this->returns): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_RETURNS_EMPTY'); ?></p><?php endif; ?>
  </section>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'documents',Text::_('COM_MINIMARKET_DOCUMENTS_TITLE')); ?>
+ <section class="card card-body mm-admin-panel mm-order-card">
+  <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_DOCUMENTS_TITLE'); ?></h2>
+  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DOCUMENT_NON_FISCAL'); ?></p>
+  <?php if($this->documentId!==null): ?>
+   <a class="btn btn-outline-primary" href="<?php echo $e($to('document',$this->documentId)); ?>"><?php echo Text::_('COM_MINIMARKET_DOCUMENT_OPEN'); ?></a>
+  <?php elseif($this->canCreateDocument&&$active): ?>
+   <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=document.create',false)); ?>">
+    <input type="hidden" name="order_id" value="<?php echo $oid; ?>">
+    <?php echo HTMLHelper::_('form.token'); ?>
+    <button type="submit" class="btn btn-primary"><?php echo Text::_('COM_MINIMARKET_DOCUMENT_CREATE'); ?></button>
+   </form>
+  <?php else: ?>
+   <p><?php echo Text::_('COM_MINIMARKET_DOCUMENTS_EMPTY'); ?></p>
+  <?php endif; ?>
+ </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
  <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </div>
