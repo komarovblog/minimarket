@@ -88,6 +88,12 @@ namespace Joomla\CMS\Toolbar {
     }
 }
 
+namespace MiniMarket\Component\Minimarket\Administrator\Service {
+    final class AttentionInbox {
+        public static function count(object $db):int {return 0;}
+    }
+}
+
 namespace MiniMarket\AdminOptionsTest {
     use Joomla\CMS\Factory;
     use Joomla\CMS\Toolbar\ToolbarHelper;
