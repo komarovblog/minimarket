@@ -84,5 +84,5 @@ foreach(['ru-RU','en-GB'] as $lang){
         $lang.' preset translation');
 }
 $release=file_get_contents(__DIR__.'/release-to-desktop.ps1');
-$check(str_contains($release,'MINIMARKET_DESKTOP_2_FILES_OK'),'one-time module not reissued');
+$check(str_contains($release,'MINIMARKET_DESKTOP_3_FILES_OK'),'one-time module not reissued');
 echo 'MM064_UI_PASS: '.$n." checks\n";
