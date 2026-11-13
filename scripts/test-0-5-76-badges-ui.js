@@ -1,4 +1,4 @@
-/* MiniMarket 0.5.76: badge flags remain editable and formats independent. */
+/* MiniMarket 0.6.13: badge formats follow active flags; incompatible bundle flags disappear. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -39,9 +39,11 @@ const form={querySelector(query){
 const doc={readyState:'complete',getElementById(id){return id==='adminForm'?form:null;}};
 vm.runInNewContext(source,{document:doc});
 assert.equal(fields.badge_sale.input.disabled,false,'sale toggle stays active before old price is set');
-assert.equal(fields.badge_sale_display.row.hidden,false,'percent/ruble choice visible even when flag unchecked');
+assert.equal(fields.badge_sale_display.row.hidden,true,'percent/ruble choice hidden until sale flag is selected');
+assert.equal(fields.badge_benefit_display.row.hidden,true,'savings format hidden while savings flag is inactive');
 fields.badge_sale.input.checked=true;
 fields.badge_sale.input.fire('change');
+assert.equal(fields.badge_sale_display.row.hidden,false,'manual sale format appears when flag is enabled');
 assert.equal(fields.badge_sale.hint.hidden,false,'a warning appears if old price is missing');
 fields.old_price.input.value='1990.00';
 fields.old_price.input.fire('input');
@@ -49,8 +51,16 @@ assert.equal(fields.badge_sale.input.checked,true,'editing old price does not cl
 assert.equal(fields.badge_sale.hint.hidden,true,'valid old price resolves warning');
 fields.bundle_price_mode.input.value='discount';
 fields.bundle_price_mode.input.fire('change');
-assert.equal(fields.badge_sale.input.disabled,true,'calculated bundle cannot claim manual sale');
+assert.equal(fields.badge_sale.row.hidden,true,'calculated bundle hides manual sale flag');
+assert.equal(fields.badge_sale.input.checked,false,'automatic bundle removes incompatible sale flag');
 assert.equal(fields.badge_sale_display.row.hidden,true,'manual sale units hidden for auto-discount bundle');
-assert.equal(fields.badge_benefit.input.disabled,false,'savings enabled for auto-discount bundle');
-assert.equal(fields.badge_benefit_display.row.hidden,false,'savings money/percent choice always available');
-console.log('MM76_PRODUCT_BADGE_UI_PASS: sale eligibility, manual choice, units, bundle mode');
+assert.equal(fields.badge_benefit.row.hidden,false,'savings flag visible in auto-discount bundle');
+assert.equal(fields.badge_benefit_display.row.hidden,true,'savings format remains hidden until enabled');
+fields.badge_benefit.input.checked=true;
+fields.badge_benefit.input.fire('change');
+assert.equal(fields.badge_benefit_display.row.hidden,false,'savings format appears when flag is enabled');
+fields.bundle_price_mode.input.value='fixed';
+fields.bundle_price_mode.input.fire('change');
+assert.equal(fields.badge_sale.row.hidden,false,'manual sale flag reappears in fixed-price mode');
+assert.equal(fields.badge_benefit.row.hidden,true,'savings flag hidden in fixed-price mode');
+console.log('MM613_PRODUCT_BADGE_UI_PASS: conditional sale/benefit visibility');
