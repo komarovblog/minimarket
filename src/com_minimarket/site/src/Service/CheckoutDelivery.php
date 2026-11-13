@@ -91,6 +91,35 @@ final class CheckoutDelivery
     }
 
     /**
+     * The only payment × delivery compatibility matrix for builtin methods.
+     * Missing option means historical default (backwards compatible).
+     */
+    public static function allowedForPayment(object $params,string $payment):array
+    {
+        $defaults=match($payment){
+            'on_receipt'=>['pickup','courier'],
+            'bank_transfer'=>['pickup','courier','digital'],
+            default=>[]
+        };
+        if(!$defaults)return [];
+        $raw=$params->get('payment_'.$payment.'_allowed_deliveries',null);
+        if($raw===null)return $defaults;
+        if(!is_string($raw)||strlen($raw)>40)
+            throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
+        $selected=$raw===''?[]:explode(',',$raw);
+        if(count($selected)!==count(array_unique($selected))
+            ||array_diff($selected,$defaults))
+            throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
+        return array_values(array_intersect($defaults,$selected));
+    }
+
+    public static function compatible(object $params,string $payment,string $delivery):bool
+    {
+        if($payment==='pending'||$delivery==='pending')return true;
+        return in_array($delivery,self::allowedForPayment($params,$payment),true);
+    }
+
+    /**
      * Explicitly skipped choices become "pending", not a fabricated
      * courier/pickup or paid status. Shipping remains 0 until staff resolves it.
      * The admin has intentionally accepted missing checkout information.
@@ -136,7 +165,8 @@ final class CheckoutDelivery
         $payment=(string)($input['payment_method']??'');
         if (!$methods || !array_key_exists($method,$methods)
             || ($allowPendingPayment && $payment==='pending'
-                ? false : (!$payments || !array_key_exists($payment,$payments)))) {
+                ? false : (!$payments || !array_key_exists($payment,$payments)))
+            || !self::compatible($params,$payment,$method)) {
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_UNAVAILABLE');
         }
         if ($method==='digital') {

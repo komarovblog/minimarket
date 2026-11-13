@@ -51,13 +51,21 @@ final class MethodSettings
                 throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
             return ['checkout_verification_method'=>$primary==='1'?'email':''];
         }
-        if($scope==='payment' && $method==='on_receipt'){
-            return ['payment_on_receipt_enabled'=>(int)$enabled];
-        }
-        if($scope==='payment' && $method==='bank_transfer'){
-            $instructions=self::cleanText((string)($input['instructions']??''),2000);
-            return ['payment_bank_transfer_enabled'=>(int)$enabled,
-                'payment_bank_instructions'=>$instructions];
+        if($scope==='payment' && in_array($method,['on_receipt','bank_transfer'],true)){
+            $result=['payment_'.$method.'_enabled'=>(int)$enabled];
+            if($method==='bank_transfer')
+                $result['payment_bank_instructions']=self::cleanText((string)($input['instructions']??''),2000);
+            if(array_key_exists('allowed_deliveries',$input)){
+                $choices=$input['allowed_deliveries'];
+                if(!is_array($choices)||count($choices)>3)
+                    throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+                $available=$method==='on_receipt'?['pickup','courier']:['pickup','courier','digital'];
+                if(count(array_unique($choices))!==count($choices)
+                    ||array_diff($choices,$available))
+                    throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+                $result['payment_'.$method.'_allowed_deliveries']=implode(',',array_values(array_intersect($available,$choices)));
+            }
+            return $result;
         }
         throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
     }
@@ -69,6 +77,7 @@ final class MethodSettings
             'delivery_pickup_fee_cents','delivery_pickup_schedule','delivery_pickup_map_url',
             'delivery_courier_enabled','delivery_rate_source','delivery_city_rates',
             'payment_on_receipt_enabled','payment_bank_transfer_enabled',
+            'payment_on_receipt_allowed_deliveries','payment_bank_transfer_allowed_deliveries',
             'payment_bank_instructions','checkout_verification_method',
             'notification_email_enabled','notification_email_events',
             'notification_plugin_events'

@@ -80,7 +80,8 @@ final class MethodsettingsController extends BaseController
                 'map_url'=>$post->getString('map_url',''),
                 'rate_source'=>$post->getCmd('rate_source','directory'),
                 'city_rates'=>$post->get('city_rates','','raw'),
-                'instructions'=>$post->get('instructions','','raw')
+                'instructions'=>$post->get('instructions','','raw'),
+                ...($scope==='payment'?['allowed_deliveries'=>$post->get('allowed_deliveries',[],'array')]:[])
             ]);
             MethodSettings::save(Factory::getContainer()->get(DatabaseInterface::class),$changes);
             $app->enqueueMessage(Text::_('COM_MINIMARKET_METHOD_SETTINGS_SAVED'));
