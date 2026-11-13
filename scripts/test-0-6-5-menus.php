@@ -28,6 +28,7 @@ $expected=[
  'promocodes'=>'index.php?option=com_minimarket&view=promocode&layout=create',
  'seofilters'=>'index.php?option=com_minimarket&view=seofilter&layout=create',
  'feeds'=>'index.php?option=com_minimarket&task=feed.add',
+ 'tickets'=>'index.php?option=com_minimarket&view=ticket&layout=create',
 ];
 $found=[];
 foreach($items as $item){
@@ -50,7 +51,7 @@ foreach($items as $item){
     $ok(!isset($found[$view]),'exactly one plus on '.$view);
     $found[$view]=true;
 }
-$ok(count($found)===count($expected),'all 16 possible create actions covered');
+$ok(count($found)===count($expected),'all supported create actions covered');
 
 $cartXml=$root.'site/tmpl/cart/default.xml';
 $cart=simplexml_load_file($cartXml);
