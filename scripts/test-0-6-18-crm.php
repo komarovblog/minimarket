@@ -22,11 +22,16 @@ foreach(['customers','customer','tickets','ticket','workqueue'] as $view){
 $dashboard=file_get_contents($root.'admin/tmpl/dashboard/default.php');
 $preset=file_get_contents($root.'admin/presets/minimarket.xml');
 $manifest=file_get_contents($root.'minimarket.xml');
-foreach(['customers','tickets','workqueue'] as $view){
+foreach(['customers','tickets'] as $view){
  $check(str_contains($dashboard,"'view' => '".$view."'")
    &&str_contains($preset,'view='.$view)
    &&str_contains($manifest,'view='.$view),'all three navigation layers '.$view);
 }
+$check(!str_contains($dashboard,"'view' => 'workqueue'")
+ &&!str_contains($preset,'view=workqueue')
+ &&!str_contains($manifest,'view=workqueue')
+ &&str_contains($routes,"'workqueue'"),
+ 'legacy workqueue route retained without redundant navigation');
 $crm=file_get_contents($root.'admin/src/View/Customers/HtmlView.php');
 $check(str_contains($crm,'COUNT(DISTINCT o.user_id)')
     &&str_contains($crm,'o.user_id>0')&&str_contains($crm,'JOIN'),
