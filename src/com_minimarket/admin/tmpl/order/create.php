@@ -5,6 +5,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 $firstDelivery=array_key_first($this->deliveryMethods);
 $firstPayment=array_key_first($this->paymentMethods);
+$mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
 ?>
 <div class="btn-toolbar d-flex gap-2 flex-wrap mb-3" role="toolbar">
  <button type="submit" form="mm-manual-order-form" class="btn btn-success"><span class="icon-save" aria-hidden="true"></span> <?php echo Text::_('JSAVE'); ?></button>
@@ -95,7 +96,7 @@ $firstPayment=array_key_first($this->paymentMethods);
             <legend class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_METHOD'); ?></legend>
             <div class="d-flex flex-wrap gap-3">
                 <?php foreach ($this->deliveryMethods as $method=>$settings) : ?>
-                    <div class="form-check">
+                    <div class="form-check" data-mm-delivery-choice>
                         <input class="form-check-input" type="radio" name="delivery_method"
                                id="mm-manual-<?php echo $method; ?>" value="<?php echo $method; ?>"
                                <?php echo $method===$firstDelivery?'checked':''; ?>>
@@ -145,13 +146,15 @@ $firstPayment=array_key_first($this->paymentMethods);
         <fieldset class="mb-4">
             <legend class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_METHOD'); ?></legend>
             <?php foreach ($this->paymentMethods as $method=>$key) : ?>
-                <div class="form-check">
+                <div class="form-check" data-mm-payment-choice>
                     <input class="form-check-input" type="radio" name="payment_method"
+                           data-allowed-deliveries="<?php echo $this->escape(implode(',',\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::allowedForPayment($mmMethodParams,$method))); ?>"
                            id="mm-manual-payment-<?php echo $method; ?>" value="<?php echo $method; ?>"
                            <?php echo $method===$firstPayment?'checked':''; ?>>
                     <label class="form-check-label" for="mm-manual-payment-<?php echo $method; ?>"><?php echo Text::_($key); ?></label>
                 </div>
             <?php endforeach; ?>
+            <p class="text-danger small" data-mm-compatibility-error hidden><?php echo Text::_('COM_MINIMARKET_PAYMENT_INCOMPATIBLE'); ?></p>
         </fieldset>
         <?php echo HTMLHelper::_('form.token'); ?>
 

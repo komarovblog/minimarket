@@ -74,7 +74,9 @@ final class HtmlView extends BaseHtmlView
             }
             $app->getDocument()->getWebAssetManager()
                 ->registerAndUseScript('com_minimarket.manual-order',
-                    'media/com_minimarket/js/manual-order.js',[],['defer'=>true]);
+                    'media/com_minimarket/js/manual-order.js',[],['defer'=>true])
+                ->registerAndUseScript('com_minimarket.payment-compatibility',
+                    'media/com_minimarket/js/payment-compatibility.js',[],['defer'=>true]);
             ToolbarHelper::title(Text::_('COM_MINIMARKET_MANUAL_ORDER_TITLE'));
             parent::display($tpl);
             return;

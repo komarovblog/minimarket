@@ -9,6 +9,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
 
 $firstDelivery=array_key_first($this->deliveryMethods);
 $firstPayment=array_key_first($this->paymentMethods);
+$mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket');
 ?>
 <section class="mm-cart mm-checkout">
     <h1><?php echo Text::_('COM_MINIMARKET_CHECKOUT_TITLE'); ?></h1>
@@ -140,7 +141,7 @@ $firstPayment=array_key_first($this->paymentMethods);
                     <?php if($this->deliveryDescription!==''): ?><p class="text-muted"><?php echo InputFilter::getInstance()->clean($this->deliveryDescription, 'HTML'); ?></p><?php endif; ?>
                     <div class="d-flex flex-wrap gap-3" role="group" aria-label="<?php echo Text::_('COM_MINIMARKET_CHECKOUT_RECEIPT'); ?>">
                         <?php foreach ($this->deliveryMethods as $method=>$settings) : ?>
-                        <div class="form-check mm-checkout-option">
+                        <div class="form-check mm-checkout-option" data-mm-delivery-choice>
                             <input class="form-check-input" type="radio" name="delivery_method" id="mm-delivery-<?php echo $method; ?>"
                                    value="<?php echo $method; ?>" data-fee-cents="<?php echo (int)($settings['fee_cents']??0); ?>"
                                    <?php echo $method===$firstDelivery?'checked':''; ?> required>
@@ -258,6 +259,7 @@ $firstPayment=array_key_first($this->paymentMethods);
 
                 <?php if($this->skipPayment): ?>
                     <input type="hidden" name="payment_method"
+                           data-allowed-deliveries="<?php echo $this->escape(implode(',',\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::allowedForPayment($mmMethodParams,(string)($firstPayment??'pending')))); ?>"
                            value="<?php echo $this->escape((string)($firstPayment??'pending')); ?>">
                     <?php if($firstPayment===null): ?>
                         <p class="form-text"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT_PENDING_NOTICE'); ?></p>
@@ -267,13 +269,15 @@ $firstPayment=array_key_first($this->paymentMethods);
                     <h2 id="mm-checkout-payment" class="h4"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT'); ?></h2>
                     <?php if($this->paymentDescription!==''): ?><p class="text-muted"><?php echo InputFilter::getInstance()->clean($this->paymentDescription, 'HTML'); ?></p><?php endif; ?>
                     <?php foreach ($this->paymentMethods as $method=>$label) : ?>
-                    <div class="form-check mb-2">
+                    <div class="form-check mb-2" data-mm-payment-choice>
                         <input class="form-check-input" type="radio" name="payment_method" id="mm-payment-<?php echo $method; ?>"
+                               data-allowed-deliveries="<?php echo $this->escape(implode(',',\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::allowedForPayment($mmMethodParams,$method))); ?>"
                                value="<?php echo $method; ?>" <?php echo $method===$firstPayment?'checked':''; ?> required>
                         <label class="form-check-label" for="mm-payment-<?php echo $method; ?>"><?php echo Text::_($label); ?></label>
                     </div>
                     <?php endforeach; ?>
                     <p class="small text-muted"><?php echo Text::_('COM_MINIMARKET_CHECKOUT_PAYMENT_MANUAL'); ?></p>
+                    <p class="text-danger small" data-mm-compatibility-error hidden><?php echo Text::_('COM_MINIMARKET_PAYMENT_INCOMPATIBLE'); ?></p>
                 </section>
                 <?php endif; ?>
                 <?php if (!$this->skipBuyer && ($this->fields['comment']??'hidden')!=='hidden') : ?>

@@ -141,7 +141,9 @@ final class HtmlView extends BaseHtmlView
         $app->setHeader('Cache-Control','private, no-store',true);
         $document->getWebAssetManager()
             ->registerAndUseStyle('com_minimarket.checkout','media/com_minimarket/css/checkout.css')
-            ->registerAndUseScript('com_minimarket.checkout','media/com_minimarket/js/checkout.js',[],['defer'=>true]);
+            ->registerAndUseScript('com_minimarket.checkout','media/com_minimarket/js/checkout.js',[],['defer'=>true])
+            ->registerAndUseScript('com_minimarket.payment-compatibility',
+                'media/com_minimarket/js/payment-compatibility.js',[],['defer'=>true]);
         parent::display($tpl);
     }
 }
