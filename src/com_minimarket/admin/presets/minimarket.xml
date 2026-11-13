@@ -45,6 +45,12 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=seofilters"/>
         <menuitem title="COM_MINIMARKET_STOCK_REPORT_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=stockreport"/>
+        <menuitem title="COM_MINIMARKET_SALES_REPORT_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=salesreport"/>
+        <menuitem title="COM_MINIMARKET_RETURNS_REPORT_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returnsreport"/>
+        <menuitem title="COM_MINIMARKET_BUSINESS_REPORT_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=businessreport"/>
         <menuitem title="COM_MINIMARKET_IMPORT_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=import"/>
         <menuitem title="COM_MINIMARKET_FEEDS_TITLE" type="component"

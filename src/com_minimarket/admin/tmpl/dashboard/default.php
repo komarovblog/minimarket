@@ -39,6 +39,12 @@ $sections = [
         'items' => [
             ['view' => 'stockreport', 'label' => 'COM_MINIMARKET_STOCK_REPORT_TITLE',
                 'icon' => 'icon-box', 'count' => null],
+            ['view' => 'salesreport', 'label' => 'COM_MINIMARKET_SALES_REPORT_TITLE',
+                'icon' => 'icon-chart-bar', 'count' => null],
+            ['view' => 'returnsreport', 'label' => 'COM_MINIMARKET_RETURNS_REPORT_TITLE',
+                'icon' => 'icon-reply', 'count' => null],
+            ['view' => 'businessreport', 'label' => 'COM_MINIMARKET_BUSINESS_REPORT_TITLE',
+                'icon' => 'icon-chart-bar', 'count' => null],
         ],
     ],
     [
