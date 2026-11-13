@@ -307,6 +307,9 @@ final class OrderController extends BaseController
             }
             OrderLifecycle::refresh($db,$id,(int)$app->getIdentity()->id);
             $db->transactionCommit();
+            if($state==='ready'&&$before!=='ready')
+                \MiniMarket\Component\Minimarket\Site\Service\NotificationSender::emit(
+                    $id,'pickup_ready');
             $app->enqueueMessage(Text::_('COM_MINIMARKET_PAYMENT_STATUS_SAVED'));
         }catch(\Throwable $e){
             $db->transactionRollback();
@@ -439,6 +442,9 @@ final class OrderController extends BaseController
                     OrderLifecycle::refresh($db,$id,(int)$app->getIdentity()->id);
             }
             $db->transactionCommit();
+            if((string)$before['status']!==$next)
+                \MiniMarket\Component\Minimarket\Site\Service\NotificationSender::emit(
+                    $id,$next==='confirmed'?'order_accepted':'order_cancelled');
             $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_STATUS_SAVED'));
         }catch(\Throwable $e){
             $db->transactionRollback();

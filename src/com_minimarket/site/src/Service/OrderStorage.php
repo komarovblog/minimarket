@@ -179,6 +179,7 @@ final class OrderStorage
                     $db->quote(''),$db->quote($source),'UTC_TIMESTAMP()']));
             $db->setQuery($q);$db->execute();
             $db->transactionCommit();
+            NotificationSender::emit($orderId,'order_created');
             return $orderId;
         } catch (\Throwable $e) {
             $db->transactionRollback();

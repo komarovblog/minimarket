@@ -10,6 +10,9 @@ namespace MiniMarket\Component\Minimarket\Site\Service {
     final class StockReservation {
         public static function allocate(\Joomla\Database\DatabaseInterface $db,int $id,array $lines,bool $pickup):void {}
     }
+    final class NotificationSender {
+        public static function emit(int $orderId,string $eventCode,string $reference='1'):void {}
+    }
 }
 namespace MiniMarket\CheckoutSmoke {
     use Joomla\Database\DatabaseInterface;

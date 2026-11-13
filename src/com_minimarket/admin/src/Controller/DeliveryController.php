@@ -140,6 +140,10 @@ final class DeliveryController extends BaseController
                 }
                 OrderLifecycle::refresh($db,(int)$before['order_id'],(int)$app->getIdentity()->id);
                 $db->transactionCommit();
+                if((string)$before['status']!==$data['status'])
+                    \MiniMarket\Component\Minimarket\Site\Service\NotificationSender::emit(
+                        (int)$before['order_id'],'delivery_updated',
+                        'shipment_'.$id.'_'.$data['status']);
             }catch(\Throwable $e){
                 $db->transactionRollback();
                 throw $e;
