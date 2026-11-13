@@ -20,9 +20,9 @@ checkNative(str_contains($html, "'title' => 'COM_MINIMARKET_DASHBOARD_SHOP'") &&
 checkNative(str_contains($html, 'mm-dashboard-icon--bundle') &&
     str_contains($html, '<svg') && str_contains($html, "'view' => 'bundles'"),
     'Bundles have distinct vector icon');
-checkNative(substr_count($html, "'count' => '") === 16 &&
+checkNative(substr_count($html, "'count' => '") === 17 &&
     substr_count($html, "'pending' => true") === 0,
-    'all sixteen live count mappings including Returns and Promo Codes');
+    'all seventeen live tile counters including Payments and Returns');
 checkNative(str_contains($css, 'a.mm-dashboard-tile:focus-visible') &&
     str_contains($css, 'outline: 2px solid') &&
     str_contains($css, 'prefers-reduced-motion'),
