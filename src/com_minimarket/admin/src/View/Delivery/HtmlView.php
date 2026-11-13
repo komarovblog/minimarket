@@ -14,11 +14,14 @@ final class HtmlView extends BaseHtmlView
     public int $preselectedOrder=0;
     public bool $hasPriorShipment=false;
     public array $linkedReturns=[];
+    public bool $canViewFinance=false;
+    public array $costRevisions=[];
     public function display($tpl=null)
     {
         $app=Factory::getApplication();$u=$app->getIdentity();
         if(!$u->authorise('core.manage','com_minimarket'))
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
+        $this->canViewFinance=$u->authorise('core.admin','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         $this->setLayout($this->isCreate?'create':'default');
         if($this->isCreate && !$u->authorise('core.create','com_minimarket'))
@@ -50,6 +53,14 @@ final class HtmlView extends BaseHtmlView
                 ->from($db->quoteName('#__minimarket_returns'))
                 ->where('shipment_id='.(int)$id)->order('id DESC');
             $db->setQuery($q);$this->linkedReturns=(array)$db->loadObjectList();
+            if($this->canViewFinance){
+                $q=$db->getQuery(true)->select(['previous_cost_cents','confirmed_cost_cents',
+                    'evidence_reference','actor_user_id','created_at'])
+                    ->from($db->quoteName('#__minimarket_shipment_cost_revisions'))
+                    ->where('shipment_id='.(int)$id)->order('id DESC');
+                $db->setQuery($q,0,50);
+                $this->costRevisions=(array)$db->loadObjectList();
+            }
         }
         ToolbarHelper::title(Text::_($this->isCreate?'COM_MINIMARKET_DELIVERY_NEW':'COM_MINIMARKET_DASHBOARD_DELIVERIES'));
         parent::display($tpl);

@@ -109,6 +109,7 @@ final class OrderStorage
             throw new \DomainException('COM_MINIMARKET_CHECKOUT_CART_INVALID');
         }
 
+        if(!class_exists(PurchaseCost::class))require_once __DIR__.'/PurchaseCost.php';
         $db->transactionStart();
         try {
             // Procurement costs are historical snapshots. Unknown means NULL.

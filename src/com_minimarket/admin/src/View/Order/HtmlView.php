@@ -13,6 +13,7 @@ final class HtmlView extends BaseHtmlView
     public ?object $order=null;
     public ?object $linkedUser=null;
     public bool $canViewUsers=false;
+    public bool $canViewFinance=false;
     public array $items=[];
     public bool $hasDigitalItems=false;
     public array $customFields=[];
@@ -45,6 +46,7 @@ final class HtmlView extends BaseHtmlView
         $this->canDelete=$identity->authorise('core.delete','com_minimarket');
         $this->canCreateDelivery=$identity->authorise('core.create','com_minimarket');
         $this->canViewUsers=$identity->authorise('core.manage','com_users');
+        $this->canViewFinance=$identity->authorise('core.admin','com_minimarket');
         $this->canCreateReturn=$identity->authorise('core.create','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {
@@ -109,7 +111,7 @@ final class HtmlView extends BaseHtmlView
         $db->setQuery($q);
         $this->customFields=(array)$db->loadObjectList();
         $q=$db->getQuery(true)->select(['id','order_id','carrier','tracking_number',
-                'reason','status','created_at'])
+                'reason','status','actual_cost_cents','created_at'])
             ->from($db->quoteName('#__minimarket_shipments'))
             ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
         $db->setQuery($q);

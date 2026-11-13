@@ -129,6 +129,7 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      <th><?php echo Text::_('COM_MINIMARKET_CART_UNIT_PRICE'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?></th>
+     <?php if($this->canViewFinance): ?><th><?php echo Text::_('COM_MINIMARKET_ORDER_COST_LINE'); ?></th><?php endif; ?>
     </tr></thead><tbody>
     <?php foreach($this->items as $line): ?>
      <tr>
@@ -137,11 +138,33 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
       <td><?php echo $money($line->unit_cents); ?></td>
       <td><?php echo (int)$line->quantity; ?></td>
       <td><?php echo $money($line->line_cents); ?></td>
+      <?php if($this->canViewFinance): ?>
+       <td><?php echo $line->line_cost_cents===null?Text::_('COM_MINIMARKET_FINANCE_UNKNOWN'):$money($line->line_cost_cents); ?></td>
+      <?php endif; ?>
      </tr>
     <?php endforeach; ?>
     </tbody>
    </table>
   </div>
+  <?php if($this->canViewFinance): ?>
+   <?php
+    $allKnown=count($this->items)>0;
+    $costSum=0;
+    foreach($this->items as $line){
+        if($line->line_cost_cents===null){$allKnown=false;break;}
+        $costSum+=(int)$line->line_cost_cents;
+    }
+    $goodsNet=(int)$o->items_total_cents-(int)($o->discount_cents??0);
+   ?>
+   <dl class="row mt-3 mb-0">
+    <dt class="col-sm-6"><?php echo Text::_('COM_MINIMARKET_ORDER_GOODS_NET'); ?></dt>
+    <dd class="col-sm-6"><?php echo $money($goodsNet); ?></dd>
+    <dt class="col-sm-6"><?php echo Text::_('COM_MINIMARKET_ORDER_COST_TOTAL'); ?></dt>
+    <dd class="col-sm-6"><?php echo $allKnown?$money($costSum):Text::_('COM_MINIMARKET_FINANCE_UNKNOWN'); ?></dd>
+    <dt class="col-sm-6"><?php echo Text::_('COM_MINIMARKET_ORDER_GROSS_DIFFERENCE'); ?></dt>
+    <dd class="col-sm-6"><?php echo $allKnown?$money($goodsNet-$costSum):Text::_('COM_MINIMARKET_FINANCE_UNKNOWN'); ?></dd>
+   </dl>
+  <?php endif; ?>
  </section>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
  <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'payment',Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK')); ?>
@@ -320,6 +343,21 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
   <?php endforeach; ?>
  </section>
  <?php endif; ?>
+<?php if($this->canViewFinance): ?>
+    <?php
+      $expensesKnown=count($this->shipments)>0;
+      $expenses=0;
+      foreach($this->shipments as $shipment){
+          if($shipment->actual_cost_cents===null){$expensesKnown=false;break;}
+          $expenses+=(int)$shipment->actual_cost_cents;
+      }
+    ?>
+    <div class="alert alert-info mt-2">
+       <?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_REAL_COST'); ?>:
+       <strong><?php echo $expensesKnown?$money($expenses):Text::_('COM_MINIMARKET_FINANCE_UNKNOWN'); ?></strong>
+       <span class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_REAL_COST_HELP'); ?></span>
+    </div>
+<?php endif; ?>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
  <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'returns',Text::_('COM_MINIMARKET_RETURNS_TITLE')); ?>
  <section class="card card-body mm-admin-panel mm-order-card mt-3">

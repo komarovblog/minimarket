@@ -58,7 +58,43 @@ $s=$this->shipment;
   </div>
   <div class="col-12"><?php echo HTMLHelper::_('form.token'); ?></div>
  </form>
-
+ <?php if($this->canViewFinance): ?>
+ <div class="mt-4 pt-3 border-top">
+  <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_DELIVERY_ACTUAL_COST'); ?></h3>
+  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DELIVERY_COST_HELP'); ?></p>
+  <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=delivery.cost',false)); ?>" class="row g-3">
+    <input type="hidden" name="id" value="<?php echo (int)$s->id; ?>">
+    <div class="col-12 col-md-4">
+      <label class="form-label" for="mm-shipping-cost"><?php echo Text::_('COM_MINIMARKET_DELIVERY_ACTUAL_COST'); ?></label>
+      <input id="mm-shipping-cost" name="actual_cost" class="form-control" type="number" step="0.01" min="0" max="9999999999999.99"
+        value="<?php echo $s->actual_cost_cents===null?'':number_format((int)$s->actual_cost_cents/100,2,'.',''); ?>" required>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label" for="mm-shipping-proof"><?php echo Text::_('COM_MINIMARKET_DELIVERY_COST_REFERENCE'); ?></label>
+      <input id="mm-shipping-proof" name="cost_reference" class="form-control" maxlength="128" minlength="3"
+        value="<?php echo $this->escape((string)$s->cost_reference); ?>" required>
+    </div>
+    <div class="col-12 col-md-2 align-self-end">
+      <?php echo HTMLHelper::_('form.token'); ?>
+      <button type="submit" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
+    </div>
+  </form>
+  <?php if($s->actual_cost_cents!==null): ?>
+   <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DELIVERY_COST_CONFIRMED'); ?>:
+    <?php echo $this->escape((string)($s->cost_confirmed_at??'')); ?>,
+    #<?php echo (int)($s->cost_confirmed_by??0); ?></p>
+  <?php endif; ?>
+  <?php if($this->costRevisions): ?>
+  <div class="table-responsive"><table class="table table-striped">
+   <thead><tr><th><?php echo Text::_('JDATE'); ?></th><th><?php echo Text::_('COM_MINIMARKET_DELIVERY_ACTUAL_COST'); ?></th><th><?php echo Text::_('COM_MINIMARKET_DELIVERY_COST_REFERENCE'); ?></th></tr></thead>
+   <tbody><?php foreach($this->costRevisions as $rev): ?>
+    <tr><td><?php echo $this->escape((string)$rev->created_at); ?></td>
+     <td><?php echo number_format((int)$rev->confirmed_cost_cents/100,2,'.',' '); ?> ₽</td>
+     <td><?php echo $this->escape((string)$rev->evidence_reference); ?> (#<?php echo (int)$rev->actor_user_id; ?>)</td></tr>
+   <?php endforeach; ?></tbody></table></div>
+  <?php endif; ?>
+ </div>
+ <?php endif; ?>
 </section>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>
  <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-'.(int)$s->id,'returns',Text::_('COM_MINIMARKET_RETURNS_TITLE')); ?>

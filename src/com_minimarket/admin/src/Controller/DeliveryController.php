@@ -155,4 +155,57 @@ final class DeliveryController extends BaseController
         }
         $this->setRedirect('index.php?option=com_minimarket&view=delivery&id='.$id);
     }
+    public function cost(): void
+    {
+        // Procurement/shipping financial data are administrator-only until
+        // a dedicated finance ACL is designed. This checks on the SERVER.
+        $this->requirePost('core.admin');
+        $app=Factory::getApplication();
+        $id=$app->input->post->getInt('id',0);
+        $raw=trim($app->input->post->getString('actual_cost',''));
+        $reference=trim($app->input->post->getString('cost_reference',''));
+        $db=Factory::getContainer()->get(DatabaseInterface::class);
+        try {
+            if($id<1||!preg_match('/^(0|[1-9][0-9]{0,12})(?:\.([0-9]{1,2}))?$/D',$raw,$m)
+                ||mb_strlen($reference)<3||mb_strlen($reference)>128
+                ||preg_match('/[\x00-\x1f<>]/u',$reference))
+                throw new \DomainException('COM_MINIMARKET_DELIVERY_COST_INVALID');
+            $cents=(int)$m[1]*100+(int)str_pad($m[2]??'',2,'0');
+            $db->transactionStart();
+            try {
+                $db->setQuery('SELECT order_id,actual_cost_cents,cost_reference FROM '
+                    .$db->quoteName('#__minimarket_shipments').' WHERE id='.$id.' FOR UPDATE');
+                $previous=$db->loadAssoc();
+                if(!$previous)throw new \DomainException('COM_MINIMARKET_DELIVERY_COST_INVALID');
+                if($previous['actual_cost_cents']!==null
+                    &&(int)$previous['actual_cost_cents']===$cents
+                    &&(string)$previous['cost_reference']===$reference){
+                    $db->transactionCommit();
+                }else{
+                    $actor=(int)$app->getIdentity()->id;
+                    $before=$previous['actual_cost_cents'];
+                    $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_shipments'))
+                        ->set('actual_cost_cents='.$cents)
+                        ->set('cost_reference='.$db->quote($reference))
+                        ->set('cost_confirmed_at=UTC_TIMESTAMP()')
+                        ->set('cost_confirmed_by='.$actor)
+                        ->set('updated_at=UTC_TIMESTAMP()')->where('id='.$id);
+                    $db->setQuery($q);$db->execute();
+                    $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_shipment_cost_revisions'))
+                        ->columns($db->quoteName(['shipment_id','previous_cost_cents',
+                            'confirmed_cost_cents','evidence_reference','actor_user_id','created_at']))
+                        ->values(implode(',',[(string)$id,$before===null?'NULL':(string)(int)$before,
+                            (string)$cents,$db->quote($reference),(string)$actor,'UTC_TIMESTAMP()']));
+                    $db->setQuery($q);$db->execute();
+                    OrderHistory::record($db,(int)$previous['order_id'],$actor,
+                        'delivery_cost',$before===null?'unknown':(string)$before,(string)$cents);
+                    $db->transactionCommit();
+                }
+            }catch(\Throwable $e){$db->transactionRollback();throw $e;}
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_DELIVERY_COST_SAVED'));
+        }catch(\Throwable $e){
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_DELIVERY_COST_INVALID'),'warning');
+        }
+        $this->setRedirect('index.php?option=com_minimarket&view=delivery&id='.$id);
+    }
 }
