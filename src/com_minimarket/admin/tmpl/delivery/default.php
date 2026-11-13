@@ -9,6 +9,9 @@ $s=$this->shipment;
  <button type="submit" form="mm-delivery-update-form" class="btn btn-success"><?php echo Text::_('JSAVE'); ?></button>
  <a class="btn btn-outline-secondary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
 </div>
+<div id="j-main-container" class="j-main-container">
+ <?php echo HTMLHelper::_('uitab.startTabSet','mm-delivery-'.(int)$s->id,['active'=>'details']); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-'.(int)$s->id,'details',Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
 <section class="mm-admin-panel mm-admin-list-panel">
  <h2 class="h4">#<?php echo (int)$s->id; ?> — <?php echo Text::_('COM_MINIMARKET_DASHBOARD_DELIVERIES'); ?></h2>
  <p><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$s->order_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?> #<?php echo (int)$s->order_id; ?></a> — <?php echo $this->escape((string)$s->customer_name); ?></p>
@@ -55,6 +58,11 @@ $s=$this->shipment;
   </div>
   <div class="col-12"><?php echo HTMLHelper::_('form.token'); ?></div>
  </form>
+
+</section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-delivery-'.(int)$s->id,'returns',Text::_('COM_MINIMARKET_RETURNS_TITLE')); ?>
+ <section class="card card-body mm-admin-panel">
   <?php if($this->linkedReturns): ?>
   <div class="mt-3">
    <h3 class="h5"><?php echo Text::_('COM_MINIMARKET_RETURNS_TITLE'); ?></h3>
@@ -63,4 +71,8 @@ $s=$this->shipment;
    <?php endforeach; ?>
   </div>
   <?php endif; ?>
-</section>
+
+ </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
+</div>
