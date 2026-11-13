@@ -12,7 +12,7 @@ $mmSearch=['view'=>'messagetemplates','query'=>$this->search,'sort'=>$this->sort
  'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
  'customer'=>Text::_('COM_MINIMARKET_TEMPLATE_CUSTOMER'),
  'admin'=>Text::_('COM_MINIMARKET_TEMPLATE_ADMIN'),
- 'marketing'=>Text::_('COM_MINIMARKET_TEMPLATE_MARKETING')]]];
+ 'marketing'=>Text::_('COM_MINIMARKET_TEMPLATE_MARKETING')]]]];
 ?>
 <form method="post" id="adminForm" name="adminForm"
  action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=messagetemplates',false)); ?>">
