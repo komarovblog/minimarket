@@ -18,7 +18,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
                 'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','returns','returns','reviews','seofilters','promocodes','autodiscounts','recommendations','settings',
-                'deliverymethods','paymentmethods','registrationmethods','payments','stockreport','customers','tickets','salesreport','returnsreport','businessreport','planfactreport','documents','fiscalization','abandonedcarts','fiscalproviders','notificationevents','marketingflows'
+                'deliverymethods','paymentmethods','registrationmethods','payments','stockreport','customers','tickets','salesreport','returnsreport','businessreport','planfactreport','documents','fiscalization','notifications','abandonedcarts','fiscalproviders','notificationevents','marketingflows'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
             if ($name==='deliveries') return 'index.php?option=com_minimarket&amp;view=deliveries';
             if ($name==='reviews') return 'index.php?option=com_minimarket&amp;view=reviews&amp;filter_status=pending';
