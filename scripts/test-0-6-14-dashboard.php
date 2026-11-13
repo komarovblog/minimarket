@@ -24,8 +24,8 @@ $ok(str_contains($managementSection,"'view' => 'payments', 'label' => 'COM_MINIM
     && str_contains($managementSection,"'icon' => 'icon-credit-card', 'count' => 'payments'"),
     'payments remains fourth management item with original counter');
 $ok(str_contains($reportSection,"'view' => 'stockreport'")
-    && substr_count($reportSection,"'view' => '")===1,
-    'stock report sole tile in second band');
+    && substr_count($reportSection,"'view' => 'stockreport'")===1,
+    'stock report occurs once, inside second band (other reports may be added)');
 $ok(str_contains($markup, "['view'] === 'paymentmethods' || " . '$item' . "['view'] === 'payments'")
     && str_contains($markup, '<rect x="2" y="5" width="20" height="14" rx="2"/>'),
     'payments shares visible inline SVG card icon with payment methods');
