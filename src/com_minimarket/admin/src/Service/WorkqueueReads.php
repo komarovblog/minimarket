@@ -25,7 +25,7 @@ final class WorkqueueReads
                 ." WHERE o.payment_status IN ('unpaid','processing')"
                 ." AND o.status NOT IN ('cancelled','completed') AND o.deleted_at IS NULL",
             'delivery' => 'SELECT s.id,s.order_id,s.status AS shipment_status,'
-                .'s.problem_status AS has_problem,CONCAT(.$db->quote('Order #').',s.order_id,'
+                .'s.problem_status AS has_problem,CONCAT('.$db->quote('Order #').',s.order_id,'
                 .$db->quote(' · ').',s.problem_code) AS description,'
                 .'s.created_at AS date_value,CONCAT(s.problem_status,'
                 .$db->quote(':').',s.problem_code) AS state_code,'
