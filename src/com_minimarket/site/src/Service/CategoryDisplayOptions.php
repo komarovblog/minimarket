@@ -60,6 +60,10 @@ final class CategoryDisplayOptions
                 ? (int) $global->get($key, $default) === 1
                 : $local === 1;
         }
+        // Hidden dependent switches cannot override a disabled parent setting.
+        // Keep their saved values, but never apply them in the storefront.
+        if (!$result['show_products']) $result['show_descendant_products'] = false;
+        if (!$result['show_bundles']) $result['show_descendant_bundles'] = false;
         $layout = (string) ($category->product_layout ?? 'inherit');
         if (!in_array($layout, ['list', 'grid'], true)) {
             $layout = (string) $global->get('category_product_layout', 'grid');
@@ -97,8 +101,9 @@ final class CategoryDisplayOptions
             $result[$field]=in_array($local,$allowed,true)?$local:$glob;
         }
         $stock=(int)($category->filter_stock_mode??-1);
-        $result['filter_stock_enabled']=$stock===-1
-            ?(int)$global->get('filter_stock_enabled',0)===1:$stock===1;
+        $result['filter_stock_enabled']=(int)$global->get('inventory_enabled',1)===1
+            && ($stock===-1
+                ?(int)$global->get('filter_stock_enabled',0)===1:$stock===1);
         return $result;
     }
 

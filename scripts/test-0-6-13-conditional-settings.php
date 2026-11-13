@@ -55,6 +55,19 @@ $check('extra','mask','type:text,tel');
 $check('extra','options','type:select');
 $check('variant','introtext_override','description_mode:1');
 $check('variant','videos','video_mode:1');
+require $root.'site/src/Service/CategoryDisplayOptions.php';
+$display='MiniMarket\\Component\\Minimarket\\Site\\Service\\CategoryDisplayOptions';
+$global=new class{
+    private array $v=['category_show_products'=>0,'category_show_bundles'=>0,
+        'category_show_descendant_products'=>1,'category_show_descendant_bundles'=>1,
+        'filter_stock_enabled'=>1,'inventory_enabled'=>0];
+    public function get(string $key,mixed $default=null):mixed{return $this->v[$key]??$default;}
+};
+$resolved=$display::resolve((object)[],$global);
+$assert(!$resolved['show_products']&&!$resolved['show_bundles']
+    && !$resolved['show_descendant_products']&&!$resolved['show_descendant_bundles'],
+    'hidden descendant options cannot override disabled parent');
+$assert(!$resolved['filter_stock_enabled'],'stock filter inactive when inventory disabled');
 require $root.'site/src/Service/CheckoutExtraFields.php';
 $service='MiniMarket\\Component\\Minimarket\\Site\\Service\\CheckoutExtraFields';
 $from=static fn(array $entries)=>new class($entries){
