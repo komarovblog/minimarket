@@ -26,6 +26,7 @@ $expected=[
  'brands'=>'index.php?option=com_minimarket&task=brand.add',
  'collections'=>'index.php?option=com_minimarket&task=collection.add',
  'promocodes'=>'index.php?option=com_minimarket&view=promocode&layout=create',
+ 'autodiscounts'=>'index.php?option=com_minimarket&view=autodiscount&layout=create',
  'seofilters'=>'index.php?option=com_minimarket&view=seofilter&layout=create',
  'feeds'=>'index.php?option=com_minimarket&task=feed.add',
  'tickets'=>'index.php?option=com_minimarket&view=ticket&layout=create',
