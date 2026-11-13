@@ -34,7 +34,7 @@ final class HtmlView extends BaseHtmlView
             ->from($db->quoteName('#__minimarket_customer_notes'))
             ->where('user_id='.$id)->order('id DESC'),0,100);
         $this->notes=(array)$db->loadObjectList();
-        $db->setQuery($db->getQuery(true)->select(['id','subject','status','updated_at','created_at'])
+        $db->setQuery($db->getQuery(true)->select(['id','subject','status','priority','updated_at','created_at'])
             ->from($db->quoteName('#__minimarket_support_tickets'))
             ->where('user_id='.$id)->order('id DESC'),0,100);
         $this->tickets=(array)$db->loadObjectList();

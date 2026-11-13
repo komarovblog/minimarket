@@ -13,7 +13,12 @@ $mmSearch=[
     'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
       'new'=>Text::_('COM_MINIMARKET_TICKET_NEW_STATUS'),
       'in_progress'=>Text::_('COM_MINIMARKET_TICKET_PROGRESS'),
-      'closed'=>Text::_('COM_MINIMARKET_TICKET_CLOSED')]]]];
+      'closed'=>Text::_('COM_MINIMARKET_TICKET_CLOSED')]],
+   ['name'=>'filter_priority','label'=>Text::_('COM_MINIMARKET_TICKET_PRIORITY'),
+    'value'=>$this->priorityFilter,
+    'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+      'normal'=>Text::_('COM_MINIMARKET_TICKET_PRIORITY_NORMAL'),
+      'high'=>Text::_('COM_MINIMARKET_TICKET_PRIORITY_HIGH')]]]];
 ?>
 <form method="post" id="adminForm" name="adminForm" class="mm-list-form"
  action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=tickets',false)); ?>">
@@ -26,6 +31,7 @@ $mmSearch=[
   <div class="table-responsive mm-native-list-viewport"><table id="mm-ticket-list" class="table table-striped mm-admin-list">
    <thead><tr><th>ID</th><th><?php echo Text::_('COM_MINIMARKET_TICKET_SUBJECT'); ?></th>
     <th><?php echo Text::_('JSTATUS'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY'); ?></th>
     <th><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?></th>
     <th><?php echo Text::_('COM_MINIMARKET_CUSTOMER_TITLE'); ?></th>
     <th><?php echo Text::_('JDATE'); ?></th></tr></thead>
@@ -33,6 +39,7 @@ $mmSearch=[
     <td>#<?php echo (int)$ticket->id; ?></td>
     <td><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&id='.(int)$ticket->id,false)); ?>"><?php echo $this->escape($ticket->subject); ?></a></td>
     <td><?php echo Text::_('COM_MINIMARKET_TICKET_'.strtoupper((string)$ticket->status)); ?></td>
+     <td><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_'.strtoupper((string)$ticket->priority)); ?></td>
     <td><?php if($ticket->order_id!==null): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$ticket->order_id,false)); ?>">#<?php echo (int)$ticket->order_id; ?></a><?php endif; ?></td>
     <td><?php if((int)$ticket->user_id>0): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=customer&id='.(int)$ticket->user_id,false)); ?>">#<?php echo (int)$ticket->user_id; ?></a><?php endif; ?></td>
     <td><?php echo $this->escape($ticket->created_at); ?></td>

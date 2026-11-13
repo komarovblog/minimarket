@@ -20,6 +20,24 @@ use Joomla\CMS\Router\Route;
     <div class="form-text"><?php echo Text::_('COM_MINIMARKET_CRM_LINKED_ID_HELP'); ?></div></div>
   <div class="col-md-6"><label class="form-label" for="mm-ticket-order"><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?></label>
     <input class="form-control" id="mm-ticket-order" type="number" min="0" name="order_id" value="<?php echo max(0,(int)\Joomla\CMS\Factory::getApplication()->input->getInt('order_id',0)); ?>"></div>
+  <div class="col-md-4">
+    <label class="form-label" for="mm-ticket-priority"><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY'); ?></label>
+    <select id="mm-ticket-priority" name="priority" class="form-select">
+     <option value="normal"><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_NORMAL'); ?></option>
+     <option value="high"><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_HIGH'); ?></option>
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label" for="mm-ticket-shipment"><?php echo Text::_('COM_MINIMARKET_TICKET_SHIPMENT'); ?></label>
+    <input id="mm-ticket-shipment" name="shipment_id" type="number" min="0" class="form-control"
+      value="<?php echo max(0,(int)\Joomla\CMS\Factory::getApplication()->input->getInt('shipment_id',0)); ?>">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label" for="mm-ticket-return"><?php echo Text::_('COM_MINIMARKET_TICKET_RETURN'); ?></label>
+    <input id="mm-ticket-return" name="return_id" type="number" min="0" class="form-control"
+      value="<?php echo max(0,(int)\Joomla\CMS\Factory::getApplication()->input->getInt('return_id',0)); ?>">
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_TICKET_LINK_HELP'); ?></p>
+  </div>
   <div class="col-12"><label class="form-label" for="mm-ticket-message"><?php echo Text::_('COM_MINIMARKET_TICKET_MESSAGE'); ?></label>
     <textarea class="form-control" id="mm-ticket-message" name="message" rows="5" required maxlength="4000"></textarea></div>
   <div class="col-12"><?php echo HTMLHelper::_('form.token'); ?></div>

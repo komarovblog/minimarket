@@ -35,7 +35,12 @@ final class TicketController extends BaseController
             $message=self::text($post->getString('message',''),3,4000);
             $userId=$post->getInt('user_id',0);
             $orderId=$post->getInt('order_id',0);
-            if($userId<0||$orderId<0)throw new \DomainException('COM_MINIMARKET_TICKET_INVALID');
+            $shipmentId=$post->getInt('shipment_id',0);
+            $returnId=$post->getInt('return_id',0);
+            $priority=$post->getCmd('priority','normal');
+            if($userId<0||$orderId<0||$shipmentId<0||$returnId<0
+               ||($orderId===0&&($shipmentId>0||$returnId>0))
+               ||!in_array($priority,['normal','high'],true))throw new \DomainException('COM_MINIMARKET_TICKET_INVALID');
             $db->transactionStart();
             try{
                 if($orderId>0){
@@ -52,12 +57,25 @@ final class TicketController extends BaseController
                     if((int)$db->loadResult()!==$userId)
                         throw new \DomainException('COM_MINIMARKET_TICKET_INVALID');
                 }
+                // Related delivery / return must belong to the selected order.
+                foreach([['shipments',$shipmentId],['returns',$returnId]] as [$tableName,$relatedId]){
+                    if($relatedId<1)continue;
+                    $db->setQuery('SELECT order_id FROM '
+                        .$db->quoteName('#__minimarket_'.$tableName)
+                        .' WHERE id='.$relatedId.' FOR UPDATE');
+                    if((int)$db->loadResult()!==$orderId)
+                        throw new DomainException('COM_MINIMARKET_TICKET_INVALID');
+                }
                 $actor=(int)$app->getIdentity()->id;
                 $table=$db->quoteName('#__minimarket_support_tickets');
                 $q=$db->getQuery(true)->insert($table)
-                    ->columns($db->quoteName(['order_id','user_id','subject','status','created_by','created_at']))
+                    ->columns($db->quoteName(['order_id','user_id','subject','status','priority',
+                        'shipment_id','return_id','created_by','created_at']))
                     ->values(implode(',',[$orderId>0?(string)$orderId:'NULL',(string)$userId,
-                        $db->quote($subject),$db->quote('new'),(string)$actor,'UTC_TIMESTAMP()']));
+                        $db->quote($subject),$db->quote('new'),$db->quote($priority),
+                        $shipmentId>0?(string)$shipmentId:'NULL',
+                        $returnId>0?(string)$returnId:'NULL',
+                        (string)$actor,'UTC_TIMESTAMP()']));
                 $db->setQuery($q);$db->execute();
                 $id=(int)$db->insertid();
                 if($id<1)throw new \RuntimeException('Ticket insert failed');
@@ -80,8 +98,10 @@ final class TicketController extends BaseController
         $id=$post->getInt('id',0);
         try {
             $status=$post->getCmd('status','');
+            $priority=$post->getCmd('priority','normal');
             $message=trim($post->getString('message',''));
-            if($id<1||!in_array($status,['new','in_progress','closed'],true))
+            if($id<1||!in_array($status,['new','in_progress','closed'],true)
+               ||!in_array($priority,['normal','high'],true))
                 throw new \DomainException('COM_MINIMARKET_TICKET_INVALID');
             $message=$message===''?'':self::text($message,3,4000);
             $db->transactionStart();
@@ -95,6 +115,7 @@ final class TicketController extends BaseController
                     throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
                 $q=$db->getQuery(true)->update($db->quoteName('#__minimarket_support_tickets'))
                     ->set('status='.$db->quote($status))
+                    ->set('priority='.$db->quote($priority))
                     ->set('updated_at=UTC_TIMESTAMP()')->where('id='.$id);
                 $db->setQuery($q);$db->execute();
                 if($message!=='')

@@ -10,7 +10,7 @@ final class HtmlView extends BaseHtmlView
 {
     public array $tickets=[];
     public int $total=0,$offset=0,$pageSize=20;
-    public string $search='',$statusFilter='',$sort='newest';
+    public string $search='',$statusFilter='',$priorityFilter='',$sort='newest';
     public bool $canCreate=false;
     public function display($tpl=null)
     {
@@ -21,6 +21,8 @@ final class HtmlView extends BaseHtmlView
         $this->search=mb_substr(trim($app->input->getString('filter_search','')),0,100);
         $state=$app->input->getCmd('filter_status','');
         $this->statusFilter=in_array($state,['new','in_progress','closed'],true)?$state:'';
+        $priority=$app->input->getCmd('filter_priority','');
+        $this->priorityFilter=in_array($priority,['normal','high'],true)?$priority:'';
         $this->sort=$app->input->getCmd('filter_sort','newest')==='oldest'?'oldest':'newest';
         $limit=$app->input->getInt('limit',20);
         $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
@@ -28,6 +30,7 @@ final class HtmlView extends BaseHtmlView
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $where=[];
         if($this->statusFilter!=='')$where[]='t.status='.$db->quote($this->statusFilter);
+        if($this->priorityFilter!=='')$where[]='t.priority='.$db->quote($this->priorityFilter);
         if($this->search!==''){
             $like=$db->quote('%'.$db->escape($this->search,true).'%',false);
             $search=['t.subject LIKE '.$like];
@@ -41,7 +44,7 @@ final class HtmlView extends BaseHtmlView
         $this->offset=$this->total?min($this->offset,
             (int)(floor(($this->total-1)/$this->pageSize)*$this->pageSize)):0;
         $q=$db->getQuery(true)->select(['t.id','t.subject','t.status',
-            't.order_id','t.user_id','t.created_at','t.updated_at'])
+            't.order_id','t.user_id','t.priority','t.created_at','t.updated_at'])
             ->from($db->quoteName('#__minimarket_support_tickets','t'))
             ->order('t.id '.($this->sort==='oldest'?'ASC':'DESC'));
         foreach($where as $term)$q->where($term);

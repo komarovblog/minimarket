@@ -31,7 +31,9 @@ $c=$this->customer;
  <?php echo HTMLHelper::_('uitab.addTab','mm-customer-'.(int)$c->id,'tickets',Text::_('COM_MINIMARKET_TICKETS_TITLE')); ?>
  <section class="card card-body mm-admin-panel">
   <?php foreach($this->tickets as $ticket): ?>
-   <p><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&id='.(int)$ticket->id,false)); ?>">#<?php echo (int)$ticket->id; ?> — <?php echo $this->escape($ticket->subject); ?></a></p>
+   <p><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=ticket&id='.(int)$ticket->id,false)); ?>">#<?php echo (int)$ticket->id; ?> — <?php echo $this->escape($ticket->subject); ?></a>
+   (<?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_'.strtoupper((string)$ticket->priority)); ?>;
+    <?php echo Text::_('COM_MINIMARKET_TICKET_'.strtoupper((string)$ticket->status)); ?>)</p>
   <?php endforeach; ?>
  </section>
  <?php echo HTMLHelper::_('uitab.endTab'); ?>

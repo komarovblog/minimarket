@@ -13,6 +13,8 @@ $t=$this->ticket;
  <div class="d-flex flex-wrap gap-3 mb-3">
   <?php if($t->order_id!==null): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$t->order_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?> #<?php echo (int)$t->order_id; ?></a><?php endif; ?>
   <?php if((int)$t->user_id>0): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=customer&id='.(int)$t->user_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_CUSTOMER_TITLE'); ?> #<?php echo (int)$t->user_id; ?></a><?php endif; ?>
+  <?php if((int)($t->shipment_id??0)>0): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=delivery&id='.(int)$t->shipment_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_TICKET_SHIPMENT'); ?> #<?php echo (int)$t->shipment_id; ?></a><?php endif; ?>
+  <?php if((int)($t->return_id??0)>0): ?><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=returncase&id='.(int)$t->return_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_TICKET_RETURN'); ?> #<?php echo (int)$t->return_id; ?></a><?php endif; ?>
  </div>
  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_TICKET_INTERNAL_HELP'); ?></p>
  <?php foreach($this->messages as $msg): ?>
@@ -32,6 +34,14 @@ $t=$this->ticket;
      <?php endforeach; ?>
     </select>
     <?php if(!$this->canChangeStatus): ?><input type="hidden" name="status" value="<?php echo $this->escape($t->status); ?>"><?php endif; ?>
+   </div>
+   <div class="col-md-6">
+    <label for="mm-ticket-priority" class="form-label"><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY'); ?></label>
+    <select id="mm-ticket-priority" name="priority" class="form-select">
+     <?php foreach(['normal','high'] as $value): ?>
+      <option value="<?php echo $value; ?>"<?php echo (string)$t->priority===$value?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_TICKET_PRIORITY_'.strtoupper($value)); ?></option>
+     <?php endforeach; ?>
+    </select>
    </div>
    <div class="col-12">
     <label for="mm-ticket-reply" class="form-label"><?php echo Text::_('COM_MINIMARKET_TICKET_MESSAGE'); ?></label>
