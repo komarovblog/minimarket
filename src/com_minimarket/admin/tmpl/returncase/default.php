@@ -18,6 +18,8 @@ $validNext=match((string)$r->status){
  <a class="btn btn-outline-primary" href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=order&id='.(int)$r->order_id,false)); ?>"><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?> #<?php echo (int)$r->order_id; ?></a>
 </div>
 <div id="j-main-container" class="j-main-container">
+ <?php echo HTMLHelper::_('uitab.startTabSet','mm-return-'.(int)$r->id,['active'=>'details']); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-return-'.(int)$r->id,'details',Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
  <div class="row g-3">
   <div class="col-12 col-lg-7">
    <section class="card card-body mm-admin-panel h-100">
@@ -72,6 +74,9 @@ $validNext=match((string)$r->status){
    </section>
   </div>
  </div>
+
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-return-'.(int)$r->id,'items',Text::_('COM_MINIMARKET_RETURN_ITEMS')); ?>
  <section class="card card-body mm-admin-panel mt-3">
   <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_RETURN_ITEMS'); ?></h2>
   <div class="table-responsive mm-editor-table-viewport">
@@ -115,4 +120,6 @@ $validNext=match((string)$r->status){
    </form>
   <?php endif; ?>
  </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </div>
