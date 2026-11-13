@@ -22,12 +22,17 @@
     panel.hidden=!active;
     for(const field of panel.querySelectorAll('input,textarea,select'))field.disabled=!active;
    }
+   const point=form.querySelector('[name="pickup_point_id"]');
+   if(point)point.required=method==='pickup';
    if(city)city.required=method==='courier';
    if(address)address.required=method==='courier';
    fee=0;needsQuote=false;
    if(method==='pickup'){
      const input=form.querySelector('input[name="delivery_method"]:checked, input[type="hidden"][name="delivery_method"]');
-     const configured=Number.parseInt(input?.dataset.feeCents||'0',10);
+     const point=form.querySelector('[name="pickup_point_id"]');
+     const option=point?.selectedOptions?.[0];
+     const configured=Number.parseInt((option&&point.value!=='0')
+       ?option.dataset.feeCents:(input?.dataset.feeCents||'0'),10);
      fee=Number.isSafeInteger(configured)&&configured>=0?configured:0;
    }
    if(method==='courier'){
@@ -74,7 +79,7 @@
   }
   function invalidate(){serverFee=null;update();void preview();}
   form.querySelectorAll('input[name="delivery_method"]').forEach(r=>r.addEventListener('change',invalidate));
-  for(const name of ['delivery_city','delivery_country','delivery_region','delivery_postcode','delivery_address','payment_method']){
+  for(const name of ['pickup_point_id','delivery_city','delivery_country','delivery_region','delivery_postcode','delivery_address','payment_method']){
    form.querySelectorAll('[name="'+name+'"]').forEach(el=>el.addEventListener('change',invalidate));
   }
   promo?.addEventListener('change',preview);

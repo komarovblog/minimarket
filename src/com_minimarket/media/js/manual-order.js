@@ -12,6 +12,8 @@
    const isCourier=form.querySelector('[name="delivery_method"]:checked')?.value==='courier';
    const panel=form.querySelector('[data-mm-manual-courier]');
    const pickup=form.querySelector('[data-mm-manual-pickup]');
+   const point=form.querySelector('[name="pickup_point_id"]');
+   if(point)point.required=!isCourier;
    if(panel){
     panel.hidden=!isCourier;
     panel.querySelectorAll('input,select,textarea').forEach(field=>{
