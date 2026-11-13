@@ -136,6 +136,20 @@ final class OrderController extends BaseController
                     .$db->quote($before==='paid'?(string)$order['payment_reference']:$proof)
                     ." WHERE id=".(int)$id);
                 $db->execute();
+                // One durable, verified receipt per actual manual transition.
+                // Never invent a payment record for legacy already-paid orders.
+                if($before!=='paid'){
+                    $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_payment_records'))
+                        ->columns($db->quoteName(['order_id','amount_cents','currency',
+                            'method','source','external_reference','recorded_by','confirmed_at','created_at']))
+                        ->values(implode(',',[(string)$id,(string)(int)$order['total_cents'],
+                            $db->quote((string)$order['currency']),
+                            $db->quote((string)$order['payment_method']),
+                            $db->quote('manual'),$db->quote($proof),
+                            (string)(int)$app->getIdentity()->id,
+                            'UTC_TIMESTAMP()','UTC_TIMESTAMP()']));
+                    $db->setQuery($q);$db->execute();
+                }
             }
             if($before!==$action){
                 if($order['delivery_method']==='pickup'&&$order['reservation_state']==='held'){
