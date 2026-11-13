@@ -37,6 +37,7 @@ $views=['payment'=>'payment','delivery'=>'delivery','ticket'=>'ticket','returnca
         <td>
          <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=workqueue.setRead',false)); ?>">
           <input type="hidden" name="kind" value="<?php echo $this->escape($kind); ?>">
+          <input type="hidden" name="return_view" value="<?php echo $this->onlyUnread?'notifications':'workqueue'; ?>">
           <input type="hidden" name="id" value="<?php echo (int)$entry->id; ?>">
           <input type="hidden" name="signature" value="<?php echo $this->escape($entry->signature); ?>">
           <input type="hidden" name="read" value="<?php echo $entry->wasRead?'0':'1'; ?>">

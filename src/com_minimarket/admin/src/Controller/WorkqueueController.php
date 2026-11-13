@@ -33,6 +33,8 @@ final class WorkqueueController extends BaseController
         }catch(\DomainException $e){
             $app->enqueueMessage(Text::_('COM_MINIMARKET_WORKQUEUE_STALE'),'warning');
         }
-        $this->setRedirect('index.php?option=com_minimarket&view=workqueue');
+        $return=$post->getCmd('return_view','workqueue');
+        $return=in_array($return,['workqueue','notifications'],true)?$return:'workqueue';
+        $this->setRedirect('index.php?option=com_minimarket&view='.$return);
     }
 }
