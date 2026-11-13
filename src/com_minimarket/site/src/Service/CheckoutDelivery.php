@@ -175,13 +175,25 @@ final class CheckoutDelivery
                 'rate_source'=>'none','payment_method'=>$payment];
         }
         if ($method==='pickup') {
+            $pointId=null;
             $address=$methods['pickup']['address'];
+            $fee=$methods['pickup']['fee_cents'];
+            if((string)$params->get('delivery_pickup_points_mode','single')==='multiple'){
+                $db=Factory::getContainer()->get(DatabaseInterface::class);
+                $points=PickupPoints::all($db);
+                if(!$points)throw new \DomainException('COM_MINIMARKET_PICKUP_POINT_REQUIRED');
+                $point=PickupPoints::select($points,(int)($input['pickup_point_id']??0));
+                $pointId=(int)$point->id;
+                $address=(string)$point->address;
+                $fee=(int)$point->fee_cents;
+            }
             if (mb_strlen($address)>512) {
                 throw new \DomainException('COM_MINIMARKET_CHECKOUT_DELIVERY_CONFIG_INVALID');
             }
             return ['method'=>'pickup','city'=>'','address'=>$address,
                 'country'=>'RU','region'=>'','postcode'=>'','zone_id'=>null,
-                'fee_cents'=>$methods['pickup']['fee_cents'],'rate_source'=>'none','payment_method'=>$payment];
+                'pickup_point_id'=>$pointId,
+                'fee_cents'=>$fee,'rate_source'=>'none','payment_method'=>$payment];
         }
 
         $city=trim((string)($input['delivery_city']??''));

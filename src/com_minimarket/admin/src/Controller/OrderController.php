@@ -60,6 +60,7 @@ final class OrderController extends BaseController
             }
             $delivery=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::quote($params,[
                 'delivery_method'=>$app->input->post->get('delivery_method','','string'),
+                'pickup_point_id'=>$app->input->post->getInt('pickup_point_id',0),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
                 'delivery_country'=>$app->input->post->get('delivery_country','RU','string'),
                 'delivery_region'=>$app->input->post->get('delivery_region','','string'),

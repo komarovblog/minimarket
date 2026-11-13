@@ -26,7 +26,11 @@ final class MethodSettings
                 || parse_url($map,PHP_URL_USER)!==null
                 || parse_url($map,PHP_URL_PASS)!==null))
                 throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
-            return ['delivery_pickup_enabled'=>(int)$enabled,
+            $pointsMode=(string)($input['points_mode']??'single');
+            if(!in_array($pointsMode,['single','multiple'],true))
+                throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
+            return ['delivery_pickup_points_mode'=>$pointsMode,
+                'delivery_pickup_enabled'=>(int)$enabled,
                 'delivery_pickup_address'=>$address,
                 'delivery_pickup_fee_cents'=>$price,
                 'delivery_pickup_schedule'=>$schedule,
@@ -78,6 +82,7 @@ final class MethodSettings
         $allowed=[
             'delivery_pickup_enabled','delivery_pickup_address',
             'delivery_pickup_fee_cents','delivery_pickup_schedule','delivery_pickup_map_url',
+            'delivery_pickup_points_mode',
             'delivery_courier_enabled','delivery_rate_source','delivery_city_rates',
             'payment_on_receipt_enabled','payment_bank_transfer_enabled',
             'payment_on_receipt_allowed_deliveries','payment_bank_transfer_allowed_deliveries',

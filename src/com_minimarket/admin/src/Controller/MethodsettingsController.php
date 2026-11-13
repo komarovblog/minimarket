@@ -78,6 +78,7 @@ final class MethodsettingsController extends BaseController
                 'fee'=>$post->getString('fee','0'),
                 'schedule'=>$post->get('schedule','','raw'),
                 'map_url'=>$post->getString('map_url',''),
+                'points_mode'=>$post->getCmd('points_mode','single'),
                 'rate_source'=>$post->getCmd('rate_source','directory'),
                 'city_rates'=>$post->get('city_rates','','raw'),
                 'instructions'=>$post->get('instructions','','raw'),

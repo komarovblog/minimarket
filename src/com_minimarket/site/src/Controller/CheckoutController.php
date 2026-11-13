@@ -60,6 +60,7 @@ final class CheckoutController extends BaseController
             }
             $delivery=CheckoutDelivery::checkoutQuote($params,[
                 'delivery_method'=>$input->getString('delivery_method',''),
+            'pickup_point_id'=>$input->getInt('pickup_point_id',0),
                 'delivery_city'=>$input->getString('delivery_city',''),
                 'delivery_country'=>$input->getString('delivery_country','RU'),
                 'delivery_region'=>$input->getString('delivery_region',''),
@@ -255,6 +256,7 @@ final class CheckoutController extends BaseController
             // as free shipping or a successful payment.
             $delivery=CheckoutDelivery::checkoutQuote($params,[
                 'delivery_method'=>$app->input->post->get('delivery_method','','string'),
+                'pickup_point_id'=>$app->input->post->getInt('pickup_point_id',0),
                 'delivery_city'=>$app->input->post->get('delivery_city','','string'),
                 'delivery_country'=>$app->input->post->get('delivery_country','RU','string'),
                 'delivery_region'=>$app->input->post->get('delivery_region','','string'),

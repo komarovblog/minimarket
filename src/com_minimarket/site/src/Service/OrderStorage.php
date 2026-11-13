@@ -34,13 +34,16 @@ final class OrderStorage
         $delivery=array_merge([
             'method'=>'pickup','city'=>'','address'=>'','fee_cents'=>0,
             'rate_source'=>'none','payment_method'=>'on_receipt','zone_id'=>null,
-            'country'=>'RU','region'=>'','postcode'=>''
+            'country'=>'RU','region'=>'','postcode'=>'','pickup_point_id'=>null
         ],$delivery);
         if (!in_array($delivery['method'],['pickup','courier','digital','pending'],true)
             || !in_array($delivery['payment_method'],['on_receipt','bank_transfer','pending'],true)
             || !in_array($delivery['rate_source'],['none','directory','zones'],true)
             || !is_int($delivery['fee_cents']) || $delivery['fee_cents']<0
             || $delivery['fee_cents']>99999999999
+            || ($delivery['pickup_point_id']!==null
+                &&(!is_int($delivery['pickup_point_id'])||$delivery['pickup_point_id']<1))
+            || ($delivery['method']!=='pickup'&&$delivery['pickup_point_id']!==null)
             || !is_string($delivery['city']) || !is_string($delivery['address'])
             || mb_strlen($delivery['city'])>120
             || mb_strlen($delivery['address'])>512
@@ -120,7 +123,7 @@ final class OrderStorage
             $discount=(int)($promo['discount_cents']??0);
             if($discount>$total)throw new \DomainException('COM_MINIMARKET_PROMO_INVALID');
             $columns=['checkout_key','user_id','customer_name','phone','email',
-                'customer_comment','delivery_method','delivery_city','delivery_country',
+                'customer_comment','delivery_method','pickup_point_id','delivery_city','delivery_country',
                 'delivery_region','delivery_postcode','delivery_address',
                 'delivery_rate_source','delivery_zone_id','delivery_fee_cents','payment_method',
                 'digital_recipient_email','order_source','status','currency','items_total_cents','promo_code_id',
@@ -129,7 +132,9 @@ final class OrderStorage
                 $db->quote($checkoutKey),(string)$userId,
                 $db->quote($contact['name']),$db->quote($contact['phone']),
                 $db->quote($contact['email']),$db->quote($contact['comment']),
-                $db->quote($delivery['method']),$db->quote($delivery['city']),
+                $db->quote($delivery['method']),
+                $delivery['pickup_point_id']===null?'NULL':(string)$delivery['pickup_point_id'],
+                $db->quote($delivery['city']),
                 $db->quote($delivery['country']),$db->quote($delivery['region']),
                 $db->quote($delivery['postcode']),$db->quote($delivery['address']),$db->quote($delivery['rate_source']),
                 $delivery['zone_id']===null?'NULL':(string)(int)$delivery['zone_id'],

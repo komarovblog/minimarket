@@ -63,19 +63,26 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
     </div>
     <?php if($this->method==='pickup'): ?>
      <div class="col-md-6">
+      <label class="form-label" for="mm-pickup-mode"><?php echo Text::_('COM_MINIMARKET_PICKUP_MODE'); ?></label>
+      <select class="form-select" id="mm-pickup-mode" name="points_mode">
+       <option value="single" <?php echo $p->get('delivery_pickup_points_mode','single')==='single'?'selected':''; ?>><?php echo Text::_('COM_MINIMARKET_PICKUP_MODE_SINGLE'); ?></option>
+       <option value="multiple" <?php echo $p->get('delivery_pickup_points_mode','single')==='multiple'?'selected':''; ?>><?php echo Text::_('COM_MINIMARKET_PICKUP_MODE_MULTIPLE'); ?></option>
+      </select>
+     </div>
+     <div class="col-md-6" data-mm-single-pickup>
       <label class="form-label" for="mm-pickup-fee"><?php echo Text::_('COM_MINIMARKET_PICKUP_FEE'); ?></label>
       <input class="form-control" type="number" min="0" step="0.01" id="mm-pickup-fee" name="fee"
        value="<?php echo $esc(number_format((int)$p->get('delivery_pickup_fee_cents',0)/100,2,'.','')); ?>">
      </div>
-     <div class="col-12">
+     <div class="col-12" data-mm-single-pickup>
       <label class="form-label" for="mm-pickup-address"><?php echo Text::_('COM_MINIMARKET_DELIVERY_PICKUP_ADDRESS'); ?></label>
       <textarea class="form-control" name="address" id="mm-pickup-address" rows="3" maxlength="512"><?php echo $esc($p->get('delivery_pickup_address','')); ?></textarea>
      </div>
-     <div class="col-12">
+     <div class="col-12" data-mm-single-pickup>
       <label class="form-label" for="mm-pickup-schedule"><?php echo Text::_('COM_MINIMARKET_PICKUP_SCHEDULE'); ?></label>
       <textarea class="form-control" name="schedule" id="mm-pickup-schedule" rows="3" maxlength="2000"><?php echo $esc($p->get('delivery_pickup_schedule','')); ?></textarea>
      </div>
-     <div class="col-12">
+     <div class="col-12" data-mm-single-pickup>
       <label class="form-label" for="mm-pickup-map"><?php echo Text::_('COM_MINIMARKET_PICKUP_MAP_URL'); ?></label>
       <input class="form-control" type="url" name="map_url" id="mm-pickup-map" maxlength="1024"
        value="<?php echo $esc($p->get('delivery_pickup_map_url','')); ?>" placeholder="https://">
@@ -209,6 +216,16 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=deliver
  <?php endif; ?>
 
  <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
+ <?php if($this->method==='pickup'): ?>
+ <script>
+ (()=>{const selector=document.getElementById('mm-pickup-mode');
+  const single=document.querySelectorAll('[data-mm-single-pickup]');
+  if(!selector)return;
+  const sync=()=>single.forEach(el=>el.hidden=selector.value==='multiple');
+  selector.addEventListener('change',sync);sync();
+ })();
+ </script>
+ <?php endif; ?>
  <?php if($this->method==='courier'): ?>
  <script>
  (()=>{const source=document.getElementById('mm-rate-source'),rates=document.getElementById('mm-directory-rates');
