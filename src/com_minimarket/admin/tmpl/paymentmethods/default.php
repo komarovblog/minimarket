@@ -47,6 +47,8 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=payment
    <button type="submit" name="save_close" value="1" class="btn btn-success"<?php echo $this->canEdit?'':' disabled'; ?>><?php echo Text::_('COM_MINIMARKET_ACTION_SAVE_CLOSE'); ?></button>
    <a class="btn btn-outline-secondary" href="<?php echo $esc(Route::_('index.php?option=com_minimarket&view=paymentmethods',false)); ?>"><?php echo Text::_('JCANCEL'); ?></a>
   </div>
+  <?php echo HTMLHelper::_('uitab.startTabSet','mm-payment-method-'.$this->method,['active'=>'main']); ?>
+  <?php echo HTMLHelper::_('uitab.addTab','mm-payment-method-'.$this->method,'main',Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
   <div class="card card-body mm-admin-panel">
    <h2 class="h5"><?php echo Text::_($this->method==='on_receipt'?'COM_MINIMARKET_PAYMENT_ON_RECEIPT':'COM_MINIMARKET_PAYMENT_BANK_TRANSFER'); ?></h2>
    <div class="row g-3">
@@ -68,6 +70,37 @@ $edit=static fn($method)=>Route::_('index.php?option=com_minimarket&view=payment
     <?php endif; ?>
    </div>
   </div>
+  <?php echo HTMLHelper::_('uitab.endTab'); ?>
+  <?php echo HTMLHelper::_('uitab.addTab','mm-payment-method-'.$this->method,'compatibility',Text::_('COM_MINIMARKET_PAYMENT_COMPATIBILITY')); ?>
+  <?php
+    $allowed=\MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery::allowedForPayment($p,$this->method);
+    $choices=$this->method==='on_receipt'?['pickup','courier']:['pickup','courier','digital'];
+  ?>
+  <div class="card card-body mm-admin-panel" data-mm-method-compatibility
+       <?php echo $bool('payment_'.$this->method.'_enabled',$this->method==='on_receipt'?1:0)?'':'hidden'; ?>>
+   <p class="form-text"><?php echo Text::_('COM_MINIMARKET_PAYMENT_COMPATIBILITY_HELP'); ?></p>
+   <?php foreach($choices as $delivery): ?>
+    <div class="form-check mb-2">
+     <input class="form-check-input" type="checkbox" name="allowed_deliveries[]"
+      id="mm-payment-allow-<?php echo $delivery; ?>" value="<?php echo $delivery; ?>"
+      <?php echo in_array($delivery,$allowed,true)?'checked':''; ?>
+      <?php echo $this->canEdit?'':'disabled'; ?>>
+     <label class="form-check-label" for="mm-payment-allow-<?php echo $delivery; ?>">
+      <?php echo Text::_('COM_MINIMARKET_DELIVERY_'.strtoupper($delivery)); ?>
+     </label>
+    </div>
+   <?php endforeach; ?>
+  </div>
+  <?php echo HTMLHelper::_('uitab.endTab'); ?>
+  <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
  </form>
+ <script>
+ (()=>{const enabled=document.getElementById('mm-payment-enabled');
+  const panel=document.querySelector('[data-mm-method-compatibility]');
+  if(!enabled||!panel)return;
+  const apply=()=>{panel.hidden=enabled.value!=='1';};
+  enabled.addEventListener('change',apply);apply();
+ })();
+ </script>
 </div>
 <?php endif; ?>
