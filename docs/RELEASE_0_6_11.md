@@ -1,6 +1,6 @@
 # MiniMarket 0.6.11 — нативная админ-панель и независимые платежи
 
-**Ветка:** development; PHP 8.4/8.5, MySQL 8.4, Joomla 6. **Реальная браузерная проверка Joomla/Atum ещё требуется.** В этой версии изменена миграция и форма администрирования.
+**Ветка:** development; PHP 8.4/8.5, MySQL 8.4, Joomla 6. **CI 6/6 PASS:** [GitHub Actions #43400791468](https://github.com/komarovblog/minimarket/actions/runs/43400791468), кодовый SHA `ce274bd293fddd8d88ba06dfdff03b19c0fa1574` (PHP 8.4/8.5, MySQL 8.4 fresh/upgrade/demo, Windows ZIP + standalone task ZIP). **Реальная браузерная проверка Joomla/Atum ещё требуется.** В этой версии изменена миграция и форма администрирования.
 
 ## 1. Навигация
 
