@@ -11,7 +11,10 @@ $source=Join-Path $root 'src\plg_task_minimarketreserves'
 [xml]$plugin=Get-Content -LiteralPath (Join-Path $source 'minimarketreserves.xml') -Raw -Encoding UTF8
 $componentVersion=[string]$component.extension.version
 $version=[string]$plugin.extension.version
-if($version -notmatch '^\d+\.\d+\.\d+
+if($version -notmatch '^\d+\.\d+\.\d+$' -or $componentVersion -notmatch '^\d+\.\d+\.\d+$'){
+    throw "MINIMARKET_TASK_VERSION_INVALID: component=$componentVersion task=$version"
+}
+# Separate task plugin keeps its own version during component-only updates.
 if([string]$plugin.extension.type -ne 'plugin' -or [string]$plugin.extension.group -ne 'task'){
     throw 'MINIMARKET_TASK_MANIFEST_INVALID'
 }
