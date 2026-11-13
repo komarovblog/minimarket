@@ -17,9 +17,9 @@
     <option value="1">COM_MINIMARKET_SKU_OWN_CONTENT</option>
   </field>
   <field name="introtext_override" type="textarea" label="COM_MINIMARKET_SKU_INTRO_OVERRIDE"
-         filter="safehtml" rows="3" cols="32"showon="description_mode:1" />
+         filter="safehtml" rows="3" cols="32" showon="description_mode:1" />
   <field name="description_override" type="textarea" label="COM_MINIMARKET_SKU_DESCRIPTION_OVERRIDE"
-         filter="safehtml" rows="5" cols="32"showon="description_mode:1" />
+         filter="safehtml" rows="5" cols="32" showon="description_mode:1" />
   <field name="video_mode" type="list" label="COM_MINIMARKET_SKU_VIDEO_MODE" filter="int" default="0">
     <option value="0">COM_MINIMARKET_SKU_INHERIT</option>
     <option value="1">COM_MINIMARKET_SKU_OWN_CONTENT</option>
@@ -28,7 +28,7 @@
   <field name="videos" type="subform" label="COM_MINIMARKET_SKU_VIDEOS"
          formsource="administrator/components/com_minimarket/forms/product_video.xml"
          multiple="true" min="0" max="20" buttons="add,remove,move"
-         layout="joomla.form.field.subform.repeatable" validate="Subform"showon="video_mode:1" />
+         layout="joomla.form.field.subform.repeatable" validate="Subform" showon="video_mode:1" />
   <field name="state" type="list" label="JSTATUS" filter="int" default="1">
     <option value="1">JPUBLISHED</option><option value="0">JUNPUBLISHED</option>
   </field>
