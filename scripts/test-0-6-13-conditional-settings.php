@@ -7,7 +7,7 @@ $assert=static function(bool $ok,string $message):void{
     if(!$ok)throw new RuntimeException('MM613_CONDITIONAL_FAIL: '.$message);
 };
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$assert((string)$manifest->version==='0.6.13','manifest version');
+$assert(version_compare((string)$manifest->version,'0.6.13','>='),'manifest version at least 0.6.13');
 $xmls=[
  'config'=>'admin/config.xml',
  'category'=>'admin/forms/category.xml',
