@@ -5,7 +5,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# One command => component ZIP and optional cumulative demo SQL.
+# One command => component ZIP, separate Task plugin ZIP and optional demo SQL.
 # The one-time toolbar module remains installed independently; do not regenerate it.
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -PathType Leaf)) {
@@ -38,7 +38,7 @@ if (-not $SkipPull) {
 foreach ($scriptName in @('release-to-desktop.ps1', 'verify-admin-lists.ps1',
     'verify-0.5.87.ps1', 'verify-0.5.88.ps1', 'verify-0.5.89.ps1', 'verify-0.5.90.ps1',
     'verify-translations.ps1', 'test-release-self-update.ps1',
-    'build.ps1', 'build-toolbar-package.ps1', 'inspect-package.ps1')) {
+    'build.ps1', 'build-task-plugin.ps1', 'build-toolbar-package.ps1', 'inspect-package.ps1')) {
     $scriptPath = Join-Path $PSScriptRoot $scriptName
     $tokens = $null
     $parseErrors = $null
@@ -80,6 +80,9 @@ if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_BUILD_FAILED' }
 $global:LASTEXITCODE = 0
 & (Join-Path $PSScriptRoot 'inspect-package.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_PACKAGE_INSPECTION_FAILED' }
+$global:LASTEXITCODE = 0
+& (Join-Path $PSScriptRoot 'build-task-plugin.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'MINIMARKET_TASK_PLUGIN_BUILD_FAILED' }
 
 [xml]$manifest = Get-Content -LiteralPath (Join-Path $root 'src\com_minimarket\minimarket.xml') -Raw -Encoding UTF8
 $version = [string]$manifest.extension.version
@@ -104,6 +107,7 @@ if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
 
 $deliverables = @(
     @{ Source = Join-Path $root "dist\com_minimarket-$version.zip"; Name = "com_minimarket-$version.zip" },
+    @{ Source = Join-Path $root "dist\plg_task_minimarketreserves-$version.zip"; Name = "plg_task_minimarketreserves-$version.zip" },
     @{ Source = $demo; Name = $demoName }
 )
 foreach ($item in $deliverables) {
@@ -121,5 +125,5 @@ foreach ($item in $deliverables) {
     }
     Write-Output "DESKTOP_FILE_OK: $dst"
 }
-Write-Output "MINIMARKET_DESKTOP_2_FILES_OK: version=$version"
+Write-Output "MINIMARKET_DESKTOP_3_FILES_OK: version=$version"
 Write-Output 'SQL_IS_OPTIONAL: for the local demo catalog only; not required for Joomla UI changes. Back up before importing.'
