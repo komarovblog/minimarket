@@ -44,6 +44,7 @@
         </menu>
         <submenu>
             <menu link="option=com_minimarket&amp;view=workqueue" img="class:bell">COM_MINIMARKET_WORKQUEUE_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=notifications" img="class:bell">COM_MINIMARKET_NOTIFICATIONS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=orders" img="class:cart">COM_MINIMARKET_ORDERS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=order&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
@@ -54,6 +55,7 @@
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=returncase&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu link="option=com_minimarket&amp;view=payments" img="class:credit-card">COM_MINIMARKET_PAYMENTS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=fiscalization" img="class:receipt">COM_MINIMARKET_CASH_REGISTER_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=customers" img="class:users">COM_MINIMARKET_CUSTOMERS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=tickets" img="class:comments">COM_MINIMARKET_TICKETS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=ticket&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
@@ -101,6 +103,7 @@
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=promocode&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu link="option=com_minimarket&amp;view=recommendations" img="class:random">COM_MINIMARKET_RECOMMENDATIONS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=abandonedcarts" img="class:cart">COM_MINIMARKET_ABANDONED_CARTS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=reviews" img="class:star">COM_MINIMARKET_REVIEWS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=review&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
@@ -117,7 +120,8 @@
             <menu link="option=com_minimarket&amp;view=paymentmethods" img="class:credit-card">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=registrationmethods" img="class:user">COM_MINIMARKET_REGISTRATION_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=notificationmethods" img="class:envelope">COM_MINIMARKET_NOTIFICATION_METHODS_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=fiscalization" img="class:file">COM_MINIMARKET_FISCAL_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=notificationevents" img="class:bell">COM_MINIMARKET_NOTIFICATION_EVENTS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=fiscalproviders" img="class:file">COM_MINIMARKET_FISCAL_PROVIDERS_TITLE</menu>
             <menu link="option=com_config&amp;view=component&amp;component=com_minimarket" img="class:cog">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
         </submenu>
     </administration>
