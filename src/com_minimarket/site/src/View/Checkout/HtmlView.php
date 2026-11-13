@@ -45,6 +45,7 @@ final class HtmlView extends BaseHtmlView
     public string $blockedMessage='';
     public bool $cdekPending=false;
     public string $promoCode='';
+    public ?array $autoDiscountPreview=null;
     public bool $needsPhysical=true;
     public bool $hasDigital=false;
     public bool $needPurchaseVerification=false;
@@ -134,6 +135,15 @@ final class HtmlView extends BaseHtmlView
             $this->blockedMessage=Text::_($e->getMessage());
         }
         $this->promoCode=(string)$session->get('com_minimarket.promo_code','');
+        if(!empty($this->cart['available'])&&!empty($this->cart['lines'])){
+            try{
+                $this->autoDiscountPreview=\MiniMarket\Component\Minimarket\Site\Service\AutoDiscount::quote(
+                    Factory::getContainer()->get(DatabaseInterface::class),
+                    $this->cart['lines'],(int)$this->cart['total_cents']);
+            }catch(\DomainException $e){
+                $this->blockedMessage=Text::_($e->getMessage());
+            }
+        }
         $key=(string)$session->get('com_minimarket.checkout.key','');
         if (!preg_match('/^[a-f0-9]{32}$/D',$key)) {
             $key=bin2hex(random_bytes(16));

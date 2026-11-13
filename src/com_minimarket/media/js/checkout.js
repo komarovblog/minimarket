@@ -14,7 +14,8 @@
   const money=cents=>new Intl.NumberFormat(locale,{minimumFractionDigits:2,maximumFractionDigits:2})
     .format(cents/100)+' ₽';
   const zones=!!form.querySelector('[name="delivery_city"][list]');
-  let discount=0,fee=0,serverFee=null,needsQuote=false,controller=null;
+  const initialAuto=Math.max(0,Number.parseInt(form.dataset.autoDiscountCents||'0',10)||0);
+  let discount=initialAuto,fee=0,serverFee=null,needsQuote=false,controller=null;
   function update(){
    const method=form.querySelector('input[name="delivery_method"]:checked, input[type="hidden"][name="delivery_method"]')?.value||'pickup';
    for(const panel of panels){
@@ -56,7 +57,7 @@
   }
   async function preview(){
    const code=(promo?.value||'').trim();
-   controller?.abort();serverFee=null;discount=0;update();
+   controller?.abort();serverFee=null;discount=initialAuto;update();
    if(!code&&!zones){if(feedback)feedback.textContent='';return;}
    controller=new AbortController();
    try{

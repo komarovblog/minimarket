@@ -48,6 +48,14 @@ final class CheckoutController extends BaseController
                 $db,$code,$quote['lines'],(int)$quote['total_cents'],
                 (int)$app->getIdentity()->id,$contact,false
             );
+            if(!class_exists(\MiniMarket\Component\Minimarket\Site\Service\AutoDiscount::class))
+                require_once dirname(__DIR__,2).'/Service/AutoDiscount.php';
+            $automatic=\MiniMarket\Component\Minimarket\Site\Service\AutoDiscount::quote(
+                $db,$quote['lines'],(int)$quote['total_cents']);
+            $bestDiscount=max((int)($promo['discount_cents']??0),
+                (int)($automatic['discount_cents']??0));
+            $autoWins=$automatic!==null
+                &&$automatic['discount_cents']>(int)($promo['discount_cents']??0);
             $grams=0;$volume=0;
             foreach($quote['lines'] as $line){
                 $grams+=(int)($line['shipping_weight_grams']??0)*(int)$line['quantity'];
@@ -68,9 +76,10 @@ final class CheckoutController extends BaseController
                 'delivery_address'=>$input->getString('delivery_address',''),
                 'payment_method'=>$input->getString('payment_method','')
             ],(int)$quote['total_cents'],$grams,$volume,$needsPhysical);
-            $result=['success'=>true,'discount_cents'=>(int)($promo['discount_cents']??0),
+            $result=['success'=>true,'discount_cents'=>$bestDiscount,
                 'shipping_cents'=>(int)$delivery['fee_cents'],
-                'message'=>Text::_('COM_MINIMARKET_PROMO_PREVIEW')];
+                'message'=>Text::_($autoWins
+                    ?'COM_MINIMARKET_AUTO_DISCOUNT_BEST_APPLIED':'COM_MINIMARKET_PROMO_PREVIEW')];
         }catch(\DomainException $error){
             $result['message']=Text::_($error->getMessage());
         }catch(\Throwable $error){
