@@ -20,8 +20,8 @@ $links=[];
 foreach($menus as $menu)if(isset($menu['link']))$links[]=(string)$menu['link'];
 $ok(!in_array('option=com_minimarket&view=dashboard',$links,true),'duplicate miniMarket sidebar gone');
 $ok(in_array('option=com_config&view=component&component=com_minimarket',$links,true),'last sidebar settings links Joomla config');
-$ok(count($xml->xpath('//administration/submenu/menu[@type="separator"]'))===4,
-    'four native separators divide five MiniMarket operation groups');
+$ok(count($xml->xpath('//administration/submenu/menu[@type="separator"]'))===5,
+    'five native separators divide six MiniMarket operation groups');
 $order=$xml->xpath('//administration/submenu/menu[@link="option=com_minimarket&view=orders"]');
 $ok(count($order)===1 && count($order[0]->xpath('./params/menu-quicktask'))===1,'Orders quicktask');
 $cfg=simplexml_load_file($root.'admin/config.xml');
