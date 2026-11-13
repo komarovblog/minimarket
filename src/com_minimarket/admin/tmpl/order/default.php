@@ -68,30 +68,41 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
    <div class="col-12 col-xl-6">
     <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_BLOCK'); ?></h3>
     <p class="mb-3"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper((string)$o->status)); ?></p>
-    <?php if($canUpdate&&$this->manualStatusEnabled&&in_array((string)$o->status,['new','confirmed'],true)): ?>
-    <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>">
+    <?php if(!empty($o->accepted_at)): ?>
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_ACCEPTED_AT'); ?>: <?php echo $e($o->accepted_at); ?></p>
+    <?php endif; ?>
+    <?php if(!empty($o->cancelled_reason)): ?>
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_CANCEL_REASON'); ?>: <?php echo $e($o->cancelled_reason); ?></p>
+    <?php endif; ?>
+    <?php if(!empty($o->reserved_until)&&($o->reservation_state??'')==='held'): ?>
+    <p><strong><?php echo Text::_('COM_MINIMARKET_ORDER_RESERVE_UNTIL'); ?>:</strong> <?php echo $e($o->reserved_until); ?></p>
+    <?php endif; ?>
+    <?php if(($o->reservation_state??'legacy')==='legacy'): ?>
+    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_LEGACY_NO_RESERVATION'); ?></p>
+    <?php endif; ?>
+    <?php $canCancel=$canUpdate&&in_array((string)$o->status,['new','confirmed'],true)
+        &&$o->payment_status!=='processing'
+        &&!in_array((string)$o->fulfillment_status,['shipped','in_transit','awaiting_pickup','delivered','failed'],true)
+        &&!array_filter($this->shipments,static fn($x)=>in_array((string)$x->status,['in_transit','awaiting_pickup','delivered','failed'],true)); ?>
+    <?php if($canUpdate&&$o->status==='new'): ?>
+    <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>" class="mb-2">
      <input type="hidden" name="id" value="<?php echo $oid; ?>">
-     <div class="d-flex flex-wrap gap-2 align-items-end">
-      <div class="flex-grow-1">
-       <label for="mm-order-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS'); ?></label>
-       <select name="status" id="mm-order-status" class="form-select">
-        <?php
-         $available=[(string)$o->status];
-         if($o->status==='new')$available[]='confirmed';
-         if($o->status==='confirmed'&&$o->payment_status==='paid'&&$o->fulfillment_status==='delivered'
-           &&!array_filter($this->returns,static fn($r)=>in_array((string)$r->status,['new','approved','received'],true)))
-             $available[]='completed';
-         if($o->payment_status!=='paid'&&!in_array((string)$o->fulfillment_status,['shipped','delivered'],true)
-            &&!array_filter($this->shipments,static fn($s)=>in_array((string)$s->status,['in_transit','delivered'],true)))
-             $available[]='cancelled';
-         foreach($available as $status): ?>
-         <option value="<?php echo $status; ?>"<?php echo $o->status===$status?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_ORDER_STATUS_'.strtoupper($status)); ?></option>
-        <?php endforeach; ?>
-       </select>
-      </div>
-      <?php echo HTMLHelper::_('form.token'); ?>
-      <button class="btn btn-success" type="submit"><?php echo Text::_('JSAVE'); ?></button>
-     </div>
+     <input type="hidden" name="status" value="confirmed">
+     <?php echo HTMLHelper::_('form.token'); ?>
+     <button class="btn btn-success" type="submit"><?php echo Text::_('COM_MINIMARKET_ORDER_ACCEPT'); ?></button>
+    </form>
+    <?php endif; ?>
+    <?php if($canCancel): ?>
+    <form method="post" action="<?php echo $e(Route::_('index.php?option=com_minimarket&task=order.status',false)); ?>" class="d-flex flex-column gap-2">
+     <input type="hidden" name="id" value="<?php echo $oid; ?>">
+     <input type="hidden" name="status" value="cancelled">
+     <label class="form-label" for="mm-cancel-reason"><?php echo Text::_('COM_MINIMARKET_ORDER_CANCEL_REASON'); ?></label>
+     <input class="form-control" id="mm-cancel-reason" name="cancel_reason" minlength="3" maxlength="512" required>
+     <?php echo HTMLHelper::_('form.token'); ?>
+     <div><button type="submit" class="btn btn-outline-danger"><?php echo Text::_('COM_MINIMARKET_ORDER_CANCEL'); ?></button></div>
+     <?php if($o->payment_status==='paid'): ?>
+     <p class="form-text"><?php echo Text::_('COM_MINIMARKET_ORDER_PAID_CANCEL_NOTICE'); ?></p>
+     <?php endif; ?>
     </form>
     <?php endif; ?>
     <?php if($this->canDelete && ((string)$o->status==='cancelled'||!empty($o->deleted_at))): ?>
@@ -220,7 +231,7 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
      <div class="flex-grow-1">
       <label for="mm-fulfillment-status" class="form-label"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS'); ?></label>
       <select name="fulfillment_status" id="mm-fulfillment-status" class="form-select">
-       <?php foreach(['pending','shipped','delivered'] as $status): ?>
+       <?php foreach(['awaiting_assembly','assembling','ready','delivered'] as $status): ?>
         <option value="<?php echo $status; ?>"<?php echo ($o->fulfillment_status??'pending')===$status?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper($status)); ?></option>
        <?php endforeach; ?>
       </select>
