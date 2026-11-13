@@ -25,7 +25,7 @@ foreach($source[0]->option as $opt)$sourceValues[]=(string)$opt['value'];
 check4($sourceValues===['manual','preset'],'no legacy source option');
 $dict=$form->xpath("//fieldset[@name='details']/field[@name='unified_values']");
 check4(count($dict)===1 && (string)$dict[0]['type']==='subform'
-    && (string)$dict[0]['showon']==='value_source:preset'
+    && (string)$dict[0]['showon']==='value_source:preset[AND]input_type!:boolean'
     && (string)$dict[0]['multiple']==='true',
     'all dictionary values share a single repeatable form');
 foreach(['id','title','code','value_payload','sample_image','color_hex','state'] as $part){
