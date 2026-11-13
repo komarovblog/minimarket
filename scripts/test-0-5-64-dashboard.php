@@ -18,7 +18,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
                 'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','returns','returns','reviews','seofilters','promocodes','autodiscounts','recommendations','settings',
-                'deliverymethods','paymentmethods','registrationmethods','payments','notificationmethods','stockreport','customers','tickets','workqueue','salesreport','returnsreport','businessreport','planfactreport','documents','fiscalization','notifications','abandonedcarts','fiscalproviders','notificationevents'
+                'deliverymethods','paymentmethods','registrationmethods','payments','notificationmethods','stockreport','customers','tickets','workqueue','salesreport','returnsreport','businessreport','planfactreport','documents','fiscalization','notifications','abandonedcarts','fiscalproviders','notificationevents','marketingflows','messagetemplates'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
             if ($name==='deliveries') return 'index.php?option=com_minimarket&amp;view=deliveries';
             if ($name==='reviews') return 'index.php?option=com_minimarket&amp;view=reviews&amp;filter_status=pending';
@@ -49,9 +49,9 @@ namespace MiniMarket\DashboardTest {
     $html=(new View())->output();
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6,
         'six native dashboard panels including Reports');
-    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===39 &&
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===41 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
-        'thirty-nine working tiles across six groups');
+        'forty-one working tiles across six groups');
     verify(substr_count($html,'mm-dashboard-tiles')===6,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
@@ -73,7 +73,7 @@ namespace MiniMarket\DashboardTest {
     foreach(['categories','products','bundles','brands','collections','groups',
         'bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries',
         'seofilters','promocodes','autodiscounts','recommendations','deliverymethods','paymentmethods','registrationmethods',
-        'payments','notificationmethods','stockreport','customers','tickets','workqueue','salesreport','returnsreport','businessreport','planfactreport','documents','fiscalization','notifications','abandonedcarts','fiscalproviders','notificationevents'] as $view) {
+        'payments','notificationmethods','stockreport','customers','tickets','workqueue','salesreport','returnsreport','businessreport','planfactreport','documents','fiscalization','notifications','abandonedcarts','fiscalproviders','notificationevents','marketingflows','messagetemplates'] as $view) {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
     }

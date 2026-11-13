@@ -27,10 +27,10 @@ namespace Joomla\CMS\MVC\View {
     }
 }
 namespace MiniMarket\Component\Minimarket\Administrator\Service {
-    final class WorkqueueReads {
-        public static function unreadCount(object $db,int $userId):array{
+    final class AdminInbox {
+        public static function load(object $db,int $userId):array{
             if($userId!==7)throw new \RuntimeException('Operator identity mismatch');
-            return ['count'=>4,'capped'=>false];
+            return ['unread'=>4,'capped'=>false];
         }
     }
     final class AdminEntityLinks {
@@ -181,7 +181,7 @@ namespace MiniMarket\DashboardCountsTest {
         && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
         'Orders shows new cases instead of all historic orders');
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===39 &&
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===41 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');

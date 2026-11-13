@@ -36,10 +36,10 @@ $groups=[
  'reports'=>['businessreport','salesreport','stockreport','returnsreport','planfactreport'],
  'shop'=>['categories','products','bundles','groups','bundlegroups','brands',
   'collections','attributes','orderoptions'],
- 'marketing'=>['autodiscounts','promocodes','recommendations','abandonedcarts','reviews','seofilters'],
+ 'marketing'=>['autodiscounts','promocodes','marketingflows','recommendations','abandonedcarts','reviews','seofilters'],
  'tools'=>['import','feeds'],
  'settings'=>['deliverymethods','paymentmethods','registrationmethods',
-  'notificationmethods','notificationevents','fiscalproviders','settings']
+  'notificationmethods','notificationevents','messagetemplates','fiscalproviders','settings']
 ];
 $all=[];
 foreach($groups as $section=>$views){

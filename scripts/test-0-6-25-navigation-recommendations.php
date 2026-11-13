@@ -58,9 +58,9 @@ $groups=[
  'management'=>['workqueue','notifications','orders','deliveries','returns','payments','fiscalization','customers','tickets','documents'],
  'reports'=>['businessreport','salesreport','stockreport','returnsreport','planfactreport'],
  'shop'=>['categories','products','bundles','groups','bundlegroups','brands','collections','attributes','orderoptions'],
- 'marketing'=>['autodiscounts','promocodes','recommendations','abandonedcarts','reviews','seofilters'],
+ 'marketing'=>['autodiscounts','promocodes','marketingflows','recommendations','abandonedcarts','reviews','seofilters'],
  'tools'=>['import','feeds'],
- 'settings'=>['deliverymethods','paymentmethods','registrationmethods','notificationmethods','notificationevents','fiscalproviders','settings']
+ 'settings'=>['deliverymethods','paymentmethods','registrationmethods','notificationmethods','notificationevents','messagetemplates','fiscalproviders','settings']
 ];
 $expected=[];
 foreach($groups as $group=>$views){
