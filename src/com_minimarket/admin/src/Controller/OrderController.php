@@ -103,7 +103,8 @@ final class OrderController extends BaseController
             throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'),403);
         $id=$app->input->post->getInt('id',0);
         $action=$app->input->post->getCmd('payment_status','');
-        if($id<1||!in_array($action,['paid','refunded'],true))
+        $proof=trim(strip_tags($app->input->post->getString('payment_confirmation','')));
+        if($id<1||$action!=='paid')
             throw new \RuntimeException(Text::_('COM_MINIMARKET_ORDER_STATUS_INVALID'),400);
         $db=Factory::getContainer()->get(DatabaseInterface::class);
         $rows=[];$email='';$digitalOnly=false;$buyerUserId=0;
@@ -115,12 +116,15 @@ final class OrderController extends BaseController
             $db->setQuery('SELECT * FROM '.$db->quoteName('#__minimarket_orders')
                 .' WHERE id='.(int)$id.' AND deleted_at IS NULL FOR UPDATE');
             $order=$db->loadAssoc();
-            if(!$order||$order['status']==='cancelled')throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
+            if(!$order)throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
             $before=$order['payment_status'];
             if($action==='paid'){
                 if(!in_array($before,['unpaid','paid'],true))
                     throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
-                $rows=DigitalFulfillment::prepare($db,$id);
+                if($before!=='paid'&&(mb_strlen($proof)<3||mb_strlen($proof)>128
+                   ||preg_match('/[\x00-\x1f<>]/u',$proof)))
+                    throw new \DomainException('COM_MINIMARKET_PAYMENT_PROOF_REQUIRED');
+                $rows=$order['status']==='cancelled'?[]:DigitalFulfillment::prepare($db,$id);
                 // A consciously skipped buyer/recipient step can leave no email.
                 // Payment may still be confirmed independently; digital delivery
                 // remains pending and no mail is sent until an address is known.
@@ -128,15 +132,19 @@ final class OrderController extends BaseController
                 $digitalOnly=$order['delivery_method']==='digital';
                 $buyerUserId=(int)$order['user_id'];
                 $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
-                    ." SET payment_status='paid', paid_at=COALESCE(paid_at,UTC_TIMESTAMP()) WHERE id=".(int)$id);
-                $db->execute();
-            }else{
-                if($before!=='paid')throw new \DomainException('COM_MINIMARKET_PAYMENT_INVALID');
-                $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
-                    ." SET payment_status='refunded' WHERE id=".(int)$id);
+                    ." SET payment_status='paid', paid_at=COALESCE(paid_at,UTC_TIMESTAMP()), payment_reference="
+                    .$db->quote($before==='paid'?(string)$order['payment_reference']:$proof)
+                    ." WHERE id=".(int)$id);
                 $db->execute();
             }
             if($before!==$action){
+                if($order['delivery_method']==='pickup'&&$order['reservation_state']==='held'){
+                    $days=\MiniMarket\Component\Minimarket\Site\Service\StockReservation::days('pickup_paid_review_days',7);
+                    $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
+                        .' SET reserved_until=DATE_ADD(UTC_TIMESTAMP(),INTERVAL '.$days.' DAY)'
+                        .' WHERE id='.$id.' AND reservation_state='.$db->quote('held'));
+                    $db->execute();
+                }
                 $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_events'))
                     ->columns($db->quoteName(['order_id','actor_user_id','event_type','old_value','new_value','created_at']))
                     ->values(implode(',',[(string)$id,(string)(int)$app->getIdentity()->id,
@@ -156,10 +164,18 @@ final class OrderController extends BaseController
                 // Digital-only orders complete after confirmed payment and
                 // successful delivery email. Mixed orders await physical shipping.
                 if($digitalOnly && DigitalFulfillment::allAutomatic($rows)){
-                    $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
-                        ." SET fulfillment_status='delivered', fulfilled_at=UTC_TIMESTAMP(), status='completed'"
-                        ." WHERE id=".(int)$id." AND payment_status='paid' AND status<>'cancelled'");
-                    $db->execute();
+                    $db->transactionStart();
+                    try{
+                        $db->setQuery('UPDATE '.$db->quoteName('#__minimarket_orders')
+                            ." SET fulfillment_status='delivered', fulfilled_at=UTC_TIMESTAMP()"
+                            ." WHERE id=".(int)$id." AND payment_status='paid' AND status<>'cancelled'");
+                        $db->execute();
+                        OrderLifecycle::refresh($db,$id,(int)$app->getIdentity()->id);
+                        $db->transactionCommit();
+                    }catch(\Throwable $e){
+                        $db->transactionRollback();
+                        $app->enqueueMessage(Text::_('COM_MINIMARKET_DIGITAL_SEND_FAILED'),'warning');
+                    }
                 }
                 $app->enqueueMessage(Text::_('COM_MINIMARKET_DIGITAL_SENT'));
             }else{
