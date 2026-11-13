@@ -11,8 +11,9 @@ foreach(['payment_status','fulfillment_status','status','filter_payment','filter
 if(!str_contains($tpl,"'cancelled'=>'secondary'")||
    (!str_contains($tpl,'COM_MINIMARKET_ORDER_STATUS_')||!str_contains($tpl,'$order->status')))
  throw new RuntimeException('MM_LIST_CANCELLED_NOT_VISIBLE');
-if(str_contains($tpl,'reserved_until')||str_contains($tpl,'reservation_expires_at'))
- throw new RuntimeException('MM_LIST_FAKE_RESERVE');
+if(!str_contains($tpl,'reserved_until')||!str_contains($tpl,'reservation_state')
+ ||!str_contains($view,'o.reserved_until'))
+ throw new RuntimeException('MM_LIST_REAL_RESERVE_MISSING');
 if(substr_count($tpl,'data-label="<?php echo Text::')<6)
  throw new RuntimeException('MM_LIST_NATIVE_COLUMNS_MISSING');
 echo "MM_ORDER_LIST_THREE_AXES_OK\n";
