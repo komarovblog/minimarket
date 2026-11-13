@@ -55,6 +55,10 @@ use Joomla\CMS\Component\ComponentHelper;
                     echo $this->form->renderField('price');
                     echo $this->form->renderField('old_price');
                     echo $this->form->renderField('bundle_discount_pct');
+                    if (\Joomla\CMS\Factory::getApplication()->getIdentity()
+                        ->authorise('core.admin','com_minimarket')) {
+                        echo '<p class="form-text">'.Text::_('COM_MINIMARKET_BUNDLE_COST_DERIVED').'</p>';
+                    }
                     ?>
                     <div class="mm-bundle-totals" data-mm-bundle-totals data-mm-discount-only<?php echo (($this->item->bundle_price_mode ?? "fixed")==="discount") ? "" : " hidden"; ?>>
                         <span><?php echo Text::_('COM_MINIMARKET_BUNDLE_PRICE_COMPONENT_TOTAL'); ?></span>
@@ -72,6 +76,10 @@ use Joomla\CMS\Component\ComponentHelper;
                     echo '</div>';
                 } else {
                     echo $this->form->renderField('price');
+                    if (\Joomla\CMS\Factory::getApplication()->getIdentity()
+                        ->authorise('core.admin','com_minimarket')) {
+                        echo $this->form->renderField('cost_price');
+                    }
                     echo $this->form->renderField('old_price');
                     echo $this->form->renderField('option_stock_mode');
                     echo $this->form->renderField('stock');

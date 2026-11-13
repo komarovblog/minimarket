@@ -85,6 +85,17 @@ final class ProductTable extends Table
             return false;
         }
 
+        // Unknown procurement cost is NULL, never silently substituted with zero.
+        $costPrice=trim((string)($this->cost_price??''));
+        if($costPrice==='') {
+            $this->cost_price=null;
+        } elseif(!preg_match('/^(0|[1-9][0-9]{0,12})(?:\\.[0-9]{1,2})?$/D',$costPrice)) {
+            $this->setError(Text::_('COM_MINIMARKET_COST_PRICE_INVALID'));
+            return false;
+        } else {
+            $this->cost_price=$costPrice;
+        }
+
         // Comparison price is optional and never changes the actual selling price.
         $oldPrice=trim((string)($this->old_price??''));
         if($oldPrice==='') {

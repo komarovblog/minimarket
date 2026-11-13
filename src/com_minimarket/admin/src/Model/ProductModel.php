@@ -75,6 +75,12 @@ final class ProductModel extends AdminModel
      */
     public function save($data)
     {
+        // Only component administrators may set internal procurement costs.
+        // Staff editing SKU/description must not erase or change hidden costs.
+        if(!Factory::getApplication()->getIdentity()->authorise('core.admin','com_minimarket')
+            ||(string)($data['product_type']??'simple')==='bundle'){
+            unset($data['cost_price']);
+        }
         // A frozen inventory field cannot overwrite stored stock in the database.
         $inventoryEnabled = !class_exists(ComponentHelper::class)
             || (int) ComponentHelper::getParams('com_minimarket')->get('inventory_enabled', 1) === 1;

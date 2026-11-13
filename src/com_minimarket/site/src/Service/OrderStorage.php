@@ -111,6 +111,9 @@ final class OrderStorage
 
         $db->transactionStart();
         try {
+            // Procurement costs are historical snapshots. Unknown means NULL.
+            // Bundle cost derives from the cost of its current components.
+            $costs=\MiniMarket\Component\Minimarket\Site\Service\PurchaseCost::snapshot($db,$lines);
             // Row lock serializes promotion usage-limit checks across checkouts.
             $promo=PromotionService::quote($db,$promoCode,$lines,$total,$userId,$contact,true,$checkoutKey);
             $discount=(int)($promo['discount_cents']??0);
@@ -143,6 +146,7 @@ final class OrderStorage
             $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_order_items'))
                 ->columns($db->quoteName(['order_id','product_id','variant_id',
                     'sku','title','unit_cents','quantity','line_cents',
+                    'unit_cost_cents','line_cost_cents',
                     'delivery_type','digital_asset_key','digital_filename',
                     'digital_delivery_mode','digital_delivery_note']));
             foreach ($lines as $line) {
@@ -150,7 +154,10 @@ final class OrderStorage
                     (string)$orderId,(string)$line['product_id'],(string)$line['variant_id'],
                     $db->quote($line['sku']),$db->quote($line['title']),
                     (string)$line['unit_cents'],(string)$line['quantity'],
-                    (string)$line['line_cents'],$db->quote($line['delivery_type']),
+                    (string)$line['line_cents'],
+                    $costs[$line['product_id']]===null?'NULL':(string)$costs[$line['product_id']],
+                    $costs[$line['product_id']]===null?'NULL':(string)($costs[$line['product_id']]*$line['quantity']),
+                    $db->quote($line['delivery_type']),
                     $db->quote($line['digital_asset_key']),$db->quote($line['digital_filename']),
                     $db->quote($line['digital_delivery_mode']),$db->quote($line['digital_delivery_note'])
                 ]));

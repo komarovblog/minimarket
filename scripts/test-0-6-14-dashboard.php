@@ -7,7 +7,7 @@ $ok=static function(bool $yes,string $message):void {
     if(!$yes)throw new RuntimeException('MM614_DASHBOARD_FAIL: '.$message);
 };
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$ok($manifest!==false&&(string)$manifest->version==='0.6.14','version');
+$ok($manifest!==false&&version_compare((string)$manifest->version,'0.6.14','>='),'version');
 $markup=(string)file_get_contents($root.'admin/tmpl/dashboard/default.php');
 preg_match_all("/'type' => '(management|reports|shop|marketing|tools|settings)'/", $markup, $matches);
 $ok($matches[1]===['management','reports','shop','marketing','tools','settings'],

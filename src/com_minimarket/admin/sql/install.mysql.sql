@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS `#__minimarket_products` (
     `alias` VARCHAR(255) NOT NULL,
     `sku` VARCHAR(100) NOT NULL DEFAULT '',
     `price` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `cost_price` DECIMAL(15, 2) NULL DEFAULT NULL,
     `old_price` DECIMAL(15,2) NULL DEFAULT NULL,
     `badge_sale` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `badge_benefit` TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -769,6 +770,10 @@ CREATE TABLE IF NOT EXISTS #__minimarket_shipments (
     order_id INT UNSIGNED NOT NULL,
     carrier VARCHAR(16) NOT NULL DEFAULT 'own',
     tracking_number VARCHAR(120) NOT NULL DEFAULT '',
+    actual_cost_cents BIGINT UNSIGNED NULL DEFAULT NULL,
+    cost_reference VARCHAR(128) NOT NULL DEFAULT '',
+    cost_confirmed_at DATETIME NULL DEFAULT NULL,
+    cost_confirmed_by INT UNSIGNED NULL DEFAULT NULL,
     reason VARCHAR(24) NOT NULL DEFAULT 'initial',
     status VARCHAR(24) NOT NULL DEFAULT 'awaiting_assembly',
     note TEXT NULL,
@@ -783,6 +788,21 @@ CREATE TABLE IF NOT EXISTS #__minimarket_shipments (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Revisions only: reporting sums the current confirmed shipment cost ONCE.
+CREATE TABLE IF NOT EXISTS #__minimarket_shipment_cost_revisions (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    shipment_id INT UNSIGNED NOT NULL,
+    previous_cost_cents BIGINT UNSIGNED NULL,
+    confirmed_cost_cents BIGINT UNSIGNED NOT NULL,
+    evidence_reference VARCHAR(128) NOT NULL,
+    actor_user_id INT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_mm_shipment_cost_revision (shipment_id,id),
+    CONSTRAINT fk_mm_shipment_cost_revision FOREIGN KEY(shipment_id)
+        REFERENCES #__minimarket_shipments(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS #__minimarket_order_items (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     order_id INT UNSIGNED NOT NULL,
@@ -793,6 +813,8 @@ CREATE TABLE IF NOT EXISTS #__minimarket_order_items (
     unit_cents BIGINT UNSIGNED NOT NULL,
     quantity INT UNSIGNED NOT NULL,
     line_cents BIGINT UNSIGNED NOT NULL,
+    unit_cost_cents BIGINT UNSIGNED NULL DEFAULT NULL,
+    line_cost_cents BIGINT UNSIGNED NULL DEFAULT NULL,
     delivery_type VARCHAR(12) NOT NULL DEFAULT 'physical',
     digital_asset_key VARCHAR(80) NOT NULL DEFAULT '',
     digital_filename VARCHAR(255) NOT NULL DEFAULT '',
