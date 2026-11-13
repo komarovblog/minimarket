@@ -23,7 +23,7 @@ foreach(['admin/src/View/Stockreport/HtmlView.php','admin/tmpl/stockreport/defau
  $assert(is_file($base.$path),'actual report view '.$path);
 $svc=file_get_contents($base.'admin/src/Service/StockReport.php');
 foreach(["a.status='fulfilled'","o.payment_status='paid'","o.fulfillment_status='delivered'",
- 'source_kind','source_id','stock_allocations','order_items'] as $key)
+ 'source_kind','source_id','stock_allocations','order_items','COALESCE(o.fulfilled_at,o.created_at)'] as $key)
  $assert(str_contains($svc,$key),'source-aware demand '.$key);
 $router=file_get_contents($base.'admin/src/Controller/DisplayController.php');
 $assert(substr_count($router,"'stockreport'")>=3,'real route, list scripts and POST filters');
