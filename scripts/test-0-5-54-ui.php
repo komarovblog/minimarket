@@ -89,13 +89,13 @@ namespace MiniMarket\Smoke54 {
         str_contains($api,'$db->setQuery($q,0,25)'),
         'protected paginated brand search endpoint');
     $productJs=(string)file_get_contents($root.'media/js/product-badges.js');
-    verify(str_contains($productJs,'sale.disabled=discounted') &&
+    verify(str_contains($productJs,'wrap.hidden=discounted') &&
         !str_contains($productJs,'sale.disabled=!eligible') &&
-        str_contains($productJs,'row(saleDisplay).hidden=discounted'),
-        'sale remains selectable with manual price; format is independently configurable');
+        str_contains($productJs,'row(saleDisplay).hidden=discounted||!sale?.checked'),
+        'sale toggle is visible with manual price; format follows the active flag');
     verify(str_contains($productJs,"mode.value==='discount'") &&
-        str_contains($productJs,'benefit.disabled=!discounted'),
-        'bundle discounted price UI and benefit flag conditions');
+        str_contains($productJs,'wrap.hidden=!discounted'),
+        'discount bundle shows savings flag and hides incompatible manual sale');
     $table=(string)file_get_contents($root.'admin/src/Table/ProductTable.php');
     verify(str_contains($table,'COM_MINIMARKET_BADGE_BENEFIT_INVALID'),
         'server enforces savings badge eligibility');
