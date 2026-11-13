@@ -7,7 +7,7 @@ $check=static function(bool $ok,string $label):void{
  if(!$ok)throw new RuntimeException('MM615_COMMERCE_FAIL: '.$label);
 };
 $manifest=simplexml_load_file($root.'minimarket.xml');
-$check((string)$manifest->version==='0.6.15','version');
+$check(version_compare((string)$manifest->version,'0.6.15','>='),'version');
 $form=simplexml_load_file($root.'admin/forms/product.xml');
 $check(count($form->xpath('//field[@name="cost_price" and @filter="string"]'))===1,
  'single nullable acquisition cost input');

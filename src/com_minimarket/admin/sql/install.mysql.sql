@@ -776,6 +776,8 @@ CREATE TABLE IF NOT EXISTS #__minimarket_shipments (
     cost_confirmed_by INT UNSIGNED NULL DEFAULT NULL,
     reason VARCHAR(24) NOT NULL DEFAULT 'initial',
     status VARCHAR(24) NOT NULL DEFAULT 'awaiting_assembly',
+    problem_status VARCHAR(16) NOT NULL DEFAULT 'none',
+    problem_code VARCHAR(24) NOT NULL DEFAULT '',
     note TEXT NULL,
     created_by INT UNSIGNED NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL,
@@ -801,6 +803,27 @@ CREATE TABLE IF NOT EXISTS #__minimarket_shipment_cost_revisions (
     KEY idx_mm_shipment_cost_revision (shipment_id,id),
     CONSTRAINT fk_mm_shipment_cost_revision FOREIGN KEY(shipment_id)
         REFERENCES #__minimarket_shipments(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Immutable delivery events, never inventory movements.
+CREATE TABLE IF NOT EXISTS #__minimarket_shipment_events (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    shipment_id INT UNSIGNED NOT NULL,
+    event_key CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    source VARCHAR(16) NOT NULL DEFAULT 'manual',
+    source_reference VARCHAR(128) NOT NULL,
+    event_code VARCHAR(32) NOT NULL,
+    problem_code VARCHAR(24) NOT NULL DEFAULT '',
+    note VARCHAR(2000) NOT NULL DEFAULT '',
+    occurred_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL,
+    actor_user_id INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY(id),
+    UNIQUE KEY uq_mm_shipment_event_key (shipment_id,event_key),
+    UNIQUE KEY uq_mm_shipment_source_ref (shipment_id,source,source_reference),
+    KEY idx_mm_shipment_events_date (shipment_id,occurred_at,id),
+    CONSTRAINT fk_mm_shipment_event_parent FOREIGN KEY(shipment_id)
+      REFERENCES #__minimarket_shipments(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS #__minimarket_order_items (
