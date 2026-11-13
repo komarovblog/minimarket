@@ -202,6 +202,7 @@ jobs:
           php scripts/test-0-6-21-recommendations-mysql84.php
           php scripts/test-0-6-22-planfact-mysql84.php
           php scripts/test-0-6-23-documents-mysql84.php
+          php scripts/test-0-6-24-queue-crm-mysql84.php
 
   windows-package:
     name: Windows component ZIP
@@ -515,6 +516,7 @@ jobs:
           php scripts/test-0-6-21-recommendations.php
           php scripts/test-0-6-22-planfact.php
           php scripts/test-0-6-23-documents.php
+          php scripts/test-0-6-24-queue-crm.php
           node --check src/com_minimarket/media/js/payment-compatibility.js
           for file in src/com_minimarket/admin/src/Field/RegistrationverificationField.php src/com_minimarket/admin/src/Controller/{Order,Productpicker}Controller.php src/com_minimarket/admin/src/View/Order/HtmlView.php src/com_minimarket/admin/tmpl/{order/create,order/default,delivery/create}.php; do php -l "$file"; done
       - name: 0.6.7 order returns, shipment reasons, audit history and native operational UI
