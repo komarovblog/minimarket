@@ -95,17 +95,8 @@ namespace MiniMarket\DashboardTest {
         !str_contains($html,'mm-dashboard-section') &&
         !str_contains($html,'mm-dashboard-cards'),
         'old vertical menus and three narrow column cards entirely gone');
-    verify(substr_count($html,'<svg class="mm-dashboard-icon"')>=24
-      && str_contains($html,'
-    $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
-    verify(str_contains($css,'.mm-dashboard-band > .card-body') &&
-       str_contains($css,'.mm-dashboard-tile') &&
-       str_contains($css,'max-width: none'),
-       'responsive tiled layout has scoped Atum-aware styles');
-    echo "MM064_DASHBOARD_RENDER_PASS: $checks assertions\n";
-}
- . 'not-a-literal')===false,
-      'visible inline SVG icons do not depend on missing Joomla glyphs');
+    verify(substr_count($html,'<svg class="mm-dashboard-icon"')>=24,
+        'all cards have vector icons instead of missing font glyphs');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
     verify(str_contains($css,'.mm-dashboard-band > .card-body') &&
        str_contains($css,'.mm-dashboard-tile') &&
