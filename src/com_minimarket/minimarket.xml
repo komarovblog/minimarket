@@ -43,83 +43,82 @@
             <params><dashboard>minimarket</dashboard></params>
         </menu>
         <submenu>
-            <menu link="option=com_minimarket&amp;view=orders">COM_MINIMARKET_ORDERS_TITLE
+            <menu link="option=com_minimarket&amp;view=workqueue" img="class:bell">COM_MINIMARKET_WORKQUEUE_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=orders" img="class:cart">COM_MINIMARKET_ORDERS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=order&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=deliveries">COM_MINIMARKET_DASHBOARD_DELIVERIES
+            <menu link="option=com_minimarket&amp;view=deliveries" img="class:truck">COM_MINIMARKET_DASHBOARD_DELIVERIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=delivery&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=returns">COM_MINIMARKET_RETURNS_TITLE
+            <menu link="option=com_minimarket&amp;view=returns" img="class:reply">COM_MINIMARKET_RETURNS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=returncase&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=payments">COM_MINIMARKET_PAYMENTS_TITLE</menu>
-             <menu link="option=com_minimarket&amp;view=documents">COM_MINIMARKET_DOCUMENTS_TITLE</menu>
-
-            <menu link="option=com_minimarket&amp;view=customers">COM_MINIMARKET_CUSTOMERS_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=tickets">COM_MINIMARKET_TICKETS_TITLE
+            <menu link="option=com_minimarket&amp;view=payments" img="class:credit-card">COM_MINIMARKET_PAYMENTS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=customers" img="class:users">COM_MINIMARKET_CUSTOMERS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=tickets" img="class:comments">COM_MINIMARKET_TICKETS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=ticket&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=workqueue">COM_MINIMARKET_WORKQUEUE_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=documents" img="class:file">COM_MINIMARKET_DOCUMENTS_TITLE</menu>
+            <menu type="separator" alias="mm-group-reports">-</menu>
+            <menu link="option=com_minimarket&amp;view=businessreport" img="class:chart-bar">COM_MINIMARKET_BUSINESS_REPORT_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=salesreport" img="class:chart-line">COM_MINIMARKET_SALES_REPORT_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=stockreport" img="class:box">COM_MINIMARKET_STOCK_REPORT_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=returnsreport" img="class:reply">COM_MINIMARKET_RETURNS_REPORT_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=planfactreport" img="class:chart-bar">COM_MINIMARKET_PLANFACT_REPORT_TITLE</menu>
             <menu type="separator" alias="mm-group-1">-</menu>
-            <menu link="option=com_minimarket&amp;view=categories">COM_MINIMARKET_CATEGORIES
+            <menu link="option=com_minimarket&amp;view=categories" img="class:folder">COM_MINIMARKET_CATEGORIES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=category.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=products">COM_MINIMARKET_PRODUCTS
+            <menu link="option=com_minimarket&amp;view=products" img="class:cube">COM_MINIMARKET_PRODUCTS
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=product&amp;layout=edit&amp;product_type=simple</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=bundles">COM_MINIMARKET_BUNDLES
+            <menu link="option=com_minimarket&amp;view=bundles" img="class:cubes">COM_MINIMARKET_BUNDLES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=product&amp;layout=edit&amp;product_type=bundle</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=brands">COM_MINIMARKET_BRANDS
-                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=brand.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
-            </menu>
-            <menu link="option=com_minimarket&amp;view=collections">COM_MINIMARKET_COLLECTIONS
-                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=collection.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
-            </menu>
-            <menu link="option=com_minimarket&amp;view=groups">COM_MINIMARKET_GROUPS
+            <menu link="option=com_minimarket&amp;view=groups" img="class:link">COM_MINIMARKET_GROUPS
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=group.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=bundlegroups">COM_MINIMARKET_BUNDLE_GROUPS
+            <menu link="option=com_minimarket&amp;view=bundlegroups" img="class:link">COM_MINIMARKET_BUNDLE_GROUPS
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=group&amp;layout=edit&amp;group_type=bundle</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=attributes">COM_MINIMARKET_ATTRIBUTES
+            <menu link="option=com_minimarket&amp;view=brands" img="class:tag">COM_MINIMARKET_BRANDS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=brand.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=collections" img="class:bookmark">COM_MINIMARKET_COLLECTIONS
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=collection.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=attributes" img="class:list">COM_MINIMARKET_ATTRIBUTES
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=attribute.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=orderoptions">COM_MINIMARKET_ORDER_OPTIONS
+            <menu link="option=com_minimarket&amp;view=orderoptions" img="class:sliders-h">COM_MINIMARKET_ORDER_OPTIONS
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=orderoption.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu type="separator" alias="mm-group-2">-</menu>
-            <menu link="option=com_minimarket&amp;view=reviews">COM_MINIMARKET_REVIEWS_TITLE
-                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=review&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
-            </menu>
-            <menu link="option=com_minimarket&amp;view=promocodes">COM_MINIMARKET_PROMOCODES_TITLE
-                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=promocode&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
-            </menu>
-            <menu link="option=com_minimarket&amp;view=recommendations">COM_MINIMARKET_RECOMMENDATIONS_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=autodiscounts">COM_MINIMARKET_AUTO_DISCOUNTS_TITLE
+            <menu link="option=com_minimarket&amp;view=autodiscounts" img="class:percent">COM_MINIMARKET_AUTO_DISCOUNTS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=autodiscount&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu link="option=com_minimarket&amp;view=seofilters">COM_MINIMARKET_SEOFILTERS_TITLE
+            <menu link="option=com_minimarket&amp;view=promocodes" img="class:tag">COM_MINIMARKET_PROMOCODES_TITLE
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=promocode&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=recommendations" img="class:random">COM_MINIMARKET_RECOMMENDATIONS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=reviews" img="class:star">COM_MINIMARKET_REVIEWS_TITLE
+                <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=review&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
+            </menu>
+            <menu link="option=com_minimarket&amp;view=seofilters" img="class:filter">COM_MINIMARKET_SEOFILTERS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=seofilter&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
-            <menu type="separator" alias="mm-group-reports">-</menu>
-            <menu link="option=com_minimarket&amp;view=stockreport">COM_MINIMARKET_STOCK_REPORT_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=salesreport">COM_MINIMARKET_SALES_REPORT_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=returnsreport">COM_MINIMARKET_RETURNS_REPORT_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=businessreport">COM_MINIMARKET_BUSINESS_REPORT_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=planfactreport">COM_MINIMARKET_PLANFACT_REPORT_TITLE</menu>
             <menu type="separator" alias="mm-group-3">-</menu>
-            <menu link="option=com_minimarket&amp;view=import">COM_MINIMARKET_IMPORT_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=feeds">COM_MINIMARKET_FEEDS_TITLE
+            <menu link="option=com_minimarket&amp;view=import" img="class:exchange-alt">COM_MINIMARKET_IMPORT_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=feeds" img="class:share">COM_MINIMARKET_FEEDS_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;task=feed.add</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu type="separator" alias="mm-group-4">-</menu>
-            <menu link="option=com_minimarket&amp;view=deliverymethods">COM_MINIMARKET_DELIVERY_METHODS_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=paymentmethods">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
-             <menu link="option=com_minimarket&amp;view=fiscalization">COM_MINIMARKET_FISCAL_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=registrationmethods">COM_MINIMARKET_REGISTRATION_METHODS_TITLE</menu>
-            <menu link="option=com_minimarket&amp;view=notificationmethods">COM_MINIMARKET_NOTIFICATION_METHODS_TITLE</menu>
-            <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
+            <menu link="option=com_minimarket&amp;view=deliverymethods" img="class:truck">COM_MINIMARKET_DELIVERY_METHODS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=paymentmethods" img="class:credit-card">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=registrationmethods" img="class:user">COM_MINIMARKET_REGISTRATION_METHODS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=notificationmethods" img="class:envelope">COM_MINIMARKET_NOTIFICATION_METHODS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=fiscalization" img="class:file">COM_MINIMARKET_FISCAL_TITLE</menu>
+            <menu link="option=com_config&amp;view=component&amp;component=com_minimarket" img="class:cog">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
         </submenu>
     </administration>
     <dashboards>

@@ -2,76 +2,75 @@
 <menu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns="urn:joomla.org" xsi:schemaLocation="urn:joomla.org menu.xsd">
     <menuitem title="COM_MINIMARKET" type="heading" icon="cart" dashboard="minimarket">
-        <menuitem title="COM_MINIMARKET_DASHBOARD_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_DASHBOARD_TITLE" type="component" icon="file"
                   element="com_minimarket"
                   link="index.php?option=com_minimarket&amp;view=dashboard"/>
-        <menuitem title="COM_MINIMARKET_ORDERS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=orders"/>
-        <menuitem title="COM_MINIMARKET_DASHBOARD_DELIVERIES" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=deliveries"/>
-        <menuitem title="COM_MINIMARKET_RETURNS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returns"/>
-        <menuitem title="COM_MINIMARKET_PAYMENTS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=payments"/>
-        <menuitem title="COM_MINIMARKET_DOCUMENTS_TITLE" type="component" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=documents"/>
-        <menuitem title="COM_MINIMARKET_CUSTOMERS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=customers"/>
-        <menuitem title="COM_MINIMARKET_TICKETS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=tickets"/>
-        <menuitem title="COM_MINIMARKET_WORKQUEUE_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_WORKQUEUE_TITLE" type="component" icon="bell"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=workqueue"/>
-        <menuitem title="COM_MINIMARKET_CATEGORIES" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=categories"/>
-        <menuitem title="COM_MINIMARKET_PRODUCTS" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=products"/>
-        <menuitem title="COM_MINIMARKET_BUNDLES" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=bundles"/>
-        <menuitem title="COM_MINIMARKET_BRANDS" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=brands"/>
-        <menuitem title="COM_MINIMARKET_COLLECTIONS" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=collections"/>
-        <menuitem title="COM_MINIMARKET_GROUPS" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=groups"/>
-        <menuitem title="COM_MINIMARKET_BUNDLE_GROUPS" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=bundlegroups"/>
-        <menuitem title="COM_MINIMARKET_ATTRIBUTES" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=attributes"/>
-        <menuitem title="COM_MINIMARKET_ORDER_OPTIONS" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=orderoptions"/>
-        <menuitem title="COM_MINIMARKET_REVIEWS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=reviews"/>
-        <menuitem title="COM_MINIMARKET_PROMOCODES_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=promocodes"/>
-        <menuitem title="COM_MINIMARKET_RECOMMENDATIONS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=recommendations"/>
-        <menuitem title="COM_MINIMARKET_AUTO_DISCOUNTS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=autodiscounts"/>
-        <menuitem title="COM_MINIMARKET_SEOFILTERS_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=seofilters"/>
-        <menuitem title="COM_MINIMARKET_STOCK_REPORT_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=stockreport"/>
-        <menuitem title="COM_MINIMARKET_SALES_REPORT_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=salesreport"/>
-        <menuitem title="COM_MINIMARKET_RETURNS_REPORT_TITLE" type="component"
-                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returnsreport"/>
-        <menuitem title="COM_MINIMARKET_BUSINESS_REPORT_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_ORDERS_TITLE" type="component" icon="cart"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=orders"/>
+        <menuitem title="COM_MINIMARKET_DASHBOARD_DELIVERIES" type="component" icon="truck"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=deliveries"/>
+        <menuitem title="COM_MINIMARKET_RETURNS_TITLE" type="component" icon="reply"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returns"/>
+        <menuitem title="COM_MINIMARKET_PAYMENTS_TITLE" type="component" icon="credit-card"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=payments"/>
+        <menuitem title="COM_MINIMARKET_CUSTOMERS_TITLE" type="component" icon="users"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=customers"/>
+        <menuitem title="COM_MINIMARKET_TICKETS_TITLE" type="component" icon="comments"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=tickets"/>
+        <menuitem title="COM_MINIMARKET_DOCUMENTS_TITLE" type="component" icon="file" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=documents"/>
+        <menuitem title="COM_MINIMARKET_BUSINESS_REPORT_TITLE" type="component" icon="chart-bar"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=businessreport"/>
-        <menuitem title="COM_MINIMARKET_PLANFACT_REPORT_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_SALES_REPORT_TITLE" type="component" icon="chart-line"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=salesreport"/>
+        <menuitem title="COM_MINIMARKET_STOCK_REPORT_TITLE" type="component" icon="box"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=stockreport"/>
+        <menuitem title="COM_MINIMARKET_RETURNS_REPORT_TITLE" type="component" icon="reply"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returnsreport"/>
+        <menuitem title="COM_MINIMARKET_PLANFACT_REPORT_TITLE" type="component" icon="chart-bar"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=planfactreport"/>
-        <menuitem title="COM_MINIMARKET_IMPORT_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_CATEGORIES" type="component" icon="folder"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=categories"/>
+        <menuitem title="COM_MINIMARKET_PRODUCTS" type="component" icon="cube"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=products"/>
+        <menuitem title="COM_MINIMARKET_BUNDLES" type="component" icon="cubes"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=bundles"/>
+        <menuitem title="COM_MINIMARKET_GROUPS" type="component" icon="link"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=groups"/>
+        <menuitem title="COM_MINIMARKET_BUNDLE_GROUPS" type="component" icon="link"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=bundlegroups"/>
+        <menuitem title="COM_MINIMARKET_BRANDS" type="component" icon="tag"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=brands"/>
+        <menuitem title="COM_MINIMARKET_COLLECTIONS" type="component" icon="bookmark"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=collections"/>
+        <menuitem title="COM_MINIMARKET_ATTRIBUTES" type="component" icon="list"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=attributes"/>
+        <menuitem title="COM_MINIMARKET_ORDER_OPTIONS" type="component" icon="sliders-h"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=orderoptions"/>
+        <menuitem title="COM_MINIMARKET_AUTO_DISCOUNTS_TITLE" type="component" icon="percent"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=autodiscounts"/>
+        <menuitem title="COM_MINIMARKET_PROMOCODES_TITLE" type="component" icon="tag"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=promocodes"/>
+        <menuitem title="COM_MINIMARKET_RECOMMENDATIONS_TITLE" type="component" icon="random"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=recommendations"/>
+        <menuitem title="COM_MINIMARKET_REVIEWS_TITLE" type="component" icon="star"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=reviews"/>
+        <menuitem title="COM_MINIMARKET_SEOFILTERS_TITLE" type="component" icon="filter"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=seofilters"/>
+        <menuitem title="COM_MINIMARKET_IMPORT_TITLE" type="component" icon="exchange-alt"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=import"/>
-        <menuitem title="COM_MINIMARKET_FEEDS_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_FEEDS_TITLE" type="component" icon="share"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=feeds"/>
-        <menuitem title="COM_MINIMARKET_DELIVERY_METHODS_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_DELIVERY_METHODS_TITLE" type="component" icon="truck"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=deliverymethods"/>
-        <menuitem title="COM_MINIMARKET_PAYMENT_METHODS_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_PAYMENT_METHODS_TITLE" type="component" icon="credit-card"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=paymentmethods"/>
-        <menuitem title="COM_MINIMARKET_FISCAL_TITLE" type="component" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=fiscalization"/>
-        <menuitem title="COM_MINIMARKET_REGISTRATION_METHODS_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_REGISTRATION_METHODS_TITLE" type="component" icon="user"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=registrationmethods"/>
-        <menuitem title="COM_MINIMARKET_NOTIFICATION_METHODS_TITLE" type="component"
+        <menuitem title="COM_MINIMARKET_NOTIFICATION_METHODS_TITLE" type="component" icon="envelope"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notificationmethods"/>
-        <menuitem title="COM_MINIMARKET_CONFIG_SETTINGS_MENU" type="component"
-                  element="com_config" link="index.php?option=com_config&amp;view=component&amp;component=com_minimarket"/>
+        <menuitem title="COM_MINIMARKET_FISCAL_TITLE" type="component" icon="file" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=fiscalization"/>
+        undefined
     </menuitem>
 </menu>
