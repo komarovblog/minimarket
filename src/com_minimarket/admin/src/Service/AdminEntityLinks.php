@@ -13,7 +13,7 @@ final class AdminEntityLinks
 {
     private const ENTITIES = ['attribute', 'orderoption', 'category', 'product', 'group', 'value', 'brand', 'collection'];
     private const VIEWS = ['dashboard', 'categories', 'products', 'groups', 'attributes',
-        'orderoptions', 'import', 'feeds', 'brands', 'collections', 'bundles', 'bundlegroups','orders','deliveries','returns','deliveryzones','deliverymethods','paymentmethods','reviews','seofilters','promocodes','settings','registrationmethods'];
+        'orderoptions', 'import', 'feeds', 'brands', 'collections', 'bundles', 'bundlegroups','orders','deliveries','returns','deliveryzones','deliverymethods','paymentmethods','payments','notificationmethods','reviews','seofilters','promocodes','settings','registrationmethods'];
 
     public static function edit(string $entity, int $id): string
     {
