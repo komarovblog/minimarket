@@ -110,7 +110,7 @@ $mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket
                 <div class="mt-2" data-mm-manual-pickup>
                  <label class="form-label" for="mm-manual-point"><?php echo Text::_('COM_MINIMARKET_PICKUP_SELECT'); ?></label>
                  <select class="form-select" name="pickup_point_id" id="mm-manual-point">
-                  <option value="0"><?php echo Text::_('COM_MINIMARKET_PICKUP_CHOOSE'); ?></option>
+                  <option value=""><?php echo Text::_('COM_MINIMARKET_PICKUP_CHOOSE'); ?></option>
                   <?php foreach($this->pickupPoints as $point): ?>
                    <option value="<?php echo (int)$point->id; ?>"<?php echo count($this->pickupPoints)===1?' selected':''; ?>>
                     <?php echo $this->escape($point->title.' — '.$point->address); ?>

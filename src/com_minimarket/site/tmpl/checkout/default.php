@@ -157,7 +157,7 @@ $mmMethodParams=\Joomla\CMS\Component\ComponentHelper::getParams('com_minimarket
                         <div class="mb-3">
                           <label class="form-label" for="mm-pickup-point"><?php echo Text::_('COM_MINIMARKET_PICKUP_SELECT'); ?> *</label>
                           <select class="form-select" name="pickup_point_id" id="mm-pickup-point" required>
-                            <option value="0"><?php echo Text::_('COM_MINIMARKET_PICKUP_CHOOSE'); ?></option>
+                            <option value=""><?php echo Text::_('COM_MINIMARKET_PICKUP_CHOOSE'); ?></option>
                             <?php foreach($this->pickupPoints as $point): ?>
                              <option value="<?php echo (int)$point->id; ?>" data-fee-cents="<?php echo (int)$point->fee_cents; ?>"<?php echo count($this->pickupPoints)===1?' selected':''; ?>>
                               <?php echo $this->escape($point->title.' — '.$point->address.($point->schedule!==''?' ('.$point->schedule.')':'')); ?>

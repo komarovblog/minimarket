@@ -12,6 +12,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CartState;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutSettings;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutExtraFields;
+use MiniMarket\Component\Minimarket\Site\Service\PickupPoints;
 
 final class HtmlView extends BaseHtmlView
 {

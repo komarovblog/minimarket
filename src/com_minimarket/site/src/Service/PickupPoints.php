@@ -33,7 +33,7 @@ final class PickupPoints
         if(mb_strlen($title)<2||mb_strlen($title)>150
             ||mb_strlen($address)<5||mb_strlen($address)>512||mb_strlen($schedule)>1000
             ||!in_array($state,['0','1'],true)
-            ||preg_match('/[\x00-\x1f<>]/u',$title.$address.$schedule)
+            ||preg_match('/[\x00-\x08\x0b\x0c\x0e-\x1f<>]/u',$title.$address.$schedule)
             ||!preg_match('/^(0|[1-9][0-9]{0,8})(?:[.,]([0-9]{1,2}))?$/D',$fee,$m)
             ||($map!==''&&(strlen($map)>1024||!filter_var($map,FILTER_VALIDATE_URL)
                 ||strtolower((string)parse_url($map,PHP_URL_SCHEME))!=='https'
