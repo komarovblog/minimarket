@@ -58,7 +58,7 @@ final class StockReport
         }
         $where="a.status='fulfilled' AND o.payment_status='paid'"
             ." AND o.fulfillment_status='delivered' AND o.status<>'cancelled'"
-            .' AND o.deleted_at IS NULL AND o.created_at>=DATE_SUB(UTC_TIMESTAMP(),INTERVAL '.$days.' DAY)';
+            .' AND o.deleted_at IS NULL AND COALESCE(o.fulfilled_at,o.created_at)>=DATE_SUB(UTC_TIMESTAMP(),INTERVAL '.$days.' DAY)';
         $db->setQuery('SELECT a.source_kind,a.source_id,SUM(a.quantity) AS units'
             .' FROM '.$db->quoteName('#__minimarket_stock_allocations','a')
             .' INNER JOIN '.$db->quoteName('#__minimarket_orders','o').' ON o.id=a.order_id'
@@ -79,7 +79,7 @@ final class StockReport
             ." WHERE oi.delivery_type='physical' AND p.product_type='simple'"
             ." AND o.payment_status='paid' AND o.fulfillment_status='delivered'"
             ." AND o.status<>'cancelled' AND o.deleted_at IS NULL"
-            .' AND o.created_at>=DATE_SUB(UTC_TIMESTAMP(),INTERVAL '.$days.' DAY)'
+            .' AND COALESCE(o.fulfilled_at,o.created_at)>=DATE_SUB(UTC_TIMESTAMP(),INTERVAL '.$days.' DAY)'
             .' GROUP BY source_kind,source_id');
         foreach((array)$db->loadAssocList() as $a){
             $key=(string)$a['source_kind'].':'.(int)$a['source_id'];
