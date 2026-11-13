@@ -55,13 +55,13 @@ final class DisplayController extends BaseController
         if (in_array($viewName, [
             'orders', 'deliveries', 'returns', 'reviews', 'promocodes', 'seofilters',
             'feeds', 'registrationmethods', 'deliveryzones',
-            'deliverymethods', 'paymentmethods'
+            'deliverymethods', 'paymentmethods', 'notificationmethods'
         ], true)) {
             \MiniMarket\Component\Minimarket\Administrator\Service\NativeListTools::importRequest();
         }
 
         // Keep the proven M0 dashboard without introducing a dummy Model.
-        if (in_array($viewName, ['dashboard','import','feeds','feed','orders','order','deliveries','delivery','returns','returncase','deliveryzones','deliveryzone','deliverymethods','paymentmethods','registrationmethods','reviews','review','seofilters','seofilter','promocodes','promocode'],true)) {
+        if (in_array($viewName, ['dashboard','import','feeds','feed','orders','order','deliveries','delivery','returns','returncase','deliveryzones','deliveryzone','deliverymethods','paymentmethods','registrationmethods','notificationmethods','reviews','review','seofilters','seofilter','promocodes','promocode'],true)) {
             if(in_array($viewName,['feeds','feed'],true)) {
                 \Joomla\CMS\Factory::getApplication()->getDocument()->getWebAssetManager()
                     ->registerAndUseStyle('com_minimarket.feed-editor',
