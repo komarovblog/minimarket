@@ -147,7 +147,10 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
  <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'payment',Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK')); ?>
 
  <section class="card card-body mm-admin-panel mm-order-card mb-3">
-    <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK'); ?></h2>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+  <h2 class="h5 mb-0"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK'); ?></h2>
+  <a class="btn btn-outline-secondary btn-sm" href="<?php echo $e($to('payment',$oid)); ?>"><?php echo Text::_('COM_MINIMARKET_PAYMENT_OPERATIONS'); ?></a>
+ </div>
     <dl class="row mb-3">
      <dt class="col-sm-5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_METHOD'); ?></dt>
      <dd class="col-sm-7"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_'.strtoupper((string)$o->payment_method)); ?></dd>
@@ -197,7 +200,6 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
         <option value="paid"><?php echo Text::_('COM_MINIMARKET_PAYMENT_MARK_PAID'); ?></option>
         <?php else: ?>
         <?php if($this->hasDigitalItems): ?><option value="paid"><?php echo Text::_('COM_MINIMARKET_DIGITAL_RESEND'); ?></option><?php endif; ?>
-        <option value="refunded"><?php echo Text::_('COM_MINIMARKET_PAYMENT_MARK_REFUNDED'); ?></option>
         <?php endif; ?>
        </select>
       </div>
