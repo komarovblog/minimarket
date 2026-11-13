@@ -249,7 +249,7 @@ jobs:
       - name: Audit RU/EN Joomla translation references (admin and storefront)
         shell: pwsh
         run: |
-          & ./scripts/verify-translations.ps1
+          & ./scripts/verify-translations.ps1 -Strict
       - name: Verify one-command Desktop delivery has exactly 3 files
         shell: powershell
         run: |

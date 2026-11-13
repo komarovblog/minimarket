@@ -32,8 +32,8 @@ final class HtmlView extends BaseHtmlView {
   if($this->total===0)$this->offset=0;
   else $this->offset=min($this->offset,(int)(floor(($this->total-1)/$this->pageSize)*$this->pageSize));
   $db->setQuery('SELECT p.id,p.title,p.sku,p.product_type,p.state,'
-   ."COALESCE(s.similar_mode,'auto') AS similar_mode,"
-   ."COALESCE(s.together_mode,'auto') AS together_mode"
+   ."COALESCE(s.similar_mode,'inherit') AS similar_mode,"
+   ."COALESCE(s.together_mode,'inherit') AS together_mode"
    .' FROM '.$table.' AS p LEFT JOIN '
    .$db->quoteName('#__minimarket_recommendation_settings').' AS s ON s.product_id=p.id'
    .' WHERE 1=1'.$predicate.' ORDER BY p.id '.($this->sort==='oldest'?'ASC':'DESC'),
