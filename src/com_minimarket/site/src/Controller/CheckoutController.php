@@ -49,7 +49,7 @@ final class CheckoutController extends BaseController
                 (int)$app->getIdentity()->id,$contact,false
             );
             if(!class_exists(\MiniMarket\Component\Minimarket\Site\Service\AutoDiscount::class))
-                require_once dirname(__DIR__,2).'/Service/AutoDiscount.php';
+                require_once dirname(__DIR__).'/Service/AutoDiscount.php';
             $automatic=\MiniMarket\Component\Minimarket\Site\Service\AutoDiscount::quote(
                 $db,$quote['lines'],(int)$quote['total_cents']);
             $bestDiscount=max((int)($promo['discount_cents']??0),
