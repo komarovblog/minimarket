@@ -113,6 +113,7 @@ final class OrderStorage
         }
 
         if(!class_exists(PurchaseCost::class))require_once __DIR__.'/PurchaseCost.php';
+        if(!class_exists(AutoDiscount::class))require_once __DIR__.'/AutoDiscount.php';
         $db->transactionStart();
         try {
             // Procurement costs are historical snapshots. Unknown means NULL.
@@ -120,14 +121,21 @@ final class OrderStorage
             $costs=\MiniMarket\Component\Minimarket\Site\Service\PurchaseCost::snapshot($db,$lines);
             // Row lock serializes promotion usage-limit checks across checkouts.
             $promo=PromotionService::quote($db,$promoCode,$lines,$total,$userId,$contact,true,$checkoutKey);
-            $discount=(int)($promo['discount_cents']??0);
+            $automatic=AutoDiscount::quote($db,$lines,$total);
+            // No stacking. A customer-entered coupon wins equal discounts.
+            $useAutomatic=$automatic!==null
+                &&$automatic['discount_cents']>(int)($promo['discount_cents']??0);
+            if(!$useAutomatic)$automatic=null;
+            else $promo=null;
+            $discount=$automatic['discount_cents']??(int)($promo['discount_cents']??0);
             if($discount>$total)throw new \DomainException('COM_MINIMARKET_PROMO_INVALID');
             $columns=['checkout_key','user_id','customer_name','phone','email',
                 'customer_comment','delivery_method','pickup_point_id','delivery_city','delivery_country',
                 'delivery_region','delivery_postcode','delivery_address',
                 'delivery_rate_source','delivery_zone_id','delivery_fee_cents','payment_method',
                 'digital_recipient_email','order_source','status','currency','items_total_cents','promo_code_id',
-                'promo_code','discount_cents','total_cents','item_count','created_at'];
+                'promo_code','auto_discount_id','auto_discount_title',
+                'discount_cents','total_cents','item_count','created_at'];
             $values=[
                 $db->quote($checkoutKey),(string)$userId,
                 $db->quote($contact['name']),$db->quote($contact['phone']),
@@ -141,7 +149,8 @@ final class OrderStorage
                 (string)$delivery['fee_cents'],$db->quote($delivery['payment_method']),
                 $db->quote($recipient),$db->quote($source),$db->quote('new'),$db->quote('RUB'),(string)$total,
                 $promo===null?'NULL':(string)$promo['id'],$db->quote($promo['code']??''),
-                (string)$discount,(string)($total+$delivery['fee_cents']-$discount),
+                $automatic===null?'NULL':(string)$automatic['id'],
+                $db->quote($automatic['title']??''),(string)$discount,(string)($total+$delivery['fee_cents']-$discount),
                 (string)$units,$db->quote(gmdate('Y-m-d H:i:s'))
             ];
             $q=$db->getQuery(true)->insert($db->quoteName('#__minimarket_orders'))

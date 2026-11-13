@@ -632,6 +632,25 @@ CREATE TABLE IF NOT EXISTS #__minimarket_pickup_points (
  KEY idx_mm_pickup_state (state,ordering,id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Automatic customer-facing offers; separate from one-time coupon redemptions.
+CREATE TABLE IF NOT EXISTS #__minimarket_auto_discounts (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(160) NOT NULL,
+    state TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    discount_type VARCHAR(10) NOT NULL DEFAULT 'percent',
+    amount_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    basis_points INT UNSIGNED NOT NULL DEFAULT 0,
+    applies_to VARCHAR(12) NOT NULL DEFAULT 'all',
+    target_ids_json TEXT NULL,
+    starts_at DATETIME NULL,
+    ends_at DATETIME NULL,
+    created_by INT UNSIGNED NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NULL,
+    PRIMARY KEY (id),
+    KEY idx_mm_auto_discount_period (state,starts_at,ends_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     checkout_key CHAR(32) NOT NULL,
@@ -663,6 +682,8 @@ CREATE TABLE IF NOT EXISTS #__minimarket_orders (
     currency CHAR(3) NOT NULL DEFAULT 'RUB',
     items_total_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     promo_code_id INT UNSIGNED NULL,
+    auto_discount_id INT UNSIGNED NULL DEFAULT NULL,
+    auto_discount_title VARCHAR(160) NOT NULL DEFAULT '',
     promo_code VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT '',
     discount_cents BIGINT UNSIGNED NOT NULL DEFAULT 0,
     total_cents BIGINT UNSIGNED NOT NULL,
