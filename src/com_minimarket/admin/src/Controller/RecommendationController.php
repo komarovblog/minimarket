@@ -10,22 +10,8 @@ final class RecommendationController extends BaseController
 {
  public static function normalize(string $similarMode,string $togetherMode,string $similarIds,string $togetherIds,int $source):array
  {
-  if($source<1||!in_array($similarMode,['auto','manual','hybrid'],true)
-   ||!in_array($togetherMode,['auto','manual','hybrid'],true))
-    throw new \DomainException('COM_MINIMARKET_RECOMMENDATIONS_INVALID');
-  $parse=static function(string $input)use($source):array {
-   $input=trim($input);
-   if($input==='')return [];
-   if(strlen($input)>340||!preg_match('/^[1-9][0-9]*(?:,[1-9][0-9]*){0,29}$/D',$input))
-    throw new \DomainException('COM_MINIMARKET_RECOMMENDATIONS_INVALID');
-   $ids=array_map('intval',explode(',',$input));
-   if(in_array($source,$ids,true)||count($ids)!==count(array_unique($ids))
-      ||in_array(0,$ids,true)||count($ids)>30)
-    throw new \DomainException('COM_MINIMARKET_RECOMMENDATIONS_INVALID');
-   return $ids;
-  };
-  return ['modes'=>['similar'=>$similarMode,'together'=>$togetherMode],
-   'similar'=>$parse($similarIds),'together'=>$parse($togetherIds)];
+  return \MiniMarket\Component\Minimarket\Administrator\Service\RecommendationSettings::normalize(
+   $similarMode,$togetherMode,$similarIds,$togetherIds,$source);
  }
 
  public function save():void
@@ -44,35 +30,8 @@ final class RecommendationController extends BaseController
    $db=Factory::getContainer()->get(DatabaseInterface::class);
    $db->transactionStart();
    try{
-    // Prevent a concurrent product deletion while links are replaced.
-    $db->setQuery('SELECT id FROM '.$db->quoteName('#__minimarket_products')
-       .' WHERE id='.$id.' FOR UPDATE');
-    if((int)$db->loadResult()!==$id)
-     throw new \DomainException('COM_MINIMARKET_RECOMMENDATIONS_INVALID');
-    $ids=array_values(array_unique(array_merge($data['similar'],$data['together'])));
-    if($ids){
-     $db->setQuery('SELECT COUNT(DISTINCT id) FROM '
-      .$db->quoteName('#__minimarket_products').' WHERE id IN ('.implode(',',$ids).')');
-     if((int)$db->loadResult()!==count($ids))
-      throw new \DomainException('COM_MINIMARKET_RECOMMENDATIONS_INVALID');
-    }
-    $db->setQuery('INSERT INTO '.$db->quoteName('#__minimarket_recommendation_settings')
-     .' (product_id,similar_mode,together_mode,updated_at) VALUES ('.$id.','
-     .$db->quote($data['modes']['similar']).','.$db->quote($data['modes']['together'])
-     .',UTC_TIMESTAMP()) ON DUPLICATE KEY UPDATE similar_mode=VALUES(similar_mode),'
-     .' together_mode=VALUES(together_mode),updated_at=VALUES(updated_at)');
-    $db->execute();
-    $db->setQuery('DELETE FROM '.$db->quoteName('#__minimarket_recommendation_links')
-      .' WHERE source_product_id='.$id);
-    $db->execute();
-    foreach(['similar','together'] as $kind){
-     foreach($data[$kind] as $position=>$target){
-      $db->setQuery('INSERT INTO '.$db->quoteName('#__minimarket_recommendation_links')
-        .' (source_product_id,target_product_id,kind,sort_order) VALUES ('.$id.','
-        .(int)$target.','.$db->quote($kind).','.(int)$position.')');
-      $db->execute();
-     }
-    }
+    \MiniMarket\Component\Minimarket\Administrator\Service\RecommendationSettings::save(
+     $db,$id,$data);
     $db->transactionCommit();
    }catch(\Throwable $e){$db->transactionRollback();throw $e;}
    $app->enqueueMessage(Text::_('COM_MINIMARKET_RECOMMENDATIONS_SAVED'));
