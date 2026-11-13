@@ -8,7 +8,7 @@
   const message=form.querySelector('[data-mm-compatibility-error]');
   const submit=form.querySelector('button[type="submit"],input[type="submit"]')
     ||document.querySelector('button[form="'+form.id+'"][type="submit"]');
-  const allowed=(p,d)=>p.value==='pending'||(p.dataset.allowedDeliveries||'').split(',').includes(d);
+  const allowed=(p,d)=>p.value==='pending'||d==='pending'||(p.dataset.allowedDeliveries||'').split(',').includes(d);
   let busy=false;
   function sync(){
    if(busy)return;
