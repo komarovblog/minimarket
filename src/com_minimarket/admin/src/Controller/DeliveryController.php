@@ -244,13 +244,15 @@ final class DeliveryController extends BaseController
                     .' WHERE id='.$orderId." AND status<>'cancelled' AND deleted_at IS NULL");
                 if((int)$db->loadResult()!==$orderId)
                     throw new \DomainException('COM_MINIMARKET_SHIPMENT_EVENT_INVALID');
-                $db->setQuery('SELECT event_code,occurred_at FROM '
+                $db->setQuery('SELECT event_code,occurred_at,problem_code,note FROM '
                     .$db->quoteName('#__minimarket_shipment_events')
                     .' WHERE shipment_id='.$id.' AND event_key='.$db->quote($data['event_key']));
                 $existing=$db->loadAssoc();
                 if($existing){
                     if((string)$existing['event_code']!==$data['event_code']
-                        ||(string)$existing['occurred_at']!==$data['occurred_at'])
+                        ||(string)$existing['occurred_at']!==$data['occurred_at']
+                        ||(string)$existing['problem_code']!==$data['problem_code']
+                        ||(string)$existing['note']!==$data['note'])
                         throw new \DomainException('COM_MINIMARKET_SHIPMENT_EVENT_INVALID');
                     $db->transactionCommit();
                 }else{

@@ -60,6 +60,9 @@ final class MethodSettings
                 if(!is_array($choices)||count($choices)>3)
                     throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
                 $available=$method==='on_receipt'?['pickup','courier']:['pickup','courier','digital'];
+                foreach($choices as $choice)
+                    if(!is_string($choice))
+                        throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
                 if(count(array_unique($choices))!==count($choices)
                     ||array_diff($choices,$available))
                     throw new \DomainException('COM_MINIMARKET_METHOD_SETTINGS_INVALID');
