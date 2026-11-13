@@ -109,7 +109,7 @@ namespace MiniMarket\DashboardCountsTest {
             'auto_discounts|1=1'=>2,
             'recommendation_settings|1=1'=>3,
             "orders|status='new' AND deleted_at IS NULL"=>1,
-            "shipments|status='new' OR problem_status='open'"=>2,
+            "shipments|status='new' OR problem_status='open' OR (status='awaiting_pickup' AND COALESCE(updated_at,created_at) <=DATE_SUB(UTC_TIMESTAMP(),INTERVAL 3 DAY))"=>2,
             "returns|status='new'"=>1,
             "orders|payment_status IN ('unpaid','processing') AND status<>'cancelled' AND deleted_at IS NULL"=>1,
             "support_tickets|status='new'"=>1,
