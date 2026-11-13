@@ -29,7 +29,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
 }
 namespace MiniMarket\DashboardTest {
     class View {
-        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3,'orders'=>2,'deliveries'=>1,'returns'=>1,'payments'=>2,'documents'=>1,'reviews'=>2,'seofilters'=>3,'promocodes'=>4];
+        public array $stats=['categories'=>7,'products'=>26,'bundles'=>5,'feeds'=>3,'orders'=>2,'deliveries'=>1,'returns'=>1,'payments'=>2,'documents'=>1,'reviews'=>2,'seofilters'=>3,'promocodes'=>4,'notifications_attention'=>3];
         public function output():string {
             ob_start();
             try {
