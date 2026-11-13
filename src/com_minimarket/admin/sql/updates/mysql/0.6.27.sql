@@ -44,3 +44,14 @@ CREATE TABLE IF NOT EXISTS #__minimarket_marketing_flow_steps (
  CONSTRAINT fk_mm_flow_template FOREIGN KEY(template_id)
   REFERENCES #__minimarket_message_templates(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Per-manager read receipts for real, immutable operational events.
+-- No duplication of task status and no fake outgoing message log.
+CREATE TABLE IF NOT EXISTS #__minimarket_admin_inbox_reads (
+ user_id INT UNSIGNED NOT NULL,
+ event_kind VARCHAR(16) NOT NULL,
+ event_id BIGINT UNSIGNED NOT NULL,
+ read_at DATETIME NOT NULL,
+ PRIMARY KEY (user_id,event_kind,event_id),
+ KEY idx_mm_inbox_event (event_kind,event_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
