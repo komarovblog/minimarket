@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS #__minimarket_payment_records (
  confirmed_at DATETIME NOT NULL,
  created_at DATETIME NOT NULL,
  PRIMARY KEY (id),
- UNIQUE KEY uq_mm_payment_origin_reference (source,external_reference),
+ UNIQUE KEY uq_mm_payment_origin_reference (order_id,source,external_reference),
  KEY idx_mm_payment_order (order_id,confirmed_at),
  CONSTRAINT fk_mm_payment_order FOREIGN KEY(order_id)
      REFERENCES #__minimarket_orders(id) ON DELETE RESTRICT
