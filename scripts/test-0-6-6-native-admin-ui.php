@@ -15,7 +15,7 @@ $ok(is_file(dirname(__DIR__).'/scripts/build-toolbar-package.ps1'),
     'one-time module ZIP has independent build entrypoint');
 $release=file_get_contents(__DIR__.'/release-to-desktop.ps1');
 $ok(!str_contains($release,'mod_minimarket_toolbar-$version.zip')
-    &&str_contains($release,'MINIMARKET_DESKTOP_2_FILES_OK'),
+    &&str_contains($release,'MINIMARKET_DESKTOP_3_FILES_OK'),
     'ordinary component release does not rebuild toolbar');
 $categoryForm=simplexml_load_file($root.'admin/forms/category.xml');
 $ok(count($categoryForm->xpath('//fieldset[@name="display"]/field[@name="product_grid_note"]'))===1,
