@@ -1,3 +1,16 @@
+## 13.11.2026 — 0.6.26: событийная матрица, корзины и кассовые провайдеры
+
+| Экран | Источник записи | Использование / граница |
+|---|---|---|
+| Маркетинг → Брошенные корзины | `CartController::change` после успешного cart POST → `AbandonedCartStore::record` → `#__minimarket_cart_snapshots`; `CheckoutController::submit` после `OrderStorage::create` → `converted` | 60 минут без изменений, 30-дневное окно, случайный hashed cart token, подтверждённый Joomla user_id, product/variant qty; **нет контактов, ремаркетинга и реального recovery** |
+| Управление → Уведомления | `Notifications/HtmlView` использует `Workqueue/HtmlView` + персональные `queue_reads` | Только существующие незакрытые задачи, первые 100 на источник, отметка read не решает кейс; без внешних уведомлений |
+| Настройки → События уведомлений | `NotificationeventsController::save` → `MethodSettings::save` → `#__extensions.params` | Клиент: `notification_email_events`/`notification_plugin_events` — общий источник с методами. Админ: `notification_admin_email_events`/`notification_admin_plugin_events` — конфигурация, **нет admin sender и адресатов** |
+| Управление → Касса | `Fiscalization/HtmlView`, read-only `fiscal_operations` | Операции/ошибки/чек только после подключения реально подтверждённой кассы |
+| Настройки → Операторы фискализации | `Fiscalproviders/HtmlView` → `InstalledMethodPlugins::list('fiscal')` → `#__extensions` | Вывод установленных plugin `minimarket/fiscal_*` и ссылка на core Joomla plugin edit при ACL; **нет готового провайдера** |
+| Главная панель | `Dashboard/HtmlView` агрегаты по реальным статусам, отдельно WorkqueueReads | badges new/attention/unread, нет count для справочников/отчётов; при cap уведомлений указывать неполную оценку |
+
+Не вводить дублирующие senders или табличные ERP-сущности без отдельного решения. `scripts/test-0-6-26-carts-events-menu.php`, `scripts/test-0-6-26-carts-mysql84.php`. **0.6.26:** UI и серверный каркас реализованы в `development`; CI [#43495569874](https://github.com/komarovblog/minimarket/actions/runs/43495569874) проверяет код. Последний полностью проверенный код до этой правки: `878040c7be5d7aafaf694316c35dde48fdcdb2f6`, CI 6/6. Браузерная Joomla/Atum приёмка ещё не проведена.
+
 ## 13.11.2026 — 0.6.25: наследование рекомендаций и интерфейс
 
 | Экран / элемент | Источник записи | Потребитель и проверка |
