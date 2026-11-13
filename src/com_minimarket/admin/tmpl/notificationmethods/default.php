@@ -44,7 +44,7 @@ $esc=static fn($v)=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8
     </div>
     <?php else: ?>
      <p class="form-text"><?php echo Text::_('COM_MINIMARKET_NOTIFY_PLUGIN_OWNER'); ?>
-      <a href="<?php echo $esc(Route::_('index.php?option=com_plugins&view=plugins',false)); ?>"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_INFO'); ?></a>
+      <a href="<?php echo $esc(Route::_('index.php?option=com_plugins',false)); ?>"><?php echo Text::_('COM_MINIMARKET_METHOD_PLUGIN_INFO'); ?></a>
      </p>
     <?php endif; ?>
     <h3 class="h6"><?php echo Text::_('COM_MINIMARKET_NOTIFY_EVENT_SECTION'); ?></h3>
