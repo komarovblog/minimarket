@@ -22,7 +22,9 @@ $editor=file_get_contents($admin.'src/Controller/NotificationmethodsController.p
 foreach(['order_created','pickup_ready','pickup_reminder','pickup_final',
           'order_cancelled','delivery_updated'] as $event)
  if(!str_contains($policy,$event))throw new RuntimeException('MM610_NOTIFY_EVENT_'.$event);
-if(!str_contains($preferences,"'notification\\_%'")
+if(!str_contains($preferences,'folder=')
+  ||!str_contains($preferences,"quote('minimarket')")
+  ||!str_contains($preferences,'element LIKE')
   ||!str_contains($preferences,'enabled=1'))
  throw new RuntimeException('MM610_NOTIFY_INSTALLED_ONLY');
 if(!str_contains($sender,"notification_email_enabled")
