@@ -1,3 +1,17 @@
+# MiniMarket 0.6.16 — совместимость оплаты и события доставки
+
+**Дата:** 13.11.2026; **исходный SHA:** 44d15772d202df27519dc91df603fe26e677e191. **Этапы:** C04 + C05 из [docs/COMMERCE_EXPANSION_2026_11_13.md](docs/COMMERCE_EXPANSION_2026_11_13.md).
+
+**C04:** одна матрица оплаты × доставки внутри способов оплаты, без второй настройки в доставках. Joomla params хранят разрешённые пары; `CheckoutDelivery::quote` отклоняет недопустимые сочетания из публичного и ручного checkout, JS только помогает отображению. Старые параметры не меняются без явного редактирования.
+
+**C05:** реальные события отправки, ПВЗ, вручения/неудачи/возврата перевозчиком и открытие/закрытие проблем. Новая таблица событий, nonce, независимый `problem_status`, транзакции, UTC, SearchTools. Обработка вручную, без API перевозчика и без склада.
+
+**Затронутые сервисы:** MethodSettings, CheckoutDelivery, ShipmentEvents, DeliveryController, View Delivery/Deliveries, два checkout. **Не менять:** резерв, продажи, деньги, CRM, порядок меню, SEO, фискализацию, Joomla core. **Миграция:** admin/sql/updates/mysql/0.6.16.sql, без backfill; делать backup, demo SQL не импортировать.
+
+**Автотесты:** scripts/test-0-6-16-commerce.php и scripts/test-0-6-16-migration-mysql84.php, JS syntax, полный CI. **Браузерная приёмка:** ждёт установки на Joomla 6, RU/EN, dark/light Atum, mobile/desktop. [Релиз](docs/RELEASE_0_6_16.md).
+
+---
+
 # MiniMarket 0.6.15 — себестоимость и подтверждённые расходы доставки
 
 **Ветка:** development. Исходный SHA: 362b62a6ffa8a1e8d6ab0a75d570aaa088f7fb33. Продуктовая карта: [docs/COMMERCE_EXPANSION_2026_11_13.md](docs/COMMERCE_EXPANSION_2026_11_13.md). Пользователь исключил журнал движения запасов и согласовал 12 направлений, 0.6.15 — только C01/C02.

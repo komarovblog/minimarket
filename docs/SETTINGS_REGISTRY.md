@@ -1,3 +1,16 @@
+## 13.11.2026 — C04/C05, MiniMarket 0.6.16 (текущие настройки и данные)
+
+| Настройка / поле | Запись | Чтение | UI / серверное действие | Регрессия |
+|---|---|---|---|---|
+| `payment_on_receipt_allowed_deliveries` | `MethodSettings::normalize/save` → Joomla `#__extensions.params`; список кодов `pickup,courier`; NULL отсутствует → прежние значения по умолчанию | `CheckoutDelivery::allowedForPayment/compatible/quote` | Настройки → Способы оплаты → «При получении» → Совместимость. Сайт и ручной заказ фильтруют вариант; POST проверяется сервером | `test-0-6-16-commerce.php` |
+| `payment_bank_transfer_allowed_deliveries` | тот же `MethodSettings`; коды `pickup,courier,digital` | тот же `CheckoutDelivery` | Способ оплаты → Банковский перевод → Совместимость. Значение пусто — нет разрешённых пар. Отключённый способ остаётся скрыт от покупателя | `test-0-6-16-commerce.php` |
+| `shipments.problem_status / problem_code` | `DeliveryController::event`, row-lock и `ShipmentEvents::apply` | View Delivery / View Deliveries + SearchTools | Нет / Открыта / Решена; физическая доставка остаётся в своём статусе; не влияет на склад | `test-0-6-16-commerce.php`, MySQL 8.4 |
+| `shipment_events` | `DeliveryController::event` + immutable insert | View Delivery | UTC-факт, ручной источник, actor, nonce, защита повторов | MySQL 8.4 + контракт |
+
+**Правило:** значения в params сохраняются при отключении способа; backend запрещает недопустимые сочетания. Плагины методов оплаты/доставки без работающего адаптера в checkout не показываются. Ни Joomla core, ни склад, ни цены/скидки не меняются.
+
+---
+
 # MiniMarket 0.6.0 — действующий реестр настроек и полей
 
 Обновлён 12 ноября 2026 по **фактическим XML исходникам** ветки `development`. Это перечисление полей конфигурации/форм. **Наличие XML-поля не означает рабочую бизнес-логику**: статусы ниже разделяют реально подключённые настройки и будущие связи.
