@@ -55,6 +55,8 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returnsreport"/>
         <menuitem title="COM_MINIMARKET_BUSINESS_REPORT_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=businessreport"/>
+        <menuitem title="COM_MINIMARKET_PLANFACT_REPORT_TITLE" type="component"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=planfactreport"/>
         <menuitem title="COM_MINIMARKET_IMPORT_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=import"/>
         <menuitem title="COM_MINIMARKET_FEEDS_TITLE" type="component"

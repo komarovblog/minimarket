@@ -45,6 +45,8 @@ $sections = [
                 'icon' => 'icon-reply', 'count' => null],
             ['view' => 'businessreport', 'label' => 'COM_MINIMARKET_BUSINESS_REPORT_TITLE',
                 'icon' => 'icon-chart-bar', 'count' => null],
+            ['view' => 'planfactreport', 'label' => 'COM_MINIMARKET_PLANFACT_REPORT_TITLE',
+                'icon' => 'icon-chart-bar', 'count' => null],
         ],
     ],
     [
