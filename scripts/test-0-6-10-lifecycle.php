@@ -3,7 +3,7 @@
 declare(strict_types=1);
 $root=dirname(__DIR__).'/src/com_minimarket/';
 $manifest=simplexml_load_file($root.'minimarket.xml');
-if((string)$manifest->version!=='0.6.10')throw new RuntimeException('MM010_VERSION');
+if(version_compare((string)$manifest->version,'0.6.10','<'))throw new RuntimeException('MM010_VERSION');
 $schema=file_get_contents($root.'admin/sql/install.mysql.sql');
 $migrate=file_get_contents($root.'admin/sql/updates/mysql/0.6.10.sql');
 foreach([$schema,$migrate] as $sql)
