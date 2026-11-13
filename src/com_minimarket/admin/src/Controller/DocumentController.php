@@ -28,7 +28,7 @@ final class DocumentController extends BaseController
             $app->enqueueMessage(Text::_('COM_MINIMARKET_DOCUMENT_CREATED'));
             $this->setRedirect('index.php?option=com_minimarket&view=document&id='.$id);
         }catch(\DomainException $e){
-            $app->enqueueMessage(Text::_('COM_MINIMARKET_DOCUMENT_INVALID'),'warning');
+            $app->enqueueMessage(Text::_('COM_MINIMARKET_ORDER_DOCUMENT_INVALID'),'warning');
             $this->setRedirect($redirect);
         }
     }

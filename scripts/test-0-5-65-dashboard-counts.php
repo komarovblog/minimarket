@@ -88,6 +88,7 @@ namespace MiniMarket\DashboardCountsTest {
             'order_options|1=1'=>7,
             'feeds|1=1'=>3,
             'orders|deleted_at IS NULL'=>2,
+            'order_documents|1=1'=>1,
             "support_tickets|status IN ('new','in_progress')"=>1,
             "orders|payment_status IN ('unpaid','processing') AND status NOT IN ('cancelled','completed') AND deleted_at IS NULL"=>1,
             "shipments|problem_status='open'"=>2,
@@ -134,13 +135,13 @@ namespace MiniMarket\DashboardCountsTest {
     $expected=[
         'categories'=>27,'products'=>78,'bundles'=>3,'brands'=>5,
         'collections'=>6,'groups'=>4,'bundlegroups'=>2,'attributes'=>12,
-        'orderoptions'=>7,'feeds'=>3,'orders'=>2,'deliveries'=>1,'returns'=>3,'deliveryzones'=>6,
+        'orderoptions'=>7,'feeds'=>3,'orders'=>2,'documents'=>1,'deliveries'=>1,'returns'=>3,'deliveryzones'=>6,
         'reviews'=>2,'seofilters'=>3,'promocodes'=>4,'autodiscounts'=>2,'recommendations'=>3,'payments'=>2,
         'tickets'=>1,'customers'=>1,'workqueue'=>7
     ];
     verify($view->stats==$expected,'all real entity counters plus payment obligations use actual records');
-    verify(count(Factory::$database->queries)===24,'twenty-four real count queries including promotions and workqueue');
-    verify(count(array_unique(Factory::$database->queries))===23,
+    verify(count(Factory::$database->queries)===25,'twenty-five real count queries including promotions and workqueue');
+    verify(count(array_unique(Factory::$database->queries))===24,
         'the returns count is deliberately reused for workqueue, other count queries remain distinct');
     $html=(new Renderer($view->stats))->html();
     foreach($expected as $key=>$count){
@@ -152,15 +153,15 @@ namespace MiniMarket\DashboardCountsTest {
         verify((bool)preg_match('/data-mm-stat="'.preg_quote($key,'/').'"[^>]*>\\s*'.(int)$count.'\\s*<\\/span>/u',$html),
             'real server-rendered number for '.$key);
     }
-    verify(substr_count($html,'data-mm-stat="none"')===11,
-        'Import, Settings, provider methods and three new financial reports have non-numeric counters');
-    verify(substr_count($html,'<span aria-hidden="true">—</span>')===11,
-        'All eleven report/settings/tool tiles without counts show dashes, never zero');
+    verify(substr_count($html,'data-mm-stat="none"')===12,
+        'Import, Settings, fiscalization, provider methods and three new financial reports have non-numeric counters');
+    verify(substr_count($html,'<span aria-hidden="true">—</span>')===12,
+        'All twelve report/settings/tool tiles without counts show dashes, never zero');
     verify(str_contains($html,'data-mm-stat="orders"')
         && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
         'Orders now has a real counter and active link');
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===33 &&
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===35 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
