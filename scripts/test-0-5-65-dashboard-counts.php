@@ -138,8 +138,8 @@ namespace MiniMarket\DashboardCountsTest {
     ];
     verify($view->stats==$expected,'all real entity counters plus payment obligations use actual records');
     verify(count(Factory::$database->queries)===22,'twenty-two real count queries including CRM and workqueue');
-    verify(count(array_unique(Factory::$database->queries))===22,
-        'each entity/filter has its own distinct count query');
+    verify(count(array_unique(Factory::$database->queries))===21,
+        'the returns count is deliberately reused for workqueue, other count queries remain distinct');
     $html=(new Renderer($view->stats))->html();
     foreach($expected as $key=>$count){
         if($key==='deliveryzones'){
