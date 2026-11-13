@@ -26,6 +26,7 @@ $groups=[
       <table class="table table-striped mm-admin-list">
        <thead><tr>
         <th><?php echo Text::_('COM_MINIMARKET_NOTIFICATION_EVENTS_EVENT'); ?></th>
+        <th><?php echo Text::_('COM_MINIMARKET_MESSAGE_TEMPLATES_TITLE'); ?></th>
         <?php foreach($this->channels as $channel): ?>
          <th><?php echo $e($channel['name']); ?><?php if(!$channel['enabled']): ?>
           <span class="form-text">(<?php echo Text::_('COM_MINIMARKET_METHOD_INACTIVE'); ?>)</span>
@@ -34,6 +35,8 @@ $groups=[
        </tr></thead><tbody>
        <?php foreach($group['events'] as $event=>$label): ?><tr>
         <th scope="row"><?php echo Text::_($label); ?></th>
+        <td><a href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=messagetemplate&layout=edit&audience='.$group['name'].'&event_code='.$event,false)); ?>">
+         <?php echo Text::_('COM_MINIMARKET_TEMPLATE_EDIT_FOR_EVENT'); ?></a></td>
         <?php foreach($this->channels as $channel): ?>
          <td><label class="form-check">
           <input class="form-check-input" type="checkbox"

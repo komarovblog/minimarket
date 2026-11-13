@@ -13,6 +13,7 @@ final class HtmlView extends BaseHtmlView
 {
     public ?object $item=null;
     public array $events=[];
+    public string $initialAudience='customer',$initialEvent='order_created';
     public function display($tpl=null)
     {
         $app=Factory::getApplication();$id=$app->input->getInt('id',0);
@@ -26,6 +27,12 @@ final class HtmlView extends BaseHtmlView
             $this->item=$db->loadObject()?:null;
             if(!$this->item)throw new \RuntimeException(Text::_('JERROR_PAGE_NOT_FOUND'),404);
         }
+        $selected=$app->input->getCmd('audience','customer');
+        $this->initialAudience=in_array($selected,MessageTemplates::AUDIENCES,true)
+            ?$selected:'customer';
+        $event=$app->input->getCmd('event_code','');
+        $available=MessageTemplates::events($this->initialAudience);
+        $this->initialEvent=in_array($event,$available,true)?$event:(string)($available[0]??'');
         $this->events=[
             'customer'=>NotificationPolicy::EVENTS,
             'admin'=>NotificationPolicy::ADMIN_EVENTS,

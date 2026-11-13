@@ -4,6 +4,8 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 $t=$this->item;
+$initialAudience=$this->initialAudience;
+$initialEvent=$this->initialEvent;
 $val=static fn($key,$default='')=>(string)($t->$key??$default);
 ?>
 <form method="post" action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=messagetemplate.save',false)); ?>">
@@ -22,7 +24,7 @@ $val=static fn($key,$default='')=>(string)($t->$key??$default);
   <div class="col-md-6"><label class="form-label" for="mm-template-audience"><?php echo Text::_('COM_MINIMARKET_TEMPLATE_AUDIENCE'); ?></label>
    <select class="form-select" id="mm-template-audience" name="audience">
     <?php foreach(['customer','admin','marketing'] as $audience): ?>
-     <option value="<?php echo $audience; ?>"<?php echo $val('audience','customer')===$audience?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_TEMPLATE_'.strtoupper($audience)); ?></option>
+     <option value="<?php echo $audience; ?>"<?php echo $val('audience',$initialAudience)===$audience?' selected':''; ?>><?php echo Text::_('COM_MINIMARKET_TEMPLATE_'.strtoupper($audience)); ?></option>
     <?php endforeach; ?>
    </select></div>
   <div class="col-md-6"><label class="form-label" for="mm-template-event"><?php echo Text::_('COM_MINIMARKET_NOTIFICATION_EVENTS_EVENT'); ?></label>
@@ -30,7 +32,7 @@ $val=static fn($key,$default='')=>(string)($t->$key??$default);
     <?php foreach($this->events as $audience=>$list): ?>
      <?php foreach($list as $code=>$label): ?>
       <option value="<?php echo $this->escape($code); ?>" data-mm-audience="<?php echo $audience; ?>"
-       <?php echo $val('event_code')===$code&&$val('audience','customer')===$audience?' selected':''; ?>>
+       <?php echo $val('event_code',$initialEvent)===$code&&$val('audience',$initialAudience)===$audience?' selected':''; ?>>
        <?php echo Text::_($label); ?></option>
      <?php endforeach; ?>
     <?php endforeach; ?>
