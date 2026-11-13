@@ -101,7 +101,7 @@ for($pos=0;$pos<count($submenu);$pos++) {
   // Native Joomla submenu links may include nested quicktask params and
   // indentation whitespace; the label itself must still be unchanged.
   if(trim((string)$item)==='COM_MINIMARKET_FEEDS_TITLE')$feedIndex=$pos;
-  if(trim((string)$item)==='COM_MINIMARKET_CONFIG_SETTINGS_MENU')$settingsIndex=$pos;
+  if(in_array(trim((string)$item),['COM_MINIMARKET_CONFIG_SETTINGS_MENU','COM_MINIMARKET_GENERAL_SETTINGS_TITLE'],true))$settingsIndex=$pos;
 }
 check61($feedIndex>0 && $settingsIndex>$feedIndex,
  'Feeds stays beside Import, before final Settings menu');
