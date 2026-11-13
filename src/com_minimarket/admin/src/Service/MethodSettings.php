@@ -69,7 +69,9 @@ final class MethodSettings
             'delivery_pickup_fee_cents','delivery_pickup_schedule','delivery_pickup_map_url',
             'delivery_courier_enabled','delivery_rate_source','delivery_city_rates',
             'payment_on_receipt_enabled','payment_bank_transfer_enabled',
-            'payment_bank_instructions','checkout_verification_method'
+            'payment_bank_instructions','checkout_verification_method',
+            'notification_email_enabled','notification_email_events',
+            'notification_plugin_events'
         ];
         foreach($changes as $key=>$value){
             if(!in_array($key,$allowed,true))throw new \LogicException('Unrecognized method option');

@@ -25,7 +25,8 @@ final class MethodsettingsController extends BaseController
         $scope=$post->getCmd('scope','');
         $allow=['delivery'=>['pickup','courier'],
                 'payment'=>['on_receipt','bank_transfer'],
-                'registration'=>['email']];
+                'registration'=>['email'],
+                'notification'=>['email']];
         if(!isset($allow[$scope]))
             throw new \RuntimeException(Text::_('COM_MINIMARKET_METHOD_SETTINGS_INVALID'),400);
         $selected=$post->get('cid',[],'array');
