@@ -55,10 +55,11 @@ namespace MiniMarket\Regression55 {
   'search uses fetched rows');
  $js=file_get_contents($dir.'media/js/product-badges.js');
  check(str_contains($js,"[[price,!discounted],[old,!discounted],[pct,discounted]]")
-  && str_contains($js,'sale.disabled=discounted')
-  && str_contains($js,'benefit.disabled=!discounted')
-  && str_contains($js,'row(saleDisplay).hidden=discounted'),
-  'fixed price and auto discounts mutually exclusive');
+  && str_contains($js,'wrap.hidden=discounted')
+  && str_contains($js,'wrap.hidden=!discounted')
+  && str_contains($js,'row(saleDisplay).hidden=discounted||!sale?.checked')
+  && str_contains($js,'row(benefitDisplay).hidden=!discounted||!benefit?.checked'),
+  'fixed and calculated prices hide incompatible badge controls and inactive units');
  $table=file_get_contents($dir.'admin/src/Table/ProductTable.php');
  check(str_contains($table,"['physical','digital']") &&
   str_contains($table,'COM_MINIMARKET_BADGE_SALE_FIXED_ONLY'),
