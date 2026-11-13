@@ -96,7 +96,10 @@ if ($version -notmatch '^\d+\.\d+\.\d+$') {
 if($IncludeTaskPlugin){
     [xml]$taskManifest=Get-Content -LiteralPath (Join-Path $root 'src\plg_task_minimarketreserves\minimarketreserves.xml') -Raw -Encoding UTF8
     $taskVersion=[string]$taskManifest.extension.version
-    if ($taskVersion -notmatch '^\d+\.\d+\.\d+
+    if ($taskVersion -notmatch '^\d+\.\d+\.\d+$') {
+        throw "MINIMARKET_TASK_VERSION_INVALID: $taskVersion"
+    }
+}
 $demoName = "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql"
 $demo = Join-Path (Join-Path $root 'sample-data') $demoName
 if (-not (Test-Path -LiteralPath $demo -PathType Leaf)) {
