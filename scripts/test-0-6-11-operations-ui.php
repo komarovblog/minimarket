@@ -36,7 +36,7 @@ if(!str_contains($orders,'shared/searchtools.php')||
 foreach(['awaiting_assembly','assembling','ready','in_transit','awaiting_pickup','delivered','failed'] as $status)
  if(!str_contains($ordersView,$status))throw new RuntimeException('MM611_ALL_DELIVERY_STATUSES_'.$status);
 $dashboard=(string)file_get_contents($root.'admin/tmpl/dashboard/default.php');
-foreach(['management','shop','marketing','tools','settings'] as $group)
+foreach(['management','shop','marketing','reports','tools','settings'] as $group)
  if(!str_contains($dashboard,"'type' => '".$group."'"))
   throw new RuntimeException('MM611_DASHBOARD_GROUP_'.$group);
 preg_match_all("/\['view' => '([a-z]+)'/",$dashboard,$match);
