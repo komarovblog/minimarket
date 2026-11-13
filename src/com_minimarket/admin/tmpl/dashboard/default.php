@@ -6,7 +6,7 @@ use Joomla\CMS\Uri\Uri;
 use MiniMarket\Component\Minimarket\Administrator\Service\AdminEntityLinks;
 
 /**
- * Three full-width stacked Atum dashboard sections; each uses a responsive
+ * Full-width stacked Atum dashboard sections; each uses a responsive
  * tile grid. The native #wrapper.closed class switches 4 to 6 desktop tiles.
  * No vertical section menus; Orders links to real stored requests.
  */
@@ -62,6 +62,15 @@ $sections = [
                 'icon' => 'icon-tag', 'count' => 'promocodes'],
             ['view' => 'seofilters', 'label' => 'COM_MINIMARKET_SEOFILTERS_TITLE',
                 'icon' => 'icon-filter', 'count' => 'seofilters'],
+        ],
+    ],
+    [
+        'title' => 'COM_MINIMARKET_DASHBOARD_REPORTS',
+        'type' => 'reports',
+        'icon' => 'icon-chart-bar',
+        'items' => [
+            ['view' => 'stockreport', 'label' => 'COM_MINIMARKET_STOCK_REPORT_TITLE',
+                'icon' => 'icon-box', 'count' => null],
         ],
     ],
     [
