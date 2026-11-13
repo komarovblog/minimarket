@@ -88,7 +88,8 @@ final class MethodSettings
             'payment_on_receipt_allowed_deliveries','payment_bank_transfer_allowed_deliveries',
             'payment_bank_instructions','checkout_verification_method',
             'notification_email_enabled','notification_email_events',
-            'notification_plugin_events'
+            'notification_plugin_events',
+            'notification_admin_email_events','notification_admin_plugin_events'
         ];
         foreach($changes as $key=>$value){
             if(!in_array($key,$allowed,true))throw new \LogicException('Unrecognized method option');

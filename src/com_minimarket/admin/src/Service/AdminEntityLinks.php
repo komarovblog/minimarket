@@ -45,6 +45,15 @@ final class AdminEntityLinks
         if ($view==='reviews') {
             return self::htmlUrl('index.php?option=com_minimarket&view=reviews&filter_status=pending');
         }
+        if ($view==='orders') {
+            return self::htmlUrl('index.php?option=com_minimarket&view=orders&filter_quick=new');
+        }
+        if ($view==='returns') {
+            return self::htmlUrl('index.php?option=com_minimarket&view=returns&filter_status=new');
+        }
+        if ($view==='tickets') {
+            return self::htmlUrl('index.php?option=com_minimarket&view=tickets&filter_status=new');
+        }
         if ($view==='deliveries') {
             return self::htmlUrl('index.php?option=com_minimarket&view=deliveries');
         }
