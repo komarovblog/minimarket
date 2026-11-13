@@ -52,7 +52,7 @@ namespace MiniMarket\CheckoutSmoke {
         public function values($row):self{$this->entries[]=(string)$row;return $this;}
     }
     final class FakeDb implements DatabaseInterface {
-        public ?Query $current=null;
+        public Query|string|null $current=null;
         public array $saved=[];
         public array $steps=[];
         public bool $failItems=false;
@@ -60,6 +60,9 @@ namespace MiniMarket\CheckoutSmoke {
         public function quoteName($value):mixed{return $value;}
         public function quote($value):string{return "'".str_replace("'","''",(string)$value)."'";}
         public function setQuery($q):void{$this->current=$q;}
+        // Legacy checkout smoke has no catalog tables. NULL costs are real
+        // unknowns; production cost snapshots are tested against MySQL 8.4.
+        public function loadAssoc():?array{return null;}
         public function execute():void {
             if($this->failItems && str_contains($this->current->table,'order_items')) {
                 throw new \RuntimeException('simulated line write failure');
