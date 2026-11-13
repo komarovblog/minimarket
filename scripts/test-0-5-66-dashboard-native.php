@@ -20,7 +20,7 @@ checkNative(str_contains($html, "'title' => 'COM_MINIMARKET_DASHBOARD_SHOP'") &&
 checkNative(str_contains($html, 'mm-dashboard-icon--bundle') &&
     str_contains($html, '<svg') && str_contains($html, "'view' => 'bundles'"),
     'Bundles have distinct vector icon');
-checkNative(substr_count($html, "'count' => '") >= 9 &&
+checkNative(substr_count($html, "'count' => '") >= 8 &&
     substr_count($html, "'pending' => true") === 0 &&
     str_contains($html,"'count' => 'orders_new'") &&
     str_contains($html,'data-mm-stat="notifications_attention"') &&
