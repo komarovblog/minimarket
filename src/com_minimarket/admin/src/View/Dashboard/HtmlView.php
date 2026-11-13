@@ -30,6 +30,7 @@ final class HtmlView extends BaseHtmlView
             'orderoptions' => ['order_options', '1=1'],
             'feeds'        => ['feeds', '1=1'],
             'orders'       => ['orders', 'deleted_at IS NULL'],
+             'documents'    => ['order_documents', '1=1'],
             'tickets'      => ['support_tickets', "status IN ('new','in_progress')"],
             'deliveries'   => ['shipments', "status IN ('new','in_transit')"],
             'returns'      => ['returns', "status IN ('new','approved','received')"],

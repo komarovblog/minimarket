@@ -25,6 +25,8 @@ final class HtmlView extends BaseHtmlView
     public ?int $shipmentId=null;
     public array $shipments=[],$returns=[];
     public bool $canCreateReturn=false;
+    public bool $canCreateDocument=false;
+    public ?int $documentId=null;
     public bool $isCreate=false;
     public array $productChoices=[];
     public array $pickerCategories=[];
@@ -50,6 +52,7 @@ final class HtmlView extends BaseHtmlView
         $this->canViewUsers=$identity->authorise('core.manage','com_users');
         $this->canViewFinance=$identity->authorise('core.admin','com_minimarket');
         $this->canCreateReturn=$identity->authorise('core.create','com_minimarket');
+        $this->canCreateDocument=$identity->authorise('core.admin','com_minimarket');
         $this->isCreate=$app->input->getCmd('layout','default')==='create';
         if ($this->isCreate) {
             $this->setLayout('create');
@@ -131,6 +134,10 @@ final class HtmlView extends BaseHtmlView
             ->where('order_id='.(int)$id)->order('created_at DESC,id DESC');
         $db->setQuery($q);
         $this->returns=(array)$db->loadObjectList();
+        $db->setQuery('SELECT id FROM '.$db->quoteName('#__minimarket_order_documents')
+            .' WHERE order_id='.$id." AND document_type='invoice'");
+        $existingDocument=$db->loadResult();
+        $this->documentId=$existingDocument?(int)$existingDocument:null;
         if((string)$this->order->payment_status==='refunded'){
             $db->setQuery('SELECT MAX(created_at) FROM '.$db->quoteName('#__minimarket_order_events')
                 ." WHERE order_id=".(int)$id." AND event_type='payment' AND new_value='refunded'");

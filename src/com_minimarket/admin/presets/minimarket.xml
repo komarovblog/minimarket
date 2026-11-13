@@ -13,6 +13,7 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=returns"/>
         <menuitem title="COM_MINIMARKET_PAYMENTS_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=payments"/>
+        <menuitem title="COM_MINIMARKET_DOCUMENTS_TITLE" type="component" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=documents"/>
         <menuitem title="COM_MINIMARKET_CUSTOMERS_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=customers"/>
         <menuitem title="COM_MINIMARKET_TICKETS_TITLE" type="component"
@@ -65,6 +66,7 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=deliverymethods"/>
         <menuitem title="COM_MINIMARKET_PAYMENT_METHODS_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=paymentmethods"/>
+        <menuitem title="COM_MINIMARKET_FISCAL_TITLE" type="component" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=fiscalization"/>
         <menuitem title="COM_MINIMARKET_REGISTRATION_METHODS_TITLE" type="component"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=registrationmethods"/>
         <menuitem title="COM_MINIMARKET_NOTIFICATION_METHODS_TITLE" type="component"

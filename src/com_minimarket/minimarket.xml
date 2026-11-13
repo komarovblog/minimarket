@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.6.22</version>
+    <version>0.6.23</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -53,6 +53,7 @@
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=returncase&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
             <menu link="option=com_minimarket&amp;view=payments">COM_MINIMARKET_PAYMENTS_TITLE</menu>
+             <menu link="option=com_minimarket&amp;view=documents">COM_MINIMARKET_DOCUMENTS_TITLE</menu>
 
             <menu link="option=com_minimarket&amp;view=customers">COM_MINIMARKET_CUSTOMERS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=tickets">COM_MINIMARKET_TICKETS_TITLE
@@ -115,6 +116,7 @@
             <menu type="separator" alias="mm-group-4">-</menu>
             <menu link="option=com_minimarket&amp;view=deliverymethods">COM_MINIMARKET_DELIVERY_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=paymentmethods">COM_MINIMARKET_PAYMENT_METHODS_TITLE</menu>
+             <menu link="option=com_minimarket&amp;view=fiscalization">COM_MINIMARKET_FISCAL_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=registrationmethods">COM_MINIMARKET_REGISTRATION_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=notificationmethods">COM_MINIMARKET_NOTIFICATION_METHODS_TITLE</menu>
             <menu link="option=com_config&amp;view=component&amp;component=com_minimarket">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
