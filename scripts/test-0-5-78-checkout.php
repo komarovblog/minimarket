@@ -4,6 +4,13 @@ declare(strict_types=1);
 namespace Joomla\Database {
     interface DatabaseInterface {}
 }
+// Old in-memory checkout smoke uses a fake database without stock tables.
+// The real MySQL atomic allocation path is covered in 0.6.10 integration tests.
+namespace MiniMarket\Component\Minimarket\Site\Service {
+    final class StockReservation {
+        public static function allocate(\Joomla\Database\DatabaseInterface $db,int $id,array $lines,bool $pickup):void {}
+    }
+}
 namespace MiniMarket\CheckoutSmoke {
     use Joomla\Database\DatabaseInterface;
     use MiniMarket\Component\Minimarket\Site\Service\CheckoutData;
