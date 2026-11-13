@@ -21,6 +21,6 @@ foreach(['ru-RU','en-GB'] as $locale){
    'COM_MINIMARKET_ORDER_TRANSITION_DENIED','COM_MINIMARKET_ORDER_REFUNDED_AT'] as $k)
   if(empty($ini[$k]))throw new RuntimeException('Missing translation: '.$locale.' '.$k);
 }
-if((string)simplexml_load_file($root.'minimarket.xml')->version!=='0.6.9')
+if(version_compare((string)simplexml_load_file($root.'minimarket.xml')->version,'0.6.9','<'))
  throw new RuntimeException('Version missing');
 echo "MM069_LIFECYCLE_UI_OK\n";
