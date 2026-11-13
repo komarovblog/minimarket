@@ -30,7 +30,6 @@ final class HtmlView extends BaseHtmlView
             'orderoptions' => ['order_options', '1=1'],
             'feeds'        => ['feeds', '1=1'],
             'orders'       => ['orders', 'deleted_at IS NULL'],
-            'payments'     => ['orders', 'deleted_at IS NULL'],
             'deliveries'   => ['shipments', "status IN ('new','in_transit')"],
             'returns'      => ['returns', "status IN ('new','approved','received')"],
             'deliveryzones'=> ['delivery_zones','1=1'],
@@ -42,6 +41,10 @@ final class HtmlView extends BaseHtmlView
                 .$db->quoteName('#__minimarket_'.$table).' WHERE '.$predicate);
             $this->stats[$key]=(int)$db->loadResult();
         }
+        // Payment register contains an obligation row for every active order.
+        // Reuse the same count; avoid duplicate SQL and invented receipts.
+        $this->stats['payments']=$this->stats['orders'];
+
         Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseStyle('com_minimarket.dashboard',
                 'media/com_minimarket/css/dashboard.css');
