@@ -78,7 +78,8 @@ final class ListBulkActions
             '#__minimarket_shipments' => 'status',
             '#__minimarket_reviews' => 'state',
             '#__minimarket_seo_filters' => 'state',
-            '#__minimarket_promo_codes' => 'state'
+            '#__minimarket_promo_codes' => 'state',
+            '#__minimarket_auto_discounts' => 'state'
         ];
         if (($allowedTables[$table] ?? null) !== $field) {
             throw new \LogicException('Invalid MiniMarket bulk target');
