@@ -54,6 +54,8 @@
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=autodiscounts"/>
         <menuitem title="COM_MINIMARKET_PROMOCODES_TITLE" type="component" icon="tag"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=promocodes"/>
+        <menuitem title="COM_MINIMARKET_MARKETING_FLOWS_TITLE" type="component" icon="envelope"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=marketingflows"/>
         <menuitem title="COM_MINIMARKET_RECOMMENDATIONS_TITLE" type="component" icon="random"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=recommendations"/>
         <menuitem title="COM_MINIMARKET_ABANDONED_CARTS_TITLE" type="component" icon="cart" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=abandonedcarts"/>
@@ -74,6 +76,8 @@
         <menuitem title="COM_MINIMARKET_NOTIFICATION_METHODS_TITLE" type="component" icon="envelope"
                   element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notificationmethods"/>
         <menuitem title="COM_MINIMARKET_NOTIFICATION_EVENTS_TITLE" type="component" icon="bell" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=notificationevents"/>
+        <menuitem title="COM_MINIMARKET_MESSAGE_TEMPLATES_TITLE" type="component" icon="file"
+                  element="com_minimarket" link="index.php?option=com_minimarket&amp;view=messagetemplates"/>
         <menuitem title="COM_MINIMARKET_FISCAL_PROVIDERS_TITLE" type="component" icon="file" element="com_minimarket" link="index.php?option=com_minimarket&amp;view=fiscalproviders"/>
         <menuitem title="COM_MINIMARKET_CONFIG_SETTINGS_MENU" type="component" icon="cog"
                   element="com_config" link="index.php?option=com_config&amp;view=component&amp;component=com_minimarket"/>

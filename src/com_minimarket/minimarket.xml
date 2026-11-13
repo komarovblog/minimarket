@@ -6,7 +6,7 @@
     <author>MiniMarket</author>
     <copyright>Copyright (C) MiniMarket contributors</copyright>
     <license>GNU General Public License version 3 or later</license>
-    <version>0.6.26</version>
+    <version>0.6.27</version>
     <description>COM_MINIMARKET_XML_DESCRIPTION</description>
     <namespace path="src">MiniMarket\Component\Minimarket</namespace>
 
@@ -102,6 +102,7 @@
             <menu link="option=com_minimarket&amp;view=promocodes" img="class:tag">COM_MINIMARKET_PROMOCODES_TITLE
                 <params><menu-quicktask-title>JNEW</menu-quicktask-title><menu-quicktask>index.php?option=com_minimarket&amp;view=promocode&amp;layout=create</menu-quicktask><menu-quicktask-icon>plus</menu-quicktask-icon></params>
             </menu>
+            <menu link="option=com_minimarket&amp;view=marketingflows" img="class:envelope">COM_MINIMARKET_MARKETING_FLOWS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=recommendations" img="class:random">COM_MINIMARKET_RECOMMENDATIONS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=abandonedcarts" img="class:cart">COM_MINIMARKET_ABANDONED_CARTS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=reviews" img="class:star">COM_MINIMARKET_REVIEWS_TITLE
@@ -121,6 +122,7 @@
             <menu link="option=com_minimarket&amp;view=registrationmethods" img="class:user">COM_MINIMARKET_REGISTRATION_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=notificationmethods" img="class:envelope">COM_MINIMARKET_NOTIFICATION_METHODS_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=notificationevents" img="class:bell">COM_MINIMARKET_NOTIFICATION_EVENTS_TITLE</menu>
+            <menu link="option=com_minimarket&amp;view=messagetemplates" img="class:file">COM_MINIMARKET_MESSAGE_TEMPLATES_TITLE</menu>
             <menu link="option=com_minimarket&amp;view=fiscalproviders" img="class:file">COM_MINIMARKET_FISCAL_PROVIDERS_TITLE</menu>
             <menu link="option=com_config&amp;view=component&amp;component=com_minimarket" img="class:cog">COM_MINIMARKET_CONFIG_SETTINGS_MENU</menu>
         </submenu>
