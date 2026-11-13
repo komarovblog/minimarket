@@ -27,7 +27,8 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
   <span class="badge bg-secondary"><?php echo Text::_('COM_MINIMARKET_FULFILLMENT_STATUS_'.strtoupper((string)($o->fulfillment_status??'pending'))); ?></span>
   <?php if($this->returns): ?><span class="badge bg-warning text-dark"><?php echo Text::_('COM_MINIMARKET_RETURNS_TITLE'); ?>: <?php echo count($this->returns); ?></span><?php endif; ?>
  </div>
- <div class="row g-3 mb-3"><div class="col-12 col-xl-7">
+ <?php echo HTMLHelper::_('uitab.startTabSet', 'mm-order-'.$oid, ['active'=>'general']); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'general',Text::_('COM_MINIMARKET_TAB_MAIN')); ?>
  <section class="card card-body mm-admin-panel mm-order-card mb-3">
   <div class="row g-3 align-items-start">
    <div class="col-12 col-xl-6">
@@ -116,7 +117,35 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
    </div>
   </div>
  </section>
- </div><div class="col-12 col-xl-5">
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'products',Text::_('COM_MINIMARKET_ORDER_PRODUCTS_BLOCK')); ?>
+ <section class="card card-body mm-admin-panel mm-order-card mb-3">
+  <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PRODUCTS_BLOCK'); ?></h2>
+  <div class="table-responsive mm-editor-table-viewport">
+   <table class="table table-striped mm-admin-list">
+    <thead><tr>
+     <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
+     <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_CART_UNIT_PRICE'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></th>
+     <th><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?></th>
+    </tr></thead><tbody>
+    <?php foreach($this->items as $line): ?>
+     <tr>
+      <td><?php echo $e($line->sku); ?></td>
+      <td><?php if((int)$line->product_id>0): ?><a href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=product&layout=edit&id='.(int)$line->product_id,false)); ?>"><?php echo $e($line->title); ?></a><?php else: ?><?php echo $e($line->title); ?><?php endif; ?></td>
+      <td><?php echo $money($line->unit_cents); ?></td>
+      <td><?php echo (int)$line->quantity; ?></td>
+      <td><?php echo $money($line->line_cents); ?></td>
+     </tr>
+    <?php endforeach; ?>
+    </tbody>
+   </table>
+  </div>
+ </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'payment',Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK')); ?>
+
  <section class="card card-body mm-admin-panel mm-order-card mb-3">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PAYMENT_BLOCK'); ?></h2>
     <dl class="row mb-3">
@@ -187,31 +216,8 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
     <?php endif; ?>
     <?php endif; ?>
    </section>
- </div></div>
- <section class="card card-body mm-admin-panel mm-order-card mb-3">
-  <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_PRODUCTS_BLOCK'); ?></h2>
-  <div class="table-responsive mm-editor-table-viewport">
-   <table class="table table-striped mm-admin-list">
-    <thead><tr>
-     <th><?php echo Text::_('COM_MINIMARKET_PRODUCT_SKU'); ?></th>
-     <th><?php echo Text::_('JGLOBAL_TITLE'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_CART_UNIT_PRICE'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_CART_QUANTITY'); ?></th>
-     <th><?php echo Text::_('COM_MINIMARKET_CART_TOTAL'); ?></th>
-    </tr></thead><tbody>
-    <?php foreach($this->items as $line): ?>
-     <tr>
-      <td><?php echo $e($line->sku); ?></td>
-      <td><?php if((int)$line->product_id>0): ?><a href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=product&layout=edit&id='.(int)$line->product_id,false)); ?>"><?php echo $e($line->title); ?></a><?php else: ?><?php echo $e($line->title); ?><?php endif; ?></td>
-      <td><?php echo $money($line->unit_cents); ?></td>
-      <td><?php echo (int)$line->quantity; ?></td>
-      <td><?php echo $money($line->line_cents); ?></td>
-     </tr>
-    <?php endforeach; ?>
-    </tbody>
-   </table>
-  </div>
- </section>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'delivery',Text::_('COM_MINIMARKET_ORDER_DELIVERY_BLOCK')); ?>
  <section class="card card-body mm-admin-panel mm-order-card mb-3">
     <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_BLOCK'); ?></h2>
     <dl class="row mb-3">
@@ -312,6 +318,8 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
   <?php endforeach; ?>
  </section>
  <?php endif; ?>
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.addTab','mm-order-'.$oid,'returns',Text::_('COM_MINIMARKET_RETURNS_TITLE')); ?>
  <section class="card card-body mm-admin-panel mm-order-card mt-3">
   <h2 class="h5"><?php echo Text::_('COM_MINIMARKET_RETURNS_TITLE'); ?></h2>
   <div class="table-responsive mm-editor-table-viewport">
@@ -337,5 +345,6 @@ $money=static fn($cents):string=>number_format((int)$cents/100,2,'.',' ').' ₽'
   </div>
   <?php if(!$this->returns): ?><p class="form-text"><?php echo Text::_('COM_MINIMARKET_RETURNS_EMPTY'); ?></p><?php endif; ?>
  </section>
-
+ <?php echo HTMLHelper::_('uitab.endTab'); ?>
+ <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 </div>
