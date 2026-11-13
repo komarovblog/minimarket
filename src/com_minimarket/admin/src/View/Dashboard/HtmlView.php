@@ -91,7 +91,7 @@ final class HtmlView extends BaseHtmlView
             $this->stats[$key]=(int)$db->loadResult();
         }
         try{
-            $unread=\MiniMarket\Component\Minimarket\Administrator\Service\WorkqueueReads::unreadCount(
+            $unread=\MiniMarket\Component\Minimarket\Administrator\Service\AdminInbox::load(
                 $db,(int)Factory::getApplication()->getIdentity()->id);
             $this->stats['notifications_unread']=(int)$unread['count'];
             $this->stats['notifications_capped']=(bool)$unread['capped'];
