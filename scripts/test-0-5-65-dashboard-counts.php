@@ -97,6 +97,7 @@ namespace MiniMarket\DashboardCountsTest {
             'reviews|state=0'=>2,
             'seo_filters|1=1'=>3,
             'promo_codes|1=1'=>4,
+            'auto_discounts|1=1'=>2,
         ];
         public function quoteName(string $name):string{return '`'.$name.'`';}
         public function setQuery(string $query):void{$this->query=$query;$this->queries[]=$query;}
@@ -133,12 +134,12 @@ namespace MiniMarket\DashboardCountsTest {
         'categories'=>27,'products'=>78,'bundles'=>3,'brands'=>5,
         'collections'=>6,'groups'=>4,'bundlegroups'=>2,'attributes'=>12,
         'orderoptions'=>7,'feeds'=>3,'orders'=>2,'deliveries'=>1,'returns'=>3,'deliveryzones'=>6,
-        'reviews'=>2,'seofilters'=>3,'promocodes'=>4,'payments'=>2,
+        'reviews'=>2,'seofilters'=>3,'promocodes'=>4,'autodiscounts'=>2,'payments'=>2,
         'tickets'=>1,'customers'=>1,'workqueue'=>7
     ];
     verify($view->stats==$expected,'all real entity counters plus payment obligations use actual records');
-    verify(count(Factory::$database->queries)===22,'twenty-two real count queries including CRM and workqueue');
-    verify(count(array_unique(Factory::$database->queries))===21,
+    verify(count(Factory::$database->queries)===23,'twenty-three real count queries including promotions and workqueue');
+    verify(count(array_unique(Factory::$database->queries))===22,
         'the returns count is deliberately reused for workqueue, other count queries remain distinct');
     $html=(new Renderer($view->stats))->html();
     foreach($expected as $key=>$count){
@@ -158,7 +159,7 @@ namespace MiniMarket\DashboardCountsTest {
         && !str_contains($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"'),
         'Orders now has a real counter and active link');
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6 &&
-        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===30 &&
+        (substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===31 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
         'all section panels and native-size tiles preserved');
     $css=(string)file_get_contents(__DIR__.'/../src/com_minimarket/media/css/dashboard.css');
