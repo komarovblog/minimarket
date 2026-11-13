@@ -28,7 +28,11 @@ $mmSearch=[
     ['name'=>'filter_abc','label'=>Text::_('COM_MINIMARKET_STOCK_REPORT_ABC'),
      'value'=>$this->abcFilter,'options'=>[
       ''=>Text::_('COM_MINIMARKET_FILTER_ANY'),'A'=>'A','B'=>'B','C'=>'C',
-      'none'=>Text::_('COM_MINIMARKET_STOCK_REPORT_NO_ABC')]]
+      'none'=>Text::_('COM_MINIMARKET_STOCK_REPORT_NO_ABC')]],
+    ['name'=>'filter_xyz','label'=>Text::_('COM_MINIMARKET_STOCK_REPORT_XYZ'),
+     'value'=>$this->xyzFilter,'options'=>[
+      ''=>Text::_('COM_MINIMARKET_FILTER_ANY'),'X'=>'X','Y'=>'Y','Z'=>'Z',
+      'none'=>Text::_('COM_MINIMARKET_STOCK_REPORT_NO_XYZ')]]
  ]
 ];
 ?>
@@ -38,7 +42,7 @@ $mmSearch=[
   <?php if(!$this->inventoryEnabled): ?>
    <div class="alert alert-warning"><?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_INVENTORY_OFF'); ?></div>
   <?php endif; ?>
-  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_HELP'); ?></p>
+  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_HELP'); ?> <?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_XYZ_HELP'); ?></p>
   <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
   <?php $mmColumnTable='mm-stockreport-list'; require dirname(__DIR__).'/shared/column-toggle.php'; ?>
   <div class="table-responsive mm-native-list-viewport">
@@ -52,6 +56,7 @@ $mmSearch=[
      <th><?php echo Text::sprintf('COM_MINIMARKET_STOCK_REPORT_SOLD',$this->period); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_COVER'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_ABC'); ?></th>
+     <th title="<?php echo $this->escape(Text::_('COM_MINIMARKET_STOCK_REPORT_XYZ_HELP')); ?>"><?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_XYZ'); ?></th>
      <th><?php echo Text::_('COM_MINIMARKET_STOCK_REPORT_REVENUE'); ?></th>
     </tr></thead><tbody>
     <?php foreach($this->rows as $row): ?>
@@ -67,6 +72,7 @@ $mmSearch=[
       <td class="text-end"><?php echo number_format((int)$row['sold'],0,',',' '); ?></td>
       <td class="text-end"><?php echo $row['cover_days']===null?'—':number_format((float)$row['cover_days'],1,',',' '); ?></td>
       <td class="text-center"><?php echo $row['abc']!==''?$this->escape((string)$row['abc']):'—'; ?></td>
+      <td class="text-center"><?php echo $row['xyz']!==''?$this->escape((string)$row['xyz']):'—'; ?></td>
       <td class="text-end text-nowrap"><?php echo number_format((int)$row['revenue_cents']/100,2,',',' '); ?> ₽</td>
      </tr>
     <?php endforeach; ?>

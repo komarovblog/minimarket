@@ -15,7 +15,7 @@ final class HtmlView extends BaseHtmlView
 {
     public array $rows=[];
     public int $total=0,$offset=0,$pageSize=20,$period=30;
-    public string $search='',$stockFilter='',$abcFilter='',$sort='title';
+    public string $search='',$stockFilter='',$abcFilter='',$xyzFilter='',$sort='title';
     public bool $inventoryEnabled=true;
 
     public function display($tpl=null)
@@ -31,6 +31,8 @@ final class HtmlView extends BaseHtmlView
         $this->stockFilter=in_array($status,['out','low','reserved','no_demand'],true)?$status:'';
         $abc=$app->input->getCmd('filter_abc','');
         $this->abcFilter=in_array($abc,['A','B','C','none'],true)?$abc:'';
+        $xyz=$app->input->getCmd('filter_xyz','');
+        $this->xyzFilter=in_array($xyz,['X','Y','Z','none'],true)?$xyz:'';
         $sort=$app->input->getCmd('filter_sort','title');
         $this->sort=in_array($sort,['title','cover','sold','available'],true)?$sort:'title';
         $limit=$app->input->getInt('limit',20);
@@ -45,6 +47,7 @@ final class HtmlView extends BaseHtmlView
                 &&!str_contains(mb_strtolower((string)$r['title']),$this->search)
                 &&!str_contains(mb_strtolower((string)$r['sku']),$this->search))return false;
             if($this->abcFilter!=='' && $r['abc']!==($this->abcFilter==='none'?'':$this->abcFilter))return false;
+            if($this->xyzFilter!=='' && $r['xyz']!==($this->xyzFilter==='none'?'':$this->xyzFilter))return false;
             return match($this->stockFilter){
                 'out'=>$r['available']===0,
                 'low'=>$r['cover_days']!==null&&$r['cover_days']<=7,
