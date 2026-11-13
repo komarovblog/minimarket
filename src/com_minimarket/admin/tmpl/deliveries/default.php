@@ -27,12 +27,18 @@ $mmSearch=[
    'redelivery'=>Text::_('COM_MINIMARKET_DELIVERY_REASON_REDELIVERY'),
    'replacement'=>Text::_('COM_MINIMARKET_DELIVERY_REASON_REPLACEMENT'),
    'other'=>Text::_('COM_MINIMARKET_DELIVERY_REASON_OTHER')]],
+ ['name'=>'filter_problem','label'=>Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_TYPE'),
+  'value'=>$this->problemFilter,
+  'options'=>[''=>Text::_('COM_MINIMARKET_FILTER_ANY'),
+   'open'=>Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_OPEN'),
+   'resolved'=>Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_RESOLVED')]],
  ['name'=>'filter_status','label'=>Text::_('COM_MINIMARKET_DELIVERY_STATUS'),
    'value'=>$this->status,'options'=>$statusOptions]]
 ];
 $href='index.php?option=com_minimarket&view=deliveries&'.http_build_query([
  'filter_search'=>$this->search,'filter_status'=>$this->status,'filter_carrier'=>$this->carrierFilter,
- 'filter_reason'=>$this->reasonFilter,'filter_sort'=>$this->sort,'limit'=>$this->pageSize
+ 'filter_reason'=>$this->reasonFilter,'filter_problem'=>$this->problemFilter,
+ 'filter_sort'=>$this->sort,'limit'=>$this->pageSize
 ],'','&',PHP_QUERY_RFC3986);
 ?>
 <form action="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&view=deliveries',false)); ?>"
@@ -55,6 +61,7 @@ $href='index.php?option=com_minimarket&view=deliveries&'.http_build_query([
       <th><?php echo Text::_('COM_MINIMARKET_DELIVERY_TRACK'); ?></th>
       <th><?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_CITY'); ?></th>
       <th><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS'); ?></th>
+      <th><?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_TYPE'); ?></th>
      </tr></thead>
      <tbody>
      <?php foreach($this->deliveries as $i=>$delivery): ?>
@@ -69,6 +76,13 @@ $href='index.php?option=com_minimarket&view=deliveries&'.http_build_query([
        <td data-label="<?php echo Text::_('COM_MINIMARKET_DELIVERY_TRACK'); ?>"><?php echo $this->escape((string)$delivery->tracking_number); ?></td>
        <td data-label="<?php echo Text::_('COM_MINIMARKET_ORDER_DELIVERY_CITY'); ?>"><?php echo $this->escape((string)$delivery->delivery_city); ?></td>
        <td data-label="<?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS'); ?>"><span class="badge bg-<?php echo $colors[(string)$delivery->status]??'secondary'; ?>"><?php echo Text::_('COM_MINIMARKET_DELIVERY_STATUS_'.strtoupper((string)$delivery->status)); ?></span></td>
+       <td data-label="<?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_TYPE'); ?>">
+        <?php if((string)$delivery->problem_status==='open'): ?>
+         <span class="badge bg-warning text-dark"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_'.strtoupper((string)$delivery->problem_code)); ?></span>
+        <?php elseif((string)$delivery->problem_status==='resolved'): ?>
+         <span class="badge bg-secondary"><?php echo Text::_('COM_MINIMARKET_SHIPMENT_PROBLEM_RESOLVED'); ?></span>
+        <?php else: ?>—<?php endif; ?>
+       </td>
       </tr>
      <?php endforeach; ?>
      </tbody>

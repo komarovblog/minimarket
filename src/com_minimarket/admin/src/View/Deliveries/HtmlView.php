@@ -11,7 +11,7 @@ use Joomla\Database\DatabaseInterface;
 final class HtmlView extends BaseHtmlView
 {
     public array $deliveries=[];
-    public string $status='', $search='', $carrierFilter='', $reasonFilter='', $sort='newest';
+    public string $status='', $search='', $carrierFilter='', $reasonFilter='', $problemFilter='', $sort='newest';
     public int $offset=0, $total=0, $pageSize=20;
     public bool $canCreate=false;
 
@@ -28,6 +28,8 @@ final class HtmlView extends BaseHtmlView
         $this->carrierFilter=in_array($carrier,['own','cdek','other'],true)?$carrier:'';
         $reason=$app->input->getCmd('filter_reason','');
         $this->reasonFilter=in_array($reason,['initial','redelivery','replacement','other'],true)?$reason:'';
+        $problem=$app->input->getCmd('filter_problem','');
+        $this->problemFilter=in_array($problem,['open','resolved'],true)?$problem:'';
         $this->sort=$app->input->getCmd('filter_sort','newest')==='oldest'?'oldest':'newest';
         $limit=$app->input->getInt('limit',20);
         $this->pageSize=in_array($limit,[20,50,100],true)?$limit:20;
@@ -37,6 +39,7 @@ final class HtmlView extends BaseHtmlView
         if($this->status!=='')$where[]='s.status='.$db->quote($this->status);
         if($this->carrierFilter!=='')$where[]='s.carrier='.$db->quote($this->carrierFilter);
         if($this->reasonFilter!=='')$where[]='s.reason='.$db->quote($this->reasonFilter);
+        if($this->problemFilter!=='')$where[]='s.problem_status='.$db->quote($this->problemFilter);
         if($this->search!==''){
             $like=$db->quote('%'.$db->escape($this->search,true).'%',false);
             $terms=['o.customer_name LIKE '.$like,'o.phone LIKE '.$like,
@@ -57,7 +60,8 @@ final class HtmlView extends BaseHtmlView
         $db->setQuery($count);$this->total=(int)$db->loadResult();
         $this->offset=$this->total===0?0:min($this->offset,(int)(floor(($this->total-1)/$this->pageSize)*$this->pageSize));
         $q=$base()->select(['s.id','s.order_id','s.carrier','s.tracking_number',
-            's.reason','s.status','s.created_at','o.customer_name','o.phone','o.delivery_city',
+            's.reason','s.status','s.problem_status','s.problem_code',
+            's.created_at','o.customer_name','o.phone','o.delivery_city',
             'o.delivery_address','o.delivery_fee_cents'])
             ->order('s.id '.($this->sort==='oldest'?'ASC':'DESC'));
         foreach($where as $condition)$q->where($condition);
