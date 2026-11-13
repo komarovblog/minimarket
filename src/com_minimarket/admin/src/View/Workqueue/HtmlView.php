@@ -42,6 +42,10 @@ class HtmlView extends BaseHtmlView
             $ids=array_map(static fn($row)=>(int)$row->id,$rows);
             $receipts=WorkqueueReads::receipts($db,(int)$user->id,$kind,$ids);
             foreach($rows as $row){
+                if($kind==='delivery'&&($row->shipment_status??'')==='awaiting_pickup'
+                   &&($row->has_problem??'')!=='open')
+                    $row->description=Text::sprintf('COM_MINIMARKET_TASK_PICKUP_OVERDUE',
+                        (int)$row->order_id);
                 $row->signature=WorkqueueReads::signature($kind,$row);
                 $saved=$receipts[(int)$row->id]??'';
                 $row->wasRead=$saved!==''&&hash_equals($saved,$row->signature);
