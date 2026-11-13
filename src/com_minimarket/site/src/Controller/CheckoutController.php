@@ -17,6 +17,7 @@ use MiniMarket\Component\Minimarket\Site\Service\CheckoutVerification;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutExtraFields;
 use MiniMarket\Component\Minimarket\Site\Service\CheckoutDelivery;
 use MiniMarket\Component\Minimarket\Site\Service\OrderStorage;
+use MiniMarket\Component\Minimarket\Site\Service\AbandonedCartStore;
 
 /** Customer POST only: validate nonce, CSRF, inventory and fresh server prices. */
 final class CheckoutController extends BaseController
@@ -276,6 +277,8 @@ final class CheckoutController extends BaseController
             $promoCode=strtoupper(trim((string)$app->input->post->get('promo_code',
                 (string)$session->get('com_minimarket.promo_code',''),'string')));
             $id=OrderStorage::create($db,$contact,$quote,$expected,(int)$identity->id,$delivery,'site',$promoCode);
+            // Mark the checkout session cart converted only AFTER OrderStorage::create.
+            try{AbandonedCartStore::converted($db,$session,$id);}catch(\Throwable){}
             CheckoutVerification::consume($session);
             $session->set('com_minimarket.checkout.key','');
             $session->set(CartState::SESSION_KEY,[]);

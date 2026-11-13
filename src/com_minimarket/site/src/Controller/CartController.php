@@ -12,6 +12,7 @@ use Joomla\Database\DatabaseInterface;
 use MiniMarket\Component\Minimarket\Site\Helper\RouteHelper;
 use MiniMarket\Component\Minimarket\Site\Service\CartCatalog;
 use MiniMarket\Component\Minimarket\Site\Service\CartState;
+use MiniMarket\Component\Minimarket\Site\Service\AbandonedCartStore;
 
 /** Only POST+Joomla CSRF token may mutate the visitor's session cart. */
 final class CartController extends BaseController
@@ -95,6 +96,9 @@ final class CartController extends BaseController
                 $catalog->assertAvailable($next,$inventory);
             }
             $session->set(CartState::SESSION_KEY,$next);
+            // Best-effort first-party cart analytics; must not interrupt the purchase.
+            try{AbandonedCartStore::record(Factory::getContainer()->get(DatabaseInterface::class),
+                $session,(int)$app->getIdentity()->id,$next);}catch(\Throwable){}
             if ($message==='') $message=Text::_($mode === 'add'
                 ? 'COM_MINIMARKET_CART_ADDED' : 'COM_MINIMARKET_CART_UPDATED');
         } catch (\DomainException $exception) {

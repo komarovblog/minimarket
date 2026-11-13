@@ -49,6 +49,13 @@ final class AbandonedCartStore
             .'item_units=VALUES(item_units),cart_status=VALUES(cart_status),'
             .'converted_order_id=NULL,updated_at=VALUES(updated_at)');
         $db->execute();
+        // Opportunistic bounded data minimization; no site cron dependency.
+        if(random_int(1,64)===1){
+            $db->setQuery('DELETE FROM '.$table
+                .' WHERE updated_at<DATE_SUB(UTC_TIMESTAMP(),INTERVAL '
+                .self::RETENTION_DAYS.' DAY) LIMIT 100');
+            $db->execute();
+        }
     }
 
     /** Never changes OrderStorage state. A completed order is NOT abandoned. */
