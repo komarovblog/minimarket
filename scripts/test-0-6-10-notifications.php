@@ -23,7 +23,7 @@ foreach(['order_created','pickup_ready','pickup_reminder','pickup_final',
           'order_cancelled','delivery_updated'] as $event)
  if(!str_contains($policy,$event))throw new RuntimeException('MM610_NOTIFY_EVENT_'.$event);
 foreach(['on','User','Session::checkToken','authorize',''] as $ignored){} // no runtime
-if(!str_contains($preferences,"folder=".$"."db->quote('minimarket')")
+if(!str_contains($preferences,"\$db->quote('minimarket')")
   ||!str_contains($preferences,'enabled=1'))
  throw new RuntimeException('MM610_NOTIFY_INSTALLED_ONLY');
 if(!str_contains($sender,"notification_email_enabled")
