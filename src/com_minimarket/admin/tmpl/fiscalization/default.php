@@ -7,6 +7,7 @@ $e=static fn($v)=>htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8')
 <div id="j-main-container" class="j-main-container">
  <div class="alert alert-warning"><?php echo Text::_('COM_MINIMARKET_FISCAL_DISABLED'); ?></div>
  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_FISCAL_HELP'); ?></p>
+ <p class="form-text"><?php echo Text::_('COM_MINIMARKET_FISCAL_INTEGRATION_NOTE'); ?></p>
  <div class="table-responsive mm-native-list-viewport">
   <table class="table table-striped mm-admin-list">
    <thead><tr><th>ID</th><th><?php echo Text::_('COM_MINIMARKET_ORDER_NUMBER'); ?></th>

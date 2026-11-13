@@ -21,6 +21,7 @@ $e=static fn($value)=>htmlspecialchars((string)$value,ENT_QUOTES|ENT_SUBSTITUTE,
    <div class="mb-3"><a href="<?php echo $e(Route::_('index.php?option=com_minimarket&view=order&id='.$this->orderFilter,false)); ?>" class="btn btn-outline-secondary"><?php echo Text::_('JTOOLBAR_BACK'); ?> #<?php echo (int)$this->orderFilter; ?></a></div>
    <input type="hidden" name="filter_order" value="<?php echo (int)$this->orderFilter; ?>">
   <?php endif; ?>
+  <p class="form-text"><?php echo Text::_('COM_MINIMARKET_DOCUMENTS_HELP'); ?></p>
   <?php require dirname(__DIR__).'/shared/searchtools.php'; ?>
   <?php $mmColumnTable='mm-document-list';require dirname(__DIR__).'/shared/column-toggle.php'; ?>
   <div class="table-responsive mm-native-list-viewport">

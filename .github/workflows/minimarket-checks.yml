@@ -246,6 +246,10 @@ jobs:
         shell: powershell
         run: |
           & .\scripts\test-release-self-update.ps1
+      - name: Audit RU/EN Joomla translation references (admin and storefront)
+        shell: pwsh
+        run: |
+          & ./scripts/verify-translations.ps1
       - name: Verify one-command Desktop delivery has exactly 3 files
         shell: powershell
         run: |
