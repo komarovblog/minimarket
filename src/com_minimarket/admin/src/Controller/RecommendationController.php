@@ -25,7 +25,7 @@ final class RecommendationController extends BaseController
   $url='index.php?option=com_minimarket&view=recommendation&product_id='.$id;
   try {
    $data=self::normalize(
-    $post->getCmd('similar_mode','auto'),$post->getCmd('together_mode','auto'),
+    $post->getCmd('similar_mode','inherit'),$post->getCmd('together_mode','inherit'),
     $post->getString('similar_ids',''),$post->getString('together_ids',''),$id);
    $db=Factory::getContainer()->get(DatabaseInterface::class);
    $db->transactionStart();

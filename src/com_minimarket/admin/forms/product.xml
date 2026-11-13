@@ -100,6 +100,26 @@
                description="COM_MINIMARKET_PRODUCT_COLLECTIONS_HELP"
                multiple="true" filter="array"/>
     </fieldset>
+    <fieldset name="recommend_similar" label="COM_MINIMARKET_RECOMM_SIMILAR_TAB">
+        <field name="rec_similar_mode" type="list" default="inherit" filter="cmd"
+               label="COM_MINIMARKET_RECOMMEND_MODE" description="COM_MINIMARKET_RECOMM_PRODUCT_OVERRIDE_HELP">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="auto">COM_MINIMARKET_RECOMMEND_MODE_AUTO</option>
+            <option value="manual">COM_MINIMARKET_RECOMMEND_MODE_MANUAL</option>
+            <option value="hybrid">COM_MINIMARKET_RECOMMEND_MODE_HYBRID</option>
+        </field>
+        <field name="rec_similar_ids" type="hidden" filter="string" default=""/>
+    </fieldset>
+    <fieldset name="recommend_together" label="COM_MINIMARKET_RECOMM_TOGETHER_TAB">
+        <field name="rec_together_mode" type="list" default="inherit" filter="cmd"
+               label="COM_MINIMARKET_RECOMMEND_MODE" description="COM_MINIMARKET_RECOMM_PRODUCT_OVERRIDE_HELP">
+            <option value="inherit">COM_MINIMARKET_CATEGORY_INHERIT</option>
+            <option value="auto">COM_MINIMARKET_RECOMMEND_MODE_AUTO</option>
+            <option value="manual">COM_MINIMARKET_RECOMMEND_MODE_MANUAL</option>
+            <option value="hybrid">COM_MINIMARKET_RECOMMEND_MODE_HYBRID</option>
+        </field>
+        <field name="rec_together_ids" type="hidden" filter="string" default=""/>
+    </fieldset>
     <fieldset name="descriptions" label="COM_MINIMARKET_PRODUCT_TAB_DESCRIPTIONS">
         <field name="introtext" type="editor" label="COM_MINIMARKET_CATEGORY_INTRO" filter="safehtml" buttons="true"/>
         <field name="description" type="editor" label="JGLOBAL_DESCRIPTION" filter="safehtml" buttons="true"/>

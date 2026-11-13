@@ -25,7 +25,7 @@ $pid=(int)$this->product->id;
    <div class="mb-3">
     <label class="form-label" for="mm-rec-mode-<?php echo $type; ?>"><?php echo Text::_('COM_MINIMARKET_RECOMMEND_MODE'); ?></label>
     <select class="form-select" id="mm-rec-mode-<?php echo $type; ?>" name="<?php echo $type; ?>_mode" data-mm-recommend-mode>
-     <?php foreach(['auto','manual','hybrid'] as $mode): ?>
+     <?php foreach(['inherit','auto','manual','hybrid'] as $mode): ?>
       <option value="<?php echo $mode; ?>"<?php echo $this->modes[$type]===$mode?' selected':''; ?>>
        <?php echo Text::_('COM_MINIMARKET_RECOMMEND_MODE_'.strtoupper($mode)); ?>
       </option>

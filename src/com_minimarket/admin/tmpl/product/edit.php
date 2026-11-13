@@ -21,6 +21,8 @@ use Joomla\CMS\Component\ComponentHelper;
         'badges' => 'COM_MINIMARKET_BADGES_TAB',
         'descriptions' => 'COM_MINIMARKET_PRODUCT_TAB_DESCRIPTIONS',
         'merchandising' => 'COM_MINIMARKET_PRODUCT_TAB_MERCHANDISING',
+        'recommend_similar' => 'COM_MINIMARKET_RECOMM_SIMILAR_TAB',
+        'recommend_together' => 'COM_MINIMARKET_RECOMM_TOGETHER_TAB',
         'attributes' => 'COM_MINIMARKET_PRODUCT_TAB_ATTRIBUTES',
         'variants' => 'COM_MINIMARKET_PRODUCT_TAB_VARIANTS',
         'groups' => 'COM_MINIMARKET_PRODUCT_TAB_GROUPS',
@@ -163,6 +165,23 @@ use Joomla\CMS\Component\ComponentHelper;
                 $renderFlag('badge_popular', 'COM_MINIMARKET_BADGE_POPULAR_NAME');
                 echo $this->form->renderField('badge_popular_days');
                 ?>
+            <?php elseif ($section === 'recommend_similar' || $section === 'recommend_together') : ?>
+                <?php
+                $type=$section==='recommend_similar'?'similar':'together';
+                if((int)($this->item->id??0)>0):
+                    echo $this->form->renderField('rec_'.$type.'_mode');
+                    $mmReference=['input'=>'jform[rec_'.$type.'_ids]',
+                        'endpoint'=>'search','multiple'=>true,
+                        'selected'=>$this->{'rec'.ucfirst($type)},
+                        'title'=>Text::_('COM_MINIMARKET_RECOMMEND_TARGETS'),
+                        'help'=>Text::_('COM_MINIMARKET_RECOMM_PRODUCT_OVERRIDE_HELP')];
+                    require dirname(__DIR__).'/shared/reference-picker.php';
+                    ?>
+                    <p class="form-text"><a href="<?php echo $this->escape(Route::_('index.php?option=com_minimarket&task=category.edit&id='.(int)$this->item->category_id,false)); ?>">
+                        <?php echo Text::_('COM_MINIMARKET_RECOMM_OPEN_CATEGORY_RULES'); ?></a></p>
+                <?php else: ?>
+                    <p class="form-text"><?php echo Text::_('COM_MINIMARKET_RECOMM_SAVE_PRODUCT_FIRST'); ?></p>
+                <?php endif; ?>
             <?php elseif ($section === 'variants') : ?>
                 <?php echo $this->form->renderField('variants_present'); ?>
                 <?php echo $this->form->renderField('variant_dimensions_present'); ?>

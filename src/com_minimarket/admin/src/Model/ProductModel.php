@@ -23,6 +23,7 @@ use MiniMarket\Component\Minimarket\Administrator\Service\BundleItems;
 use MiniMarket\Component\Minimarket\Administrator\Service\BundleStock;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductBadges;
 use MiniMarket\Component\Minimarket\Administrator\Service\ProductDigitalFile;
+use MiniMarket\Component\Minimarket\Administrator\Service\RecommendationSettings;
 use MiniMarket\Component\Minimarket\Site\Service\DigitalLicensePool;
 
 final class ProductModel extends AdminModel
@@ -54,6 +55,15 @@ final class ProductModel extends AdminModel
             $item->group_ids = ProductGroups::currentIds($this->getDatabase(), (int) $item->id);
             $item->collection_ids = ProductCollections::selected($this->getDatabase(), (int) $item->id);
             $item->bundle_items = BundleItems::formRows($this->getDatabase(), (int) $item->id);
+            $modeRows=\MiniMarket\Component\Minimarket\Site\Service\ProductRecommendations::modes(
+                $this->getDatabase(),(int)$item->id);
+            $item->rec_similar_mode=$modeRows['similar'];
+            $item->rec_together_mode=$modeRows['together'];
+            foreach(['similar','together'] as $kind){
+                $items=\MiniMarket\Component\Minimarket\Site\Service\ProductRecommendations::manualIds(
+                    $this->getDatabase(),(int)$item->id,$kind);
+                $item->{'rec_'.$kind.'_ids'}=implode(',',$items);
+            }
         } elseif ($item) {
             $item->gallery = [];
             $item->videos = [];
@@ -64,6 +74,10 @@ final class ProductModel extends AdminModel
             $item->group_ids = [];
             $item->collection_ids = [];
             $item->bundle_items = [];
+            $item->rec_similar_mode='inherit';
+            $item->rec_together_mode='inherit';
+            $item->rec_similar_ids='';
+            $item->rec_together_ids='';
         }
 
         return $item;
@@ -75,6 +89,16 @@ final class ProductModel extends AdminModel
      */
     public function save($data)
     {
+        $hasRecs=array_key_exists('rec_similar_mode',$data)
+            ||array_key_exists('rec_together_mode',$data);
+        $recRaw=$hasRecs?[
+            'similar_mode'=>(string)($data['rec_similar_mode']??'inherit'),
+            'together_mode'=>(string)($data['rec_together_mode']??'inherit'),
+            'similar_ids'=>(string)($data['rec_similar_ids']??''),
+            'together_ids'=>(string)($data['rec_together_ids']??'')
+        ]:[];
+        unset($data['rec_similar_mode'],$data['rec_together_mode'],
+              $data['rec_similar_ids'],$data['rec_together_ids']);
         // Only component administrators may set internal procurement costs.
         // Staff editing SKU/description must not erase or change hidden costs.
         if(!Factory::getApplication()->getIdentity()->authorise('core.admin','com_minimarket')
@@ -334,6 +358,12 @@ final class ProductModel extends AdminModel
             }
 
             $savedProductId = (int)$this->getState($this->getName().'.id');
+            if($hasRecs){
+                $rec=RecommendationSettings::normalize($recRaw['similar_mode'],
+                    $recRaw['together_mode'],$recRaw['similar_ids'],
+                    $recRaw['together_ids'],$savedProductId);
+                RecommendationSettings::save($db,$savedProductId,$rec);
+            }
             if ($isBundle) {
                 // Do not silently discard old SKU matrix or dimensions when
                 // changing the type of an existing product to a bundle.
@@ -406,6 +436,7 @@ final class ProductModel extends AdminModel
             $key=$error->getMessage();
             $this->setError(Text::_(str_starts_with($key,'COM_MINIMARKET_BUNDLE_')
                 ||str_starts_with($key,'COM_MINIMARKET_DIGITAL_')
+                 ||str_starts_with($key,'COM_MINIMARKET_RECOMMENDATIONS_')
                 ? $key : 'COM_MINIMARKET_VARIANTS_SAVE_FAILED'));
             return false;
         }

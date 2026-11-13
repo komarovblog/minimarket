@@ -12,6 +12,7 @@ final class HtmlView extends BaseHtmlView
 {
     public $form;
     public $item;
+    public array $recSimilar=[],$recTogether=[];
 
     public function display($tpl = null)
     {
@@ -22,6 +23,20 @@ final class HtmlView extends BaseHtmlView
             throw new \RuntimeException('MiniMarket product form unavailable');
         }
 
+        if((int)($this->item->id??0)>0){
+            $db=Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class);
+            $db->setQuery($db->getQuery(true)->select(['l.kind','p.id','p.title'])
+                ->from($db->quoteName('#__minimarket_recommendation_links','l'))
+                ->join('INNER',$db->quoteName('#__minimarket_products','p')
+                    .' ON p.id=l.target_product_id')
+                ->where('l.source_product_id='.(int)$this->item->id)
+                ->order('l.kind ASC,l.sort_order ASC,l.id ASC'));
+            foreach((array)$db->loadAssocList() as $entry){
+                $kind=(string)$entry['kind'];
+                if(in_array($kind,['similar','together'],true))
+                    $this->{'rec'.ucfirst($kind)}[(int)$entry['id']]=(string)$entry['title'];
+            }
+        }
         // Joomla Save/Apply проверяет form-validate; без скрипта сохранение может не начаться.
         Factory::getApplication()->getDocument()->getWebAssetManager()->useScript('form.validate');
         // Component-local Joomla Media cleanup; no Joomla core modifications.
