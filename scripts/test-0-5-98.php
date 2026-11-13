@@ -65,10 +65,13 @@ $check(str_contains($product,'data-mm-product-tab')
     &&str_contains($product,'data-mm-tab-panel="reviews"')
     &&str_contains($product,'data-mm-section-link')
     &&str_contains($product,'data-mm-product-sticky'), 'real product-page UI regions');
-$check(str_contains($consumer,"o.status IN ('confirmed','completed')")
+$check(str_contains($consumer,"o.fulfillment_status='delivered'")
+    &&str_contains($consumer,"o.payment_status='paid'")
     &&str_contains($consumer,'o.deleted_at IS NULL')
+    &&str_contains($consumer,'NOT EXISTS (SELECT 1 FROM')
     &&str_contains($catalog,'getVisibleRecommendationsByIds')
-    &&str_contains($catalog,'catalogListing()'), 'order-based suggestions with public availability');
+    &&str_contains($catalog,'catalogListing()'),
+    'completed paid, delivered, non-returned purchases filtered for public availability');
 $checkout=(string)file_get_contents($root.'site/tmpl/checkout/default.php');
 $check(substr_count($checkout,"InputFilter::getInstance()->clean(\$this->")>=3,
     'all three checkout step HTML descriptions safely rendered');
