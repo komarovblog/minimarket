@@ -140,7 +140,7 @@ namespace MiniMarket\CheckoutSmoke {
         'Joomla checkout form and required phone exist');
     $admin=file_get_contents($root.'admin/tmpl/dashboard/default.php');
     chk(str_contains($admin,"'view' => 'orders'")
-        && str_contains($admin,"'count' => 'orders'"),
+        && str_contains($admin,"'count' => 'orders_new'"),
         'dashboard Orders tile links to real count');
     echo "MM78_CHECKOUT_OK: $n checks\n";
 }

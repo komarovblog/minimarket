@@ -21,7 +21,7 @@ $managementSection=substr($markup,$management,$reports-$management);
 $reportSection=substr($markup,$reports,$shop-$reports);
 $ok(substr_count($markup,"'view' => 'payments'")===1, 'no duplicate payment tile');
 $ok(str_contains($managementSection,"'view' => 'payments', 'label' => 'COM_MINIMARKET_PAYMENTS_TITLE'")
-    && str_contains($managementSection,"'icon' => 'icon-credit-card', 'count' => 'payments'"),
+    && str_contains($managementSection,"'icon' => 'icon-credit-card', 'count' => 'payments_attention'"),
     'payments remains fourth management item with original counter');
 $ok(str_contains($reportSection,"'view' => 'stockreport'")
     && substr_count($reportSection,"'view' => 'stockreport'")===1,
