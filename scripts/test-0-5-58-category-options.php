@@ -29,8 +29,8 @@ $global->values=['category_show_children'=>0,'category_show_products'=>0,
 $v=Options::resolve($category,$global);
 check58(!$v['show_children'] && !$v['show_products'] && $v['show_bundles'],
  'global flags resolved independently');
-check58($v['show_descendant_products'] && $v['show_descendant_bundles'],
- 'global nested products and kits work independently');
+check58(!$v['show_descendant_products'] && $v['show_descendant_bundles'],
+ 'disabled product visibility suppresses descendant products but leaves kits enabled');
 check58($v['layout']==='grid' && $v['cards_xxl']===6,'global responsive layout');
 $category=(object)['show_children'=>1,'show_products'=>1,'show_bundles'=>0,
     'show_descendant_products'=>0,'show_descendant_bundles'=>-1,
@@ -39,8 +39,8 @@ $category=(object)['show_children'=>1,'show_products'=>1,'show_bundles'=>0,
 $v=Options::resolve($category,$global);
 check58($v['show_children'] && $v['show_products'] && !$v['show_bundles'],
  'local category flag overrides global');
-check58(!$v['show_descendant_products'] && $v['show_descendant_bundles'],
- 'each descendant setting inherits or overrides separately');
+check58(!$v['show_descendant_products'] && !$v['show_descendant_bundles'],
+ 'disabled bundle visibility suppresses inherited descendant bundles');
 check58($v['layout']==='list' && $v['cards_xs']===2 && $v['cards_sm']===2
     && $v['cards_md']===3 && $v['cards_lg']===4
     && $v['cards_xl']===6 && $v['cards_xxl']===6,
