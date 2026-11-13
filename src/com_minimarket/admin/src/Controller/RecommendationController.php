@@ -1,6 +1,7 @@
 <?php
 namespace MiniMarket\Component\Minimarket\Administrator\Controller;
 \defined('_JEXEC') or die;
+require_once dirname(__DIR__).'/Service/RecommendationSettings.php';
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
