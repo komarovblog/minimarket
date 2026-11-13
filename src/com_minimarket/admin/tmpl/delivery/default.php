@@ -67,7 +67,7 @@ $s=$this->shipment;
     <div class="col-12 col-md-4">
       <label class="form-label" for="mm-shipping-cost"><?php echo Text::_('COM_MINIMARKET_DELIVERY_ACTUAL_COST'); ?></label>
       <input id="mm-shipping-cost" name="actual_cost" class="form-control" type="number" step="0.01" min="0" max="9999999999999.99"
-        value="<?php echo $s->actual_cost_cents===null?'':number_format((int)$s->actual_cost_cents/100,2,'.',''); ?>" required>
+        value="<?php echo $s->actual_cost_cents===null?'':intdiv((int)$s->actual_cost_cents,100).'.'.str_pad((string)((int)$s->actual_cost_cents%100),2,'0',STR_PAD_LEFT); ?>" required>
     </div>
     <div class="col-12 col-md-6">
       <label class="form-label" for="mm-shipping-proof"><?php echo Text::_('COM_MINIMARKET_DELIVERY_COST_REFERENCE'); ?></label>

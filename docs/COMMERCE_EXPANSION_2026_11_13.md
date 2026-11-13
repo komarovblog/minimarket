@@ -1,6 +1,6 @@
 # MiniMarket — согласованный план расширения коммерческих функций, 13.11.2026
 
-**Исходная база:** MiniMarket 0.6.14, Joomla 6 / PHP 8.4–8.5 / MySQL 8.4; разработка только в ветке \`development\`.
+**Исходная база:** MiniMarket 0.6.14, Joomla 6 / PHP 8.4–8.5 / MySQL 8.4; разработка только в ветке `development`.
 **Источник идей:** komarovblog/shop (ветка development), документы REQUIREMENTS_V2.md §§6–12 и PRODUCT_ATTRIBUTES_OPTIONS_LINKED_PRODUCTS_2026-11-03.md. Не копировать код Symfony в Joomla. Решения здесь приняты для MiniMarket только в перечисленном объёме.
 
 ## Жёсткое исключение

@@ -4,6 +4,8 @@
 
 **Код:** product.cost_price nullable; исторические unit_cost_cents/line_cost_cents в новых OrderItem; вложенные виртуальные комплекты оцениваются по существующей структуре компонентов, если все ценовые источники известны. Shipment.actual_cost_cents nullable, подтверждение только core.admin с документом, временем и автором, отдельные неизменяемые revisions; суммы в заказе/доставке только для администратора. UI: штатные Joomla формы, без новых собственных дизайнов. Не ретроспективно считать старые заказы, не создавать складской журнал.
 
+**CI:** 6/6 PASS на [Actions #43424345411](https://github.com/komarovblog/minimarket/actions/runs/43424345411) при кодовом SHA `be6203711f1727ff698260b69f6848eaf7fa4d29`; окончательная версия документов может иметь отдельный commit. Браузерная приёмка локальной Joomla ещё не выполнена.
+
 **Тест:** scripts/test-0-6-15-commerce.php, scripts/test-0-6-15-commerce-mysql84.php, PHP 8.4/8.5, MySQL 8.4, Windows ZIP. После CI статусы фиксировать отдельно; ручная проверка Joomla/Atum RU/EN, старой и новой БД, Super User и неадминистратора остаётся обязательной.
 
 **Выход:** com_minimarket-0.6.15.zip; один стандартный release-to-desktop.ps1; demo SQL не импортировать. Изменение схемы — Joomla upgrade migration; сделать backup перед установкой.
