@@ -1,7 +1,11 @@
 # MiniMarket 0.6.28 — центр уведомлений и разделение настроек
 
 **Дата:** 14.11.2026; **ветка:** `development`; исходная база `2fc1b1c`.
-**Статус:** исходники и регрессионные проверки сформированы, CI и ручная Joomla 6 / Atum приёмка отдельно.
+**Статус:** CI 6/6 PASS, реальная Joomla 6 / Atum browser-приёмка ещё не проведена.
+
+**CI MiniMarket 0.6.28: 6/6 PASS** — [GitHub Actions #43510979241](https://github.com/komarovblog/minimarket/actions/runs/43510979241), проверенный кодовый SHA `362e7eea6f7c4b5a03df9c909ea6ca3eab9fa21b`: PHP 8.4/8.5, Windows component ZIP, MySQL fresh/demo/upgrade, строгий RU/EN аудит. **Локальная браузерная Joomla/Atum-приёмка ещё НЕ проведена.**
+
+
 
 ## Что видно на панели
 

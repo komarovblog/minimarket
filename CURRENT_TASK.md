@@ -1,3 +1,5 @@
+**CI MiniMarket 0.6.28: 6/6 PASS** — [GitHub Actions #43510979241](https://github.com/komarovblog/minimarket/actions/runs/43510979241), проверенный кодовый SHA `362e7eea6f7c4b5a03df9c909ea6ca3eab9fa21b`: PHP 8.4/8.5, Windows component ZIP, MySQL fresh/demo/upgrade, строгий RU/EN аудит. **Локальная браузерная Joomla/Atum-приёмка ещё НЕ проведена.**
+
 ## 14.11.2026 — MiniMarket 0.6.28: единый центр уведомлений и шесть групп настроек
 
 **Ветка:** development. Предыдущая база: 0.6.27, кодовый SHA 2fc1b1c. **Статус:** исходники подготовлены; CI и реальная Joomla/Atum-приёмка должны фиксироваться отдельно.
