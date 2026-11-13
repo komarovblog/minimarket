@@ -17,7 +17,7 @@ final class OrdersController extends BaseController
 
     public function cancel(): void
     {
-        $this->change('#__minimarket_orders', 'status', 'cancelled', ['new','confirmed','cancelled'], true, false);
+        $this->change('#__minimarket_orders', 'status', 'cancelled', ['new','confirmed'], true, false);
     }
 
     public function trash(): void

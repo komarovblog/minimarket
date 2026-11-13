@@ -84,8 +84,16 @@ final class ListBulkActions
             throw new \LogicException('Invalid MiniMarket bulk target');
         }
         $ids = self::selected($softDelete ? 'core.delete' : 'core.edit.state');
-        if($table==='#__minimarket_orders'&&!$softDelete&&!OrderLifecycle::manualEnabled())
-            throw new \DomainException('COM_MINIMARKET_ORDER_MANUAL_DISABLED');
+
+        // Accept/cancel are regular business actions, never disabled by a
+        // setting for exceptional direct status overrides.
+        sort($ids,SORT_NUMERIC);
+        $actor=(int)Factory::getApplication()->getIdentity()->id;
+        $reason=trim(strip_tags(Factory::getApplication()->input->post->getString('cancel_reason','')));
+        if($table==='#__minimarket_orders' && !$softDelete && $target==='cancelled'
+           &&(mb_strlen($reason)<3||mb_strlen($reason)>512
+              ||preg_match('/[\x00-\x1f<>]/u',$reason)))
+            throw new \DomainException('COM_MINIMARKET_ORDER_CANCEL_REASON_REQUIRED');
         $db = Factory::getContainer()->get(DatabaseInterface::class);
         $db->transactionStart();
         try {
@@ -109,12 +117,27 @@ final class ListBulkActions
                 if($table==='#__minimarket_orders'&&!$softDelete)
                     OrderLifecycle::validateManual($db,$row,$target);
             }
+
+            if($table==='#__minimarket_orders'&&!$softDelete&&$target==='cancelled'){
+                foreach($rows as $row)
+                    \MiniMarket\Component\Minimarket\Site\Service\StockReservation::release(
+                        $db,(int)$row['id']);
+            }
             $query = $db->getQuery(true)->update($db->quoteName($table))
                 ->where($db->quoteName('id').' IN ('.implode(',', $ids).')');
             if ($softDelete) {
                 $query->set($db->quoteName('deleted_at').'=UTC_TIMESTAMP()');
             } else {
                 $query->set($db->quoteName($field).'='.$db->quote($target));
+            }
+
+            if($table==='#__minimarket_orders'&&!$softDelete){
+                if($target==='confirmed'){
+                    $query->set('accepted_at=COALESCE(accepted_at,UTC_TIMESTAMP())');
+                    $query->set('accepted_by='.$actor);
+                }elseif($target==='cancelled'){
+                    $query->set('cancelled_reason='.$db->quote($reason));
+                }
             }
             if ($onlyLiveOrders) {
                 $query->where($db->quoteName('deleted_at').' IS NULL');
@@ -128,6 +151,16 @@ final class ListBulkActions
                         (int)Factory::getApplication()->getIdentity()->id,
                         $softDelete?'trash':($table==='#__minimarket_orders'?'status':'delivery_status'),
                         (string)$row[$field],$softDelete?'trashed':$target);
+            }
+
+            if($table==='#__minimarket_orders'&&!$softDelete){
+                foreach($rows as $row){
+                    if($target==='cancelled')
+                        OrderHistory::record($db,(int)$row['id'],$actor,
+                            'cancel_reason','',mb_substr($reason,0,32));
+                    if($target==='confirmed')
+                        OrderLifecycle::refresh($db,(int)$row['id'],$actor);
+                }
             }
             if($table==='#__minimarket_shipments'){
                 $orderIds=array_values(array_unique(array_map(static fn($row)=>(int)$row['order_id'],$rows)));
