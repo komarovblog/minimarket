@@ -1,3 +1,7 @@
+## 13.11.2026 — 0.6.23: документы и фискальный реестр
+
+Новых сохранённых `com_minimarket` component params и реальных настроек провайдера **нет**. Вкладка «Документы» в Order вызывает POST `document.create` (CSRF, `core.admin`) → `OrderDocuments::create` → immutable `#__minimarket_order_documents` → закрытый `view=document` c хеш-проверкой. `view=documents` — read-only список; `view=fiscalization` — `core.admin` read-only для `#__minimarket_fiscal_operations`. Не открывать настройку «включить фискализацию» до реального интеграционного адаптера и юридического контракта. Тест `test-0-6-23-documents.php`, MySQL `test-0-6-23-documents-mysql84.php`.
+
 ## 13.11.2026 — C04/C05, MiniMarket 0.6.16 (текущие настройки и данные)
 
 | Настройка / поле | Запись | Чтение | UI / серверное действие | Регрессия |
