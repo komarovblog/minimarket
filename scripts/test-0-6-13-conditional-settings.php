@@ -91,7 +91,12 @@ $zone=file_get_contents($root.'admin/tmpl/deliveryzone/edit.php');
 $assert(str_contains($zone,"data-mm-zone-unit-rate")&&str_contains($zone,"mode.value==='fixed'"),
     'unit-rate input hidden when delivery zone uses fixed tariff');
 $notify=file_get_contents($root.'admin/tmpl/notificationmethods/default.php');
-$assert(str_contains($notify,'data-mm-notification-events')&&str_contains($notify,"enabled.value!=='1'"),
-    'email event settings hidden while notifications disabled');
+$eventSettings=file_get_contents($root.'admin/tmpl/notificationevents/default.php');
+$notifyController=file_get_contents($root.'admin/src/Controller/NotificationmethodsController.php');
+$assert(!str_contains($notify,'data-mm-notification-events')
+    &&str_contains($notify,'view=notificationevents')
+    &&str_contains($eventSettings,'NotificationPolicy::EVENTS')
+    &&str_contains($notifyController,"get('events',null,'array')"),
+    'email channel toggle never resets the single event settings matrix');
 $assert(is_file($root.'admin/sql/updates/mysql/0.6.13.sql'),'versioned no-DB-change upgrade');
 echo "MM613_CONDITIONAL_SETTINGS_PASS\n";
