@@ -23,7 +23,7 @@ final class HtmlView extends BaseHtmlView
             .'FROM '.$db->quoteName('#__minimarket_fiscal_operations')
             .' ORDER BY id DESC',0,100);
         $this->operations=(array)$db->loadObjectList();
-        ToolbarHelper::title(Text::_('COM_MINIMARKET_FISCAL_TITLE'));
+        ToolbarHelper::title(Text::_('COM_MINIMARKET_CASH_REGISTER_TITLE'));
         parent::display($tpl);
     }
 }

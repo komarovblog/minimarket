@@ -21,21 +21,21 @@ $sections = [
             ['view' => 'notifications', 'label' => 'COM_MINIMARKET_NOTIFICATIONS_TITLE',
                 'icon' => 'icon-bell', 'count' => 'notifications_unread'],
             ['view' => 'orders', 'label' => 'COM_MINIMARKET_DASHBOARD_ORDERS',
-                'icon' => 'icon-cart', 'count' => 'orders'],
+                'icon' => 'icon-cart', 'count' => 'orders_new'],
             ['view' => 'deliveries', 'label' => 'COM_MINIMARKET_DASHBOARD_DELIVERIES',
-                'icon' => 'icon-truck', 'count' => 'deliveries'],
+                'icon' => 'icon-truck', 'count' => 'deliveries_attention'],
             ['view' => 'returns', 'label' => 'COM_MINIMARKET_RETURNS_TITLE',
-                'icon' => 'icon-reply', 'count' => 'returns'],
+                'icon' => 'icon-reply', 'count' => 'returns_new'],
             ['view' => 'payments', 'label' => 'COM_MINIMARKET_PAYMENTS_TITLE',
-                'icon' => 'icon-credit-card', 'count' => 'payments'],
+                'icon' => 'icon-credit-card', 'count' => 'payments_attention'],
             ['view' => 'fiscalization', 'label' => 'COM_MINIMARKET_CASH_REGISTER_TITLE',
                 'icon' => 'icon-file', 'count' => 'fiscal_attention'],
             ['view' => 'customers', 'label' => 'COM_MINIMARKET_CUSTOMERS_TITLE',
-                'icon' => 'icon-users', 'count' => 'customers'],
+                'icon' => 'icon-users', 'count' => null],
             ['view' => 'tickets', 'label' => 'COM_MINIMARKET_TICKETS_TITLE',
-                'icon' => 'icon-comments', 'count' => 'tickets'],
+                'icon' => 'icon-comments', 'count' => 'tickets_new'],
             ['view' => 'documents', 'label' => 'COM_MINIMARKET_DOCUMENTS_TITLE',
-                'icon' => 'icon-file', 'count' => 'documents'],
+                'icon' => 'icon-file', 'count' => null],
         ],
     ],
     [
@@ -61,23 +61,23 @@ $sections = [
         'icon' => 'icon-cart',
         'items' => [
             ['view' => 'categories', 'label' => 'COM_MINIMARKET_CATEGORIES',
-                'icon' => 'icon-folder', 'count' => 'categories'],
+                'icon' => 'icon-folder', 'count' => null],
             ['view' => 'products', 'label' => 'COM_MINIMARKET_PRODUCTS',
-                'icon' => 'icon-cube', 'count' => 'products'],
+                'icon' => 'icon-cube', 'count' => null],
             ['view' => 'bundles', 'label' => 'COM_MINIMARKET_BUNDLES',
-                'icon' => 'icon-cube', 'count' => 'bundles'],
+                'icon' => 'icon-cube', 'count' => null],
             ['view' => 'groups', 'label' => 'COM_MINIMARKET_GROUPS',
-                'icon' => 'icon-link', 'count' => 'groups'],
+                'icon' => 'icon-link', 'count' => null],
             ['view' => 'bundlegroups', 'label' => 'COM_MINIMARKET_BUNDLE_GROUPS',
-                'icon' => 'icon-link', 'count' => 'bundlegroups'],
+                'icon' => 'icon-link', 'count' => null],
             ['view' => 'brands', 'label' => 'COM_MINIMARKET_BRANDS',
-                'icon' => 'icon-tag', 'count' => 'brands'],
+                'icon' => 'icon-tag', 'count' => null],
             ['view' => 'collections', 'label' => 'COM_MINIMARKET_COLLECTIONS',
-                'icon' => 'icon-bookmark', 'count' => 'collections'],
+                'icon' => 'icon-bookmark', 'count' => null],
             ['view' => 'attributes', 'label' => 'COM_MINIMARKET_ATTRIBUTES',
-                'icon' => 'icon-list', 'count' => 'attributes'],
+                'icon' => 'icon-list', 'count' => null],
             ['view' => 'orderoptions', 'label' => 'COM_MINIMARKET_ORDER_OPTIONS',
-                'icon' => 'icon-sliders-h', 'count' => 'orderoptions'],
+                'icon' => 'icon-sliders-h', 'count' => null],
         ],
     ],
     [
@@ -86,17 +86,17 @@ $sections = [
         'icon' => 'icon-bullhorn',
         'items' => [
             ['view' => 'autodiscounts', 'label' => 'COM_MINIMARKET_AUTO_DISCOUNTS_TITLE',
-                'icon' => 'icon-percent', 'count' => 'autodiscounts'],
+                'icon' => 'icon-percent', 'count' => null],
             ['view' => 'promocodes', 'label' => 'COM_MINIMARKET_PROMOCODES_TITLE',
-                'icon' => 'icon-tag', 'count' => 'promocodes'],
+                'icon' => 'icon-tag', 'count' => null],
             ['view' => 'recommendations', 'label' => 'COM_MINIMARKET_RECOMMENDATIONS_TITLE',
-                'icon' => 'icon-link', 'count' => 'recommendations'],
+                'icon' => 'icon-link', 'count' => null],
             ['view' => 'abandonedcarts', 'label' => 'COM_MINIMARKET_ABANDONED_CARTS_TITLE',
                 'icon' => 'icon-cart', 'count' => 'abandonedcarts'],
             ['view' => 'reviews', 'label' => 'COM_MINIMARKET_REVIEWS_TITLE',
                 'icon' => 'icon-star', 'count' => 'reviews'],
             ['view' => 'seofilters', 'label' => 'COM_MINIMARKET_SEOFILTERS_TITLE',
-                'icon' => 'icon-filter', 'count' => 'seofilters'],
+                'icon' => 'icon-filter', 'count' => null],
         ],
     ],
     [
@@ -107,7 +107,7 @@ $sections = [
             ['view' => 'import', 'label' => 'COM_MINIMARKET_IMPORT_TITLE',
                 'icon' => 'icon-exchange-alt', 'count' => null],
             ['view' => 'feeds', 'label' => 'COM_MINIMARKET_FEEDS_TITLE',
-                'icon' => 'icon-share', 'count' => 'feeds'],
+                'icon' => 'icon-share', 'count' => null],
         ],
     ],
     [
@@ -207,15 +207,16 @@ $sections = [
                                     <?php else : ?>
                                         <span class="<?php echo htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8'); ?> mm-dashboard-icon" aria-hidden="true"></span>
                                     <?php endif; ?>
+                                    <?php $mmCount=$item['count']===null?null:($this->stats[$item['count']]??null); ?>
+                                    <?php if($mmCount!==null && (int)$mmCount>0): ?>
                                     <span class="badge mm-dashboard-count"
-                                          data-mm-stat="<?php echo htmlspecialchars((string)($item['count'] ?? 'none'), ENT_QUOTES, 'UTF-8'); ?>"
-                                          aria-label="<?php echo htmlspecialchars(Text::_($item['label']), ENT_QUOTES, 'UTF-8'); ?>">
-                                        <?php if ($item['count'] === null) : ?>
-                                            <span aria-hidden="true">—</span>
-                                        <?php else : ?>
-                                            <?php echo (int) ($this->stats[$item['count']] ?? 0); ?>
-                                        <?php endif; ?>
+                                          data-mm-stat="<?php echo htmlspecialchars((string)$item['count'], ENT_QUOTES, 'UTF-8'); ?>"
+                                          aria-label="<?php echo htmlspecialchars(Text::sprintf('COM_MINIMARKET_DASHBOARD_ATTENTION_COUNT',
+                                               Text::_($item['label']),(int)$mmCount),ENT_QUOTES,'UTF-8'); ?>">
+                                      <?php echo $item['view']==='notifications'&&!empty($this->stats['notifications_capped'])
+                                          ?'999+':(int)$mmCount; ?>
                                     </span>
+                                    <?php endif; ?>
                                 </div>
                                 <span class="mm-dashboard-tile-title"><?php echo Text::_($item['label']); ?></span>
                             </a>

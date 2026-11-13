@@ -64,6 +64,32 @@ final class HtmlView extends BaseHtmlView
             $work+=(int)$db->loadResult();
         }
         $this->stats['workqueue']=$work;
+        // Alert badges describe what needs action, never all stored records.
+        foreach([
+            'orders_new'=>['orders',"status='new' AND deleted_at IS NULL"],
+            'deliveries_attention'=>['shipments',"status='new' OR problem_status='open'"],
+            'returns_new'=>['returns',"status='new'"],
+            'payments_attention'=>['orders',
+                "payment_status IN ('unpaid','processing') AND status<>'cancelled' AND deleted_at IS NULL"],
+            'tickets_new'=>['support_tickets',"status='new'"],
+            'fiscal_attention'=>['fiscal_operations',"status IN ('failed','pending')"],
+            'abandonedcarts'=>['cart_snapshots',
+                \MiniMarket\Component\Minimarket\Site\Service\AbandonedCartStore::abandonedPredicate('c')],
+        ] as $key=>[$table,$predicate]){
+            $source=$db->quoteName('#__minimarket_'.$table,
+                $key==='abandonedcarts'?'c':null);
+            $db->setQuery('SELECT COUNT(*) FROM '.$source.' WHERE '.$predicate);
+            $this->stats[$key]=(int)$db->loadResult();
+        }
+        try{
+            $unread=\MiniMarket\Component\Minimarket\Administrator\Service\WorkqueueReads::unreadCount(
+                $db,(int)Factory::getApplication()->getIdentity()->id);
+            $this->stats['notifications_unread']=(int)$unread['count'];
+            $this->stats['notifications_capped']=(bool)$unread['capped'];
+        }catch(\Throwable $e){
+            $this->stats['notifications_unread']=null;
+            $this->stats['notifications_capped']=false;
+        }
 
         Factory::getApplication()->getDocument()->getWebAssetManager()
             ->registerAndUseStyle('com_minimarket.dashboard',

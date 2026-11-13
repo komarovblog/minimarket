@@ -81,6 +81,26 @@ final class WorkqueueReads
         return $map;
     }
 
+    /** Count actual personal unread events; cap large stores rather than guess. */
+    public static function unreadCount(DatabaseInterface $db,int $userId,int $max=250):array
+    {
+        if($userId<1)return ['count'=>0,'capped'=>false];
+        $count=0;$capped=false;
+        foreach(self::KINDS as $kind){
+            $alias=match($kind){'payment'=>'o','delivery'=>'s','ticket'=>'t','returncase'=>'r'};
+            $db->setQuery(self::sourceSql($db,$kind).' ORDER BY '.$alias.'.id DESC',0,$max+1);
+            $rows=(array)$db->loadObjectList();
+            if(count($rows)>$max){$capped=true;$rows=array_slice($rows,0,$max);}
+            $receipts=self::receipts($db,$userId,$kind,array_map(
+                static fn($row)=>(int)$row->id,$rows));
+            foreach($rows as $row){
+                $read=$receipts[(int)$row->id]??'';
+                if($read===''||!hash_equals($read,self::signature($kind,$row)))$count++;
+            }
+        }
+        return ['count'=>$count,'capped'=>$capped];
+    }
+
     /** Prevent a stale browser form from marking a newer source event as read. */
     public static function save(DatabaseInterface $db,int $userId,string $kind,int $id,
                                 string $expectedSignature,bool $read):void
