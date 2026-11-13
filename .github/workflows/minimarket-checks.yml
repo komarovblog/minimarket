@@ -246,7 +246,9 @@ jobs:
           $actual = @(Get-ChildItem -LiteralPath $dest -File | Select-Object -ExpandProperty Name | Sort-Object)
           [xml]$manifest = Get-Content -LiteralPath '.\src\com_minimarket\minimarket.xml' -Raw -Encoding UTF8
           $version = [string]$manifest.extension.version
-          $expected = @("com_minimarket-$version.zip", "plg_task_minimarketreserves-$version.zip", "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql") | Sort-Object
+          [xml]$taskManifest=Get-Content -LiteralPath '.\src\plg_task_minimarketreserves\minimarketreserves.xml' -Raw -Encoding UTF8
+          $taskVersion=[string]$taskManifest.extension.version
+          $expected = @("com_minimarket-$version.zip", "plg_task_minimarketreserves-$taskVersion.zip", "minimarket_mysql84_nnop3_update_$($version.Replace('.', '_')).sql") | Sort-Object
           if (($actual -join '|') -ne ($expected -join '|')) {
             throw ("MM75_DESKTOP_RELEASE_EXPECTED_THREE: " + ($actual -join ','))
           }
