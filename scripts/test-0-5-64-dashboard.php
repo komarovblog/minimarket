@@ -16,7 +16,7 @@ namespace MiniMarket\Component\Minimarket\Administrator\Service {
         public static function view(string $name):string{
             if (!in_array($name,[
                 'categories','products','bundles','brands','collections',
-                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','returns','returns','reviews','seofilters','promocodes','settings',
+                'groups','bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries','returns','returns','reviews','seofilters','promocodes','autodiscounts','settings',
                 'deliverymethods','paymentmethods','registrationmethods','payments','notificationmethods','stockreport','customers','tickets','workqueue','salesreport','returnsreport','businessreport'
             ],true))throw new \RuntimeException('Unknown MiniMarket dashboard view '.$name);
             if ($name==='deliveries') return 'index.php?option=com_minimarket&amp;view=deliveries';
@@ -48,9 +48,9 @@ namespace MiniMarket\DashboardTest {
     $html=(new View())->output();
     verify(substr_count($html,'mm-dashboard-band card mm-dashboard-band--')===6,
         'six native dashboard panels including Reports');
-    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===30 &&
+    verify((substr_count($html,'class="mm-dashboard-tile text-decoration-none"')===31 &&
         substr_count($html,'class="mm-dashboard-tile mm-dashboard-tile--pending"')===0),
-        'thirty working tiles across six groups');
+        'thirty-one working tiles across six groups');
     verify(substr_count($html,'mm-dashboard-tiles')===6,
         'each band has its own responsive grid');
     $names=['COM_MINIMARKET_DASHBOARD_MANAGEMENT',
@@ -71,7 +71,7 @@ namespace MiniMarket\DashboardTest {
         'Orders opens a real administrator list');
     foreach(['categories','products','bundles','brands','collections','groups',
         'bundlegroups','attributes','orderoptions','import','feeds','orders','deliveries',
-        'seofilters','promocodes','deliverymethods','paymentmethods','registrationmethods',
+        'seofilters','promocodes','autodiscounts','deliverymethods','paymentmethods','registrationmethods',
         'payments','notificationmethods','stockreport','customers','tickets','workqueue','salesreport','returnsreport','businessreport'] as $view) {
         verify(substr_count($html,'&amp;view='.$view.'"')===1,
             'unique functional link for '.$view);
